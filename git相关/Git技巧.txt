@@ -1,0 +1,139 @@
+
+开始以“块”形式暂存改动简单到只需一条命令（括号部分替换为特定文件）：
+
+git add -p (path/file)
+
+切换到最后所在分支
+当不希望无关的修正影响到现在正在进行功能开发的分支；应该使用git stash命令来暂时存放你的改动，然后切到master分支（译者注：或是其它啥分支，我一般是取名为fix），在那个分支进行修正。（译者注：修正完了，可以切回正在进行功能开发的分支，执行git stash pop来弹出之前暂存的改动，继续进行开发）。在不同分支间切换很乏味，幸好这里有个快捷命令可以切换到你最后所在的分支：
+
+git checkout -
+这个语法对于使用linux的高富帅们来说一定不陌生，cd命令有个类似的缩写cd -，表示切换到你最后所在的目录。当你需要切回功能开发分支时，你根本不用关心那个分支是啥名，只需git checkout -。
+
+
+显示哪些分支被合并了（或是哪些没有被合并）
+
+如果你想要看看你的本地分支里哪些分支是已经合并进你当前所在的分支时，可以使用：
+
+git branch --merged
+反过来，如果需要查看哪些分支还没有合并进当前所在的分支，可以使用：
+
+git branch --no-merged
+结合高富帅的UNIX工具，你可以轻松的删除那些已经合并了的分支：
+
+git branch --merged | xargs git branch -d
+译者注：xargs是UNIX平台的一个工具，它的作用是将参数列表转换成小块分段传递给其他命令，以避免参数列表过长的问题。如果git branch --merged显示的是a，b，c三个分支已经合并，上面的命令会转换为：git branch -d a b c。
+
+
+另一个分支里某一个文件的改动引入到当前工作的分支里,而不用切换分支:
+git checkout (branch) -- (path/file)
+
+
+以最后提交排序的Git分支
+想必你已经使用上面的tip处理了杂乱的分支，有一些是用--merged选项标志来清理的吧。那其它的分支咋办呢？你咋知道哪些是有用的，哪些是完全过期无用的呢？git for-each-ref命令可以打印出一个列表，该列表显示每个分支最后一次提交的引用（reference）信息。我们可以自定义输出来包含一些有用的信息，更重要的是我们还可以按日期排序。可以使用下面的命令来输出一个列表，该表将显示按时间先后排序的每个分支的最后提交信息、提交者等信息：
+
+git for-each-ref --sort=-committerdate --format="%(committername)@%(refname:short) [%(committerdate:short)] %(contents)"
+还可以把它定义在gitconfig里：
+
+[alias]
+  latest = for-each-ref --sort=-committerdate --format=\"%(committername)@%(refname:short) [%(committerdate:short)] %(contents)\"
+译者注：定义后就只需执行git latest了。注意双引号需要转义！
+
+
+
+如果你要查看文件的每个部分是谁修改的
+git blame用来显示一份文件每一行的最近一次提交的提交hash值和提交者。
+只要运行'git blame [filename]', 你就会得到整个文件的每一行的详细修改信息:包括SHA串,日期和作者
+你也可以用"-L"参数在命令(blame)中指定开始和结束行(查看文件sha1_file.c，160~169行的改动情况):
+$>git blame -L 160,+10 sha1_file.c 
+
+git blame -w  # 忽略移除空白这类改动
+git blame -M  # 忽略移动文本内容这类改动
+git blame -C  # 忽略移动文本内容到其它文件这类改动
+
+
+在整个git仓库提交历史中找寻内容
+你有时可能需要查找一行你写的代码，但是就是无法找到。它可能安放在了一些已经被遗忘的分支，或是删除了很久，又或是就在那显而易见的地方。无论哪种方式，你都可以通过一些命令在整个git仓库的历史中搜寻特定的字符串。
+首先，我们需要拿到所有的提交，然后，使用git grep来搜寻特定的字符串。如下：
+
+git rev-list --all | xargs git grep -F '搜寻的字符串'
+
+你可能有一个粗心的朋友不小心在仓库里提交了诸如，用户名、密码、等敏感信息。首先，他们得更改用户名、密码。然后，你需要搜寻这些得罪人的文件，并将他们从整个仓库的历史里抹去（这听起来好像很容易）。经过下面这个处理，那些执行git pull的伙计们就会发现所有提交中包含的敏感信息都被清理干净了，而那些没有合并你的远程改动的家伙还是拥有敏感信息（所以，千万别忘记先改用户名和密码）：
+
+首先，重写每个分支的历史，移除敏感信息：
+
+git filter-branch --index-filter 'git rm --cached --ignore-unmatch (filename)' --prune-empty --tag-name-filter cat -- --all
+然后，将记录敏感信息的文件增加到.gitignore文件，并提交（括号部分替换为对应文件名）：
+
+echo (filename) >> .gitignore
+git add .gitignore
+git commit -m "Add sensitive (filename) file to gitignore"
+接着，由于我们改写了历史，我们需要“强制”的将改动推到远程：
+
+git push origin master --force
+# 译者注：还可以使用命令
+git push origin +master
+最后，这个文件还在你的本地仓库里，还需要将它完全抹除：
+
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now
+git gc --aggressive --prune=now
+
+
+忽略文件跟踪
+在和他人合作时可能常常意味着你需要更改一些配置才能让应用在环境里跑起来，这时，常常会不小心把这些只对你有意义的配置文件也给提交了。为了不再常常关注这些文件，看着它们在git status时放肆的显示“modified”，你可以告诉git忽略它们的改动。这种方式，可以看成是一种和仓库绑定的gitignore文件（括号部分替换为对应文件）：
+
+  git update-index --assume-unchanged (path/file)
+译者注：感觉，.gitignore文件更方便和好理解。
+
+让分支的历史归零
+不管出于啥理由，有时从头开始正是你需要的。也许是你接手了一个不确信能安全开源的代码仓库；也许是你要着手做些全新的事情；也许是你想创建用于其它目的一个新分支，又希望继续在仓库里维护它（比如：github页面，项目的文档一类的东西）。上述的情形下，你可以非常简单的创建一个没有提交历史的分支（括号部分替换为对应分支）：
+
+  git checkout --orphan (branch)
+译者注：我们知道，分支只是对提交的一个引用，所以，每当从当前分支创建一个分支时，被创建的分支都会延续之前的历史，但是这种方式却不会，是一个完完全全干净的git分支，没有任何的提交！
+
+# 查看4天内，某个author改了些什么
+git log --since '4 day ago' --oneline --author gswyhqyang@web1.co
+
+# 比较暂存区和版本库差异
+git diff --staged
+
+你一定离不开的别名
+不讨论能节省大量敲击时间的“git别名（git alias）”技巧的git文章一定都是在耍流氓。停止输入冗长的命令，使用超级有用的别名吧！git别名可以加到.gitconfig文件里，或是使用命令（译者注：本质就是改写.gitconfig命令）来增加（括号部分替换为别名和对应的命令）：
+
+    git config --global alias.(name) "(command)"
+在依赖分支的工作流程中，你常常要在不同分支间切换，每次敲击节约你6个字母。
+co = checkout
+在提交前瞧瞧你将要提交的都有什么改动是一个好习惯，这可以帮助你发现拼写错误、不小心的提交敏感信息、将代码组织成符合逻辑的组。使用git add暂存你的改动，然后使用git ds查看你将要提交的改动动。
+ds = diff --staged  
+
+你可能十分熟悉git输出的详细状态信息了，当到达一定境界时，你可能需要忽略所有那些描述，直击问题的核心。这个别名输出将输出git status的简短形式和分支的详细信息。
+st = status -sb
+你是否在提交后才发现忘记git add某个文件了，或是提交了才想再改动些啥？amend（修正）暂存区到最近的一次提交吧。（译者注：这个命令不太好理解，--amend是重写提交历史，-C是重用某次提交的提交信息。场景是当你提交完了发现还有些改动没提交，又不想写什么“改动了X，再次提交”这种狗血的提交信息。重新git add并git amend后，重用上次的提交信息再次提交，替换上次的不完整提交。特别注意--amend重写了提交，如果你已经push到远程了，慎用这条命令！）
+amend = commit --amend -C HEAD
+有时上面的修正可能不好使了，你需要undo（撤销）。undo会回退到上次提交，暂存区也会回退到那次提交时的状态。你可以进行额外的改动，用新的提交信息来再次进行提交。
+undo = reset --soft HEAD^
+维护一个多人编辑的代码仓库常常意味着试着发现何人在改动什么，这个别名可以输出提交者和提交日期的log信息。
+ls = log --pretty=format:'%C(yellow)%h %C(blue)%ad %C(red)%d %C(reset)%s %C(green) [%cn]' --decorate --date=short
+这个别名用来在一天的开启时回顾你昨天做了啥，或是在早晨刷新你的记忆（括号内替换为自己的email）。
+standup = log --since '1 day ago' --oneline --author (YOUREMAIL)
+一个复杂的仓库可能很难用直线式的输出来查看，这个别名可以用图表的形式向你展示提交是怎样及何时被加到当前分支的。
+graph = log --graph --pretty=format:'%C(yellow)%h %C(blue)%d %C(reset)%s %C(white)%an, %ar%C(reset)'
+译者注：我根据上面的别名进行了一些整理修改，这是我现在的.gitconfig里的别名配置：
+
+[alias]
+  st = status -sb
+  co = checkout
+  br = branch
+  mg = merge
+  ci = commit
+  ds = diff --staged
+  dt = difftool
+  mt = mergetool
+  last = log -1 HEAD
+  latest = for-each-ref --sort=-committerdate --format=\"%(committername)@%(refname:short) [%(committerdate:short)] %(contents)\"
+  ls = log --pretty=format:\"%C(yellow)%h %C(blue)%ad %C(red)%d %C(reset)%s %C(green)[%cn]\" --decorate --date=short
+  hist = log --pretty=format:\"%C(yellow)%h %C(red)%d %C(reset)%s %C(green)[%an] %C(blue)%ad\" --topo-order --graph --date=short
+  type = cat-file -t
+  dump = cat-file -p
+

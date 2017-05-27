@@ -1,0 +1,144 @@
+
+1、下载：
+https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.3.0.tar.gz
+
+2、解压当前目录
+gswyhq@gswyhq-pc:~/下载$ tar -xzvf elasticsearch-5.3.0.tar.gz -C .
+参数-C 表示解压到指定路径
+
+3、移动到/usr/local 目录下，并改权限
+gswyhq@gswyhq-pc:/usr/local$ sudo mv /home/gswyhq/下载/elasticsearch-5.3.0 elasticsearch-5.3.0
+gswyhq@gswyhq-pc:/usr/local$ sudo chown -R gswyhq:gswyhq elasticsearch-5.3.0
+
+4、安装分词工具，详情：https://github.com/medcl/elasticsearch-analysis-ik
+gswyhq@gswyhq-pc:~$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ git checkout v5.3.0
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn clean
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn compile
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn package
+
+生成/home/gswyhq/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-5.3.0.zip 文件；
+拷贝和解压release下的文件: #{project_path}/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-*.zip 到你的 elasticsearch 插件目录plugins下;
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ ls
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ mkdir elasticsearch-analysis-ik-5.3.0
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ unzip /home/gswyhq/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-5.3.0.zip -d elasticsearch-analysis-ik-5.3.0
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ ls
+elasticsearch-analysis-ik-5.3.0
+
+
+若bash: mvn: 未找到命令，则需要：
+gswyhq@gswyhq-pc:~$ sudo apt-get install maven
+
+安装elasticsearch-analysis-pinyin分词器
+http://www.cnblogs.com/xing901022/p/5910139.html
+
+gswyhq@gswyhq-pc:~$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ git checkout v5.3.0
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn clean
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn compile
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn package
+
+生成文件：/home/gswyhq/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.3.0.zip
+解压并复制：
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ mkdir elasticsearch-analysis-pinyin-5.3.0
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ unzip /home/gswyhq/github_projects/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.3.0.zip -d elasticsearch-analysis-pinyin-5.3.0
+Archive:  /home/gswyhq/github_projects/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.3.0.zip
+  inflating: elasticsearch-analysis-pinyin-5.3.0/elasticsearch-analysis-pinyin-5.3.0.jar  
+  inflating: elasticsearch-analysis-pinyin-5.3.0/nlp-lang-1.7.jar  
+  inflating: elasticsearch-analysis-pinyin-5.3.0/plugin-descriptor.properties  
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ ls
+elasticsearch-analysis-ik-5.3.0  elasticsearch-analysis-pinyin-5.3.0
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ cd elasticsearch-analysis-pinyin-5.3.0/
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins/elasticsearch-analysis-pinyin-5.3.0$ ls
+elasticsearch-analysis-pinyin-5.3.0.jar  nlp-lang-1.7.jar  plugin-descriptor.properties
+
+5、启动
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0$ ./bin/elasticsearch
+浏览器打开：http://localhost:9200/ ，结果如下：
+{
+  "name" : "ubQ7NbI",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "5gUmULyVR-2Nsg6ZmKv4cw",
+  "version" : {
+    "number" : "5.3.0",
+    "build_hash" : "3adb13b",
+    "build_date" : "2017-03-23T03:31:50.652Z",
+    "build_snapshot" : false,
+    "lucene_version" : "6.4.1"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+浏览器搜索：
+http://localhost:9200/_search?q=question:a卡在哪里能用
+http://localhost:9200/yhb/_search?q=question:a卡在哪里能用
+http://localhost:9200/yhb/log_qa,log_qa3/_search?q=question:a卡在哪里能用
+或：http://localhost:9200/yhb/_search?q=question:a卡在哪里能用&pretty&explain&size=5
+注，上示例中：
+yhb:索引名
+log_qa,log_qa3均为类型名
+question：被搜索字段名
+
+
+6、head 插件的安装
+        
+安装数据导入、导出插件
+　　sudo apt-get install nodejs
+　　sudo apt-get install npm
+　　sudo npm install elasticdump -g
+    sudo apt-get install phantomjs
+
+
+npm install <name>安装nodejs的依赖包
+例如npm install express 就会默认安装express的最新版本，也可以通过在后面加版本号的方式安装指定版本，如npm install express@3.0.6
+ubuntu@10-13-70-57:~$ sudo npm install elasticdump@3.2.0 -g
+npm install <name> -g  将包安装到全局环境中
+
+gswyhq@gswyhq-pc:~/github_projects$ git clone git://github.com/mobz/elasticsearch-head.git
+正克隆到 'elasticsearch-head'...
+remote: Counting objects: 4063, done.
+remote: Total 4063 (delta 0), reused 0 (delta 0), pack-reused 4063
+接收对象中: 100% (4063/4063), 2.10 MiB | 531.00 KiB/s, 完成.
+处理 delta 中: 100% (2222/2222), 完成.
+检查连接... 完成。
+gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-head/
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-head$ npm install
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-head$ npm run start
+浏览器打开： http://localhost:9100
+或者：http://localhost:9200/_plugin/head/ (旧版本中能使用)
+
+
+# 一些参数配置
+设置内核参数：
+gswyhq@gswyhq-pc:~$ sudo vim /etc/sysctl.conf
+# 增加下面的内容
+fs.file-max=65536  # 增加系统允许打开的文件数。通常默认的是1024（可以通过ulimit查看）
+vm.max_map_count=262144  # 增加最大虚拟内存，默认是65530
+然后执行,使之生效：
+gswyhq@gswyhq-pc:~$ sudo /sbin/sysctl -p
+
+设置资源参数：
+gswyhq@gswyhq-pc:~$ sudo vim /etc/security/limits.conf
+# 增加下面的内容
+* soft nofile 32768
+* hard nofile 65536
+
+修改elasticsearch使用的参数：
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0$ vim config/elasticsearch.yml
+
+# 换个集群的名字，免得跟别人的集群混在一起
+cluster.name: es-5.0-test
+
+# 换个节点名字
+node.name: node-101
+
+# 修改一下ES的监听地址，这样别的机器也可以访问
+network.host: 0.0.0.0
+
+# 默认的就好
+http.port: 9200
+
+# config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+

@@ -1,0 +1,10 @@
+
+登录es的docker：
+sudo docker run -it ambbr-es:2017-02-14  /bin/bash
+
+进入某个docker：
+sudo docker attach  cfc99817d125
+
+向镜像内传递文件：
+gow@gzcloud:~/gswyhq$ sudo docker run -it -v /home/gow/gswyhq/elasticsearch-analysis-ik-5.1.1:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.1.1 ambbr-es:2017-02-14  /bin/bash
+

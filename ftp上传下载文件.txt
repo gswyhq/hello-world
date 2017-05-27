@@ -1,0 +1,84 @@
+
+经过ftp服务器（106.75.153.117）上传下载文件
+上传本机文件到ftp服务器：
+在文件夹中打开：ftp://106.75.153.117
+输入用户名密码，复制本机文件到该目录下即可；
+
+服务器文件上传到ftp服务器：
+第一步：登陆到需要上传文件所在的服务器
+[gow@gzidc.semantics01.gow.top /gow/semantic/WhiteII]$ls
+1                  1241606000244.log  client.py  data            log             memory.txt         nohup.out       skill_server.py  sleep.txt              tornado_server.py
+
+第二步：连接ftp服务器
+[gow@gzidc.semantics01.gow.top /gow/semantic/WhiteII]$ftp
+ftp> open 106.75.153.117
+Connected to 106.75.153.117.
+220 FTP Server ready.
+Name (106.75.153.117:gow): semantice
+331 Password required for semantice
+Password:
+230 User semantice logged in
+Remote system type is UNIX.
+Using binary mode to transfer files.
+
+第三步：上传服务器文件到ftp服务器
+ftp> put tornado_server.py tornado_server.py
+local: tornado_server.py remote: tornado_server.py
+200 PORT command successful
+150 Opening BINARY mode data connection for tornado_server.py
+226 Transfer complete
+3034 bytes sent in 0.00 secs (148144.5 kB/s)
+
+第四步：查看上传结果，发现有tornado_server.py文件：
+ftp> dir
+200 PORT command successful
+150 Opening ASCII mode data connection for file list
+-rw-r--r--   1 semantice semantice      645 Feb 21 03:45 1.txt
+-rw-r--r--   1 semantice semantice  4502243 Feb 23 07:37 elasticsearch-analysis-ik-5.0.0.zip
+-rw-r--r--   1 semantice semantice  4502267 Feb 21 03:53 elasticsearch-analysis-ik-5.1.1.zip
+-rw-r--r--   1 semantice semantice   907341 Feb 21 04:22 elasticsearch-head-master.zip
+-rw-r--r--   1 semantice semantice  2054227 Feb 21 04:22 elasticsearch-servicewrapper-master.zip
+-rw-r--r--   1 semantice semantice     3034 Feb 23 09:17 tornado_server.py
+226 Transfer complete
+
+
+ftp服务器上的文件下载：
+于在某个服务器，如106.75.141.189
+# 第一步：启动ftp服务
+gow@gzcloud:~/gswyhq$ ftp 
+# 第二步：连接ftp服务器（如：106.75.153.117）
+ftp> open 106.75.153.117
+Connected to 106.75.153.117.
+220 FTP Server ready.
+# 第三步：输入用户名、密码
+Name (106.75.153.117:gow): semantice
+331 Password required for semantice
+Password:
+230 User semantice logged in
+Remote system type is UNIX.
+Using binary mode to transfer files.
+
+# 第四步：查看当前ftp服务器上的文件
+ftp> dir
+200 PORT command successful
+150 Opening ASCII mode data connection for file list
+-rw-r--r--   1 semantice semantice      645 Feb 21 03:45 1.txt
+-rw-r--r--   1 semantice semantice  4502267 Feb 21 03:53 elasticsearch-analysis-ik-5.1.1.zip
+226 Transfer complete
+
+# 第五步：下载ftp服务器文件到当前目录
+ftp> get elasticsearch-analysis-ik-5.1.1.zip
+local: elasticsearch-analysis-ik-5.1.1.zip remote: elasticsearch-analysis-ik-5.1.1.zip
+200 PORT command successful
+150 Opening BINARY mode data connection for elasticsearch-analysis-ik-5.1.1.zip (4502267 bytes)
+226 Transfer complete
+4502267 bytes received in 3.68 secs (1195.7 kB/s)
+# 第六步：退出ftp服务器
+ftp> exit
+221 Goodbye.
+
+
+
+
+
+

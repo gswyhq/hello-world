@@ -1,0 +1,216 @@
+
+https://neo4j.com/download/，下载：Download Community Edition
+
+/home/gswyhq/下载/neo4j-community-3.0.4-unix.tar.gz
+
+# 解压
+gswyhq@gswyhq-pc:/usr/local$ sudo tar -xf '/home/gswyhq/下载/neo4j-community-3.0.4-unix.tar.gz'
+
+# 切换到root用户
+gswyhq@gswyhq-pc:/usr/local$ sudo -i
+
+# 安装
+root@gswyhq-pc:/usr/local/neo4j-community-3.0.4# ./bin/neo4j console
+
+# 设置密码，在浏览器中打开：http://localhost:7474/browser/
+# 默认用户名密码是：Default username/password: neo4j/neo4j
+# 点击连接后，重新设置密码
+
+You are connected as user neo4j
+to the server http://localhost:7474/browser/
+
+# Linux Service
+# The neo4j command can also be used with start, stop, restart or status instead of console.
+# By using these actions, you can create a Neo4j service.
+
+图数据库主要是由节点（node）、关系（relationship）、属性（property）组成的。
+
+在Neo4j中查询数据一般由四种方法：
+1.利用索引进行精确查询
+2.利用索引进行模糊查询（比较深奥）
+3.利用relationship进行查询
+4.利用遍历（Traversal）图的方式查询
+
+sudo pip3 install py2neo
+
+使用示例见：http://py2neo.org/v3/
+# http://py2neo.org/2.0/essentials.html#py2neo.authenticated
+
+from py2neo import authenticate, Graph
+
+# set up authentication parameters
+authenticate("localhost:7474", "neo4j", "设置的密码")
+
+# connect to authenticated graph database
+graph = Graph("http://localhost:7474/db/data/")
+
+
+
+http://neo4j.com/download-thanks/?edition=community&flavour=unix&release=3.0.1&_ga=1.177659493.1710540997.1464707968
+下载社区版（community）
+gswyhq@gswyhq-pc:~$ tar -xf /home/gswyhq/下载/neo4j-community-3.0.1-unix.tar.gz
+gswyhq@gswyhq-pc:~$ sudo cp -r neo4j-community-3.0.1 /usr/local/neo4j
+
+    Open up your terminal/shell.
+    Extract the contents of the archive, using:
+    tar -xf <filecode>.
+    For example,
+    tar -xf neo4j-enterprise-2.3.1-unix.tar.gz
+    the top level directory is referred to as NEO4J_HOME
+    Run Neo4j using,
+    $NEO4J_HOME/bin/neo4j console
+    Instead of ‘neo4j console’, you can use neo4j start to start the server process in the background.
+    Visit http://localhost:7474 in your web browser.
+    Change the password for the ‘neo4j’ account.
+
+
+http://blog.csdn.net/zq9017197/article/details/17717815
+
+
+Neo4J的安装
+官网：http://www.neo4j.org/
+Neo4j的部署模式
+独立模式：独立的服务器，可以通过REST API、或基于语言的驱动等访问
+嵌入模式：提供若干库，嵌入到Java程序运行
+
+##安装linux版本
+http://dist.neo4j.org/neo4j-community-1.9.4-unix.tar.gz
+下载后解包 （这里下载的是社区版）
+切换root，运行./bin/neo4j install
+##安装neo4j需要首先安装JDK
+# tar zxf neo4j-community-1.9.4-unix.tar.gz
+# mv neo4j-community-1.9.4 neo4j
+# cd neo4j/bin
+[root@linux bin]# ./neo4j install
+Graph-like power should be handled carefully. What user should run Neo4j? [oracle] root
+
+##修改配置文件
+./conf/neo4j-server.properties
+org.neo4j.server.webserver.address=0.0.0.0
+
+##启动
+[root@linux bin]# ./neo4j status
+Neo4j Server is not running
+[root@linux bin]# ./neo4j start
+WARNING: Max 1024 open files allowed, minimum of 40 000 recommended. See the Neo4j manual.
+Using additional JVM arguments: -server -XX:+DisableExplicitGC -Dorg.neo4j.server.properties=conf/neo4j-server.properties -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=file:conf/log4j.properties -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+Starting Neo4j Server...process [1128]... waiting for server to be ready....... OK.
+Go to http://localhost:7474/webadmin/ for administration interface.
+[root@linux bin]# ./neo4j status
+Neo4j Server is running at pid 1128
+
+##远程web UI
+http://10.10.10.8:7474/webadmin/#
+##Web UI: Console
+http://10.10.10.8:7474/webadmin/#/console/
+##用简单的语句测试
+neo4j-sh (0)$ CREATE (ee { name: "Emil", from: "Sweden" }) RETURN ee.name;
+==> +---------+
+==> | ee.name |
+==> +---------+
+==> | "Emil"  |
+==> +---------+
+==> 1 row
+==> Nodes created: 1
+==> Properties set: 2
+==> 
+==> 1100 ms
+neo4j-sh (0)$ START ee=node(*) WHERE ee.name! = "Emil" RETURN ee;
+==> +------------------------------------+
+==> | ee                                 |
+==> +------------------------------------+
+==> | Node[1]{name:"Emil",from:"Sweden"} |
+==> +------------------------------------+
+==> 1 row
+==> 
+==> 502 ms
+neo4j-sh (0)$
+
+##Shell命令参考
+http://docs.neo4j.org/chunked/1.9.4/shell-commands.html
+
+Neo4J集群
+模拟测试Neo4j高可用
+下载Neo4j企业版
+解压为多个不同目录
+分别修改配置文件，使监听不同的端口
+启动多个Neo4j服务器进程
+Neo4j手册第26.6节
+类似Mysql的高可用集群，可以实现读写分离，写数据被引导到Master节点，再从多个slave读数据
+
+##下载企业版并解压缩到三个目录
+http://dist.neo4j.org/neo4j-enterprise-1.9.4-unix.tar.gz
+# tar zxf neo4j-enterprise-1.9.4-unix.tar
+# mv neo4j-enterprise-1.9.4 neo4j01
+[root@linux neo4j]# cp -R neo4j01 neo4j02
+[root@linux neo4j]# cp -R neo4j01 neo4j03
+
+##1号节点的配置文件 neo4j.properties
+online_backup_server=127.0.0.1:6362
+ha.server_id=1
+ha.initial_hosts=127.0.0.1:5001,127.0.0.1:5002,127.0.0.1:5003
+ha.server=127.0.0.1:6001
+ha.cluster_server=127.0.0.1:5001
+
+##1号节点的配置文件 Neo4j-server.properties
+org.neo4j.server.webserver.address=0.0.0.0
+org.neo4j.server.manage.console_engines=gremlin, shell
+org.neo4j.server.database.mode=HA
+org.neo4j.server.webserver.port=7474
+org.neo4j.server.webserver.https.port=7473
+
+##2号节点的配置文件 neo4j.properties
+online_backup_server=127.0.0.1:6363
+ha.server_id=2
+ha.initial_hosts=127.0.0.1:5001,127.0.0.1:5002,127.0.0.1:5003
+ha.server=127.0.0.1:6002
+ha.cluster_server=127.0.0.1:5002
+
+##2号节点的配置文件 Neo4j-server.properties
+org.neo4j.server.webserver.address=0.0.0.0
+org.neo4j.server.manage.console_engines=gremlin, shell
+org.neo4j.server.database.mode=HA
+org.neo4j.server.webserver.port=7484
+org.neo4j.server.webserver.https.port=7483
+
+##3号节点的配置文件 neo4j.properties
+online_backup_server=127.0.0.1:6364
+ha.server_id=3
+ha.initial_hosts=127.0.0.1:5001,127.0.0.1:5002,127.0.0.1:5003
+ha.server=127.0.0.1:6003
+ha.cluster_server=127.0.0.1:5003
+
+##3号节点的配置文件 Neo4j-server.properties
+org.neo4j.server.webserver.address=0.0.0.0
+org.neo4j.server.manage.console_engines=gremlin, shell
+org.neo4j.server.database.mode=HA
+org.neo4j.server.webserver.port=7494
+org.neo4j.server.webserver.https.port=7493
+
+##启动三个neo4j实例
+[root@linux bin]# ./neo4j start
+WARNING: Max 1024 open files allowed, minimum of 40 000 recommended. See the Neo4j manual.
+Using additional JVM arguments: -server -XX:+DisableExplicitGC -Dorg.neo4j.server.properties=conf/neo4j-server.properties -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=file:conf/log4j.properties -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+Starting Neo4j Server...HA instance started in process [2244]. Will be operational once connected to peers. See /nosql/neo4j/neo4j01/data/log/console.log for current status.
+[root@linux bin]#
+[root@linux bin]# cd /nosql/neo4j/neo4j02/bin/
+[root@linux bin]# ./neo4j start
+WARNING: Max 1024 open files allowed, minimum of 40 000 recommended. See the Neo4j manual.
+Using additional JVM arguments: -server -XX:+DisableExplicitGC -Dorg.neo4j.server.properties=conf/neo4j-server.properties -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=file:conf/log4j.properties -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+Starting Neo4j Server...HA instance started in process [2417]. Will be operational once connected to peers. See /nosql/neo4j/neo4j02/data/log/console.log for current status.
+[root@linux bin]#
+[root@linux bin]# cd /nosql/neo4j/neo4j03/bin/
+[root@linux bin]# ./neo4j start
+WARNING: Max 1024 open files allowed, minimum of 40 000 recommended. See the Neo4j manual.
+Using additional JVM arguments: -server -XX:+DisableExplicitGC -Dorg.neo4j.server.properties=conf/neo4j-server.properties -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=file:conf/log4j.properties -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+Starting Neo4j Server...HA instance started in process [2690]. Will be operational once connected to peers. See /nosql/neo4j/neo4j03/data/log/console.log for current status.
+[root@linux bin]#
+[root@linux bin]# jps
+2417 Bootstrapper
+2796 Jps
+2244 Bootstrapper
+2690 Bootstrapper
+[root@linux bin]# 
+
+##Web UI上观看高可用集群状态
+http://10.10.10.8:7474/webadmin/#/info/org.neo4j/High%20Availability/

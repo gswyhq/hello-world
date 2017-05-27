@@ -1,0 +1,29 @@
+
+https://wiki.deepin.org/?title=显卡
+
+信息查询
+硬件型号
+命令查询，终端执行：
+lspci |grep -i 'VGA'  #查看显卡型号
+dmesg | grep -i 'VGA'  #通过查看开机信息获取显卡信息
+
+安装闭源驱动
+注意：
+1、Linux系统安装完成后，就会默认启用内核自带的开源驱动，开源驱动虽然性能不如闭源驱动，但是兼容性和稳定性较为优秀。
+2、如果系统没有问题，不建议安装闭源驱动。
+
+NVIDIA显卡
+安装
+命令自动安装
+安装源内版本，终端执行：
+sudo apt-get install nvidia-driver #安装驱动包
+如果以上命令不能正常安装驱动，请终端执行：
+ubuntu-drivers list  #检测合适的驱动包
+然后使用如下命令安装对应的驱动包，例如检测的结果为nvidia-legacy-340xx-driver
+sudo apt-get install  nvidia-legacy-340xx-driver #安装驱动包
+
+卸载
+如果为命令自动安装，终端执行如下命令可卸载：
+sudo apt-get remove nvidia-driver nvidia-kernel-dkms glx-alternative-nvidia
+
+

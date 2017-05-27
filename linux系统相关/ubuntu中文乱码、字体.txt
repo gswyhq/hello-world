@@ -1,0 +1,28 @@
+
+查看支持的语言编码：
+root@10-13-101-154:~# less /usr/share/i18n/SUPPORTED 
+
+# 重新设置
+root@10-13-101-154:~# vim /etc/locale.gen 
+
+#  设置系统默认的语言编码
+root@10-13-101-154:~# vim /etc/default/locale 
+输入:
+LANG="zh_CN.UTF-8"
+LANGUAGE="zh_CN:zh"
+
+# 重新生成，带上--purge(用来删除所有旧的配置）
+root@10-13-101-154:~# locale-gen --purge
+
+# 设置好后，需要重启电脑
+
+添加字体：
+1、下载好字体
+2、新建目录
+gswyhq@gswyhq-pc:/usr/share/fonts$ sudo mkdir local
+[sudo] gswyhq 的密码：
+3、将下载的字体复制到fonts目录下的某个子目录中
+gswyhq@gswyhq-pc:/usr/share/fonts/local$ sudo cp /home/gswyhq/Downloads/simsun/simsun.ttc .
+
+
+

@@ -1,0 +1,115 @@
+
+第一步,首先确定你的系统已经安装Iptables.打开终端,输入
+gswyhq@gswyhq-pc:~$ whereis iptables
+iptables: /sbin/iptables /usr/share/iptables /usr/share/man/man8/iptables.8.gz
+这说明已经安装了iptables
+
+如果不是这个提示,或者没有任何提示，可能没有安装iptables
+请使用如下命令安装:
+sudo apt-get install iptables
+
+第二步：查看Iptables目前的配置信息
+
+gswyhq@gswyhq-pc:~$ sudo iptables -L
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination 
+
+这个结果,也就是防火墙充许所有的请求,就如没有设置防火墙一样.
+
+sudo iptables -A INPUT -p <tcp OR udp> <--dport OR --sport> <port> -j ACCEPT
+
+INPUT is the chain for incoming traffic. -p is protocol (either tcp or udp --dport or --sportspecify allowing for destination or source port. -j is "jump" and its where you ACCEPT, REJECT, orDROP the packet(s)
+
+开放5600端口接收广播，结果：
+sudo iptables -A INPUT -p udp -d 0/0 -s 0/0 --dport 5600 -j ACCEPT
+开放8000端口接收tcp，结果：
+sudo iptables -A INPUT -p tcp -d 0/0 -s 0/0 --dport  8000 -j ACCEPT
+
+
+设置防火墙的规则，允许5600端口进入
+ sudo ufw allow  5600
+ sudo ufw allow  8000
+
+ufw是一个主机端的iptables类防火墙配置工具
+
+安装方法
+ sudo apt-get install ufw
+当然，这是有图形界面的(比较简陋)，在新立得里搜索gufw试试……
+使用方法
+1 启用
+ sudo ufw enable
+ sudo ufw default deny 
+作用：开启了防火墙并随系统启动同时关闭所有外部对本机的访问（本机访问外部正常）。
+2 关闭
+ sudo ufw disable 
+2 查看防火墙状态
+ sudo ufw status
+ 状态显示是“inactive”关闭状态。 
+3 开启/禁用相应端口或服务举例
+ sudo ufw allow 80 允许外部访问80端口
+ sudo ufw delete allow 80 禁止外部访问80 端口
+ sudo ufw allow from 192.168.1.1 允许此IP访问所有的本机端口
+ sudo ufw allow from 192.168.3.51 to any port 7474 允许192.168.3.51访问本机的7474端口
+ sudo ufw deny smtp 禁止外部访问smtp服务
+ sudo ufw delete allow smtp 删除上面建立的某条规则
+ sudo ufw deny proto tcp from 10.0.0.0/8 to 192.168.0.1 port 22 要拒绝所有的TCP流量从10.0.0.0/8 到192.168.0.1地址的22端口
+ 可以允许所有RFC1918网络（局域网/无线局域网的）访问这个主机（/8,/16,/12是一种网络分级）：
+sudo ufw allow from 10.0.0.0/8
+sudo ufw allow from 172.16.0.0/12
+sudo ufw allow from 192.168.0.0/16
+
+重启ufw使得新规则生效:
+gswyhq@gswyhq-pc:~$ sudo ufw reload
+
+开发端口后，还是报错：
+gswyhq@gswyhq-pc:~/yhb curl http://119.137.53.18:8000 -d '{"question": "a在哪里能用", "uid": "123456"}'
+curl: (7) Failed to connect to 119.137.53.18 port 8000: 拒绝连接
+
+
+测试能否连接某个主机
+gswyhq@gswyhq-pc:~/yhb ping 106.75.141.166
+PING 106.75.141.166 (106.75.141.166) 56(84) bytes of data.
+64 bytes from 106.75.141.166: icmp_seq=1 ttl=53 time=7.04 ms
+64 bytes from 106.75.141.166: icmp_seq=2 ttl=53 time=6.99 ms
+64 bytes from 106.75.141.166: icmp_seq=3 ttl=53 time=7.00 ms
+64 bytes from 106.75.141.166: icmp_seq=4 ttl=53 time=6.82 ms
+64 bytes from 106.75.141.166: icmp_seq=5 ttl=53 time=7.02 ms
+
+测试某个端口号能否联通
+ telnet服务器是通过xinetd（超级Internet守护进程）来管理的，所以要先安装xinetd。安装命令如下：
+gswyhq@gswyhq-pc:~$ sudo apt-get install xinetd
+安装telnet服务器
+输入以下命令安装：gswyhq@gswyhq-pc:~$ sudo apt-get install telnetd
+
+安装telnet客户端
+   为了测试服务器，我们在linux本机安装telnet客户端来进行测试
+   gswyhq@gswyhq-pc:~$ telnet 127.0.0.1 8000
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+
+从以上结果可以看出telnet能连接成功；
+
+查看本机的外网ip：
+gswyhq@gswyhq-pc:~/yhb curl ifconfig.me/all
+ip_addr: 119.137.53.186
+remote_host: 
+user_agent: curl/7.50.1
+port: 20932
+lang: 
+connection: 
+keep_alive: 
+encoding: 
+mime: */*
+charset: 
+via: 
+forwarded: 
+
+
+

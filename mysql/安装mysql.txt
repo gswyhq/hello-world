@@ -1,0 +1,232 @@
+安装mysql数据库，仅仅需一条命令：
+gswyhq@gswyhq-pc:~$ sudo apt-get install mysql-server mysql-client
+中间会让输入一次root用户的密码；
+
+sudo apt-get update
+sudo apt-get dist-upgrade
+
+First, install the MySQL server and client packages:
+
+sudo apt-get install mysql-server mysql-client #中途会让你输入一次root用户密码
+When done, you have a MySQL database read to rock ‘n roll. However, there’s more to do.
+
+You need to set a root password, for starters. MySQL has it’s own user accounts, which are not related to the user accounts on your Linux machine. By default, the root account of the MySQL Server is empty. You need to set it. Please replace ‘mypassword’ with your actual password and myhostname with your actual hostname.
+
+sudo mysqladmin -u root -h localhost password 'mypassword'
+sudo mysqladmin -u root -h myhostname password 'mypassword'
+Now, you probably don’t want just the MySQL Server. Most likely you have Apache+PHP already installed, and want MySQL to go with that. Here are some libraries you need to install to make MySQL available to PHP:
+
+sudo apt-get install php5-mysql #安装php5-mysql 是将php和mysql连接起来
+Or for Ruby:
+
+sudo apt-get install libmysql-ruby
+You can now access your MySQL server like this:
+  既然我们前面指定了root用户的密码，可以采用如下的命令来登录：
+ 
+mysql -u root -p
+       -u 选项用来指定登录的用户，后面的root表示采用root帐号登录。-p选项表示采用密码验证的方式登录。
+      在输入前面的命令后，系统会提示输入密码，如果正确的话就可以进入系统了。
+      
+Have fun using MySQL Server.
+
+下面介绍三种方式对MySQL进行启动/停止/重启操作：
+
+切换到mysql用户启动：
+gswyhq@gswyhq-pc:~$ sudo su - mysql
+mysql@gswyhq-pc:~$ /etc/init.d/mysql start
+ 
+启动mysql：
+方式一：sudo /etc/init.d/mysql start 
+方式二：sudo start mysql
+方式三：sudo service mysql start
+ 
+停止mysql：
+方式一：sudo /etc/init.d/mysql stop 
+方式二：sudo stop mysql
+方式san：sudo service mysql stop
+ 
+重启mysql：
+方式一：sudo/etc/init.d/mysql restart
+方式二：sudo restart mysql
+方式三：sudo service mysql restart
+
+若需要指定用户启动：
+gswyhq@gswyhq-pc:/usr/local/mysql/bin$ ls -l
+总用量 1053800
+-rwxr-xr-x 1 root mysql   8139737 2月   2  2016 innochecksum
+-rwxr-xr-x 1 root mysql    191516 2月   2  2016 lz4_decompress
+-rwxr-xr-x 1 root mysql   7843159 2月   2  2016 myisamchk
+-rwxr-xr-x 1 root mysql   7420486 2月   2  2016 myisam_ftdump
+-rwxr-xr-x 1 root mysql   7273134 2月   2  2016 myisamlog
+-rwxr-xr-x 1 root mysql   7508828 2月   2  2016 myisampack
+-rwxr-xr-x 1 root mysql   5200321 2月   2  2016 my_print_defaults
+-rwxr-xr-x 1 root mysql   9584025 2月   2  2016 mysql
+-rwxr-xr-x 1 root mysql   8605752 2月   2  2016 mysqladmin
+-rwxr-xr-x 1 root mysql  10262076 2月   2  2016 mysqlbinlog
+-rwxr-xr-x 1 root mysql   8771068 2月   2  2016 mysqlcheck
+-rwxr-xr-x 1 root mysql 160142214 2月   2  2016 mysql_client_test_embedded
+-rwxr-xr-x 1 root mysql      4879 2月   2  2016 mysql_config
+-rwxr-xr-x 1 root mysql   7710798 2月   2  2016 mysql_config_editor
+-rwxr-xr-x 1 root mysql 188937829 2月   2  2016 mysqld
+-rwxr-xr-x 1 root mysql 206605862 2月   2  2016 mysqld-debug
+-rwxr-xr-x 1 root mysql     26543 2月   2  2016 mysqld_multi
+-rwxr-xr-x 1 root mysql     26304 2月   2  2016 mysqld_safe
+-rwxr-xr-x 1 root mysql   8790926 2月   2  2016 mysqldump
+-rwxr-xr-x 1 root mysql      7424 2月   2  2016 mysqldumpslow
+-rwxr-xr-x 1 root mysql 159989332 2月   2  2016 mysql_embedded
+-rwxr-xr-x 1 root mysql   8603474 2月   2  2016 mysqlimport
+-rwxr-xr-x 1 root mysql   9468583 2月   2  2016 mysql_install_db
+-rwxr-xr-x 1 root mysql   5252755 2月   2  2016 mysql_plugin
+-rwxr-xr-x 1 root mysql  14867953 2月   2  2016 mysqlpump
+-rwxr-xr-x 1 root mysql   8552589 2月   2  2016 mysql_secure_installation
+-rwxr-xr-x 1 root mysql   8554834 2月   2  2016 mysqlshow
+-rwxr-xr-x 1 root mysql   8642125 2月   2  2016 mysqlslap
+-rwxr-xr-x 1 root mysql   5490639 2月   2  2016 mysql_ssl_rsa_setup
+-rwxr-xr-x 1 root mysql 159630098 2月   2  2016 mysqltest_embedded
+-rwxr-xr-x 1 root mysql   4869485 2月   2  2016 mysql_tzinfo_to_sql
+-rwxr-xr-x 1 root mysql  11099904 2月   2  2016 mysql_upgrade
+-rwxr-xr-x 1 root mysql   5334068 2月   2  2016 perror
+-rwxr-xr-x 1 root mysql   5028692 2月   2  2016 replace
+-rwxr-xr-x 1 root mysql   5200000 2月   2  2016 resolveip
+-rwxr-xr-x 1 root mysql   5262140 2月   2  2016 resolve_stack_dump
+-rwxr-xr-x 1 root mysql     99124 2月   2  2016 zlib_decompress
+gswyhq@gswyhq-pc:/usr/local/mysql/bin$ sudo ./mysqld_safe --user=mysql
+
+# 终止指定用户的：
+gswyhq@gswyhq-pc:/usr/local/mysql/bin$ sudo ./mysqladmin -u mysql -p shutdown
+
+一. MySQL密码的恢复方法之一 
+如果忘记了MySQL的root密码，可以用以下方法重新设置： 
+1. KILL掉系统里的MySQL进程； 
+killall -TERM mysqld 
+2. 用以下命令启动MySQL，以不检查权限的方式启动； 
+safe_mysqld --skip-grant-tables & 
+3. 然后用空密码方式使用root用户登录 MySQL； 
+mysql -u root 
+4. 修改root用户的密码； 
+mysql> update mysql.user set password=PASSWORD('新密码') where User='root'; 
+mysql> flush privileges; 
+mysql> quit 
+重新启动MySQL，就可以使用新密码登录了。
+
+
+# 重新安装：
+第一步：删除原有安装及配置
+sudo apt-get remove --purge mysql-\*
+第二步：重新安装，中间会要求设置root用户的密码，设置为：123456
+sudo apt-get install mysql-server mysql-client
+
+gswyhq@gswyhq-pc:/tmp$ ps -aux|grep mysql
+mysql     4228  0.0  0.0   4300  1572 ?        Ss   10:28   0:00 /bin/sh /usr/bin/mysqld_safe
+mysql     4575  0.0  1.4 729264 117264 ?       Sl   10:28   0:00 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --log-error=/var/log/mysql/error.log --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --port=3306
+
+安装客户端：
+首先上官网上下载LINUX版本： http://download.navicat.com/download/navicat112_mysql_en_x64.tar.gz
+也可以下载简体中文版：http://download3.navicat.com/download/navicat112_mysql_cs_x64.tar.gz
+1. 下载 navicat110_mysql_en.tar.gz 文件 
+2. 下载后解压tar文件
+tar -zxvf  /home/rain/download/navicat8_mysql_en.tar.gz  
+3. 解压后  进入解压后的目录运行命令：
+./start_navicat   
+OK，这样就完啦
+连接上数据库后里面的中文数据是乱码,把Ubuntu的字符集修改为zh_CN.utf8就行了,修改方法:
+1.查看系统支持的字符集: locale -a  
+2,修改字符集: export LANG=zh_CN.utf8  
+破解方案：
+第一次执行start_navicat时，会在用户主目录下生成一个名为.navicat的隐藏文件夹。
+cd /home/rain/.navicat/  
+此文件夹下有一个system.reg文件
+rm system.reg
+把此文件删除后，下次启动navicat 会重新生成此文件，30天试用期会按新的时间开始计算。
+也可以直接删除.navicat 目录
+
+增删改字段：
+选择表，右键-> 表设计-> '添加字段'、'插入字段'等等；
+
+修改记录：
+打开表，将光标点击需要修改的记录，点击对应字段进行修改即可
+
+插入新记录：
+将光标定位到最末一行，再敲击键盘上的“↓”键即可，添加一条新记录；再填写对应的记录字段内容；
+
+navicat中文乱码的问题：
+进入mysql:
+gswyhq@gswyhq-pc:~$ mysql -u root -p
+查看mysql字符编码
+mysql> show variables like 'character%';
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | latin1                     |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | latin1                     |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.00 sec)
+
+# 修改编码：
+mysql> set character_set_database=utf8;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql> set character_set_server=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show variables like 'character%';
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | utf8                       |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | utf8                       |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.00 sec)
+
+mysql> exit
+Bye
+# 重启mysql服务：
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
+[sudo] gswyhq 的密码：
+[ ok ] Restarting mysql (via systemctl): mysql.service.
+
+但重启后，发现修改的默认编码无效，这个时候编辑配置文件
+gswyhq@gswyhq-pc:~$ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf 
+末尾添加两行：
+character-set-server=utf8
+collation-server=utf8_general_ci
+重启mysql：
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
+[ ok ] Restarting mysql (via systemctl): mysql.service.
+再次进入mysql查看编码，显示正常：
+mysql> show variables like 'character%';
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    6
+Current database: *** NONE ***
+
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | utf8                       |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | utf8                       |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.01 sec)
+
+但是在Navicat for MySQL中显示的还是乱码，实际上不是乱码，而是显示的方框；
+最后发现是字体的问题；
+打开一个表，选择上方的“工具（tools）”--> "选项（options）" --> "外观（Appearance）"--> "字体（Font）";
+将四个字体都设置为中文字体："WenQuanYi Micro Hei" 或“Droid Sans Fallback”

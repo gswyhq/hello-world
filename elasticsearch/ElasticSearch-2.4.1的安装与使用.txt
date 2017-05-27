@@ -1,0 +1,409 @@
+
+安装jdk
+1、http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html,下载，http://220.112.193.195/files/B0330000026097A2/download.oracle.com/otn-pub/java/jdk/8u101-b13/jdk-8u101-linux-x64.tar.gz
+2、sudo mkdir /usr/lib/jvm
+3、sudo tar zxvf  jdk-8u25-linux-x64.tar.gz  -C  /usr/lib/jvm/
+gswyhq@gswyhq-pc:/usr/lib/jvm$ ls
+jdk1.8.0_101
+4、编辑 .bashrc 文件。
+在终端输入如下命令：
+vi ~/.bashrc
+在该文件的末尾，加上以上几行代码：
+
+export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_101
+export CLASSPATH=${JAVA_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH
+
+5、为了让更改立即生效，请在终端执行如下命令：
+source ~/.bashrc
+
+1、下载ElasticSearch
+https://www.elastic.co/thank-you?url=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.4.1/elasticsearch-2.4.1.zip
+2、解压elasticsearch-1.7.3.tar.gz到/usr/local/elasticsearch-2.4.1
+3、修改目录权限： 
+gswyhq@gswyhq-pc:/usr/local$ sudo chown -R gswyhq elasticsearch-2.4.1/
+
+4、启动脚本
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-2.4.1/bin$ ./elasticsearch
+浏览器输入http://127.0.0.1:9200/，得到：
+{
+  "name" : "Stallior",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "DDX2zsKcTz2pVIeqy_KxZw",
+  "version" : {
+    "number" : "2.4.1",
+    "build_hash" : "c67dc32e24162035d18d6fe1e952c4cbcbe79d16",
+    "build_timestamp" : "2016-09-27T18:57:55Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.2"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+5、安装elasticsearch-servicewrapper插件
+https://github.com/elastic/elasticsearch-servicewrapper，下载service文件夹，放到es的bin目录下: 
+
+6、安装插件
+git clone git://github.com/mobz/elasticsearch-head.git
+或，下载elasticsearch-head-master.zip，解压,
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-2.4.1/plugins$ sudo mv /home/gswyhq/下载/elasticsearch-head-master ./head
+
+7、添加数据,如在索引twitter中的tweet类型中存储了id为1的数据：
+curl -XPUT 'http://localhost:9200/twitter/tweet/1' -d '{
+    "user" : "kimchy",
+    "post_date" : "2009-11-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}'
+得到：
+索引：twitter
+类型:tweet
+_id:1
+字段：message、post_date、user
+如果上面执行操作前，ES中没有twitter这个索引，那么默认会直接创建这个索引；并且type字段也会自动创建。也就是说，ES并不需要像传统的数据库事先定义表的结构。
+
+总结： 
+增删改查的RESTful接口URL形式：http://localhost:9200///[] 
+增删改查分别对应：HTTP请求的PUT、GET、DELETE方法。PUT调用是如果不存在就是创建，已存在是更新。
+http://blog.csdn.net/bsh_csn/article/details/53908406
+
+# 安装分词工具，详情：https://github.com/medcl/elasticsearch-analysis-ik
+gswyhq@gswyhq-pc:~$ git clone https://github.com/medcl/elasticsearch-analysis-ik 
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ git checkout v1.10.1
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn clean
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn compile
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-ik$ mvn package
+
+生成/home/gswyhq/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-1.10.1.zip 文件；
+
+拷贝和解压release下的文件: #{project_path}/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-*.zip 到你的 elasticsearch 插件目录, 如: plugins/ik 重启elasticsearch
+root@gswyhq-pc:/usr/local/elasticsearch-2.4.1/plugins# cp -r /home/gswyhq/elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-1.10.1 .
+
+若bash: mvn: 未找到命令，则需要：
+gswyhq@gswyhq-pc:~$ sudo apt-get install maven
+
+安装elasticsearch-analysis-pinyin分词器
+http://www.cnblogs.com/xing901022/p/5910139.html
+
+gswyhq@gswyhq-pc:~$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ git checkout v1.8.1
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn clean
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn compile
+gswyhq@gswyhq-pc:~/elasticsearch-analysis-pinyin$ mvn package
+
+生成文件：/home/gswyhq/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-1.8.1.zip
+解压并复制：
+root@gswyhq-pc:/usr/local/elasticsearch-2.4.1/plugins# cp -r /home/gswyhq/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-1.8.1 .
+
+# 建立一个索引
+curl -XPUT localhost:9200/music-index
+
+# 然后定义映射，注意：只有刚刚新建、还没有任何数据的索引，才能定义映射。定义映射Mapping可以使用_mapping RESTAPI，符合下面的标准语法：
+curl -XPUT localhost:9200/music-index/poetry/_mapping?pretty -d '{"poetry":{"properties":{"content":{"type":"string","analyzer": "ik_max_word"}, "level":{"type":"long"},"poet":{"type":"string","analyzer": "ik_max_word"},"poetryId":{"type":"long"},"title":{"type":"string","analyzer": "ik_max_word"}}}}'
+
+# 删除索引：music-index
+gswyhq@gswyhq-pc:~/wangda$ curl -XDELETE http://localhost:9200/music-index
+
+# 删除文档：
+curl -XDELETE 'http://localhost:9200/twitter/tweet/1'
+
+# 删除类型,但实际操作无效
+curl -XDELETE http://localhost:9200/index/type
+
+列出所有的索引:
+gswyhq@gswyhq-pc:~$ curl 'localhost:9200/_cat/indices?v'
+
+这将删除已删除文档的段并释放一些空间。
+
+curl -XPOST'http：// localhost：9200 / _optimize?only_expunge_deletes = true'
+要么
+
+curl -XPOST'http：// localhost：9200 / _forcemerge?only_expunge_deletes = true'
+        
+安装数据导入、导出插件
+　　sudo apt-get install nodejs
+　　sudo apt-get install npm
+　　sudo npm install elasticdump -g
+从数据库导出某个索引数据到文件：
+gswyhq@gswyhq-pc:~$ elasticdump --input=http://localhost:9200/music-index --output=/home/gswyhq/ambbr-ai/ambbr/music-index.json --all=true
+从数据库导出所有索引数据到文件：
+gswyhq@gswyhq-pc:~$ elasticdump --input=http://localhost:9200 --output=/home/gswyhq/ambbr-ai/ambbr/Elasticsearch_all_data.json --all=true
+
+从文件导入数据到数据库：
+gswyhq@gswyhq-pc:~$ elasticdump --input=/home/gswyhq/ambbr-ai/ambbr/music-index.json --output=http://localhost:9200/music-index3 --all=true  
+
+从一个数据库导出一个索引到另一个数据库：
+gswyhq@gswyhq-pc:~$ elasticdump --input=http://localhost:9200/xplan_story_info --output=http://172.26.1.196:9200/xplan_story_info --all=true  
+
+elasticdump --input=http://localhost:9200/music-index --output=http://172.26.1.196:9200/music-index --all=true  
+elasticdump --input=http://172.26.1.196:9200/search-index/test --output=http://localhost:9200/qa-search-index/test --type=mapping  
+elasticdump --input=http://localhost:9200/qa-search-index/test --output=http://172.26.1.196:9200/qa-search-index/test --all=true  
+
+
+gswyhq@gswyhq-pc:~$ elasticdump --input=http://localhost:9200/music-index --output=http://172.26.1.196:9200/music-index --type=mapping  
+gswyhq@gswyhq-pc:~$ elasticdump --input=http://localhost:9200/music-index --output=http://172.26.1.196:9200/music-index --all=true
+
+
+gswyhq@gswyhq-pc:~$ curl -XPUT localhost:9200/qa-search-index
+gswyhq@gswyhq-pc:~$ curl -XPUT localhost:9200/qa-search-index/test/_mapping?pretty -d '{"test":{"properties":{"expression": {"type": "string"},"answer": {"type": "string"},"lib": {"type": "string"},"skill": {"type": "string"},"name": {"type": "string"},"id": {"type": "string"},"label": {"type": "string"},"keyword":{"type": "string"},"content": {"analyzer": "ik_max_word","type": "string"}}}}'
+
+elasticdump --input=http://localhost:9200/qa-search-index --output=http://172.26.1.196:9200/qa-search-index --type=mapping  
+elasticdump --input=http://localhost:9200/qa-search-index --output=http://172.26.1.196:9200/qa-search-index --all=true
+
+./elasticdump  --input=http://192.168.1.1:9200/original --output=http://192.168.1.2:9200/newCopy --type=mapping  
+--type=mapping ，意思是把原始索引的mapping结构迁移给目标索引。
+然后在执行--type=data的
+./elasticdump  --input=http://192.168.1.1:9200/original --output=http://192.168.1.2:9200/newCopy --type=data  
+就可以把数据迁移过去啦
+如果索引很多，你还是懒得一个个去迁移，那么你可以改用这个命令：
+./elasticdump  --input=http://192.168.1.1:9200/ --output=http://192.168.1.2:9200/ --all=true  
+加个--all=true，input与output里不需要把索引名加上，这样就可以自动把原机器上的所有索引迁移到目标机器
+
+
+导出Mapping信息  
+elasticdump --ignore-errors=true  --scrollTime=120m  --bulk=true --input=http://10.10.20.164:9200/xmonitor-2015.04.29   --output=http://192.168.100.72:9200/xmonitor-prd-2015.04.29  --type=mapping  
+  
+导出数据  
+elasticdump --ignore-errors=true  --scrollTime=120m  --bulk=true --input=http://10.10.20.164:9200/xmonitor-2015.04.28   --output=/usr/local/esdump/node-v0.12.2-linux-x64/data/xmonitor-prd-2015.04.28.json --type=data  
+  
+导出数据到本地集群  
+elasticdump --ignore-errors=true  --scrollTime=120m  --bulk=true --input=http://10.10.20.164:9200/xmonitor-2015.04.29   --output=http://192.168.100.72:9200/xmonitor-prd-2015.04.29 --type=data  
+
+# Copy an index from production to staging with analyzer and mapping:
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=http://staging.es.com:9200/my_index \
+  --type=analyzer
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=http://staging.es.com:9200/my_index \
+  --type=mapping
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=http://staging.es.com:9200/my_index \
+  --type=data
+
+# Backup index data to a file:
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=/data/my_index_mapping.json \
+  --type=mapping
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=/data/my_index.json \
+  --type=data
+# Backup and index to a gzip using stdout:
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=$ \
+  | gzip > /data/my_index.json.gz
+
+# Backup the results of a query to a file
+elasticdump \
+  --input=http://production.es.com:9200/my_index \
+  --output=query.json \
+  --searchBody '{"query":{"term":{"username": "admin"}}}'
+  
+# Copy a single index from a elasticsearch:
+elasticdump \
+  --input=http://es.com:9200/api/search \
+  --input-index=my_index \
+  --output=http://es.com:9200/api/search \
+  --output-index=my_index \
+  --type=mapping
+
+# Copy a single type:
+elasticdump \
+  --input=http://es.com:9200/api/search \
+  --input-index=my_index/my_type \
+  --output=http://es.com:9200/api/search \
+  --output-index=my_index \
+  --type=mapping
+
+# Copy a single type:
+elasticdump \
+  --input=http://es.com:9200/api/search \
+  --input-index=my_index/my_type \
+  --output=http://es.com:9200/api/search \
+  --output-index=my_index \
+  --type=mapping
+  
+我们可以在twitter索引中搜索所有类型的所有文档：
+GET / twitter / _search?q = user:kimchy
+curl -XGET 'localhost:9200/twitter/_search?q=user:kimchy&pretty'
+
+我们还可以在特定类型中进行搜索:
+GET / twitter / tweet，user / _search?q = user:kimchy
+curl -XGET 'localhost:9200/twitter/tweet,user/_search?q=user:kimchy&pretty'
+
+我们还可以在多个索引之间搜索具有某个标签的所有tweet（例如，当每个用户都有自己的索引时）:
+GET / kimchy，elasticsearch / tweet / _search?q = tag:wow
+curl -XGET 'localhost:9200/kimchy,elasticsearch/tweet/_search?q=tag:wow&pretty'
+
+或者我们可以使用_all占位符搜索所有可用索引中的所有tweet:
+GET / _all / tweet / _search?q = tag:wow
+curl -XGET 'localhost:9200/_all/tweet/_search?q=tag:wow&pretty'
+
+甚至搜索所有的索引和所有类型:
+GET / _search?q = tag:wow
+curl -XGET 'localhost:9200/_search?q=tag:wow&pretty'
+
+默认情况下，elasticsearch拒绝将查询超过1000个分片的搜索请求。原因是这样大量的分片使协调节点的工作非常耗费CPU和内存。组织数据通常是一个更好的主意，因为有较少的较大的碎片。如果您想绕过此限制（不鼓励），可以将action.search.shard_count.limit集群设置更新为更大的值。
+
+在music-index索引display类型下，搜索musicId为001的数据；
+gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ curl -XGET 'localhost:9200/music-index/display/_search?q=musicId:001&pretty'
+
+Elasticsearch零宕机时间更新索引配置映射内容的方法，包括字段类型、分词器、分片数等。方法原理就是，利用别名机制，给索引配置别名，所有应用程序都通过别名访问索引。重建索引，通过索引原名将原索引导入新建索引。再为新索引配置相同的别名。确认成功导入后，则删掉老索引。实现配置参数更新。
+将别名alias1与索引test1建立关联：（注意别名不能跟已有索引名重名）
+    
+    curl -XPOST 'http://localhost:9200/_aliases' -d '
+    {
+        "actions": [
+            {"add": {"index": "music-index", "alias": "alias-music-index"}}
+        ]
+    }'
+    
+    一个别名也可以被移除，比如：
+    
+    curl -XPOST 'http://localhost:9200/_aliases' -d '
+    {
+        "actions": [
+            {"remove": {"index": "music-index", "alias": "alias-music-index"}}
+        ]
+    }'
+    
+    重命名一个别名就是一个简单的remove然后add的操作，也是使用相同的API。这个操作是原子的，无需担心这个别名未能指向一个索引的简短时间：
+    
+    curl -XPOST 'http://localhost:9200/_aliases' -d '
+    {
+        "actions": [
+            {"remove": {"index": "music-index", "alias": "alias-music-index"}},
+            {"add": {"index":"music-index", "alias": "alias-music-index2"}}
+        ]
+    }'
+    
+    将一个别名同多个的索引关联起来就是简单地几个add操作：
+    
+    curl -XPOST 'http://localhost:9200/_aliases' -d '
+    {
+        "actions": [
+            {"add": {"index": "test1", "alias":"alias1"}},
+            {"add": {"index": "test2", "alias":"alias1"}}
+        ]
+    }'
+
+ "status": {
+          "type":  "string", //字符串类型
+          "index": "analyzed"//分词，不分词是：not_analyzed ，设置成no，字段将不会被索引
+          "analyzer":"ik"//指定分词器
+          "boost":1.23//字段级别的分数加权
+           "doc_values":false//对not_analyzed字段，默认都是开启，分词字段不能使用，对排序和聚合能提升较大性能，节约内存
+            "fielddata":{"format":"disabled"}//针对分词字段，参与排序或聚合时能提高性能，不分词字段统一建议使用doc_value
+            "fields":{"raw":{"type":"string","index":"not_analyzed"}} //可以对一个字段提供多种索引模式，同一个字段的值，一个分词，一个不分词
+            "ignore_above":100 //超过100个字符的文本，将会被忽略，不被索引
+            "include_in_all":ture//设置是否此字段包含在_all字段中，默认是true，除非index设置成no选项
+            "index_options":"docs"//4个可选参数docs（索引文档号） ,freqs（文档号+词频），positions（文档号+词频+位置，通常用来距离查询），offsets（文档号+词频+位置+偏移量，通常被使用在高亮字段）分词字段默认是position，其他的默认是docs
+            "norms":{"enable":true,"loading":"lazy"}//分词字段默认配置，不分词字段：默认{"enable":false}，存储长度因子和索引时boost，建议对需要参与评分字段使用 ，会额外增加内存消耗量
+             "null_value":"NULL"//设置一些缺失字段的初始化值，只有string可以使用，分词字段的null值也会被分词
+             "position_increament_gap":0//影响距离查询或近似查询，可以设置在多值字段的数据上火分词字段上，查询时可指定slop间隔，默认值是100
+              "store":false//是否单独设置此字段的是否存储而从_source字段中分离，默认是false，只能搜索，不能获取值
+               "search_analyzer":"ik"//设置搜索时的分词器，默认跟ananlyzer是一致的，比如index时用standard+ngram，搜索时用standard用来完成自动提示功能
+                "similarity":"BM25"//默认是TF/IDF算法，指定一个字段评分策略，仅仅对字符串型和分词类型有效
+                "term_vector":"no"//默认不存储向量信息，支持参数yes（term存储），with_positions（term+位置）,with_offsets（term+偏移量），with_positions_offsets(term+位置+偏移量) 对快速高亮fast vector highlighter能提升性能，但开启又会加大索引体积，不适合大数据量用
+        }
+
+
+
+（2）数字类型主要如下几种： 
+long：64位存储 
+integer：32位存储 
+short：16位存储 
+byte：8位存储 
+double：64位双精度存储 
+float：32位单精度存储 
+
+支持参数： 
+
+coerce：true/false 如果数据不是干净的，将自动会将字符串转成合适的数字类型，字符串会被强转成数字，浮点型会被转成整形，经纬度会被转换为标准类型
+boost：索引时加权因子
+doc_value：是否开启doc_value
+ignore_malformed：false（错误的数字类型会报异常）true（将会忽略）
+include_in_all：是否包含在_all字段中
+index:not_analyzed默认不分词
+null_value：默认替代的数字值
+precision_step：16 额外存储对应的term，用来加快数值类型在执行范围查询时的性能，索引体积相对变大
+store：是否存储具体的值
+
+# 新建索引twitter的mappings，并设置my_type类型下，title的字段类型及分词：
+curl -XPUT 'http://localhost:9200/twitter' -d '{
+    "mappings": {
+        "my_type": {
+            "properties": {
+                "title":  {
+                    "type": "string",
+                    "index":    "analyzed",
+                    "analyzer": "ik_max_word"
+                }
+            }
+        }
+    }
+}'
+
+ik 带有两个分词器
+ik_max_word ：会将文本做最细粒度的拆分；尽可能多的拆分出词语,如： a卡在哪里能用--> 卡在 在哪 哪里 里 能用
+ik_smart：会做最粗粒度的拆分；已被分出的词语将不会再次被其它词语占有
+浏览器搜索即可看见详细的分词结果：http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=5
+
+
+from elasticsearch import Elasticsearch
+# conntect es
+es = Elasticsearch([{'host': config.elastic_host, 'port': config.elastic_port}])
+# delete index if exists
+if es.indices.exists(config.elastic_urls_index):
+    es.indices.delete(index=config.elastic_urls_index)
+# index settings
+settings = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "urls": {
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        }
+     }
+}
+# create index
+es.indices.create(index=config.elastic_urls_index, ignore=400, body=settings)
+
+self.client.indices.put_mapping(
+    index="accesslog",
+    doc_type="logs_june",
+    body={
+        "_timestamp": {  
+            "enabled":"true"
+        },
+        "properties": {  
+            "logdate": {  
+                "type":"date",
+                "format":"dd/MM/yyy HH:mm:ss"
+            }
+        }
+    }
+)
+
+Copy an index from production to staging:
+elasticdump --input=http://production.es.com:9200/my_index --output=http://staging.es.com:9200/my_index
+Backup an index to a file:
+elasticdump --input=http://production.es.com:9200/my_index --output=/var/data/es.json
+Backup and index to a gzip using stdout:
+elasticdump --input=http://production.es.com:9200/my_index --output=$ | gzip > /var/data/es.gz
+Backup ALL indices, then use Bulk API to load populate another ES cluster:
+elasticdump --all=true --input=http://staging.es.com:9200/ --output=/var/dat/es.json
+elasticdump --all=true --input=/var/dat/es.json --output=http://production.es.com:9200/ --bulk=true
+
+
+

@@ -1,0 +1,8 @@
+
+卸载：
+1.进入深度操作系统，桌面打开终端，执行以下命令重置MBR：
+ sudo dd if=/usr/lib/SYSLINUX/mbr.bin of=/dev/sda       #SYSLINUX要大写
+2.如果提示没有syslinux/mbr.bin文件或文件夹，就先执行以下命令：
+ sudo apt-get install syslinux
+3.重启进入Windows系统，点击“计算机”右键–>管理–>磁盘管理，删除Linux系统的分区后即可完成深度操作系统的卸载。
+ 假设之前deepin系统安装在D盘，在‘磁盘管理’中，选择安装的D盘右键选择删除卷；删除完毕后，再在同位置选择新建卷即可恢复。

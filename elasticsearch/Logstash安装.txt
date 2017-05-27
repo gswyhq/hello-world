@@ -1,0 +1,50 @@
+
+1、下载并解压：
+https://artifacts.elastic.co/downloads/logstash/logstash-5.4.0.tar.gz
+gswyhq@gswyhq-pc:~/Downloads$ tar zxvf logstash-5.3.0.tar.gz 
+gswyhq@gswyhq-pc:~/Downloads$ sudo mv /home/gswyhq/Downloads/logstash-5.3.0 /usr/local/logstash-5.3.0
+
+2  新建、编写 logstash.conf 配置文件
+3 运行：
+Run bin/logstash -f logstash.conf
+
+
+创建配置文件目录：
+gswyhq@gswyhq-pc:/usr/local/logstash-5.3.0$ vim config/my_logstash_search.conf 
+
+输入下面：
+input {
+ # stdin {
+ #   type => "human"
+ # }
+  
+  # 将/var/log/下的*.log文件通过logstash传到elasticsearch
+  file{
+          # path => ["/var/log/*.log"]
+          path => ["/home/gswyhq/yhb/log/io.log"]
+      }
+}
+
+output {
+ # stdout {
+ #   codec => rubydebug
+ # }
+
+  elasticsearch {
+        hosts => "localhost:9200"
+        index => "test3"
+  }
+}
+
+       
+启动：
+gswyhq@gswyhq-pc:/usr/local/logstash-5.3.0$ ./bin/logstash -f config/my_logstash_search.conf 
+浏览器打开：http://localhost:9600/
+返回结果： 
+{"host":"gswyhq-pc","version":"5.3.0","http_address":"127.0.0.1:9600","id":"ad7f471c-56cf-4b27-b9b5-b99af1a3e055","name":"gswyhq-pc","build_date":"2017-03-23T03:56:19Z","build_sha":"da58f0946883e10b4472f6ade80d38b6e02947be","build_snapshot":false}
+
+当“/home/gswyhq/yhb/log/io.log”文件有新增内容时：
+浏览器打开http://localhost:9100/
+可以看到localhost:9200，对应的test3 索引下有新数据添加进去了；
+而test3索引对应的旧数据、字段等信息均被新的数据、字段覆盖了；
+

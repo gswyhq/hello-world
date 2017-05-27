@@ -1,0 +1,4 @@
+
+数据文件都在，但查询结果却为空：
+删除数据文件中的文件`neostore.labelscanstore.db`，重启服务器即可，原因暂不明；
+ubuntu@10-13-158-31:~/yhb_test$ rm yhb.db/neostore.labelscanstore.db

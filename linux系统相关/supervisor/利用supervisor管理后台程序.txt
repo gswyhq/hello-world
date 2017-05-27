@@ -1,0 +1,158 @@
+
+Linux的后台进程运行有好几种方法，例如nohup，screen等，但是，如果是一个服务程序，要可靠地在后台运行，我们就需要把它做成daemon，最好还能监控进程状态，在意外结束时能自动重启。
+
+supervisor就是用Python开发的一套通用的进程管理程序，能将一个普通的命令行进程变为后台daemon，并监控进程状态，异常退出时能自动重启。
+
+安装supervisor
+
+Debian / Ubuntu可以直接通过apt安装：
+
+# apt-get install supervisor
+
+然后，给我们自己开发的应用程序编写一个配置文件，让supervisor来管理它。
+每个进程的配置文件都可以单独分拆，放在/etc/supervisor/conf.d/目录下，以.conf作为扩展名，例如，app.conf定义了一个gunicorn的进程：
+
+[program:app]
+command=/usr/bin/gunicorn -w 1 wsgiapp:application
+directory=/srv/www
+user=www-data
+其中，进程app定义在[program:app]中，command是命令，directory是进程的当前目录，user是进程运行的用户身份。
+
+重启supervisor，让配置文件生效，然后运行命令supervisorctl启动进程：
+
+# supervisorctl start app
+停止进程：
+
+# supervisorctl stop app
+如果要在命令行中使用变量，就需要自己先编写一个shell脚本：
+
+#!/bin/sh
+/usr/bin/gunicorn -w `grep -c ^processor /proc/cpuinfo` wsgiapp:application
+然后，加上x权限，再把command指向该shell脚本即可。
+
+实例：
+第一步：编写conf文件，如tornado.conf
+gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo vim tornado.conf
+
+[group:tornadoes]
+programs=tornado-8000
+
+[program:tornado-8000]
+# command=/home/web1/venv_demo/bin/python /home/web1/demo/main.py 
+command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
+# directory=/home/web1/demo/
+directory=/home/gswyhq/yhb/
+# user=web1
+user=gswyhq
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/gswyhq/yhb/log/tornado.log
+stderr_logfile=/home/gswyhq/yhb/log/tornado.log
+loglevel=info
+
+第二步：启动
+gswyhq@gswyhq-pc:~$ sudo supervisorctl start tornado-8000
+unix:///var/run/supervisor.sock refused connection
+这样启动会报错；改用下面的
+gswyhq@gswyhq-pc:~$ sudo supervisord -c /etc/supervisor/supervisord.conf
+Unlinking stale socket /var/run/supervisor.sock
+gswyhq@gswyhq-pc:~$ sudo supervisorctl -c /etc/supervisor/supervisord.conf
+unix:///var/run/supervisor.sock no such file
+supervisor> exit
+
+或者通过下面方法启动：
+gswyhq@gswyhq-pc:~/yhb$ sudo supervisorctl start tornadoes:tornado-8000
+
+或者通过下面方法启动（关闭supervisord后，上面两种方法启动都无效）：
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/supervisor start
+
+
+第三步：关闭
+gswyhq@gswyhq-pc:~$ sudo supervisorctl stop tornado-8000
+tornado-8000: ERROR (no such process)
+会报错，改用下面的：
+gswyhq@gswyhq-pc:~$ sudo supervisorctl stop all
+tornadoes:tornado-8000: stopped
+
+或者：
+gswyhq@gswyhq-pc:~$ sudo supervisorctl stop tornadoes:tornado-8000
+tornadoes:tornado-8000: stopped
+
+gswyhq@gswyhq-pc:~$ sudo supervisorctl stop all
+tornadoes:tornado-8000: stopped
+
+# sudo supervisorctl stop all 仅仅是结束了所有的tornadoes；并不能结束supervisord的进程
+gswyhq@gswyhq-pc:~$ ps -aux|grep supervi
+root     16781  0.0  0.1  61128 20580 ?        Ss   16:15   0:00 /usr/bin/python /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
+gswyhq   17321  0.0  0.0  14520   996 pts/2    S+   16:32   0:00 grep supervi
+
+# 若需要结束supervisord的进程，只能是关闭supervisord
+gswyhq@gswyhq-pc:~$ sudo supervisorctl shutdown
+Shut down
+
+# 查看supervisor状况：
+root@10-13-101-154:~# supervisorctl status
+tornadoes:tornado-8000           STOPPED    May 08 07:09 PM
+
+使用easy_install安装的supervisor的默认sock文件 会被定义在/tmp下面 而apt-get会在/var/run下面. 
+鉴于apt-get会出现各种问题 这里建议使用easy_install或是pip安装 supervisor.
+
+如果修改了 /etc/supervisord.conf ,,需要执行 supervisorctl reload 来重新加载配置文件，否则会感觉没有生效
+
+有时候会报错：
+FATAL      Exited too quickly (process log may have details)
+
+可能是配置有问题，command写得有问题 
+command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
+
+可能是/home/gswyhq/yhb/tornado_server.py没加执行环境 
+第一行加上#!/usr/bin/python3 
+
+报‘Exited too quickly (process log may have details)’错误，也有可能是启动程序过慢造成不停地重启失败的，
+在启动程序中加上一句停止时间，如：“sleep 3”即可
+
+也有可能是程序已经在其他地方被人为启动了，导致端口占用，报错：
+elasticsearch-head               BACKOFF   Exited too quickly (process log may have details)
+这个时候关掉人为占用，重启对应守护进程即可，如：
+gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo supervisorctl restart elasticsearch-head
+
+
+另外命令不能把终端输出信息屏蔽掉
+command=/bin/bash /usr/local/elasticsearch-5.3.0/bin/elasticsearch > /dev/null 2>&1 &   # 错误写法
+command=/bin/bash /usr/local/elasticsearch-5.3.0/bin/elasticsearch   # 正确写法
+
+故：“command=/bin/bash /usr/local/neo4j-community-3.1.1/bin/neo4j start “写是错误的；
+应该写成： ” command=/bin/bash /usr/local/neo4j-community-3.1.1/bin/neo4j console “
+因为“command=/bin/bash /usr/local/neo4j-community-3.1.1/bin/neo4j start “这样运行时，终端并没有什么输出信息；
+
+单独在shell运行elasticsearch正常，但用supervisord运行elasticsearch报错：
+max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]
+需要更改默认的配置，如：
+gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo vim elasticsearch.conf 
+[supervisord]
+minfds=65536
+minprocs=32768  
+
+[program:elasticsearch]
+command=/usr/local/elasticsearch-5.3.0/bin/elasticsearch
+
+需要注意的是，minfds的配置，与command不能在同一个选项下；
+
+也可以通过web页面管理服务，配置如下：
+#  HTTP 服务器，提供 web 管理界面
+[inet_http_server]
+# Web 管理后台运行的 IP 和端口，如果开放到公网，需要注意安全性
+port=127.0.0.1:9001
+# 登录管理后台的用户名
+username=gswyhq
+# 登录管理后台的密码
+password=123456
+
+配置好后，重新加载
+gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo /etc/init.d/supervisor reload
+浏览器打开：http://127.0.0.1:9001/ ，输入用户名密码，即可看见程序运行情；
+
+若允许非本地连接需更改：
+port=127.0.0.1:9001        ; 这个是侦听的IP和端口，侦听所有IP用 :9001或*:9001。
+改为：port=*:9001
+

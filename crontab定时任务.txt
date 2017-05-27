@@ -1,0 +1,60 @@
+查看crontab服务状态：
+gswyhq@gswyhq-pc:~$ sudo service cron status
+
+重新载入crontab配置：
+gswyhq@gswyhq-pc:~$ sudo service cron reload
+
+重启crontab服务：
+gswyhq@gswyhq-pc:~$ sudo service cron restart
+
+启动服务：
+gswyhq@gswyhq-pc:~$ sudo service cron start
+
+关闭crontab服务：
+gswyhq@gswyhq-pc:~$ sudo service cron stop
+
+
+切换到root用户，查看当前有哪些定时任务；即”crontab -l" 查看crontab 中所有部署的内容;
+root@ubuntu:~# crontab -l
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+2 0 * * * cd /gow/appserver/new-ambbr-ai/ambbr;python ambbr/weather/weatherbugFromHefeng.py >weather.log &
+2 0 * * * cd /gow/appserver/new-ambbr-ai/ambbr;python ambbr/spider/fortune_spider.py >fortune.log &
+
+一般一个用户最多只有一个crontab文件，以上实际上就是/var/spool/cron/crontabs/root文件的内容；
+”crontab -e" 进入crontab 编辑状态;
+说明：
+基本格式 : 
+*　　*　　*　　*　　*　　command 
+分　时　日　月　周　命令 
+第1列表示分钟1～59 每分钟用*或者 */1表示 
+第2列表示小时1～23（0表示0点） 
+第3列表示日期1～31 
+第4列表示月份1～12 
+第5列标识号星期0～6（0表示星期天） 
+第6列要运行的命令
+
+crontab文件的一些例子： 
+30 21 * * * /usr/local/etc/rc.d/lighttpd restart 
+上面的例子表示每晚的21:30重启apache。 
+ 

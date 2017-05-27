@@ -1,0 +1,209 @@
+1.2 nginx 的启动和关闭
+启动 nginx：
+# nginx -c /etc/nginx/nginx.conf
+
+关闭 nginx
+# nginx -s stop
+
+重读配置文件
+# nginx -s reload
+
+重新打开日志文件
+# nginx -s reopen
+
+还可以下载 nginx RPM 包中的 /etc/init.d/nginx 文件，修改路径后即可使用：
+
+# service nginx {start|stop|status|restart|reload|configtest|}
+
+2. nginx.conf 配置文件
+Nginx 配置文件主要分成四部分：main（全局设置）、http（HTTP 的通用设置）、server（虚拟主机设置）、location（匹配 URL 路径）。还有一些其他的配置段，如 event，upstream 等。
+2.1 通用设置
+user nginx
+指定运行 nginx workre 进程的用户和组
+worker_rlimit_nofile #
+指定所有 worker 进程能够打开的最大文件数
+worker_cpu_affinity
+设置 worker 进程的 CPU 粘性，以避免进程在 CPU 间切换带来的性能消耗。如 worker_cpu_affinity 0001 0010 0100 1000;（四核）
+worker_processes 4
+worker 工作进程的个数，这个值可以设置为与 CPU 数量相同，如果开启了 SSL 和 Gzip，那么可以适当增加此数值
+worker_connections 1000
+单个 worker 进程能接受的最大并发连接数，放在 event 段中
+error_log logs/error.log info
+错误日志的存放路径和记录级别
+use epoll
+使用 epoll 事件模型，放在 event 段中
+2.2 http 服务器
+server {}：
+定义一个虚拟主机
+listen 80;
+定义监听的地址和端口，默认监听在本机所有地址上
+server_name NAME [...];
+定义虚拟主机名，可以使用多个名称，还可以使用正则表达式或通配符。
+sendfile on
+开启 sendfile 调用来快速的响应客户端
+keepalive_timeout 65
+长连接超时时间，单位是秒。
+send_timeout
+指定响应客户端的超时时间
+client_max_body_size 10m
+允许客户端请求的实体最大大小
+root PATH
+设置请求 URL 所对应资源所在文件系统上的根目录
+location [ = | ~ | ~* | ^~ ] URI { ... }
+设置一个 URI 匹配路径
+=：精确匹配
+~：正则表达式匹配，区分字符大小写
+~*：正则表达式匹配，不区分字符大小写
+^~：URI 的前半部分匹配，且不实用正则表达式
+优先级：
+= > location 完整路径 > ^~ > ~ > ~* > location 起始路径 > location /
+allow 和 deny
+基于 IP 访问控制，如：
+仅允许 192.168.0.0/24 网段客户端访问
+allow 192.168.0.0/24;
+deny all;
+stub_status on
+开启状态显式，仅能用于 location 中：
+开启状态显式页面
+
+location /status {
+stub_status on;
+allow 172.16.0.0/16;
+deny all;
+}
+
+rewrite <REGEX> <REPL> <FLAG>
+URL 重写，可以使用多种标记
+例如：
+rewrite ^/images/(.*\.jpg)$ /imgs/$1 break;
+可用的 flag：
+- last：重写完成后，继续匹配其他 rewrite 规则
+- break：重写完成后不再继续匹配
+- redirect：返回 302 重定向（临时重定向），客户端对重定向的 URL 发起新的请求
+- permanent：返回 301 重定向（永久重定向），客户端对重定向的 URL 发起新的请求
+一个 server 配置示例：
+server {
+ listen  80;
+ server_name www.example.com;
+ root /web/htdocs;
+ 
+ location / {
+  index index.html index.htm;
+ }
+ 
+ location /status {
+  stub_status on;
+  allow 10.0.0.0/8;
+  deny all;
+  access_log off;
+}
+2.3 SSL 的配置
+启用一个 SSL 虚拟主机
+server {
+  listen 443;
+  server_name example.com;
+ 
+  root /apps/www;
+  index index.html index.htm;
+ 
+  ssl on;
+  ssl_certificate /etc/nginx/ssl/nginx.crt;
+  ssl_certificate_key /etc/nginx/ssl/nginx.key;
+ 
+#  ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+#  ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
+#  ssl_prefer_server_ciphers on;
+ 
+}
+其中 ssl_certificate 表示 CA 文件，ssl_certificate_key 表示密钥文件。
+如果想把 http 请求强制转到 https，可以这样：
+server {
+listen  80;
+server_name example.me;
+ 
+return 301 https://$server_name$request_uri;
+}
+
+2.4 nginx 做负载均衡反向代理
+nginx 做反向代理时，后端主机有多台，可以使用 upstream 定义一个后端主机池，在反向代理时直接使用主机池的名字。在 upstream 中可以定义负载均衡调度算法，权重，健康状态检测等参数。
+例如：
+upstream backend {
+ server 172.16.0.1:80 weight=1 max-fails=3 fail_timeout=10;
+ server 172.16.0.2:80 weight=1max-fails=3 fail_timeout=10;;
+}
+
+默认请求下，使用 round-robin 调度算法，并有健康状态检查和恢复主机的能力。
+ningx 还可以使用这些算法：
+ip_hash：基于源地址哈希，主要目的是会话保持
+least_conn：基于最少活动连接进行调度
+sticky：基于 cookie 进行会话绑定，nginx 会在客户端第一次访问时插入路由信息到 cookie 中，或者选择 cookie 中的某个字段的值作为键，以后每次请求将基于此信息进行调度
+基于 cookie 的会话绑定共有 cookie，route 和 learn 三种。
+例如，基于 cookie name 的调度：
+upstream backend {
+ server backend1.example.com;
+ server backend2.example.com;
+ 
+ sticky cookie srv_id expires=1h domain=.example.com path=/;
+}
+
+使用此主机组进行反向代理：
+location / {
+ proxy_pass http://backend;
+ proxy_set_header Host $host;
+ proxy_set_haeder X-Forwared-For $proxy_add_x_forwarded_for;
+}
+
+proxy_pass URL 指定代理的后端主机，可以指定 "http" 或 "https" 协议，域名可以是 ip 地址，也可以是 upstream 池名字
+如果代理指定的是一个 URI 地址，如 http://127.0.0.1/remote，那么将直接被代理至指定 URI，无论请求的 URI 是什么
+如果代理指定的一个主机而没有 URI，如 http://127.0.0.1，客户端请求的URI将被传递至指定域名
+如果 location 中使用模式匹配 url，那么 url 也会被传递至代理 URL 的末端
+如果 location 中使用了 URI 重写，那么 proxy_pass 会使用重写后的结果进行处理
+proxy_set_header HEADER VALUE 对转发的报文首部进行修改
+2.5 反向代理时的缓存相关设定
+proxy_cache_path PATH [levels=levels] keys_zone=NAME:SIZE
+定义磁盘缓存路径，nignx 的缓存是以键值方式存放的，keys_zone 用于指定键存放的内存空间名字和大小，对应的值则存放在 PATH 指定的路径中。levels 可以指定缓存存放路径的级数和名称字符数。此设置只能在 http 段中定义。
+如：
+proxy_cache_path /var/cache/nginx/proxy levels=1:2 keys_zone=one:10m;
+
+proxy_cache_valid [code ...] time 指定不同响应码的内容的缓存时间
+如：
+proxy_cache_valid 200 302 10m;
+proxy_cache_valid 404  1m;
+proxy_cache_valid any  1m;
+
+proxy_cache_method METHOD 定义哪些方法的请求结果可以被缓存，如：
+proxy_cache_method GET;
+proxy_cache_method HEAD;
+
+proxy_cache NAME 指定使用预先定义的缓存空间用于缓存
+2.6 fastCGI 代理的设置
+使用 fastCGI 时，设置代理的方法同 porxy_pass 类似，同时还可以使用 fastCGI 缓存，设置的方法也和 proxy_cache 类似。
+location ~ \.php$ {
+ root   /web/htdocs;
+ fastcgi_pass 127.0.0.1:9000;
+ fastcgi_index index.php;
+ fastcgi_param script_FILENAME $document_root$fastcgi_script_name;
+ include  fastcgi_params;
+}
+
+3. 一些常用内置变量
+$arg_name：请求 uri 中的 name 参数至
+$args：请求 uri 的所有参数，和 $query_string 相同
+$uri：当前请求的 uri，不带参数
+$request_uri：请求的 uri，带完整参数
+$host：http 请求报文中 host 首部，如果没有 host 首部，则以处理此请求的虚拟主机的主机名替代
+$hostname：nginx 服务运行在主机的主机名
+$remote_addr：客户端 IP
+$remote_port：客户端 port
+$remote_user：使用用户认证时客户端用户输入的用户名
+$request_filename：用户请求中的 URI 经过本地 root  或 alias 转换后映射的本地的文件路径
+$request_method：请求方法
+$server_addr：服务器地址
+$server_name：服务器名称
+$server_port：服务器端口
+$server_protocol：服务器向客户端发送响应时的协议，如 http/1.1，http/1.0
+$scheme：在请求中使用的 scheme，如 https://www.magedu.com/ 中的 https
+$http_name：匹配请求报文中的指定 HEADER，如 $http_host 匹配请求报文中的 host 首部
+$sent_http_name：匹配响应报文中指定的 HEADER，例如 $sent_content_type 匹配响应报文中的 content-type 首部
+$status：响应状态
+

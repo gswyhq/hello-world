@@ -1,0 +1,5 @@
+1、Loss是互熵损失的输出值，但结果显示它的值是Nan。于是追根溯源，又打出了Weights和bias的值，发现一样也是Nan。
+有一些样本通过正向传递输出到最外层的时候输出值变为了0，于是log(0)会导致结果显示为Nan。随后，下面还有一个网友给出解释，说clipping的办法并不是很好，因为反向传播的时候如果达到了阈值，会阻止梯度的改变。所以直接在log函数中添加了一个小常量，为了不让预测值为0。
+如: 将 cross_entropy = -tf.reduce_sum(y_*tf.log(y_conv)) 修改为：cross_entropy = -tf.reduce_sum(y_*tf.log(y_conv + 1e-10)) 即可；
+
+

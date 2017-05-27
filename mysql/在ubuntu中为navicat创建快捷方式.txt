@@ -1,0 +1,40 @@
+
+　　在ubuntu中，解压navicat并不会生成快捷方式，每次运行都需要进入软件解压的目录，然后运行命令开启navicat，十分不便．可引入快捷方式，直接双击运行．
+　　首先下载一个合适的png文件，用作快捷方式的图表，一般要求是png格式，将其置于软件所在的路径下，并重命名为navicat.png.
+
+　　接下来在软件所在路径下创建文件navicat.desktop,用作快捷方式．内容如下：　　
+
+按 Ctrl+C 复制代码
+
+[Desktop Entry]
+
+Encoding=UTF-8
+
+Name=Navicat for Mysql 客户端
+
+Comment=The Smarter Way to manage dadabase
+
+Exec=/bin/sh "/home/gswyhq/navicat112_mysql/start_navicat"
+
+Icon=/home/gswyhq/navicat112_mysql/navicat.png
+
+Categories=Application;Database;MySQL;navicat
+
+Version=1.0
+
+Type=Application
+
+Terminal=0
+按 Ctrl+C 复制代码
+　　请注意，请对照自己软件的解压路径修改exec中的执行文件路径和图标的文件路径．
+
+　　此时，双击快捷方式，会有提示：
+
+Untrusted Application Launcher
+　　我们需要赋予快捷方式运行权限：
+
+chmod +x navicat.desktop
+　　为了方便后续查找快捷方式，我们将该快捷方式复制到ubuntu应用快捷文件存放路径，方便下次搜索并运行navicat.
+
+sudo cp navicat.desktop /usr/share/applications
+

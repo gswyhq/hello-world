@@ -1,0 +1,55 @@
+
+安装：
+sudo apt-get install nginx
+
+安装好后，默认会启动
+在浏览器中输入http://localhost,若出现“Welcome to nginx!”的页面代表启动成功；
+
+sudo /etc/init.d/nginx start       #通过init.d下的启动文件启动。
+
+# 设定成service启动（设置文件是：/etc/init.d/nginx ）：
+gswyhq@gswyhq-pc:~$ sudo service nginx start
+
+# 停止nginx服务
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/nginx stop
+[ ok ] Stopping nginx (via systemctl): nginx.service.
+# 或者：
+gswyhq@gswyhq-pc:~$ sudo service nginx stop 
+
+# 重启nginx服务
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/nginx restart
+[ ok ] Restarting nginx (via systemctl): nginx.service.
+# 或者，重启加载，实现无间断服务重启：
+gswyhq@gswyhq-pc:~$ sudo service nginx reload
+
+sudo service nginx start   #通过ubuntu的服务管理器启动
+
+默认的配置文件是在：/etc/nginx/nginx.conf
+
+验证默认的nginx配置文件，是否正确：
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/nginx -t
+
+也可自己写nginx配置文件；
+测试自己写的配置文件是否正确：
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/nginx -t -c /home/gswyhq/test_nginx.conf 
+
+启动：
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/nginx -c /home/gswyhq/test_nginx.conf 
+停止自定义的配置：
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/nginx -s stop
+
+至此，“http://localhost/communication/web1.html”页面与 之前通过浏览器打开“file:///home/gswyhq/communication/web1.html”打开的页面内容一致；
+
+若将nginx的配置文件放到“/etc/nginx/conf.d”目录下，则配置文件的内容跟上面的有点不一样：
+
+系统默认的配置文件“/etc/nginx/nginx.conf ”
+由多个块组成，最外面的块是main，main包含Events和HTTP，HTTP包含upstream和多个Server，Server又包含多个location：
+nginx.conf
+├── events
+├── http
+│   ├── upstream
+│   ├── server
+│   ├── server
+
+“nginx.conf”文件，http选项下，有一句：“include /etc/nginx/conf.d/*.conf;”
+“/etc/nginx/conf.d”目录下的配置文件，只能包括“upstream”和“server”两项。

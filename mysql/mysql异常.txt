@@ -1,0 +1,85 @@
+
+现象：navicat客户端，打开表question，卡死；一直加载不上；
+mysql命令行，mysql> show tables;
+有对应的表显示出来，但是，
+mysql> check table question;
+mysql> repair table question;
+也是卡死；
+解决方法：
+在‘/etc/mysql/mysql.conf.d/mysqld.cnf’找到mysql数据的保存路径 datadir ；
+切换到保存数据路径，再进入对应数据库目录下，删除question.ibd、question.frm 即可
+
+但之后建新表会出现错误：
+[Err] 1050 - Table '`yhb`.`question`' already exists
+
+主要的原因大部分是因为还没有停止 MySQL 服务就手动对 data 目录下的数据库进行人工操作，导致虽然在目录下看不到该数据库以及其中的表格，或者通过命令也无法查找到对应的表格，但是无论如何都不能创建对应的表格，出现1050错误，原因是 mysql 服务的未关闭，导致存储空间中仍旧保留着该表的记录。
+
+所以只要在停止服务后，再手动去 data 目录下删除该数据库，然后重启 mysql 服务，应该就可以再次创建对应的数据库以及表。
+
+kill掉‘/usr/sbin/mysqld’对应的进程，mysql会自动重启；
+切换到mysql用户：
+切换用户：gswyhq@gswyhq-pc:~$ sudo su - mysql
+停止服务：mysql@gswyhq-pc:~$ /etc/init.d/mysql stop
+启动服务：mysql@gswyhq-pc:~$ /etc/init.d/mysql start
+
+启动服务时失败，报数据记录点不一致的错：
+[ERROR] [FATAL] InnoDB: Tablespace id is 168 in the data dictionary but in file ./yhb/question.ibd it is 209!
+
+删除./yhb/question.ibd文件重启启动即可；
+
+但是这个时候，仅仅是删除了ibd文件(frm文件之前已经被删除掉了)，却没有将Innodb内部数据字典中的表删除；
+想要删除重建提示创建提示Table already exist，直接创建也会提示此表已经存在，这是因为表在 innodb 内部数据字典中已存在，没有相对应的 .frm 文件,
+在 innodb 的数据文件中就形成了一个孤表(orphaned table)，这时候同名的表示无法创建或者复制粘贴进来的。
+
+可以通过在另外一个数据库中创建或者复制一个相同名字的innodb表，
+并把.frm（.ibd文件不要拷贝过来，否则会报上面数据记录不一致的错误）拷贝到这个数据库目录下，并且通过chown更改.frm文件的用户和组为mysql；
+重启mysql，数据库就会认为这个表存在，
+刷新看下此表也可以打开查看，再执行其他操作，例如drop table就可以删除掉了。
+
+'localhost'、'127.0.0.1'连接mysql正常，但‘192.168.3.51’连接异常：
+第一步：将“/etc/mysql/mysql.conf.d/mysqld.cnf”文件，[mysqld]选项下的
+bind-address            = 127.0.0.1
+改为：
+bind-address            = 0.0.0.0
+重启mysql服务：
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
+
+第二步：
+允许用户‘root’从ip为192.168.1.51的主机连接到mysql服务器的‘yhb’数据库，并使用‘123456’作为密码：
+打开Navicat for MySQL客户端，连接‘localhost’，在对应的查询编辑器里头运行下面两句即可：
+GRANT ALL PRIVILEGES ON yhb.* TO 'root'@'192.168.3.51' IDENTIFIED BY '123456' WITH GRANT OPTION;
+# 使修改生效：
+FLUSH   PRIVILEGES;
+
+其他授权方法：
+例如，你想myuser使用mypassword从任何主机连接到mysql服务器的话。
+GRANT ALL PRIVILEGES ON *.* TO 'myuser'@'%' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
+FLUSH   PRIVILEGES;
+
+如果你想允许用户myuser从ip为192.168.1.6的主机连接到mysql服务器，并使用mypassword作为密码
+GRANT ALL PRIVILEGES ON *.* TO 'myuser'@'192.168.1.3' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
+FLUSH   PRIVILEGES;
+
+撤销已经赋予给 MySQL 用户权限的权限。 
+
+revoke 跟 grant 的语法差不多，只需要把关键字 “to” 换成 “from” 即可： 
+grant all on *.* to dba@localhost; 
+revoke all on *.* from dba@localhost;
+
+revoke ALL PRIVILEGES ON yhb.* from 'root'@'192.168.3.103';
+FLUSH   PRIVILEGES;
+
+第三步：赋予其他机器使用查询、插入、删除数据的权限（允许192.168.3.103通过root用户查询、插入、更新、删除`yhb`数据表里头的数据）：
+grant select, insert, update, delete on yhb.* to  'root'@'192.168.3.103';
+FLUSH   PRIVILEGES;
+
+grant和revoke可以在几个层次上控制访问权限
+1，整个服务器，使用 grant ALL  和revoke  ALL
+2，整个数据库，使用on  database.*
+3，特点表，使用on  database.table
+4，特定的列
+5，特定的存储过程
+
+查看MySQL用户权限(来自机器‘192.168.3.103’上的root用户)：
+mysql> show grants for root@'192.168.3.103';
+

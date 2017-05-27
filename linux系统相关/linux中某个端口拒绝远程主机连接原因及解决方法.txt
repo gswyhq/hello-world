@@ -1,0 +1,76 @@
+linux中某个端口拒绝远程主机连接原因及解决方法
+
+原因一：对应的服务并没有启动（以‘7474’端口为例，下同）
+1、在远程主机上查询对应端口服务器是否启动  
+gswyhq@gswyhq-pc:~$ telnet 127.0.0.1 7474
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+
+从以上结果可以看出telnet能连接成功；代表对应服务器已经启动
+
+
+原因二：被防火墙拦截
+1、查看防火墙状态
+ sudo ufw status
+ 状态显示是“inactive”关闭状态。
+2、可以直接关闭关闭防火墙
+ sudo ufw disable
+3、若不想关闭防火墙，可以允许其他机器访问（允许192.168.3.51访问本机的7474端口）
+sudo ufw allow from 192.168.3.51 to any port 7474
+
+# 查看防火墙状态：
+gswyhq@gswyhq-pc:~$ sudo iptables -L
+# 使用 lsof 命令来查看某一端口是否开放： 
+gswyhq@gswyhq-pc:~$ lsof -i:8005
+
+原因三：该端口的监听地址为本机(127.0.0.1)，如果这样的话，只有从本机发起的对端口的访问被允许，而外部主机访问被拒绝。
+1、通过“netstat -anp | grep 7474”命令查看该端口的监听地址： 
+gswyhq@gswyhq-pc:~$ netstat -anp | grep 7474
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 127.0.0.1:56072         127.0.0.1:7474          ESTABLISHED 1726/chrome         
+tcp        0      0 127.0.0.1:56064         127.0.0.1:7474          ESTABLISHED 1726/chrome         
+tcp        0      0 127.0.0.1:56076         127.0.0.1:7474          ESTABLISHED 1726/chrome         
+tcp        0      0 127.0.0.1:56068         127.0.0.1:7474          ESTABLISHED 1726/chrome         
+tcp6       0      0 127.0.0.1:7474          :::*                    LISTEN      10450/java          
+tcp6       0      0 127.0.0.1:7474          127.0.0.1:56072         ESTABLISHED 10450/java          
+tcp6       0      0 127.0.0.1:7474          127.0.0.1:56076         ESTABLISHED 10450/java          
+tcp6       0      0 127.0.0.1:7474          127.0.0.1:56068         ESTABLISHED 10450/java          
+tcp6       0      0 127.0.0.1:7474          127.0.0.1:56064         ESTABLISHED 10450/java 
+由上面的查询结果可知，7474端口监听的地址为本地地址（127.0.0.1);
+
+2、更改neo4j的数据库启动配置，使其对应的7474端口允许非本地连接
+取消掉neo4j的启动配置文件‘conf/neo4j.conf’内，下面一行注释即可：
+dbms.connectors.default_listen_address=0.0.0.0
+
+3、重启neo4j数据库
+gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j restart
+
+4、查看更改配置后该端口的监听地址
+gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ netstat -anp | grep 7474
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 192.168.3.51:44176      192.168.3.105:7474      ESTABLISHED 1726/chrome         
+tcp6       0      0 :::7474                 :::*                    LISTEN      12218/java          
+tcp6       0      0 ::1:7474                ::1:58786               ESTABLISHED 12218/java          
+tcp6       0      0 ::1:58792               ::1:7474                ESTABLISHED 1726/chrome         
+tcp6       0      0 ::1:7474                ::1:58790               ESTABLISHED 12218/java          
+tcp6       0      0 ::1:7474                ::1:58792               ESTABLISHED 12218/java          
+tcp6       0      0 ::1:58788               ::1:7474                ESTABLISHED 1726/chrome         
+tcp6       0      0 ::1:58790               ::1:7474                ESTABLISHED 1726/chrome         
+tcp6       0      0 ::1:58786               ::1:7474                ESTABLISHED 1726/chrome         
+tcp6       0      0 ::1:7474                ::1:58788               ESTABLISHED 12218/java
+
+由上面的查询结果可知，7474端口监听的地址没有限制
+
+# 查看某个端口被那个进程给占用了：
+gswyhq@gswyhq-pc:~$ sudo apt-get install lsof
+gswyhq@gswyhq-pc:~/hello-world$ lsof -i:9100
+COMMAND  PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+grunt   4128 gswyhq   10u  IPv4  50756      0t0  TCP *:9100 (LISTEN)
+gswyhq@gswyhq-pc:~/hello-world$ ps -ef|grep 4128
+gswyhq    4128  4127  0 08:47 ?        00:00:00 grunt
+gswyhq   10185 10100  0 20:35 pts/8    00:00:00 grep 4128
+
+

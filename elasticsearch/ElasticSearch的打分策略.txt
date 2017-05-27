@@ -1,0 +1,442 @@
+
+ik 带有两个分词器
+ik_max_word ：会将文本做最细粒度的拆分；尽可能多的拆分出词语,如： a卡在哪里能用--> 卡在 在哪 哪里 里 能用
+ik_smart：会做最粗粒度的拆分；已被分出的词语将不会再次被其它词语占有
+浏览器搜索即可看见详细的分词结果：http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=5                                                                                                       
+
+score(q,d)  =    
+            queryNorm(q)    
+          · coord(q,d)      
+          · ∑ (             
+                tf(t in d)     
+              · idf(t)²        
+              · t.getBoost()   
+              · norm(t,d)      
+            ) (t in q)   
+
+每行的意义如下：
+
+score(q,d)是文档d对于查询q的相关度分值。
+queryNorm(q)是查询归约因子(Query Normalization Factor)，是新添加的部分。
+coord(q,d)是Coordination Factor，是新添加的部分。
+文档d中每个词条t对于查询q的权重之和。
+tf(t in d)是文档d中的词条t的词条频度(Term Frequency), 项频率是指 项 t 在 文档 d 中出现的次数 frequency。。
+idf(t)是词条t的倒排索引频度(Inverse Document Frequency);idf(t) 关联到反转文档频率，文档频率指出现 项 t 的文档数 docFreq。docFreq 越少 idf 就越高（物以稀为贵），但在同一个查询下些值是相同的。
+t.getBoost()是适用于查询的提升(Boost)，是新添加的部分。查询时期的 项 t 加权（如：java^1.2），或者由程序使用 setBoost()。
+norm(t,d)是字段长度归约(Field-length Norm)，可能结合了索引期间字段提升(Index-time Field-level Boost)，是新添加的部分。
+norm(t,d)压缩几个索引期间的加权和长度因子：
+    Document boost - 文档加权，在索引之前使用 doc.setBoost()
+    Field boost - 字段加权，也在索引之前调用 field.setBoost()
+    lengthNorm(field) - 由字段内的 Token 的个数来计算此值，字段越短，评分越高，在做索引的时候由 Similarity.lengthNorm 计算。
+以上所有因子相乘得出 norm 值，如果文档中有相同的字段，它们的加权也会相乘;
+索引的时候，把 norm 值压缩(encode)成一个 byte 保存在索引中。搜索的时候再把索引中 norm 值解压(decode)成一个 float 值，这个 encode/decode 由 Similarity 提供。官方说：这个过程由于精度问题，以至不是可逆的，如：decode(encode(0.89)) = 0.75。
+
+coord(q,d)是一个协调因子它的值如下：
+coord(q,d)=overlap/maxoverlap  
+其中overlap是匹配到问句query的分词个数，maxoverlap是问句query中总共的分词数，例如查询词为“无线通信”，使用默认分词器，分词结果为“无 线 通 信”，
+如果文档为“通知他们开会”，只会有一个“通”命中，这个时候它的值就是1/4=0.25
+
+tf(t in d):
+即分词 t在文档中出现的词频
+计算公式：tf(t in d) = √frequency  即出现的次数进行开方
+
+idf(t):
+这个的意思是出现的逆词频数，即召回的文档在总文档中出现过多少次，这个的计算在ES中与lucene中有些区别，只有在分片数为1的情况下，与lucene的计算是一致的，如果不唯一，那么每一个分片都有一个不同的idf的值，它的计算方式如下所示：
+idf(t) = 1 + log ( numDocs / (docFreq + 1))  
+其中，log是以e为底的，不是以10或者以2为底，这点需要注意，numDocs是指所有的文档个数，如果有分片的话，就是指的是在当前分片下总的文档个数，docFreq是指召回文档的个数，如果有分片对应的也是在当前分片下召回的个数，这点是计算的时候与lucene不同之处，如果想验证是否正确，只需将分片shard的个数设置为1即可。
+
+
+除了指定分片和副本的分配，我们还可以对一个索引指定每个节点上的最大分片数量。例如我们希望yhb索引在每个节点上只有一个分片，我们可以运行如下命令：
+gswyhq@gswyhq-pc:~/yhb$ curl -XPUT "http://localhost:9200/yhb/_settings" -d '{ "index.routing.allocation.total_shards_per_node" : 1 }'
+可以通过“http://localhost:9100/”-> "yhb"->"信息"->"索引信息",查看"total_shards_per_node"，即节点下的分片数
+
+浏览器输入查询：
+http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=1
+“a卡在哪里能用”，分词结果：“卡在 在哪 哪里 里 能用”
+对应分值分别是：[8.453608, 6.664756, 4.1175094, 4.4644356, 2.7492635]
+In[5]: sum([8.453608, 6.664756, 4.1175094, 4.4644356, 2.7492635])
+Out[5]: 26.4495725
+故总分值是：26.4495725
+
+而每一个词的分值由两个部分构成，一部分是queryweight，一部分是fieldweight，其中总分数=queryweight*fieldweight
+如，词‘卡在’fieldweight=6.137189；fieldweight=1.3774397；所以其总分数是：8.4536077750033
+In[7]: 6.137189*1.3774397
+Out[7]: 8.4536077750033
+
+queryweight的计算公式：log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5))
+其中，log是以e为底的，不是以10或者以2为底；
+docCount是指所有的文档个数，如果有分片的话，就是指的是在当前分片下总的文档个数；
+docFreq是指召回文档的个数，如果有分片对应的也是在当前分片下召回的个数；如果想验证是否正确，只需将分片shard的个数设置为1即可。
+再来说说Shard，每个Index（对应Database）包含多个Shard，默认是5个，分散在不同的Node上，但不会存在两个相同的Shard存在一个Node上，这样就没有备份的意义了。Shard是一个最小的Lucene索引单元。当来一个document的时候，Elasticsearch通过对docid进行hash来确定其放在哪个shard上面，然后在shard上面进行索引存储。
+
+如，词‘卡在’，当前分片总文档个数69643，召回文档数150，最后计算的queryweight=6.137188
+In[10]: docCount=69643
+In[11]: docFreq=150
+In[12]: math.log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5))
+Out[12]: 6.137188746297559
+
+fieldweight的计算公式：(freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength))
+In[14]: termFreq=1.0  # termFreq＝1表明检索的词项在该字段(被匹配句子的分词结果，包括同义词)下只出现了一次，并且该词的term_freq值=1；termFreq的计算方法：被检索词在匹配句子中匹配到的词（包括同义词）各自的term_freq值的加和
+In[15]: k1=1.2
+In[16]: b=0.75
+In[17]: avgFieldLength=31.012966
+In[18]: fieldLength=10.24
+In[19]: freq=1
+In[20]: (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength))
+Out[20]: 1.3774397639313984
+
+"fieldLength"项是指匹配到的模板句的token(分词)数量的一个量度
+如，匹配上了句子“这个是上网流量卡？”，其分词结果是：“这个 上网 流量 卡”，其中“‘是’、 ‘？’”分词没有分出来；
+所以，这个分词数是3；
+句子“你好你好你好”，分词结果为：“你好 你好 你好”，其分词数还是记为3；
+然而分词数，转换成fieldLength值，是通过‘encodeNormValue’过程（编码索引中存储的规范化因子。
+编码使用3位尾数，5位指数和15点的零指数点，从而表示从大约7x10 ^ 9到2×10 ^ -9的值，大约有一个十进制数字的精度。 
+零也有代表。 负数被四舍五入为零。 值大到不能表示的值被舍入到最大的可表示值。 值太小而不能表示的值被舍入到最小的可表示值。
+支持该值的有损压缩的理由是，鉴于用户通过查询来表达真实信息的困难（和不准确），只有很大的差异才是重要的。
+http://lucene.apache.org/core/4_0_0/core/org/apache/lucene/search/similarities/TFIDFSimilarity.html#encodeNormValue(float)
+）；
+分词数->fieldLength值,下面举了几个示例（简而言之分词数越大，fieldLength值也越大）：
+
+{2: 2.56,
+ 3: 4.0,
+ 4: 4.0,
+ 5: 5.2244897,
+ 6: 7.111111,
+ 8: 10.24,
+ 9: 10.24,
+ 10: 10.24,
+ 15: 16,
+ 37: 40.96}
+
+而“avgFieldLength”，指节点某一分片下，所有记录“fieldLength值”的平均值；
+
+查询id号为‘29723’对应的‘question’字段，分词的结果及每个词的term_freq值；
+gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'localhost:9200/yhb/log_qa/29723/_termvectors?fields=question&pretty'
+
+在页面“http://localhost:9100/”搜索时，"yhb/log_qa/_search"改为“yhb/log_qa/_search?explain”也可以查看详细的分数信息
+
+指定节点查询：
+gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=1&preference=_only_nodes:ubQ7NbI2QOKn_dePpe7W8A'
+查询时加上preference=_only_nodes:node1id,node2id 就可以指定在node1和node2中搜索
+
+# 更多说明：http://blog.csdn.net/dm_vincent/article/details/42201721
+http://blog.csdn.net/qq_19598855/article/details/50581945
+http://www.cnblogs.com/richaaaard/p/5254988.html
+http://blog.csdn.net/dm_vincent/article/details/42113401
+
+
+    {
+        "_shard" : "[yhb][4]",
+        "_node" : "ubQ7NbI2QOKn_dePpe7W8A",
+        "_index" : "yhb",
+        "_type" : "log_qa",
+        "_id" : "29723",
+        "_score" : 26.449574,
+        "_source" : {
+          "answer" : "香港澳门都可以",
+          "question" : "这个流量卡在哪里可以用",
+          "timestamp" : "2017-04-23T18:18:12.316898"
+        },
+        "_explanation" : {
+          "value" : 26.449572,
+          "description" : "sum of:",
+          "details" : [
+            {
+              "value" : 8.453608,
+              "description" : "weight(question:卡在 in 6178) [PerFieldSimilarity], result of:",
+              "details" : [
+                {
+                  "value" : 8.453608,
+                  "description" : "score(doc=6178,freq=1.0 = termFreq=1.0\n), product of:",
+                  "details" : [
+                    {
+                      "value" : 6.137189,
+                      "description" : "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                      "details" : [
+                        {
+                          "value" : 150.0,
+                          "description" : "docFreq",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 69643.0,
+                          "description" : "docCount",
+                          "details" : [ ]
+                        }
+                      ]
+                    },
+                    {
+                      "value" : 1.3774397,
+                      "description" : "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                      "details" : [
+                        {
+                          "value" : 1.0,
+                          "description" : "termFreq=1.0",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 1.2,
+                          "description" : "parameter k1",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 0.75,
+                          "description" : "parameter b",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 31.012966,
+                          "description" : "avgFieldLength",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 10.24,
+                          "description" : "fieldLength",
+                          "details" : [ ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "value" : 6.664756,
+              "description" : "weight(question:在哪 in 6178) [PerFieldSimilarity], result of:",
+              "details" : [
+                {
+                  "value" : 6.664756,
+                  "description" : "score(doc=6178,freq=1.0 = termFreq=1.0\n), product of:",
+                  "details" : [
+                    {
+                      "value" : 4.83851,
+                      "description" : "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                      "details" : [
+                        {
+                          "value" : 551.0,
+                          "description" : "docFreq",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 69643.0,
+                          "description" : "docCount",
+                          "details" : [ ]
+                        }
+                      ]
+                    },
+                    {
+                      "value" : 1.3774397,
+                      "description" : "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                      "details" : [
+                        {
+                          "value" : 1.0,
+                          "description" : "termFreq=1.0",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 1.2,
+                          "description" : "parameter k1",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 0.75,
+                          "description" : "parameter b",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 31.012966,
+                          "description" : "avgFieldLength",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 10.24,
+                          "description" : "fieldLength",
+                          "details" : [ ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "value" : 4.1175094,
+              "description" : "weight(Synonym(question:什么国家 question:什么地方 question:什么地点 question:什么市 question:哪一个 question:哪一款 question:哪一种 question:哪个 question:哪个市 question:哪个省 question:哪些地方 question:哪些地点 question:哪儿 question:哪款 question:哪种 question:哪里 question:谁 question:那个) in 6178) [PerFieldSimilarity], result of:",
+              "details" : [
+                {
+                  "value" : 4.1175094,
+                  "description" : "score(doc=6178,freq=18.0 = termFreq=18.0\n), product of:",
+                  "details" : [
+                    {
+                      "value" : 1.9336869,
+                      "description" : "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                      "details" : [
+                        {
+                          "value" : 10071.0,
+                          "description" : "docFreq",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 69643.0,
+                          "description" : "docCount",
+                          "details" : [ ]
+                        }
+                      ]
+                    },
+                    {
+                      "value" : 2.1293569,
+                      "description" : "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                      "details" : [
+                        {
+                          "value" : 18.0,
+                          "description" : "termFreq=18.0",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 1.2,
+                          "description" : "parameter k1",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 0.75,
+                          "description" : "parameter b",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 31.012966,
+                          "description" : "avgFieldLength",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 10.24,
+                          "description" : "fieldLength",
+                          "details" : [ ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "value" : 4.4644356,
+              "description" : "weight(question:里 in 6178) [PerFieldSimilarity], result of:",
+              "details" : [
+                {
+                  "value" : 4.4644356,
+                  "description" : "score(doc=6178,freq=1.0 = termFreq=1.0\n), product of:",
+                  "details" : [
+                    {
+                      "value" : 3.2411115,
+                      "description" : "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                      "details" : [
+                        {
+                          "value" : 2724.0,
+                          "description" : "docFreq",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 69643.0,
+                          "description" : "docCount",
+                          "details" : [ ]
+                        }
+                      ]
+                    },
+                    {
+                      "value" : 1.3774397,
+                      "description" : "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                      "details" : [
+                        {
+                          "value" : 1.0,
+                          "description" : "termFreq=1.0",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 1.2,
+                          "description" : "parameter k1",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 0.75,
+                          "description" : "parameter b",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 31.012966,
+                          "description" : "avgFieldLength",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 10.24,
+                          "description" : "fieldLength",
+                          "details" : [ ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "value" : 2.7492635,
+              "description" : "weight(Synonym(question:仍然可以使用 question:仍然可以用 question:仍然有效 question:仍然能使用 question:仍然能用 question:使用 question:利用 question:可以使用 question:可以用 question:可用 question:启用 question:拿 question:支持 question:有效 question:激活 question:生效 question:用 question:能使用 question:能用 question:还可以使用 question:还可以用 question:还有效 question:还能使用 question:还能用) in 6178) [PerFieldSimilarity], result of:",
+              "details" : [
+                {
+                  "value" : 2.7492635,
+                  "description" : "score(doc=6178,freq=42.0 = termFreq=42.0\n), product of:",
+                  "details" : [
+                    {
+                      "value" : 1.2674334,
+                      "description" : "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                      "details" : [
+                        {
+                          "value" : 19608.0,
+                          "description" : "docFreq",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 69643.0,
+                          "description" : "docCount",
+                          "details" : [ ]
+                        }
+                      ]
+                    },
+                    {
+                      "value" : 2.1691582,
+                      "description" : "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                      "details" : [
+                        {
+                          "value" : 42.0,
+                          "description" : "termFreq=42.0",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 1.2,
+                          "description" : "parameter k1",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 0.75,
+                          "description" : "parameter b",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 31.012966,
+                          "description" : "avgFieldLength",
+                          "details" : [ ]
+                        },
+                        {
+                          "value" : 10.24,
+                          "description" : "fieldLength",
+                          "details" : [ ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+

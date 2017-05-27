@@ -1,0 +1,78 @@
+
+在当前目录及子目录中，查找文件名包含‘shell’的txt文件
+gswyhq@gswyhq-pc:~/hello-world$ find . -name "*shell*.txt"
+
+将当前目录下文件名符合"20170*.txt"输出到当前目录下的test.tmp文件中
+gswyhq@gswyhq-pc:~$ find -name "20170*.txt" -exec 'cat' {} \; > test.tmp
+
+find是我们很常用的一个Linux命令，若有进一步的操作，这个时候exec的作用就显现出来了。
+exec解释：
+-exec  参数后面跟的是command命令，它的终止是以‘;’为结束标志的，所以这句命令后面的分号是不可缺少的，考虑到各个系统中分号会有不同的意义，所以前面加反斜杠。
+{}   花括号代表前面find查找出来的文件名。
+exec选项后面跟随着所要执行的命令或脚本，然后是一对儿{ }，一个空格和一个\，最后是一个分号。
+
+查找当前目录及子目录下的zip格式文件，以下两条命令的效果是一样的：
+gswyhq@gswyhq-pc:~$ find . -name "*.zip"
+gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec ls {} \;
+
+复制查找的所有结果到当前目录下的test子目录中：
+gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec cp {} test/ \;
+
+查找当前目录及子目录下的zip文件，并解压到当前目录的test子目录中（unar的-o 参数是用于解压到指定目录中）：
+gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec unar {} -o test/ \;
+
+查找当前目录及子目录中的mp3格式的文件，并移动到父目录下的mp3目录中：
+gswyhq@gswyhq-pc:~$ find . -name "*.mp3" -exec mv {} ../mp3/ \;
+
+更多示例见：http://www.cnblogs.com/wanqieddy/archive/2011/06/09/2076785.html
+
+-type    b/d/c/p/l/f         #查是块设备、目录、字符设备、管道、符号链接、普通文件
+
+find   /home   -mtime   -2                 在/home下查最近两天内改动过的文件
+-mtime＋1 表示文件修改时间为大于1天的文件，即距离当前时间2天（48小时）之外的文件
+这也能解释了，为什么6号22点生成的这个文件为什么没有输出出来
+这里-mtime +1 为什么是48小时以外，而不是24小时以外呢，因为n只能是整数，比1大的下一个整数是2，所以是48小时以外的
+
+-mtime 1 表示文件修改时间距离当前为1天的文件，即距离当前时间1天（24小时－48小时）的文件
+-mtime 0 表示文件修改时间距离当前为0天的文件，即距离当前时间不到1天（24小时）以内的文件
+-mtime -1 表示文件修改时间为小于1天的文件，即距离当前时间1天（24小时）之内的文件
+
+find   -name april*                     在当前目录下查找以april开始的文件
+find   -name   april*   fprint file        在当前目录下查找以april开始的文件，并把结果输出到file中
+find   -name ap* -o -name may*   查找以ap或may开头的文件
+find   /mnt   -name tom.txt   -ftype vfat   在/mnt下查找名称为tom.txt且文件系统类型为vfat的文件
+find   /mnt   -name t.txt ! -ftype vfat   在/mnt下查找名称为tom.txt且文件系统类型不为vfat的文件
+find   /tmp   -name wa* -type l            在/tmp下查找名为wa开头且类型为符号链接的文件
+find   /home   -mtime   -2                 在/home下查最近两天内改动过的文件
+find /home    -atime -1                  查1天之内被存取过的文件
+find /home -mmin    +60                  在/home下查60分钟前改动过的文件
+find /home   -amin   +30                  查最近30分钟前被存取过的文件
+find /home   -newer   tmp.txt             在/home下查更新时间比tmp.txt近的文件或目录
+find /home   -anewer   tmp.txt            在/home下查存取时间比tmp.txt近的文件或目录
+find   /home   -used   -2                  列出文件或目录被改动过之后，在2日内被存取过的文件或目录
+find   /home   -user cnscn                列出/home目录内属于用户cnscn的文件或目录
+find   /home   -uid   +501                  列出/home目录内用户的识别码大于501的文件或目录
+find   /home   -group   cnscn              列出/home内组为cnscn的文件或目录
+find   /home   -gid 501                   列出/home内组id为501的文件或目录
+find   /home   -nouser                    列出/home内不属于本地用户的文件或目录
+find   /home   -nogroup                   列出/home内不属于本地组的文件或目录
+find   /home    -name tmp.txt    -maxdepth   4   列出/home内的tmp.txt 查时深度最多为3层
+find   /home   -name tmp.txt   -mindepth   3   从第2层开始查
+find   /home   -empty                     查找大小为0的文件或空目录
+find   /home   -size   +512k                查大于512k的文件
+find   /home   -size   -512k               查小于512k的文件
+find   /home   -links   +2                查硬连接数大于2的文件或目录
+find   /home   -perm   0700                查权限为700的文件或目录
+find   /tmp   -name tmp.txt   -exec cat {} \;
+find   /tmp   -name   tmp.txt   -ok   rm {} \;
+
+find    /   -amin    -10     # 查找在系统中最后10分钟访问的文件
+find    /   -atime   -2        # 查找在系统中最后48小时访问的文件
+find    /   -empty             # 查找在系统中为空的文件或者文件夹
+find    /   -group   cat        # 查找在系统中属于 groupcat的文件
+find    /   -mmin   -5         # 查找在系统中最后5分钟里修改过的文件
+find    /   -mtime   -1       #查找在系统中最后24小时里修改过的文件
+find    /   -nouser           #查找在系统中属于作废用户的文件
+find    /   -user    fred     #查找在系统中属于FRED这个用户的文件
+
+

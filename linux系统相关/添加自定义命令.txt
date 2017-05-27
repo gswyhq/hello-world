@@ -1,0 +1,41 @@
+
+Shell的初始化脚本分为2种：一种是全局默认的，一种是用户自己的。
+全局默认的路径为/etc/profile在profile中，它默认会再加载/etc/bash.bashrc。
+另一种用户自己的就是$HOME目录下的.profile它默认会载加载~/.bashrc文件。
+
+在你的home目录中，你可以找到一个包含用户配置的隐藏文件.bashrc。你可以根据自己的需要修改这个文件。
+
+文件中为你提供了一些有用的调整设置，默认情况下其中一些设置是被注释掉的。
+
+例如，一些ls命令的别名：
+
+alias ls='ls --color=auto'
+#alias dir='dir --color=auto'
+#alias vdir='vdir --color=auto'
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+类似上面提供的别名是用来帮助其它系统的用户熟悉使用（例如dir相当于DOS/Windows系统中的ls）。另外一些是为了给像ls和grep这些命令的输出结果添加颜色。
+
+~.bashrc 中有一句话
+
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+就是说可以另外新建一个文件用于专门存放自己的alias信息,默认情况下这个文件并不存在
+
+gswyhq@gswyhq-pc:~$ vim .bash_aliases
+alias baidu='python3 /home/gswyhq/hello-world/linux系统相关/baidu.py'
+alias cmd_help='python3 /home/gswyhq/hello-world/linux系统相关/cmd_help.py'
+
+# 让添加的别名设置立即生效：
+gswyhq@gswyhq-pc:~$ source .bashrc 
+
+# 试用自定义的命令
+gswyhq@gswyhq-pc:~$ baidu 你好
+gswyhq@gswyhq-pc:~$ cmd_help unzip
+

@@ -1,0 +1,9 @@
+
+# 显示与之前某次commit有哪些不同的文件：
+gswyhq@gswyhq-pc:~/qa_jar$ git diff 6c0311a8da6d848e04c40446ea25386824d37b7b --stat
+ conf/pub_default.py   |  5 +++++
+ jar/models/dict.txt   | 24 +++++++-----------------
+ tornado_jar_server.py |  3 ++-
+ 3 files changed, 14 insertions(+), 18 deletions(-)
+
+

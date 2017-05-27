@@ -1,0 +1,155 @@
+
+add_argument:读入命令行参数，该调用有多个参数
+ArgumentParser.add_argument(name or flags…[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
+
+name or flags:是必须的参数，该参数接受选项参数或者是位置参数（一串文件名）
+
+
+
+
+>>> parser.add_argument('-f', '--foo')    #选项参数  
+>>> parser.add_argument('bar')        #位置参数  
+
+nargs: 当选项后接受多个或者0个参数时需要这个来指定
+比如-u选项接受2个参数
+
+
+>>> parser.add_argument('-u',nargs=2)  
+>>> parser.parse_args('-u a b'.split())  
+Namespace(u=['a', 'b'])  
+
+当选项接受1个或者不需要参数时指定nargs=’?',当没有参数时，会从default中取值。对于选项参数有一个额外的情况，就是出现选项而后面没有跟具体参数，那么会从const中取值
+
+
+>>> parser.add_argument('-u',nargs='?')  
+>>> parser.parse_args(''.split())  
+Namespace(u=None)  
+>>> parser.parse_args('-u a'.split())  
+Namespace(u='a')  
+  
+>>> parser.add_argument('-u',nargs='?',default='d')  
+>>> parser.add_argument('A',nargs='?',default='e')  
+>>> parser.parse_args(''.split())  
+Namespace(A='e', u='d')  
+>>> parser.parse_args('-u'.split())  
+Namespace(A='e', u=None)  
+  
+>>> parser.add_argument('-u',nargs='?',default='d',const='s')  
+>>> parser.add_argument('A',nargs='?',default='T',const='P')  
+>>> parser.parse_args(''.split())  
+Namespace(A='T', u='d')  
+>>> parser.parse_args('-u'.split())  
+Namespace(A='T', u='s')  
+>>> parser.parse_args('A'.split())  
+Namespace(A='A', u='d')  
+
+
+
+而对于后面需要跟多个参数的情况（–foo a1 a2 a3…),则需要设置nargs=’*’
+
+>>> parser.add_argument('-u',nargs='*')  
+>>> parser.parse_args('-u a b c d e'.split())  
+Namespace(u=['a', 'b', 'c', 'd', 'e'])  
+
+
+
+
+nargs=’+'也和nargs=’*'一样，但是有一个区别当’+'时少于1个参数（没有参数）位置参数会报错误
+
+>>> parser.add_argument('u',nargs='+')  
+>>> parser.parse_args(''.split())  
+usage: [-h] u [u ...]  
+: error: too few arguments  
+
+
+
+
+而‘*’会使用默认值
+
+>>> parser.add_argument('u',nargs='*',default='e')  
+>>> parser.parse_args(''.split())  
+Namespace(u='e')  
+
+
+
+default: 当参数需要默认值时，由这个参数指定，默认为None,当default=argparse.SUPPRESS时，不使用任何值
+
+>>> parser.add_argument('u',nargs='*',default=argparse.SUPPRESS)  
+>>> parser.parse_args(''.split())  
+Namespace()  
+
+type: 使用这个参数，转换输入参数的具体类型,这个参数可以关联到某个自定义的处理函数，这种函数通常用来检查值的范围，以及合法性
+
+>>> parser.parse_args('-u',type=int)  
+>>> parser.add_argument('f',type=file)  
+>>> parser.parse_args('-u 2 aa'.split())  
+Namespace(f='aa', mode 'r' at 0x8b4ee38>, u=2)  
+
+
+
+
+choices: 这个参数用来检查输入参数的范围
+>>> parser.add_argument('-u',type=int,choices=[1,3,5])  
+>>> parser.parse_args('-u 3'.split())  
+Namespace(u=3)  
+>>> parser.parse_args('-u 4'.split())  
+usage: [-h] [-u {1,3,5}]  
+: error: argument -u: invalid choice: 4 (choose from 1, 3, 5)  
+
+
+
+required: 当某个选项指定需要在命令中出现的时候用这个参数
+>>> parser.add_argument('-u',required=True)  
+>>> parser.parse_args(''.split())  
+usage: [-h] -u U  
+: error: argument -u is required  
+
+help: 使用这个参数描述选项作用
+
+>>> parser.add_argument('-u',required=True,default='wowo',help='%(prog)s for test sth(default: %(default)s)')  
+>>> parser.print_help()                                                        usage: [-h] -u U  
+  
+optional arguments:  
+  -h, --help  show this help message and exit  
+  -u U        for test sth(default: wowo)  
+
+
+
+
+dest: 这个参数相当于把位置或者选项关联到一个特定的名字
+>>> parser.add_argument('--str',nargs='*')  
+>>> parser.parse_args('--str a b c'.split())  
+Namespace(str=['a', 'b', 'c'])  
+  
+>>> parser.add_argument('--str',nargs='*',dest='myname')  
+>>> parser.parse_args('--str a b c'.split())  
+Namespace(myname=['a', 'b', 'c'])  
+
+metavar: 这个参数用于help 信息输出中
+
+>>> parser.add_argument('--str',nargs='*',metavar='AAA')  
+>>> parser.print_help()  
+usage: [-h] [--str [AAA [AAA ...]]]  
+  
+optional arguments:  
+  -h, --help            show this help message and exit  
+  --str [AAA [AAA ...]]  
+  
+>>> parser.add_argument('str',nargs='*',metavar='AAA')  
+>>> parser.print_help()  
+usage: [-h] [AAA [AAA ...]]  
+  
+positional arguments:  
+  AAA  
+  
+optional arguments:  
+  -h, --help  show this help message and exit
+
+
+
+bool值设置
+parser.add_argument('--feature', dest='feature', action='store_true')
+parser.add_argument('--no-feature', dest='feature', action='store_false')
+parser.set_defaults(feature=True)
+
+

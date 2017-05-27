@@ -1,0 +1,1140 @@
+
+1，git 安装：
+
+　　sudo apt-get install git-core openssh-server openssh-client
+
+　　$ sudo apt-get install git-core git-gui git-doc 
+
+　　sudo apt-get install libcurl4-gnutls-dev libexpat1-dev gettext libz-dev git-core  
+　　
+　　ssh-keygen -C 'gswyhq@126.com' -t rsa
+　　#生成密钥
+　　#http://www.cnblogs.com/jackge/archive/2013/08/17/3264801.html
+　　
+　　scp yhq@172.19.1.239:/home/pkg.tgz .
+　　#复制文件到当前目录
+　　
+# 向git代码库添加公钥
+打开http://172.26.1.167/profile/keys
+将生成的公钥文件id_rsa.pub文件中的内容粘贴到key中，粘贴后，title处自动获取邮箱名；再点击add key 即可；
+
+# 若不想生成密钥，也可以从其他地方，拷贝~/.ssh目录过来即可
+semantic@ubuntu:~$ scp -r semantic@172.26.1.196:/home/semantic/.ssh .
+semantic@ubuntu:~$ git clone git@172.26.1.167:ai/new-ambbr-ai.git
+
+# 若想要一台电脑上，可用多个email提交：
+第一步：再生成新email的SSH key
+gswyhq@gswyhq-pc:~$ ssh-keygen -C 'gswyhq2@126.com' -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/gswyhq/.ssh/id_rsa): /home/gswyhq/.ssh/id_rsa_gswyhq  # 注意这个地方不要用默认的路径文件，否则会把上一个用户的key给覆盖掉
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+gswyhq@gswyhq-pc:~$ cd .ssh/
+gswyhq@gswyhq-pc:~/.ssh$ ls
+id_rsa  id_rsa_gswyhq  id_rsa_gswyhq.pub  id_rsa.pub  known_hosts
+至此，~.ssh 目录中就有两个email的key;其中id_rsa，id_rsa.pub是前一个邮箱(gswyhq@126.com)的私钥与公钥；id_rsa_gswyhq、id_rsa_gswyhq.pub是后一个账号（gswyhq2@126.com）的私钥与公钥；
+第二步：修改配置
+ 在~/.ssh目录下找到config文件，如果没有就创建；
+如果存在的话，其实就是往这个config中添加一个Host：
+#建一个github别名，新建的帐号使用这个别名做克隆和更新
+其规则就是：从上至下读取config的内容，在每个Host下寻找对应的私钥。
+这里将内部Git SSH仓库地址（git@192.168.3.101:web1/chat_bot_demo.git）中的git@192.168.3.101替换成新建的Host别名如：web1，那么原地址 是：git@192.168.3.101:web1/chat_bot_demo.git，替换后应该是：web1:web1/chat_bot_demo.git
+gswyhq@gswyhq-pc:~/.ssh$ vim config 
+Host        web1
+    HostName        192.168.3.101
+    Port            80
+    User            gswyhq@126.com
+    IdentityFile    ~/.ssh/id_rsa
+
+Host        github.com
+    HostName    github.com
+    Port        22
+    User        gswyhq2@126.com
+    IdentityFile    ~/.ssh/id_rsa_gswyhq
+
+第三步：add key
+打开新生成的~/.ssh/id_rsa_gswyhq.pub文件，将里面的内容添加到Git服务器后台。
+
+
+gswyhq@gswyhq-pc:~$ mkdir git-project
+gswyhq@gswyhq-pc:~$ cd git-project/
+gswyhq@gswyhq-pc:~/git-project$ git init #本地初始化，并在当前文件夹生成一个.git文件夹
+初始化空的 Git 仓库于 /home/gswyhq/git-project/.git/
+gswyhq@gswyhq-pc:~/git-project$ ls
+pkg.tgz
+gswyhq@gswyhq-pc:~/git-project$ touch pkg.tgz #linux的touch命令不常用，一般在使用make的时候可能会用到，用来修改文件时间戳，或者新建一个不存在的文件。
+gswyhq@gswyhq-pc:~/git-project$ git add pkg.tgz #添加文件到暂存区
+gswyhq@gswyhq-pc:~/git-project$ echo $?
+0
+
+
+root@gswyhq-pc:/home/gswyhq/git-project# scp -r yhq@114.119.10.194:/mnt/sdb/shell2/ /home/gswyhq/git-project/
+#复制服务器114.119.10.194上的/mnt/sdb/shell2/ 文件到本地文件夹/home/gswyhq/git-project/中。
+
+gswyhq@gswyhq-pc:~/git-project$ git config --global user.email "gswyhq@126.com"
+gswyhq@gswyhq-pc:~/git-project$ git config --global user.name 'gswyhq'
+
+gswyhq@gswyhq-pc:~/git-project$ git clone git@172.19.1.100:gow.ai #将远程服务器上（git@172.19.1.100:gow.ai）克隆一个版本库到本地
+正克隆到 'gow.ai'...
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':  #输入密码,设置的密码跟deepin开机系统密码一致
+warning: 您似乎克隆了一个空仓库。
+检查连接... 完成。
+gswyhq@gswyhq-pc:~/git-project$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project$ ls
+gow.ai  pkg.tgz
+gswyhq@gswyhq-pc:~/git-project$ mv pkg.tgz gow.ai/ #移动文件到刚才克隆的版本库
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git init
+重新初始化现存的 Git 仓库于 /home/gswyhq/git-project/gow.ai/.git/
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git add pkg.tgz #添加文件到暂存区
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git commit -m '172.19.1.239服务器上pkg.tgz文件第一次提交'
+[master（根提交） 52a6575] 172.19.1.239服务器上pkg.tgz文件第一次提交
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 pkg.tgz
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+0
+
+git commit --amend命令用来修复最近一次commit. 可以让你合并你缓存区的修改和上一次commit, 而不是提交一个新的快照. 还可以用来编辑上一次的commit描述. 
+记住amend不是修改最近一次commit, 而是整个替换掉他. 对于Git来说是一个新的commit. 
+合并缓存区的修改和最近的一次commit, 然后用生成的新的commit替换掉老的. 如果缓存区没有内容, 那么利用amend可以修改上一次commit的描述.
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git commit --amend -m "增加获取...;"
+
+使用别名：
+gswyhq@gswyhq-pc:~/hello-world$ git config --global alias.gswyhq "commit --amend --author='gswyhq <gswyhq@126.com>' -m '增加记录' "
+执行了这条命令后，以后下面两条命令是等价的
+gswyhq@gswyhq-pc:~/hello-world$ git gswyhq
+gswyhq@gswyhq-pc:~/hello-world$ git commit --amend --author='gswyhq <gswyhq@126.com>' -m '增加记录'
+
+当然，也可以在.gitconfig里的别名配置
+[alias]
+  gswyhq = commit --amend --author='gswyhq <gswyhq@126.com>' -m '增加记录'
+
+
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git remote add gow_git git@172.19.1.100:gow.ai #增加一个远程服务器端
+#上面的命令会增加URL地址为'git@172.19.1.100:gow.ai'，名称为gow_git的远程服务器库，以后提交代码的时候只需要使用 gow_git别名即可
+
+# 将本地分支jar推送到服务器jar分支上去。
+zy@ubuntu:~$ git push origin jar:jar
+
+git push不会推送标签（tag），除非使用--tags选项。
+$ git push origin --tags
+
+gswyhq@gswyhq-pc:~$ git clone git@172.19.1.100:AI/WhiteII # 将从远程主机克隆一个版本库；该命令会在本地主机生成一个目录，
+与远程主机的版本库同名。如果要指定不同的目录名，可以将目录名作为git clone命令的第二个参数。$ git clone <版本库的网址> <本地目录名>
+
+为了便于管理，Git要求每个远程主机都必须指定一个主机名。git remote命令就用于管理主机名。
+不带选项的时候，git remote命令列出所有远程主机。
+使用-v选项，可以参看远程主机的网址。
+下面命令表示，当前只有一台远程主机，叫做origin，以及它的网址。
+gswyhq@gswyhq-pc:~/WhiteII$ git remote
+origin
+gswyhq@gswyhq-pc:~/WhiteII$ git remote -v
+origin	git@172.19.1.100:AI/WhiteII (fetch)
+origin	git@172.19.1.100:AI/WhiteII (push)
+
+克隆版本库的时候，所使用的远程主机自动被Git命名为origin。如果想用其他的主机名，需要用git clone命令的-o选项指定。
+$ git clone -o jQuery https://github.com/jquery/jquery.git
+$ git remote
+jQuery
+
+
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git branch test # 创建一个名为test的分支
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git branch # 直接输入git branch，不加任何后续参数，
+就表示让git列出所有已存在的分支。前面带“星号”的分支表示当前所在的分支。
+* master
+  test
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git checkout test 
+M	WhiteII/archives/archives_intention.py
+M	WhiteII/archives/archives_settings.py
+M	WhiteII/archives/archives_start.py
+切换到分支 'test'
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git branch 
+  master
+* test
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git checkout master  # 切换到主分支
+M	WhiteII/archives/archives_intention.py
+M	WhiteII/archives/archives_settings.py
+M	WhiteII/archives/archives_start.py
+切换到分支 'master'
+您的分支与上游分支 'origin/master' 一致。
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git status # 当前状态
+位于分支 master
+您的分支与上游分支 'origin/master' 一致。
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     archives_intention.py
+	修改：     archives_settings.py
+	修改：     archives_start.py
+
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	statemachine.py
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git add statemachine.py 
+#git add命令主要用于把我们要提交的文件的信息添加到索引库中。当我们使用git commit时，git将依据索引库中的内容来进行文件的提交。
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git status 
+位于分支 master
+您的分支与上游分支 'origin/master' 一致。
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	新文件：   statemachine.py
+
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     archives_intention.py
+	修改：     archives_settings.py
+	修改：     archives_start.py
+
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git commit -a 
+#　git commit –m “提交留言”　-v参数：把要提交的内容与版本库中的比较结果添加到编辑器中。　-a参数：把工作目录树中当前所有的修改提交到版本库中。
+[master 658f114] 添加档案揭秘的继续播放功能
+ 4 files changed, 849 insertions(+), 106 deletions(-)
+ create mode 100644 WhiteII/archives/statemachine.py
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git status 
+位于分支 master
+您的分支领先 'origin/master' 共 1 个提交。
+  （使用 "git push" 来发布您的本地提交）
+无文件要提交，干净的工作区
+gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ 
+
+
+一旦远程主机的版本库有了更新（Git术语叫做commit），需要将这些更新取回本地，这时就要用到git fetch命令。
+
+$ git fetch <远程主机名>
+上面命令将某个远程主机的更新，全部取回本地。
+git fetch命令通常用来查看其他人的进程，因为它取回的代码对你本地的开发代码没有影响。
+默认情况下，git fetch取回所有分支（branch）的更新。如果只想取回特定分支的更新，可以指定分支名。
+
+$ git fetch <远程主机名> <分支名>
+比如，取回origin主机的master分支。
+
+gswyhq@gswyhq-pc:~/WhiteII$ git fetch origin master
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+来自 172.19.1.100:AI/WhiteII
+ * branch            master     -> FETCH_HEAD
+gswyhq@gswyhq-pc:~/WhiteII$ git branch -r
+  origin/HEAD -> origin/master
+  origin/dev
+  origin/master
+gswyhq@gswyhq-pc:~/WhiteII$ git branch -a
+  master
+* test
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/dev
+  remotes/origin/master
+
+所取回的更新，在本地主机上要用"远程主机名/分支名"的形式读取。比如origin主机的master，就要用origin/master读取。
+git branch命令的-r选项，可以用来查看远程分支，-a选项查看所有分支。
+
+git pull命令的作用是，取回远程主机某个分支的更新，再与本地的指定分支合并。它的完整格式稍稍有点复杂。
+
+$ git pull <远程主机名> <远程分支名>:<本地分支名>
+比如，取回origin主机的next分支，与本地的master分支合并，需要写成下面这样。
+
+$ git pull origin next:master
+如果远程分支是与当前分支合并，则冒号后面的部分可以省略。
+
+$ git pull origin next
+上面命令表示，取回origin/next分支，再与当前分支合并。实质上，这等同于先做git fetch，再做git merge。
+
+
+git push命令用于将本地分支的更新，推送到远程主机。它的格式与git pull命令相仿。
+
+$ git push <远程主机名> <本地分支名>:<远程分支名>
+注意，分支推送顺序的写法是<来源地>:<目的地>，所以git pull是<远程分支>:<本地分支>，而git push是<本地分支>:<远程分支>。
+如果省略远程分支名，则表示将本地分支推送与之存在"追踪关系"的远程分支（通常两者同名），如果该远程分支不存在，则会被新建。
+
+$ git push origin master
+上面命令表示，将本地的master分支推送到origin主机的master分支。如果后者不存在，则会被新建。
+如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。
+
+$ git push origin :master
+# 等同于
+$ git push origin --delete master
+上面命令表示删除origin主机的master分支。
+如果当前分支与远程分支之间存在追踪关系，则本地分支和远程分支都可以省略。
+
+$ git push origin
+上面命令表示，将当前分支推送到origin主机的对应分支。
+如果当前分支只有一个追踪分支，那么主机名都可以省略。
+
+$ git push
+如果当前分支与多个主机存在追踪关系，则可以使用-u选项指定一个默认主机，这样后面就可以不加任何参数使用git push。
+
+$ git push -u origin master
+上面命令将本地的master分支推送到origin主机，同时指定origin为默认主机，后面就可以不加任何参数使用git push了。
+不带任何参数的git push，默认只推送当前分支，这叫做simple方式。此外，还有一种matching方式，会推送所有有对应的远程分支的本地分支。
+Git 2.0版本之前，默认采用matching方法，现在改为默认采用simple方式。如果要修改这个设置，可以采用git config命令。
+
+$ git config --global push.default matching
+# 或者
+$ git config --global push.default simple
+还有一种情况，就是不管是否存在对应的远程分支，将本地的所有分支都推送到远程主机，这时需要使用--all选项。
+
+$ git push --all origin
+上面命令表示，将所有本地分支都推送到origin主机。
+如果远程主机的版本比本地版本更新，推送时Git会报错，要求先在本地做git pull合并差异，然后再推送到远程主机。这时，如果你一定要推送，可以使用--force选项。
+
+$ git push --force origin 
+上面命令使用--force选项，结果导致远程主机上更新的版本被覆盖。除非你很确定要这样做，否则应该尽量避免使用--force选项。
+最后，git push不会推送标签（tag），除非使用--tags选项。
+
+$ git push origin --tags
+
+git pull origin master # 更新远程主机origin分支master到本地master(默认)
+
+.gitignore 配置文件用于配置不需要加入版本管理的文件，配置好该文件可以为我们的版本管理带来很大的便利，以下是个人对于配置 .gitignore 的一些心得。
+
+1、配置语法：
+
+　　以斜杠“/”开头表示目录；
+
+　　以星号“*”通配多个字符；
+
+　　以问号“?”通配单个字符
+
+　　以方括号“[]”包含单个字符的匹配列表；
+
+　　以叹号“!”表示不忽略(跟踪)匹配到的文件或目录；
+
+　　
+
+　　此外，git 对于 .ignore 配置文件是按行从上到下进行规则匹配的，意味着如果前面的规则匹配的范围更大，则后面的规则将不会生效；
+
+2、示例：
+
+　　（1）规则：fd1/*
+　　　　  说明：忽略目录 fd1 下的全部内容；注意，不管是根目录下的 /fd1/ 目录，还是某个子目录 /child/fd1/ 目录，都会被忽略；
+
+　　（2）规则：/fd1/*
+　　　　  说明：忽略根目录下的 /fd1/ 目录的全部内容；
+
+　　（3）规则：
+
+/*
+!.gitignore
+!/fw/bin/
+!/fw/sf/
+
+说明：忽略全部内容，但是不忽略 .gitignore 文件、根目录下的 /fw/bin/ 和 /fw/sf/ 目录；
+.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。
+那么解决方法就是先把本地缓存删除（改变成未track状态），然后再提交：
+
+git rm -r --cached .
+
+git rm -r -n --cached "bin/" //-n：加上这个参数，执行命令时，是不会删除任何文件，而是展示此命令要删除的文件列表预览。--cached 保留本地文件，或用 -f 强制删除
+
+git add .
+git commit -m 'update .gitignore'
+
+/*
+!/WhiteII/music/
+!/WhiteII/story/
+!/WhiteII/archives/
+!/WhiteII/idiom/
+!/WhiteII/volumn/
+
+上面的表示:当前目录下面的文件不提交,但不包括以!开头的文件,但遗憾的是,当前文件夹中的文件也被提交了.
+
+1. .gitignore无效的情况
+
+问题：在.gitignore文件中添加某文件，想对其进行忽略，但是通过git status查看仍然显示该文件的状态。
+
+原因：在git库中已经存在该文件（以前push过），而.gitignore仅对还没有加入到版本管理的的文件起作用
+
+解决办法：在git库中删除该文件（或者先移到项目目录外），并提交
+
+cat .git/config #查找其连接的远端服务器信息
+
+# 克隆远程到本地,若参数2 忽略,则默认与远程的同名
+ git clone git@172.26.1.167:ai/WhiteII.git White167
+ 
+# 将本地的分支remotely推送到远程主机origin,下的master分支
+git push origin remotely:master
+
+gswyhq@gswyhq-pc:~/White167$ git checkout remotely # 切换到分支remotely
+切换到分支 'remotely'
+gswyhq@gswyhq-pc:~/White167$ git merge master # 将master的内容合并到当前所在分支remotely
+
+git clone只能clone远程库的master分支，无法clone所有分支，解决办法如下：
+1. 找一个干净目录
+gswyhq@gswyhq-pc:~$ mkdir git_work
+
+2.进入目录
+gswyhq@gswyhq-pc:~$ cd git_work/
+
+3.克隆远程的项目到本地
+gswyhq@gswyhq-pc:~/git_work$ git clone git@172.26.1.167:ai/WhiteII.git,这样在git_work目录下得到一个WhiteII子目录
+
+4.进入项目目录,列出所有的远程分支
+gswyhq@gswyhq-pc:~/git_work$ cd WhiteII/
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git branch -a  # 列出远程的所有分支名称如下：
+* master
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/dev
+  remotes/origin/haomei
+  remotes/origin/master
+  remotes/origin/revert-97ddcfaf
+  remotes/origin/wangda
+  remotes/origin/xiaoxiao
+
+5. checkout远程的某个分支到本地,并在本地取同样的名字
+#作用是checkout远程的haomei分支，在本地起名为haomei分支，并切换到本地的haomei分支
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git checkout -b haomei origin/haomei 
+分支 haomei 设置为跟踪来自 origin 的远程分支 haomei。
+切换到一个新分支 'haomei'
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git checkout -b wangda origin/wangda
+分支 wangda 设置为跟踪来自 origin 的远程分支 wangda。
+切换到一个新分支 'wangda'
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git checkout -b xiaoxiao origin/xiaoxiao
+分支 xiaoxiao 设置为跟踪来自 origin 的远程分支 xiaoxiao。
+切换到一个新分支 'xiaoxiao'
+
+6.切换回开发分支,继续开发
+git checkout dev，切换回dev分支，并开始开发。
+
+
+# 将好妹分支下的文件music_es.py 复制到当前分支
+gswyhq@gswyhq-pc:~/git_work/WhiteII/WhiteII/music$ git checkout haomei -- music_es.py
+
+# 将本地initiative_test分支‘music’目录复制到当前分支
+git checkout initiative_test -- music
+
+#git pull命令的作用是，取回远程主机某个分支的更新，再与本地的指定分支合并。如果远程分支是与当前分支合并，则冒号后面的部分可以省略。。
+$ git pull <远程主机名> <远程分支名>:<本地分支名>
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git pull origin wangda:wangda
+
+
+pull代码时有时候会出现与本地冲突，(自动合并失败，修正冲突然后提交修正的结果)
+可以通过PyCharm来解决：
+1、File -> New Project -> 选择有冲突的项目目录
+2、VCS -> GIT -> Resolve Conflicts
+3、解决好冲突后，git commit，再push到远程；
+
+或者，报自动合并失败后，运行：
+使用 "git merge --abort" 终止合并
+这个时候会将已合并的（自动合并成功的）、合并有冲突的都回退到pull之前的状态。
+
+
+# git push命令用于将本地分支的更新，推送到远程主机。它的格式与git pull命令相仿。
+$ git push <远程主机名> <本地分支名>:<远程分支名>
+# 注意，分支推送顺序的写法是<来源地>:<目的地>，所以git pull是<远程分支>:<本地分支>，而git push是<本地分支>:<远程分支>。
+# 如果省略远程分支名，则表示将本地分支推送与之存在”追踪关系”的远程分支(通常两者同名)，如果该远程分支不存在，则会被新建。
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git push origin wangda:wangda
+
+# 有时候同步某个远程分支到本地的某个分支，被拒绝了
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git pull origin xiaoxiao:xiaoxiao 
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+来自 172.26.1.167:ai/WhiteII
+ ! [已拒绝]          xiaoxiao    -> xiaoxiao  （非快进式）
+# 这个时候，可以切换到本地指定分支，再执行下面的，可以去掉本地分支名（如果远程分支是与当前分支合并，则冒号后面的部分可以省略。）
+gswyhq@gswyhq-pc:~/git_work/WhiteII$ git pull origin xiaoxiao 
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+来自 172.26.1.167:ai/WhiteII
+ * branch            xiaoxiao    -> FETCH_HEAD
+Already up-to-date.
+
+# 克隆远程目录到本地，并在当前目录下，生成一个x-ai-project目录。
+git clone git@172.26.1.167:ai/x-ai-project.git
+
+
+1.  git add -A   保存所有的修改
+2.  git add .     保存新的添加和修改，但是不包括删除
+3.  git add -u   保存修改和删除，但是不包括新建文件。
+
+git 放弃本地修改 强制更新
+git fetch --all
+git reset --hard origin/master
+
+$ git fetch <远程主机名>
+上面命令将某个远程主机的更新，全部取回本地。
+默认情况下，git fetch取回所有分支(branch)的更新。如果只想取回特定分支的更新，可以指定分支名。
+$ git fetch <远程主机名> <分支名>
+
+git reset --hard origin/master  把HEAD指向刚刚下载的远程master分支的最新的版本
+
+# 删除远程分支
+git push origin :branch-name
+冒号前面的空格不能少，原理是把一个空分支push到server上，相当于删除该分支。
+
+# 删除本地分支
+git branch -d intent_by_essearch 
+git branch -D intent_by_essearch # 参数D ，即使没有合并也会进行删除
+
+# 文件比较
+git diff        显示工作目录与索引区文件（add 之后的）之间的差异
+即git diff 查看当前没有add 文件与对应已经add文件的差别，如：
+gswyhq@gswyhq-pc:~/hello-world$ git diff linux操作命令.txt
+
+# 比较两个分支的不同，输出不同的文件
+git diff branch1 branch2 --stat
+加上 --stat 是显示文件列表, 否则是文件内容diff
+
+# 比较其他分支的某个文件与当前分支的不同
+gswyhq@gswyhq-pc:~/qa_jar$ git diff branch2 -- tornado_jar_server.py
+
+git diff --cached显示索引区（add 之后的）与git仓库（commit之后的）之间的差异
+
+git diff HEAD   显示工作目录与git仓库（HEAD代表本地commit之后的）之间的差异
+        git diff HEAD^  比较上次提交
+        git diff HEAD~2 比较上2次提交
+
+--diff-filter=[ACDMRTUXB*]
+        显示指定状态的文件：Added (A), Copied (C), Deleted (D), Modified (M), Renamed (R), changed (T), are Unmerged (U), are Unknown (X)
+
+git difftool    使用图形工具显示文件之间的差异
+git diff --stat 列出文件
+git diff -- filename    只对比给定的文件，如：git diff HEAD^ -- music_settings.py
+
+历史提交对比：
+$ git diff commit       将所指定的某次提交与当前工作目录进行对比。
+$ git diff commit1 commit2 将2次提交的内容进行对比
+等价于
+$ git diff commit1..commit2 如果省略任意一个commit，默认将使用HEAD代替
+commit可以是简写的commit哈希值，也可是是HEAD。其中HEAD代表最后一次提交，HEAD^代表最后一次提交的父提交，HEAD~1>等价于HEAD^,HEAD~2为倒数第二次提交，以此类推。
+
+# 本地代码回滚，回退
+git reset --hard 2fc27b236ef82f0fb1951147cebe0ebe6a760811 # 回退到“2fc27b236ef82f0fb1951147cebe0ebe6a760811”，并且之后commit的代码都丢失
+
+git revert commit （比如：fa042ce57ebbe5bb9c8db709f719cec2c58ee7ff）撤销指定的版本，撤销也会作为一次提交进行保存。
+
+# revert 撤销掉‘9fe6364285bd13f584b3a1779503e16057a418ce’的提交（注意，并不是回退到“9fe6364285bd13f584b3a1779503e16057a418ce”），
+# -n, --no-commit       不要自动提交，故revert之后，需要重新commit
+git revert -n 9fe6364285bd13f584b3a1779503e16057a418ce
+git revert是用一次新的commit来回滚之前的commit，git reset是直接删除指定的commit
+
+看似达到的效果是一样的,其实完全不同.
+
+第一:
+上面我们说的如果你已经push到线上代码库, reset 删除指定commit以后,你git push可能导致一大堆冲突.但是revert 并不会.
+第二:
+如果在日后现有分支和历史分支需要合并的时候,reset 恢复部分的代码依然会出现在历史分支里.但是revert 方向提交的commit 并不会出现在历史分支里.
+
+第三:
+reset 是在正常的commit历史中,删除了指定的commit,这时 HEAD 是向后移动了,而 revert 是在正常的commit历史中再commit一次,只不过是反向提交,他的 HEAD 是一直向前的.
+
+//如果你写代码写错了之后想撤销的话，也就是还原文件初始状态
+、git checkout --文件名
+//如果你已经add了代码到缓存区
+git reset HEAD 文件名
+//但是如果你已经commit了，就需要版本回退了
+git reset --hard 版本号
+//要是你推送到了远程仓库，比如github
+
+commit之后，pull了远程代码之后，想撤销本次的pull操作；
+第一步：通过git log获取pull之前的版本号
+gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git log 
+commit 61d534e4a52dbf54b2ba137d7312c139e6399474
+Author: gswyhq <gswyhq@126.com>
+Date:   Fri Nov 25 14:02:30 2016 +0800
+
+    debug initiative
+
+commit 7a2ce91c4ec67e13fc440445b64db62e3328e12b
+Merge: 9ba7af3 88b0eae
+Author: gswyhq <gswyhq@126.com>
+Date:   Thu Nov 24 16:53:36 2016 +0800
+
+    Merge branch 'dev' of 172.26.1.167:ai/new-ambbr-ai into dev
+
+第二步：回退到pull之前的版本
+gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git reset --hard 61d534e4a52dbf54b2ba137d7312c139e6399474
+HEAD 现在位于 61d534e debug initiative
+
+回退版本：
+第一步查看历史记录
+gswyhq@gswyhq-pc:~/hello-world$ git log 
+commit ac16836ae865ab521950e32470b774a601a78c34
+Author: gswyhq <gswyhq@126.com>
+Date:   Wed Feb 22 22:27:56 2017 +0800
+
+    添加linux相关操作命令记录
+
+commit d37e24978f952cdb5d8243af3ce2d2ec41223a2a
+Author: gswyhq <gswyhq@126.com>
+Date:   Fri Feb 17 21:46:27 2017 +0800
+
+    添加.gitignore文件
+
+commit 19a886f11500fa8a15be15dcb736f38aabb11f0f
+Author: gswyhq <gswyhq@126.com>
+Date:   Wed Jun 3 22:50:47 2015 +0800
+
+    第二次更改
+    
+    添加了，print（“你好！”）
+
+commit 3d2ab6bdb1fc0ef15fd3d2c85ee29587af7dcb80
+Author: gswyhq <gswyhq@126.com>
+Date:   Wed Jun 3 22:47:51 2015 +0800
+
+    第一次更改
+    
+    第一次更改，什么都没有写。
+    
+第二步：回退到指定版本：
+gswyhq@gswyhq-pc:~/hello-world$ git reset --hard 19a886f11500fa8a15be15dcb736f38aabb11f0f
+HEAD 现在位于 19a886f 第二次更改
+
+第三步：查看回退效果，发现回退到指定版本号之后的提交都没有了（这应该是跟撤销的最大区别吧）；
+gswyhq@gswyhq-pc:~/hello-world$ git log 
+commit 19a886f11500fa8a15be15dcb736f38aabb11f0f
+Author: gswyhq <gswyhq@126.com>
+Date:   Wed Jun 3 22:50:47 2015 +0800
+
+    第二次更改
+    
+    添加了，print（“你好！”）
+
+commit 3d2ab6bdb1fc0ef15fd3d2c85ee29587af7dcb80
+Author: gswyhq <gswyhq@126.com>
+Date:   Wed Jun 3 22:47:51 2015 +0800
+
+    第一次更改
+    
+    第一次更改，什么都没有写。
+# 并且回退之后并没有显示要提交的东西，仅仅是比远程的落后了，故这个时候需要把本次回退提交（push）到远程，否则下次pull一下，本次回退就白忙活了；
+# 但直接push会报错，因为本地版本落后于远程的版本，这个时候需要强制push，或者刚才删除远程的对应分支后再push。
+gswyhq@gswyhq-pc:~/hello-world$ git status 
+位于分支 master
+您的分支落后 'origin/master' 共 2 个提交，并且可以快进。
+  （使用 "git pull" 来更新您的本地分支）
+  
+# 强制提交本地master分支到远程master
+gswyhq@gswyhq-pc:~/hello-world$ git push -f origin master:master 
+Total 0 (delta 0), reused 0 (delta 0)
+To https://github.com/gswyhq/hello-world.git
+ + ac16836...19a886f master -> master (forced update)
+
+Git-cola是一款图形界面的Git 客户端
+Python 编写，集成常用的pull，push，commit功能，可用来对比文件不同。
+安装：sudo apt-get install git-cola
+文件打开项目的根目录. 然后 在终端中输入:git cola，即可运行
+报“ Gtk-WARNING **: 无法在模块路径中找到主题引擎：“adwaita”，”错误
+sudo apt-get install gnome-themes-standard gnome-themes-standard-data ；即可解决
+
+查看文件的修改提交记录
+git log -p musicBag.py
+
+也可以通过查看某个指定文件的提交记录：
+git log --pretty=oneline 文件名
+
+使用git show 命令查看具体的修改详情：
+git show <git提交版本号> <文件名>
+
+有时候会出现问 Please tell me who you are.
+semantic@ubuntu:~/x-ai-project$ git config --global user.email "ai_public@gow.cn"
+semantic@ubuntu:~/x-ai-project$ git config --global user.name "ai_pubic_172.26.1.196"
+
+外网的时候需要有～/.ssh/config文件，文件内容为：
+“host gitlab
+hostname 183.62.194.131
+port 22022
+”
+# 有时候出现权限不对，但key等等都是对的，主要因为文件的权限太大所致
+semantic@sz:/gow/semantic/xiaoxiaoxiao/WhiteII$ git pull origin wangda
+GitLab: Your account has been blocked.
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+这个时候，可以通过：
+ls -alrth ~/.ssh/config 
+查看文件权限，结果如：-rw-r--r-- 1 semantic semantic 47 Oct 29 10:24 /home/semantic/.ssh/config
+通过下面的命令更改文件权限：
+chmod 644  ~/.ssh/config 
+
+另外~/.ssh/目录下保存有公钥、私钥文件；
+~/.gitconfig文件保存git账号信息，内容如：
+[user]
+        email = gswyhq@126.com
+        name = gswyhq
+[push]
+        default = matching
+
+获得两个版本间所有变更的文件列表
+git diff hash1 hash1 --stat
+如果是branch的话
+git diff branch1 branch2 --stat
+加上 --stat 是显示文件列表, 否则是文件内容diff
+如：
+git diff d44abc579ef5867001d6b541b5b7ec8948566dd7 3f5c6d7143b8b9ebfbb22a24a71d6b39e7dafb4b --stat
+另外，
+git diff --cached比较git add和git commit之间的区别，而git diff是比较暂存区的文件和暂存区之间的区别
+
+比较某两次提交的文件不一样：
+semantic@ubuntu:~/new-ambbr-ai/ambbr$ git diff 1461ae68aab2012eb2d53408c3730e1ee8735f0a:ambbr/ambbr/reject/reject.py 612417f49532b9f3f228bd87386665385272ff1b:./ambbr/reject/reject.py
+
+
+git stash 可用来暂存当前正在进行的工作， 比如想pull 最新代码， 又不想加新commit， 或者另外一种情况，为了fix 一个紧急的bug,  先stash, 使返回到自己上一个commit, 改完bug之后再stash pop, 继续原来的工作。
+
+# 怎么保证远程记录上，仅仅有本次修改，而没有合并内容
+第一步，改动之前，先pull远程代码
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git pull origin dev
+第二步，pull之后，开始改动，并add操作
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git add ambbr/intent/intentReMatch.py
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git pull origin dev
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git commit -m "add huLaHoop"
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git push origin dev:dev
+
+查看某个文件的改动记录
+gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git log --pretty=oneline ambbr/intent/intentReMatch.py
+用git show 命令查看具体的修改详情了
+gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git show 2debc4998e6e5fcf33c7b0e442c468a0b8ad2515 ambbr/intent/intentReMatch.py
+
+# 中文文件名显示乱码，可以通过以下方法来解决：
+gswyhq@gswyhq-pc:~/biji$ git config --global core.quotepath false
+gswyhq@gswyhq-pc:~/biji$ git status 
+位于分支 master
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	RabbitMQ的安装使用.txt
+
+提交为空，但是存在尚未跟踪的文件（使用 "git add" 建立跟踪）
+
+克隆比较大的文件时，会出现下面这样的错误：
+gswyhq@gswyhq-pc:~$ git clone https://github.com/gswyhq/Named-Entity-Recognition.git
+正克隆到 'Named-Entity-Recognition'...
+remote: Counting objects: 26, done.
+remote: Compressing objects: 100% (23/23), done.
+error: RPC failed; result=56, HTTP code = 200
+fatal: The remote end hung up unexpectedly
+fatal: early EOF
+fatal: index-objects failed
+主要原因是：HTTP传输请求数据时最大的缓存字节数，默认时1M字节。
+更改git缓存值为5G，
+sudo git config --global http.postBuffer 5242880000
+
+gswyhq@gswyhq-pc:~$ git clone https://github.com/gswyhq/Named-Entity-Recognition.git
+正克隆到 'Named-Entity-Recognition'...
+remote: Counting objects: 26, done.
+remote: Compressing objects: 100% (23/23), done.
+error: RPC failed; result=56, HTTP code = 200
+fatal: The remote end hung up unexpectedly
+fatal: early EOF
+fatal: unpack-objects failed
+看来是被Ruby误认为超时中断了。解决办法就是调大unicorn的timeout值。
+#修改缓存时间为一个小时；  
+git config --global credential.helper 'cache --timeout=3600'  
+
+
+中文文件名乱码，通过下面的方法即可解决：
+git config --global core.quotepath false
+
+semantic@sz:/gow/semantic/xiaoxiaoxiao/WhiteII$ less .git/config 
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = false
+        logallrefupdates = true
+[remote "origin"]
+        # url = git@172.26.1.167:ai/WhiteII.git
+        # url = git@gitlab:ai/WhiteII.git
+        url = http://183.62.194.130:8086/ai/WhiteII.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+        remote = origin
+        merge = refs/heads/master
+[branch "wangda"]
+        remote = origin
+        merge = refs/heads/wangda
+
+semantic@sz:~$ less .gitconfig 
+[user]
+        email = ai_public@gow.cn
+        name = ai_public
+[push]
+        default = matching
+
+root@gzidc:/home/lmz/.ssh# less config 
+host gitlab
+hostname 183.62.194.131
+port 22022
+
+git clone有时候很慢，可以改用 ssh:// 的方式去 clone，大多数的代码托管服务也都支持 ssh 连接，如：
+git clone ssh://github.com/kamikat/moshi-jsonapi.git 
+
+合并dev分支到master分支
+1、保证当前分支 'master'
+gswyhq@gswyhq-pc:~/hello-world$ git branch 
+  dev
+* master
+2、合并
+gswyhq@gswyhq-pc:~/hello-world$ git merge dev 
+更新 5cc1757..9db9db8
+
+
+
+# 同步远程的某个tag到本地
+$ git fetch origin tag release1.1.3.170225
+
+# 查看本地的tag
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git tag 
+beta0.1.161121
+beta0.1.161123
+
+# 查看远程的tag
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git ls-remote --tags origin 
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+08b236d71c6c0610725cc353244584b6fa2552a4	refs/tags/beta0.1.161121
+4a598200e26aa44430fbfa01ebcd4c80d9af4560	refs/tags/beta0.1.161121^{}
+d676f05c4c4d22fbbded524fb1ca732e550eea01	refs/tags/beta0.1.161123
+ae2ff5289039d8e7e82a00c6a98235ca1a07254c	refs/tags/release1.1.1.170225
+043c7e803cf3d12e1f0517b8b54080d4e8661fcd	refs/tags/release1.1.2.170225
+6bc6f7f848c10d68d8349986207ded6eae893d00	refs/tags/release1.1.3.170225
+
+# 同步远程某个tag到本地：
+gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git fetch origin tag release1.1.3.170225
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+remote: Counting objects: 6, done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 6 (delta 5), reused 0 (delta 0)
+展开对象中: 100% (6/6), 完成.
+来自 172.26.1.167:ai/new-ambbr-ai
+ * [新标签]          release1.1.3.170225 -> release1.1.3.170225
+ * [新标签]          beta0.1.17021501 -> beta0.1.17021501
+ * [新标签]          beta0.1.17021801 -> beta0.1.17021801
+ * [新标签]          beta0.1.17022001 -> beta0.1.17022001
+ * [新标签]          beta0.1.17022101 -> beta0.1.17022101
+ * [新标签]          beta0.1.17022201 -> beta0.1.17022201
+ * [新标签]          beta0.1.17022401 -> beta0.1.17022401
+ * [新标签]          beta0.1.17022501 -> beta0.1.17022501
+ * [新标签]          release1.1.1.170225 -> release1.1.1.170225
+ * [新标签]          release1.1.2.170225 -> release1.1.2.170225
+
+# 查看tag日志：
+git log --oneline --decorate 
+
+
+删除远程分支：
+$ git push origin --delete <branchName>
+删除远程tag这么用：
+git push origin --delete tag <tagname>
+否则，可以使用这种语法，推送一个空分支到远程分支，其实就相当于删除远程分支：
+git push origin :<branchName>
+
+一次删除多个远程tag:
+gswyhq@gswyhq-pc:~$ git push origin -d alpha0.0.1.170324 alpha0.0.1.170328
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+To 192.168.3.101:web1/chat_bot_demo.git
+ - [deleted]         alpha0.0.1.170324
+ - [deleted]         alpha0.0.1.170328
+
+这是删除本地tag的方法：
+git tag -d <tagname>
+
+一次删除多个本地tag:
+gswyhq@gswyhq-pc:~$ git tag 
+alpha0.0.1.170322
+alpha0.0.1.170323
+alpha0.0.1.170324
+alpha0.0.1.170328
+alpha0.0.1.170413
+alpha0.0.1.170420
+gswyhq@gswyhq-pc:~$ git tag -d alpha0.0.1.170322 alpha0.0.1.170323 alpha0.0.1.170324 alpha0.0.1.170328
+已删除标签 'alpha0.0.1.170322'（曾为 c1e9b91）
+已删除标签 'alpha0.0.1.170323'（曾为 c079797）
+已删除标签 'alpha0.0.1.170324'（曾为 4bd6022）
+已删除标签 'alpha0.0.1.170328'（曾为 6a51569）
+
+推送一个空tag到远程tag：
+git push origin :refs/tags/<tagname>
+两种语法作用完全相同。
+
+在git中重命名远程分支，其实就是先删除远程分支，然后重命名本地分支，再重新提交一个远程分支。
+1、删除远程devel分支：
+$ git push --delete origin devel
+2、把本地 devel 分支重命名为 develop 分支：
+$ git branch -m devel develop
+3、推送本地分支：
+$ git push origin develop
+
+1）新建tag：
+git tag -a 'release_1.1' -m 'tag code'
+2）push到服务器
+git push origin tag release_1.1
+3）查看tag
+git tag -l
+4）删除tag
+git tag -d release_1.1
+
+#查询远程heads和tags的命令如下：
+git ls-remote --heads origin
+git ls-remote --tags origin
+git ls-remote origin
+
+
+
+GIT的使用 
+
+1、SSH的获得
+
+1）Linux：
+
+在命令行下输入：
+
+ssh-keygen -t rsa 
+
+会在你自己的home下生成一个.ssh的目录，这个目录下的id_rsa.pub是你的公钥，可以作为服务器端的认证凭据，需要给服务器的管理人员；id_rsa是私钥，请保密（私钥代表你的身份，任何通过私钥在服务器上完成的操作都将被系统记录）。 
+
+2）Windows
+
+（1）下载git客户端：{+}http://git-scm.com/download/win+
+
+（2）双击安装git，安装都使用默认配置即可，一路下一步完成；
+
+（3）安装完成后，在开始菜单-程序中会有git菜单目录（或者右键菜单），如下：
+
+
+
+其中Git Bash是命令行，Git GUI是图形界面；命令行可以执行跟linux一致的命令；
+
+（4）生成key，输入 ssh-keygen -t rsa，会默认生成C:\Users\用户名\.ssh中
+
+ 
+
+
+
+2、如何上传一个git repository到服务器
+
+1）将你的仓库名字告诉仓库管理人员，这里以voice_app为例，让他在服务器中新建仓库，并开启权限
+
+2）本地新建一个文件夹，名字叫做voice_app
+
+3）把git bash打开，进入上面的文件夹，执行 $git init
+
+4）执行 $ git remote add server git@192.168.x.x:voice_app.git (中间的server字段任取， 后面的字段根据服务器确定)
+
+5）执行$ git push server master （这里master是branch的名字，任何一个git仓库都必须有master branch） 
+
+
+
+3、下载代码到本地
+
+（1）git clone git@192.168.x.x:voice_app.git -b Dev 
+
+参数-b后面接的是你要下载的branch名字
+
+（2）下载完成后，切换到你需要的branch
+
+git checkout -t origin/master -b master
+
+（3）更新本地仓库
+
+直接 git pull
+
+（4）查看本地改动
+
+git status //可以看到本地改动了哪些文件，添加了哪些文件
+
+git diff //可以看到本地改动了哪些代码
+
+（5）把改动推送到本地git repository
+
+git commit 你需要推送的文件名 -m 你的改动说明
+
+注意：你的改动说明请尽量详细，可以方便以后的代码查找
+
+如果你有新增文件，请先添加你的文件到本地git repository，然后再使用上面的命令
+
+git add 你的文件
+
+（6）推送到远程服务器
+
+git push server master 
+
+
+
+4、新建branch，并上传到服务器
+
+1）本地新建一个branch：git branch Dev
+
+2）切换到这个branch上面：git checkout Dev
+
+3）上传branch到远程服务器：git push origin Dev 
+
+
+
+5、代码合并
+
+通常有下面三种常用方法可以进行代码合并，即merge、patch、cherry-pick。这里以将master branch上面的改动合并到Dev为例，来说明上面三种方法的不同用法。 
+
+1）merge
+
+当你能确定master branch是在Dev branch的基础上进行了一些改动，master branch上面所有的改动都需要合并到Dev上面，就可以使用git merge，具体步骤如下：
+
+（1）进入代码目录，切换到Dev branch：git checkout Dev；git pull
+
+（2）合并代码：git merge master
+
+（3）上传到服务器：git push server Dev 
+
+2）cherry-pick
+
+当你仅仅需要把master branch的某一个commit合并到Dev branch，cherry-pick是最方便的选择了。使用方法如下：
+
+（1）查看你提交的commit hash值
+
+git log
+
+找到你需要合并的commit
+
+commit df9cd67b20d9d95579a14406cfcb9a1b8edce111
+
+Author: carlos <carlos@123.net>
+
+Date: Thu Nov 6 09:22:25 2016 +0800 
+
+init repo 
+
+（2）切换到你要合并的branch Dev上
+
+git checkout Dev 
+
+（3）合并commit到branch Dev
+即将其他分支的某次提交合并到本分支；需要注意的是：合并到本分支后，会在本分支上产生新的commit ID（SHA-1 Hash值），
+这个时候在其他分支上用git branch --no-merged 查看未合并的分支时，会发现明明通过git cherry-pick合并某次提交，却造成了还有未合并的项；
+git cherry-pick df9cd67b20d9d95579a14406cfcb9a1b8edce111 
+
+（4）把改动推送到远程服务器
+
+git push server Dev 
+
+3）patch
+
+patch是这三种方式中最灵活的，可以把你的改动做成文件的形式保存下来，这个文件可以被灵活的使用，比如patch到另外的仓库等。具体操作如下：
+
+（1）找到你需要的commit：git log
+
+（2）制作patch：git format-patch df9cd67b20d9d95579a14406cfcb9a1b8edce111
+
+当前目录下会生成一个以 .patch 命名的文件，你可以打开这个文件看看文件的具体内容。
+
+（3）在拿到这个patch文件之后，就可以用patch命令很方便的放入你的目标目录
+
+patch < XXXX.patch 
+
+4）冲突的解决
+
+所有的合并命令都会面临冲突的问题，在使用合并命令时，如果有冲突，就会有failed的提示。但是注意虽然有failed提示，但是合并命令会执行完所有的合并。然后可以通过 git status看到所有的冲突文件，并且冲突时会产生多余的文件（后缀名.rej和.proj）。
+
+这时，我们只需要把有冲突的源文件打开，把相应的冲突解决掉，然后删掉rej proj文件，用git add命令把解决了冲突之后的文件加入到仓库中，就可以把这个改动添加成功。 
+
+
+
+6、tag的使用
+
+当我们发布给测试发布测试包时，为了不影响我们的开发进度，又不另起branch，我们就需要使用tag了，基于tag可以很方便的进行新建branch操作等各种代码追踪操作。 
+
+1）新建tag：
+
+git tag -a 'release_1.1' -m 'tag code'
+
+2）push到服务器
+
+git push origin tag release_1.1
+
+3）查看tag
+
+git tag -l
+
+4）删除tag
+
+git tag -d release_1.1
+
+外网服务器可访问内网git服务器设置：
+第一步，在内网git服务器上或其他机器上，如本机（192.168.3.51），进行ssh反向映射:
+ssh -NfR 7770:192.168.3.101:80 root@106.75.141.166
+
+第二步：登陆外网服务器用http服务同步代码(输入用户名密码时是登陆git服务器的密码，而不是git用户密码)
+web1@10-13-101-154:~$ git clone http://127.0.0.1:7770/web1/chat_bot_demo.git
+
+ssh -NfR [服务器IP或省略]:[服务器端口]:[客户端侧能访问的IP]:[客户端侧能访问的IP的端口] [登陆服务器的用户名@服务器IP] -p [服务器ssh服务端口（默认22）]
+其中，服务器IP如果省略，则默认为127.0.0.1，只有服务器自身可以访问。指定服务器外网IP的话，任何人都可以通过[服务器IP:端口]来访问服务。当然，这个时候服务器本机也要输入外网IP:端口来访问。
+
+
+git rebase
+如果你想让"mywork"分支历史看起来像没有经过任何合并一样，你也许可以用 git rebase:
+$ git checkout mywork
+$ git rebase origin
+这些命令会把你的"mywork"分支里的每个提交(commit)取消掉，并且把它们临时 保存为补丁(patch)(这些补丁放到".git/rebase"目录中),然后把"mywork"分支更新 到最新的"origin"分支，最后把保存的这些补丁应用到"mywork"分支上。
+在rebase的过程中，也许会出现冲突(conflict). 在这种情况，Git会停止rebase并会让你去解决 冲突；在解决完冲突后，用"git-add"命令去更新这些内容的索引(index), 然后，你无需执行 git-commit,只要执行:
+$ git rebase --continue
+这样git会继续应用(apply)余下的补丁。
+如果您想跳过此补丁，则执行 "git rebase --skip"。
+在任何时候，你可以用--abort参数来终止rebase的行动，并且"mywork" 分支会回到rebase开始前的状态。
+$ git rebase --abort
+
+git checkout给了我们2个可选参数,分别是--ours和--theirs。
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git branch 
+  dev
+* master
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git rebase dev 
+在上面git rebase有冲突时，实际上是在执行“在执行将分支 'master' 变基到 'dev' 的操作。”
+虽说是在master上对 dev 进行rebase，自然会想到“ours就是master，theirs就是 dev ”...然而事实告诉我们，其实并不是这样。
+仔细回忆刚才说的打patch的过程，我们其实是把master的变更作为patch打进来，所以这时候如果指定ours，那么保留的是dev的工作。而指定theirs才是保留在master上工作;
+故接受dev分支的工作应该是：
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git checkout --ours yhb.db
+并以取消暂存：
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git reset HEAD yhb.db
+结束rebase, 运行 "git rebase --continue"
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git rebase --continue
+如果您想跳过此补丁，则执行 "git rebase --skip"。
+
+# pull代码时有冲突：
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git pull origin master 
+接受本地的，放弃远程的：
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git checkout --ours yhb.db
+添加本地修改
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git add yhb.db
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git commit -m "将dev分支"
+# push到远程
+gswyhq@gswyhq-pc:~/chat_bot_demo$ git push origin master:master
+
+
+经常有忘记修改Git 的author 和email 就直接提交的情况嘛。
+这个时候就需要修改commit 中的author信息啦
+
+1> rebase 到你要修改的那一条commit
+    git rebase -i <commit_hashcode>
+2> 这个时候会出现一个文本编辑界面内容大概如下, 把你要改的commit 前面的pick替换成edit，然后输入wq退出
+pick <hashcode1>  <commit_message1>
+pick <hashcode2>  <commit_message2>
+pick <hashcode3>  <commit_message3>
+pick <hashcode4>  <commit_message4>
+
+3>使用--amend 修改 author 
+    git commit --amend --author=‘xxx <xxxx@xxx.xxx>’
+4>输入git rebase --continue 结束修改
+
+
+如何用命令将本地项目上传到git
+1、（先进入项目文件夹）通过命令 git init 把这个目录变成git可以管理的仓库
+git init
+2、把文件添加到版本库中，使用命令 git add .添加到暂存区里面去，不要忘记后面的小数点“.”，意为添加文件夹下的所有文件
+git add .
+3、用命令 git commit告诉Git，把文件提交到仓库。引号内为提交说明
+git commit -m 'first commit'
+4、关联到远程库
+git remote add origin 你的远程库地址
+如：
+git remote add origin https://github.com/cade8800/ionic-demo.git
+5、获取远程库与本地同步合并（如果远程库不为空必须做这一步，否则后面的提交会失败）
+git pull --rebase origin master
+6、把本地库的内容推送到远程，使用 git push命令，实际上是把当前分支master推送到远程。执行此命令后会要求输入用户名、密码，验证通过后即开始上传。
+git push -u origin master
+
+高亮行,定位到某一行
+例如，在 URL 中加上 #L52 可以高亮第52行。或者你也可以直接点击行数。
+多行高亮同样支持。你可以使用类似#L53-L60格式，或者在按住shift的同时点击。
+https://github.com/rails/rails/blob/master/activemodel/lib/active_model.rb#L53-L60 

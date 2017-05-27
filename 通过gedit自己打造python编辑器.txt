@@ -1,0 +1,64 @@
+gedit
+
+sudo apt-get install  gedit-plugins
+
+https://github.com/JacekPliszka/gedit-betterpythonconsole,下载并解压
+sudo cp -r betterpythonconsole /usr/lib/x86_64-linux-gnu/gedit/plugins
+sudo cp -r betterpythonconsole.plugin /usr/lib/x86_64-linux-gnu/gedit/plugins
+
+https://github.com/Quixotix/gedit-source-code-browser
+sudo cp -r sourcecodebrowser /usr/lib/x86_64-linux-gnu/gedit/plugins
+sudo cp -r sourcecodebrowser.plugin /usr/lib/x86_64-linux-gnu/gedit/plugins
+
+an error occurred:找不到插件加载器 python
+sourcecodebrowser.plugin 中第二行的Loader=python改为Loader=python3
+
+https://github.com/fenrrir/geditpycompletion
+sudo cp -r pythoncodecompletion /usr/lib/x86_64-linux-gnu/gedit/plugins
+sudo cp -r pythoncodecompletion.plugin /usr/lib/x86_64-linux-gnu/gedit/plugins
+
+https://sourceforge.net/projects/eric-ide/files/eric6/stable/6.1.3/
+https://riverbankcomputing.com/software/qscintilla/download/
+
+tar zxvf QScintilla-gpl-2.9.1.tar.gz
+gswyhq@gswyhq-pc:~/下载$ cd QScintilla-gpl-2.9.1/
+cd Qt4Qt5
+    qmake qscintilla.pro
+    make
+    make install
+cd /home/gswyhq/下 载/QScintilla-gpl-2.9.1/Python/
+gswyhq@gswyhq-pc:~/下载/QScintilla-gpl-2.9.1/Python$ python3 configure.py
+Error: Unable to import PyQt4.QtCore. Make sure PyQt4 is installed.
+
+将configure.py中90行的“pyqt5_is_default = False”改为：“pyqt5_is_default = True",再：
+python3 configure.py
+    make
+    make install
+cd /home/gswyhq/下载/eric6-6.1.3/
+gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
+Checking dependencies
+Python Version: 3.5.1
+Found PyQt5
+Found pyuic5
+Found QScintilla2
+Found QtGui
+Found QtNetwork
+Found QtPrintSupport
+Found QtSql
+Sorry, please install QtSvg.
+Error: No module named 'PyQt5.QtSvg'
+Found QtWebKit
+Found QtWebKitWidgets
+Found QtWidgets
+
+sudo apt-get install PyQt5.QtSvg
+gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
+安装成功
+
+gswyhq@gswyhq-pc:~/下载$ tar zxvf eric6-i18n-zh_CN-6.1.3.tar.gz 
+gswyhq@gswyhq-pc:~/下载$ cd eric6-6.1.3/
+gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install-i18n.py 
+
+
+
+

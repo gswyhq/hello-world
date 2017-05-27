@@ -1,0 +1,127 @@
+一、添加同义词文件
+
+elasticsearch的安装目录下添加同义词文件：
+gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0$ vim config/test_synonyms.txt 
+内容为： 
+    #Example:
+    ipod, i-pod, i pod
+    foozball , foosball
+    universe , cosmos
+    西红柿, 番茄
+    马铃薯, 土豆
+    aa, bb
+
+二、建立索引
+建立索引：
+ik_body = {
+    "settings": {
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "jt_cn": {
+                        "type": "custom",
+                        "use_smart": "true",
+                        "tokenizer": "ik_max_word",
+                        "filter": ["jt_tfr", "jt_sfr"],
+                        "char_filter": ["jt_cfr"]
+                    },
+                    # "ik_smart": {
+                    #     "type": "ik",
+                    #     "use_smart": "true"
+                    # },
+                    # "ik_max_word": {
+                    #     "type": "ik",
+                    #     "use_smart": "false"
+                    # }
+                },
+                "filter": {
+                    "jt_tfr": {
+                        "type": "stop",
+                        "stopwords": [" "]
+                    },
+                    "jt_sfr": {
+                        "type": "synonym",
+                        "synonyms_path": "test_synonyms.txt"
+                    }
+                },
+                "char_filter": {
+                    "jt_cfr": {
+                        "type": "mapping",
+                        "mappings": [
+                            "| => \\|"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "solution": {
+            "properties": {
+                "title": {
+                    "include_in_all": "true",
+                    "analyzer": "jt_cn",
+                    # "term_vector": "with_positions_offsets",
+                    # "boost": 8,
+                    "store": "true",
+                    "type": "text"
+                }
+            }
+        }
+    }
+}
+
+es = Elasticsearch(host='localhost', port='9200')
+es.indices.create(index='test3', ignore=400, body=ik_body)
+
+三、添加数据
+gswyhq@gswyhq-pc:~$ curl -XPUT localhost:9200/test3/solution/1 -d '{"title": "番茄"}'
+
+四、搜索西红柿
+{
+"query": {
+"bool": {
+"must": [
+{
+"query_string": {
+"default_field": "title",
+"query": "西红柿"
+}
+}
+],
+"must_not": [ ],
+"should": [ ]
+}
+},
+"from": 0,
+"size": 10,
+"sort": [ ],
+"aggs": { }
+}
+
+返回结果：
+{
+"took": 7,
+"timed_out": false,
+"_shards": {
+"total": 5,
+"successful": 5,
+"failed": 0
+},
+"hits": {
+"total": 1,
+"max_score": 0.39556286,
+"hits": [
+{
+"_index": "test3",
+"_type": "solution",
+"_id": "1",
+"_score": 0.39556286,
+"_source": {
+"title": "番茄"
+}
+}
+]
+}
+}
+

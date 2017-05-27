@@ -1,0 +1,22 @@
+
+用 fc-list :lang=zh
+查看系统已经安装的字体。
+
+添加字体，以宋体为例：
+ 复制  simsun.ttf 字体文件到，/usr/share/fonts/local/simsun.ttc
+ 
+/usr/share/fonts/，即系统的字体文件，local是自己新建的文件夹；
+复制好后，在local中运行：
+root@gswyhq-pc:/usr/share/fonts/local# mkfontscale
+root@gswyhq-pc:/usr/share/fonts/local# mkfontdir
+root@gswyhq-pc:/usr/share/fonts/local# ls -l
+总用量 14976
+-rw-r--r-- 1 root root      716 7月   4 23:26 fonts.dir
+-rw-r--r-- 1 root root      716 7月   4 23:26 fonts.scale
+-rwxrwxrwx 1 root root 15323200 6月  11  2009 simsun.ttc
+
+生成相应的 fonts.scale 和 fonts.dir 文件。
+
+此时宋体字体已安装完成。
+https://pypi.python.org/packages/60/ed/d6523ed3c7bb1702cd20e106790735087a1c7fae6d22b855165b9c282404/scikit_learn-0.17.1-cp35-cp35m-manylinux1_x86_64.whl#md5=3a76514dbe5ce67eef3625c658cea5d0
+

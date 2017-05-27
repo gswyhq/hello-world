@@ -1,0 +1,44 @@
+1、登陆服务器（192.168.3.105）
+gswyhq@gswyhq-pc:~$ ssh zy@192.168.3.105
+
+2、复制服务器上文件到本地
+gswyhq@gswyhq-pc:~$ scp zy@192.168.3.105:/home/zy/hello.py hello.py   # 将服务器上我文件‘/home/zy/hello.py’ 拷贝到当前目录
+
+3、拷贝本地文件到服务器
+gswyhq@gswyhq-pc:~$ scp ./yhb/hello.py zy@192.168.3.105:/home/zy/hello.py
+
+4、通过密钥验证用户身份（登陆时候不需要输入密码）
+方法一：$ ssh-keygen
+        ...(一直按Enter，最后在~/.ssh/下生成密钥)
+        $ ls ~/.ssh/
+        id_rsa id_rsa.pub known_hosts
+        将本地生成的id_rsa.pub公钥复制到服务器主机上，并将内容追加到~/.ssh/authorized_keys中
+        $ cat id_rsa.pub >> ~/.ssh/authorized_keys
+方法二：ssh-copy-id 将key写到远程机器的 ~/ .ssh/authorized_key.文件中
+        gswyhq@gswyhq-pc:~$ ssh-copy-id zy@192.168.3.105
+
+反向代理：
+ssh -NfR 8001:192.168.3.105:8000 root@106.75.141.166
+root@106.75.141.166上的8001端口转接到192.168.3.105:8000
+
+自动重连反向代理
+zy@ubuntu:~$ sudo apt install autossh
+autossh -M 5678 -NfR 19999:localhost:22 zy@192.168.3.105
+-M 5678参数，负责通过5678端口监视连接状态，连接有问题时就会自动重连，-f参数使用程序后台运行
+设置重启、开机自动启动autossh
+sudo vi /etc/rc.local 在exit 0前面输入：
+autossh -M 5678 -NfR 19999:localhost:22 用户名@203.195.xxx.xxx -o BatchMode=yes -i /home/gswyhq/.ssh/id_rsa
+-o BatchMode不用输入yes，-i密钥的绝对路径
+
+使用别名登陆服务器
+1、编辑~/.ssh/config文件，添加如下内容
+gswyhq@gswyhq-pc:~/.ssh$ tail -f config 
+Host        zy103
+    HostName        192.168.3.103
+    Port            22
+    User            zy
+    IdentityFile    ~/.ssh/id_rsa
+2、采用别名“zy103”登陆
+gswyhq@gswyhq-pc:~/.ssh$ ssh zy103
+zy@192.168.3.103's password: 
+

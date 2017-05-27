@@ -1,0 +1,10 @@
+
+来源：http://www.mf158.com/6084.html
+
+1、下载hosts文件：
+https://pan.baidu.com/s/1i5QLtJZ
+提取码：krw1
+
+2、解压，并替换“/etc/hosts”文件；
+
+3、打开“https://www.google.com.hk/”，不能是“http://www.google.com.hk/”

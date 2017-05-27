@@ -1,0 +1,82 @@
+
+gswyhq@gswyhq-pc:~$ echo {1..3}
+1 2 3
+gswyhq@gswyhq-pc:~$ echo `seq 3`
+1 2 3
+
+语法：
+for varname in list
+do
+ command1
+ command2
+ ..
+done
+
+列表是一组值（数字、字符串等）组成的序列，每个值通过空格分隔。每循环一次，就将列表中的下一个值赋给变量。
+
+示例：
+gswyhq@gswyhq-pc:~$ for varname in {1..3}
+> do
+> echo $varname
+> done
+1
+2
+3
+
+语法：
+for (( expr1; expr2; expr3 ))
+do
+ command1
+ command2
+ ..
+done
+
+示例：
+for((i=1;i<10;i++))
+	do
+		if((i%3==0))
+			then
+			echo $i
+			continue
+		fi
+	done
+
+
+#示例 遍历固定字符串系列
+i=1
+for day in Mon Tue Wed Thu Fri
+do
+ echo "Weekday $((i++)) : $day"
+done
+
+示例：输出被3整除的数
+for i in `seq 100`
+do
+	if((i%3==0))
+		then
+		echo $i
+		continue
+	fi
+done
+
+示例，输出被3整除的数：
+i=1
+while(($i<10))
+do
+	if(($i%3==0))
+		then
+		echo $i
+	fi
+	i=$(($i+1))
+done
+
+示例，查找当前目录中，1~400中，缺失的mp3文件：
+for i in {1..400}
+do 
+	name=$i'.mp3'
+	if [ ! -f $name ]
+		then echo $name
+	fi
+done
+
+

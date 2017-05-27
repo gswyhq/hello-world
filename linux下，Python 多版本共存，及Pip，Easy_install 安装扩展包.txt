@@ -1,0 +1,250 @@
+
+linux下，Python 多版本共存，及Pip，Easy_install 安装扩展包
+
+Python2与Python3共存
+
+ 
+
+安装Python3后，建立ln，使用Python（Python2），Python3 来区分两个版本
+
+使用sudo apt-get install python3-setuptools 安装Easy_install
+再使用sudo easy_install3 pip 安装Pip
+
+或者：先下载儿ez_setup.py,
+    sudo python3 ez_setup.py install 
+    sudo easy_install pip
+
+
+ 
+
+区分：
+
+Pip 对应Python2
+
+Pip3 对应Python3
+
+ 
+
+Easy_Install 对应Python2
+
+Easy_Install3 对应Python3
+
+用pip3 list可以查看已安装的第三方包
+
+当显示没有权限的时候，需要在前面添加“sudo”
+
+root@10-13-101-154:~# pip3 install tensorflow
+Downloading/unpacking tensorflow
+  Could not find any downloads that satisfy the requirement tensorflow
+
+这主要是因为pip3的版本过低
+查看pip的版本
+t@10-13-101-154:~# pip3 --version
+pip 1.5.6 from /usr/lib/python3/dist-packages (python 3.4)
+
+升级pip的版本
+root@10-13-101-154:~# python3 -m pip install -U pip
+或者：
+root@10-13-101-154:~# pip install --upgrade pip
+但发现pip3并没有升级，pip对应上了pip3
+root@10-13-101-154:~# pip3 -V
+pip 1.5.6 from /usr/lib/python3/dist-packages (python 3.4)
+root@10-13-101-154:~# pip -V
+pip 9.0.1 from /usr/local/lib/python3.4/dist-packages (python 3.4)
+主要原因是升级的时候，优先升级了‘/usr/local/lib/python3.4/dist-packages’路径下的；
+>>> sys.path
+['', '/usr/lib/python3.4', '/usr/lib/python3.4/plat-x86_64-linux-gnu', '/usr/lib/python3.4/lib-dynload', '/usr/local/lib/python3.4/dist-packages', '/usr/lib/python3/dist-packages']
+
+在/usr/local/lib/python2.7/dist-packages/下，新建mypack.pth文件，输入以下内容
+新建这个文件的作用是，Python的搜索路径先搜搜/usr/local/lib/，后搜搜/usr/lib。
+    # 文件内容    
+    /usr/local/lib/python2.7/dist-packages/
+
+
+如何安装beatifulsoup？
+
+从beatifulsoup的官网上找到下载链接，打到最新的新的版本下载到本地，然后安装。
+
+$wget http://www.crummy.com/software/BeautifulSoup/bs4/download/4.3/beautifulsoup4-4.3.2.tar.gz
+$tar zxvf beautifulsoup4-4.3.2.tar.gz
+$cd beautifulsoup4-4.3.2
+$python3 setup.py install
+$python
+>> from bs4 import BeautifulSoup却报错：
+'You are trying to run the Python 2 version of Beautiful Soup under Python 3. This will not work.'<>'You need to convert the code, either by installing it (`python setup.py install`) or by running 2to3 (`2to3 -w bs4`).'
+
+这个时候，进入安装目录：
+$ cd /usr/local/lib/python3.5/dist-packages/
+运行：
+sudo 2to3 -w bs4
+即可以安装成功。
+
+安装pyqt5说是没有安装sip。
+于是下载sip-4.17.tar.gz,解压并cd sip-4.17
+运行python3 configure.py,
+再make,说是没有g++命令。
+sudo apt-get install g++，安装g++.
+再make,出现siplib.c:20:20: fatal error: Python.h: 没有那个文件或目录
+解决方法是安装python-dev，这是Python3的头文件和静态库包:
+sudo apt-get install python3-dev
+最后运行sudo make install
+安装成功。
+
+gswyhq@gswyhq-pc:/media/gswyhq/000724FA000F917A/Baike/Baike$ for i in {04..41};do 7z e part-r-000$i.7z;done
+
+
+下载PyQt-gpl-5.5.1.tar.gz，并解压
+gswyhq@gswyhq-pc:~/下载$ tar zxvf PyQt-gpl-5.5.1.tar.gz
+
+gswyhq@gswyhq-pc:~/下载$ cd PyQt-gpl-5.5.1
+gswyhq@gswyhq-pc:~/下载/PyQt-gpl-5.5.1$ python3 configure.py
+
+Querying qmake about your Qt installation...
+qmake: could not exec '/usr/lib/x86_64-linux-gnu/qt4/bin/qmake': No such file or directory
+Error: PyQt5 requires Qt v5.0 or later. You seem to be using v3. Use the
+--qmake flag to specify the correct version of qmake.
+
+sudo apt-get install qt-sdk
+
+gswyhq@gswyhq-pc:~/下载/PyQt-gpl-5.5.1$ python3 configure.py --qmake /usr/bin/qmake
+Querying qmake about your Qt installation...
+Error: PyQt5 requires Qt v5.0 or later. You seem to be using v4.8.7. Use the
+--qmake flag to specify the correct version of qmake.
+
+sudo apt-get install qt5-default
+
+python3 configure.py --qmake /usr/bin/qmake
+make
+sudo make install
+安装pyqt5成功。
+
+sudo pip3 install pytesseract
+
+pynlpir 初始化失败的解决方法：
+https://github.com/NLPIR-team/NLPIR/blob/master/License/license%20for%20a%20month/NLPIR-ICTCLAS%E5%88%86%E8%AF%8D%E7%B3%BB%E7%BB%9F%E6%8E%88%E6%9D%83/NLPIR.user
+下载NLPIR.user,
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/
+cli.py       Data/        __init__.py  lib/         nlpir.py     pos_map.py   __pycache__/ 
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/
+
+gswyhq@gswyhq-pc:~/下载$ sudo mv /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user.backup
+[sudo] gswyhq 的密码：
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user
+
+出现：RuntimeError: NLPIR function 'NLPIR_Init' failed.也是同样的，下载替换掉NLPIR.user即可；
+
+
+pygraphviz安装：
+sudo apt-get install graphviz libgraphviz-dev pkg-config
+sudo pip3 install pygraphviz
+
+ 下载opencvz :
+ https://github.com/Itseez/opencv/archive/3.1.0.zip
+ 解压到“/usr/local/”
+ root@gswyhq-pc:/usr/local/opencv-3.1.0# mkdir build && cd build
+root@gswyhq-pc:/usr/local/opencv-3.1.0/build# cmake -D CMAKE_BUILD_TYPE=Release \
+> -D CMAKE_INSTALL_PREFIX=/usr/local  \
+> PYTHON3_EXECUTABLE=/usr/bin/python3 \
+> PYTHON_INCLUDE_DIR=/usr/include/python3.5 \
+> PYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.5m.so \
+> PYTHON3_NUMPY_INCLUDE_DIRS=/usr/local/lib/python3.5/dist-packages/numpy/core/include ..
+
+
+root@gswyhq-pc:/usr/local/opencv-3.1.0/build# make -j4
+
+gswyhq@gswyhq-pc:/usr/local/opencv-3.1.0/build$ sudo make install 
+
+
+
+sudo pip install ipython 报错：
+OSError: [Errno 2] 没有那个文件或目录: '/usr/local/lib/python2.7/dist-packages/setuptools-18.1-py2.7.egg'
+
+https://bootstrap.pypa.io/ez_setup.py，下载ez_setup.py，再运行：
+    sudo python ez_setup.py install 
+    sudo easy_install pip
+
+
+gswyhq@gswyhq-pc:~$ sudo apt-get purge python-pkg-resources
+正在读取软件包列表... 完成
+正在分析软件包的依赖关系树       
+正在读取状态信息... 完成       
+下列软件包将被【卸载】：
+  dde* deepin-movie* deepin-music* deepin-screenshot* deepin-social-sharing* dmusic-plugin-baidumusic* python-chardet*
+  python-cryptography* python-oauthlib* python-pkg-resources* python-pysrt* python-requests* python-requests-oauthlib* python-setuptools*
+升级了 0 个软件包，新安装了 0 个软件包，要卸载 14 个软件包，有 685 个软件包未被升级。
+解压缩后将会空出 57.7 MB 的空间。
+您希望继续执行吗？ [Y/n] y
+(正在读取数据库 ... 系统当前共安装有 188784 个文件和目录。)
+正在卸载 dde (3.0+7) ...
+正在卸载 deepin-movie (2.2.3-1) ...
+正在卸载 dmusic-plugin-baidumusic (0.23~deepin5) ...
+正在卸载 deepin-music (2.3.0-4) ...
+正在卸载 deepin-screenshot (3.1.7-1) ...
+正在卸载 deepin-social-sharing (1.1.2-1) ...
+正在卸载 python-requests-oauthlib (0.4.0-1) ...
+正在卸载 python-requests (2.9.1-3) ...
+正在卸载 python-pysrt (1.0.1-1) ...
+正在卸载 python-chardet (2.3.0-2) ...
+正在卸载 python-oauthlib (1.0.3-1) ...
+正在卸载 python-cryptography (1.2.2-2) ...
+正在卸载 python-setuptools (20.3.1-1) ...
+正在卸载 python-pkg-resources (20.3.1-1) ...
+正在处理用于 hicolor-icon-theme (0.13-1) 的触发器 ...
+正在处理用于 lastore-daemon (0.9.18-1) 的触发器 ...
+com.deepin.store.Api is running...
+正在处理用于 desktop-file-utils (0.22-1) 的触发器 ...
+正在处理用于 bamfdaemon (0.2.118-1+b1) 的触发器 ...
+Rebuilding /usr/share/applications/bamf.index...
+正在处理用于 mime-support (3.59) 的触发器 ...
+正在处理用于 man-db (2.7.5-1) 的触发器 ...
+gswyhq@gswyhq-pc:~$ echo $?
+0
+
+https://bootstrap.pypa.io/get-pip.py
+下载到：/usr/local/lib/python2.7/dist-packages/get-pip.py，并运行python get-pip.py
+ pip2 --version
+ 
+ 
+redis 数据库
+安装服务端
+sudo apt-get install redis-server
+安装python包：
+sudo pip install redis
+
+启动服务器
+
+ 
+
+gswyhq@gswyhq-pc:/usr/bin$ ./redis-server 
+(#加上`&`号使redis以后台程序方式运行
+./redis-server &)
+或 
+$redis-server /etc/redis/redis.conf  
+
+# imposm.parser 安装：
+https://github.com/omniscale/imposm-parser，下载源码：
+解压，安装：
+root@gswyhq-pc:/usr/local/lib/python2.7/dist-packages/imposm-parser-master# python setup.py install 
+
+sudo pip2 install -U rdflib-sparql
+
+gswyhq@gswyhq-pc:~$ sudo pip2 install tensorflow
+gswyhq@gswyhq-pc:~$ sudo pip2 install flask
+
+pip安装时ReadTimeoutError解决办法
+pip --default-timeout=100 install -U pip
+
+python 调用java程序可以用jpype：
+Python 3.5安装JPype
+使用命令pip install jpype1可安装jpype。
+但有时会报下面的错误：
+    native/python/include/jpype_python.h:23:20: fatal error: Python.h: No such file or directory
+     #include <Python.h>
+                        ^
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+
+通过下面方法即可解决：
+ubuntu@10-13-70-173:~$ sudo apt-get install python3.5-dev
+ubuntu@10-13-70-173:~$ sudo apt-get install libevent-dev
+ubuntu@10-13-70-57:~$ sudo apt-get install g++

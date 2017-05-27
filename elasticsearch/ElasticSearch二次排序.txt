@@ -1,0 +1,384 @@
+
+像语句：
+{
+  "query": {
+    "match": {
+      "question": "a卡在哪里能用"
+    }
+  }
+}
+在内部被重写成下面这样：
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "question": "a卡"
+          }
+        },
+        {
+          "term": {
+            "question": "哪里"
+          }
+        },
+        {
+          "term": {
+            "question": "能用"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 查询‘a卡在哪里能用’，但不能出现“支持”
+{
+  "query": {
+    "bool": {
+      "must": {
+        "match": {
+          "question": "a卡在哪里能用"
+        }
+      },
+      "must_not": {
+        "match": {
+          "question": "支持"
+        }
+      }
+    }
+  }
+}
+
+但有时，must_not过于严格了；
+下面的查询将‘支持’相关的文档考虑在内，只是会降低它们的相关度 - 将它们的排序更靠后：
+{
+  "query": {
+    "boosting": {
+      "positive": {
+        "match": {
+          "question": "a卡在哪里能用"
+        }
+      },
+      "negative": {
+        "match": {
+          "question": "支持"
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
+constant_score查询。该查询能够包含一个查询或者一个过滤器，所有匹配文档的相关度分值都为1，不考虑TF/IDF：
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "constant_score": {
+            "query": {
+              "match": {
+                "question": "a卡"
+              }
+            }
+          }
+        },
+        {
+          "constant_score": {
+            "query": {
+              "match": {
+                "question": "哪里"
+              }
+            }
+          }
+        },
+        {
+          "constant_score": {
+            "query": {
+              "match": {
+                "question": "能用"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 若并不是所有的词都同等重要 - 其中的某些更有价值，那么我们可以对它进行相应提升（这里是’a卡‘）：
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "constant_score": {
+            "boost": 2,
+            "query": {
+              "match": {
+                "question": "a卡"
+              }
+            }
+          }
+        },
+        {
+          "constant_score": {
+            "query": {
+              "match": {
+                "question": "哪里"
+              }
+            }
+          }
+        },
+        {
+          "constant_score": {
+            "query": {
+              "match": {
+                "question": "能用"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+在这里，每个结果的最终分值并不是将所有匹配子句的分值累加而得到。Coordination因子和查询归约因子(Query Normalization Factor)仍然会被考虑在内。
+
+
+function_score查询它能够对所有匹配了主查询的每份文档调用一个函数来调整甚至是完全替换原来的_score。
+它拥有几种预先定义好了的函数：
+
+weight
+对每份文档适用一个简单的提升，且该提升不会被归约：当weight为2时，结果为2 * _score。
+
+field_value_factor
+使用文档中某个字段的值来改变_score，比如将受欢迎程度或者投票数量考虑在内。
+
+random_score
+使用一致性随机分值计算来对每个用户采用不同的结果排序方式，对相同用户仍然使用相同的排序方式。
+
+衰减函数(Decay Function) - linear，exp，gauss
+将像publish_date，geo_location或者price这类浮动值考虑到_score中，偏好最近发布的文档，邻近于某个地理位置(译注：其中的某个字段)的文档或者价格(译注：其中的某个字段)靠近某一点的文档。
+
+script_score
+使用自定义的脚本来完全控制分值计算逻辑。如果你需要以上预定义函数之外的功能，可以根据需要通过脚本进行实现。
+
+假设我们有一个博客网站让用户投票选择他们喜欢的文章。我们希望让人气高的文章出现在结果列表的头部，但是主要的排序依据仍然是全文搜索分值。我们可以通过保存每篇文章的投票数量来实现；
+{
+  "query": {
+    "function_score": { 
+      "query": { 
+        "multi_match": {
+          "query":    "体育新闻",
+          "fields": [ "title", "content" ]  # 被查询字段
+        }
+      },
+      "field_value_factor": { 
+        "field": "votes"  # 投票数字段
+      }
+    }
+  }
+}
+这里，function_score查询会包含主查询(Main Query)和希望适用的函数。先会执行主查询，然后再为匹配的文档调用相应的函数。每份文档中都必须有一个votes字段用来保证function_score能够起作用。
+在前面的例子中，每份文档的最终_score会通过下面的方式改变：
+new_score = old_score * number_of_votes
+
+为了让votes值对最终分值的影响更缓和，我们可以使用modifier。换言之，我们需要让头几票的效果更明显，其后的票的影响逐渐减小。0票和1票的区别应该比10票和11票的区别要大的多。
+一个用于此场景的典型modifier是log1p，它将公式改成这样：
+new_score = old_score * log(1 + number_of_votes)
+
+使用了modifier参数的请求如下：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query":    "popularity",
+          "fields": [ "title", "content" ]
+        }
+      },
+      "field_value_factor": {
+        "field":    "votes",
+        "modifier": "log1p" 
+      }
+    }
+  }
+}
+可用的modifiers有：none(默认值)，log，log1p，log2p，ln，ln1p，ln2p，square，sqrt以及reciprocal。
+它们的详细功能和用法可以参考：https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-function-score-query.html#_field_value_factor
+
+factor
+可以通过将votes字段的值乘以某个数值来增加该字段的影响力，这个数值被称为factor：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query":    "popularity",
+          "fields": [ "title", "content" ]
+        }
+      },
+      "field_value_factor": {
+        "field":    "votes",
+        "modifier": "log1p",
+        "factor":   2 
+      }
+    }
+  }
+}
+添加了factor将公式修改成这样：
+new_score = old_score * log(1 + factor * number_of_votes)
+当factor大于1时，会增加其影响力，而小于1的factor则相应减小了其影响力;
+
+boost_mode
+将全文搜索的相关度分值乘以field_value_factor函数的结果，对最终分值的影响可能太大了。通过boost_mode参数，我们可以控制函数的结果应该如何与_score结合在一起，该参数接受下面的值：
+multiply：_score乘以函数结果(默认情况)
+sum：_score加上函数结果
+min：_score和函数结果的较小值
+max：_score和函数结果的较大值
+replace：将_score替换成函数结果
+如果我们是通过将函数结果累加来得到_score，其影响会小的多，特别是当我们使用了一个较低的factor时：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query":    "popularity",
+          "fields": [ "title", "content" ]
+        }
+      },
+      "field_value_factor": {
+        "field":    "votes",
+        "modifier": "log1p",
+        "factor":   0.1
+      },
+      "boost_mode": "sum" 
+    }
+  }
+}
+上述请求的公式如下所示：
+new_score = old_score + log(1 + 0.1 * number_of_votes)
+
+max_boost
+最后，我们能够通过制定max_boost参数来限制函数的最大影响：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query":    "popularity",
+          "fields": [ "title", "content" ]
+        }
+      },
+      "field_value_factor": {
+        "field":    "votes",
+        "modifier": "log1p",
+        "factor":   0.1
+      },
+      "boost_mode": "sum",
+      "max_boost":  1.5 
+    }
+  }
+}
+无论field_value_factor函数的结果是多少，它绝不会大于1.5。
+max_boost只是对函数的结果有所限制，并不是最终的_score。
+
+使用过滤器将结果分成子集(一个词对应一个过滤器)，然后对每个子集适用一个不同的函数:
+{
+  "query": {
+    "function_score": {
+      "filter": { # 这里，function_score中使用的是filter，而不是query。在上例中，我们没有必要使用全文搜索。我们只是想得到在city字段中出现了Barcelona的所有文档，而该逻辑使用过滤器表达更合适。由过滤器得到的所有文档的_score都是1。function_score会接受一个查询或是一个过滤器。如果什么都没有指定，那么默认使用的是match_all查询。
+
+        "term": { "city": "Barcelona" }
+      },
+      
+      "functions": [ 
+        {
+          "filter": { "term": { "features": "wifi" }}, 
+          "weight": 1
+        },
+        {
+          "filter": { "term": { "features": "garden" }}, 
+          "weight": 1
+        },
+        {
+          "filter": { "term": { "features": "pool" }}, 
+          "weight": 2 
+        }
+      ],
+      "score_mode": "sum", 
+    }
+  }
+}
+
+score_mode
+每个函数都会返回一个结果，我们需要某种方法将多个结果归约成一个，然后将它合并到原始的_score中去。score_mode参数指定了该归约操作，它可以取下面的值：
+multiply: 函数结果会相乘(默认行为)
+sum：函数结果会累加
+avg：得到所有函数结果的平均值
+max：得到最大的函数结果
+min：得到最小的函数结果
+first：只使用第一个函数的结果，该函数可以有过滤器，也可以没有
+上例中，我们希望对每个函数的结果进行相加来得到最终的分值，因此使用的是score_mode是sum。
+没有匹配任何过滤器的文档会保留它们原本的_score，即为1。
+
+使用上面的查询，拥有相同的_score的结果每次的返回顺序都是相同的。此时引入一定程度的随机性会更好，来保证拥有相同分值的文档都能有同等的展示机会。
+我们希望每个用户都能看到一个不同的随机顺序，但是对于相同的用户，当他点击第二页，第三页或者后续页面时，看到的顺序应该是相同的。这就是所谓的一致性随机(Consistently Random)。
+random_score函数，它的输出是一个介于0到1之间的数字，当给它提供相同的seed值时，它能够产生一致性随机的结果，这个seed值可以是用户的会话(Session)ID：
+{
+  "query": {
+    "function_score": {
+      "filter": {
+        "term": { "city": "Barcelona" }
+      },
+      "functions": [
+        {
+          "filter": { "term": { "features": "wifi" }},
+          "weight": 1
+        },
+        {
+          "filter": { "term": { "features": "garden" }},
+          "weight": 1
+        },
+        {
+          "filter": { "term": { "features": "pool" }},
+          "weight": 2
+        },
+        {
+          "random_score": { 
+            "seed":  "the users session id" 
+          }
+        }
+      ],
+      "score_mode": "sum",
+    }
+  }
+}
+random_score子句不包含任何的filter，因此它适用于所有文档。
+
+如果你想要找到所有售价高于10000美刀的车，同时也对这些车计算其平均价格，那么可以使用一个filtered查询：
+{
+    "query" : {
+        "filtered": {
+            "filter": {
+                "range": {
+                    "price": {
+                        "gte": 10000
+                    }
+                }
+            }
+        }
+    },
+    "aggs" : {
+        "single_avg_price": {
+            "avg" : { "field" : "price" }
+        }
+    }
+}
+
+
+
+
+

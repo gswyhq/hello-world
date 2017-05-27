@@ -1,0 +1,10 @@
+
+安装：
+gswyhq@gswyhq-pc:~$ sudo pip3 install pyzmq
+gswyhq@gswyhq-pc:~$ sudo pip3 install jinja2
+gswyhq@gswyhq-pc:~$ sudo pip3 install jsonschema
+gswyhq@gswyhq-pc:~$ sudo pip3 install jupyter
+
+命令行打开：gswyhq@gswyhq-pc:~$ ipython notebook
+
+或浏览器打开：http://localhost:8888/tree

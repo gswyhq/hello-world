@@ -1,0 +1,57 @@
+datetime的格式是：
+datetime.datetime(2014, 1, 5, 16, 47, 49)
+
+>>> import time
+>>> import datetime
+
+string转换为datetime：
+>>> string = '2014-01-08 11:59:58'
+>>> time1 = datetime.datetime.strptime(string,'%Y-%m-%d %H:%M:%S')
+>>> print time1
+2014-01-08 11:59:58
+
+时间的加减：
+>>> last = time1 - datetime.timedelta(hours = 24)
+>>> next_dat = time1 + datetime.timedelta(hours = 24)
+>>> print last
+2014-01-07 11:59:58
+>>> next_dat
+datetime.datetime(2014, 1, 9, 11, 59, 58)
+>>> print next_dat
+2014-01-09 11:59:58
+>>> str(last)
+'2014-01-07 11:59:58'
+
+datetime转为字符串：
+>>> time1_str = datetime.datetime.strftime(time1,'%Y-%m-%d %H:%M:%S')
+>>> time1_str
+'2014-01-08 11:59:58'
+
+python获取当前时间：
+time.time() 获取当前时间戳
+time.localtime() 当前时间的struct_time形式
+time.ctime() 当前时间的字符串形式
+>>> time.time()
+1389243184.696
+>>> time.localtime()
+time.struct_time(tm_year=2014, tm_mon=1, tm_mday=9, tm_hour=12, tm_min=53, tm_sec=13, tm_wday=3, tm_yday=9, tm_isdst=0)
+>>> time.ctime()
+'Thu Jan 09 12:53:19 2014'
+
+struct_time转换为字符串：
+>>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+'2014-01-09 12:59:00'
+>>> time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())
+'Thu Jan 09 13:01:00 2014'
+In[12]: datetime.strftime(datetime.now(),'%Y-%m-%d %H:%M:%S %f')
+Out[12]: '2017-04-14 14:56:09 093717'
+
+将格式字符串转换为时间戳：
+>>> a = "Sat Mar 28 22:24:24 2009"
+>>> b = time.mktime(time.strptime(a,"%a %b %d %H:%M:%S %Y"))
+>>> b
+1238250264.0
+
+datetime转化为时间戳：
+>>> time.mktime(datetime.datetime(2014,1,8,11,59,58).timetuple())
+1389153598.0

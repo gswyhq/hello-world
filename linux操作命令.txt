@@ -1,0 +1,771 @@
+rm -rf 360热点 #删除文件夹“360热点”及其内部的所有文件夹及文件
+7z x 360热点.7z  #将压缩文件“360热点.7z”解压到同目录下的“360热点”文件夹中，其目录结构不变
+7z e 360热点.7z  #将压缩文件“360热点.7z”中的所有目录及文件，解压到同目录下的文件夹中。
+
+tar -xf 360热点.tar ##将压缩文件“360热点.tar”解压到同目录下的“360热点”文件夹中，其目录结构不变
+tar -zxvf japan.tar.gz -C /tmp/ 解压到指定目录 /tmp/
+
+gswyhq@gswyhq-pc:~/服务器上的文件$ tar -czvf /home/gswyhq/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswyhq/服务器上的文件/360热点.tar.gz’
+
+
+gswyhq@gswyhq-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
+
+sudo chmod a+r bs4/ #改变文件夹的权限
+
+sudo cp -r /run/media/gow/9016-4EF8/bs4 /usr/lib/python3.3/site-packages/ #复制文件/run/media/gow/9016-4EF8/bs4 到 /usr/lib/python3.3/site-packages/下
+
+运行 ps aux 的到如下信息：
+   ps aux
+USER    PID   %CPU %MEM VSZ   RSS TTY    STAT   START TIME COMMAND
+smmsp 3521   0.0    0.7     6556 1616     ?        Ss      20:40 0:00 sendmail: Queue runner@01:00:00 f
+root    3532    0.0       0.2     2428    452     ?        Ss      20:40 0:00 gpm -m /dev/input/mice -t imps2
+htt        3563    0.0       0.0    2956    196     ?        Ss       20:41 0:00 /usr/sbin/htt -retryonerror 0
+htt        3564    0.0       1.7   29460 3704     ?        Sl        20:41 0:00 htt_server -nodaemon
+root      3574    0.0       0.4     5236 992     ?        Ss       20:41 0:00 crond
+xfs        3617    0.0       1.3   13572 2804     ?        Ss       20:41 0:00 xfs -droppriv -daemon
+root       3627   0.0       0.2     3448    552     ?        SNs     20:41 0:00 anacron -s
+root      3636    0.0       0.1     2304    420     ?        Ss       20:41 0:00 /usr/sbin/atd
+dbus    3655    0.0       0.5   13840 1084     ?        Ssl       20:41 0:00 dbus-daemon-1 --system
+....................................
+stat 中的参数意义如下：
+   D 不可中断 Uninterruptible（usually IO）
+   R 正在运行，或在队列中的进程
+   S 处于休眠状态
+   T 停止或被追踪
+   Z 僵尸进程
+   W 进入内存交换（从内核2.6开始无效）
+   X   死掉的进程
+
+    < 高优先级
+    n   低优先级
+    s   包含子进程
+    +   位于后台的进程组
+    
+    
+    
+mongodb 安装
+下载源文件：https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz?_ga=1.249661326.982219555.1458790832
+gswyhq@gswyhq-pc:~/下载$ sudo tar -zxvf mongodb-linux-x86_64-3.2.4.tgz -C /usr/local/
+将 /usr/local/中的mongodb-linux-x86_64-3.2.4改名为：mongodb
+gswyhq@gswyhq-pc:~/下载$ sudo mkdir /data
+gswyhq@gswyhq-pc:~/下载$ sudo mkdir /data/db #MongoDB 将数据存储在/data/db 目录中
+gswyhq@gswyhq-pc:~/下载$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+gswyhq@gswyhq-pc:~/下载$ export PATH=$PATH:/usr/local/mongodb/bin  #添加到环境变量
+gswyhq@gswyhq-pc:~/下载$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/mongodb/bin
+gswyhq@gswyhq-pc:~/下载$ 
+还需要解决：mongodb必须有读写和目，录创建权限
+
+http://api.mongodb.org/python/current/installation.html
+
+
+安装opencc
+下载源文件：https://bintray.com/artifact/download/byvoid/opencc/opencc-1.0.3.tar.gz
+
+
+https://github.com/BYVoid/OpenCC
+
+sudo tar -zxvf opencc-1.0.3.tar.gz -C /usr/local/
+
+再执行：sudo make
+出现错误：  Doxygen is needed to build the documentation.  Please install it correctly
+ftp://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz，下载doxygen
+
+gswyhq@gswyhq-pc:~/下载$ sudo tar -zxvf doxygen-1.8.11.linux.bin.tar.gz -C /usr/local/
+gswyhq@gswyhq-pc:~/下载$ cd /usr/local/doxygen-1.8.11/
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ ./configure
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ sudo make install
+/usr/bin/install: 无法获取'bin/doxytag' 的文件状态(stat): 没有那个文件或目录
+Makefile:13: recipe for target 'install' failed
+make: *** [install] Error 1
+gswyhq@gswyhq-pc:/usr/local$ sudo git clone https://github.com/doxygen/doxygen.git
+gswyhq@gswyhq-pc:/usr/local$ cd doxygen
+
+gswyhq@gswyhq-pc:/usr/local/doxygen$ sudo mkdir build
+gswyhq@gswyhq-pc:/usr/local/doxygen$ cd build
+gswyhq@gswyhq-pc:/usr/local/doxygen/build$ cmake -G "Unix Makefiles" ..
+- Found PythonInterp: /usr/bin/python (found version "2.7.11") 
+CMake Error at /usr/share/cmake-3.4/Modules/FindPackageHandleStandardArgs.cmake:148 (message):
+  Could NOT find FLEX (missing: FLEX_EXECUTABLE)
+
+于是：sudo apt-get install flex
+Could NOT find BISON (missing: BISON_EXECUTABLE)
+于是：gswyhq@gswyhq-pc:/usr/local$ sudo apt-get install bison
+
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cd build/
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11/build$ cmake -G "Unix Makefiles" ..
+再运行：
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_wizard=YES
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -L
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ make
+
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_doc=YES
+gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ make docs
+
+epstopdf: not found
+
+不管这个。
+gswyhq@gswyhq-pc:/usr/local$ cd opencc-1.0.3/
+gswyhq@gswyhq-pc:/usr/local/opencc-1.0.3$ sudo make
+gswyhq@gswyhq-pc:/usr/local/opencc-1.0.3$ sudo make install
+
+安装opencc成功。
+
+http://www.stack.nl/~dimitri/doxygen/download.html
+
+https://github.com/doxygen/doxygen
+
+
+http://dev.mysql.com/downloads/file/?id=461343
+下载：Download - mysql-5.7.11-linux-glibc2.5-x86_64.tar.gz
+
+
+
+sudo pip3 install PyMySQL
+
+进入mysql数据库控制台，
+root@gswyhq-pc:~# mysql -uroot -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 5
+Server version: 5.7.11
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> set password=password('gswyhq');
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql> 
+
+
+sudo apt-get -u install mysql-workbench
+sudo apt autoremove #卸载安装过程中的辅助包
+
+
+
+安装spark
+http://spark.apache.org/downloads.html
+下载spark-1.6.1.tgz
+解压到/usr/local/
+root@gswyhq-pc:/usr/local/spark-1.6.0/build# ./mvn -pl :spark-streaming_2.10 clean install
+
+Using `mvn` from path: /usr/local/spark-1.6.0/build/apache-maven-3.3.3/bin/mvn
+Warning: JAVA_HOME environment variable is not set.
+OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Could not find the selected project in the reactor: :spark-streaming_2.10 @ 
+[ERROR] Could not find the selected project in the reactor: :spark-streaming_2.10 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MavenExecutionException
+root@gswyhq-pc:/usr/local/spark-1.6.0/build# echo $?
+1
+
+gswyhq@gswyhq-pc:~$ export PATH=$PATH:/usr/bin/java
+
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Could not find the selected project in the reactor: :spark-streaming_2.10 @ 
+[ERROR] Could not find the selected project in the reactor: :spark-streaming_2.10 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MavenExecutionException
+root@gswyhq-pc:/usr/local/spark-1.6.0/build# 
+
+于
+http://mvnrepository.com/artifact/org.apache.spark/spark-streaming_2.10/1.6.0
+下载/home/gswyhq/下载/spark-streaming_2.10-1.6.0.jar
+
+
+ sudo pip3 install polyglot
+ polyglot download embeddings2.zh
+ polyglot download ner2.zh
+ polyglot download sentiment2.enable
+ polyglot download sentiment2.zh
+ 
+ 
+ Downloader> l
+Packages:
+Error connecting to server: [Errno -2] Name or service not known
+经过推测，是服务器无法连接下载服务器地址导致的。
+查看一下nltk download配置
+Downloader> c
+Data Server:
+ - URL: <http://nltk.googlecode.com/svn/trunk/nltk_data/index.xml>
+ - 3 Package Collections Available
+ - 74 Individual Packages Available
+Local Machine:
+ - Data directory: /home/wym/nltk_data
+然后
+> curl http://nltk.googlecode.com/svn/trunk/nltk_data/index.xml
+报错：curl: (6) Couldn't resolve host 'nltk.googlecode.com'
+google的地址肯定是被墙掉了（唉，大家懂的）
+解决办法：
+修改dns地址，
+> vim /etc/resolv.conf
+修改nameserver为：  nameserver  8.8.8.8
+问题解决
+
+# Generated by NetworkManager
+nameserver 192.168.1.1
+ 
+LIBSVM安装：
+http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/liblinear.cgi?+http://www.csie.ntu.edu.tw/~cjlin/liblinear+tar.gz下载
+解压，复制到 /usr/local/lib/python3.5/dist-packages/
+在/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python，打开命令行终端：运行“make”
+cd /usr/local/lib/python3.5/dist-packages/liblinear-2.1
+再运行“make”
+切换到gswyhq用户，运行：
+gswyhq@gswyhq-pc:~$ export PATH=$PATH:/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
+
+export PYTHON3PATH=$PYTHON3PATH:/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
+上面设置路径方法还是不行；最终，在sys.path随便一个路径下，如：'/usr/local/lib/python3.5/dist-packages'
+添加一个路径文件，如mypkpath.pth，必须以.pth为后缀，写上你要加入的模块文件所在的目录名称就是了.
+/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
+/usr/local/lib/python3.5/dist-packages/libsvm-3.21/python
+
+使用libsvm还需要gnuplot
+
+安装 gnuplot 不能直接 sudo apt-get install gnuplot，因为预编译的gnuplot不能识别ubuntu的图形界面，所以必须先运行这句：
+[plain] view plain copy
+sudo apt-get install libx11-dev   
+
+然后从下载 gnuplot的源代码：
+https://sourceforge.net/projects/gnuplot/files/latest/download?source=files
+将其解压缩，进入解压后的目录 编译 ，安装：
+tar xzvf gnuplot-5.0.3.tar.gz
+cd gnuplot-5.0.3.tar.gz
+./configure  
+make  
+sudo make install  
+
+在/usr/local/lib/python3.5/dist-packages/libsvm-3.21/tools文件夹下找到 easy.py 和 grid.py 两个文件。
+把其中 gnuplot 的路径设置好。注意gnuplot的pathname不是解压的那个目录，而是要用 which gnuplot 命令来找出。
+我安装完后gnuplot的路径是 /usr/local/bin/gnuplot
+
+easy.py文件中
+#gnuplot_exe = "/usr/bin/gnuplot"更改为：
+	gnuplot_exe = "/usr/local/bin/gnuplot"
+grid.py文件中
+#self.gnuplot_pathname = '/usr/bin/gnuplot'更改为：
+	self.gnuplot_pathname = '/usr/local/bin/gnuplot'
+最后执行在libsvm的文件夹下执行make命令，在子目录python下执行make命令。
+至此 libsvm的安装完成！
+
+
+pyltp安装步骤
+https://github.com/hit-scir/ltp,下载ltp，解压到/usr/local
+cd ltp
+./configure
+make
+更多说明见：http://ltp.readthedocs.org/zh_CN/latest/install.html#linux-mac-osx-cygwin
+sudo pip3 install pyltp，安装pyltp
+下载模型文件：http://pan.baidu.com/share/link?shareid=1988562907&uk=2738088569#path=%252Fltp-models%252F3.3.1
+
+
+pynlpir 初始化失败的解决方法：
+https://github.com/NLPIR-team/NLPIR/blob/master/License/license%20for%20a%20month/NLPIR-ICTCLAS%E5%88%86%E8%AF%8D%E7%B3%BB%E7%BB%9F%E6%8E%88%E6%9D%83/NLPIR.user
+下载NLPIR.user,
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/
+cli.py       Data/        __init__.py  lib/         nlpir.py     pos_map.py   __pycache__/ 
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/
+
+gswyhq@gswyhq-pc:~/下载$ sudo mv /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user.backup
+[sudo] gswyhq 的密码：
+gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user
+
+
+sudo pip3 install sklearn
+
+1) 统计当前文件夹下文件的个数
+复制代码 代码如下:
+
+ls -l |grep "^-"|wc -l
+2) 统计当前文件夹下目录的个数
+复制代码 代码如下:
+
+ls -l |grep "^d"|wc -l
+
+ 
+3) 统计当前文件夹下文件的个数，包括子文件夹里的 
+复制代码 代码如下:
+
+ls -lR|grep "^-"|wc -l
+
+ 
+4) 统计文件夹下目录的个数，包括子文件夹里的
+复制代码 代码如下:
+
+ls -lR|grep "^d"|wc -l
+
+ 
+说明：
+复制代码 代码如下:
+
+ls -l 
+
+长列表输出当前文件夹下文件信息(注意这里的文件，不同于一般的文件，可能是目录、链接、设备文件等)
+ 
+复制代码 代码如下:
+
+grep "^-" 
+
+这里将长列表输出信息过滤一部分，只保留一般文件，如果只保留目录就是 ^d
+复制代码 代码如下:
+
+wc -l 
+
+统计输出信息的行数，因为已经过滤得只剩一般文件了，所以统计结果就是一般文件信息的行数，
+又由于一行信息对应一个文件，所以也就是文件的个数。
+
+grep的-A, -B, -C选项分别可以显示匹配行的后,前,后前多少行内容,如：
+grep -A 2 '12:29:35,674-INFO-13714612092' io.log*
+
+tail -f io.log*|grep 'begin_tonado.py:65' 会报下面的错误
+Binary file a.log matches
+原因：grep认为a.log是二进制文件
+可以看看grep -a参数的功能，即可解决
+二进制文件等价于文本文件
+
+1，git 安装：
+
+　　sudo apt-get install git-core openssh-server openssh-client
+
+　　$ sudo apt-get install git-core git-gui git-doc 
+
+　　sudo apt-get install libcurl4-gnutls-dev libexpat1-dev gettext libz-dev git-core  
+　　
+　　ssh-keygen -C 'gswyhq@126.com' -t rsa
+　　#生成密钥
+　　#http://www.cnblogs.com/jackge/archive/2013/08/17/3264801.html
+　　
+　　scp yhq@172.19.1.239:/home/pkg.tgz .
+　　#复制文件到当前目录
+　　
+gswyhq@gswyhq-pc:~$ mkdir git-project
+gswyhq@gswyhq-pc:~$ cd git-project/
+gswyhq@gswyhq-pc:~/git-project$ git init #本地初始化，并在当前文件夹生成一个.git文件夹
+初始化空的 Git 仓库于 /home/gswyhq/git-project/.git/
+gswyhq@gswyhq-pc:~/git-project$ ls
+pkg.tgz
+gswyhq@gswyhq-pc:~/git-project$ touch pkg.tgz #linux的touch命令不常用，一般在使用make的时候可能会用到，用来修改文件时间戳，或者新建一个不存在的文件。
+gswyhq@gswyhq-pc:~/git-project$ git add pkg.tgz #添加文件到暂存区
+gswyhq@gswyhq-pc:~/git-project$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project$ 
+
+
+
+root@gswyhq-pc:/home/gswyhq/git-project# scp -r yhq@114.119.10.194:/mnt/sdb/shell2/ /home/gswyhq/git-project/
+
+#复制服务器114.119.10.194上的/mnt/sdb/shell2/ 文件到本地文件夹/home/gswyhq/git-project/中。
+
+gswyhq@gswyhq-pc:~/git-project$ git config --global user.email "gswyhq@126.com"
+gswyhq@gswyhq-pc:~/git-project$ git config --global user.name 'gswyhq'
+
+gswyhq@gswyhq-pc:~/git-project$ git clone git@172.19.1.100:gow.ai #将远程服务器上（git@172.19.1.100:gow.ai）克隆一个版本库到本地
+正克隆到 'gow.ai'...
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':  #输入密码
+warning: 您似乎克隆了一个空仓库。
+检查连接... 完成。
+gswyhq@gswyhq-pc:~/git-project$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project$ ls
+gow.ai  pkg.tgz
+gswyhq@gswyhq-pc:~/git-project$ mv pkg.tgz gow.ai/ #移动文件到刚才克隆的版本库
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git init
+重新初始化现存的 Git 仓库于 /home/gswyhq/git-project/gow.ai/.git/
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git add pkg.tgz #添加文件到暂存区
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git commit -m '172.19.1.239服务器上pkg.tgz文件第一次提交'
+[master（根提交） 52a6575] 172.19.1.239服务器上pkg.tgz文件第一次提交
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 pkg.tgz
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git remote add gow_git git@172.19.1.100:gow.ai #增加一个远程服务器端
+#上面的命令会增加URL地址为'git@172.19.1.100:gow.ai'，名称为gow_git的远程服务器库，以后提交代码的时候只需要使用 gow_git别名即可
+
+#git push (远程仓库名) (分支名) 将本地分支推送到服务器上去。
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ git push gow_git master # 将本地分支推送到服务器上去。
+Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+对象计数中: 3, 完成.
+Delta compression using up to 4 threads.
+压缩对象中: 100% (2/2), 完成.
+写入对象中: 100% (3/3), 291.36 MiB | 11.23 MiB/s, 完成.
+Total 3 (delta 0), reused 0 (delta 0)
+To git@172.19.1.100:gow.ai
+ * [new branch]      master -> master
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+0
+gswyhq@gswyhq-pc:~/git-project/gow.ai$ 
+
+
+
+
+nltk 运行失败：
+  Resource 'taggers/averaged_perceptron_tagger/averaged_perceptron
+  _tagger.pickle' not found.  Please use the NLTK Downloader to
+  obtain the resource:  >>> nltk.download()
+  Searched in:
+    - '/home/gswyhq/nltk_data'
+    - '/usr/share/nltk_data'
+    - '/usr/local/share/nltk_data'
+    - '/usr/lib/nltk_data'
+    - '/usr/local/lib/nltk_data'
+**************************************
+
+nltk_data,打包下载（推荐）：
+http://yunpan.cn/cgGUPFzF3spir （提取码：504e）
+运行还是失败，于 http://www.nltk.org/nltk_data/ 下载：
+Averaged Perceptron Tagger [ download | source ] https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/taggers/averaged_perceptron_tagger.zip
+下载到：/usr/local/lib/nltk_data/taggers；
+即：/usr/local/lib/nltk_data/taggers/averaged_perceptron_tagger.zip，#并不需要解压
+
+
+
+思维导图软件安装，应用商店搜索下载安装。或者
+http://www.xmind.net/download/linux/，填写邮箱，下载 
+Download XMind  For Linux 64-bit (GTK)
+
+xmind安装，下载，解压，安装：
+http://xiazai.xmindchina.cn/trail/xmind-7-linux-amd64.rar
+dpkg -i /usr/local/xmind-7-linux-amd64.deb
+
+目录下，所有文件字符串替换：
+sed -i "s/logger.debug/logger.info/g" `grep logger.debug -rl /home/gswyhq/svn/WhiteII/WhiteII`
+将/home/gswyhq/svn/WhiteII/WhiteII目录及其子目录中所有文件中的logger.debug替换为：logger.info
+
+在ubuntu中如果解压zip包出现中文乱码，可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip或者 unar -e GB18030 xxx.zip 即可！
+
+gswyhq@gswyhq-pc:~$ curl localhost:9200
+bash: curl: 未找到命令
+通过下面的安装即可：
+sudo apt-get install curl
+
+Linux下查看文件和文件夹大小
+df命令可以显示目前所有文件系统的可用空间及使用情形
+df -h
+参数 -h 表示使用「Human-readable」的输出，也就是在档案系统大小使用 GB、MB 等易读的格式。
+
+    上面的命令输出的第一个字段（Filesystem）及最后一个字段（Mounted on）分别是档案系统及其挂入点。我们可以看到 /dev/sda1 这个分割区被挂在根目录下。
+
+    接下来的四个字段 Size、Used、Avail、及 Use% 分别是该分割区的容量、已使用的大小、剩下的大小、及使用的百分比。 FreeBSD下，当硬盘容量已满时，
+    您可能会看到已使用的百分比超过 100%，因为 FreeBSD 会留一些空间给 root，让 root 在档案系统满时，还是可以写东西到该档案系统中，以进行管理。
+
+    du：查询文件或文件夹的磁盘使用空间
+
+    如果当前目录下文件和文件夹很多，使用不带参数du的命令，可以循环列出所有文件和文件夹所使用的空间。这对查看究竟是那个地方过大是不利的，
+    所以得指定深入目录的层数，参数：--max-depth=，这是个极为有用的参数！如下，注意使用“*”，可以得到文件的使用空间大小.
+    
+# 查看/home/gswyhq/xiaoxiao/下文件大小
+gswyhq@gswyhq-pc:~/xiaoxiao$ du -h --max-depth=1 /home/gswyhq/xiaoxiao/*
+
+查看linux文件目录的大小和文件夹包含的文件数
+    统计总数大小
+    du -sh xmldb/
+    du -sm * | sort -n //统计当前目录大小 并安大小 排序
+    du -sk * | sort -n
+    du -sk * | grep guojf //看一个人的大小
+    du -m | cut -d "/" -f 2 //看第二个/ 字符前的文字
+    查看此文件夹有多少文件 /*/*/* 有多少文件
+    du xmldb/
+    du xmldb/*/*/* |wc -l
+    40752
+    解释：
+    wc [-lmw]
+    参数说明：
+    -l :多少行
+    -m:多少字符
+    -w:多少字
+
+# 断点续传下载
+wget -c -t 0 -O asia-latest.osm.bz2 http://download.geofabrik.de/asia-latest.osm.bz2
+-c #断点续传 
+-t 0 #反复尝试的次数，0为不限次数 
+-O asia-latest.osm.bz2 # 把下载的文件命名为asia-latest.osm.bz2
+http://download.geofabrik.de/asia-latest.osm.bz2 #要下载的文件的网址 
+
+protoc 命令安装：
+
+在https://github.com/google/protobuf/releases/，下载protobuf-python-3.0.0.tar.gz，并解压复制到：/usr/local/protobuf-3.0.0
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# ./configure 
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# make
+# 出现下面的错误
+CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/bash /usr/local/protobuf-3.0.0/missing aclocal-1.14 -I m4
+/usr/local/protobuf-3.0.0/missing:行81: aclocal-1.14: 未找到命令
+# 删除文件，重新用命令行解压
+root@gswyhq-pc:/usr/local# rm -r protobuf-3.0.0
+root@gswyhq-pc:/usr/local# tar -xzvf /home/gswyhq/下载/protobuf-python-3.0.0.tar.gz
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# make 
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# make check
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# make install
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# protoc --version  
+protoc: error while loading shared libraries: libprotobuf.so.10: cannot open shared object file: No such file or directory
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# 
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
+打开配置文件“~/.profile ”，在该文件开头中添加
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+然后保存退出，接下来执行
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# source ~/.profile  
+root@gswyhq-pc:/usr/local/protobuf-3.0.0# protoc --version  
+libprotoc 3.0.0
+
+# 更改文件的权限，将当前目录下的skill_server.sh更改成有可执行权限
+gswyhq@gswyhq-pc:~/wangda$ chmod 777 ./skill_server.sh
+
+# 递归比较两个文件目录的不同
+diff -urNa ./xiaoxiao /home/gswyhq/git_work/WhiteII > diff0909.txt
+
+# 搭建FTP服务
+gswyhq@gswyhq-pc:~$ sudo apt-get install vsftpd
+
+# 更改配置文件
+sudo vim /etc/vsftpd.conf
+    #禁止匿名访问
+    anonymous_enable=NO
+    #接受本地用户
+    local_enable=YES
+    #允许上传
+    write_enable=YES
+    #用户只能访问限制的目录
+    chroot_local_user=YES
+    #设置固定目录，在结尾添加。如果不添加这一行，各用户对应自己的目录，当然这个文件夹自己建
+    local_root=/home/ftp
+# 添加用户，设置密码（123456）
+gswyhq@gswyhq-pc:~$ sudo useradd -d /home/ftp -M ftpuser
+gswyhq@gswyhq-pc:~$ sudo passwd ftpuser
+输入新的 UNIX 密码：
+重新输入新的 UNIX 密码：
+passwd：已成功更新密码
+gswyhq@gswyhq-pc:~$ 
+
+# 新建文件夹，调整权限
+sudo chmod a-w /home/ftp
+sudo mkdir /home/ftp/data
+
+root@gswyhq-pc:~# vim /etc/pam.d/vsftpd
+    #auth    required pam_shells.so
+
+# 重启ftp服务
+gswyhq@gswyhq-pc:~$ sudo service vsftpd restart
+
+# gswyhq@gswyhq-pc:~$ sudo service vsftpd stop
+
+#关于用户访问文件夹限制
+由chroot_local_user、chroot_list_enable、chroot_list_file这三个控制（在/etc/vsftpd.conf中），转别人的一段话：
+
+首先，chroot_list_enable好理解，就是：是否启用chroot_list_file配置的文件，如果为YES表示chroot_list_file配置的文件生效，否则不生效；
+第二，chroot_list_file也简单，配置了一个文件路径，默认是/etc/vsftpd.chroot_list，该文件中会填入一些账户名称。
+但是这些账户的意义不是固定的，是跟配置项chroot_local_user有关的。后一条中说明；
+第三，chroot_local_user为YES表示所有用户都*不能*切换到主目录之外其他目录，但是！除了chroot_list_file配置的文件列出的用户。
+chroot_local_user为NO表示所有用户都*能*切换到主目录之外其他目录，
+但是！除了chroot_list_file配置的文件列出的用户。也可以理解为，chroot_list_file列出的“例外情况”的用户。
+
+# 批量查找替换
+sed -i s/is_word_day/is_week_day/g `grep -l 'is_word_day' *.py`
+sed:-i 表示操作的是文件，``括起来的grep命令，表示将grep命令的的结果作为操作文件
+s/is_word_day/is_week_day/表示查找is_word_day并替换为is_week_day，后面跟g表示一行中有多个is_word_day的时候，都替换，而不是仅替换第一个
+``内的grep ,-l表示仅列出符合条件的文件名，用来传给sed命令做操作
+
+Shell脚本中的：>/dev/null 2>&1 的作用
+shell中可能经常能看到：>/dev/null 2>&1 
+命令的结果可以通过 > 的形式来定义输出 
+/dev/null 代表空设备文件 
+> 代表重定向到哪里，例如：echo "123" > /home/123.txt 
+1 表示stdout标准输出，系统默认值是1，所以">/dev/null"等同于"1>/dev/null" 
+2 表示stderr标准错误 
+& 表示等同于的意思，2>&1:表示2的输出重定向等同于1 
+1>/dev/null: 首先表示标准输出重定向到空设备文件，也就是不输出任何信息到终端，说白了就是不显示任何信息。 
+2>&1: 接着，标准错误输出重定向等同于 标准输出，因为之前标准输出已经重定向到了空设备文件，所以标准错误输出也重定向到空设备文件。 
+UNIX有几种输入输出流，它们分别与几个数字有如下的对应关系：0-标准输入流(stdin)，1-标准输出流(stdout)，2-标准错误流 (stderr)。
+”2>&1″的意思就是将stderr重定向至stdout，并一起在屏幕上显示出来。如果不加数字，那么默认的重定向动作是针对stdout(1)的，
+比如”ls -l > result”就等价于”ls -l 1 > result”。
+
+使用"tree -L 2 "这个命令，只查看当前第二级的目录和文件
+
+# 添加用户，新增用户
+useradd -m group_test -s /bin/bash
+这样，会添加一个用户group_test,并且自动建立目录/home/group_test,用户group_test有读写的权限。其中-s指定用户的默认shell
+对其他目录拥有可读的权限。
+adduser phpq                             //新建phpq用户
+passwd phpq                               //给phpq用户设置密码
+usermod -s /bin/bash semantic // 修改用户semantic 使用的默认shell
+
+# 查看本机端口是否畅通
+telnet localhost 11111
+
+下载密钥文件
+更改权限：
+gswyhq@gswyhq-pc:~$ chmod 600 gswyhq.pem 
+
+登陆跳板机
+ssh gswyhq@172.26.1.9 -i gswyhq.pem
+
+        您的用户名： gswyhq
+        您的权限： 普通用户
+        您的web登录密码： yN1GNDt_CSoUqzKg
+        您的ssh密钥文件密码： 0M2tW6QEQhANAI4x
+        密钥下载地址： http://172.26.1.9/juser/key/down/?uuid=f9cbcd65e1064d5995bb88e831b4c7fd
+        说明： 请登陆跳板机后台下载密钥, 然后使用密钥登陆跳板机！
+        
+[ID ] IP               Port   Hostname                               SysUser    Comment
+[0  ] 58.67.213.146    62022  gzidc-xxb-semantics01                  [gow]   小小语义服务器-1
+[1  ] 58.67.213.149    22     gzidc-xb-semantics01                   [gow]   小语义服务器-1
+[2  ] 58.67.214.77     62022  gzidc.pro02.se..xb01.gow.cn         [gow]   小语义服务器-1(备用)
+[3  ] 58.67.214.82     62022  gzidc.pro03.se..n01.gow.top         [gow]   Xplan语义服务器-1
+[4  ] 58.67.214.83     62022  gzidc.pro03.se..n02.gow.top         [gow]   Xplan语义服务器-2
+[5  ] 58.67.214.84     62022  gzidc.pro03.GP..n03.gow.top         [gow]   Xplan GPU 服务器-1
+[6  ] 58.67.214.85     62022  gzidc.pro03.GP..n04.gow.top         [gow]   Xplan GPU 服务器-2
+[7  ] 114.119.10.194   62022  gnidc-xb-application01                 [gow]   老小应用服务器-1
+
+登陆后输入相应的id,如：0，登陆相应的服务器；
+Opt or ID>: 0
+
+登陆后切换到root用户：
+[gow@gzidc.semantics01.gow.top ~]$sudo su
+
+查看当前的用户：
+root@gzidc:/home/gow# cat /etc/passwd
+
+切换到其他普通用户
+root@gzidc:/home/gow# su lmz
+
+有时候报错，是因为权限太多，更改下权限即可
+semantic@xmr:~$ cd xiaoxiao/
+semantic@xmr:~/xiaoxiao$ git clone git@gitlab:ai/WhiteII.git
+Cloning into 'WhiteII'...
+Bad owner or permissions on /home/semantic/.ssh/config
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+semantic@xmr:~/xiaoxiao$ ls -alrth ~/.ssh/config 
+-rw-rw-r-- 1 semantic semantic 47 Oct 29 10:24 /home/semantic/.ssh/config
+semantic@xmr:~/xiaoxiao$ chmod 644  ~/.ssh/config 
+semantic@xmr:~/xiaoxiao$ git clone git@gitlab:ai/WhiteII.git
+Cloning into 'WhiteII'...
+The authenticity of host '[183.62.194.131]:22022 ([183.62.194.131]:22022)' can't be established.
+ECDSA key fingerprint is 34:1c:bb:85:1c:80:05:14:c0:c9:09:6b:20:c1:94:10.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[183.62.194.131]:22022' (ECDSA) to the list of known hosts.
+remote: Counting objects: 3122, done.
+remote: Compressing objects: 100% (963/963), done.
+remote: Total 3122 (delta 2135), reused 3085 (delta 2117)
+Receiving objects: 100% (3122/3122), 173.68 MiB | 1.12 MiB/s, done.
+Resolving deltas: 100% (2135/2135), done.
+Checking connectivity... done.
+semantic@xmr:~/xiaoxiao$ ls -alrth ~/.ssh/config 
+-rw-r--r-- 1 semantic semantic 47 Oct 29 10:24 /home/semantic/.ssh/config
+
+
+文件合并：
+cat file1.txt >> file2.txt： 将file1.txt追加到file2.txt的末尾
+cat file1.txt file2.txt > file.txt ： 将file1.txt和file2.txt合并到file.txt  
+
+vim 显示行号,编辑vimrc文件即可
+vim /etc/vim/vimrc，再文件末尾添加一行，内容为：set number
+
+# 搜索ls后的文件，作为grep 的输入，最后输出到mid_msn.txt文件中；
+grep 'tornado_server.py - post - 77' `ls |grep WhiteII.log` > mid_msn.txt
+
+# 代码比较工具的安装
+sudo apt-get install meld
+ 安装完后，在/usr/bin/下找到meld,然后发送到桌面上
+ 
+ # 更改文件所有者
+ chown [-R] 账号名称:用户组名称 文件或目录
+ 
+安装adb命令：
+gswyhq@gswyhq-pc:~$ sudo apt-get install android-tools-adb
+安装apk程序
+adb install -r /home/gswyhq/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
+显示adb日志
+adb shell logcat
+
+Ubuntu系统打开Windows下生成的文本文件，会在每行的末尾出现’^M’
+原因就是Windows和Linux的回车符是不同的
+在Windows下回车符是\r\n回车换行
+在Linux下回车符是\n
+
+sudo apt-get install tofrodos 
+实际上它安装了两个工具：todos（相当于unix2dos），和fromdos（相当于dos2unix）
+安装完即可，现在你已经可以进行文本格式的转换啦。 
+比如： todos Hello.txt (即unix2dos Hello.txt) 
+fromdos Hello.txt (即dos2unix Hello.txt)
+
+Linux中source命令的用法
+source命令：
+source命令也称为“点命令”，也就是一个点符号（.）。source命令通常用于重新执行刚修改的初始化文件，使之立即生效，而不必注销并重新登录。
+用法：
+source filename 或 . filename
+方法1：
+让/etc/profile文件修改后立即生效 ,可以使用如下命令:
+# .  /etc/profile
+注意: . 和 /etc/profile 有空格
+方法2：
+让/etc/profile文件修改后立即生效 ,可以使用如下命令:
+# source /etc/profile
+
+
+gswyhq@gswyhq-pc:~$ sudo apt-get update
+正在读取软件包列表... 完成
+E: 无法获得锁 /var/lib/apt/lists/lock - open (11: 资源暂时不可用)
+E: 无法对目录 /var/lib/apt/lists/ 加锁
+gswyhq@gswyhq-pc:~$ sudo rm /var/lib/apt/lists/lock
+gswyhq@gswyhq-pc:~$ sudo apt-get update
+
+python 中对某行代码运行时间进行计时：
+https://github.com/lilydjwg/winterpy/blob/master/pylib/myutils.py#L184-L201
+
+安装adb程序
+adb install -r /home/gswyhq/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
+查看日志
+adb shell logcat
+
+从Linux上访问Windows共享出来的目录；访问服务器资源，资源位置：
+smb://172.19.1.100/公共资源/holo_测试app/资源1.15倍
+
+
+
+配置Vim及不同语法显示不同颜色
+打开/etc/vim/vimrc文件
+将“ 19 "syntax on”改为：
+ 19 if has("syntax")
+ 20   syntax on
+ 21 endif
+ 
+syntax on            //设置语法高亮
+set tabstop=4        //设置制表符宽度为4
+set softtabstop=4    //设置软制表符宽度为4
+set shiftwidth=4    //设置缩进的空格数为4
+set autoindent      //设置自动缩进
+set cindent          //设置使用 C/C++ 语言的自动缩进方式
+set nu              //在左侧显示文本的行号 
+
+linux读写md格式文件：
+1.安装retext
+gswyhq@gswyhq-pc:~/tensorflow-zh$ sudo apt-get install retext
+2.打开对应的md格式文件，如：TOC.md
+gswyhq@gswyhq-pc:~/tensorflow-zh$ retext TOC.md
+
+切换到root用户：
+sudo su
+切换到某个用户：
+su lmz
+
+

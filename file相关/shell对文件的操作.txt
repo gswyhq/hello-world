@@ -1,0 +1,20 @@
+
+将b.txt文件内容，追加到a.txt文件中：
+cat b.txt >> a.txt
+
+在当前目录及其子目录中，查找内容含‘@timing’且文件名后缀为的.py文件
+gswyhq@gswyhq-pc:~/hello-world$ grep -R --include="*.py" '@timing' .
+
+
+# 批量查找替换
+sed -i s/is_word_day/is_week_day/g `grep -l 'is_word_day' *.py`
+sed:-i 表示操作的是文件，``括起来的grep命令，表示将grep命令的的结果作为操作文件
+s/is_word_day/is_week_day/表示查找is_word_day并替换为is_week_day，后面跟g表示一行中有多个is_word_day的时候，都替换，而不是仅替换第一个
+``内的grep ,-l表示仅列出符合条件的文件名，用来传给sed命令做操作
+eg: gswyhq@gswyhq-pc:~$ sed -i s/'import logger'/'from logger.logger import logger'/g `grep -l -R --include="*.py" 'import logger' .`
+
+文件夹建立软链接（用绝对地址）
+　　ln -s 源地址  目的地址
+　　比如我把Linux文件系统/home/gswyhq/yhb/yhb.db软链接到/usr/local/neo4j-community-3.1.1/data/databases/yhb.db目录下
+gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1/data/databases$ ln -s /home/gswyhq/yhb/yhb.db /usr/local/neo4j-community-3.1.1/data/databases/yhb.db
+

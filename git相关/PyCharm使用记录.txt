@@ -1,0 +1,31 @@
+中文文件名不显示的问题：
+file -> settings -> Appearance & Behavior -> Appearance -> Name 选择为中文字体，如：NSimSun 等。
+
+将pycharm的tab键用四个空格代替。
+file-->setting-->Editor-->Code Style--> Python --> Tabs and Indents -->将Use tab character前面的√去掉。apply即可
+
+运行项目中的单个脚本时，报路径错误，可以通过设置根目录路径解决：
+1、file --> "Settings" --> "Build, Execution, Deployment"--> "Console"--> "Python Console" ,设置"Working directory"
+2、Run --> "Edit Configuration" --> "Python" ,找到需要运行的脚本,设置"Working directory"
+3、删除掉项目根目录下的.idea目录 “rm -rf .idea”，重新运行即可；
+
+pull代码时有时候会出现与本地冲突，可以通过PyCharm来解决：
+1、File -> New Project -> 选择有冲突的项目目录
+2、VCS -> GIT -> Resolve Conflicts
+
+比较某一次commit的差异：
+VCS -> GIT -> Show History
+
+汉化处理：
+网上下载汉化语言包，如‘pycharm5汉化包_pycharm2016.3汉化包 2016.3.3中文语言包’
+http://www.sdbeta.com/xiazai/2015/1103/46398.html
+解压下载的文件，获取到resources_cn.jar文件；
+解压到当前目录
+gswyhq@gswyhq-pc:~$ unrar e pycharm5hhb.rar
+备份之前的：
+gswyhq@gswyhq-pc:/usr/lib/pycharm-community/lib$ mv resources_en.jar resources_en.jar.bak 
+用汉化包，替换原语言包：
+sudo mv /home/gswyhq/resources_cn.jar /usr/lib/pycharm-community/lib/resources_en.jar
+重启pycharm即可。
+以上测试通过的版本是：PyCharm Community Edition 2016.1.4
+

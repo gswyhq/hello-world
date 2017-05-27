@@ -1,0 +1,109 @@
+
+{
+  "query": {
+    "match": {
+      "question": {
+        "query": "怎么充值",
+        "type": "phrase",
+        "fuzziness": 2
+      }
+    }
+  }
+}
+
+模糊查询：
+{
+  "query": {
+    "fuzzy": {
+      "question": {
+        "value": "怎么充值",
+        "boost": 1,
+        "fuzziness": 2,
+        "prefix_length": 0,
+        "max_expansions": 5
+      }
+    }
+  }
+}
+
+精确匹配：
+{
+  "query": {
+    "match_phrase": {
+      "question": "怎么充值"
+    }
+  }
+}
+
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "default_field": "question",
+            "query": "怎么充值"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  },
+  "from": 0,
+  "size": 10,
+  "sort": [],
+  "aggs": {}
+}
+
+{
+  "query": {
+    "match": {
+      "question": "怎么充值"
+    }
+  },
+  "size": 20
+}
+
+二次排序：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match": {
+          "question": "怎么充值"
+        }
+      },
+      "script_score": {
+        "script": {
+          "inline": "_score*Math.log(2 + 4)"
+        }
+      }
+    }
+  }
+}
+
+排序：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match": {
+          "question": "怎么充值"
+        }
+      },
+      "script_score": {
+        "script": {
+          "params": {
+            "a": 5,
+            "b": 1.2
+          },
+          "inline": "params.a / Math.pow(params.b, 2)+_score"
+        }
+      }
+    }
+  }
+}
+
+

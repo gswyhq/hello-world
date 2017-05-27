@@ -1,0 +1,41 @@
+
+/etc/vim/vimrc 是所有用户的配置，
+~/.vimrc只影响到单个用户
+
+双引号开始的行为注释行
+
+
+vim 显示行号,编辑vimrc文件即可
+vim /etc/vim/vimrc，再文件末尾添加一行，内容为：set number
+vim语法高亮度显示
+取消‘syntax on’的注释即可，即删除前面的引号
+
+
+配置Vim及不同语法显示不同颜色
+打开/etc/vim/vimrc文件
+将“ 19 "syntax on”改为：
+ 19 if has("syntax")
+  20   syntax on
+   21 endif
+    
+    syntax on            //设置语法高亮
+    set tabstop=4        //设置制表符宽度为4 或者：set  ts=4
+    set softtabstop=4    //设置软制表符宽度为4
+    set shiftwidth=4    //设置缩进的空格数为4
+    set autoindent      //设置自动缩进
+    set cindent          //设置使用 C/C++ 语言的自动缩进方式
+    set nu              //在左侧显示文本的行号 
+
+set smartindent "智能对齐
+
+set autoindent "自动对齐
+
+:hi Normal ctermfg=grey ctermbg=black
+hightlight Normal ctermfg=grey ctermbg=black
+第一个 ctermfg 是没有被 hightlight 的文字颜色。第二个 ctermbg 是背景色，你可以用关键字设置，也可以用颜色码
+
+colorscheme dracula  " 切换颜色方案， 要退出重启后才生效
+set background=dark  " 设置背景色  
+autocmd ColorScheme dracula highlight Normal ctermbg=235
+
+

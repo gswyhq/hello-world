@@ -1,0 +1,154 @@
+# import necessary packages
+
+import hdidx
+import numpy as np
+
+# print log messages
+import logging
+reload(logging)
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+# generating sample data
+ndim = 256     # dimension of features
+ndb = 10000    # number of dababase items
+nqry = 120     # number of queries
+
+X_db = np.random.random((ndb, ndim)).astype(np.float64)
+X_qry = np.random.random((nqry, ndim)).astype(np.float32)
+Basic Usage
+In [2]:
+# create Product Quantization Indexer
+idx = hdidx.indexer.PQIndexer()
+# set storage for the indexer, the default is store indexex in memory
+idx.set_storage()
+# build indexer
+idx.build({'vals': X_db, 'nsubq': 8})
+# add database items to the indexer
+idx.add(X_db)
+# searching in the database, and return top-100 items for each query
+idx.search(X_qry, 100)
+2015-04-08 16:51:18,613 - INFO - Building codebooks in subspaces - BEGIN
+2015-04-08 16:51:18,614 - INFO - 	subspace 0/8:
+2015-04-08 16:51:18,877 - INFO - 	subspace 1/8:
+2015-04-08 16:51:19,266 - INFO - 	subspace 2/8:
+2015-04-08 16:51:19,527 - INFO - 	subspace 3/8:
+2015-04-08 16:51:19,821 - INFO - 	subspace 4/8:
+2015-04-08 16:51:20,192 - INFO - 	subspace 5/8:
+2015-04-08 16:51:20,654 - INFO - 	subspace 6/8:
+2015-04-08 16:51:21,007 - INFO - 	subspace 7/8:
+2015-04-08 16:51:21,371 - INFO - Building codebooks in subspaces - DONE
+2015-04-08 16:51:21,372 - INFO -        0/10000: 10000
+2015-04-08 16:51:25,919 - INFO - Start Querying ...
+2015-04-08 16:51:25,973 - INFO - 	100/120: 0.0005s per query
+2015-04-08 16:51:25,973 - INFO - 		knn: 0.0001;	distance: 0.0001;	result: 0.0000;	distab: 0.0003
+2015-04-08 16:51:25,983 - INFO - Querying Finished!
+2015-04-08 16:51:25,984 - INFO - Average querying time: 0.0005
+Out[2]:
+(array([[4875, 1010, 2924, ..., 1778, 9669, 6937],
+        [ 935, 7988, 6960, ..., 6155, 2862, 8552],
+        [4070, 6554, 2425, ..., 5717, 8434, 7749],
+        ..., 
+        [6695, 6395, 8149, ..., 2395, 3857, 7193],
+        [5368,   77, 1238, ..., 1319, 8494, 2513],
+        [3920, 9361, 9265, ..., 1398, 2621, 4062]], dtype=int32),
+ array([[ 22.39608955,  22.64003181,  23.18744469, ...,  24.55779076,
+          24.56216049,  24.56312752],
+        [ 21.87729645,  22.44916153,  22.9182663 , ...,  24.82294655,
+          24.83014107,  24.83216476],
+        [ 24.05742455,  24.07415771,  24.18813896, ...,  26.00284767,
+          26.00819397,  26.01751709],
+        ..., 
+        [ 23.31334496,  23.70270348,  24.25839233, ...,  26.0488205 ,
+          26.04973793,  26.05724144],
+        [ 24.52768135,  24.54415512,  24.70788956, ...,  26.36787415,
+          26.36966705,  26.37992859],
+        [ 22.33849525,  22.79646301,  22.85318565, ...,  24.45709991,
+          24.45932007,  24.46750259]], dtype=float32))
+Save indexer
+In [3]:
+# create Product Quantization Indexer
+idx = hdidx.indexer.PQIndexer()
+# set storage for the indexer, this time we store the indexes into LMDB
+idx.set_storage('lmdb', {'path': '/tmp/pq.idx'})
+# build indexer
+idx.build({'vals': X_db, 'nsubq': 8})
+# save the index information for future use
+idx.save('/tmp/pq.info')
+# add database items to the indexer
+idx.add(X_db)
+# searching in the database, and return top-100 items for each query
+idx.search(X_qry, 100)
+2015-04-08 16:51:26,219 - INFO - Building codebooks in subspaces - BEGIN
+2015-04-08 16:51:26,219 - INFO - 	subspace 0/8:
+2015-04-08 16:51:26,635 - INFO - 	subspace 1/8:
+2015-04-08 16:51:27,027 - INFO - 	subspace 2/8:
+2015-04-08 16:51:27,354 - INFO - 	subspace 3/8:
+2015-04-08 16:51:27,619 - INFO - 	subspace 4/8:
+2015-04-08 16:51:27,953 - INFO - 	subspace 5/8:
+2015-04-08 16:51:28,295 - INFO - 	subspace 6/8:
+2015-04-08 16:51:28,721 - INFO - 	subspace 7/8:
+2015-04-08 16:51:29,056 - INFO - Building codebooks in subspaces - DONE
+2015-04-08 16:51:29,057 - INFO -        0/10000: 10000
+2015-04-08 16:51:31,449 - INFO - Start Querying ...
+2015-04-08 16:51:31,568 - INFO - 	100/120: 0.0012s per query
+2015-04-08 16:51:31,569 - INFO - 		knn: 0.0004;	distance: 0.0005;	result: 0.0000;	distab: 0.0003
+2015-04-08 16:51:31,594 - INFO - Querying Finished!
+2015-04-08 16:51:31,594 - INFO - Average querying time: 0.0012
+Out[3]:
+(array([[33870,  6606, 25826, ...,  2502, 12495, 26082],
+        [42343, 49349, 13409, ..., 44196,  2002, 18067],
+        [47133, 20148, 37617, ...,  8761, 33348, 36543],
+        ..., 
+        [ 2807, 10529, 37991, ...,  8355, 47615, 30899],
+        [13999, 36660,  3608, ..., 44946, 15916, 20692],
+        [36386, 13856, 46034, ..., 41069, 45679,  4505]], dtype=int32),
+ array([[ 22.21693611,  22.44924736,  22.58147049, ...,  23.68716049,
+          23.69098854,  23.70442963],
+        [ 22.1412468 ,  22.20767593,  22.21963882, ...,  24.13736343,
+          24.13786697,  24.13886642],
+        [ 23.51828194,  23.58364487,  23.73697472, ...,  25.25225258,
+          25.25513077,  25.25598907],
+        ..., 
+        [ 23.4031868 ,  23.53798866,  23.63532448, ...,  25.11426353,
+          25.13235092,  25.13462448],
+        [ 23.5990181 ,  23.77312851,  23.82258415, ...,  25.51331329,
+          25.51656532,  25.51693535],
+        [ 21.98418999,  22.25404167,  22.51370621, ...,  23.68246841,
+          23.68491936,  23.6861496 ]], dtype=float32))
+Load existing indexer
+In [4]:
+# create Product Quantization Indexer
+idx = hdidx.indexer.PQIndexer()
+# set storage for the indexer, this time we load the indexes from LMDB
+idx.set_storage('lmdb', {'path': '/tmp/pq.idx'})
+# save the index information for future use
+idx.load('/tmp/pq.info')
+# searching in the database, and return top-100 items for each query
+idx.search(X_qry, 100)
+2015-04-08 16:51:31,882 - INFO - Start Querying ...
+2015-04-08 16:51:32,000 - INFO - 	100/120: 0.0012s per query
+2015-04-08 16:51:32,001 - INFO - 		knn: 0.0004;	distance: 0.0005;	result: 0.0000;	distab: 0.0003
+2015-04-08 16:51:32,024 - INFO - Querying Finished!
+2015-04-08 16:51:32,025 - INFO - Average querying time: 0.0012
+Out[4]:
+(array([[33870,  6606, 25826, ...,  2502, 12495, 26082],
+        [42343, 49349, 13409, ..., 44196,  2002, 18067],
+        [47133, 20148, 37617, ...,  8761, 33348, 36543],
+        ..., 
+        [ 2807, 10529, 37991, ...,  8355, 47615, 30899],
+        [13999, 36660,  3608, ..., 44946, 15916, 20692],
+        [36386, 13856, 46034, ..., 41069, 45679,  4505]], dtype=int32),
+ array([[ 22.21693611,  22.44924736,  22.58147049, ...,  23.68716049,
+          23.69098854,  23.70442963],
+        [ 22.1412468 ,  22.20767593,  22.21963882, ...,  24.13736343,
+          24.13786697,  24.13886642],
+        [ 23.51828194,  23.58364487,  23.73697472, ...,  25.25225258,
+          25.25513077,  25.25598907],
+        ..., 
+        [ 23.4031868 ,  23.53798866,  23.63532448, ...,  25.11426353,
+          25.13235092,  25.13462448],
+        [ 23.5990181 ,  23.77312851,  23.82258415, ...,  25.51331329,
+          25.51656532,  25.51693535],
+        [ 21.98418999,  22.25404167,  22.51370621, ...,  23.68246841,
+          23.68491936,  23.6861496 ]], dtype=float32))

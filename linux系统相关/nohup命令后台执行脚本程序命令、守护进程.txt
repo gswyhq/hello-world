@@ -1,0 +1,50 @@
+
+linux nohup命令后台执行脚本程序命令、守护进程
+
+上文： 这两天要在服务器端一直运行一个Python的socket服务端脚本，当然就想到了在命令后面加&符号
+
+
+[tomener@localhost ~]$ python /data/python/server.py >python.log &
+
+
+
+说明：
+     1、 > 表示把标准输出（STDOUT）重定向到 那个文件，这里重定向到了python.log
+     2、 & 表示在后台执行脚本
+这样可以到达目的，但是，我们退出shell窗口的时候，必须用exit命令来退出，否则，退出之后，该进程也会随着shell的消失而消失（退出、关闭）
+
+
+来说说今天的猪脚nohup：
+
+
+[tomener@localhost ~]$ nohup python /data/python/server.py > python.log3 2>&1 &
+[1] 1885
+[tomener@localhost ~]$ ps aux|grep python
+tomener 1885  0.1  0.4  13120  4528 pts/0    S    15:48   0:00 python /data/python/server.py
+tomener 1887  0.0  0.0   5980   752 pts/0    S+   15:48   0:00 grep python
+
+
+
+
+说明：
+1、1是标准输出（STDOUT）的文件描述符，2是标准错误（STDERR）的文件描述符
+     1> python.log 简化为 > python.log，表示把标准输出重定向到python.log这个文件
+2、2>&1 表示把标准错误重定向到标准输出，这里&1表示标准输出
+     为什么需要将标准错误重定向到标准输出的原因，是因为标准错误没有缓冲区，而STDOUT有。
+     这就会导致  commond > python.log  2> python.log 文件python.log被两次打开，而STDOUT和              STDERR将会竞争覆盖，这肯定不是我门想要的
+3、好了，我们现在可以直接关闭shell窗口（我用的是SecureCRT，用的比较多的还有Xshell），而不用再输入exit这个命令来退出shell了
+
+
+--------------------------------------------------------------------------------------
+现在当我们，直接关闭shell窗口，再连接上服务器，查看Python的进程
+发现，进程还在哦~~
+嘿嘿，这就是nohup的好处。
+
+
+
+[tomener@localhost ~]$ ps aux|grep python
+tomener 1885  0.1  0.4  13120  4528 pts/0    S    15:48   0:00 python /data/python/server.py
+tomener 1887  0.0  0.0   5980   752 pts/0    S+   15:48   0:00 grep python
+
+
+
