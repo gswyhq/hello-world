@@ -1,0 +1,37 @@
+
+git config是用于进行一些配置设置，有三种不同的方式来指定这些配置适用的范围：
+1) git config   针对一个git仓库
+2) git config --global    针对一个用户
+3) sudo git config --system    针对一个系统，因为是针对整个系统的，所以必须使用sudo
+
+1) 第一种默认当前目录是一个git仓库，假设我们有一个仓库叫hello-world，它所修改配置保存在hello-world/.git/config
+gswyhq@gswyhq-pc:~/hello-world$ less .git/config
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = true
+        logallrefupdates = true
+
+如果我们想修改bare为false，最简单的办法就是直接用vim打开hello-world/.git/config文件进行修改，
+另一种办法就是使用git config来修改:
+gswyhq@gswyhq-pc:~/hello-world$ git config core.bare false
+
+2) 第2种是适用于当前用户，也就是说只要是这个用户操作任何git仓库，那么这个配置都会生效，这种配置保存在~/.gitconfig当中
+gswyhq@gswyhq-pc:~$ less .gitconfig 
+[user]
+        email = gswyhq@126.com
+        name = gswyhq
+
+同样可以直接编辑，也可以命令行设置
+$git config --global user.name "I Love You"
+$git config --global user.email "i.love.you@gmail.com"
+
+3) 第3种是适用于一个系统中所有的用户，也就是说这里的配置对所有用户都生效，保存在‘/etc/gitconfig’中；
+如将vim设置为所有用户默认使用的编辑器，我们来看设置的过程
+$sudo git config --system core.editor vim
+
+如果一个配置出即出现在/etc/gitconfig，~/.gitconfig以及hello-world/.git/config这三个位置时，
+我们又恰巧要操作git仓库hello-world，那么生效的优先级顺序是：
+(1)git_test/.git/config，(2)~/.gitconfig，(3)/etc/gitconfig，也就是说如果同一个配置同时出现在三个文件中时，(1)有效。
+
+
