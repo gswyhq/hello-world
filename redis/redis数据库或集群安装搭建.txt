@@ -73,11 +73,16 @@ gswyhq    5166  0.0  0.0  40296  3820 ?        Ssl  10:54   0:00 redis-server 12
 gswyhq    5351  0.0  0.0  40296  3920 ?        Ssl  10:59   0:00 redis-server 127.0.0.1:7005 [cluster]
 gswyhq    5436  0.0  0.0  14424  2156 pts/7    S+   11:03   0:00 grep redis
 
-已经有了六个正在运行中的 Redis 实例， 接下来我们需要使用这些实例来创建集群。通过使用 Redis 集群命令行工具 redis-trib ， 编写节点配置文件的工作可以非常容易地完成： redis-trib 位于 Redis 源码的 src 文件夹中， 它是一个 Ruby 程序， 这个程序通过向实例发送特殊命令来完成创建新集群， 检查集群， 或者对集群进行重新分片（reshared）等工作。这里通过create命令来创建集群，指定replicas=1，即每一个主实例有一个从实例。
+已经有了六个正在运行中的 Redis 实例， 接下来我们需要使用这些实例来创建集群。通过使用 Redis 集群命令行工具 redis-trib ， 
+编写节点配置文件的工作可以非常容易地完成： redis-trib 位于 Redis 源码的 src 文件夹中， 它是一个 Ruby 程序， 
+这个程序通过向实例发送特殊命令来完成创建新集群， 检查集群， 或者对集群进行重新分片（reshared）等工作。
+这里通过create命令来创建集群，指定replicas=1，即每一个主实例有一个从实例。
 src下面的ruby脚本，建立集群： --replicas 1的意思是每个master有1个slave。
 gswyhq@gswyhq-pc:~/redis_cluster$ cp /usr/share/doc/redis-tools/examples/redis-trib.rb .
 gswyhq@gswyhq-pc:~/redis_cluster$ ls
 7000  7001  7002  7003  7004  7005  redis-trib.rb
+
+# 注意连接集群模式的redis实例时需要加上参数-c，表示连接的是集群模式的实例
 gswyhq@gswyhq-pc:~/redis_cluster$ redis-cli -c -p 7000
 127.0.0.1:7000> CLUSTER MEET 172.0.0.1 7001
 OK
@@ -116,7 +121,7 @@ gswyhq@gswyhq-pc:~$ sudo gem install redis
 
 再运行：
 gswyhq@gswyhq-pc:~/redis_cluster$ ./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
-可能会询问是否保存设置
+可能会询问是否保存集群设置
 Can I set the above configuration? (type 'yes' to accept): 
 回答yes
 
@@ -141,10 +146,56 @@ cluster_stats_messages_sent:340
 cluster_stats_messages_received:340
 127.0.0.1:7000> 
 
-redis图形化界面安装：
-git clone --recursive https://github.com/uglide/RedisDesktopManager.git -b 0.8.0 rdm && cd ./rdm
+# 这次安装配置好后，以后启动不需要再仅仅对应的配置，仅仅需要启动对应的端口即可，可以写个启动脚本：
+gswyhq@gswyhq-pc:~/redis_cluster$ vim start.sh 
+#!/bin/bash
 
-# 通过ip及端口登陆
+if [ `ps -aux|grep redis-server |grep cluster | wc -l ` -le 0 ] ; then
+    redis-server /home/gswyhq/redis_cluster/7000/redis.conf 
+    redis-server /home/gswyhq/redis_cluster/7001/redis.conf 
+    redis-server /home/gswyhq/redis_cluster/7002/redis.conf 
+    redis-server /home/gswyhq/redis_cluster/7003/redis.conf 
+    redis-server /home/gswyhq/redis_cluster/7004/redis.conf 
+    redis-server /home/gswyhq/redis_cluster/7005/redis.conf 
+fi
+    echo `date`, 'redis集群, 启动'
+
+# 还可以写个停止服务的脚本：
+gswyhq@gswyhq-pc:~/redis_cluster$ vim kill.sh 
+#!/bin/bash
+
+for i in `ps uax|grep redis-server |grep cluster | awk '{print $2}'` ; do
+    kill -9 $i
+done
+
+echo "redis集群关闭"
+
+redis图形化界面安装：
+方法一：
+gswyhq@gswyhq-pc:~/github_projects$ git clone --recursive https://github.com/uglide/RedisDesktopManager.git -b 0.9 rdm && cd ./rdm
+# --recursive：递归下载；-b：克隆指定分支；rdm && cd ./rdm ：将项目克隆到当前目录下的‘rdm’目录中（若不存在，则新建），并克隆完成后，切好到该目录中
+gswyhq@gswyhq-pc:~/github_projects/rdm$ cd src/
+gswyhq@gswyhq-pc:~/github_projects/rdm/src$ ./configure 
+Your operational system is not supported!
+系统不支持，安装失败
+
+方法二：
+gswyhq@gswyhq-pc:~$ sudo apt-get install mono-complete
+gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/ServiceStackApps/RedisReact.git
+gswyhq@gswyhq-pc:~/github_projects/RedisReact/dist$ ls
+appsettings.txt  RedisReact.AppMac.app.zip  RedisReact.AppMac.mono.app.zip  RedisReact-console.exe  RedisReact-console.zip  RedisReact-winforms.exe
+gswyhq@gswyhq-pc:~/github_projects/RedisReact/dist$ mono RedisReact-console.exe 
+在默认浏览器中打开了一个http服务（http://127.0.0.1:2337/#/），默认连接的redis(127.0.0.1:6379 db=0),
+可以在github_projects/RedisReact/dist/appsettings.txt，更改默认配置；
+
+当然也可以仅仅下载一个exe文件也是可以运行的：
+gswyhq@gswyhq-pc:~$ wget https://raw.githubusercontent.com/ServiceStackApps/RedisReact/master/dist/RedisReact-console.exe
+gswyhq@gswyhq-pc:~$ mono RedisReact-console.exe 
+ServiceStack SelfHost listening at http://127.0.0.1:2337/
+已在现有的浏览器会话中创建新的窗口。
+
+
+#  通过ip及端口登陆
 gow@gzidc:~$ redis-cli -h 10.20.200.57 -c -p 6383
 
 # 登陆之后查看基本信息
