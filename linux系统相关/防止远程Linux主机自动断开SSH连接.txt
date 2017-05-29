@@ -1,0 +1,24 @@
+
+在使用ssh连接远程Linux主机时，如果长时间不操作，ssh会自动断开，只能重新登陆。
+原因是：由于ssh的安全机制，如果10分钟没有任何操作，本次SSH会话会自动关闭。
+
+防止远程Linux自动断开SSH连接
+
+编辑本地SSH配置文件：
+
+
+$ vim ~/.ssh/config    # 当前登陆用户生效
+添加：
+Host *
+ ServerAliveInterval 30
+# *号代表所有主机，你可以指定某个主机，如：
+Host server1
+ ServerAliveInterval 30
+# ServerAliveInterval 30表示ssh客户端每隔30秒给远程主机发送一个no-op包，no-op是无任何操作的意思，这样远程主机就不会关闭这个SSH会话。
+
+为了使所有用户生效，你可以在/etc/ssh/ssh_config全局配置文件添加如下一行：
+ServerAliveInterval 30
+
+还可以在连接时使用选项：
+$ ssh -o ServerAliveInterval=30 user@remote-ssh-server-ip
+
