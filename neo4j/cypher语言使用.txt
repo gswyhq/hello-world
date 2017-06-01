@@ -59,6 +59,10 @@ RETURN：返回所需要的。
                        查询属性name的值是Kaine的节点，及其所有距离为2并且去除距离为1的节点。
                       （在计算好友的好友时会用到，即如果a、b、c三个人都认识，如果仅计算跟a距离为2的人的时候会把b、c也算上，因为a->b->c，或者a->c->b都是通路）
 
+        MATCH (s) WHERE ID(s) = 143 RETURN s  # 根据id查询实体；
+        MATCH (v0 : Entity{ name: "系列1"})    RETURN ID(v0)  # 根据实体查询其id
+        MATCH p=()-[r:`答案列表`]->() RETURN ID(r)  # 获取`答案列表`这个属性的id；
+
         注：关联的中括号内数字的含义
             n 距离为n
             ..n 最大距离为n
