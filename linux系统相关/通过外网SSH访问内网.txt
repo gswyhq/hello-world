@@ -44,3 +44,26 @@ SSH 参数解释
 -N 不执行任何命令
 -R 将端口绑定到远程服务器，反向代理
 -L 将端口绑定到本地客户端，正向代理
+
+# 有时候通过‘127.0.0.1’、‘localhost’能访问本地端口，却通过本机ip“10.13.101.154”不能访问；
+这个时候需要配置一下nginx;
+root@10-13-101-154:/etc/nginx# vim nginx.conf
+在http下，添加一个：
+   server{
+    listen 8802;
+        location / {
+            proxy_pass_header Server;
+            proxy_set_header Host $http_host;
+            proxy_redirect off;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            proxy_pass http://127.0.0.1:18200/;
+        }
+    }
+# 重新加载一下配置：
+root@10-13-101-154:/etc/nginx# service nginx reload
+# 另外若有防火墙，还得设置一下防火墙；
+这样可以通过访问“10.13.101.154:8802",来间接访问：`10.13.101.154:18200` <==> `127.0.0.1:18200`
+curl http://10.13.101.154:8802/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
+
+
