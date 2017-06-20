@@ -1,0 +1,30 @@
+
+gswyhq@gswyhq-pc:~$ sudo apt-get update
+gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
+Created symlink from /etc/systemd/system/sockets.target.wants/docker.socket to /lib/systemd/system/docker.socket.
+正在处理用于 systemd (229-4) 的触发器 ...
+
+用户组和配置文件修改
+把当前用户加入到docker用户组中
+gswyhq@gswyhq-pc:~$ sudo usermod -a -G docker $USER
+
+添加配置文件
+gswyhq@gswyhq-pc:~$ sudo vim /etc/default/docker
+在配置文件中添加或修改
+DOCKER="/usr/bin/docker"  
+重启docker
+gswyhq@gswyhq-pc:~$ sudo service docker restart
+
+查看版本：
+gswyhq@gswyhq-pc:~$ docker -v
+Docker version 1.13.0, build 49bf474
+
+查看状态：
+gswyhq@gswyhq-pc:~$ sudo service docker status
+
+其他状态命令：
+sudo service docker start    #启动 
+sudo service docker stop    #关闭 
+sudo service docker restart #重启 
+
+

@@ -1,0 +1,9 @@
+
+1. 本地分支重命名
+git branch -m oldbranchname newbranchname
+
+# 远程分支重命名，先在本地重命名，再删除远程分支，再把本地分支推送远程
+gswyhq@gswyhq-pc:~/yhb$ git branch -m wmd wmd_match
+gswyhq@gswyhq-pc:~/yhb$ git push origin :wmd
+gswyhq@gswyhq-pc:~/yhb$ git push origin wmd_match:wmd_match
+

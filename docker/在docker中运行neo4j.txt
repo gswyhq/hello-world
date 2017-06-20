@@ -1,0 +1,19 @@
+
+docker安装好后，从Docker Hub上pull一个Neo4j的镜像
+gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
+
+启动一个Neo4j的容器, 需要在你的Home目录下建立一个/neo4j/data文件夹
+# 默认端口启动neo4j
+gswyhq@gswyhq-pc:~$ sudo docker run --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data neo4j
+
+这里采用17474端口启动：
+gswyhq@gswyhq-pc:~$ sudo docker run --publish=17474:7474 --publish=17687:7687 --volume=$HOME/neo4j/data:/data neo4j
+
+浏览器打开：http://localhost:17474/browser/
+需要设置host:
+这里将默认的`bolt://localhost:7687`改为：`bolt://localhost:17687`
+并输入默认的Username：neo4j
+Password：neo4j
+点击`Connect`，会让设置新密码；
+下次重新连接时，输入新密码即可；
+

@@ -1,0 +1,49 @@
+
+# 可以通过参数`--detach=false`，那么容器将会运行在后台模式。
+
+gswyhq@gswyhq-pc:~$ sudo docker run \
+>     --detach \
+>     --publish=17474:7474 --publish=17687:7687 \
+>     --volume=$HOME/neo4j/data:/data \
+>     --volume=$HOME/neo4j/logs:/logs \
+>     --volume=$HOME/neo4j/conf:/conf \
+>     neo4j:3.2
+Unable to find image 'neo4j:3.2' locally
+3.2: Pulling from library/neo4j
+Digest: sha256:a924fd66ed70b546676067b3797c07214b97a33db4696ce9b4966047c1e404ff
+Status: Downloaded newer image for neo4j:3.2
+2432a632b19f921c4f92f1e73a0c197ee4228b997fa3804bdd5dc545c9b32345
+
+# docker即在后台运行了，查看正在运行的容器：
+gswyhq@gswyhq-pc:~$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                        NAMES
+2432a632b19f        neo4j:3.2           "/docker-entrypoin..."   7 minutes ago       Up 7 minutes        7473/tcp, 0.0.0.0:17474->7474/tcp, 0.0.0.0:17687->7687/tcp   inspiring_stonebraker
+
+# 查看所有的容器，包括已经停止的。
+gswyhq@gswyhq-pc:~$ sudo docker ps -a
+
+# 可以通过`--name`参数为启动的容器命名：
+gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+87551d79de66f14b74009128cfc79163b94d23b4ace6f2fb53bff2fa21a84b4c
+gswyhq@gswyhq-pc:~$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
+87551d79de66        neo4j:3.2           "/docker-entrypoin..."   14 seconds ago      Up 12 seconds       0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   neo4j17474
+
+
+删除容器id为`a70d3901c981`的容器：
+gswyhq@gswyhq-pc:~$ sudo docker rm a70d3901c981
+
+# 删除容器名为`peaceful_haibt`的容器：
+gswyhq@gswyhq-pc:~$ sudo docker rm peaceful_haibt
+
+# 删除所有容器
+gswyhq@gswyhq-pc:~$ sudo docker rm $(sudo docker ps -a -q)
+
+# 删除单个容器
+docker rm <容器名orID>
+
+# 停止、启动、杀死一个容器
+docker stop <容器名orID>
+docker start <容器名orID>
+docker kill <容器名orID>
+

@@ -1,0 +1,351 @@
+
+Cypher查询语言
+
+http://shanshanpt.github.io/2016/02/17/Neo4j-1.html
+
+1.基本操作符
+　　 Cypher的操作符包括常见的一些数学计算符号例如+, -, *, / 和 %,还有一些比较比较操作符例如=, <>, <, >, <=, >=。这些操作符都比较简单, 下面主要讲讲'?'和'!'操作符。这两个操作符是用于处理缺少值情况,即当在查询过程中,用于检查某个属性是否存在。 在缺失属性时,'?'操作符总是返回true,'!'操作符返回false。这两个操作符有点类似于C/C++中的断言assert。 例如: where n.alias ?= "A",如果n不存在这个属性,那么这个比较返回true, 对于where n.alias != "A",如果n不存在这个属性,那么这个比较返回false。
+2.一些实用模式
+1).创建节点
+
+　　 首先,我们必须得有数据,才能谈到查询。最简单的创建节点的代码如下:
+create n
+这个节点n没有任何属性,只有系统分配的ID。如果想给创建的节点一些属性,代码如下:
+
+create (n {name:"A", age:10})
+上面代码中{}之间是设置的节点属性。 有些时候想要在创建节点的时候给节点一个Label标签,那么代码为:
+
+create (n:User {name:"A", age:10})
+上面的代码给创建的节点n打了User标签。 如果想要返回创建的节点,那么加上return语句就可以了,代码是:
+
+create (n:User {name:"A", age:10}) return n
+
+
+2).创建属性关系
+
+　　 节点是最基本的数据,节点之间的关系是更重要的一种数据。下面看看创建节点之间的属性,代码如下:
+
+start n1=node(id1), n2=node(id2)
+create n1-[:rel]->n2
+start是关键词,表示从当前定义的节点开始。上面代表的意思是,首先定义了两个节点n1和n2, 两个节点分别是ID值为id1和id2的节点,node可以通过参数获取相应的节点,注意,参数可以多个,例如node(id1,id2)。 接着创建两个节点之间的关系,Cypher中的关系使用"-->"和"--"表示。"-->"代表有方向的关系,例如A是B的老师,那么为: A-老师->B; "--"仅仅代表两者之间存在关系,至于是神马关系都无所谓,只要有联系就是OK的。上面的代码中创建了n1到n2的关系, 关系名称是"rel"。创建关系之后如下图所示:
+1
+
+注意关系也可以有属性,属性的设置和节点的属性设置是类似的,代码如下:
+
+start n1=node(id1), n2=node(id2)
+create n1-[r:rel {name : "XXX", time : "YYY"}]->n2
+return r
+上面的代码创建的节点之间的关系,并且关系有两个属性分别是name和time,最后返回关系数据。
+当然还有很多其他的创建方法,详见Neo4j手册。
+创建好了数据之后,我们就可以做查询操作了,下面具体看看一些查询模式。
+
+
+下面所有的执行过程都是以下图为基准的,如图所示,所有的节点的Label都是Person,
+
+2
+
+3).start
+
+start表示从当前定义的点开始,也可以认为是定义了一些初始化节点变量。例如下面代码:
+
+start a=node(id)
+return a
+上面代码表示将id节点赋值到变量a上,然后返回a节点。
+对于node来说,可以绑定多个节点,例如:
+
+start a=node(1,2,3)
+return a
+上面代码返回的a包含三个节点。
+如果想要绑定所有的节点,那么可以这样:
+
+start a=node(*) return a
+上面所有的start中的绑定(初始化)都是针对节点进行的,对于关系,我们也可以这样做。看下面的代码:
+
+start r=relationship(0) return r
+或者使用rel()也是一样的。
+
+START r=rel(0) return r
+上面的代码返回的是关系ID=0的关系数据。
+上面所有的操作都是针对节点或者关系ID进行绑定的,我们也可以通过索引关系来得到。假设现在节点放在索引node_idx中, 关系放在索引rel_idx中,那么我们通过下面的代码可以获得初始化的变量。
+
+start n=node:node_idx(name = "A") return n
+start r=relationship:rel_idx(property ="some_value") return r
+
+
+4).match
+
+match类似于SQL中的select,如果匹配的结果存在多个就返回多个,如果不存在那么返回null。看下面几个例子:
+
+match n return n
+上面代码会匹配所有的n节点,返回所有已经创建的节点。
+
+match (n:Person) return n
+上面代码匹配标签为Person的节点,并返回这些节点。当然你可以加上一些条件控制,例如:
+
+macth (n:Person) where n.age=20 return n
+上面的代码会返回Person中年龄=2的所有节点。where在后面会详细介绍。
+
+当然match也可以匹配关系数据,如下面代码所示:
+
+match ()-[r:rel]->() return rel
+上面代码返回rel关系数据,返回的结果如下图所示:
+
+3
+
+在匹配关系过程中有"-->"和"--"两者,后者是不要求方向的关系。下面看下代码:
+
+start a=node(id1) match a--x return x
+上面代码返回的是和n1相关的节点,即n2和n4,结果如图所示:
+4
+
+如果将代码改成下面这样:
+
+start a=node(id1) match a-->x return x
+那么返回的结果只有n2。
+我们还可以返回个某个节点相关的所有关系数据,代码如下:
+
+start a=node(id2) match a-[r]-() return r
+上面代码返回的是和n2相关的所有的关系数据,结果如下图所示:
+5
+
+下面看看多重关系的情况,先看下面的代码:
+
+start a=node(id1) match a-[]-()-[]->()-[]->(b) return b
+上面的代码是返回关系路径长度为3的结果,结果应该是n1本身和n5节点,结果如图所示:
+6
+
+当然你在()中定义具体的关系也是OK的,注意当指定关系路径不存在的时候返回null。
+
+下面看看可变长度关系的情况,先看下面的代码:
+
+start a=node(id1), x=node(id2, id3)
+match a-[:rel*1..3]->x
+return a,x
+上面代码中rel*1..3表示a->x的关系在路径长度1~3之内是会返回的,否则不会被返回。
+
+match除了上面之外还有一些其他的技巧,以后遇到的时候也需要注意!
+
+
+
+5).where
+
+　　 where子句和SQL中是类似的,即用于条件过滤。在条件过滤中,我们可以使用三个bool运算符辅助操作,分别是: and,or和not, 看下面的代码示例:
+
+match (n:Person) where (n.age=<30 and n.name="A") or not(n.name="A")
+return n
+上面的代码会返回名字叫A并且年龄在30以下的Person以及名字不是A的Person。否定运算可以使用not操作。
+
+where也可以进行模糊匹配,使用正则表达式=~ "regexp"进行处理,看下面的代码:
+
+match (n:Person) where n.name =~ "n.*" return n
+上面的代码返回的是Person中节点名字前面是"n"的节点,又有上图中所有节点都是"n"开头,那么返回所有节点。 下面我返回名字中存在"2"的节点,代码如下:
+
+match (n:Person) where n.name =~ ".*2.*" return n
+执行上面的代码,将会返回n2节点。
+下面介绍一些特殊情况: 
+1> 如果在正则表达式中需要有斜杠时可以通过"\"转义实现。例如:
+
+start n=node(id3, id1)
+where n.name =~ "some\/thing" return n
+上面的但会会返回名字中有 "some/thing"字符串的节点。
+2> 如果想要正则匹配部分大小写,那么需在匹配串前面加上(?i),如下面代码所示:
+
+start n=node(3, 1)
+where n.name =~ "(?i)XXX.*" return n
+上面的代码会返回name中包含XXX和xxx的节点。
+3> 如何过滤关系类型,例如我只想筛选出关系类型名称以M开头的关系,那么可以这样执行:
+
+match ()-[r]->()
+where type(r) =~ "r.*"
+return r
+上面的代码会过滤出以"r"开头的关系,并返回。注意这里使用了type函数,它可以识别关系r的类型(名称)。如果你只想过滤出名称存在"2"的关系, 那么代码这样写:
+
+match ()-[r]->()
+where type(r) =~ ".*2.*"
+return r
+4> 缺失属性过滤,之前已经介绍了,"?"和"!"操作符,当使用"?"匹配时候没有匹配到那么会where返回的是true,如果是"!"那么默认是false,看看下面代码:
+
+match (n:Person)
+where n.house ?= "exist"
+return n
+上面的代码会返回那些有房子或者没房子的Person,下面的代码只会返回有房子的节点:
+
+match (n:Person)
+where n.house != "exist"
+return n
+5> 如果你想通过关系进行过滤,那么可以这样写:
+
+start a=node(id1), b=node(id2)
+where a-->b
+return b
+上面代表表示如果a-->b关系存在,那么返回相应的b节点。
+
+6> 如果想判断null值,那么可以使用is null或者is not null,下面看个例子:
+
+start a=node(25), b=node(26)
+match p=a-->b
+where p is not null
+return p
+上面语句意义是:如果a-->b之间存在关系路径,那么就返回这个路径!
+
+
+
+6).count
+
+计数函数,和SQL下类似。对于所有的返回结果,都可以使用count进行计数。下面看一段代码:
+
+match (n:Person) where n.name =~ "n.*" return count(n)
+在之前的结构图中执行上面的代码会返回结果5,即代表n1~n5节点个数。 注意count还可以根据返回的结果进行自动分类操作,看下面代码:
+
+match (n:Person) where n.name =~ "n.*" return n, count(n)
+上面代码的返回结果如下图所示:
+7
+
+
+
+7).sum/avg/max/min
+
+sum是求和函数,会自动将null值去掉;avg计算所有值的平均值;max取最大值;min取最小值,代码如下:
+
+start n=node(id1,id2,id3)
+return sum(n.age), avg(n.age), max(n.age), min(n.age)
+
+
+8).collect
+
+collect会将返回的结果放置到一个list中,代码如下:
+
+match (n:Person) where n.name =~ "n.*" return collect(n)
+
+
+9).distinct
+
+distinct用于去重数据,和SQL中的类似,代码如下:
+
+match (n:Person) return distinct(n.age)
+上面的操作会对age进行去重,并将结果返回。
+
+
+
+10). order by
+
+　　 order by用于对输出的结果进行排序。注意,它不能使用节点或者关系排序,仅仅只针对其属性有效。 和SQL中的order by也是类似的。看一个简单地例子:
+
+match (n:Person) return n order by n.name
+上面的代码会按照n的name进行默认升序排序返回结果。如果你想将结果按照降序进行排序,那么代码如下:
+
+match (n:Person) return n order by n.name desc
+加上desc就可以了。
+如果想要根据多个属性进行排序,那么直接在order by后面加上多个属性就可以了,那么order by会优先按照 第一个属性进行排序,如果在第一个属性相等的情况下,按照第二个属性进行排序...代码如下:
+
+match (n:Person) return n order by n.name,n.age
+
+
+11). skip
+
+skip是跳过返回结果的前几项,基本用法比较简单,如下:
+
+match (n:Person) return n skip 3
+结果的前面三项被忽略,返回第三项之后的那些节点。
+
+
+
+12). limit
+
+limit是限制返回的结果数量,使用方法也很简单:
+
+match (n:Person) return n limit 3
+只返回前面三项结果。
+
+*常用的做法: * 一般skip,limit已经order by混合使用比较多。
+例如返回第3个节点~第6个节点,怎么处理呢?代码如下:
+
+match (n:Person)
+return n
+skip 2
+limit 4
+按照上面代码逻辑,对于返回结果n,会跳过前面2个,即从第3个开始,然后limit 4说明只返回3开始的4个节点,即3~6节点。
+
+如果加上排序,当然也是可以的,代码如下所示:
+
+match (n:Person)
+return n
+order by n.age
+skip 2
+limit 4
+
+
+13). set
+
+set用于更新节点和关系数据。使用方法也比较简单,代码如下:
+
+match (n:Person)
+where n.name="n2"
+set n.age=11
+return n
+前面两句是根据条件筛选出相应的节点,后面的set设置相应的节点的属性值,最终返回节点。 Neo4j中没有update,set其实就是update,可以更新属性值或者增加属性值。
+
+当然也可以set关系属性,例如:
+
+start r=rel(id) set r.label="test" return r
+上面的代码设置属性r的label属性值为"test"。
+
+
+
+14). delete
+
+delete用于删除单个节点(此节点没有relationship),关系以及属性。
+删除单一节点代码:
+
+match (n:Person)
+where n.name =~ "1.*"
+delete n
+上面的代码是将名称以"1"开头的节点都删除。
+*注意: * 上面的代码无法删除有relationship的节点的,如果想要删除,那么可以下面这样做:
+
+match (n:Person)
+with n
+match  n-[r]->()
+delete r,n
+上面的代码是将节点n和相应的关系同时删除,这样才是OK的!!!
+同时注意:上面的代码使用了with,with其实是连接两个查询的关键句,这个具体可以去看文档。
+
+删除属性代码如下:
+
+start a = node(3)
+delete a.age
+return a
+
+
+15).All/Any/None/Single
+
+这些都是判断函数,All用于判断条件是否都符合;Any用于判断是否存在符合条件的节点; None对于判断的条件中,如果没有元素返回那么返回true;Single用于判断是不是仅有一个节点符合条件. 看一下代码:
+
+start a=node(25),b=node(32)
+match p=a-[*1..5]->b
+where all(x in nodes(p) where x.age=11)
+return p
+上面的代码中如果p中所有的节点都有age=11,那么all才会返回true,where才成立.
+如果将all换成any,那么只有存在一个节点满足age=11,那么就可以返回p.
+如果将all换成None,只有当p中所有节点都没有age=11才会返回p.
+如果将all换成single,那么只有当仅有一个元素的时候才会返回.
+
+
+
+16).一些Scalar函数
+
+1> length函数返回路径或者集合长度
+
+start a=node(3) match p=a-->b return length(p)
+2> type函数用于判断条件类型,之前已经使用过.
+
+start n=node(3) match (n)-[r]->() return type(r)
+3> id函数返回节点或者relationship的ID
+
+start a=node(id) return id(a)
+4> coalesce函数返回表达式中第一个非空值。
+
+5> nodes函数返回一个路径中所有的节点,之前已经使用过.
+
+6> relationships函数用于返回一个路径中所有的关系.
+
