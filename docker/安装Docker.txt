@@ -27,4 +27,10 @@ sudo service docker start    #启动
 sudo service docker stop    #关闭 
 sudo service docker restart #重启 
 
+# 有时候pull镜像时，一直都是timeout，这时可采用国内的镜像：
+gswyhq@gswyhq-pc:~$ echo "DOCKER_OPTS="$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io"" | sudo tee -a /etc/default/docker
+# 重启docker
+gswyhq@gswyhq-pc:~$ sudo service docker restart
+# 继续拉取neo4j
+gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
 
