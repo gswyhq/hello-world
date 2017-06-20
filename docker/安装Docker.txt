@@ -34,3 +34,10 @@ gswyhq@gswyhq-pc:~$ sudo service docker restart
 # 继续拉取neo4j
 gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
 
+# docker-compose的安装：
+gswyhq@gswyhq-pc:~$ sudo pip3 install -U docker-compose
+
+# 查看安装的docker-compose的版本： 
+gswyhq@gswyhq-pc:~$ docker-compose --version
+docker-compose version 1.14.0, build c7bdf9e
+
