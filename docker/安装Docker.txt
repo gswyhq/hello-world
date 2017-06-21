@@ -22,6 +22,9 @@ Docker version 1.13.0, build 49bf474
 查看状态：
 gswyhq@gswyhq-pc:~$ sudo service docker status
 
+# 启动指定id的容器：
+gswyhq@gswyhq-pc:~$ sudo docker start d42fe5599730
+
 其他状态命令：
 sudo service docker start    #启动 
 sudo service docker stop    #关闭 

@@ -1,0 +1,50 @@
+
+# 查看已有的镜像：
+gswyhq@gswyhq-pc:~$ sudo docker images 
+[sudo] gswyhq 的密码：
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+neo4j               3.2                 87ca73ed691a        2 weeks ago         173 MB
+neo4j               latest              87ca73ed691a        2 weeks ago         173 MB
+# 将id为`87ca73ed691a`的镜像保存到文件：/home/gswyhq/neo4j-save.tar
+gswyhq@gswyhq-pc:~$ sudo docker save 87ca73ed691a > /home/gswyhq/neo4j-save.tar
+
+# 从文件中加载镜像：
+zy@ubuntu:~$ sudo docker load < /home/zy/neo4j-save.tar 
+3fb66f713c9f: Loading layer [==================================================>] 4.221 MB/4.221 MB
+68816a1ad86d: Loading layer [==================================================>] 3.584 kB/3.584 kB
+5c9f60e933c4: Loading layer [==================================================>] 78.31 MB/78.31 MB
+e5958a9d23a4: Loading layer [==================================================>] 6.113 MB/6.113 MB
+100f25661106: Loading layer [==================================================>] 2.048 kB/2.048 kB
+6b5924b70be2: Loading layer [==================================================>] 87.56 MB/87.56 MB
+279dbad482e5: Loading layer [==================================================>]  7.68 kB/7.68 kB
+Loaded image ID: sha256:87ca73ed691a42e52ba3f302a864205121fc2b4f4565d817a8bed9a16a992528
+
+# 加载的镜像可能没有名字：
+zy@ubuntu:~$ sudo docker images 
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+<none>              <none>              87ca73ed691a        2 weeks ago         173.2 MB
+
+# 可以通过设置tag添加名字：
+zy@ubuntu:~$ sudo docker tag 87ca73ed691a neo4j:latest
+zy@ubuntu:~$ sudo docker images 
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+neo4j               latest              87ca73ed691a        2 weeks ago         173.2 MB
+
+# 导出容器id 为`d42fe5599730`的容器到文件
+gswyhq@gswyhq-pc:~/neo4j$ sudo docker export d42fe5599730 > /home/gswyhq/neo4j/neo4j17474.tar
+
+# 从文件中导入，创建镜像，命名为：test/neo4j17474:v1
+zy@ubuntu:~/neo4j$ sudo docker import /home/zy/neo4j/neo4j17474.tar test/neo4j17474:v1
+sha256:039fc5e6422a35507c3f93b559665a4bf2c4d6426acf60a623045076dbfad8e6
+zy@ubuntu:~/neo4j$ sudo docker images test/neo4j17474:v1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+test/neo4j17474     v1                  039fc5e6422a        4 minutes ago       172.1 MB
+
+导出 export 与 保存 save 的区别
+ (1).export导出的镜像文件大小  小于 save保存的镜像
+ (2).export 导出（import导入）是根据容器拿到的镜像，再导入时会丢失镜像所有的历史，所以无法进行回滚操作（docker tag <LAYER ID> <IMAGE NAME>）；而save保存（load加载）的镜像，没有丢失镜像的历史，可以回滚到之前的层（layer）。（查看方式：docker images --tree）
+
+注：导入加载进来觉得不合适可以使用 docker rm 容器ID 、 docker rmi 镜像ID 来删掉。
+#  移除所有的容器和镜像（大扫除）：
+docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a)   
+

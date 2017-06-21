@@ -1,0 +1,36 @@
+
+Docker 命令
+
+Docker命令采用docker-CMD或docker CMD方式执行
+docker-attach # 依附到一个正在运行的容器中
+docker-build # 从一个Dockerfile创建一个镜像
+docker-commit # 从一个容器的修改中创建一个新的镜像
+docker-create # 创建一个新容器，但是不运行它
+docker-cp #从容器中复制文件到宿主系统中
+docker-diff # 检查一个容器文件系统的修改
+docker-events # 从服务端获取实时的事件
+docker-exec # 在运行的容器中植入广告
+docker-export # 导出容器内容为一个tar
+docker-history # 显示一个镜像的历史
+docker-images # 列出存在的镜像
+docker-import # 导入一个文件路径或目录来创建一个镜像
+docker-kill # 关闭一个运行中的容器
+docker-load #从一个tar中加载镜像
+docker-login # 注册或登录到一个Docker的仓库服务器
+docker-logout # 从Docker的仓库服务器登出
+docker-logs # 获取容器的log信息
+docker-pause #暂停一个容器中的所有进程
+docker-ps # 列出容器
+docker-pull # 从Docker的仓库服务器下拉一个镜像或者仓库
+docker-push # 将一个镜像或仓库推送到一个Docker的注册服务器
+docker-restart # 重启一个运行中的容器
+docker-rm # 删除指定的若干容器
+docker-rmi # 删除指定的镜像
+docker-run # 创建一个新容器，并在其中运行给定命令
+docker save # 保存一个镜像为tar包文件
+docker-search # 在Docker index中搜索一个镜像
+docker-start # 启动一个容器
+docker-tag # 为镜像打标签
+docker-unpause # 将一个容器内所有的进程从暂停状态中恢复
+docker-version # 输出Docker的版本信息
+

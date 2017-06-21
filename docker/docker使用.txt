@@ -47,3 +47,14 @@ docker stop <容器名orID>
 docker start <容器名orID>
 docker kill <容器名orID>
 
+# 删除单个镜像：
+命令格式：docker  rmi   image_name/ID
+若要删除所有的image, 使用命令：docker rmi  $( docker  images -q )
+
+注意：运行导入的镜像的时候必须带command，否则启动报如下错误
+FATA[0000] Error response from daemon: No command specified  
+具体的command需要在导出容器的时候通过docker ps查看到。
+
+# 查询容器id为`d42fe5599730`的详细信息,也可以查询到command：
+gswyhq@gswyhq-pc:~$ sudo docker inspect d42fe5599730
+
