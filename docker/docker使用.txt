@@ -58,3 +58,19 @@ FATA[0000] Error response from daemon: No command specified
 # 查询容器id为`d42fe5599730`的详细信息,也可以查询到command：
 gswyhq@gswyhq-pc:~$ sudo docker inspect d42fe5599730
 
+# 重命名容器：
+zy@ubuntu:~/nwd$ sudo docker ps
+[sudo] password for zy: 
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
+bf1bbe3e0fbf        neo4j               "/docker-entrypoint.s"   25 hours ago        Up 25 hours         0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   cocky_cori
+zy@ubuntu:~/nwd$ sudo docker rename cocky_cori nwd7474
+zy@ubuntu:~/nwd$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
+bf1bbe3e0fbf        neo4j               "/docker-entrypoint.s"   25 hours ago        Up 25 hours         0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   nwd7474
+
+# 进入正在运行的容器id 为`bf1bbe3e0fbf`的容器：
+zy@ubuntu:~$ sudo docker exec -it bf1bbe3e0fbf /bin/bash
+bash-4.3# 
+
+
+

@@ -17,3 +17,5 @@ Password：neo4j
 点击`Connect`，会让设置新密码；
 下次重新连接时，输入新密码即可；
 
+gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+

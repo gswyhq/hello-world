@@ -12,6 +12,12 @@ gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j console
 
 4、然后网页浏览http://localhost:7474/, 就会看到neo4j的后台界面，如图，初次默认用户名和密码是 neo4j/neo4j 
 
+或者打开网页后，输入`:server connect`即可打开设置页面；
+# 其他类似命令：
+断开连接：`:server disconnect`
+查询帮助命令：`:help commands`
+
+
 这个时候会要求重设密码，比如设置成：gswyhq
 
 START：在图中的开始点，通过元素的ID或所以查找获得。
