@@ -1,0 +1,6 @@
+
+# 配置gpu的使用，包括显卡数目的使用，显卡的显存占有率：
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.99) 
+sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+

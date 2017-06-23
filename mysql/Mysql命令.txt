@@ -204,3 +204,7 @@ UPDATE `table` SET `c`=`c`+1 WHERE `a`=1;
 # 删除数据表class_member的全部数据，但保留表结构（字段名、字段值类型等）；
 mysql> truncate TABLE class_member;
 
+# 清空表数据（表结构还保留，仅仅清空数据）：
+TRUNCATE TABLE 表格名;
+
+
