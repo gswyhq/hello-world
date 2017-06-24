@@ -3,6 +3,11 @@
 redis 数据库
 安装服务端
 sudo apt-get install redis-server
+
+# 通过上方式安装redis服务的停止与启动方法：
+gswyhq@gswyhq-pc:~$ sudo systemctl stop redis-server
+gswyhq@gswyhq-pc:~$ sudo systemctl start redis-server
+
 安装python包：
 sudo pip install redis
 

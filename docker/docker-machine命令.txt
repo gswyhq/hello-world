@@ -1,0 +1,28 @@
+
+注意，每次重启后，docker machine可能关闭，要重新打开相应的docker machine，并设置docker为docker-machine中的docker
+docker-machine start pydm
+更改环境变量，使得本地docker指向名为`pydm`的docker-machine
+eval $(docker-machine env pydm)
+
+docker-machine命令
+help 查看帮助信息，输入docker-machine help就会出现下面内容
+active 查看活动的Docker主机
+config 输出连接的配置信息
+create 创建一个Docker主机
+env 显示连接到某个主机需要的环境变量
+inspect 输出主机更新信息
+获取Docker主机地址
+docker-machine ip default
+kill 停止某个Docker主机
+ls 列出所有管理的Docker主机
+regenerate-certs 为某个主机重新成功TLS认证信息
+restart 重启Docker主机
+rm 删除Docker主机
+scp 在Docker主机之间复制文件
+ssh SSH到主机上执行命令
+start 启动一个主机
+status 查看一个主机状态
+stop 停止一个主机
+upgrade 更新主机Docker版本为最新
+url 获取主机的URL
+

@@ -1,0 +1,37 @@
+
+gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+
+通过镜像名为`neo4j`,tag为`3.2`的镜像，启动一个容器
+
+--name：命名容器的名字
+若启动容器时候没有命名，则会随机生成一个名字，通过`sudo docker ps -a`可以查询到`NAMES`；再通过`docker rename`重命名；
+如，通过`sudo docker rename cocky_cori nwd7474`，将容器名`cocky_cori`的容器，重命名为`nwd7474`；
+
+--detach：后台模式启动
+或者--detach=true或者-d=true或者-d，那么容器将会运行在后台模式。
+此时所有I/O数据只能通过网络资源或者共享卷组来进行交互。因为容器不再监听你执行docker run的这个终端命令行窗口。
+但你可以通过执行docker attach来重新附着到该容器的回话中。需要注意的是，容器运行在后台模式下，是不能使用--rm选项的。
+在前台模式下（不指定-d参数即可），Docker会在容器中启动进程，同时将当前的命令行窗口附着到容器的标准输入、标准输出和标准错误中。
+
+--publish：将容器内的端口暴露给主机
+或者-p
+
+--volume: 给容器挂载存储卷，挂载到容器的某个目录 
+
+
+-P, --publish-all=false    随机指定容器暴露的端口    
+当使用-P时，Docker会在主机中随机从49153 和65535之间查找一个未被占用的端口绑定到容器。
+你可以使用`docker port 容器名`来查找这个随机绑定端口。并且每重启一次这个容器，都会随机生成一个新的port；
+gswyhq@gswyhq-pc:~$ sudo docker run -P redis
+gswyhq@gswyhq-pc:~$ sudo docker port 6cfa9da94df2
+6379/tcp -> 0.0.0.0:32770
+
+-i, --interactive=false   打开STDIN，用于控制台交互    
+-t, --tty=false            分配tty设备，该可以支持终端登录，默认为false  
+如果要进行交互式操作（例如Shell脚本），那我们必须使用-i -t参数同容器进行数据交互。
+但是当通过管道同容器进行交互时，就不需要使用-t参数，例如下面的命令：
+echo test | docker run -i busybox cat
+因为要作一个最小的系统，又要实现一个linux系统的基本功能。因此选定busybox来实现这个系统。（busybox是静态编译，没有任何依赖，无需系统库及第三方库，且1.21.1版本的busybox只有951K）。
+
+
+

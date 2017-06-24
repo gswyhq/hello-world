@@ -40,7 +40,35 @@ gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
 # docker-compose的安装：
 gswyhq@gswyhq-pc:~$ sudo pip3 install -U docker-compose
 
+docker-compose是为了部署应用。一般情况需要docker run image1、docker run image2...一次一次不厌其烦的重复这些操作，每次都写大量的命令参数。
+Compose简化了这个流程，只需要把这些内容固化到docker-compose.yml中。
+
 # 查看安装的docker-compose的版本： 
 gswyhq@gswyhq-pc:~$ docker-compose --version
 docker-compose version 1.14.0, build c7bdf9e
+
+# docker官方仓库,https://hub.docker.com,可搜索想要的软件,再拉取即可，如`redis`:
+gswyhq@gswyhq-pc:~$ sudo docker pull redis
+
+# 安装docker-machine：
+# 下载最新版本的Docker Machine并将docker-machine文件放到了/usr/local/bin/后，添加执行权限即可：
+gswyhq@gswyhq-pc:~$ curl -L https://github.com/docker/machine/releases/download/v0.12.0-rc2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&   chmod +x /tmp/docker-machine &&  sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+
+# 查看docker-machine的安装版本：
+gswyhq@gswyhq-pc:~$ docker-machine -v
+docker-machine version 0.12.0-rc2, build 64fa459
+
+# 查看当前的machine：
+gswyhq@gswyhq-pc:~$ docker-machine ls
+NAME   ACTIVE   DRIVER   STATE   URL   SWARM   DOCKER   ERRORS
+
+# 创建一个docker machine：
+gswyhq@gswyhq-pc:~$ docker-machine create -d virtualbox default
+Creating CA: /home/gswyhq/.docker/machine/certs/ca.pem
+Creating client certificate: /home/gswyhq/.docker/machine/certs/cert.pem
+Running pre-create checks...
+Error with pre-create check: "VBoxManage not found. Make sure VirtualBox is installed and VBoxManage is in the path"
+gswyhq@gswyhq-pc:~$ sudo apt-get install -y virtualbox-qt
+# 重新执行：
+gswyhq@gswyhq-pc:~$ docker-machine create -d virtualbox default
 

@@ -1,0 +1,39 @@
+
+# 连接redis:
+gswyhq@gswyhq-pc:~$ redis-cli 
+# 获取某个key的值
+127.0.0.1:6379> get foo
+"10"
+# 查看当前数据库（默认连接的db=0）key的数目
+127.0.0.1:6379> dbsize
+(integer) 1
+# 切换到数据库db=9
+127.0.0.1:6379> select 9
+OK
+127.0.0.1:6379[9]> dbsize
+(integer) 2
+# 通过正则匹配所有的key
+127.0.0.1:6379[9]> keys guest*
+1) "guest901:images"
+2) "guest901:initiative"
+127.0.0.1:6379[9]> get guest901:images
+"{\"fid_lists\": [\"\\u7528\\u6237\\u672c\\u4eba\\u7684\\u8138\"], \"\\u7528\\u6237\\u672c\\u4eba\\u7684\\u8138\": {\"name\": \"\\u6240\\u53d1\\u751f\\u7684\", \"relationship\": \"\\u670b\\u53cb\"}}"
+127.0.0.1:6379[9]> exit
+gswyhq@gswyhq-pc:~$
+
+# 连接ip=127.0.0.1,port=6379,db=9:
+gswyhq@gswyhq-pc:~$ redis-cli -h 127.0.0.1 -p 6379 -n 9
+127.0.0.1:6379[9]> dbsize
+(integer) 2
+
+# 通过127.0.0.1能连接上，但通过本机ip却连接不上：
+Could not connect to Redis at 192.168.1.104:6379: Connection refused
+# 第一步，更改配置
+gswyhq@gswyhq-pc:~$ sudo vim /etc/redis/redis.conf
+将`bind 127.0.0.1`改为：`bind 0.0.0.0`即可
+# 第二步，重启服务
+gswyhq@gswyhq-pc:~$ sudo systemctl restart redis-server
+# 第三步，重新连接成功：
+gswyhq@gswyhq-pc:~$ redis-cli -h 192.168.1.104 -p 6379 -n 9
+192.168.1.104:6379[9]> exit
+

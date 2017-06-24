@@ -1,0 +1,26 @@
+
+启动一个容器，什么-p -P --expose都不指定。 就用busybox吧，很小。起了以后就是一个bash等在那儿。
+gswyhq@gswyhq-pc:~$ sudo docker run -it busybox
+Unable to find image 'busybox:latest' locally
+latest: Pulling from library/busybox
+27144aa8f1b9: Pull complete 
+Digest: sha256:be3c11fdba7cfe299214e46edc642e09514dbb9bbefcd0d3836c05a1e0cd0642
+Status: Downloaded newer image for busybox:latest
+/ # ifconfig eth0 |grep 'inet addr:'
+          inet addr:172.17.0.3  Bcast:0.0.0.0  Mask:255.255.0.0
+/ # nc -ll -p 7777 -e date
+
+# 以上意思，是通过镜像`busybox`创建一个容器，查询容器内部的ip地址是：`172.17.0.3`；
+并在容器里执行一个netcat侦听端口7777。 一旦得到连接就发送date命令的结果给对方。
+
+# 当然，也可以通过容器号，查询容器的iP：
+gswyhq@gswyhq-pc:~$ sudo docker inspect 5709caedb0b8 |grep IPA
+            "SecondaryIPAddresses": null,
+            "IPAddress": "172.17.0.3",
+                    "IPAMConfig": null,
+                    "IPAddress": "172.17.0.3",
+# 在别的容器里，连接`5709caedb0b8`容器的7777端口：
+gswyhq@gswyhq-pc:~$ docker run busybox nc 172.17.0.3 7777
+Sat Jun 24 07:49:32 UTC 2017
+
+
