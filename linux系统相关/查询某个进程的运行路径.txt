@@ -1,0 +1,29 @@
+
+# 查询某个进程对应的程序路径
+# 第一步，查询进程号
+zy@ubuntu:~/dbang$ ps -aux|grep tornado_server.py 
+zy        5476  1.4 45.5 2149796 1843032 pts/7 S    09:08   0:10 python3 /home/zy/qbzz/tornado_server.py --no-templates --wmd
+zy        5652  0.0  0.0  14224   940 pts/7    S+   09:20   0:00 grep --color=auto tornado_server.py
+zy       20276  0.0  0.2 449932 11572 ?        Sl   Jun02   0:06 /usr/bin/python3 /home/zy/yhb/tornado_server.py
+zy       28925  0.0 33.6 2190120 1362224 pts/2 Sl+  Jun13   0:57 python3 tornado_server.py --no-templates --wmd
+zy       30427  0.0  6.4 436724 263016 pts/5   Sl+  Jun15   0:03 python3 tornado_server.py --no-templates
+
+# 第二步，进入目录`/proc/进程号`查看进程详细信息：
+zy@ubuntu:~/dbang$ cd /proc/30427
+zy@ubuntu:/proc/30427$ ls -l
+total 0
+dr-xr-xr-x 2 zy zy 0 Jun 22 09:20 attr
+-rw-r--r-- 1 zy zy 0 Jun 22 09:20 autogroup
+-r-------- 1 zy zy 0 Jun 22 09:20 auxv
+-r--r--r-- 1 zy zy 0 Jun 22 09:20 cgroup
+--w------- 1 zy zy 0 Jun 22 09:20 clear_refs
+-r--r--r-- 1 zy zy 0 Jun 22 09:08 cmdline
+-rw-r--r-- 1 zy zy 0 Jun 22 09:20 comm
+-rw-r--r-- 1 zy zy 0 Jun 22 09:20 coredump_filter
+-r--r--r-- 1 zy zy 0 Jun 22 09:20 cpuset
+lrwxrwxrwx 1 zy zy 0 Jun 22 09:20 cwd -> /home/zy/qbzz-dm
+-r-------- 1 zy zy 0 Jun 22 09:20 environ
+lrwxrwxrwx 1 zy zy 0 Jun 22 09:20 exe -> /usr/bin/python3.5
+
+注意cwd，即是你要查找的进程所在路径。
+
