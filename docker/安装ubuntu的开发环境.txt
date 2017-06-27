@@ -1,0 +1,23 @@
+
+1、拉取ubuntu镜像
+gswyhq@gswyhq-pc:~$ sudo docker pull ubuntu
+2、运行ubuntu镜像，生成一个容器
+gswyhq@gswyhq-pc:~$ docker run -i -t ubuntu /bin/bash
+3、在容器内更新软件源
+root@50d8508bb70c:/# sudo apt-get update
+4、安装程序
+root@50d8508bb70c:/# apt-get install python3-pip
+5、退出容器，并将容器保存为新的ubuntu镜像
+root@50d8508bb70c:/# exit
+gswyhq@gswyhq-pc:~$ docker commit 50d8508bb70c ubuntu:0627
+提交变更，并且把容器保存成Tag为0627的新的ubuntu镜像.(注意，这里提交只是提交到本地仓库，类似Git)
+6、查看刚刚保存的镜像
+gswyhq@gswyhq-pc:~$ docker images 
+REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
+ubuntu              0627                02390dd538bb        About a minute ago   442 MB
+7、将镜像保存为文件
+gswyhq@gswyhq-pc:~$ sudo docker save 02390dd538bb > ubuntu0627-save.tar
+8、从文件中加载镜像：
+zy@ubuntu:~$ sudo docker load < /home/zy/neo4j-save.tar
+
+
