@@ -44,4 +44,18 @@ root@06c9a3a2bcee:/# pip3 list
 jieba (0.36.2)
 
 
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+50d8508bb70c        ubuntu              "/bin/bash"         25 hours ago        Up About an hour                        priceless_mayer
+
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker exec -i 50d8508bb70c pip3 list
+pip (8.1.1)
+setuptools (20.7.0)
+wheel (0.29.0)
+
+docker exec -i compassionate_mclean python /root/python/myscript.py
+
+docker exec -i compassionate_mclean bash -c "cd /root/python && python myscript.py"
+
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -v /home/gswyhq/docker/ubuntu:/ubuntu ubuntu /bin/bash /ubuntu/start.sh
 
