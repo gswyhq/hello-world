@@ -43,6 +43,9 @@ gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ sudo vim conf/neo4j.conf
 改为：
 dbms.active_database=gswyhq.db
 
+# 更多样例数据见：
+https://neo4j.com/developer/example-data/
+
 允许非本地连接
 取消掉‘conf/neo4j.conf’内，下面一行注释即可：
 dbms.connectors.default_listen_address=0.0.0.0

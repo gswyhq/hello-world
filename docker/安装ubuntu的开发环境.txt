@@ -18,6 +18,30 @@ ubuntu              0627                02390dd538bb        About a minute ago  
 7、将镜像保存为文件
 gswyhq@gswyhq-pc:~$ sudo docker save 02390dd538bb > ubuntu0627-save.tar
 8、从文件中加载镜像：
-zy@ubuntu:~$ sudo docker load < /home/zy/neo4j-save.tar
+gswyhq@gswyhq-pc:~/docker/ubuntu$ sudo docker load < ubuntu0627-save.tar
+9、添加tag
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker tag 02390dd538bb ubuntu:0627
+10、运行导入的镜像生成一个容器
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -i -t ubuntu:0627 /bin/bash
+11、安装一些安装包，并退出：
+root@06c9a3a2bcee:~# pip3 install jieba==0.36.2
+root@06c9a3a2bcee:~# exit
+12、运行容器
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker start 06c9a3a2bcee
+13、进入容器
+方法1：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker attach 06c9a3a2bcee
+#通过`方法1`进入docker容器ssh界面，只要这个连接终止，或者使用了exit命令，容器就会退出后台运行，
+#若使用方法2，则退出时不会终止后台运行
+方法2：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/sh
+# 
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/bash
+root@06c9a3a2bcee:/# 
+# 用`/bin/sh`登录后不会显示用户及主机名；用`/bin/bash`会显示用户及主机名
+14、查看刚才安装的包：
+root@06c9a3a2bcee:/# pip3 list
+jieba (0.36.2)
+
 
 
