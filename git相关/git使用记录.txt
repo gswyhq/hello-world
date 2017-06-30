@@ -778,6 +778,9 @@ gswyhq@gswyhq-pc:~/hello-world$ git merge dev
 # 同步远程的某个tag到本地
 $ git fetch origin tag release1.1.3.170225
 
+# 同步远程所有tag到本地
+gswyhq@gswyhq-pc:~/yhb$ git fetch --tags
+
 # 查看本地的tag
 gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git tag 
 beta0.1.161121

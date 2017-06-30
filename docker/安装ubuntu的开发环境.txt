@@ -59,3 +59,5 @@ docker exec -i compassionate_mclean bash -c "cd /root/python && python myscript.
 
 gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -v /home/gswyhq/docker/ubuntu:/ubuntu ubuntu /bin/bash /ubuntu/start.sh
 
+# 向容器内复制文件：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl

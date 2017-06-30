@@ -1,0 +1,17 @@
+
+import redis
+import datetime
+import time
+
+pool = redis.ConnectionPool(host='192.168.3.51', port=6379, db=0)
+r = redis.StrictRedis(connection_pool=pool)
+extime = datetime.datetime(2015, 9, 8, 15, 19, 10)
+print (r.expire('ex1', 10))
+print (extime.strftime('%Y-%m-%d %H:%M:%S %f'))
+print (r.expireat('ex2', extime)  )
+
+expire函数设置过期时间为10秒。10秒后，ex1将会失效
+expireat设置一个具体的时间，15年9月8日15点19分10秒，过了这个时间，ex2将失效
+如果设置过期时间成功会返回True,反之返回False
+
+当键不存在时，设置过期时间会返回False;
