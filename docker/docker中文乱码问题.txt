@@ -1,0 +1,54 @@
+挂载含有中文字符的文件到docker，出现中文乱码
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -t -i -v /home/gswyhq/docker/ubuntu:/ubuntu -w /ubuntu ubuntu:0629 /bin/bash
+# 查看docker容器编码格式：执行locale命令；可以看到当前编码格式为POSIX，而这种编码格式不支持中文
+root@db835fa8e5de:/ubuntu# locale
+LANG=
+LANGUAGE=
+LC_CTYPE="POSIX"
+
+2、查看容器所有语言环境
+root@db835fa8e5de:/ubuntu# locale -a
+C
+C.UTF-8
+POSIX
+3、临时修改, 有的是zh_CN.UTF-8，不过我在本地没发现这种编码
+root@db835fa8e5de:/ubuntu# LANG=C.UTF-8 
+# 让设定生效
+root@db835fa8e5de:/ubuntu# source /etc/profile
+4.永久修改1：修改Dockerfile
+在Dockerfile中添加一行
+ENV LANG C.UTF-8
+重新制作docker镜像，docker run -ti [镜像] 进入容器后执行locale发现编码格式已经被修改为C.UTF-8
+5.永久修改2：
+# 更新源
+root@db835fa8e5de:~# apt-get update
+# 下载安装中文字体
+root@db835fa8e5de:~# apt-get install  -y language-pack-zh-hans
+root@db835fa8e5de:~#  apt-get install -y language-pack-zh-hant
+root@db835fa8e5de:~# cd /usr/share/locales/
+root@db835fa8e5de:/usr/share/locales# ./install-language-pack zh_CN
+root@db835fa8e5de:/usr/share/locales# locale-gen
+Generating locales (this might take a while)...
+  zh_CN.GB2312... done
+  zh_CN.UTF-8... done
+  zh_HK.UTF-8... done
+  zh_SG.UTF-8... done
+  zh_TW.UTF-8... done
+root@db835fa8e5de:/usr/share/locales# vim /etc/profile
+末尾添加一行：export LANG=zh_CN.UTF-8
+root@8b79b4483485:~# vim .bashrc
+末尾添加两行：
+export LC_ALL=zh_CN.utf8
+export LANG=zh_CN.UTF-8
+root@8b79b4483485:~# source .bashrc
+
+root@db835fa8e5de:/usr/share/locales# source /etc/profile
+root@db835fa8e5de:/usr/share/locales# locale
+LANG=zh_CN.UTF-8
+LANGUAGE=
+LC_CTYPE="zh_CN.UTF-8"
+LC_NUMERIC="zh_CN.UTF-8"
+# 退出，提交保存为一个新的镜像：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker commit db835fa8e5de ubuntu:0629-2
+
+

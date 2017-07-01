@@ -8,6 +8,26 @@ neo4j               latest              87ca73ed691a        2 weeks ago         
 # 将id为`87ca73ed691a`的镜像保存到文件：/home/gswyhq/neo4j-save.tar
 gswyhq@gswyhq-pc:~$ sudo docker save 87ca73ed691a > /home/gswyhq/neo4j-save.tar
 
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker export feb11022b2e5(是容器id) > ubuntu0701-export.tar
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker save 2356a0ec52f8(是镜像id) > ubuntu0701-save.tar
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker import ubuntu0701-export.tar ubuntu:0701-1
+sha256:be09d22933ede9ae963692dd1e64c281c1e3eb7628a5d7075b671b365c72befd
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker load < ubuntu0701-save.tar
+Loaded image ID: sha256:2356a0ec52f8ba37774072e69e177eea52f52e54e432d2f0402afdd18a59414e
+# 通过import导入的镜像，查看其历史记录，只有一条：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker history be09d22933ede
+IMAGE               CREATED             CREATED BY          SIZE                COMMENT
+be09d22933ed        20 seconds ago                          1.72 GB             Imported from -
+# 通过load导入的镜像，查看其历史记录，会发现有很多条，从哪个到哪个镜像而来都显示出来了；
+# 倘若load这个镜像文件之前，缺失对应的依赖镜像，则会load出错；而import则不会出现这个问题；
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker history 2356a0ec52f8ba37
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+2356a0ec52f8        About an hour ago   /bin/bash                                       262 MB              
+17f5f2467864        7 hours ago         /bin/bash                                       6.94 kB             
+c33f88a2eb15        8 hours ago         /bin/bash                                       65.8 MB             
+1dd282f1d3a1        2 days ago          /bin/bash                                       995 MB 
+
+
 # 从文件中加载镜像：
 zy@ubuntu:~$ sudo docker load < /home/zy/neo4j-save.tar 
 3fb66f713c9f: Loading layer [==================================================>] 4.221 MB/4.221 MB
@@ -42,9 +62,25 @@ test/neo4j17474     v1                  039fc5e6422a        4 minutes ago       
 
 导出 export 与 保存 save 的区别
  (1).export导出的镜像文件大小  小于 save保存的镜像
- (2).export 导出（import导入）是根据容器拿到的镜像，再导入时会丢失镜像所有的历史，所以无法进行回滚操作（docker tag <LAYER ID> <IMAGE NAME>）；而save保存（load加载）的镜像，没有丢失镜像的历史，可以回滚到之前的层（layer）。（查看方式：docker images --tree）
+ (2).export 导出（import导入）是根据容器拿到的镜像，再导入时会丢失镜像所有的历史，所以无法进行回滚操作（docker tag <LAYER ID> <IMAGE NAME>）；
+而save保存（load加载）的镜像，没有丢失镜像的历史，可以回滚到之前的层（layer）。（查看方式：docker history 镜像id ）
+ (3).export是针对容器的操作，故对应容器的id；save是针对镜像的操作，故对应镜像的id；
 
 注：导入加载进来觉得不合适可以使用 docker rm 容器ID 、 docker rmi 镜像ID 来删掉。
 #  移除所有的容器和镜像（大扫除）：
 docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a)   
+
+# 删除一个镜像时，必须选删除在这个镜像基础上新建的容器；同时也要删除对此镜像的依赖镜像；
+
+# 比如通个镜像`ubuntu:latest`生成了一个容器`538328cf9aa8`，在这个容器中进行的一些操作，如‘安装了一些软件包’；
+# 再将容器`538328cf9aa8`commit成一个新的镜像`ubuntu:0629`；再在镜像`ubuntu:0629`基础上生成了一个容器`eccf8245a3ab`；
+# 在容器`eccf8245a3ab`中，又继续安装了一些另外的程序包；之后commit成镜像`ubuntu:0630`；这个时候，
+# 若要删除镜像`ubuntu:0629`是删除不掉的；即使把容器`538328cf9aa8`、`eccf8245a3ab`都删除掉也是不行的；
+# 只有把镜像`ubuntu:0630`删除掉，才可以删除镜像`ubuntu:0629`；故这里第二次安装程序包，不应该在
+# 镜像`ubuntu:0629`基础上生成了一个容器`eccf8245a3ab`进行安装，而是应该在容器`538328cf9aa8`中继续安装，
+# 安装完了再commit成`ubuntu:0630`；这个时候，若删除想要删除镜像`ubuntu:0629`只需要
+# 删除掉容器`538328cf9aa8`即可，而不必删除镜像`ubuntu:0630`；
+
+# 查看一个镜像的历史：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker history 2356a0ec52f8
 

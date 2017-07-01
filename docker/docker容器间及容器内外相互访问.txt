@@ -23,4 +23,20 @@ gswyhq@gswyhq-pc:~$ sudo docker inspect 5709caedb0b8 |grep IPA
 gswyhq@gswyhq-pc:~$ docker run busybox nc 172.17.0.3 7777
 Sat Jun 24 07:49:32 UTC 2017
 
+# 在容器内若要访问宿主机，通过‘127.0.0.1’、‘localhost’肯定是不行的，这个时候，他们指的容器自身；
+# 可以通过宿主机的ip进行访问：
+# 在容器外获取宿主机的ip
+gswyhq@gswyhq-pc:~/docker/redis$ ifconfig 
+wlp9s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.104  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::7081:a93d:5a44:8c3e  prefixlen 64  scopeid 0x20<link>
+        ether 74:e5:0b:86:a2:e8  txqueuelen 1000  (Ethernet)
+        RX packets 683182  bytes 879923683 (839.1 MiB)
+# 在容器内访问宿主机：
+root@527284633c1d:/yhb# python3
+>>> import redis
+>>> rc = redis.StrictRedis(host='192.168.1.104', port=6379, db=0)
+>>> rc.get('foo')
+b'10'
+
 
