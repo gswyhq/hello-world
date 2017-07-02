@@ -72,5 +72,13 @@ bf1bbe3e0fbf        neo4j               "/docker-entrypoint.s"   25 hours ago   
 zy@ubuntu:~$ sudo docker exec -it bf1bbe3e0fbf /bin/bash
 bash-4.3# 
 
+# 查看容器的标准输出：
+gswyhq@gswyhq-pc:~$ docker logs -f ubuntu-yhb 
+
+# 查看容器的进程：
+gswyhq@gswyhq-pc:~$ docker top ubuntu-yhb 
+
+# 查看容器的配置：
+gswyhq@gswyhq-pc:~$ docker inspect ubuntu-yhb
 
 

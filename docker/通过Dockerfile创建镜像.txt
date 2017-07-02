@@ -1,0 +1,189 @@
+
+Dockerfile用来创建一个自定义的image,包含了用户指定的软件依赖等。
+
+Dockerfile的指令是忽略大小写的，建议使用大写，使用 # 作为注释，每一行只支持一条指令，每条指令可以携带多个参数。
+Dockerfile的指令根据作用可以分为两种，构建指令和设置指令。构建指令用于构建image，其指定的操作不会在运行image的容器上执行；
+设置指令用于设置image的属性，其指定的操作将在运行image的容器中执行。
+
+1、FROM（指定基础image）
+构建指令，必须指定且需要在Dockerfile其他指令的前面。后续的指令都依赖于该指令指定的image。
+FROM指令指定的基础image可以是官方远程仓库中的，也可以位于本地仓库。该指令有两种格式：
+FROM redis
+指定基础image为该image的最后修改的版本。或者：
+FROM <image>:<tag>  
+指定基础image为该image的一个tag版本。
+
+2、MAINTAINER（用来指定镜像创建者信息）
+构建指令，用于将image的制作者相关的信息写入到image中。当我们对该image执行docker inspect命令时，输出中有相应的字段记录该信息。
+格式：
+MAINTAINER <name>
+
+3、RUN（安装软件用）
+构建指令，RUN可以运行任何被基础image支持的命令。如基础image选择了ubuntu，那么软件管理部分只能使用ubuntu的命令。
+每条 RUN 指令将在当前镜像基础上执行指定命令，并提交为新的镜像。当命令较长时可以使用 \ 来换行。
+也就是说RUN命令会在上面FROM指定的镜像里执行任何命令，然后提交(commit)结果，提交的镜像会在后面继续用到。
+RUN命令等价于:
+docker run image command
+docker commit container_id
+该指令有两种格式：
+RUN <command> (the command is run in a shell - `/bin/sh -c`)  
+RUN ["executable", "param1", "param2" ... ]  (exec form)  
+在使用apt-get安装软件时，需要加上"-y"的参数，如果不指定-y参数的话，apt-get命令会进入交互模式，需要用户输入命令来进行确认，
+但在docker环境中是无法响应这种交互的。所以就会造成安装中断这种问题。
+如：
+#安装ssh server进行远程操控
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+# 设置root ssh远程登录密码
+RUN echo "root:123456" | chpasswd
+安装了ssh，chpasswd方法给ssh添加root用户登录密码为123456。"chpasswd"可以批量的为ssh添加以"username:passwd"为格式的用户与密码。
+可以将username:passwd批量的写在一个txt文件中，然后使用xxx.txt chpasswd方法为ssh批量添加用户。
+
+4、CMD（设置container启动时执行的操作）
+设置指令，用于container启动时指定的操作。该操作可以是执行自定义脚本，也可以是执行系统命令。
+该指令只能在文件中存在一次，如果有多个，则只执行最后一条。并且可被 docker run 提供的参数覆盖。
+该指令有三种格式：
+CMD ["executable","param1","param2"] (like an exec, this is the preferred form)  
+CMD command param1 param2 (as a shell)
+CMD ["redis-server", "/usr/local/etc/redis.conf"]
+当Dockerfile指定了ENTRYPOINT，那么使用下面的格式：
+CMD ["param1","param2"] (as default parameters to ENTRYPOINT)  
+ENTRYPOINT指定的是一个可执行的脚本或者程序的路径，该指定的脚本或者程序将会以param1和param2作为参数执行。
+所以如果CMD指令使用上面的形式，那么Dockerfile中必须要有配套的ENTRYPOINT。
+
+例如指定:
+CMD [“/bin/echo”, “this is a echo test ”]
+build后运行(假设镜像名为ec):
+docker run ec
+就会输出: this is a echo test
+
+docker run命令如果指定了参数会把CMD里的参数覆盖；
+举例来说：docker run -it ubuntu /bin/bash 命令的参数是指/bin/bash 而非 -it ,-it只是docker 的参数，而不是容器的参数
+同样是上面的ec镜像启动：
+docker run ec /bin/bash abcd
+就不会输出：`this is a echo test`，而是输出`abcd`，因为CMD命令被”/bin/bash abcd”覆盖了。
+
+（5）ENTRYPOINT（设置container启动时执行的操作）
+设置指令，指定容器启动时执行的命令，可以多次设置，但是只有最后一个有效。
+两种格式:
+ENTRYPOINT ["executable", "param1", "param2"] (like an exec, the preferred form)  
+ENTRYPOINT command param1 param2 (as a shell)
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT 命令设置在容器启动时执行命令，也就是配置容器启动后执行的命令，并且不可被 docker run 提供的参数覆盖。
+
+使用下面的ENTRYPOINT构造镜像：
+FROM UBUNTU
+ENTRYPOINT ["/bin/echo"]
+那么docker build出来的镜像以后的容器功能就像一个/bin/echo程序：
+比如我build出来的镜像名称叫imageecho，那么我可以这样用它：
+docker run -it imageecho “this is a test”
+这里就会输出”this is a test”这串字符，而这个imageecho镜像对应的容器表现出来的功能就像一个echo程序一样。
+你添加的参数“this is a test”会添加到ENTRYPOINT后面，就成了这样　/bin/echo “this is a test”，即
+`docker run -it imageecho “this is a test”`等价于`docker run -it ubuntu /bin/echo “this is a test”`
+
+# CMD指令将不会被执行，只有ENTRYPOINT指令被执行  
+CMD echo “Hello, World!”  
+ENTRYPOINT ls -l  
+另一种用法和CMD指令配合使用来指定ENTRYPOINT的默认参数，这时CMD指令不是一个完整的可执行命令，仅仅是参数部分；
+ENTRYPOINT指令只能使用JSON方式指定执行命令，而不能指定参数。如：
+FROM ubuntu  
+CMD ["-l"]  
+ENTRYPOINT ["/usr/bin/ls"]  
+
+（6）USER（设置container容器的用户）
+设置指令，设置启动容器的用户，默认是root用户。
+ 
+# 指定memcached的运行用户  
+ENTRYPOINT ["memcached"]  
+USER daemon  
+或  
+ENTRYPOINT ["memcached", "-u", "daemon"]  
+
+（7）EXPOSE（指定容器需要映射到宿主机器的端口）
+设置指令，该指令会将容器中的端口映射成宿主机器中的某个端口。当你需要访问容器的时候，可以不是用容器的IP地址而是使用宿主机器的IP地址和映射后的端口。
+要完成整个操作需要两个步骤，首先在Dockerfile使用EXPOSE设置需要映射的容器端口，然后在运行容器的时候指定-p选项加上EXPOSE设置的端口，
+这样EXPOSE设置的端口号会被随机映射成宿主机器中的一个端口号。也可以指定需要映射到宿主机器的那个端口，这时要确保宿主机器上的端口号没有被使用。
+EXPOSE指令可以一次设置多个端口号，相应的运行容器的时候，可以配套的多次使用-p选项。
+格式:
+EXPOSE <port> [<port>...]
+# 映射一个端口  
+EXPOSE port1
+或者：
+EXPOSE $REDIS_PORT
+# 相应的运行容器使用的命令  
+docker run -p port1 image  
+  
+# 映射多个端口  
+EXPOSE port1 port2 port3  
+# 相应的运行容器使用的命令  
+docker run -p port1 -p port2 -p port3 image  
+# 还可以指定需要映射到宿主机器上的某个端口号  
+docker run -p host_port1:port1 -p host_port2:port2 -p host_port3:port3 image  
+端口映射是docker比较重要的一个功能，原因在于我们每次运行容器的时候容器的IP地址不能指定而是在桥接网卡的地址范围内随机生成的。
+宿主机器的IP地址是固定的，我们可以将容器的端口的映射到宿主机器上的一个端口，免去每次访问容器中的某个服务时都要查看容器的IP的地址。
+对于一个运行的容器，可以使用docker port加上容器中需要映射的端口和容器的ID来查看该端口号在宿主机器上的映射端口。
+
+（8）ENV（用于设置环境变量）
+构建指令，在image中设置一个环境变量。
+如:
+ENV REDIS_PORT 7000
+
+设置了后，后续的RUN命令都可以使用，container启动后，可以通过docker inspect查看这个环境变量，
+也可以通过在docker run --env key=value时设置或修改环境变量。
+假如你安装了JAVA程序，需要设置JAVA_HOME，那么可以在Dockerfile中这样写：
+ENV JAVA_HOME /path/to/java/dirent
+
+（9）ADD（从src复制文件到container的dest路径）
+构建指令，所有拷贝到container中的文件和文件夹权限为0755，uid和gid为0；如果是一个目录，那么会将该目录下的所有文件添加到container中，
+不包括目录；如果文件是可识别的压缩格式，则docker会帮忙解压缩（注意压缩格式）；如果<src>是文件且<dest>中不使用斜杠结束，
+则会将<dest>视为文件，<src>的内容会写入<dest>；如果<src>是文件且<dest>中使用斜杠结束，则会<src>文件拷贝到<dest>目录下。
+格式:
+ 
+ADD <src> <dest>  
+
+<src> 是相对被构建的源目录的相对路径，可以是文件或目录的路径，也可以是一个远程的文件url;
+<dest> 是container中的绝对路径
+
+（10）VOLUME（指定挂载点)）
+设置指令，使容器中的一个目录具有持久化存储数据的功能，该目录可以被容器本身使用，也可以共享给其他容器使用。我们知道容器使用的是AUFS，
+这种文件系统不能持久化数据，当容器关闭后，所有的更改都会丢失。当容器中的应用有持久化数据的需求时可以在Dockerfile中使用该指令。
+格式:
+ 
+VOLUME ["<mountpoint>"]  
+
+ 
+FROM base  
+VOLUME ["/tmp/data"]  
+运行通过该Dockerfile生成image的容器，/tmp/data目录中的数据在容器关闭后，里面的数据还存在。例如另一个容器也有持久化数据的需求，
+且想使用上面容器共享的/tmp/data目录，那么可以运行下面的命令启动一个容器：
+ 
+docker run -t -i -rm -volumes-from container1 image2 bash  
+container1为第一个容器的ID，image2为第二个容器运行image的名字。
+
+（11）WORKDIR（切换目录）
+设置指令，可以多次切换(相当于cd命令)，指定RUN、CMD与ENTRYPOINT命令的工作目录。
+格式:
+ 
+WORKDIR /path/to/workdir  
+
+ 
+# 在 /p1/p2 下执行 vim a.txt  
+WORKDIR /p1 WORKDIR p2 RUN vim a.txt  
+
+（12）ONBUILD（在子镜像中执行）
+ 
+ONBUILD <Dockerfile关键字>  
+ONBUILD 指定的命令在构建镜像时并不执行，而是在它的子镜像中执行。
+ 
+13、COPY
+COPY entrypoint.sh /usr/local/bin/
+COPY redis.conf /usr/local/etc/
+
+使用Dockerfile构建镜像
+$docker build -t py-ubuntu .
+额外选项，如：
+--rm=true表示构建成功后，移除所有中间容器
+--no-cache=false表示在构建过程中不使用缓存
+-t   给该镜像赋予一个tag，用以将来的调用与搜索
+.　  表示调用当前目录的Dockerfile
+

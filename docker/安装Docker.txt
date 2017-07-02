@@ -34,6 +34,9 @@ sudo service docker restart #重启
 gswyhq@gswyhq-pc:~$ echo "DOCKER_OPTS="$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io"" | sudo tee -a /etc/default/docker
 # 重启docker
 gswyhq@gswyhq-pc:~$ sudo service docker restart
+或者：
+gswyhq@gswyhq-pc:~$ systemctl restart docker
+
 # 继续拉取neo4j
 gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
 

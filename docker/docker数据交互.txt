@@ -1,0 +1,38 @@
+ 数据卷是一个在一个活多个容器里特别设计的目录，围绕union file system来提供多个持久的或共享数据的特性：
+     a）data volumes可以被多个容器共享和重用
+     b）可以直接修改在dota volumes进行变动
+     c）变动data volumes不包括更新一个镜像
+     d）volumes将一直存在知道没有容器使用它们
+如，宿主机目录`/home/gswyhq/yhb`与容器目录`/yhb`数据关联起来了；
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswyhq/yhb:/yhb -p 8000:8000 -w /yhb ubuntu:0701 /bin/bash
+
+docker默认是实现可读可写的volume，不过我们也可以自定义为只读
+docker run -d -P --name web -v /src/webapp:/opt/webapp:ro tra
+
+# 创建和挂载一个data volume 容器（容器挂载另一个容器的data volume）
+
+如果有需要保存的数据并且在容器中共享，或者被一些不长久使用的容器使用，最好是创建一个data volume的容器，然后再使用它的时候采取挂载。
+     
+# 创建一个容器，并且里面创建一个data volume。   
+docker run -i -t -v /dbdata --name dbdata centos /bin/bash
+   
+# 创建另一个容器，挂载dbdata的data volume----/dbdata
+docker run -i -t --volumes-from dbdata(容器名) --name db1 centos /bin/bash
+
+# 创建第二个容器来挂载dbdata的data volume
+docker run -i -t --volumes-from dbdata --name db2 centos /bin/bash
+
+这种挂载可以继续传递下去：
+ docker run -i -t --volumes-from db1 --name db3 centos /bin/bash
+     如果删除了其中的一些容器，甚至是一开始创建的dbdata这个容器，该volume都会存在，直到所有挂载volume的容器都删除掉，这个volume才会被删除掉。
+
+data volumes备份、恢复或迁移   
+ docker run --volumes-from dbdata -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /dbdata
+     这里我们启动一个新的容器然后挂载dbdata容器的volume。接着挂载一个当前host的路径到/backup。最后，我们使用tar来将dbdata的volume备份到backup.tar（在/backup目录中，即是宿主机的当前目录）。当命令结束且容器停止了之后我们就获得了dbdata的volume的备份。
+
+可以将它恢复到相同的容器中，或者其他的任何地方。
+
+  docker run -v /dbdata --name dbdata2 ubuntu /bin/bash
+  docker run --volumes-from dbdata2 -v $(pwd):/backup centos tar xvf /backup/backup.tar
+
+
