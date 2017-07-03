@@ -1,0 +1,83 @@
+
+ab是apache自带的一个很好用的压力测试工具，当安装完apache的时候，就可以在bin下面找到ab
+apache2的安装（apache2在apache的基础上有大的改动）：
+gswyhq@gswyhq-pc:~$ sudo apt-get install apache2
+gswyhq@gswyhq-pc:~$ whereis ab
+ab: /usr/bin/ab /usr/share/man/man1/ab.1.gz
+
+# 键入命令： 
+ab -n 800 -c 800  http://192.168.0.10/ 
+（-n发出800个请求，-c模拟800并发，相当800人同时访问，后面是测试url）
+
+ab -t 60 -c 100 http://192.168.0.10/ 
+在60秒内发请求，一次100个请求。 
+
+# 带参数的请求：
+gswyhq@gswyhq-pc:~$ ab -c 5 -n 10 -p test.txt http://192.168.3.51:8000/ 
+# 参数文本的内容如下：
+gswyhq@gswyhq-pc:~$ head test.txt 
+{"question": "a卡在哪里能用", "uid": "1234567"}
+
+等同于：curl http://192.168.3.51:8000/ -d '{"question": "a卡在哪里能用", "uid": "1234567"}'
+
+
+结果解释：
+gswyhq@gswyhq-pc:~$ ab -c 10 -n 20 -p test.txt http://192.168.3.51:8000/
+This is ApacheBench, Version 2.3 <$Revision: 1757674 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.3.51 (be patient).....done
+# 以上内容显示测试完成度，本次测试发起请求数量较少，完成较快，无中间过程显示。在请求数量很多时会分行显示当前完成数量。
+
+Server Software:        TornadoServer/4.4.2  # 被测试的服务器所用的软件信息
+Server Hostname:        192.168.3.51  # 被测试的主机名
+Server Port:            8000  # 被测主机的服务端口号，一般http请求的默认端口号是80，https默认使用443端口
+
+Document Path:          /  # 请求的具体内容或文件
+Document Length:        508 bytes  # 请求的内容或文件大小
+
+Concurrency Level:      10  # 并发数，请求中-c参数指定的数量
+Time taken for tests:   0.932 seconds  # 本次测试总共花费的时间
+Complete requests:      20  # 本次测试总共发起的请求数量
+Failed requests:        0  # 失败的请求数量。因网络原因或服务器性能原因，发起的请求并不一定全部成功，通过该数值和Complete requests相除可以计算请求的失败率，作为测试结果的重要参考。
+Total transferred:      16300 bytes  # 总共传输的数据量，指的是ab从被测服务器接收到的总数据量，包括index.html的文本内容和请求头信息。
+Total body sent:        3720
+HTML transferred:       10160 bytes  # 从服务器接收到的内容或文件的总大小，等于Document Length＊Complete requests＝508 bytes＊20＝10160 bytes
+Requests per second:    21.47 [#/sec] (mean)  #吞吐量-平均每秒请求数；等于Complete requests/Time taken for tests=20/0.932=21.47
+Time per request:       465.765 [ms] (mean)  # 服务器收到请求，响应页面要花费的时间，即从用户角度看，完成一个请求所需要的时间（因用户数量不止一个，服务器完成10个请求，平均每个用户才接收到一个完整的返回，所以该值是下一项数值的10倍。）
+Time per request:       46.576 [ms] (mean, across all concurrent requests)  # 并发的每个请求平均消耗时间，即服务器完成一个请求的时间。
+Transfer rate:          17.09 [Kbytes/sec] received  # 平均每秒网络上的流量，可以帮助排除是否存在网络流量过大导致响应时间延长的问题；
+                        3.90 kb/s sent
+                        20.99 kb/s total
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:   177  360 100.9    369     487
+Waiting:      177  360 100.9    369     487
+Total:        177  360 100.8    369     487
+
+# 这几行组成的表格主要是针对响应时间也就是第一个Time per request进行细分和统计。
+# 一个请求的响应时间可以分成网络链接（Connect），系统处理（Processing）和等待（Waiting）三个部分。
+# 表中min表示最小值； mean表示平均值；[+/-sd]表示标准差（Standard Deviation） ，也称均方差（mean square error），表示数据的离散程度，数值越大表示数据越分散，系统响应时间越不稳定。 
+median表示中位数； max当然就是表示最大值了。
+# 需要注意的是表中的Total并不等于前三行数据相加，因为前三行的数据并不是在同一个请求中采集到的，可能某个请求的网络延迟最短，但是系统处理时间又是最长的呢。
+所以Total是从整个请求所需要的时间的角度来统计的。这里可以看到最慢的一个请求花费了487ms，这个数据可以在下面的表中得到验证。
+
+Percentage of the requests served within a certain time (ms)
+  50%    369
+  66%    440
+  75%    453
+  80%    453
+  90%    479
+  95%    487
+  98%    487
+  99%    487
+ 100%    487 (longest request)
+
+整个场景中所有请求的响应情况。在场景中每个请求都有一个响应时间 
+其中 50％ 的用户响应时间小于 369 毫秒 
+80 ％ 的用户响应时间小于 453 毫秒 
+最大的响应时间小于 487 毫秒 
+

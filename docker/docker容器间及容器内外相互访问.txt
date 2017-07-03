@@ -32,6 +32,20 @@ wlp9s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet6 fe80::7081:a93d:5a44:8c3e  prefixlen 64  scopeid 0x20<link>
         ether 74:e5:0b:86:a2:e8  txqueuelen 1000  (Ethernet)
         RX packets 683182  bytes 879923683 (839.1 MiB)
+# 并且宿主机允许其他的机器通过ip访问
+# 如防火墙允许：
+gswyhq@gswyhq-pc:~/yhb$ sudo ufw allow from 172.17.0.0/12
+[sudo] gswyhq 的密码：
+WARN: Rule changed after normalization
+Rule added
+# 重启ufw使新规则生效
+gswyhq@gswyhq-pc:~/yhb$ sudo ufw reload
+
+# 数据库层面的允许，如mysql数据库允许其他的机器访问：
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.%' IDENTIFIED BY '123456' WITH GRANT OPTION;
+# 使修改生效：
+FLUSH   PRIVILEGES;
+
 # 在容器内访问宿主机：
 root@527284633c1d:/yhb# python3
 >>> import redis
