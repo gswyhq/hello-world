@@ -4,6 +4,11 @@ gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
 Created symlink from /etc/systemd/system/sockets.target.wants/docker.socket to /lib/systemd/system/docker.socket.
 正在处理用于 systemd (229-4) 的触发器 ...
 
+# 或者直接下载安装文件进行安装：
+ubuntu@10-13-109-255:~$ sudo curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.05.0-ce.tgz 
+ubuntu@10-13-109-255:~$ sudo tar --strip-components=1 -xvzf docker-17.05.0-ce.tgz -C /usr/local/bin
+以守护进程进行运行：/usr/local/bin/dockerd
+
 用户组和配置文件修改
 把当前用户加入到docker用户组中
 gswyhq@gswyhq-pc:~$ sudo usermod -a -G docker $USER

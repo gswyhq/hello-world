@@ -1,0 +1,28 @@
+
+ubuntu@10-13-109-255:~$ sudo docker ps
+如果不跟 sudo，直接执行 docker ps 命令会有如下问题：
+ubuntu@10-13-109-255:~$ docker ps
+FATA[0000] Get http:///var/run/docker.sock/v1.18/containers/json: dial unix /var/run/docker.sock: permission denied. Are you trying to connect to a TLS-enabled daemon without TLS? 
+
+# 免 sudo 使用 docker
+第一步：如果还没有 docker group 就添加一个：
+sudo groupadd docker
+第二步：将用户加入该 group 内。然后退出并重新登录就生效啦。
+sudo gpasswd -a ${USER} docker
+第三步：重启 docker 服务
+sudo service docker restart
+第四步：然后退出并重新登录就生效
+切换当前会话到新 group 或者重启 X 会话
+注意，最后一步是必须的，否则因为 groups 命令获取到的是缓存的组信息，刚添加的组信息未能生效，所以 docker images 执行时同样有错。
+
+# docker服务未启动报错：
+ubuntu@10-13-109-255:~/docker$ docker images 
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+这个时候启动docker服务即可：
+root@10-13-109-255:~# /usr/local/bin/dockerd &
+或者：
+systemctl start docker # 启动docker
+systemctl restart docker # 重启dokcer
+systemctl enable docker # 开机自动启动docker
+
+
