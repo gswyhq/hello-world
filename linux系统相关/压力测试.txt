@@ -2,6 +2,17 @@
 ab是apache自带的一个很好用的压力测试工具，当安装完apache的时候，就可以在bin下面找到ab
 apache2的安装（apache2在apache的基础上有大的改动）：
 gswyhq@gswyhq-pc:~$ sudo apt-get install apache2
+
+# 需要注意的是，apache跟nginx同时使用是冲突的，都会使用80端口；
+这个时候可以更改一下apache的监听端口：
+gswyhq@gswyhq-pc:~$ sudo vim /etc/apache2/ports.conf 
+`Listen 80`  改为 `Listen 8080`
+
+# 查看apache服务的状态：
+gswyhq@gswyhq-pc:~$ /usr/sbin/apachectl status
+# 停止apache服务
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/apache2ctl stop
+
 gswyhq@gswyhq-pc:~$ whereis ab
 ab: /usr/bin/ab /usr/share/man/man1/ab.1.gz
 
@@ -80,4 +91,5 @@ Percentage of the requests served within a certain time (ms)
 其中 50％ 的用户响应时间小于 369 毫秒 
 80 ％ 的用户响应时间小于 453 毫秒 
 最大的响应时间小于 487 毫秒 
+
 
