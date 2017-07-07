@@ -12,6 +12,8 @@ gswyhq@gswyhq-pc:~$ sudo vim /etc/apache2/ports.conf
 gswyhq@gswyhq-pc:~$ /usr/sbin/apachectl status
 # 停止apache服务
 gswyhq@gswyhq-pc:~$ sudo /usr/sbin/apache2ctl stop
+# 重新启动nginx:
+gswyhq@gswyhq-pc:~$ sudo /etc/init.d/nginx restart
 
 gswyhq@gswyhq-pc:~$ whereis ab
 ab: /usr/bin/ab /usr/share/man/man1/ab.1.gz
