@@ -101,3 +101,15 @@ $ netstat -ant | grep 4243
 7、继续启动服务
 gswyhq@gswyhq-pc:~/docker/test_web$ docker-compose up
 
+# 有时会报下面的错误：
+gswyhq@gswyhq-pc:~$ docker ps
+Cannot connect to the Docker daemon at tcp://localhost:4243. Is the docker daemon running?
+这时需要把当前用户加入到docker用户组中
+gswyhq@gswyhq-pc:~$ sudo usermod -a -G docker $USER
+# 查看docker服务是否开启：
+gswyhq@gswyhq-pc:~$ netstat -pan | grep 4243
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+# 将docker设置为开机启动
+gswyhq@gswyhq-pc:~$ sudo systemctl enable docker
+
