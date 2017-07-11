@@ -207,3 +207,17 @@ $http_name：匹配请求报文中的指定 HEADER，如 $http_host 匹配请求
 $sent_http_name：匹配响应报文中指定的 HEADER，例如 $sent_content_type 匹配响应报文中的 content-type 首部
 $status：响应状态
 
+有时候启动nginx出错：
+gswyhq@gswyhq-pc:~$ /etc/init.d/nginx restart
+[....] Restarting nginx (via systemctl): nginx.serviceJob for nginx.service failed because the control process exited with error code. See "systemctl status nginx.service" and "journalctl -xe" for details.
+ failed!
+这个时候可能是其他的某个程序占用了80端口，如：
+gswyhq@gswyhq-pc:~$ /usr/sbin/apachectl status
+/usr/sbin/apachectl: 113: /usr/sbin/apachectl: www-browser: not found
+'www-browser -dump http://localhost:80/server-status' failed.
+Maybe you need to install a package providing www-browser or you
+need to adjust the APACHE_LYNX variable in /etc/apache2/envvars
+gswyhq@gswyhq-pc:~$ sudo /usr/sbin/apachectl stop
+就能正常使用nginx了；
+
+

@@ -33,5 +33,11 @@ gswyhq@gswyhq-pc:~$ sudo docker port 6cfa9da94df2
 echo test | docker run -i busybox cat
 因为要作一个最小的系统，又要实现一个linux系统的基本功能。因此选定busybox来实现这个系统。（busybox是静态编译，没有任何依赖，无需系统库及第三方库，且1.21.1版本的busybox只有951K）。
 
+–restart(自动重启)：默认情况下容器是不重启的，–restart标志会检查容器的退出码来决定容器是否重启容器。 
+docker run --restart=always --name docker_restart -d centos /bin/sh -c "while true;do echo hello world; sleep;done":
+--restart=always:不管容器的返回码是什么，都会重启容器。
+--restart=on-failure:5:当容器的返回值是非0时才会重启容器。5是可选的重启次数。
+
+
 
 

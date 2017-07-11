@@ -19,11 +19,23 @@ user=www-data
 其中，进程app定义在[program:app]中，command是命令，directory是进程的当前目录，user是进程运行的用户身份。
 
 重启supervisor，让配置文件生效，然后运行命令supervisorctl启动进程：
-
 # supervisorctl start app
-停止进程：
 
+# 更新新的配置到supervisord (会将新写的配置文件直接start，对于旧的已经在运行的不会重启)   
+ubuntu@10-13-70-173:~/qbzz$ sudo supervisorctl update
+
+# 重新启动配置中的所有程序（对现有运行的程序会重启一次）
+supervisorctl reload  
+
+
+停止进程 (app=你配置中写的程序名称)：
 # supervisorctl stop app
+
+停止全部进程：
+supervisorctl stop all  
+
+注意：显示用stop停止掉的进程，用reload或者update都不会自动重启。
+
 如果要在命令行中使用变量，就需要自己先编写一个shell脚本：
 
 #!/bin/sh

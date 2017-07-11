@@ -1,0 +1,7 @@
+
+1 //删除当前数据库中的所有Key  
+2 flushdb  
+3 //删除所有数据库中的key  
+4 flushall 
+
+
