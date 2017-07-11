@@ -468,6 +468,9 @@ df -h
 # 查看/home/gswyhq/xiaoxiao/下文件大小
 gswyhq@gswyhq-pc:~/xiaoxiao$ du -h --max-depth=1 /home/gswyhq/xiaoxiao/*
 
+# 查看当前目录下的文件及文件夹的大小：
+web1@10-13-101-154:~$ du -sh *
+
 # 查看文件的md5值：
 gswyhq@gswyhq-pc:~/qa_jar$ md5sum jar/sim.jar
 0810a0fbeda9bb7a5e8954e569910d2a  jar/sim.jar

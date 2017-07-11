@@ -1,5 +1,11 @@
 
+# 更新系统，确保软件包列表的有效性
 gswyhq@gswyhq-pc:~$ sudo apt-get update
+# 如果Ubuntu的版本不满足，还需升级Ubuntu
+# apt-get -y upgrade
+upgrade 是升级已安装的所有软件包，升级之后的版本就是本地索引里的，因此，在执行 upgrade 之前一定要执行 update, 这样才能是最新的。
+
+# 安装docker
 gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
 Created symlink from /etc/systemd/system/sockets.target.wants/docker.socket to /lib/systemd/system/docker.socket.
 正在处理用于 systemd (229-4) 的触发器 ...
@@ -34,6 +40,28 @@ gswyhq@gswyhq-pc:~$ sudo docker start d42fe5599730
 sudo service docker start    #启动 
 sudo service docker stop    #关闭 
 sudo service docker restart #重启 
+
+# 自动重启容器
+$ sudo docker run --restart=always --name my_container -d ubuntu /bin/bash
+--restart 标志会检查容器的退出代码，并据此来决定是否要重启容器，默认是不会重启。
+--restart的参数说明
+always：无论容器的退出代码是什么，Docker都会自动重启该容器。
+on-failure：只有当容器的退出代码为非0值的时候才会自动重启。
+另外，该参数还接受一个可选的重启次数参数，`--restart=on-fialure:5`表示当容器退出代码为非0时，Docker会尝试自动重启该容器，最多5次。
+注意：自动重启容器，只有在docker服务设置了开机启动后才有效；
+
+# 让docker服务开机启动：
+ubuntu 15 及以上可通过下面方法设置开机启动docker
+zy@ubuntu:~$ cat /etc/issue
+Ubuntu 16.04.2 LTS \n \l
+zy@ubuntu:~$ sudo systemctl enable docker
+
+# 低版本的ubuntu只能通过下面方法设置开机启动
+ubuntu@10-13-70-173:~$ cat /etc/issue
+Ubuntu 14.04.5 LTS \n \l
+ubuntu@10-13-70-173:~$ sudo systemctl enable docker
+sudo: systemctl: command not found
+ubuntu@10-13-70-173:~$ sudo update-rc.d docker defaults
 
 # 有时候pull镜像时，一直都是timeout，这时可采用国内的镜像：
 gswyhq@gswyhq-pc:~$ echo "DOCKER_OPTS="$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io"" | sudo tee -a /etc/default/docker

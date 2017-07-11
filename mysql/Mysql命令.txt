@@ -201,6 +201,9 @@ ON DUPLICATE KEY UPDATE b=VALUES(b);
 INSERT INTO `table` (`a`, `b`, `c`) VALUES (1, 2, 3) ON DUPLICATE KEY UPDATE `c`=`c`+1; 
 UPDATE `table` SET `c`=`c`+1 WHERE `a`=1;
 
+REPLACE语句和INSERT语句用法非常相似，唯一的区别就是，在一个UNIQUE索引或PRIMARY KEY中出现重复值的时候，REPLACE会先删除旧行后再插入新行，INSERT语句则报错。
+如果数据表没有使用PRIMARY KEY或UNIQUE索引，则REPLACE与INSERT语句完全一样。
+
 # 删除数据表class_member的全部数据，但保留表结构（字段名、字段值类型等）；
 mysql> truncate TABLE class_member;
 
