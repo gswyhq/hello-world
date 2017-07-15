@@ -1,0 +1,68 @@
+
+实践，编写Dockerfile文件及python应用
+gswyhq@gswyhq-pc:~/test_docker$ ls
+Dockerfile  hello.py
+gswyhq@gswyhq-pc:~/test_docker$ vim Dockerfile
+  1 FROM ubuntu:0701
+  2
+  3 # 设置环境变量
+  4 ENV LANG zh_CN.UTF-8
+  5 ENV MYSQL_HOST localhost
+  6 ENV MYSQL_PORT 3306
+  7
+  8 ADD hello.py /src/hello.py
+  9
+ 10 # WORKDIR: 当前的工作目录
+ 11 WORKDIR /src/
+ 12
+ 13 EXPOSE 8000
+ 14
+ 15 # 设置container启动时执行的操作，指定了该镜像启动时的入口
+ 16 ENTRYPOINT ["python3", "hello.py"]
+ 17
+ 18 # 指定了容器启动时的命令
+ 19 CMD ["-qa"]
+ 20
+
+ gswyhq@gswyhq-pc:~/test_docker$ vim hello.py
+  1 #!/usr/bin/python3
+  2 # coding: utf-8
+  3 import os
+  4 import argparse
+  5
+  6 MYSQL_HOST = os.getenv('MYSQL_HOST')
+  7 MYSQL_PORT = os.getenv('MYSQL_PORT')
+  8
+  9 parser = argparse.ArgumentParser()
+ 10 parser.add_argument('-qa', '--qa', dest='qa', action='store_true', help='启用用户自定义的配置（默认启用用户自定义配置）')
+ 11 parser.add_argument('-no-qa', '-not-qa', '--not-qa', '--no-qa', dest='qa', action='store_false', help='不启用用户自定义的配置（默>    认启用用户自定义配置）')
+ 12 parser.set_defaults(qa=True)
+ 13
+ 14 args = parser.parse_args()
+ 15
+ 16 print("命令行启动参数: {}".format(vars(args)))
+ 17
+ 18 def main():
+ 19     print('你好')
+ 20     print("环境变量`MYSQL_HOST`的值：", MYSQL_HOST)
+ 21     print("环境变量`MYSQL_PORT`的数据类型：", type(MYSQL_PORT))
+ 22
+ 23
+ 24 if __name__ == '__main__':
+ 25     main()
+
+gswyhq@gswyhq-pc:~/test_docker$ docker build -t test_dockt_py0716 .
+
+gswyhq@gswyhq-pc:~/test_docker$ docker run test_dockt_py0716
+
+# 覆盖Dockerfile文件中cmd参数(默认是`-qa`), 修改环境变量MYSQL_HOST（默认值是`localhost`）为196.168.3.51
+gswyhq@gswyhq-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716 -no-qa
+命令行启动参数: {'qa': False}
+你好
+环境变量`MYSQL_HOST`的值： 196.168.3.51
+环境变量`MYSQL_PORT`的数据类型： <class 'str'>
+gswyhq@gswyhq-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716
+命令行启动参数: {'qa': True}
+你好
+环境变量`MYSQL_HOST`的值： 196.168.3.51
+环境变量`MYSQL_PORT`的数据类型： <class 'str'>

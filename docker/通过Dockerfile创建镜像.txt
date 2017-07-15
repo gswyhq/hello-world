@@ -186,4 +186,3 @@ $docker build -t py-ubuntu .
 --no-cache=false表示在构建过程中不使用缓存
 -t   给该镜像赋予一个tag，用以将来的调用与搜索
 .　  表示调用当前目录的Dockerfile
-
