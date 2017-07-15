@@ -35,4 +35,7 @@ data volumes备份、恢复或迁移
   docker run -v /dbdata --name dbdata2 ubuntu /bin/bash
   docker run --volumes-from dbdata2 -v $(pwd):/backup centos tar xvf /backup/backup.tar
 
-
+# 向容器内复制文件：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl
+# 将容器内的文件复制到当前目录：
+gswyhq@gswyhq-pc:~/hello-world/docker$ docker cp b874b4c27fe0:/ubuntu/abc.py .

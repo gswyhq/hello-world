@@ -1,0 +1,52 @@
+
+gswyhq@gswyhq-pc:~/docker/mysql$ docker run --name mysql13306 -p 13306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+
+# 默认情况下，Docker通过使用自己的内部卷管理将数据库文件写入主机系统上的磁盘来管理数据库数据的存储。
+缺点是在容器外部，比如宿主机上可能难以定位到文件；
+在宿主机系统（容器外部）上创建一个数据目录，并将其安装到容器内部可见的目录中。
+这将数据库文件放置在主机系统上的已知位置，并使主机系统上的工具和应用程序易于访问文件。
+缺点是用户需要确保目录存在，例如，主机系统上的目录权限和其他安全机制设置正确。
+在宿主机系统上的合适卷上创建数据目录（`/home/gswyhq/docker/mysql/datadir`），并使用下面的参数启动容器：
+-v /home/gswyhq/docker/mysql/datadir:/var/lib/mysql
+$ docker run --name some-mysql -v /home/gswyhq/docker/mysql/datadir:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+some-mysql：容器的名字
+my-secret-pw：设置的mysql实例对应的root用户密码
+
+# MYSQL_ROOT_PASSWORD: 是必须参数，设置mysql数据库root用户密码
+# MYSQL_DATABASE：非必须参数，启动镜像时创建的数据库名
+# MYSQL_USER，MYSQL_PASSWORD
+这些变量是可选的，用于创建新用户并设置该用户的密码。
+该用户将被授予由MYSQL_DATABASE变量指定的数据库的超级用户权限。这两个变量是创建用户所必需的。
+
+# MYSQL_ALLOW_EMPTY_PASSWORD
+这是一个可选变量。设置为yes以允许以root用户的空白密码启动容器。
+将使MySQL实例完全无保护，从而允许任何人获得完整的超级用户访问权限。
+
+MYSQL_RANDOM_ROOT_PASSWORD
+这是一个可选变量。设置为yes以生成root用户的随机初始密码（使用pwgen）。
+生成的根密码将打印到标准输出（GENERATED ROOT PASSWORD：.....）。
+
+MYSQL_ONETIME_PASSWORD
+一旦init完成，将root（而不是MYSQL_USER！）中指定的用户设置为过期，则首次登录时强制更改密码。
+
+# 使用自定义MySQL配置文件
+MySQL启动配置在文件/etc/mysql/my.cnf中指定，该文件又包含在/etc/mysql/conf.d目录中以.cnf结尾的任何文件。
+此目录中文件中的设置将‘增加或覆盖’/etc/mysql/my.cnf中的设置。
+如果要使用自定义的MySQL配置，您可以在主机上的目录中创建备用配置文件，然后将该目录位置作为/etc/mysql/conf.d装载到mysql容器内。
+
+如果/home/gswyhq/config-file.cnf是自定义配置文件的路径和名称，
+则可以像这样启动您的mysql容器（请注意，此命令中仅使用自定义配置文件的目录路径）：
+$ docker run --name some-mysql -v /home/gswyhq:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD = my-secret-pw -d mysql：tag
+这将启动一个新的容器some-mysql，其中MySQL实例使用/etc/mysql/my.cnf和/etc/mysql/conf.d/config-file.cnf中的组合启动设置，后者的设置优先。
+
+# 没有cnf文件的配置
+许多配置选项可以作为标志传递给mysqld。这将使您灵活地自定义容器而不需要cnf文件。
+例如，如果要将所有表的默认编码和排序规则更改为使用UTF-8（utf8mb4），请运行以下命令：
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+如果您想查看完整的可用选项列表，只需运行：
+
+$ docker run -it --rm mysql:tag --verbose --help
+
+

@@ -1,0 +1,43 @@
+
+elasticsearch
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch9200 -p 9200:9200 -p 9300:9300 elasticsearch
+
+以上启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
+但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
+这个时候需要进入容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
+# config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker cp elasticsearch.yml elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker restart elasticsearch9200
+
+使用集群时，需要修改宿主机的 vm.max_map_count的值：
+sysctl -w vm.max_map_count=262144
+
+如果vm.max_map_count不够高，Elasticsearch将不会在生产模式下启动。
+如果您的系统上的值不够高，那么您的集群将在某个阶段崩溃并刻录，您将丢失数据。
+
+集群配置例子：
+$ docker run -d --name elas elasticsearch -Etransport.host=0.0.0.0 -Ediscovery.zen.minimum_master_nodes=1
+
+简单地运行默认的elasticsearch命令：
+$ docker run -d elasticsearch
+
+您还可以传递额外的标记弹性搜索：
+$ docker run -d elasticsearch -Des.node.name="TestNode"
+
+如果要提供自己的一组配置文件，可以通过安装在/usr/share/elasticsearch/config上的卷来实现：
+$ docker run -d -v "$PWD/config":/usr/share/elasticsearch/config elasticsearch
+
+如果要将数据保存在已装入的卷中，请使用该路径：
+$ docker run -d -v "$PWD/esdata":/usr/share/elasticsearch/data elasticsearch
+
+elasticsearch镜像包括EXPOSE 9200 9300（默认http.port）
+
+启动时，有时候报错：
+[2017-07-15T09:27:44,374][INFO ][o.e.c.r.a.DiskThresholdMonitor] [JVpxgkj] low disk watermark [85%] exceeded on [JVpxgkjYSnCjeeAbAD41rQ][JVpxgkj][/usr/share/elasticsearch/data/nodes/0] free: 13.3gb[10.4%], replicas will not be assigned to this node
+是因为磁盘空间已经有85%被使用，这个时候，清理下宿主机的磁盘空间即可；
+
