@@ -8,6 +8,10 @@ sudo apt-get install redis-server
 gswyhq@gswyhq-pc:~$ sudo systemctl stop redis-server
 gswyhq@gswyhq-pc:~$ sudo systemctl start redis-server
 
+# 设置与取消开机启动：
+gswyhq@gswyhq-pc:~$ sudo systemctl enable redis-server
+gswyhq@gswyhq-pc:~$ sudo systemctl disable redis-server
+
 安装python包：
 sudo pip install redis
 

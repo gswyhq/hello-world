@@ -1,0 +1,13 @@
+hello-test:
+  build: .
+  links:
+    - docker-redis
+  ports:
+    - "8000:8000"
+  restart: always
+
+docker-redis:
+  image: redis
+  restart: always
+
+#  `docker-compose build` or `docker-compose -p yhb0716 up --build -d `

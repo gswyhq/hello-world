@@ -1,0 +1,71 @@
+
+一、安装docker及配置
+
+二、自定义一个ubuntu镜像
+1、拉取ubuntu镜像
+gswyhq@gswyhq-pc:~$ sudo docker pull ubuntu
+2、运行ubuntu镜像，生成一个容器
+gswyhq@gswyhq-pc:~$ docker run -i -t ubuntu /bin/bash
+3、在容器内更新软件源
+root@50d8508bb70c:/# sudo apt-get update
+4、安装程序
+root@50d8508bb70c:/# apt-get install python3-pip
+...
+5、退出容器，并将容器保存为新的ubuntu镜像
+root@50d8508bb70c:/# exit
+gswyhq@gswyhq-pc:~$ docker commit 50d8508bb70c ubuntu:0716
+提交变更，并且把容器保存成Tag为0716的新的ubuntu镜像.(注意，这里提交只是提交到本地仓库，类似Git)
+6、查看刚刚保存的镜像
+gswyhq@gswyhq-pc:~$ docker images
+REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
+ubuntu                     0716                c27181d8ffe6        40 minutes ago      1.83 GB
+
+三、编写python应用程序
+gswyhq@gswyhq-pc:~/yhb0716$ vim hello.py
+
+四、编写Dockerfile文件以用于生成`python应用`的镜像
+gswyhq@gswyhq-pc:~/yhb0716$ vim Dockerfile
+
+五、编写docker-compose.yml文件以管理工程项目
+gswyhq@gswyhq-pc:~/yhb0716$ vim docker-compose.yml
+
+至此，准备工作已完成，查看目录结构：
+gswyhq@gswyhq-pc:~/yhb0716$ ls
+docker-compose.yml  Dockerfile  hello.py
+
+# 创建镜像及生成对应的容器：
+# -f, --file FILE 指定一个非docker-compose.yml命名的yaml文件。
+# -p, --project-name NAME 设置一个项目名称，默认使用目录名称。
+# gswyhq@gswyhq-pc:~/hello-world/docker/利用docker-compose管理一个工程$ docker-compose -p yhb0716 up --build -d
+gswyhq@gswyhq-pc:~/yhb0716$ docker-compose up --build
+...
+Successfully built 0e24dbab8875
+Creating yhb0716_docker-redis_1 ... done
+Creating yhb0716_hello-test_1 ... done
+Attaching to yhb0716_docker-redis_1, yhb0716_hello-test_1
+...
+
+# 至此创建了一个名为`yhb0716_hello-test`的镜像，其中`yhb0716`为工程所在的目录名，
+`hello-test`为docker-compose.yml文件中定义的镜像名
+gswyhq@gswyhq-pc:~$ docker images
+REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
+yhb0716_hello-test   latest              0e24dbab8875        39 minutes ago      1.83 GB
+
+# 并且生成了两个容器：
+gswyhq@gswyhq-pc:~$ docker ps
+CONTAINER ID        IMAGE                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+4b0a49083ad6        yhb0716_hello-test   "python3 hello.py -qa"   43 minutes ago      Up 43 minutes       8000/tcp            yhb0716_hello-test_1
+3b97edd06b5f        redis                      "docker-entrypoint..."   43 minutes ago      Up 43 minutes       6379/tcp            yhb0716_docker-redis_1
+
+# 浏览器打开`http://172.17.0.3:8000/`，得到如下结果：
+你好，这是第 b'1' 次请求.
+刷新一下浏览器，结果为：
+你好，这是第 b'2' 次请求.
+
+# kill掉`docker-compose up --build`对应的进程
+gswyhq@gswyhq-pc:~$ ps -aux|grep docker-compose
+gswyhq    7834  0.2  0.2 317992 29388 pts/1    Sl+  12:58   0:07 /usr/bin/python3 /usr/local/bin/docker-compose up --build
+gswyhq@gswyhq-pc:~$ kill -9 7834
+浏览器打开`http://172.17.0.3:8000/`，结果如下：
+你好，这是第 b'3' 次请求.
+
