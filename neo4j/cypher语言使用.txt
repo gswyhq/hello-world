@@ -1,4 +1,6 @@
 
+更详细的neo4j查询语句可见： http://neo4j.com/docs/2.2.0/query-functions-scalar.html
+
  neo4j数据库简单除暴理解的概念：
 
 Neo4j中不存在表的概念，只有两类：节点(Node)和关联(Relation)，可以简单理解为图里面的点和边。
@@ -62,7 +64,10 @@ RETURN：返回所需要的。
         MATCH (s) WHERE ID(s) = 143 RETURN s  # 根据id查询实体；
         MATCH (v0 : Entity{ name: "系列1"})    RETURN ID(v0)  # 根据实体查询其id
         MATCH p=()-[r:`答案列表`]->() RETURN ID(r)  # 获取`答案列表`这个属性的id；
-
+        
+        MATCH (x:Shuxing)-[r]-() RETURN endNode(r)  # 查询所有的叶子节点
+        MATCH (a) WHERE ANY (x IN a.alias WHERE x = "价格") RETURN a  # 在列表中查询，若有一个满足及查询成功
+        
         注：关联的中括号内数字的含义
             n 距离为n
             ..n 最大距离为n
