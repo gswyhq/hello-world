@@ -42,6 +42,9 @@ docker run --restart=always --name docker_restart -d centos /bin/sh -c "while tr
 --restart=always:不管容器的返回码是什么，都会重启容器。
 --restart=on-failure:5:当容器的返回值是非0时才会重启容器。5是可选的重启次数。
 
+# 向已经运行的容器添加重启策略：
+docker update --restart=always <CONTAINER ID>
+
 
 
 

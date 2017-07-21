@@ -25,4 +25,15 @@ systemctl start docker # 启动docker
 systemctl restart docker # 重启dokcer
 systemctl enable docker # 开机自动启动docker
 
+# 监测容器：
+gswyhq@gswyhq-pc:~$ sudo pip3 install ctop
+
+在一下旧的版本中导入时可能出错：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker export ca4b1acbe79b > ubuntu0717-export.tar
+ubuntu@10-13-158-31:~/docker/ubuntu$ sudo docker import ubuntu0717-export.tar ubuntu:0717
+Downloading from http://ubuntu0717-export.tar
+FATA[0001] Get http://ubuntu0717-export.tar: dial tcp: lookup ubuntu0717-export.tar: no such host 
+# 这个时候改用下面的方法导入即可：
+ubuntu@10-13-158-31:~/docker/ubuntu$ cat ubuntu0717-export.tar | sudo docker import - ubuntu:0717
+16a079ae5a08c141a3e710a987259a3cd633f206de226430a46d9ef4e4ddf023
 
