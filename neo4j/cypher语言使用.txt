@@ -25,8 +25,17 @@ RETURN：返回所需要的。
             create (a:Person) 创建标签（可以理解为类）为Person的节点
             create (a:Person {name:‘Kaine‘,age:28}) 创建标签为Person，属性name值为Kaine，属性age值为28的节点
 
+创建一个标签的节点：
+CREATE (ee:Person { name: "Emil", from: "Sweden", klout: 99 })
 
+创建多个标签（这里是`Person`、`Kaa`）的节点：
+CREATE (ee:Person :Kaa { name: "Emil", from: "Sweden", klout: 199 })
 
+删除某个标签（这里是删除`Kaa`）：
+MATCH(m:Person) WHERE m.klout = 199 REMOVE m:Kaa RETURN m
+
+重命名某个节点的标签：
+MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
 
  2）创建关联
 
@@ -215,4 +224,74 @@ RETURN type(r);
 MATCH (:Person { name:'Taylor' })-[r:Follow]->(Person)
 RETURN Person.name;
 
+# http://neo4j.com/docs/2.2.0/query-functions-scalar.html
+13.1. Predicates
+ALL
+ANY
+NONE
+SINGLE
+EXISTS
+
+13.2. Scalar functions
+LENGTH
+LENGTH of pattern expression
+TYPE
+ID
+COALESCE
+HEAD
+LAST
+TIMESTAMP
+STARTNODE
+ENDNODE
+TOINT
+TOFLOAT
+TOSTRING
+
+13.3. Collection functions
+NODES
+RELATIONSHIPS
+LABELS
+KEYS
+EXTRACT
+FILTER
+TAIL
+RANGE
+REDUCE
+
+13.4. Mathematical functions
+ABS
+ACOS
+ASIN
+ATAN
+ATAN2
+COS
+COT
+DEGREES
+E
+EXP
+FLOOR
+HAVERSIN
+LOG
+LOG10
+PI
+RADIANS
+RAND
+ROUND
+SIGN
+SIN
+SQRT
+TAN
+
+13.5. String functions
+STR
+REPLACE
+SUBSTRING
+LEFT
+RIGHT
+LTRIM
+RTRIM
+TRIM
+LOWER
+UPPER
+SPLIT
 

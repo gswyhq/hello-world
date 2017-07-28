@@ -39,12 +39,15 @@ tag的使用
 	gswyhq@gswyhq-pc:~/yhb$ git fetch --tags
 
 5）查看tag
-	git tag -l
-
 	查看本地的tag
 	gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git tag
 	beta0.1.161121
 	beta0.1.161123
+
+    查看本地tag的详细信息：
+    gswyhq@gswyhq-pc:~/yhb$ git tag -n
+    alpha0.0.1.170413 问句与模板匹配算法切换到词向量前的较稳定版本
+    alpha0.0.1.170420 服务器上20170420运行的版本
 
 	查看远程的tag
 	gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git ls-remote --tags origin

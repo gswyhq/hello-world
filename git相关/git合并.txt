@@ -43,7 +43,23 @@ Merge made by the 'recursive' strategy.
 # 合并某个分支上的单个commit
 git checkout master  
 git cherry-pick 62ecb3  
-现在62ecb3 就被合并到master分支，并在master中添加了commit（作为一个新的commit）
+现在62ecb3 就被合并到master分支，并在master中添加了commit
+cherry-pick是作为一个新的commit, 合并过来的commit`62ecb3`在本分支上是看不到的，
+故用`git branch --no-merged`查看未合并分支时，发现该commit对应的分支仍未合并
+
+# 有时候一个分支明明比另一个分值领先，但查看未合并分支时，发现有旧的分支没有合并；
+# 这个时候，可以先查找旧分支上未合并的commit 的hash值，再把对应的commit合并过来即可
+    gswyhq@gswyhq-pc:~/yhb$ git branch
+      dev
+    * dingdang
+      wmd_template
+    gswyhq@gswyhq-pc:~/yhb$ git branch --no-merged
+      wmd_template
+    gswyhq@gswyhq-pc:~/yhb$ git merge e880911049
+    Merge made by the 'recursive' strategy.
+     wmd/qa_chat_wmd.py | 1 +
+     1 file changed, 1 insertion(+)
+    gswyhq@gswyhq-pc:~/yhb$ git branch --no-merged
 
 # 合并某个分支上的一系列commits
 假设你需要合并feature分支的commit76cada ~62ecb3 到master分支。
@@ -53,3 +69,79 @@ git checkout -bnewbranch 62ecb3
 git rebase --ontomaster 76cada^  
 得到的结果就是feature分支的commit 76cada ~62ecb3 都被合并到了master分支。
 
+合并多个commit示例：
+1、查看当前的日志，找出不需要合并的 commit 的 hash 值
+    gswyhq@gswyhq-pc:~/yhb$ git log
+    commit 2e0b6531fc555883884cd0e6dfab98c13e5feb43
+    Merge: 4a9da01 d9d3650
+    Author: gswyhqyang <gswyhqyang@web1.co>
+    Date:   2017-07-24 15:17:48 +0800
+
+        合并线上运行版本
+
+    commit d9d36509d3e590d72196754f2c92d40fee985b48
+    Author: web1 <web1@web1.co>
+    Date:   2017-07-24 09:09:21 +0800
+
+        分值不够，但解析出实体也走上下文流程
+
+    commit 4cd50b7aacdb4b3d704ac91f589392a3eeecff80
+    Author: web1 <web1@web1.co>
+    Date:   2017-07-22 14:22:38 +0800
+
+        20170722模板
+
+    commit 4a9da0103bbea7ec98c75209014966be3b81292b
+    Author: gswyhqyang <gswyhqyang@web1.co>
+    Date:   2017-07-06 20:51:48 +0800
+
+        debug：融合答案
+
+2、rebase不需要合并的 commit 的 hash，进入到 vi 的编辑模式（示例，将 2e0b6531f 、 d9d36509d3e 和 4cd50b7aacd 合并成一个 commit）
+    gswyhq@gswyhq-pc:~/yhb$ git rebase -i 4a9da0103b
+
+    pick 11497ad 你我贷项目个性化配置
+    pick 42fb915 你我贷项目个性化配置
+    pick 4cd50b7 20170722模板
+    pick d9d3650 分值不够，但解析出实体也走上下文流程
+
+    # 变基 4a9da01..2e0b653 到 4a9da01（4 个提交）
+    #
+    # 命令:
+    # p, pick = 使用提交
+    # r, reword = 使用提交，但修改提交说明
+    # e, edit = 使用提交，但停止以便进行提交修补
+    # s, squash = 使用提交，但和前一个版本融合
+    # f, fixup = 类似于 "squash"，但丢弃提交说明日志
+    # x, exec = 使用 shell 运行命令（此行剩余部分）
+    # d, drop = 删除提交
+    #
+    # 这些行可以被重新排序；它们会被从上至下地执行。
+    #
+    #
+    # 如果您在这里删除一行，对应的提交将会丢失。
+    #
+    # 然而，如果您删除全部内容，变基操作将会终止。
+    #
+    # 注意空提交已被注释掉
+
+    选择pick操作，git会应用这个补丁，以同样的提交信息（commit message）保存提交
+    选择reword操作，git会应用这个补丁，但需要重新编辑提交信息
+    选择edit操作，git会应用这个补丁，但会因为amending而终止
+    选择squash操作，git会应用这个补丁，但会与之前的提交合并
+    选择fixup操作，git会应用这个补丁，但会丢掉提交日志
+    选择exec操作，git会在shell中运行这个命令
+
+3、将需要合并的 commit 前方的`pick`命令改成 squash 或 s，然后输入`ctrl+X`以保存并退出
+    s 11497ad 你我贷项目个性化配置
+    s 42fb915 你我贷项目个性化配置
+    s 4cd50b7 20170722模板
+    s d9d3650 分值不够，但解析出实体也走上下文流程
+
+    ^G 求助          ^O Write Out     ^W 搜索          ^K 剪切文字      ^J 对齐          ^C 游标位置      ^Y 上页          M-\ 首行         M-W 何处是下一个 ^^ 标记文字      M-} 缩进文字     M-U 撤销
+    ^X 离开          ^R 读档          ^\ 替换          ^U Uncut Text    ^T 拼写检查      ^_ 跳行          ^V 下页          M-/ 尾行         M-] To Bracket   M-^ 复制文字     M-{ 取消缩进     M-E 重做
+
+4、注意事项：
+    没有父提交的情况下不能 'squash'，也就是说`2e0b6531f`是由`42fb915`和`11497ad`合并而成，并不能再进行合并
+    如果这个过程中有操作错误，可以使用 git rebase --abort来撤销修改，回到没有开始操作合并之前的状态。
+    gswyhq@gswyhq-pc:~/yhb$ git rebase --abort
