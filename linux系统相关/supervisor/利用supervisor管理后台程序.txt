@@ -34,6 +34,14 @@ supervisorctl reload
 停止全部进程：
 supervisorctl stop all  
 
+supervisorctl stop programxxx   停止某一个进程(programxxx)，programxxx为[program:chatdemon]里配置的值，这个示例就是chatdemon
+supervisorctl start programxxx  启动某个进程
+supervisorctl restart programxxx    重启某个进程
+supervisorctl stop groupworker  重启所有属于名为groupworker这个分组的进程(start,restart同理)
+supervisorctl stop all  停止全部进程，注：start、restart、stop都不会载入最新的配置文件
+supervisorctl reload    载入最新的配置文件，停止原有进程并按新的配置启动、管理所有进程
+supervisorctl update    根据最新的配置文件，启动新配置或有改动的进程，配置没有改动的进程不会受影响而重启。注意：显示用stop停止掉的进程，用reload或者update都不会自动重启
+
 注意：显示用stop停止掉的进程，用reload或者update都不会自动重启。
 
 如果要在命令行中使用变量，就需要自己先编写一个shell脚本：
@@ -56,11 +64,47 @@ command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
 directory=/home/gswyhq/yhb/
 # user=web1
 user=gswyhq
-autorestart=true
-redirect_stderr=true
+startretries=10               ; 启动失败时的最多重试次数
+autostart=true                    ; 程序是否随supervisor启动而启动                
+autorestart=true                  ;程序停止时，是否自动重启 
+redirect_stderr=true          ; 重定向stderr到stdout
 stdout_logfile=/home/gswyhq/yhb/log/tornado.log
 stderr_logfile=/home/gswyhq/yhb/log/tornado.log
 loglevel=info
+
+
+; 管理单个进程的配置，可创建多个，下面是所有可能的配置选项
+;[program:theprogramname]
+;command=/bin/cat              ; 启动进程的命令 使用相对路径，可以加参数
+;process_name=%(program_name)s ; 进程名称 表达式 (默认 %(program_name)s)
+;numprocs=1                    ; 进程数目 (def 1)
+;directory=/tmp                ; 执行命令所在的目录 (def no cwd)
+;umask=022                     ; 进程默认权限 (default None)
+;priority=999                  ; 进程启动相对优先权 (default 999)
+;autostart=true                ; 跟随supervisor启动时启动 (default: true)
+;autorestart=unexpected        ; 计划启动 (default: unexpected)
+;startsecs=1                   ; 延时启动 (def. 1)
+;startretries=3                ; 最多连续启动失败 (default 3)
+;exitcodes=0,2                 ; 进程结束代码 (default 0,2)
+;stopsignal=QUIT               ; signal used to kill process (default TERM)
+;stopwaitsecs=10               ; 最长结束等待时间，否则使用 SIGKILL (default 10)
+;stopasgroup=false             ; 是否想UNIX进程组发送结束信号 (default false)
+;killasgroup=false             ; SIGKILL UNIX 进程组 (def false)
+;user=chrism                   ; 设置启动此程序的用户
+;redirect_stderr=true          ; 重定向程序的标准错误到标准输出 (default false)
+;stdout_logfile=/a/path        ; 标准输出的日志路径, NONE for none; default AUTO
+;stdout_logfile_maxbytes=1MB   ; 日志文件最大值，否则循环写入 (default 50MB)
+;stdout_logfile_backups=10     ; 标准输出日志备份数目 (default 10)
+;stdout_capture_maxbytes=1MB   ; number of bytes in 'capturemode' (default 0)
+;stdout_events_enabled=false   ; emit events on stdout writes (default false)
+;stderr_logfile=/a/path        ; 标准错误输出日志路径, NONE for none; default AUTO
+;stderr_logfile_maxbytes=1MB   ; 日志文件最大值，否则循环写入 (default 50MB)
+;stderr_logfile_backups=10     ; 标准错误日志备份数目 (default 10)
+;stderr_capture_maxbytes=1MB   ; number of bytes in 'capturemode' (default 0)
+;stderr_events_enabled=false   ; emit events on stderr writes (default false)
+;environment=A="1",B="2"       ; 进程附加环境 (def no adds)
+;serverurl=AUTO                ; override serverurl computation (childutils)
+
 
 第二步：启动
 gswyhq@gswyhq-pc:~$ sudo supervisorctl start tornado-8000

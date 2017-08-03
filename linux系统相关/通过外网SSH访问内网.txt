@@ -36,6 +36,9 @@ ssh -fCNL "*:<port_b2>:localhost:<port_b1>' localhost
 ssh -p <portb2> usra@B.B.B.B
 至此方案完成。
 
+autossh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
+ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
+
 附：
 
 SSH 参数解释

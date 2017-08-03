@@ -1,0 +1,25 @@
+
+启动对应的neo4j服务后，进入neo4j安装目录，连接上对应的数据路径：
+gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j-shell -path /home/gswyhq/docker/neo4j/movie_graph/data
+
+# 创建一个节点数据：
+neo4j-sh (?)$ CREATE (:Movie { title:"The Matrix",released:1997 }) ;
++-------------------+
+| No data returned. |
++-------------------+
+Nodes created: 1
+Properties set: 2
+Labels added: 1
+962 ms
+
+# 查询刚刚创建的数据：
+neo4j-sh (?)$ match (m:Movie) return m limit 2;
++-------------------------------------------+
+| m                                         |
++-------------------------------------------+
+| Node[0]{title:"The Matrix",released:1997} |
++-------------------------------------------+
+1 row
+329 ms
+
+

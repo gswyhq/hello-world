@@ -1,5 +1,26 @@
 
 更详细的neo4j查询语句可见： http://neo4j.com/docs/2.2.0/query-functions-scalar.html
+https://www.w3cschool.cn/neo4j/neo4j_cql_merge.html
+
+创建测试数据：
+浏览器打开：http://localhost:7474/browser/
+输入：`:play movie graph`
+或`:play northwind-graph`即可获取数据；
+
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/products.csv" AS row
+CREATE (n:Product)
+SET n = row,
+  n.unitPrice = toFloat(row.unitPrice),
+  n.unitsInStock = toInteger(row.unitsInStock), n.unitsOnOrder = toInteger(row.unitsOnOrder),
+  n.reorderLevel = toInteger(row.reorderLevel), n.discontinued = (row.discontinued <> "0")
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/categories.csv" AS row
+CREATE (n:Category)
+SET n = row
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/suppliers.csv" AS row
+CREATE (n:Supplier)
+SET n = row
+Create indexes
+
 
  neo4j数据库简单除暴理解的概念：
 
@@ -19,6 +40,9 @@ MATCH：图形的匹配模式，束缚于开始点。
 WHERE：过滤条件。
 RETURN：返回所需要的。
 
+py2neo支持的语法关键词：
+expected whitespace, '.', node labels, '[', "=~", IN, STARTS, ENDS, CONTAINS, IS, '^', '*', '/', '%', '+', '-', '=', "<>", "!=", '<', '>', "<=", ">=", AND, XOR, OR, LOAD CSV, START, MATCH, UNWIND, MERGE, CREATE, SET, DELETE, REMOVE, FOREACH, WITH, CALL, RETURN, UNION, ';' or end 
+
 1）创建节点
 
             create (a) 创建空节点
@@ -30,6 +54,9 @@ CREATE (ee:Person { name: "Emil", from: "Sweden", klout: 99 })
 
 创建多个标签（这里是`Person`、`Kaa`）的节点：
 CREATE (ee:Person :Kaa { name: "Emil", from: "Sweden", klout: 199 })
+
+使用约束： title被唯一化约束
+CREATE CONSTRAINT ON (movie:Movie) ASSERT movie.title IS UNIQUE
 
 删除某个标签（这里是删除`Kaa`）：
 MATCH(m:Person) WHERE m.klout = 199 REMOVE m:Kaa RETURN m
@@ -43,6 +70,9 @@ MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
             where a.name=‘Kaine‘ and b.name=‘Sharon‘
             create (a)-[r]->(b) 创建a节点和b节点的路径，此时变量r即代表关联，它也可以有标签
 
+            # 将match和create进行合并使用。将匹配到的节点连接到一个新的节点上。
+            match (p:Shuxing {name:"共享wifi最大连接数"}) create (m:Shuxing {name:"5个",alias:"5个",Name:"5个"}) create (p)-[r:next]->(m) return p,r,m;
+            match (p:Person {name:"Christopher Guest"}) create (m:School {name:"DEJY",address:"deyang"}) create (p)-[r:ACTED_IN {roles:["studeng"]}]->(m) return p,r,m;
 
 3）查询关键字
 
@@ -77,6 +107,14 @@ MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
         MATCH (x:Shuxing)-[r]-() RETURN endNode(r)  # 查询所有的叶子节点
         MATCH (a) WHERE ANY (x IN a.alias WHERE x = "价格") RETURN a  # 在列表中查询，若有一个满足及查询成功
         
+        MATCH (a) WHERE a.name='Eskil' RETURN a.array, filter(x IN a.array WHERE length(x)= 3)  # 在搜索结果的基础上继续过滤；
+       
+        match (n) where not (n)-->() return distinct n  # 查找所有的叶子节点
+
+        MATCH (person:Person{name: "张三"}) SET person.ths = CASE person.salary WHEN 'Teacher' THEN 50000 WHEN 'Assistant' THEN 40000 WHEN 85 THEN 'abc' ELSE 'asd' END RETURN person # 选择性赋值
+
+        MATCH p=(n)-[*]->(n1) where n1.name="亚洲"and n.name="支持地区" RETURN length(p)  # 查询两个节点间的路径长度；
+ 
         注：关联的中括号内数字的含义
             n 距离为n
             ..n 最大距离为n
@@ -92,6 +130,16 @@ id:     为节点添加一个唯一ID，不设置则系统自动设置一个，�
 label:  标签，生命节点类型
 {}:     属性定义，key/value格式
 
+merge在查找时，如果找到则返回，如果没找到则创建。可以避免创建重复的节点
+merge (m:School {name:"SCDX"})
+on create set m.address="chegndu"
+return m;
+
+MATCH (m:School { name:"CDLG" })
+MATCH (p:Person { name:"jiaj" })
+MERGE (p)-[r:ACTED_IN]->(m)
+ON CREATE SET r.roles =['teacher']
+RETURN p,r,m ;
 
 b.关系
 
@@ -223,6 +271,37 @@ RETURN type(r);
 查询一个节点的所有Follower。
 MATCH (:Person { name:'Taylor' })-[r:Follow]->(Person)
 RETURN Person.name;
+
+常用聚合： count, sum, avg, min, max，count(DISTINCT role)，NULL值自动跳过
+MATCH (:Person) RETURN count(*) AS people
+
+排序用法：ORDER BY person.age
+分页用法：SKIP {offset} LIMIT {count}
+MATCH (a:Person)-[:ACTED_IN]->(m:Movie)
+RETURN a,count(*) AS appearances
+ORDER BY appearances DESC LIMIT 10;
+
+聚集聚合
+MATCH (m:Movie)<-[:ACTED_IN]-(a:Person)
+RETURN m.title AS movie, collect(a.name) AS cast, count(*) AS actors
+
+编写大型语句
+# 要组合具有相同结果结构的两个语句的结果，可以使用UNION [ALL]。
+若要查找演员和导演，而不使用同时查找两种关系`()-[:ACTED_IN|:DIRECTED]->()`，则可以使用：
+MATCH (actor:Person)-[r:ACTED_IN]->(movie:Movie)
+RETURN actor.name AS name, type(r) AS acted_in, movie.title AS title
+UNION
+MATCH (director:Person)-[r:DIRECTED]->(movie:Movie)
+RETURN director.name AS name, type(r) AS acted_in, movie.title AS title
+
+# 在Cypher中，可以将一段语句链接在一起，就像在数据流管道中一样。 每个片段都可以从上一个片段中输出，其结果可以进入下一个片段。
+您可以使用WITH子句组合各个部分，并声明哪些数据从一个流到另一个。 WITH非常像RETURN，区别在于它不完成查询，但准备下一个部分的输入。 您可以使用与RETURN子句中相同的表达式，聚合，排序和分页。
+唯一的区别是你必须别名所有列，否则它们将不可访问。 您在WITH子句中声明的列只能在后续查询部分中使用。
+看下面的例子，我们收集一些有人出现的电影，然后过滤掉只出现在一部电影中的电影。
+MATCH (person:Person)-[:ACTED_IN]->(m:Movie)
+WITH person, count(*) AS appearances, collect(m.title) AS movies
+WHERE appearances > 1
+RETURN person.name, appearances, movies
 
 # http://neo4j.com/docs/2.2.0/query-functions-scalar.html
 13.1. Predicates
