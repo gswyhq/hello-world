@@ -45,7 +45,7 @@ docker run --restart=always --name docker_restart -d centos /bin/sh -c "while tr
 # 向已经运行的容器添加重启策略：
 docker update --restart=always <CONTAINER ID>
 # 或者更新之前的重启策略：
-gswyhq@gswyhq-pc:~$ docker update --restart=no youhuibao0717_youhuibao_1 youhuibao0717_docker-neo4j_1 youhuibao0717_docker-redis_1 qibaozhaozhao17474 
+gswyhq@gswyhq-pc:~$ docker update --restart=no yhb0717_yhb_1 yhb0717_docker-neo4j_1 yhb0717_docker-redis_1 qbzz17474 
 
 # 可以通过查询对应的run参数：
 gswyhq@gswyhq-pc:~$ docker inspect e7185e2bb696

@@ -47,6 +47,28 @@ Date:   2017-07-22 14:22:38 +0800
 改回默认格式的命令：
 gswyhq@gswyhq-pc:~/yhb20170717$ git config log.date default 
 
+查看配置信息
+要检查已有的配置信息，可以使用 git config --list 命令：
+gswyhq@gswyhq-pc:~/hello-world$ git config --list 
+core.quotepath=false
+user.email=gswyhqyang@web1.co
+user.name=gswyhqyang
+alias.gswyhq=commit --author='gswyhq <gswyhq@126.com>' -m '增加记录' 
+merge.ours.driver=true
+http.postbuffer=524288000
+log.date=iso8601
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
+user.email=gswyhq@126.com
+user.name=gswyhq
+remote.origin.url=https://github.com/gswyhq/hello-world.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+branch.master.remote=origin
+branch.master.merge=refs/heads/master
+
+有时候会看到重复的变量名，那就说明它们来自不同的配置文件（比如 /etc/gitconfig 和 ~/.gitconfig），不过最终 Git 实际采用的是最后一个。
 
 
 
