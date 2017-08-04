@@ -23,3 +23,59 @@ neo4j-sh (?)$ match (m:Movie) return m limit 2;
 329 ms
 
 
+# Create a node
+ neo4j-sh (?)$ mknode --cd
+
+ # where are we?
+ neo4j-sh (0)$ pwd
+ Current is (0)
+ (0)
+
+
+ # On the current node, set the key "name" to value "Jon"
+ neo4j-sh (0)$ set name "Jon"
+
+ # send a cypher query
+ neo4j-sh (Jon,0)$ match n where id(n) = 0 return n;
+ +---------------------+
+ | n                   |
+ +---------------------+
+ | Node[0]{name:"Jon"} |
+ +---------------------+
+ 1 row
+ 53 ms
+
+
+ # make an incoming relationship of type LIKES, create the end node with the node properties specified.
+ neo4j-sh (Jon,0)$ mkrel -c -d i -t LIKES --np "{'app':'foobar'}"
+
+ # where are we?
+ neo4j-sh (Jon,0)$ ls
+ *name =[Jon]
+ (me)<-[:LIKES]-(1)
+
+
+ # change to the newly created node
+ neo4j-sh (Jon,0)$ cd 1
+
+ # list relationships, including relationship id
+ neo4j-sh (1)$ ls -avr
+ (me)-[:LIKES,0]->(Jon,0)
+
+
+ # create one more KNOWS relationship and the end node
+ neo4j-sh (1)$ mkrel -c -d i -t KNOWS --np "{'name':'Bob'}"
+
+ # print current history stack
+ neo4j-sh (1)$ pwd
+ Current is (1)
+ (Jon,0)-->(1)
+
+
+ # verbose list relationships
+ neo4j-sh (1)$ ls -avr
+ (me)-[:LIKES,0]->(Jon,0)
+ (me)<-[:KNOWS,1]-(Bob,2)
+
+更多示例见：http://neo4j.com/docs/2.3.11/shell-matrix-example.html
+
