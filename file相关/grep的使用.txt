@@ -1,0 +1,14 @@
+
+# 在当前目录及子目录中，的py文件中查找字符串`1234`并且忽略`.git`目录：
+gswyhq@gswyhq-pc:~/yhb$ grep -R --include="*.py" --exclude-dir=".git" '1234' .
+
+# 在当前目录及子目录中，的py文件中查找字符串`1234`并且忽略`.git,contexts,conf,test`目录：
+gswyhq@gswyhq-pc:~/yhb$ grep -R --include="*.py" --exclude-dir={.git,contexts,conf,test} '123456' .
+
+# 排除扩展名为 java 和 js 的文件
+grep -E "http"  . -R --exclude=*.{java,js}
+
+# 忽略多个隐藏目录：
+gswyhq@gswyhq-pc:~$ grep -R --include="*.py" --exclude-dir={.cache,.local,.deepinwine,.PyCharm2016.1,.cxoffice,.PyCharm50,.git,.navicat64}  "browser" .
+
+
