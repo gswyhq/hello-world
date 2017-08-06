@@ -1,0 +1,47 @@
+
+neo4j-shell已被弃用，并被cyphell-shell替代。
+
+# 启动一个neo4j容器
+gswyhq@gswyhq-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  --name=movie7475 --publish=7475:7474 --publish=7688:7687    --volume=$PWD/data:/data  neo4j
+
+# 浏览器打开：http://localhost:7475/browser/
+# 输入`:play movie graph`，点击右箭头，导入数据
+		创建：右边是一个包含由多个CREATE子句组成的单个Cypher查询语句的巨型代码块。 这将创建电影图。
+		点击代码块
+		注意它被复制到上面的编辑↑
+		单击编辑器的播放按钮执行
+		等待查询完成
+		警告：每次运行时，将数据添加到当前数据库中！
+
+# 进入容器：
+gswyhq@gswyhq-pc:~/docker/neo4j/movie$ docker exec -it movie7475 /bin/bash
+# 进入neo4j目录：
+bash-4.3# cd /var/lib/neo4j/bin/
+bash-4.3# pwd
+/var/lib/neo4j/bin
+bash-4.3# ./cypher-shell --help
+
+# 连接neo4j服务及用户名密码：
+bash-4.3# ./cypher-shell -a bolt://localhost:7687 -u neo4j -p gswyhq
+	以用户neo4j连接到Neo4j 3.2.1在bolt：// localhost：7687。
+	键入`:help`可用命令的列表，或`:exit`退出shell。
+	请注意，Cypher查询必须以分号结尾。
+
+# 执行查询操作：
+neo4j> MATCH (n:Movie) RETURN n LIMIT 2;
++--------------------------------------------------------------------------------------+
+| n                                                                                    |
++--------------------------------------------------------------------------------------+
+| (:Movie {tagline: "Welcome to the Real World", title: "The Matrix", released: 1999}) |
+| (:Movie {tagline: "Free your mind", title: "The Matrix Reloaded", released: 2003})   |
++--------------------------------------------------------------------------------------+
+
+2 rows available after 4 ms, consumed after another 2 ms
+
+# 退出cypher-shell（注意`exit`前面有`:`）
+neo4j> :exit
+Bye!
+# 退出docker容器
+bash-4.3# exit
+exit
+gswyhq@gswyhq-pc:~/docker/neo4j/movie$
