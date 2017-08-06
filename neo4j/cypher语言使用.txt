@@ -1,5 +1,7 @@
 
-更详细的neo4j查询语句可见： http://neo4j.com/docs/2.2.0/query-functions-scalar.html
+更详细的neo4j查询语句可见： 
+https://neo4j.com/docs/developer-manual/3.2/cypher/syntax/
+http://neo4j.com/docs/2.2.0/query-functions-scalar.html
 https://www.w3cschool.cn/neo4j/neo4j_cql_merge.html
 
 创建测试数据：
