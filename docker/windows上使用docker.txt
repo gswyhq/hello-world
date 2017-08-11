@@ -1,0 +1,180 @@
+﻿
+下载：
+https://download.docker.com/win/stable/DockerToolbox.exe
+
+
+
+
+双击下载在文件安装;
+桌面会有两个快捷键;
+双击Docker Quickstart Terminal，然后会做一些默认的工作
+
+1)出现Error with pre-create check: "This Computer doesn't have VT-x/AMD-v enabled. Enabling it in the BIOS is mandatory"，
+则需要去BIOS开启VT
+# Docker的底层容器化技术只适用于Linux。要在Mac或Windows上使用它，必须使用一个名为boot2docker的命令行工具来在系统上安装一个Linux虚拟机（或“VM”）
+bios里 开启 vt-x amd-v方法：
+请确认BIOS的Virtualization是否为Enabled进入BIOS---->Advanced BIOS Features----->Virtualization---->Disabled(预设值)修改为Enabled，储存(save)，重启。
+
+2)如果boot2docker.iso下载失败，
+可以手工下载https://github.com/boot2docker/boot2docker/releases/download/v1.12.6/boot2docker.iso,
+然后放到“C:\Users\Lenovo\.docker\machine\cache”目录下，
+
+wget -b -c -t 0 https://github.com/boot2docker/boot2docker/releases/download/v17.06.0-ce/boot2docker.iso
+c:\users\Lenovo\.docker\machine\cache\boot2docker.iso
+
+再双击“Docker Quickstart Terminal”即可；
+                        ##         .
+                  ## ## ##        ==
+               ## ## ## ## ##    ===
+           /"""""""""""""""""\___/ ===
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+           \______ o           __/
+             \    \         __/
+              \____\_______/
+
+docker is configured to use the default machine with IP 192.168.99.100
+For help getting started, check out the docs at https://docs.docker.com
+
+Start interactive shell
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 ~
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 ~
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+
+$ pwd
+/c/Users/Lenovo
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 ~
+$ cd /c
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c
+$ ls
+'$Recycle.Bin'/        chat_bot_demo/             hello-world/  nlp_request_url/  PerfLogs/         'Program Files (x86)'/  Recovery/     'System Volume Information'/  Windows/
+BaiduNetdiskDownload/  'Documents and Settings'@  hiberfil.sys  pagefile.sys      'Program Files'/  ProgramData/            swapfile.sys  Users/                        windows-version.txt
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c
+$ mkdir docker
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c
+$ cd docker/
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
+$ ls
+neo4j_save.tar  redis_save.tar
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
+$ docker load < redis_save.tar
+d08535b0996b: Loading layer [==================================================>]  82.98MB/82.98MB
+74072b982a3d: Loading layer [==================================================>]  344.6kB/344.6kB
+13964fab0598: Loading layer [==================================================>]  3.129MB/3.129MB
+6f223f268efe: Loading layer [==================================================>]  16.36MB/16.36MB
+d9fe002e0a41: Loading layer [==================================================>]  1.536kB/1.536kB
+23e630c4c655: Loading layer [==================================================>]  3.584kB/3.584kB
+Loaded image: redis:latest
+
+$ docker load < neo4j_save.tar
+3fb66f713c9f: Loading layer [==================================================>]  4.221MB/4.221MB
+68816a1ad86d: Loading layer [==================================================>]  3.584kB/3.584kB
+5c9f60e933c4: Loading layer [==================================================>]  78.31MB/78.31MB
+e5958a9d23a4: Loading layer [==================================================>]  6.113MB/6.113MB
+100f25661106: Loading layer [==================================================>]  2.048kB/2.048kB
+6b5924b70be2: Loading layer [==================================================>]  87.56MB/87.56MB
+279dbad482e5: Loading layer [==================================================>]   7.68kB/7.68kB
+Loaded image: neo4j:latest
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+redis               latest              4e482b286430        6 weeks ago         99MB
+neo4j               latest              87ca73ed691a        2 months ago        173MB
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
+$ mkdir neo4j
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
+$ cd neo4j
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j
+$ mkdir youhuibao
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j
+$ cd youhuibao/
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
+$ docker run -d --name=youhuibao7474 --publish=7474:7474 --publish=7687:7687 neo4j
+c386b2311ead431d1ad9e4469275ea1a8ce6d70cd617e11705931f0b609f092c
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
+c386b2311ead        neo4j               "/docker-entrypoin..."   7 seconds ago       Up 7 seconds        0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   youhuibao7474
+
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
+$
+浏览器打开“http://192.168.99.100:7474/browser/”即可看到对应的neo4j服务；
+需要注意的是这里的主机地址是“192.168.99.100”跟Linux上的是不太相同；Linux上是‘localhost’即可。
+
+若需要改docker默认的主机地址，可以‘计算机’->"属性"->"高级系统设置"->"环境变量"->"Lenovo的用户变量"下，点击“新建”：变量名："DOCKER_HOST"，变量值："tcp://192.168.3.51:2375"；
+修改配置文件即可：
+/c/Users/Lenovo/.docker/machine/machines/default/config.json
+Lenovo@DESKTOP-JEK8LTH MINGW64 ~/.docker/machine/machines/default
+$ vim config.json
+
+    "ConfigVersion": 3,
+    "Driver": {
+        "IPAddress": "192.168.99.100",
+修改为：
+    "ConfigVersion": 3,
+    "Driver": {
+        "IPAddress": "192.168.3.51",
+
+docker-compose是一个docker官方发布的docker容器编排工具，用于通过yml格式的配置文件来简化docker命令的执行。
+在windows下，如何安装docker-compose。
+
+首先，docker-compose是一个客户端工具，也就是，它应该安装于安装了docker client的机器，并不需要安装于docker服务器；
+对Windows版本的docker-compose来说，它就是一个单个文件的.exe文件，你只需要从官网下载（https://github.com/docker/compose/releases）Windows版本的.exe文件，将文件名改成docker-compose.exe，然后随便放到任何方便访问的目录就可以了。我比较懒，一般直接丢到c:\windows\system32目录，那样就不需要设置额外的PATH路径，就能在任何当前目录下，在命令窗口直接执行了。
+有了，docker-compose，我们也可以很简单的设置我们的docker服务器每次机器启动之后，自动运行指定的docker容器，只需要配置一个机器的启动脚本，每次机器启动后自动运行docker-compose up，就可以了。
+下载：https://github.com/docker/compose/releases/download/1.15.0/docker-compose-Windows-x86_64.exe
+
+Windows系统查看本机ip的方法：
+在命令行窗口使用命令：  ipconfig  | more
+
+
+创建一个名为test01的主机，驱动方式为virtualbox
+C:\docker>docker-machine create -d virtualbox test01
+Running pre-create checks...
+Creating machine...
+(test01) Copying C:\Users\Lenovo\.docker\machine\cache\boot2docker.iso to C:\Users\Lenovo\.docker\machine\machines\test01\boot2docker.iso...
+(test01) Creating VirtualBox VM...
+(test01) Creating SSH key...
+(test01) Starting the VM...
+(test01) Check network to re-create if needed...
+(test01) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env test01
+
+C:\docker>docker-machine ls
+NAME      ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+default   *        virtualbox   Running   tcp://192.168.99.100:2376           v17.06.0-ce
+test01    -        virtualbox   Running   tcp://192.168.99.101:2376           v17.06.0-ce
+
+
+
+
+
+
+
+

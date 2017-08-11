@@ -1,4 +1,4 @@
-rm -rf 360热点 #删除文件夹“360热点”及其内部的所有文件夹及文件
+﻿rm -rf 360热点 #删除文件夹“360热点”及其内部的所有文件夹及文件
 
 
 sudo chmod a+r bs4/ #改变文件夹的权限
@@ -500,6 +500,9 @@ wget -c -t 0 -O asia-latest.osm.bz2 http://download.geofabrik.de/asia-latest.osm
 -t 0 #反复尝试的次数，0为不限次数 
 -O asia-latest.osm.bz2 # 把下载的文件命名为asia-latest.osm.bz2
 http://download.geofabrik.de/asia-latest.osm.bz2 #要下载的文件的网址 
+使用wget -b后台下载
+命令：
+wget -b http://www.minjieren.com/wordpress-3.1-zh_CN.zip
 
 protoc 命令安装：
 
@@ -840,4 +843,7 @@ root@10-13-101-154:/var/www/static# curl http://127.0.0.1/v1 -d '{"question": "a
 显示查找指定端口的进程：
 netstat -anp|grep '8000'
 
+apt-get install xxxx 安装
+apt-get remove xxxx 卸载但不删除配置
+apt-get purge xxxx 卸载并且删除相关配置
 
