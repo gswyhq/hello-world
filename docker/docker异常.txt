@@ -37,3 +37,10 @@ FATA[0001] Get http://ubuntu0717-export.tar: dial tcp: lookup ubuntu0717-export.
 ubuntu@10-13-158-31:~/docker/ubuntu$ cat ubuntu0717-export.tar | sudo docker import - ubuntu:0717
 16a079ae5a08c141a3e710a987259a3cd633f206de226430a46d9ef4e4ddf023
 
+# 重启之前的一个容器报错：
+gswyhq@gswyhq-pc:~/docker/neo4j/nwd$ sudo docker start nwd27474
+Error response from daemon: driver failed programming external connectivity on endpoint nwd27474 (aecc9f558db95cf92ebd496f382ab1608c62e422e8022ebf288ae0b350068557):  (iptables failed: iptables --wait -t filter -A DOCKER ! -i docker0 -o docker0 -p tcp -d 172.17.0.4 --dport 7687 -j ACCEPT: iptables: No chain/target/match by that name.
+ (exit status 1))
+# 解决方法，重启docker服务即可
+gswyhq@gswyhq-pc:~$ sudo systemctl restart docker
+

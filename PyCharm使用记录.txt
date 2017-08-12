@@ -1,4 +1,0 @@
-中文文件名不显示的问题：
-file -> settings -> Appearance & Behavior -> Appearance -> Name 选择为中文字体，如：NSimSun 等。
-
-

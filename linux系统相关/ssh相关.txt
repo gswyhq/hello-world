@@ -42,3 +42,23 @@ Host        zy103
 gswyhq@gswyhq-pc:~/.ssh$ ssh zy103
 zy@192.168.3.103's password: 
 
+
+通过SSH使用PEM文件登录
+gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@52.80.41.112
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0640 for 'zy.pem' are too open.
+It is required that your private key files are NOT accessible by others.
+This private key will be ignored.
+Load key "zy.pem": bad permissions
+Permission denied (publickey).
+如果出现报错说明这个问题是文件的权限太大了，需要给小点 
+gswyhq@gswyhq-pc:~$ sudo chmod 600 zy.pem 
+gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@52.80.41.112
+
+
+
+更多示例，可参考：http://www.cnblogs.com/eshizhan/archive/2012/07/16/2592902.html
+
+
