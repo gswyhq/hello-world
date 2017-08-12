@@ -1,0 +1,11 @@
+
+
+下载：
+https://git-for-windows.github.io/
+安装：
+双击安装;
+
+安装好后，双击 `Git Bash`对应在图标，打开客户端，进行相关操作，如克隆个项目：
+
+$ git clone http://github.com/gswyhq/hello-world.git
+

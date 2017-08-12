@@ -1,4 +1,4 @@
-
+﻿
 ubuntu@10-13-109-255:~$ sudo docker ps
 如果不跟 sudo，直接执行 docker ps 命令会有如下问题：
 ubuntu@10-13-109-255:~$ docker ps
@@ -43,4 +43,19 @@ Error response from daemon: driver failed programming external connectivity on e
  (exit status 1))
 # 解决方法，重启docker服务即可
 gswyhq@gswyhq-pc:~$ sudo systemctl restart docker
+
+# 修改docker容器时间：
+确认宿主机时间对否；在宿主机时间正确情况下可以：
+1、重新启动一个容器，加上如下参数，即可使用宿主机时间
+$ docker run -i -t --restart=always --detach --name=daibang18100 -p 18100:8000 --volume=$PWD:/daibang  -v /etc/localtime:/etc/localtime ubuntu:0717 /bin/bash
+2、假如，你不想重新启动，或者不能重新启动，也没关系，可以直接把文件复制到容器内，如下
+$ docker cp /etc/localtime [containerId]:/etc/localtime
+# 若宿主机时区不对，可以：
+sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+ubuntu@ip-172-31-14-6:~$ docker cp /etc/localtime shanglishi18010:/etc/localtime
+FATA[0000] Error: Path not specified
+ubuntu@ip-172-31-14-6:~$ docker -v
+Docker version 1.6.2, build 7c8fca2
+版本1.6.2不允许从主机复制到容器，您需要升级到至少1.8的支持。
 
