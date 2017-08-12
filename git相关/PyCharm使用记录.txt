@@ -41,3 +41,19 @@ sudo mv /home/gswyhq/resources_cn.jar /usr/lib/pycharm-community/lib/resources_e
 File-> Settings -> Tools -> Python Integrated Tools -> Default test runner ,将`Unittests`改为`py.test`即可；
 
 
+# 专业版安装：
+1、深度商店搜索`PyCharm Professional`，安装；
+2、双击运行：`Activate`，选择“Activate code”，
+将来自“http://blog.sina.com.cn/s/blog_1415b40850102wujm.html”的验证码，粘贴进入：
+点击‘OK’报错：
+This license CNEKJPQZEX has been cancelled
+gswyhq@gswyhq-pc:~$ sudo vim /etc/hosts
+文件下添加`0.0.0.0 account.jetbrains.com`
+重新粘贴验证码即可；
+
+
+
+
+
+
+
