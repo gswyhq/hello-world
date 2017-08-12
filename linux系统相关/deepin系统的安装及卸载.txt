@@ -1,3 +1,31 @@
+安装：
+一、制作安装启动u盘：
+1、官网下载deepin的最新安装ISO，使用解压软件打开后（如用tar打开，不必解压），
+里面有deepin_B.exe，它就是deepin的U盘制作工具。
+2、插上u盘，双击`deepin_B.exe`,安装指示完成启动u盘制作；
+
+二、安装deepin
+插上制作好的启动u盘，重启电脑，按照提示安装即可；
+
+三、重新安装系统，将新的硬盘分区挂载到`/home`目录（此步跟安装无关，只是为了日后系统出问题了，恢复数据方便）：
+1 通过deepin自带的“GParted 分区编辑器”对空余硬盘，新建分区。
+2 在终端输入：sudo fdisk -l ，可以看到新添加的硬盘分区，如`/dev/sdd1`
+3 格式化磁盘
+　　在终端输入：sudo mkfs -t ext4 /dev/sdd1
+　　用ext4格式对/dev/sdd1 进行格式化
+
+4 挂载该分区到/media/home
+sudo mkdir /media/home
+sudo mount /dev/sdd1 /media/home
+
+5 复制home目录 到sdd1
+sudo cp -a * /media/home
+
+6 修改/etc/fstab文件
+　　sudo gedit /etc/fstab
+添加如下行
+　　/dev/sdd1 /home ext4 defaults 0 2
+
 
 卸载：
 1.进入深度操作系统，桌面打开终端，执行以下命令重置MBR：
