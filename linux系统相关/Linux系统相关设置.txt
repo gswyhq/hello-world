@@ -1,16 +1,17 @@
 
-ÏµÍ³Ê±¼ä²»¶Ô£º
-·½·¨1£ºÖ±½Ó¸ÄÊ±Çø
+ç³»ç»Ÿæ—¶é—´ä¸å¯¹ï¼š
+æ–¹æ³•1ï¼šç›´æ¥æ”¹æ—¶åŒº
 ubuntu@ip-172-31-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-·½·¨2£ºÈô¸ÄÊ±Çøºó»¹²»¶Ô£¬Ôò¿ÉÒÔ£º
+æ–¹æ³•2ï¼šè‹¥æ”¹æ—¶åŒºåè¿˜ä¸å¯¹ï¼Œåˆ™å¯ä»¥ï¼š
 ubuntu@ip-172-31-14-6:~$ date
 Fri Aug 11 09:59:49 UTC 2017
-# ¸ü¸ÄÊ±Çø£º
+# æ›´æ”¹æ—¶åŒºï¼š
 ubuntu@ip-172-31-14-6:~$ sudo vim /etc/timezone
 ubuntu@ip-172-31-14-6:~$ head /etc/timezone
 Asia/shanghai
 ubuntu@ip-172-31-14-6:~$ date
 Fri Aug 11 18:03:08 UTC 2017
-# ÖØĞÂÉèÖÃÊ±¼ä£º
+# é‡æ–°è®¾ç½®æ—¶é—´ï¼š
 ubuntu@ip-172-31-14-6:~$ sudo date  -s "2017-8-11 18:04:00"
+

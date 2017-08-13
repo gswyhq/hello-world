@@ -99,21 +99,21 @@ Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker
 $ cd neo4j
 
 Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j
-$ mkdir youhuibao
+$ mkdir yhb
 
 Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j
-$ cd youhuibao/
+$ cd yhb/
 
-Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
-$ docker run -d --name=youhuibao7474 --publish=7474:7474 --publish=7687:7687 neo4j
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/yhb
+$ docker run -d --name=yhb7474 --publish=7474:7474 --publish=7687:7687 neo4j
 c386b2311ead431d1ad9e4469275ea1a8ce6d70cd617e11705931f0b609f092c
 
-Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/yhb
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
-c386b2311ead        neo4j               "/docker-entrypoin..."   7 seconds ago       Up 7 seconds        0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   youhuibao7474
+c386b2311ead        neo4j               "/docker-entrypoin..."   7 seconds ago       Up 7 seconds        0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   yhb7474
 
-Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/youhuibao
+Lenovo@DESKTOP-JEK8LTH MINGW64 /c/docker/neo4j/yhb
 $
 浏览器打开“http://192.168.99.100:7474/browser/”即可看到对应的neo4j服务；
 需要注意的是这里的主机地址是“192.168.99.100”跟Linux上的是不太相同；Linux上是‘localhost’即可。

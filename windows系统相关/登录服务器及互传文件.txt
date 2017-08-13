@@ -1,28 +1,29 @@
-��¼����������ͨ��puttyʵ�֣�
-�ڡ�https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html�����ء�64-bit: putty-64bit-0.70-installer.msi��
-���ص�ַ��https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.70-installer.msi
-˫��"putty-64bit-0.70-installer.msi"���м��ɰ�װ���ڰ�װĿ¼��C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PuTTY (64-bit)���¿����ҵ���
-PuTTY,PSFTP;PuTTYgen�ȣ�
-˫����PuTTY�����ɵ�¼���������ڣ��ڡ�Session��->��Host Name(or IP address)�����������������ַ���硰192.168.3.103����Port����Ĭ�ϵġ�22�����ɣ�
-��ú󣬵����open�������µĴ��ڣ�"login as:"�����¼�û������磺zy,�س����������뼴�ɵ�¼�˷�������
+登录服务器可以通过putty实现；
+于“https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html”下载“64-bit: putty-64bit-0.70-installer.msi”
+下载地址：https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.70-installer.msi
+双击"putty-64bit-0.70-installer.msi"运行即可安装，在安装目录“C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PuTTY (64-bit)”下可以找到：
+PuTTY,PSFTP;PuTTYgen等；
+双击“PuTTY”即可登录服务器窗口；在“Session”->“Host Name(or IP address)”项下填入服务器地址，如“192.168.3.103”，Port采用默认的“22”即可；
+填好后，点击“open”出现新的窗口，"login as:"输入登录用户名，如：zy,回车后输入密码即可登录了服务器；
 
-��װ��putty��������ͨ��pscp�����ļ���
-��ס��shift�������Ҽ�ѡ�񡰴������д��ڡ�,�����������������ļ���
+安装了putty，及可以通过pscp互传文件；
+按住“shift”键，右键选择“打开命令行窗口”,类似下面这样互传文件；
 
-C:\Users\Lenovo\Downloads>pscp zy@192.168.3.103:/home/zy/youhuibao/zhiy.pem zhiy.pem
+C:\Users\Lenovo\Downloads>pscp zy@192.168.3.103:/home/zy/yhb/zhiy.pem zhiy.pem
 zy@192.168.3.103's password:
 zhiy.pem                | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
 
 C:\Users\Lenovo\Downloads>
 
-ͨ����Կ�ļ���¼��
+通过密钥文件登录：
 
-linux ͨ��ssh-gen���ɵ�pem��ʽ ��puttyʹ�õ�ppk��ʽ���Ի���ת��
+linux 通过ssh-gen生成的pem格式 和putty使用的ppk格式可以互相转换
 pem->ppk
-ֱ��ͨ��putty�µ�puttygen.exe ѡ��file -> Load private key Ȼ��save private key ����Ϊ��Ӧ��ppk�ļ��Ϳ�����
+直接通过putty下的puttygen.exe 选的file -> Load private key 然后save private key 保存为对应的ppk文件就可以了
 ppk->pem
-���Ҳ����ѡ��load private key Ȼ��Ҫѡ��˵�Conversions�����Export SSH key
+这个也算是选择load private key 然后要选择菜单Conversions下面的Export SSH key
 
-��Connection��-> "SSH" -> "AuTH" -> �����Browse������ppk��Կ�ļ���
-�ڡ�Session��->��Host Name(or IP address)�����������������ַ���硰192.168.3.103����Port����Ĭ�ϵġ�22�����ɣ�
-��ú󣬵����open�������µĴ��ڣ�"login as:"�����¼�û������ɵ�¼��������
+“Connection”-> "SSH" -> "AuTH" -> 点击“Browse”填入ppk密钥文件；
+在“Session”->“Host Name(or IP address)”项下填入服务器地址，如“192.168.3.103”，Port采用默认的“22”即可；
+填好后，点击“open”出现新的窗口，"login as:"输入登录用户名即可登录服务器；
+
