@@ -1,4 +1,4 @@
- 数据卷是一个在一个活多个容器里特别设计的目录，围绕union file system来提供多个持久的或共享数据的特性：
+﻿ 数据卷是一个在一个活多个容器里特别设计的目录，围绕union file system来提供多个持久的或共享数据的特性：
      a）data volumes可以被多个容器共享和重用
      b）可以直接修改在dota volumes进行变动
      c）变动data volumes不包括更新一个镜像

@@ -1,4 +1,4 @@
-
+﻿
 文
 从外网 SSH 进局域网，反向代理+正向代理解决方案
 
@@ -75,5 +75,17 @@ root@10-13-101-154:/etc/nginx# service nginx reload
 # 另外若有防火墙，还得设置一下防火墙；
 这样可以通过访问“10.13.101.154:8802",来间接访问：`10.13.101.154:18200` <==> `127.0.0.1:18200`
 curl http://10.13.101.154:8802/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
+
+# 反向代理出现以下错误：
+zy@ubuntu:~/yhb$ ssh -i zhiyan.pem -NfR 7770:192.168.3.101:80 ubuntu@52.80.62.217
+zy@ubuntu:~/yhb$ Warning: remote port forwarding failed for listen port 7770
+# 在代理机器上（ubuntu@52.80.62.217），查找占用的进程，kill掉即可：
+ubuntu@ip-172-31-14-6:~/shanglishi$ sudo netstat -plant|grep 7770
+tcp        0      0 127.0.0.1:7770          0.0.0.0:*               LISTEN      29810/sshd: ubuntu
+tcp      175      0 127.0.0.1:7770          127.0.0.1:40773         CLOSE_WAIT  29810/sshd: ubuntu
+tcp      175      0 127.0.0.1:7770          127.0.0.1:40772         CLOSE_WAIT  29810/sshd: ubuntu
+tcp      175      0 127.0.0.1:7770          127.0.0.1:40771         CLOSE_WAIT  29810/sshd: ubuntu
+tcp6       0      0 ::1:7770                :::*                    LISTEN      29810/sshd: ubuntu
+ubuntu@ip-172-31-14-6:~/shanglishi$ kill -9 29810
 
 

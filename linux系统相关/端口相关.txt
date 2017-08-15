@@ -1,0 +1,21 @@
+
+
+使用命令：netstat –apn|grep 8080
+
+在所有的进程和端口使用情况中查询`8080`。查询结果最后一栏是PID/Program name 
+
+进一步使用命令：ps -aux | grep pid 查看
+就可以明确知道8080端口是被哪个程序占用了！然后判断是否使用KILL命令干掉！
+
+但有时候列“PID /Program Name ”,是一个破折号（-）；
+作为非根用户执行的命令。因此,根用户运行的过程将显示为一个破折号。
+另一种可能是,这是一个内核线程,这没有 PID,因为它运行在内核。
+
+这个时候可以通过`sudo netstat -apn |grep 8080`查看；
+
+# 查看某个端口是否开放：
+sudo apt-get install lsof
+gswyhq@gswyhq-pc:~$ lsof -i:8005
+
+
+

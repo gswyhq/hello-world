@@ -1,0 +1,32 @@
+
+语音文件不包括在内。 我们可以从Ekho Voice Data的下载页面(https://sourceforge.net/projects/e-guidedog/files/Ekho%20Voice%20Data/0.2/)获取它们。
+要替换普通话语音文件，我们可以替换整个拼音文件夹，
+然后删除pinyin.index and pinyin.voice。 重新运行ekho将会从新的语音文件中产生新的pinyin.index and pinyin.voice
+
+ekho安装方法：
+http://www.eguidedog.net/doc/doc_install_ekho.php
+下载页面：https://sourceforge.net/projects/e-guidedog/files/Ekho/7.5.1/
+
+https://github.com/hgneng/ekho
+# 安装ekho:
+gswyhq@gswyhq-pc:~$ sudo apt-get install libsndfile1-dev libpulse-dev libncurses5-dev libmp3lame-dev libespeak-dev
+gswyhq@gswyhq-pc:~$ tar xJvf ekho-7.5.1.tar.xz
+gswyhq@gswyhq-pc:~/ekho-7.5.1$ ./configure
+gswyhq@gswyhq-pc:~/ekho-7.5.1$ make
+gswyhq@gswyhq-pc:~/ekho-7.5.1$ sudo make install
+gswyhq@gswyhq-pc:~/ekho-7.5.1$ ekho "python 123 hello"
+
+# 下载音频文件解压；
+gswyhq@gswyhq-pc:~$ tar xJvf pinyin-huang-44100-wav-v2.tar.xz
+gswyhq@gswyhq-pc:~$ ls
+COPYING-pinyin-huang  ekho-7.5.1  ekho-7.5.1.tar.xz  pinyin-huang-44100-wav-v2  pinyin-huang-44100-wav-v2.tar.xz
+
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1/COPYING-pinyin-huang .
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1/pinyin-huang-44100-wav-v2 pinyin
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.voice pinyin.voice.bak
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.index pinyin.index.bak
+
+gswyhq@gswyhq-pc:~/ekho-7.5.1_data$ tar xjvf pinyin-yali-44100-v9.tar.bz2
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1_data/pinyin-yali pinyin
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1_data/COPYING-pinyin-yali .
+gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ ekho "大千世界，界域三千" -o abcd.mp3

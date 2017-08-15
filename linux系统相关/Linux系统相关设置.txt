@@ -1,0 +1,17 @@
+
+系统时间不对：
+方法1：直接改时区
+ubuntu@ip-172-31-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+方法2：若改时区后还不对，则可以：
+ubuntu@ip-172-31-14-6:~$ date
+Fri Aug 11 09:59:49 UTC 2017
+# 更改时区：
+ubuntu@ip-172-31-14-6:~$ sudo vim /etc/timezone
+ubuntu@ip-172-31-14-6:~$ head /etc/timezone
+Asia/shanghai
+ubuntu@ip-172-31-14-6:~$ date
+Fri Aug 11 18:03:08 UTC 2017
+# 重新设置时间：
+ubuntu@ip-172-31-14-6:~$ sudo date  -s "2017-8-11 18:04:00"
+

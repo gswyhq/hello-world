@@ -1,0 +1,70 @@
+
+一、系统数据备份
+制作好deepin的u盘启动盘；
+插上u盘启动，重启电脑；
+进入u盘启动安装，出现选择安装语言的界面时，按ctrl+alt+F1（也有可能是`ctrl+alt+F1`、
+`ctrl+alt+F2`、`ctrl+alt+F3`、`ctrl+alt+F4`、`ctrl+alt+F5`、`ctrl+alt+F6`），多试几下；
+进入tty，然后输入startx（也有可能不需要输出），就可以进入live cd模式。
+这个有点像win pe，类似win安全模式，系统应急盘的意思。
+
+查看磁盘详细信息：
+sudo fdisk -l
+
+找到对应的Linux系统分区，并挂载上来；
+deepin@Deepin:~$ mkdir my_deepin
+deepin@Deepin:~$ sudo mount /dev/sda4 /home/deepin/my_deepin
+
+另外找个u盘，或者其它的硬盘，同样方法，挂载上来，如：
+deepin@Deepin:~$ mkdir my_u
+deepin@Deepin:~$ sudo mount /dev/sdc1 /home/deepin/my_u
+
+# 再把挂载的linux系统分区，需要备份的内容，拷贝到挂载上来的u盘即可；
+即把`/home/deepin/my_deepin`中的相关文件复制到`/home/deepin/my_u`中即可。
+
+
+# 卸载挂载的分区：
+ umount /dev/sdb1
+如果分区正在被使用，umount会报错：
+     umount: /dev/sdb1: device is busy
+此时可使用lsof命令打开正在使用该文件系统的进程，如：
+     lsof /dev/sdb1
+再按需操作相关进程即可。
+
+二、试图修复grub（若能修复，就不需要重新装系统了）
+首先，用 Linux 启动盘进入 Live 系统环境，在 Live 的终端里，创建修复 GRUB2 所需的文件夹：
+sudo mkdir -p /mnt/system
+
+然后把 Linux 的 / 分区挂载到创建的文件夹：（注意：站长的是 sda4，请确认自己的 / 分区所在，不可照搬）
+sudo mount /dev/sda4 /mnt/system
+
+随后把 EFI 分区（即 ESP 分区）也挂载：
+sudo mount /dev/sda1 /mnt/system/boot/efi
+
+然后用 efibootmgr 创建 ubuntu 的启动项：（注意：站长的主硬盘是 sda，请确认自己的主硬盘，不可照搬）
+sudo efibootmgr -c -d /dev/sda -p 2 -w -L ubuntu
+# 重启电脑
+shutdown -r now
+
+三、重装系统，但保留之前的数据
+1、首先，去Deepin官方下载镜像、制作u盘启动盘；
+2、重新安装，进入Deepin桌面环境，选择中文（简体）
+4、开启deepin安装程序，填好用户、操作系统的名称。
+5、（重要一步！这将决定覆盖安装是否成功！！仔细操作！）：
+（1）、选择“专家模式”。
+（2）、如果出现是否卸载分区的提示，选择“是”。
+（3）、在上面磁盘那里，选择你安装Deepin的分区。
+（4）、格式选择ext4，挂载点要选择”/“（依据你的挂载方案而定，这里假设只有根目录和swap分区），不选格式化（注意！不选格式化！！）。
+（引导分区选择提示：之前把引导装在那个分区就一定要选那个分区！此外如果之前安装是用UEFI启动Deepin，那么此次修复也要选UEFI。如果之前选的是传统BIOS启动，则这次修复则切不可选择UEFI！否则有可能会导致磁盘被重新分区！）
+（5）、弹出“Deepin将安装到sd×分区”，确认是按照上面操作的，即可点击确定。
+6、等待安装完毕。
+7、进入Deepin，好啦，修复完毕
+
+
+安装独立显卡驱动
+
+注解：这里介绍的方法是从官方仓库中找到编译好的驱动来安装的。
+第一步：安装驱动
+sudo apt-get update
+    sudo apt-get install bumblebee-nvidia nvidia-driver nvidia-settings
+
+

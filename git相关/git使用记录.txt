@@ -105,7 +105,7 @@ gswyhq@gswyhq-pc:~/hello-world$ git config --global alias.gswyhq "commit --amend
 gswyhq@gswyhq-pc:~/hello-world$ git gswyhq
 gswyhq@gswyhq-pc:~/hello-world$ git commit --amend --author='gswyhq <gswyhq@126.com>' -m '增加记录'
 
-当然，也可以在.gitconfig里的别名配置或修改
+当然，也可以在.git/config里的别名配置或修改
 [alias]
   gswyhq = commit --amend --author='gswyhq <gswyhq@126.com>' -m '增加记录'
 

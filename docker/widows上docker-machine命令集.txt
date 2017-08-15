@@ -1,0 +1,157 @@
+C:\docker>docker-machine help
+Usage: docker-machine [OPTIONS] COMMAND [arg...]
+
+Create and manage machines running Docker.
+
+Version: 0.12.2, build 9371605
+
+Author:
+  Docker Machine Contributors - <https://github.com/docker/machine>
+
+Options:
+  --debug, -D                                           Enable debug mode
+  --storage-path, -s "C:\Users\Lenovo\.docker\machine"  Configures storage path [$MACHINE_STORAGE_PATH]
+  --tls-ca-cert                                         CA to verify remotes against [$MACHINE_TLS_CA_CERT]
+  --tls-ca-key                                          Private key to generate certificates [$MACHINE_TLS_CA_KEY]
+  --tls-client-cert                                     Client cert to use for TLS [$MACHINE_TLS_CLIENT_CERT]
+  --tls-client-key                                      Private key used in client TLS auth [$MACHINE_TLS_CLIENT_KEY]
+  --github-api-token                                    Token to use for requests to the Github API [$MACHINE_GITHUB_API_TOKEN]
+  --native-ssh                                          Use the native (Go-based) SSH implementation. [$MACHINE_NATIVE_SSH]
+  --bugsnag-api-token                                   BugSnag API token for crash reporting [$MACHINE_BUGSNAG_API_TOKEN]
+  --help, -h                                            show help
+  --version, -v                                         print the version
+
+Commands:
+  active                Print which machine is active
+  config                Print the connection config for machine
+  create                Create a machine
+  env                   Display the commands to set up the environment for the Docker client
+  inspect               Inspect information about a machine
+  ip                    Get the IP address of a machine
+  kill                  Kill a machine
+  ls                    List machines
+  provision             Re-provision existing machines
+  regenerate-certs      Regenerate TLS Certificates for a machine
+  restart               Restart a machine
+  rm                    Remove a machine
+  ssh                   Log into or run a command on a machine with SSH.
+  scp                   Copy files between machines
+  start                 Start a machine
+  status                Get the status of a machine
+  stop                  Stop a machine
+  upgrade               Upgrade a machine to the latest version of Docker
+  url                   Get the URL of a machine
+  version               Show the Docker Machine version or a machine docker version
+  help                  Shows a list of commands or help for one command
+
+Run 'docker-machine COMMAND --help' for more information on a command.
+
+C:\docker>
+
+命令：
+
+active：显示出当前的活动主机；
+
+config：显示主机连接配置；
+
+create：创建一个主机；
+
+env：设置当前的环境是与哪个主机通信
+
+inspect：查看主机的详情信息；
+
+ip：查看主机IP地址；
+
+kill：强制关闭一个主机；
+
+ls：查看所有的主机信息；
+
+provision：重新配置现有主机；
+
+regenerate-certs：为主机重新生成证书；
+
+restart：重启一个主机；
+
+rm：删除一个主机；
+
+ssh：以ssh方式连接到主机上；
+
+scp：远程复制，用过Linux的应该都清楚
+
+status：查看主机状态；
+
+stop：停止一个正在运行的主机；
+
+upgrade：升级主机的Docker服务到最新版本；
+
+url：
+
+version：查Docker Machine版本；
+
+help：查看Docker Machine的帮助信息；
+
+使用docker-machine 指令 --help可以查看具体指令帮助信息。
+
+常用Docker Machine指令
+
+创建主机
+docker-machine create -d virtualbox test01
+也可以写成：
+
+docker-machine create --driver virtualbox test01
+创建一个名为test01的主机，驱动方式为virtualbox
+
+启动主机
+docker-machine start test01
+C:\Users\zsl-pc>docker-machine start mytest
+Starting "mytest"...
+(mytest) Check network to re-create if needed...
+(mytest) Waiting for an IP...
+Machine "mytest" was started.
+Waiting for SSH to be available...
+Detecting the provisioner...
+Started machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
+启动名为test01的主机，根据提示需要设置环境
+
+配置环境
+C:\Users\zsl-pc>docker-machine env mytest
+SET DOCKER_TLS_VERIFY=1
+SET DOCKER_HOST=tcp://192.168.99.100:2376
+SET DOCKER_CERT_PATH=C:\Users\zsl-pc\.docker\machine\machines\mytest
+SET DOCKER_MACHINE_NAME=mytest
+REM Run this command to configure your shell:
+REM     @FOR /f "tokens=*" %i IN ('docker-machine env mytest') DO @%i
+根据提示还需要再进行下一步配置
+
+@FOR /f "tokens=*" %i IN ('docker-machine env mytest') DO @%i
+注意：在使用命令：docker-machine env mytest时可能会出现以下提示：
+
+C:\Users\zsl-pc>docker-machine env mytest
+Error checking TLS connection: Error checking and/or regenerating the certs: There was an error validating certificates
+for host "192.168.99.101:2376": dial tcp 192.168.99.101:2376: connectex: No connection could be made because the target
+machine actively refused it.
+You can attempt to regenerate them using 'docker-machine regenerate-certs [name]'.
+Be advised that this will trigger a Docker daemon restart which will stop running containers.
+当出现上述信息时需要重新生成证书信息。
+
+重新生成证书
+C:\Users\zsl-pc>docker-machine regenerate-certs mytest
+Regenerate TLS machine certs?  Warning: this is irreversible. (y/n): y
+Regenerating TLS certificates
+Waiting for SSH to be available...
+Detecting the provisioner...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+查看IP
+C:\Users\zsl-pc>docker-machine ip
+192.168.99.100
+列表主机
+C:\Users\zsl-pc>docker-machine ls
+NAME      ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER    ERRORS
+default   *        virtualbox   Running   tcp://192.168.99.102:2376           v1.12.3
+mytest    -        virtualbox   Running   tcp://192.168.99.100:2376           v1.12.3
+查看当前活动主机
+C:\Users\zsl-pc>docker-machine active
+mytest
+上述的这些指令是在docker-machine使用相对较多实用性也很强的指令。其他的只用简单测试下便知晓其作用。

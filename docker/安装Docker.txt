@@ -88,6 +88,7 @@ gswyhq@gswyhq-pc:~$ sudo docker pull redis
 
 # 安装docker-machine：
 # 下载最新版本的Docker Machine并将docker-machine文件放到了/usr/local/bin/后，添加执行权限即可：
+# 安装命令可在页面`https://github.com/docker/machine/releases/`查到；
 gswyhq@gswyhq-pc:~$ curl -L https://github.com/docker/machine/releases/download/v0.12.0-rc2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&   chmod +x /tmp/docker-machine &&  sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
 
 # 查看docker-machine的安装版本：
