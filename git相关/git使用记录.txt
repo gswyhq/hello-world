@@ -1,9 +1,7 @@
 
 1，git 安装：
 
-　　sudo apt-get install git-core openssh-server openssh-client
-
-　　$ sudo apt-get install git-core git-gui git-doc 
+　　sudo apt-get install git-core openssh-server openssh-client git-gui git-doc 
 
 　　sudo apt-get install libcurl4-gnutls-dev libexpat1-dev gettext libz-dev git-core  
 　　
@@ -701,6 +699,8 @@ gswyhq@gswyhq-pc:~/biji$ git status
   （使用 "git add <文件>..." 以包含要提交的内容）
 
 	RabbitMQ的安装使用.txt
+
+设置日期格式：git config --global log.date iso8601
 
 提交为空，但是存在尚未跟踪的文件（使用 "git add" 建立跟踪）
 

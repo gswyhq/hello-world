@@ -84,3 +84,10 @@ docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker
 # 查看一个镜像的历史：
 gswyhq@gswyhq-pc:~/docker/ubuntu$ docker history 2356a0ec52f8
 
+# 将本地某个容器保存为镜像：
+ubuntu@ip-172-31-14-6:~/touzhijia$ docker commit ubuntu0815 ubuntu:0815
+eba352b2b69ecd4bbdc680e0751820244f6026b5f57560a0ee35f5b90c76cef7
+ubuntu@ip-172-31-14-6:~/touzhijia$ docker images 
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              0815                eba352b2b69e        6 seconds ago       1.762 GB
+

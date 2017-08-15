@@ -26,4 +26,12 @@ sudo apt-get install  nvidia-legacy-340xx-driver #安装驱动包
 如果为命令自动安装，终端执行如下命令可卸载：
 sudo apt-get remove nvidia-driver nvidia-kernel-dkms glx-alternative-nvidia
 
+# 查看显卡：
+gswyhq@gswyhq-PC:~$ lspci | grep -i nvidia
+01:00.0 VGA compatible controller: NVIDIA Corporation GK208 [GeForce GT 720] (rev a1)
+01:00.1 Audio device: NVIDIA Corporation GK208 HDMI/DP Audio Controller (rev a1)
+
+要查看当前 Linux 系统上所使用的显卡驱动名称，同样可以使用 lshw 命令：
+gswyhq@gswyhq-PC:~$ sudo lshw -c video | grep configuration 
+       configuration: driver=nouveau latency=0
 

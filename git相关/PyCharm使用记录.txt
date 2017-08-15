@@ -29,3 +29,15 @@ sudo mv /home/gswyhq/resources_cn.jar /usr/lib/pycharm-community/lib/resources_e
 重启pycharm即可。
 以上测试通过的版本是：PyCharm Community Edition 2016.1.4
 
+# Pycharm上python unittest不执行"if __name__ == '__main__' "问题or选择非unittest run
+1、Pycharm运行导入unittest框架时，执行的的命令是“Run 'Unittests in XXX' “
+2、此时执行顺序为：Class->def setup ->def test_1 ->def tearDown
+3、如果执行的命令为“Run XXX”，那么会先执行class后，就执行“if __name__ == '__main__' ”
+4、在代码“"if __name__ == '__main__' ”区域，右击“run xxx”即可，具体步骤参考第二个链接（有用的解决方案）
+　　4.1 首先删除Pycharm该文件的配置，pychrm-“run”-“Edit Configurations”-"Python tests"下删除该文件的配置信息，再点击“if __name__ == '__main__' ”旁边的三角按钮，鼠标移到Run...就可以看到两个运行方式了
+           先用Run XXX方式运行下，然后到pychrm-“run”-“Edit Configurations”-"Python tests"下点击保存按钮，保存该配置
+
+# 取消默认的右击运行unittest
+File-> Settings -> Tools -> Python Integrated Tools -> Default test runner ,将`Unittests`改为`py.test`即可；
+
+

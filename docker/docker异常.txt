@@ -13,6 +13,10 @@ sudo gpasswd -a ${USER} docker
 sudo service docker restart
 第四步：然后退出并重新登录就生效
 切换当前会话到新 group 或者重启 X 会话
+gswyhq@gswyhq-pc:/var/run$ newgrp - docker
+gswyhq@gswyhq-pc:~$ docker ps 
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
 注意，最后一步是必须的，否则因为 groups 命令获取到的是缓存的组信息，刚添加的组信息未能生效，所以 docker images 执行时同样有错。
 
 # docker服务未启动报错：
@@ -36,4 +40,11 @@ FATA[0001] Get http://ubuntu0717-export.tar: dial tcp: lookup ubuntu0717-export.
 # 这个时候改用下面的方法导入即可：
 ubuntu@10-13-158-31:~/docker/ubuntu$ cat ubuntu0717-export.tar | sudo docker import - ubuntu:0717
 16a079ae5a08c141a3e710a987259a3cd633f206de226430a46d9ef4e4ddf023
+
+# 重启之前的一个容器报错：
+gswyhq@gswyhq-pc:~/docker/neo4j/niwodai$ sudo docker start niwodai27474
+Error response from daemon: driver failed programming external connectivity on endpoint niwodai27474 (aecc9f558db95cf92ebd496f382ab1608c62e422e8022ebf288ae0b350068557):  (iptables failed: iptables --wait -t filter -A DOCKER ! -i docker0 -o docker0 -p tcp -d 172.17.0.4 --dport 7687 -j ACCEPT: iptables: No chain/target/match by that name.
+ (exit status 1))
+# 解决方法，重启docker服务即可
+gswyhq@gswyhq-pc:~$ sudo systemctl restart docker
 

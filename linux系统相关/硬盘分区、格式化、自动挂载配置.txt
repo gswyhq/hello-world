@@ -1,0 +1,50 @@
+
+
+1、显示硬盘及所属分区情况。在终端窗口中输入如下命令：
+ # sudo fdisk -lu
+
+２、对硬盘进行分区。在终端窗口中输入如下命令：
+ # sudo fdisk /dev/sdb
+ # Command (m for help): m   查看帮助
+ # Command (m for help): n    创建新分区，并提示分配大小 +50G
+ # Command (m for help): e    指定分区为扩展分区（extended）
+ # Command (m for help): w   保存
+ # sudo fdisk -lu         查看系统已经识别了硬盘 /dev/sdb 的分区
+3、硬盘格式化
+ # sudo mkfs -t ext4 /dev/sdb   -t ext4 表示将分区格式化成ext4文件系统类型
+
+4、挂载硬盘分区
+ # sudo df -lh                  查看分区情况
+ # sudo mkdir devdata          建立挂载文件目录
+ # sudo mount -t ext4 /dev/sdb /devdata  挂载分区
+ # sudo df -lh                 检查
+
+5、设置开机自动挂载
+# ls -l /dev/disk/by-uuid/       查看硬盘对应的uuid
+ # sudo vim /etc/fstab        
+ # 添加以下内容
+ # /host was on /dev/sdb during installation
+  UUID=0f648388-edae-4d54-b5ac-7afe9ce16b72 /host      ext4  defaults    0     3
+
+
+
+示例：
+ubuntu@ip-172-31-14-6:~$ sudo fdisk -lu
+
+Disk /dev/xvda: 21.5 GB, 21474836480 bytes
+ubuntu@ip-172-31-14-6:~$ sudo mkfs -t ext4 /dev/xvdb
+ubuntu@ip-172-31-14-6:~$ sudo mkdir /data
+ubuntu@ip-172-31-14-6:~$ sudo mount -t ext4 /dev/xvdb /data
+ubuntu@ip-172-31-14-6:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/xvda1       20G  840M   18G   5% /
+none            4.0K     0  4.0K   0% /sys/fs/cgroup
+udev            7.5G   12K  7.5G   1% /dev
+tmpfs           1.5G  328K  1.5G   1% /run
+none            5.0M     0  5.0M   0% /run/lock
+none            7.5G     0  7.5G   0% /run/shm
+none            100M     0  100M   0% /run/user
+/dev/xvdb        30G   44M   28G   1% /data
+
+参考：http://bruce007.blog.51cto.com/7748327/1322236
+
