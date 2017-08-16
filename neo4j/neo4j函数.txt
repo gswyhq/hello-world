@@ -1,0 +1,51 @@
+
+断言函数(Predicate functions) 
+函数名称	函数说明
+ALL(identifier in collection WHERE predicate)	判断一个断言(predicate)是否满足集合(collection)里的所有元素
+ANY(identifier in collection WHERE predicate)	判断一个断言(predicate)是否至少满足集合(collection)里的一个元素
+NONE(identifier in collection WHERE predicate)	如果集合(collection)里的元素不满足断言(predicate)则返回true
+SINGLE(identifier in collection WHERE predicate)	如果集合(collection)里的只有一个元素满足断言(predicate)则返回true
+标量函数(Scalar functions)
+函数名称	函数说明
+LENGTH( collection )	返回集合的元素个数
+TYPE( relationship )	返回关系的类型
+ID( property-container )	返回节点或者关系的ID
+COALESCE( expression [, expression]* )	返回expressions列表里第一个不为空的值
+HEAD( expression )	返回一个集合 (collection)  里的第一个元素
+LAST( expression )	返回一个集合 (collection)  里最后一个元素
+集合函数(Collection functions)
+函数名称	函数说明
+NODES( path )	返回一个路径的所有节点
+RELATIONSHIPS( path )	返回一个路径的所有关系
+EXTRACT( identifier in collection : expression )	返回一个结果集合：对集合(collection)的所有元素执行expression的操作得到的结果
+FILTER(identifier in collection : predicate)	返回集合(collection)中所有满足断言(predicate)的元素组成的集合
+TAIL( expression )	返回集合中除了第一个之外的所有元素
+RANGE( start, end [, step] )	返回从start开始，end结束(闭区间)内步长为step(非0)的所有整数数字
+
+数学函数(Mathematical functions)
+函数名称	函数说明
+ABS( expression )	返回expression得到的数值的绝对值
+ROUND( expression )	取整函数：返回小于等于expression得到的数值的最大整数(还是返回离expression得到的数值最近的整数？？)
+SQRT( expression )	返回expression得到的数值的平方根
+SIGN( expression )	符号函数：如果expression得到的数值，为0则返回0；为负数则返回-1；为正数则返回1
+ 
+聚合函数(Aggregate functions)
+函数名称	函数说明
+COUNT( expression )	返回expression得到的结果的个数，expression也可为"*"
+SUM( expression )	返回expression得到结果相加的和
+AVG( expression )	返回expression得到结果的平均值
+MAX( expression )	返回expression得到结果的最大值
+MIN( expression )	返回expression得到结果的最小值
+COLLECT( expression )	把expression得到的结果以list的形式返回
+
+
+
+
+
+
+多函数组合使用示例：
+MATCH p=(n1:Didian)<-[*1..9]-(n0:Chanpinka)-[*1..9]->(n2:Gongneng) 
+    where n0.name="sim卡" and n2.name="语音功能" and n1.name="日本"
+    RETURN distinct filter(n in nodes(p) where 'Ka' in labels(n)) as nol
+
+

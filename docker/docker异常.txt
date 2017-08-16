@@ -51,7 +51,7 @@ gswyhq@gswyhq-pc:~$ sudo systemctl restart docker
 # 修改docker容器时间：
 确认宿主机时间对否；在宿主机时间正确情况下可以：
 1、重新启动一个容器，加上如下参数，即可使用宿主机时间
-$ docker run -i -t --restart=always --detach --name=daibang18100 -p 18100:8000 --volume=$PWD:/daibang  -v /etc/localtime:/etc/localtime ubuntu:0717 /bin/bash
+$ docker run -i -t --restart=always --detach --name=dbang18100 -p 18100:8000 --volume=$PWD:/dbang  -v /etc/localtime:/etc/localtime ubuntu:0717 /bin/bash
 2、假如，你不想重新启动，或者不能重新启动，也没关系，可以直接把文件复制到容器内，如下
 $ docker cp /etc/localtime [containerId]:/etc/localtime
 # 若宿主机时区不对，可以：
