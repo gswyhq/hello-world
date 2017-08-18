@@ -1,0 +1,43 @@
+
+
+    setting中可以设置： static_path，和 static_url_prefix。
+    前者指定静态目录的位置，后者指定静态目录在URL中的相关路径，默认值是 '/static/'。
+    (注意，static_path的值前后不用加反斜线，static_url_prefix则前后都要加。)
+
+
+    如设置为：
+    'static_path':'static_path',
+    'static_url_prefix':'/static_url/',
+
+
+    则可以通过 http://mydomain.domain:port/static_url/somefile
+    访问 project_root/static_path/somefile  的静态内容。
+
+
+    若不指定 static_url_prefix ，则其默认值为 '/static/'。
+    所以，前述问题中，如果只指定 static_path 为 view。
+    则需要通过 http://mydomain.domain:port/static/somefile
+    来访问 project_root/view/somefile
+
+
+    如果想自定义URL的静态路径部分，则需指定 static_url_prefix。
+
+示例：
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+        ],
+        static_path= 'communication',
+        static_url_prefix= '/test/',
+    )
+
+
+if __name__ == "__main__":
+    application = make_app()
+    myserver = HTTPServer(application)
+    application.listen(PORT)
+    logger.info('server is running....!!')
+    tornado.ioloop.IOLoop.current().start()
+
+则可以通过“http://localhost:8000/test/index.html”，访问到“./communication/index.html”文件；
+

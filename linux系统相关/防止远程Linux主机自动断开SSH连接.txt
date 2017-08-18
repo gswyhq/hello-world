@@ -16,8 +16,12 @@ Host server1
  ServerAliveInterval 30
 # ServerAliveInterval 30表示ssh客户端每隔30秒给远程主机发送一个no-op包，no-op是无任何操作的意思，这样远程主机就不会关闭这个SSH会话。
 
-为了使所有用户生效，你可以在/etc/ssh/ssh_config全局配置文件添加如下一行：
+为了使所有用户生效，你可以在/etc/ssh/ssh_config服务器端全局配置文件添加如下两行：
 ServerAliveInterval 30
+ClientAliveCountMax 6
+
+按照上面这个设置
+  SSH Server 每 30秒就会自动发送一个信号给 Client，而等待 Client 回应，如果客户端没有回应，会记录下来直到记录数超过 ClientAliveCountMax(这里设置为6次) 的值时，才会断开连接。
 
 还可以在连接时使用选项：
 $ ssh -o ServerAliveInterval=30 user@remote-ssh-server-ip

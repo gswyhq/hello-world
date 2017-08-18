@@ -46,6 +46,10 @@ Author: web1 <web1@web1.co>
 Date:   2017-07-22 14:22:38 +0800
 改回默认格式的命令：
 gswyhq@gswyhq-pc:~/yhb20170717$ git config log.date default 
+# 有时候改了日期格式，但还是无效，可能是之前设置了本项目的日期格式，这时可以：
+ubuntu@ip-172-31-8-214:~/dingdang$ git config --global log.date iso8601
+改为： 
+ubuntu@ip-172-31-8-214:~/dingdang$ git config log.date iso8601
 
 查看配置信息
 要检查已有的配置信息，可以使用 git config --list 命令：

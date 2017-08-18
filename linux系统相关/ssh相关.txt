@@ -61,4 +61,16 @@ gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@52.80.41.112
 
 更多示例，可参考：http://www.cnblogs.com/eshizhan/archive/2012/07/16/2592902.html
 
+# ssh登录后经常很快自动断开：
+ubuntu@ip-172-31-14-6:~$ sudo vim /etc/ssh/sshd_config
+ClientAliveInterval 30
+ClientAliveCountMax 5
+# 重启ssh服务使生效：
+ubuntu@ip-172-31-14-6:~$ sudo service sshd reload 
+sshd: unrecognized service
+改成：
+ubuntu@ip-172-31-14-6:~$ sudo service ssh restart
+ssh stop/waiting
+ssh start/running, process 12050
+
 

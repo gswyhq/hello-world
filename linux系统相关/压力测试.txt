@@ -10,8 +10,17 @@ gswyhq@gswyhq-pc:~$ sudo vim /etc/apache2/ports.conf
 
 # 查看apache服务的状态：
 gswyhq@gswyhq-pc:~$ /usr/sbin/apachectl status
+或者：
+gswyhq@gswyhq-PC:~$ sudo systemctl status apache2
+
 # 停止apache服务
 gswyhq@gswyhq-pc:~$ sudo /usr/sbin/apache2ctl stop
+或者：
+gswyhq@gswyhq-PC:~$ sudo systemctl stop apache2
+
+# 启动apache服务
+gswyhq@gswyhq-PC:~$ sudo systemctl start apache2
+
 # 重新启动nginx:
 gswyhq@gswyhq-pc:~$ sudo /etc/init.d/nginx restart
 
