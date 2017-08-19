@@ -46,7 +46,8 @@ def txt_to_voice(text, name='test'):
             piny = piny + '5'
             piny_song = VOICE_DICT.get(piny, silent)
 
-        new += piny_song
+        # new += piny_song
+        new = new.append(piny_song, crossfade=1)
     new.export(os.path.join(EXPORT_PATH, "{}.mp3".format(name)), format='mp3')
 
 def main():
