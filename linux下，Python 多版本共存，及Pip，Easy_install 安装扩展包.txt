@@ -14,6 +14,8 @@ Python2与Python3共存
     sudo python3 ez_setup.py install 
     sudo easy_install pip
 
+安装超时：
+root@8f71c2b955d0:/# pip3 --default-timeout=100 install pyltp
 
  
 
