@@ -1,0 +1,162 @@
+
+# 来源： http://mp.weixin.qq.com/s/qWg0C7ZwjLct2Pz-6hSVXA
+
+使用Cython来保护整个代码库的Python项目。
+起初尽管保护Python源码免受逆向工程的影响似乎是一项徒劳无功的任务，
+但是所有代码的cythonizing都会带来合理的安全性（二进制文件非常难以拆解，但是还可以通过程序的猴子补丁程序来完成）。
+这种安全性是有代价的 - Cython的主要用途是编写可以轻松与Python代码连接的编译扩展。
+因此，对复杂模块/包结构的支持是相当有限的，我们必须做一些额外的工作来实现所需的结果。
+我们必须克服的第一个障碍是很难用Cython编译整个Python包（如“包含__init__.py文件的目录”）。
+想象一下下面的结构:
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+.
+├── mypkg
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+├── mypkg2
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+└── setup.py
+
+推荐的cythonizing方法是使用setup.py文件，如下所示：
+
+setup.py或多或少是使用Cython的项目所期望的。
+但是有两件事要注意。第一，always_allow_keywords指令通过禁用具有大量参数的函数只允许使用关键字参数这一优化，
+使Flask视图函数可以正常工作。其次，我们不使用一些指南建议的ext_package参数，
+因为这会将cythonized代码放入另一个包中。通过省略这个参数，编译的代码保存在同一个地方。
+但是，在使用python setup.py build_ext构建项目之后，我们注意到生成的程序包无法导入 - 它缺少__init__.py文件。
+__init__.so可以从Python导入，但这还不足以使目录成为Python的一个包。
+无法导入包不是唯一的问题 - 其中的代码也无法执行包相对导入（例如.foo import foo），这会破坏其功能。
+要解决这个问题，我们可以在构建项目的其余部分后从源代码树中复制__init__.py文件。
+一个很好的方法是覆盖setup.py中的build_ext类：
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py build_ext
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+.
+├── build
+│   ├── lib.linux-x86_64-3.5
+│   │   ├── mypkg
+│   │   │   ├── bar.cpython-35m-x86_64-linux-gnu.so
+│   │   │   ├── foo.cpython-35m-x86_64-linux-gnu.so
+│   │   │   ├── __init__.cpython-35m-x86_64-linux-gnu.so
+│   │   │   └── __init__.py
+│   │   └── mypkg2
+│   │       ├── bar.cpython-35m-x86_64-linux-gnu.so
+│   │       ├── foo.cpython-35m-x86_64-linux-gnu.so
+│   │       ├── __init__.cpython-35m-x86_64-linux-gnu.so
+│   │       └── __init__.py
+│   ├── mypkg
+│   │   ├── bar.c
+│   │   ├── foo.c
+│   │   └── __init__.c
+│   ├── mypkg2
+│   │   ├── bar.c
+│   │   ├── foo.c
+│   │   └── __init__.c
+│   └── temp.linux-x86_64-3.5
+│       └── build
+│           ├── mypkg
+│           │   ├── bar.o
+│           │   ├── foo.o
+│           │   └── __init__.o
+│           └── mypkg2
+│               ├── bar.o
+│               ├── foo.o
+│               └── __init__.o
+├── mypkg
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+├── mypkg2
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+└── setup.py
+
+12 directories, 27 files
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ rm -r build
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+.
+├── mypkg
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+├── mypkg2
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+└── setup.py
+
+2 directories, 7 files
+
+
+我们已经成功地创建了可以导入的Python包。它们在build /lib.linux-x86_64-3.5目录下。
+遗憾的是，这不足以分发我们的包。理想情况下，我们希望安装一个仅包含已编译代码的软件包。
+目前Python存档的标准是wheel格式（.whl），其目的是替换.egg格式。所以，
+让我们尝试用python setup.py bdist_wheel创建wheel格式！ 命令完成后，应该有一个包含wheel文件的dist文件夹。
+打开就能产生这样的东西：
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py bdist_wheel
+
+显然，归档不仅包含编译代码，还包含源代码。有一种方法可以解决这个问题，但是它似乎是反直觉的。
+我们需要在调用setup时删除packages参数中的包名。这样，仍然可以构建扩展并包含在wheel中，但源代码将不会在其中。
+
+构建的wheel的内容应该如下所示：
+gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+.
+├── build
+│   ├── bdist.linux-x86_64
+│   ├── lib.linux-x86_64-3.5
+│   │   ├── mypkg
+│   │   │   ├── bar.cpython-35m-x86_64-linux-gnu.so
+│   │   │   ├── foo.cpython-35m-x86_64-linux-gnu.so
+│   │   │   ├── __init__.cpython-35m-x86_64-linux-gnu.so
+│   │   │   └── __init__.py
+│   │   └── mypkg2
+│   │       ├── bar.cpython-35m-x86_64-linux-gnu.so
+│   │       ├── foo.cpython-35m-x86_64-linux-gnu.so
+│   │       ├── __init__.cpython-35m-x86_64-linux-gnu.so
+│   │       └── __init__.py
+│   ├── mypkg
+│   │   ├── bar.c
+│   │   ├── foo.c
+│   │   └── __init__.c
+│   ├── mypkg2
+│   │   ├── bar.c
+│   │   ├── foo.c
+│   │   └── __init__.c
+│   └── temp.linux-x86_64-3.5
+│       └── build
+│           ├── mypkg
+│           │   ├── bar.o
+│           │   ├── foo.o
+│           │   └── __init__.o
+│           └── mypkg2
+│               ├── bar.o
+│               ├── foo.o
+│               └── __init__.o
+├── dist
+│   └── mypkg-0.0.0-cp35-cp35m-linux_x86_64.whl
+├── mypkg
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+├── mypkg2
+│   ├── bar.py
+│   ├── foo.py
+│   └── __init__.py
+├── mypkg.egg-info
+│   ├── dependency_links.txt
+│   ├── PKG-INFO
+│   ├── SOURCES.txt
+│   └── top_level.txt
+└── setup.py
+
+15 directories, 32 files
+
+可以使用pip install dist/*.whl安装wheel。如果我们不需要检查wheel或手动分配wheel，
+我们可以在项目目录中运行pip install，构建并安装wheel。
+也可以从.egg存档中删除Python源代码，但它涉及到从setuptools覆盖bdist_egg命令。
+我不会在这里覆盖，但如果您有兴趣，请查看上述命令类的--exclude-source-files选项和zap_pyfiles方法。
+通过遵循本指南，你应该能够利用复杂软件包/模块结构对Python代码库进行cythonize，
+从而让恶意黑客难以对其进行逆向工程并窃取你的编程成果。

@@ -1,0 +1,60 @@
+
+Debian 及其衍生版，如 Ubuntu、Linux Mint 和 Raspbian，它们的包格式是 .deb。
+从经典的 configure && make && make install 三部曲到 dpkg，从需要手处理依赖关系的 dpkg 到全自动化的 apt-get;
+
+大多数系统在本地都会有一个和远程存储库对应的包数据库，在安装或升级包之前最好更新一下这个数据库。
+# 对系统程序对应的包库进行更新（不会升级已安装的程序）：
+sudo apt-get update
+sudo apt update
+
+# 更新已经安装的程序（即升级已经安装的程序）：
+sudo apt-get upgrade	只更新已安装的包
+sudo apt-get dist-upgrade	可能会增加或删除包以满足新的依赖项
+sudo apt upgrade	和 apt-get upgrade 类似
+sudo apt full-upgrade	和 apt-get dist-upgrade 类似
+
+# 使用命令行工具进行搜索某个包：
+apt-cache search search_string	
+apt search search_string
+
+# 查看某个软件包的信息
+apt-cache show package	显示有关包的本地缓存信息
+apt show package	
+dpkg -s package	显示包的当前安装状态
+
+# 从存储库安装包
+知道包名后，通常可以用一个命令来安装它及其依赖。你也可以一次性安装多个包，只需将它们全部列出来即可。
+sudo apt-get install package	
+sudo apt-get install package1 package2 ...	安装所有列出来的包
+sudo apt-get install -y package	在 apt 提示是否继续的地方直接默认 yes
+sudo apt install package	显示一个彩色的进度条
+
+# 从本地文件系统安装一个包
+在 Debian 派生的系统上，dpkg 用来处理单个的包文件。如果一个包有未满足的依赖项，那么我们可以使用 gdebi 从官方存储库中检索它们。
+sudo dpkg -i package.deb	
+sudo apt-get install -y gdebi && sudo gdebi package.deb	安装 gdebi，然后使用 gdebi 安装 package.deb并处理缺失的依赖
+
+# 删除一个或多个已安装的包
+由于包管理器知道给定的软件包提供了哪些文件，因此如果某个软件不再需要了，它通常可以干净利落地从系统中清除这些文件。
+sudo apt-get remove package	
+sudo apt remove package	
+sudo apt-get autoremove	删除不需要的包
+
+# apt 命令
+Debian 家族发行版的管理员通常熟悉 apt-get 和 apt-cache。较少为人所知的是简化的 apt 接口，它是专为交互式使用而设计的。
+传统命令			等价的 apt 命令
+apt-get update			apt update
+apt-get dist-upgrade		apt full-upgrade
+apt-cache search string		apt search string
+apt-get install package		apt install package
+apt-get remove package		apt remove package
+apt-get purge package		apt purge package
+
+# 获取帮助
+man apt-get	更新本地包数据库以及与包一起工作
+man apt-cache	在本地的包数据库中搜索
+man dpkg	和单独的包文件一起工作以及能查询已安装的包
+man apt	通过更简洁，用户友好的接口进行最基本的操作
+
+
+

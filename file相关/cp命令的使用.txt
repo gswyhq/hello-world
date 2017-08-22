@@ -1,0 +1,23 @@
+
+# 仅仅复制更新的文件
+命令 cp -r Misc /media/clh/4388-D5FE 并执行后 ，拷贝 Misc 目录下所有文件
+（这个 -r 参数，全称 “recursive”，递归处理，意思为本目录下所有文件及子目录一起处理）到我的 USB 设备的挂载目录 /media/clh/4388-D5FE。
+可以加上-v 参数让执行结果更详细。
+只拷贝新的文件到我的存储设备上，我就使用 cp 的“更新”和“详细”选项。
+me@desktop:~/Pictures$ cp -r -u -v Misc /media/clh/4388-D5FE
+'Misc/asunder.png' -> '/media/clh/4388-D5FE/Misc/asunder.png'
+'Misc/editing tags guayadeque.png' -> '/media/clh/4388-D5FE/Misc/editing tags guayadeque.png'
+'Misc/misc on usb.png' -> '/media/clh/4388-D5FE/Misc/misc on usb.png'
+me@desktop:~/Pictures$
+上面的第一行中是 cp 命令和具体的参数（-r 是“递归”， -u 是“更新”，-v 是“详细”）。接下来的三行显示被复制文件的信息，最后一行显示命令行提示符。
+通常来说，参数 -r 也可用更详细的风格 --recursive。但是以简短的方式，也可以这么连用 -ruv。
+
+# 备份文件
+在添加新的内容之前进行备份。我决定使用带编号的备份选项，如下：
+clh@vancouver:~/Test$ cp --force --backup=numbered test1.py test1.py
+clh@vancouver:~/Test$ ls
+test1.py test1.py.~1~
+
+这个 --backup=numbered 参数意思为“我要做个备份，而且是带编号的连续备份”。所以一个备份就是 1 号，第二个就是 2 号，等等。
+使用 --force 参数是允许想备份的源文件和目标文件名字相同；
+

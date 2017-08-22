@@ -1,0 +1,59 @@
+
+一、安装cython:
+gswyhq@gswyhq-pc:~$ sudo apt-get install cython
+gswyhq@gswyhq-pc:~$ cython -V
+Cython version 0.25.2
+# 并且安装对应的python包
+gswyhq@gswyhq-pc:~$ sudo pip3 install Cython
+
+二、 使用
+
+1、编写   以 .pyx为扩展名的 cython程序，hello.pyx
+
+def say_hello_to(name):
+    print("Hello %s!" % name)
+ 2、编写python程序 setup.py，其目的是把 hello.pyx程序转化成hello.c ，并编译成so文件
+
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+
+ext_modules = [Extension("hello", ["hello.pyx"])]
+
+setup(
+  name = 'Hello world app',
+  cmdclass = {'build_ext': build_ext},
+  ext_modules = ext_modules
+)
+3. 执行python程序
+
+gswyhq@gswyhq-pc:~/hello-world/cython相关$ ls
+cython的安装、使用.txt  hello.pyx  setup.py
+gswyhq@gswyhq-pc:~/hello-world/cython相关$ python3 setup.py build_ext --inplace
+running build_ext
+cythoning hello.pyx to hello.c
+building 'hello' extension
+creating build
+creating build/temp.linux-x86_64-3.5
+x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -I/usr/include/python3.5m -c hello.c -o build/temp.linux-x86_64-3.5/hello.o
+x86_64-linux-gnu-gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,relro -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 build/temp.linux-x86_64-3.5/hello.o -o /home/gswyhq/hello-world/cython相关/hello.cpython-35m-x86_64-linux-gnu.so
+gswyhq@gswyhq-pc:~/hello-world/cython相关$ ls
+build  cython的安装、使用.txt  hello.c  hello.cpython-35m-x86_64-linux-gnu.so  hello.pyx  setup.py
+gswyhq@gswyhq-pc:~/hello-world/cython相关$ cd build/
+gswyhq@gswyhq-pc:~/hello-world/cython相关/build$ ls
+temp.linux-x86_64-3.5
+
+执行的结果会生成两个文件：hello.c 和 hello.so( 用PyObject* 封装好的文件)及一个目录build
+hello.c 及build目录都可以删除掉；
+
+4. 用python调用 hello.so,调用文件为test.py
+将`hello.cpython-35m-x86_64-linux-gnu.so`随便移动到某个位置，添加到路径即可导入，测试；
+gswyhq@gswyhq-pc:~/hello-world/cython相关$ mv hello.cpython-35m-x86_64-linux-gnu.so /home/gswyhq/
+
+import sys
+sys.path.append('/home/gswyhq')
+import hello
+hello.say_hello_to('你好，中国')
+Hello 你好，中国!
+
+cython的主要目的是： 简化python调用c语言程序的繁琐封装过程，提高python代码执行速度（C语言的执行速度比python快）
