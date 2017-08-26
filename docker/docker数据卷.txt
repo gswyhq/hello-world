@@ -1,0 +1,69 @@
+
+数据卷是一个可供一个或多个容器使用的特殊目录，它绕过 UFS，可以提供很多有用的特性：
+
+数据卷可以在容器之间共享和重用
+对数据卷的修改会立马生效
+对数据卷的更新，不会影响镜像
+数据卷默认会一直存在，即使容器被删除
+*注意：数据卷的使用，类似于 Linux 下对目录或文件进行 mount，镜像中的被指定为挂载点的目录中的文件会隐藏掉，能显示看的是挂载的数据卷。
+
+创建一个数据卷
+
+在用 docker run 命令的时候，使用 -v 标记来创建一个数据卷并挂载到容器里。在一次 run 中多次使用可以挂载多个数据卷。
+
+下面创建一个名为 web 的容器，并加载一个数据卷到容器的 /webapp 目录。
+
+$ sudo docker run -d -P --name web -v /webapp training/webapp python app.py
+*注意：也可以在 Dockerfile 中使用 VOLUME 来添加一个或者多个新的卷到由该镜像创建的任意容器。
+
+删除数据卷
+
+数据卷是被设计用来持久化数据的，它的生命周期独立于容器，Docker不会在容器被删除后自动删除数据卷，
+并且也不存在垃圾回收这样的机制来处理没有任何容器引用的数据卷。如果需要在删除容器的同时移除数据卷。
+可以在删除容器的时候使用 docker rm -v 这个命令。
+
+当我们使用 docker rm 删除 Containers 的时候，我们可能不会将这些 Containers 关联的 Volumes 删除。
+
+Volumes 只有在下面的情况下才会被删除：
+
+Container 被使用 docker rm -v 命令删除并且没有其他 Containers 于这个 Volume 关联，也没有 host 上的目录和这个 Volume 关联， -v 在这里是必需的。
+-rm 参数和 docker run 是一对。
+我们要遵循上面的规则进行 Containers 的管理，否则时间久了就会在/var/lib/docker/volumes 下产生很多垃圾文件，而且无法分辨哪些可以被安全删除。
+
+Docker 挂载数据卷的默认权限是读写，用户也可以通过 :ro 指定为只读。
+
+$ sudo docker run -d -P --name web -v /src/webapp:/opt/webapp:ro
+training/webapp python app.py
+加了 :ro 之后，就挂载为只读了。
+将主机的文件或文件夹作为volume挂载时，可以用多个 -v标签为容器添加多个volume，还可以使用:ro指定该volume为只读。
+注意：如果容器中指定的挂载目录存在相同的文件时，会被宿主机覆盖掉
+
+挂载一个本地主机文件作为数据卷
+-v 标记也可以从主机挂载单个文件到容器中
+$ sudo docker run --rm -it -v ~/.bash_history:/.bash_history ubuntu /bin/bash
+这样就可以记录在容器输入过的命令了。
+
+*注意：如果直接挂载一个文件，很多文件编辑工具，包括 vi 或者 sed --in-place，可能会造成文件 inode 的改变，从 Docker 1.1 .0起，这会导致报错误信息。
+所以最简单的办法就直接挂载文件的父目录。
+# 这也就出现挂载目录与挂载文件的区别：
+某个容器挂载了宿主机的某个文件，若通过vim对数据文件进行了数据更新，但这个时候，容器内部的数据，还是挂载时候的数据，并不能同步更新；
+若挂载目录就不同了，通过vim对宿主机挂载目录下面的文件进行改动，这个时候容器内部对应的文件也会跟着变动。
+也就是说：`当容器上的volume有变动时，宿主机也会跟着变动，那反过来呢？经测试也是一样的。不管是容器挂载点发生变动还是宿主机对挂载目录进行操作，
+另一方都会跟着变动。`这句话只是针对挂载目录是有效的，挂载单个文件的时候，是不成立的。
+
+利用docker commit生成新镜像，然后docker run -it 运行新镜像，发现容器挂载目录下没有任何文件了。说明生成新镜像时，是不保存挂载文件的。
+
+
+# 列出所有数据卷：
+gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume ls
+
+# 列出未使用的卷：
+gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume ls --filter dangling=true 
+
+# 删除数据卷：
+docker volumes rm <volume name> 
+
+# 查看某个数据卷的配置：
+gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume inspect a163382b96f3424d05f2ca11099abf472de0bd6729e70a6194cb3b69a726854a
+
+

@@ -16,7 +16,7 @@
 import os
 from pypinyin import lazy_pinyin, TONE3
 from pydub import AudioSegment
-
+import traceback
 
 # 中间插入空白静音500ms。
 silent = AudioSegment.silent(duration=500)
@@ -41,7 +41,7 @@ def load_voice_dict():
 
 VOICE_DICT = load_voice_dict()
 
-def txt_to_voice(text, name='test'):
+def txt_to_voice(text, name='test', export_path=EXPORT_PATH):
     """
     将文字转换为音频
     :param text: 需要转换的文字
@@ -60,12 +60,14 @@ def txt_to_voice(text, name='test'):
         # 交叉渐入渐出方法
         # with_style = beginning.append(end, crossfade=1500)
         # crossfade 就是让一段音乐平缓地过渡到另一段音乐，crossfade = 1500 表示过渡的时间是1.5秒。
-        crossfade = min(len(new), len(piny_song), 1500)/60
-        new = new.append(piny_song, crossfade=crossfade)
+        # if new and piny_song:
+        #     crossfade = min(len(new), len(piny_song), 1500)/60
+        #     new = new.append(piny_song, crossfade=crossfade)
+        if not piny_song:
+            continue
+        new += piny_song
 
-        # new += piny_song
-
-    new.export(os.path.join(EXPORT_PATH, "{}.mp3".format(name)), format='mp3')
+    new.export(os.path.join(export_path, "{}.mp3".format(name)), format='mp3')
 
 def main():
     text = '''    红海早过了。船在印度洋面上开驶着。但是太阳依然不饶人地迟落早起侵占去大部分的夜。
@@ -75,5 +77,28 @@ def main():
     事后大家都说是兵戈之象，因为这就是民国二十六年【一九三七年】。'''
     txt_to_voice(text)
 
+def test():
+    path = '/home/gswyhq/下载/御天神帝_qisuu.com/御天神帝'
+    fts = os.listdir(path)
+    fts.sort()
+    export_path = '/home/gswyhq/下载/御天神帝_qisuu.com/mp3'
+
+    for ft  in fts:
+        with open(os.path.join(path, ft))as f:
+            text = f.read()
+
+        try:
+            if os.path.isfile(os.path.join(export_path, ft.replace('.txt', '.mp3'))):
+                continue
+            txt_to_voice(text, name=ft[:-4], export_path=export_path)
+            print(ft)
+        except Exception as e:
+            print('转换文件出错：{}'.format(ft))
+            print("错误详情：{}".format(traceback.format_exc()))
+            print(e)
+
+    print('ok')
+
 if __name__ == '__main__':
-    main()
+    # main()
+    test()

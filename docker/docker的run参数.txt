@@ -62,4 +62,12 @@ gswyhq@gswyhq-pc:~$ docker inspect e7185e2bb696
 用 service docker restart 命令重启了我的docker引擎。
 root@gswyhq-pc:/var/lib/docker/containers/8845ad7492c1a06fe4dc24aca984a00dbd2bfbc3454c74702055a64c9d42fa1a# vim hostconfig.json 
 
+操作人员可以通过-e来设定任意的环境变量，甚至覆盖已经存在的环境变量，或者是在Dockerfile中通过ENV设定的环境变量。
+docker run -e LANG=C.UTF-8 unbuntu /bin/bash
+
+USER
+容器中默认的用户是root，但是开发人员创建新的用户之后，这些新用户也是可以使用的。开发人员可以通过Dockerfile的USER设定默认的用户，并通过"-u "来覆盖这些参数。
+
+WORKDIR
+容器中默认的工作目录是根目录（/）。开发人员可以通过Dockerfile的WORKDIR来设定默认工作目录，操作人员可以通过"-w"来覆盖默认的工作目录。
 

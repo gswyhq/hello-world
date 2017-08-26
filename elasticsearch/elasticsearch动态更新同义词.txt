@@ -1,0 +1,391 @@
+
+# 一、动态添加同义词插件
+gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/bells/elasticsearch-analysis-dynamic-synonym.git
+gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-dynamic-synonym
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ git log
+commit ec71478cdea1e0d056101cef5219b3e512ae4eac
+Author: watsonzhu(朱斌华) <watsonzhu@tencent.com>
+Date:   2017-05-17 10:25:26 +0800
+...
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ mvn package
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ cd target/releases/
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ ls
+elasticsearch-analysis-dynamic-synonym-5.2.0--.zip
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ unzip elasticsearch-analysis-dynamic-synonym-5.2.0--.zip -d  elasticsearch-analysis-dynamic-synonym-5.2.0
+
+# 二、分词插件‘pinyin’
+gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
+gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-pinyin
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ git checkout v5.2.0
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn clean
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn compile
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn package
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ cd target/releases/
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ ls
+elasticsearch-analysis-pinyin-5.2.0.zip
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ unzip elasticsearch-analysis-pinyin-5.2.0.zip -d elasticsearch-analysis-pinyin-5.2.0
+
+# 三、中文分词插件‘ik’
+gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
+gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-ik
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ git checkout v5.2.0
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn clean
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn compile
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn package
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ cd target/releases/
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ ls
+elasticsearch-analysis-ik-5.2.0.zip
+gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ unzip elasticsearch-analysis-ik-5.2.0.zip -d elasticsearch-analysis-ik-5.2.0
+
+# 四、elasticsearch的docker镜像
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker pull elasticsearch:5.2.0
+5.2.0: Pulling from library/elasticsearch
+5040bd298390: Pulling fs layer
+fce5728aad85: Pulling fs layer
+c42794440453: Pull complete
+0c0da797ba48: Pull complete
+7c9b17433752: Pull complete
+d4d33418bd6d: Pull complete
+0e10cce36e52: Pull complete
+09dd4de551b0: Pull complete
+dd2fffb2567d: Pull complete
+ccf025f80d4d: Pull complete
+672b9297eb8f: Pull complete
+38c763fc303a: Pull complete
+85a55935bd1a: Pull complete
+96cfc0c6d54d: Pull complete
+Digest: sha256:ab1c7595f92e6b7b56a9a7525982f5ac9106f0c8e5e59358ab3bbaabcf4ed48e
+Status: Downloaded newer image for elasticsearch:5.2.0
+
+# 五、编写同义词文件
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+# Example:
+ipod, i - pod, i pod
+foozball, foosball
+universe, cosmos
+西红柿, 番茄
+马铃薯, 土豆
+aa, bb
+打电话, 打手机
+电话, 手机
+
+# 六、启动一个容器，并加载同义词文件
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/my_synonyms.txt:/usr/share/elasticsearch/config/my_synonyms.txt -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
+14183ba403af6160761cffcc2d845f27218911f6c1fbc862337a1543e159ac62
+# 以上启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
+# 但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
+# 这个时候需要进入容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
+
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker exec -it elasticsearch5.2.0_9200 /bin/bash
+root@6fe69600d809:/usr/share/elasticsearch# cd config/
+root@6fe69600d809:/usr/share/elasticsearch/config# echo "http.cors.enabled: true" >> elasticsearch.yml
+root@6fe69600d809:/usr/share/elasticsearch/config# echo 'http.cors.allow-origin: "*"' >> elasticsearch.yml
+
+# 七、添加对应的分词，动态更新同义词插件，重启容器
+gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-dynamic-synonym/target/releases/elasticsearch-analysis-dynamic-synonym-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker restart elasticsearch5.2.0_9200
+
+# 八、开始使用
+1、编写一个空的同义词文件
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+
+dyn_body = {
+    "settings": {
+        "index" : {
+            "analysis": {
+                  "analyzer": {
+                    "analyzer_with_dynamic_synonym": {
+                      "type": "custom",
+                      "tokenizer": "ik_max_word",
+                      "filter": ["my_synonym"]
+                    }
+                  },
+                  "filter": {
+                    "my_synonym": {
+                      "type": "dynamic_synonym",
+                      "expand": True,
+                      "ignore_case": True,
+                      "synonyms_path" : "synonyms/my_synonyms.txt"
+                    }
+                  }
+                }
+        }
+    },
+    "mappings": {
+        "solution": {
+            "properties": {
+                "title": {
+                    "include_in_all": "true",
+                    "analyzer": "analyzer_with_dynamic_synonym",
+                    "store": True,
+                    "type": "text"
+                }
+            }
+        }
+    }
+}
+
+es = Elasticsearch(host='localhost', port='9200')
+es.indices.create(index='test2', ignore=400, body=dyn_body)
+
+# 向索引`test2`下的类型`solution`添加2条记录
+gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ curl -XPUT localhost:9200/test2/solution/1 -d '{"title": "番茄"}'
+{"_index":"test2","_type":"solution","_id":"1","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}gswyhq@gs
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/test2/solution/2 -d '{"title": "土豆"}'
+{"_index":"test2","_type":"solution","_id":"2","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}
+
+# 搜索番茄能找到结果，搜索西红柿找不到结果；搜索土豆能找到结果，但是搜索马铃薯找不到结果：
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "土豆",
+        "analyzer": "analyzer_with_dynamic_synonym"
+      }
+    }
+  }
+}
+
+对同义词文件进行修改：
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+# Example:
+ipod, i - pod, i pod
+foozball, foosball
+universe, cosmos
+西红柿, 番茄
+马铃薯, 土豆, 洋芋
+aa, bb
+打电话, 打手机
+电话, 手机
+
+# 搜索番茄能找到结果，搜索西红柿有时候能找到结果；但搜索土豆能找到结果，搜索马铃薯还是找不到结果；有点诡异！！！
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "土豆",
+        "analyzer": "analyzer_with_dynamic_synonym"
+      }
+    }
+  }
+}
+
+
+说明： synonyms_path 是必须要配置的，根据它的值是否是以http://或者https://开头来判断是本地文件，还是远程文件。
+interval 非必须配置的，默认值是60，单位秒，表示间隔多少秒去检查同义词文件是否有更新。
+ignore_case 非必须配置的， 默认值是false。
+expand 非必须配置的， 默认值是true。
+format 非必须配置的， 默认值是空字符串, 如果为wordnet，则表示WordNet结构的同义词。
+在配置同义词规则时有Solr synonyms和WordNet synonyms，一般我们使用的都是Solr synonyms。在配置时又存在映射和对等两种方式，区别如下：
+// 精确映射同义词，【阿迪】、【阿迪达斯】和【adidasi】的token将会转换为【Adidas】存入倒排索引中
+阿迪, 阿迪达斯, adidasi => Adidas
+
+// 对等同义词
+// 当expand为true时，当出现以下任何一个token，三个token都会存入倒排索引中
+// 当expand为false时，当出现以下任何一个token，第一个token也就是【Nike】会存入倒排索引中
+Nike, 耐克, naike
+
+
+热更新同义词说明
+
+对于本地文件：主要通过文件的修改时间戳(Modify time)来判断是否要重新加载。
+对于远程文件：synonyms_path 是指一个url。 这个http请求需要返回两个头部，一个是 Last-Modified，一个是 ETag，只要有一个发生变化，该插件就会去获取新的同义词来更新相应的同义词。
+注意： 不管是本地文件，还是远程文件，编码都要求是UTF-8的文本文件
+
+# 创建索引
+curl -XPUT localhost:9200/test -d'{
+    "settings":{
+        "index" : {
+            "analysis" : {
+                "analyzer" : {
+                    "synonym" : {
+                        "tokenizer" : "whitespace",
+                        "filter" : ["local_synonym"]
+                   }
+                },
+                "filter" : {
+
+                    "local_synonym" : {
+                        "type" : "dynamic_synonym",
+                        "synonyms_path" : "synonyms/my_synonyms.txt"
+                    }
+                }
+            }
+        }
+    }
+}'
+
+# 创建映射
+curl -X PUT localhost:9200/test/haizhi/_mapping -d '{
+    "haizhi": {
+      "properties": {
+        "title": {
+          "include_in_all": true,
+          "analyzer": "synonym",
+          "store": true,
+          "type": "text"
+        }
+      }
+    }
+ }'
+
+# 插入数据
+curl -XPUT localhost:9200/test/haizhi/1 -d '{
+    "title": "番茄"
+}'
+curl -XPUT localhost:9200/test/haizhi/2 -d '{
+    "title": "西红柿"
+}'
+curl -XPUT localhost:9200/test/haizhi/3 -d '{
+    "title": "我是西红柿"
+}'
+curl -XPUT localhost:9200/test/haizhi/4 -d '{
+    "title": "我是番茄"
+}'
+curl -XPUT localhost:9200/test/haizhi/5 -d '{
+    "title": "土豆"
+}'
+curl -XPUT localhost:9200/test/haizhi/6 -d '{
+    "title": "aa"
+}'
+curl -XPUT localhost:9200/test/haizhi/7 -d '{
+    "title": "马铃薯"
+}'
+
+# 查询
+curl -XPOST 'localhost:9200/test/haizhi/_search?pretty' -d '
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "西红柿",
+        "analyzer": "synonym"
+      }
+    }
+  }
+}'
+
+
+# 以下内容，并未经过测试，仅仅在这里记录
+Elasticsearch创建索引时配置分析器和过滤器：
+Example1
+{
+	"index" : {
+	    "analysis" : {
+	        "analyzer" : {
+	            "synonym" : {
+	                "tokenizer" : "whitespace",
+	                "filter" : ["remote_synonym"]
+ 	           }
+	        },
+	        "filter" : {
+	            "remote_synonym" : {
+	                "type" : "dynamic_synonym",
+	                "synonyms_path" : "http://host:port/synonym.txt",
+	                "interval": 30
+	            },
+	            "local_synonym" : {
+	                "type" : "dynamic_synonym",
+	                "synonyms_path" : "synonym.txt"
+	            },
+	        }
+	    }
+	}
+}
+
+Example2
+{
+	"index" : {
+	    "analysis" : {
+	        "analyzer" : {
+                "ik_max_word_syno":{
+                    "type": "custom",
+                    "tokenizer": "ik_max_word",
+                    "filter": ["http_synonym"]
+               },
+                "ik_smart_syno": {
+                    "type: "custom",
+                    "tokenizer": "ik_smart",
+                    "filter": ["http_synonym"]
+               }
+	        },
+	        "filter" : {
+                "local_synonym":
+                    "type": "dynamic_synonym"
+                    "synonyms_path": "analysis-dynamic-synonym/synonym.txt"
+                    "interval": 30
+                "http_synonym":
+                    "type": "dynamic_synonym"
+                    "synonyms_path": "http://127.0.0.1:8080/es-service-control/LoadWord/remote_ext_synonym.txt"
+                    "interval": 30
+
+	        }
+	    }
+	}
+}
+
+Example3
+
+{
+    "index" : {
+        "analysis" : {
+            "analyzer" : {
+                "synonym_analyzer" : {
+                    "tokenizer" : "whitespace",
+                    "filter" : ["my_synonym"]
+                }
+            },
+            "filter" : {
+                "my_synonym" : {
+                    "type" : "synonym",
+                    "expand": true,
+                    "ignore_case": true,
+                    "synonyms_path" : "analysis/synonym.txt"
+                    "synonyms" : ["阿迪, 阿迪达斯, adidasi => Adidas","Nike, 耐克, naike"]
+                }
+            }
+        }
+    }
+}
+
+Example4
+Elasticsearch创建索引时配置分析器和过滤器：
+PUT /index_synonym
+{
+      "settings": {
+        "analysis": {
+          "analyzer": {
+            "analyzer_with_dynamic_synonym": {
+              "type": "custom",
+              "tokenizer": "ik_max_word",
+              "filter": ["my_synonym"]
+            }
+          },
+          "filter": {
+            "my_synonym": {
+              "type": "dynamic-synonym",
+              "expand": true,
+              "ignore_case": true,
+              "synonyms_path" : "my_synonyms.txt"
+            }
+          }
+        }
+      }
+}
+
+设置Mapping
+
+POST /index_synonym/product/_mapping
+{
+    "product": {
+        "properties": {
+            "productName": {
+                "type": "text",
+                "analyzer": "analyzer_with_dynamic_synonym"
+            }
+        }
+    }
+}
