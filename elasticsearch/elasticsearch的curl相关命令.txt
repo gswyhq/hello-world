@@ -1,0 +1,235 @@
+
+# 删除索引：
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XDELETE localhost:9200/my_index
+
+# 新建索引：
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/my_index -d '{ "settings": { "number_of_shards": 1 }}'
+或者：curl -XPUT localhost:9200/abc
+
+# 定义映射：
+然后定义映射，注意：只有刚刚新建、还没有任何数据的索引，才能定义映射。定义映射Mapping可以使用_mapping RESTAPI，符合下面的标准语法：
+curl -XPUT localhost:9200/索引名称/类型名称/_mapping?pretty -d '{"类型名称":{"properties":{"字段名称":{"type":"字段类型","store":"是否存储","index":"索引方式、是否分析"}}}}'
+
+curl -XPUT localhost:9200/abc/abc/_mapping?pretty -d '{"abc":{"properties":{"title":{"type":"text","index":"analyzed"}}}}'
+
+
+ES curl bulk 批量导入数据
+
+比如我们现在有这样一个文件，data.json：
+{ "index" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
+{ "field1" : "value1" }
+它的第一行定义了_index，_type，_id等信息；第二行定义了字段的信息。
+注意，每一行都是通过\n回车符来判断结束，因此如果你自己定义了json，千万不要使用回车符。不然_bulk命令会报错的！
+
+然后执行命令：
+curl -XPOST localhost:9200/_bulk --data-binary @data.json
+
+或者
+如果在路径中设置了index或者type，那么在JSON中就不需要设置了。如果在JSON中设置，会覆盖掉路径中的配置。
+比如下面的例子中，文件中定义了索引为test,类型为type1；而我们在路径中定义了默认的选项，索引为test333,类型为type333。执行命令后，发现文件中的配置会覆盖掉路径中的配置。这样也提供了统一的默认配置以及个性化的特殊配置的需求。
+
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ head data.json 
+{ "index": { "_id": 1 }}
+{ "title": "The quick brown fox" }
+{ "index": { "_id": 2 }}
+{ "title": "The quick brown fox jumps over the lazy dog" }
+{ "index": { "_id": 3 }}
+{ "title": "The quick brown fox jumps over the quick dog" }
+{ "index": { "_id": 4 }}
+{ "title": "Brown fox brown dog" }
+{ "index": { "_id": 3, "_index":"test3", "_type":"type3"}}
+{ "title": "香蕉" }
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPOST localhost:9200/my_index/my_type/_bulk --data-binary @data.json
+结果如下：
+_index	_type	_id	_score	title
+my_index	my_type	1	1	The quick brown fox
+my_index	my_type	2	1	The quick brown fox jumps over the lazy dog
+my_index	my_type	3	1	The quick brown fox jumps over the quick dog
+my_index	my_type	4	1	Brown fox brown dog
+test3	type3	3	1	香蕉
+
+
+# 创建索引
+curl -XPUT localhost:9200/test -d'{
+    "settings":{
+        "index" : {
+            "analysis" : {
+                "analyzer" : {
+                    "synonym" : {
+                        "tokenizer" : "whitespace",
+                        "filter" : ["local_synonym"]
+                   }
+                },
+                "filter" : {
+
+                    "local_synonym" : {
+                        "type" : "dynamic_synonym",
+                        "synonyms_path" : "synonyms/my_synonyms.txt"
+                    }
+                }
+            }
+        }
+    }
+}'
+
+# 创建映射
+curl -X PUT localhost:9200/test/haizhi/_mapping -d '{
+    "haizhi": {
+      "properties": {
+        "title": {
+          "include_in_all": true,
+          "analyzer": "synonym",
+          "store": true,
+          "type": "text"
+        }
+      }
+    }
+ }'
+
+# 插入数据
+curl -XPUT localhost:9200/test/haizhi/1 -d '{
+    "title": "番茄"
+}'
+curl -XPUT localhost:9200/test/haizhi/2 -d '{
+    "title": "西红柿"
+}'
+curl -XPUT localhost:9200/test/haizhi/3 -d '{
+    "title": "我是西红柿"
+}'
+curl -XPUT localhost:9200/test/haizhi/4 -d '{
+    "title": "我是番茄"
+}'
+curl -XPUT localhost:9200/test/haizhi/5 -d '{
+    "title": "土豆"
+}'
+curl -XPUT localhost:9200/test/haizhi/6 -d '{
+    "title": "aa"
+}'
+curl -XPUT localhost:9200/test/haizhi/7 -d '{
+    "title": "马铃薯"
+}'
+
+# 查询
+curl -XPOST 'localhost:9200/test/haizhi/_search?pretty' -d '
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "西红柿",
+        "analyzer": "synonym"
+      }
+    }
+  }
+}'
+
+# 更新数据：
+curl -XPOST 'localhost:9200/_bulk?pretty' -H 'Content-Type: application/json' -d'
+{ "update" : {"_id" : "1", "_type" : "type1", "_index" : "index1", "_retry_on_conflict" : 3} }
+{ "doc" : {"field" : "value"} }
+{ "update" : { "_id" : "0", "_type" : "type1", "_index" : "index1", "_retry_on_conflict" : 3} }
+{ "script" : { "inline": "ctx._source.counter += params.param1", "lang" : "painless", "params" : {"param1" : 1}}, "upsert" : {"counter" : 1}}
+{ "update" : {"_id" : "2", "_type" : "type1", "_index" : "index1", "_retry_on_conflict" : 3} }
+{ "doc" : {"field" : "value"}, "doc_as_upsert" : true }
+{ "update" : {"_id" : "3", "_type" : "type1", "_index" : "index1", "_source" : true} }
+{ "doc" : {"field" : "value"} }
+{ "update" : {"_id" : "4", "_type" : "type1", "_index" : "index1"} }
+{ "doc" : {"field" : "value"}, "_source": true}
+'
+
+# 多个查询：
+curl -XGET 'localhost:9200/_mget?pretty' -H 'Content-Type: application/json' -d'
+{
+    "docs" : [
+        {
+            "_index" : "test",
+            "_type" : "type",
+            "_id" : "1"
+        },
+        {
+            "_index" : "test",
+            "_type" : "type",
+            "_id" : "2"
+        }
+    ]
+}
+'
+或者：
+curl -XGET 'localhost:9200/test/_mget?pretty' -H 'Content-Type: application/json' -d'
+{
+    "docs" : [
+        {
+            "_type" : "type",
+            "_id" : "1"
+        },
+        {
+            "_type" : "type",
+            "_id" : "2"
+        }
+    ]
+}
+'
+或者：
+curl -XGET 'localhost:9200/test/type/_mget?pretty' -H 'Content-Type: application/json' -d'
+{
+    "ids" : ["1", "2"]
+}
+'
+
+复制索引（将索引‘twitter’复制为‘new_twitter’）：
+curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json' -d'
+{
+  "source": {
+    "index": "twitter"
+  },
+  "dest": {
+    "index": "new_twitter"
+  }
+}
+'
+注意：仅仅是复制数据，并不复制源索引的设置（包括分词、映射、分片等）；
+
+# 仅仅复制某些查询结果到另一个索引：
+curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json' -d'
+{
+  "source": {
+    "index": "twitter",
+    "type": "tweet",
+    "query": {
+      "term": {
+        "user": "kimchy"
+      }
+    }
+  },
+  "dest": {
+    "index": "new_twitter"
+  }
+}
+'
+# 也可以远程复制索引：
+curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json' -d'
+{
+  "source": {
+    "remote": {
+      "host": "http://otherhost:9200",
+      "username": "user",
+      "password": "pass"
+    },
+    "index": "source",
+    "query": {
+      "match": {
+        "test": "data"
+      }
+    }
+  },
+  "dest": {
+    "index": "dest"
+  }
+}
+'
+
+
+
+
+
+
+

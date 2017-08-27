@@ -1,0 +1,79 @@
+
+Mapping定义了type中的诸多字段的数据类型以及这些字段如何被Elasticsearch处理，比如一个字段是否可以查询以及如何分词等。
+
+自定义Mapping
+
+下面是一个简单的Mapping定义：
+
+curl -XPUT 'http://localhost:9200/megacorp' -d '
+{
+    "settings": {
+        "number_of_shards": 3,
+        "number_of_replicas": 1
+    }, 
+    "mappings": {
+        "employee": {
+            "properties": {
+                "first_name": {
+                    "type": "text"
+                }, 
+                "last_name": {
+                    "type": "text"
+                }, 
+                "age": {
+                    "type": "integer"
+                }, 
+                "about": {
+                    "type": "text"
+                }, 
+                "interests": {
+                    "type": "text"
+                }, 
+                "join_time": {
+                    "type": "date", 
+                    "format": "dateOptionalTime", 
+                    "index": "not_analyzed"
+                }
+            }
+        }
+    }
+}
+'
+
+其中employee是type（相当于关系数据库中的表），在employee中我们定义了first_name、last_name、age、about、interests、join_time这6个属性。
+
+{ "interests": { "type": "text"}
+
+type表示field的数据类型，上例中interests的type为text表示为普通文本。
+Elasticsearch支持以下数据类型：
+
+文本: text
+数字: byte, short, integer, long
+浮点数: float, double
+布尔值: boolean
+Date: date
+对于type为 text 的字段，最重要的属性是：index and analyzer。
+1、index 
+index 属性控制text如何被索引，它有三个可选值:
+
+analyzed: First analyze the text, then index it. In other words,
+index this field as full text.
+not_analyzed:: Index this field, so it is searchable, but index the 
+value exactly as specified. Do not analyze it.
+no: Don’t index this field at all. This field will not be 
+searchable.
+对于text类型的filed index 默认值是： analyzed.如果我们想对进行精确查找, 那么我们需要将它设置为： not_analyzed。
+例如：
+
+{ "tag": { "type": "text", "index": "not_analyzed" }
+1
+1
+2、analyzer 
+对于 text类型的字段, 我们可以使用 analyzer 属性来指定在搜索阶段和索引阶段使用哪个分词器. 默认, Elasticsearch 使用 standard analyzer, 你也可以指定Elasticsearch内建的其它分词器，比如 whitespace, simple, or english:
+
+例如：
+
+{ "tweet": { "type": "text", "analyzer": "english" }
+
+其他简单类型——long、double、date等等——也接受index参数，但相应的值只能是no和not_analyzed，它们的值不能被分析。
+

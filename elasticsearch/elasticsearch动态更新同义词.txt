@@ -72,6 +72,10 @@ aa, bb
 # 六、启动一个容器，并加载同义词文件
 gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/my_synonyms.txt:/usr/share/elasticsearch/config/my_synonyms.txt -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
 14183ba403af6160761cffcc2d845f27218911f6c1fbc862337a1543e159ac62
+# 上面这个挂载单个文件时，宿主机有改动，容器内却不会有改动，故改成挂载目录：
+gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/synonyms:/usr/share/elasticsearch/config/synonyms -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
+14183ba403af6160761cffcc2d845f27218911f6c1fbc862337a1543e159ac62
+
 # 以上启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
 # 但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
 # 这个时候需要进入容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
@@ -142,13 +146,46 @@ gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/test2/solutio
   "query": {
     "match_phrase": {
       "title": {
-        "query": "土豆",
+        "query": "马铃薯",
         "analyzer": "analyzer_with_dynamic_synonym"
       }
     }
   }
 }
 
+后来发现是分词的原因；
+`马铃薯`、跟`西红柿`表面看起来差不多；但实际上分词还是有区别的；浏览器打开下面这两个，可以看到对应的分词结果：
+http://localhost:9200/_analyze?analyzer=ik_max_word&pretty=true&text=马铃薯
+http://localhost:9200/_analyze?analyzer=ik_max_word&pretty=true&text=西红柿
+`马铃薯`通过`ik_max_word`的分词结果为：[马铃薯、铃、薯]
+`西红柿`通过`ik_max_word`的分词结果为：[西红柿]
+
+# 这个时候把查询语句改为下面的就可以了：
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "土豆",
+        "analyzer": "analyzer_with_dynamic_synonym"
+      }
+    }
+  }
+}
+或者：
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "default_field": "title",
+            "query": "马铃薯"
+          }
+        }
+      ]
+    }
+  }
+}
 对同义词文件进行修改：
 gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
 # Example:
@@ -172,6 +209,8 @@ aa, bb
     }
   }
 }
+
+测试效果，浏览器打开：http://localhost:9200/test2/_analyze?analyzer=analyzer_with_dynamic_synonym&pretty=true&text=马铃薯
 
 
 说明： synonyms_path 是必须要配置的，根据它的值是否是以http://或者https://开头来判断是本地文件，还是远程文件。

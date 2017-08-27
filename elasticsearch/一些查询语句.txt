@@ -106,4 +106,40 @@
   }
 }
 
+# 其中我们在做索引的时候，希望能将所有的句子切分的更详细，以便更好的搜索，所以ik_max_word更多的用在做索引的时候，但是在搜索的时候，对于用户所输入的query(查询)词，我们可能更希望得比较准确的结果，例如，我们搜索“无花果”的时候，更希望是作为一个词进行查询，而不是切分为"无"，“花”，“果”三个词进行结果的召回，因此ik_smart更加常用语对于输入词的分析。
+比如新建索引时用的分词器是`ik_max_word`,在查询时候，可以指定分词器为`ik_smart`：
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "default_field": "question",
+            "query": "你认为华兴的业绩如何",
+            "analyzer": "ik_smart"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  },
+  "from": 0,
+  "size": 10,
+  "sort": [],
+  "aggs": {}
+}
+
+# long类型数据的查询：
+{
+  "query": {
+    "constant_score": {
+      "filter": {
+        "term": {
+          "price": 20
+        }
+      }
+    }
+  }
+}
 

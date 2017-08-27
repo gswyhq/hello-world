@@ -440,3 +440,5 @@ http://blog.csdn.net/dm_vincent/article/details/42113401
         }
       }
 
+http://localhost:9200/my_store/products/_search?q=title:%E8%A5%BF%E7%93%9C%E6%98%AF%E4%BB%80%E4%B9%88%E9%A2%9C&pretty&explain&size=10
+
