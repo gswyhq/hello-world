@@ -21,3 +21,13 @@ gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=1747
 
 若需要自定义配置，则将配置文件放在`$HOME/neo4j/conf`目录下即可；配置文件示例：
 https://stackoverflow.com/questions/41568829/unexpectedupgradingstoreversionexception-expected-v0-a-3-but-file-is-versio 中的`_myNeo4j.conf`文件；
+
+如果你想使用你自己的redis.conf ...
+您可以创建自己的Docker文件，将上下文中的redis.conf添加到/ data /中，如此:
+FROM redis
+COPY redis.conf /usr/local/etc/redis/redis.conf
+CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+
+或者，您可以指定与docker运行选项相同的行:
+$ docker run -v /myredis/conf/redis.conf:/usr/local/etc/redis/redis.conf --name myredis redis redis-server /usr/local/etc/redis/redis.conf
+
