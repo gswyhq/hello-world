@@ -143,6 +143,103 @@ MERGE (p)-[r:ACTED_IN]->(m)
 ON CREATE SET r.roles =['teacher']
 RETURN p,r,m ;
 
+MERGE (keanu:Person { name: 'Keanu Reeves' })
+ON CREATE SET keanu.created = timestamp()
+RETURN keanu.name, keanu.created
+
+MERGE (person:Person)
+ON MATCH SET person.found = TRUE RETURN person.name, person.found
+
+MERGE (keanu:Person { name: 'Keanu Reeves' })
+ON CREATE SET keanu.created = timestamp()
+ON MATCH SET keanu.lastSeen = timestamp()
+RETURN keanu.name, keanu.created, keanu.lastSeen
+
+MERGE (person:Person)
+ON MATCH SET person.found = TRUE , person.lastAccessed = timestamp()
+RETURN person.name, person.found, person.lastAccessed
+
+MATCH (charlie:Person { name: 'Charlie Sheen' }),(wallStreet:Movie { title: 'Wall Street' })
+MERGE (charlie)-[r:ACTED_IN]->(wallStreet)
+RETURN charlie.name, type(r), wallStreet.title
+
+match (circle:Circle {id:3, cycleId:5})
+match (member1:Member {id:1})
+match (member2:Member {id:2})
+create (invite:Invite {time:timestamp()})-[:TO_CIRCLE]->(circle)
+create (invite)-[:INVITED_BY]->(member1)
+create (invite)-[:INVITED]->(member2)
+return member1, member2, invite, circle;
+
+MATCH (u:user {id : "10662"})-[r:has_profile]->(p:profile), (u2:user)-[r2:has_profile]->(p2:profile)
+WHERE
+  p.user_id <> p2.user_id AND
+  abs(u2.date_birth - u.date_birth) >= 94608000000
+RETURN collect(u2.id) as id;
+
+# 多个子句查询：
+MATCH (g:Gene),(c:Chromosome)
+WHERE g.chromosomeID = c.chromosomeID
+CREATE (g)-[:PART_OF]->(c);
+
+＃上子句查询计算量大，可以改成下面这样：
+MATCH (c:Chromosome)
+WITH c
+MATCH (g:Gene)
+WHERE g.chromosomeID = c.chromosomeID
+CREATE (g)-[:PART_OF]->(c);
+
+# 时间查询处理：
+START n = node(0)
+MATCH (n)-[:WISH]->(m)
+return 1970 + round(m.creationDate / (365.242 * 24 * 3600)), count(m)
+
+MATCH (n)-[:WISH]->(m)
+WHERE m.creationDate > '1325376000' AND m.creationDate < '1356998399'
+return count(m) as total, '2012' as year
+
+# 创建一个时间节点
+CREATE (n:Post {created_at: TIMESTAMP()}) return n
+
+<id>:5346created_at: 1505354974256
+时间单位是毫秒，等同于python内：time.time()*1000
+
+＃　安装时间进行排序
+MATCH (a:Post) RETURN a ORDER BY a.created_at LIMIT 10
+
+＃ 更多时间处理示例：
+MATCH (m25:user)-[:gender]->(male:gender {type:"male"})
+where  tofloat(m25.birthday) < (timestamp()-788923800000)
+RETURN count(m25)
+UNION
+MATCH (f25:user)-[:gender]->(female:gender {type:"female"})
+where  tofloat(f25.birthday) < (timestamp()-788923800000)
+RETURN count(f25)
+UNION
+...
+...or...
+
+MATCH (m25:user)-[:gender]->(male:gender {type:"male"})
+where  tofloat(m25.birthday) < (timestamp()-788923800000)
+WITH count(m25) AS male25
+MATCH (f25:user)-[:gender]->(male:gender {type:"female"})
+where  tofloat(f25.birthday) < (timestamp()-788923800000)
+WITH count(f25) AS female25, male25
+
+在Neo4j Browser中使用参数
+Neo4j Browser是Neo4j内置的浏览器，用于管理数据库，更新数据库和查询数据，再命令窗体中，通过“:”能够引用内置的命令，例如，通过 ":param"能够定义参数，并能够在下一个Cypher语句中引用参数。
+1，通过:param命令定义参数
+在Neo4j Browser中，输入第一个命令，通过:param 命令定义参数，如下：
+:param events:[{year:2014,id:1},{year:2014,id:2}]
+
+2，通过$param引用参数
+紧接着，输入Cypher语句，通过$param引用参数，如下：
+unwind $events as event
+merge (y:Year {year:event.year})
+merge(y)<-[:IN]-(e:Event{id:event.id})
+RETURN e.id AS x
+order by x
+
 b.关系
 
 -[role:label {roles: ["Neo"]}]->

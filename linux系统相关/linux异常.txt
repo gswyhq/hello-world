@@ -1,0 +1,10 @@
+
+# 本地端口转发异常：
+ubuntu@ip-172-31-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
+localhost: Warning: Permanently added 'localhost' (ECDSA) to the list of known hosts.
+localhost: Permission denied (publickey).
+# 解决方法，生成密钥，添加到authorized_keys文件中：
+ubuntu@ip-172-31-14-6:~$ ssh-keygen -C 'web1172.31.14.6@web1.co' -t rsa
+ubuntu@ip-172-31-14-6:~/.ssh$ cat id_rsa.pub >> authorized_keys 
+
+
