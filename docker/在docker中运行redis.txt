@@ -19,6 +19,15 @@ gswyhq@gswyhq-pc:~/docker/redis/data$ redis-cli -h 172.17.0.4 -p 6379
 172.17.0.4:6379> get foo
 "123"
 
+如果你想使用你自己的redis.conf ...
+您可以创建自己的Docker文件，将上下文中的redis.conf添加到/ data /中，如此:
+FROM redis
+COPY redis.conf /usr/local/etc/redis/redis.conf
+CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+
+或者，您可以指定与docker运行选项相同的行:
+$ docker run -v /myredis/conf/redis.conf:/usr/local/etc/redis/redis.conf --name myredis redis redis-server /usr/local/etc/redis/redis.conf
+
 
 
 

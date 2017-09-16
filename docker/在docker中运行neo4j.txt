@@ -22,12 +22,27 @@ gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=1747
 若需要自定义配置，则将配置文件放在`$HOME/neo4j/conf`目录下即可；配置文件示例：
 https://stackoverflow.com/questions/41568829/unexpectedupgradingstoreversionexception-expected-v0-a-3-but-file-is-versio 中的`_myNeo4j.conf`文件；
 
-如果你想使用你自己的redis.conf ...
-您可以创建自己的Docker文件，将上下文中的redis.conf添加到/ data /中，如此:
-FROM redis
-COPY redis.conf /usr/local/etc/redis/redis.conf
-CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+自定义参数启动如下：
+docker run \
+    --detach \
+    --publish=7474:7474 --publish=7687:7687 \
+    --volume=$HOME/neo4j/data:/data \
+    --volume=$HOME/neo4j/logs:/logs \
+    --env=NEO4J_dbms_memory_pagecache_size=4G \
+    neo4j:3.2
 
-或者，您可以指定与docker运行选项相同的行:
-$ docker run -v /myredis/conf/redis.conf:/usr/local/etc/redis/redis.conf --name myredis redis redis-server /usr/local/etc/redis/redis.conf
+环境变量的前缀必须是： NEO4J_
+变量中的 `_`需替换为`__`
+变量中的 `.`需替换为`_`
+例如： dbms.tx_log.rotation.size could be set by specifying the following argument to docker:
 
+--env=NEO4J_dbms_tx__log_rotation_size
+
+以下环境变量也可用，并将转换为上述一般形式：
+NEO4J_AUTH: 控制身份验证，设置为none以禁用身份验证或 neo4j/<password>覆盖默认密码；
+NEO4J_dbms_memory_pagecache_size：Neo4j的本地内存缓存的大小，默认为512M
+NEO4J_dbms_memory_heap_maxSize：Neo4j的堆大小，默认为512M
+NEO4J_dbms_txLog_rotation_retentionPolicy：逻辑日志的保留策略，默认为100M大小
+NEO4J_dbms_allowFormatMigration：设置为true以启用升级，默认为false
+
+gswyhq@gswyhq-pc:~/docker/neo4j/zheshang$ sudo docker run --detach  --name=zheshang47474 --publish=47474:7474 --publish=47687:7687    --volume=$PWD/data:/data --env=NEO4J_dbms_memory_heap_maxSize=5120M --env=NEO4J_AUTH=neo4j/gswyhq neo4j
