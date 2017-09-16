@@ -6,6 +6,8 @@ gswyhq@gswyhq-pc:~$ scp zy@192.168.3.105:/home/zy/hello.py hello.py   # 将服�
 
 3、拷贝本地文件到服务器
 gswyhq@gswyhq-pc:~$ scp ./yhb/hello.py zy@192.168.3.105:/home/zy/hello.py
+或者：
+ubuntu@ip-172-31-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.tar ubuntu@52.80.24.45:/data/docker/ubuntu/ubuntu0815-export.tar
 
 4、通过密钥验证用户身份（登陆时候不需要输入密码）
 方法一：$ ssh-keygen

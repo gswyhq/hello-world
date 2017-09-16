@@ -19,6 +19,21 @@ gswyhq@gswyhq-pc:~/docker/redis/data$ redis-cli -h 172.17.0.4 -p 6379
 172.17.0.4:6379> get foo
 "123"
 
+ubuntu@ip-172-31-8-214:~/zheshang$ docker exec -it redis6379 /bin/bash
+# redis默认的数据库是0~15一共16个数据库,可以通过配置再改多或改少数据库。 可以使用select来选择要查看的数据库。
+# 进入默认的数据库
+root@da3041a5c4e2:/data# redis-cli -h 127.0.0.1 -p 6379
+127.0.0.1:6379> exit
+# 进入指定数据库
+root@da3041a5c4e2:/data# redis-cli -h 127.0.0.1 -p 6379 -n 13
+# 清空本数据库数据
+127.0.0.1:6379[13]> FLUSHDB
+OK
+# 切换到数据库 3
+127.0.0.1:6379[13]> select 3
+OK
+127.0.0.1:6379[3]>
+
 如果你想使用你自己的redis.conf ...
 您可以创建自己的Docker文件，将上下文中的redis.conf添加到/ data /中，如此:
 FROM redis

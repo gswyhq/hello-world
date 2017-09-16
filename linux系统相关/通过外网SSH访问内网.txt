@@ -29,12 +29,15 @@ sudo apt-get install openssl-server
 ssh -fCNR <port_b1>:localhost:22 usr_b@B.B.B.B
 <port_b1> 为 B 机器上端口，用来与 A 机器上的22端口绑定。
 建立 B 机器上的正向代理，用作本地转发。做这一步是因为绑定后的 端口只支持本地访问【B 机器上操作】
-ssh -fCNL "*:<port_b2>:localhost:<port_b1>' localhost
+ssh -fCNL "*:<port_b2>:localhost:<port_b1>" localhost
 <port_b2> 为本地转发端口，用以和外网通信，并将数据转发到 <port_b1>，实现可以从其他机器访问。
 其中的*表示接受来自任意机器的访问。
 现在在 C 机器上可以通过 B 机器 ssh 到 A 机器
 ssh -p <portb2> usra@B.B.B.B
 至此方案完成。
+
+示例（将18007端口的访问转发到7770端口）：
+ubuntu@ip-172-31-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
 
 autossh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166

@@ -17,6 +17,14 @@ REPOSITORY          TAG                 IMAGE ID            CREATED             
 ubuntu              0627                02390dd538bb        About a minute ago   442 MB
 7、将镜像保存为文件
 gswyhq@gswyhq-pc:~$ sudo docker save 02390dd538bb > ubuntu0627-save.tar
+
+或者将容器保存为镜像文件：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker export b06e71597f91（容器地） > ubuntu0915-export.tar
+# 从镜像文件中加载镜像
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker import ubuntu0915-export.tar ubuntu:0915
+# 低版本需要如下：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
+
 8、从文件中加载镜像：
 gswyhq@gswyhq-pc:~/docker/ubuntu$ sudo docker load < ubuntu0627-save.tar
 9、添加tag

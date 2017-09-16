@@ -82,3 +82,40 @@ Using default tag: latest
 Error response from daemon: manifest for mobz/elasticsearch-head:latest not found
 gswyhq@gswyhq-pc:~$ docker pull mobz/elasticsearch-head:5-alpine
 
+
+# 导入镜像出错：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
+FATA[0037] Error response from daemon: ApplyLayer exit status 1 stdout:  stderr: write /usr/lib/gcc/x86_64-linux-gnu/5/lto1: read-only file system
+
+请确保Docker容器中有足够的可用磁盘空间，通常是/var/lib/docker/graph。
+如果您的/var空间有限，您可以通过指定-g选项来更改docker根位置
+-g，--graph =“/var/lib/docker”
+用作Docker运行时根目录的路径
+
+
+# 删除容器异常：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker rm -v b06e71597f91
+Error response from daemon: Cannot destroy container b06e71597f91: Driver devicemapper failed to remove root filesystem b06e71597f91207bfc4968ef0c258a6accfcf4eee1e057d9d590eeb1a7e11cb4: Error running DeleteDevice dm_task_run failed
+FATA[0000] Error: failed to remove one or more containers 
+# 添加-f参数强制删除
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker rm -f b06e71597f91
+b06e71597f91
+
+使用docker运行容器时出错，
+Error response from daemon: Error running DeviceCreate (createSnapDevice) dm_task_run failed
+
+方法1：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker stop
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo thin_check /var/lib/docker/devicemapper/devicemapper/metadata
+若 thin_check 没安装，则通过下面的方法安装：
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo apt-get install thin-provisioning-tools
+ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker start
+
+方法2：
+# systemctl stop docker.service 
+# mv /var/lib/docker/ /var/lib/docker.backup
+# systemctl start docker.service
+上述方法均无效后，直接卸载重装。
+
+
+
