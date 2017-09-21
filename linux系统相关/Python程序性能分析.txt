@@ -1,0 +1,67 @@
+
+性能分析器主要有模块：
+cProfile、line_profiler、memory_profiler
+
+cProfile是python内置包，它主要用来统计函数调用以及每个函数所占的cpu时间。
+line_profiler可以帮你一行一行分析函数性能。
+memory_profiler帮你一行一行分析函数内存消耗。
+
+一、使用cProfile模块
+如果想知道每个函数和方法消耗了多少时间，以及这些函数被调用了多少次，可以使用cProfile模块。
+# 这里的timing_functions是Python脚本文件名称。
+
+$ python -m cProfile -s cumulative timing_functions.py
+
+二、使用line_profiler模块
+line_profiler模块可以给出执行每行代码所需占用的CPU时间。
+首先，安装该模块：
+
+$ pip install line_profiler
+接着，需要指定用@profile检测哪个函数（不需要在代码中用import导入模块）：
+
+@profile
+def random_sort2(n):
+  l = [random.random() for i in range(n)]
+  l.sort()
+  return l
+
+if __name__ == "__main__":
+  random_sort2(2000000)
+最好，可以通过下面的命令获得关于random_sort2函数的逐行描述。
+
+$ kernprof -l -v timing_functions.py
+其中-l表示逐行解释，-v表示表示输出详细结果。通过这种方法，我们看到构建数组消耗了44%的计算时间，而sort()方法消耗了剩余的56%的时间。
+
+三、使用memory_profiler模块
+memory_profiler模块用来基于逐行测量代码的内存使用。使用这个模块会让代码运行的更慢。
+安装方法如下：
+
+pip install memory_profiler
+另外，建议安装psutil包，这样memory_profile会运行的快一点：
+
+$ pip install psutil
+
+与line_profiler相似，使用@profile装饰器来标识需要追踪的函数。接着，输入：
+
+$ python -m memory_profiler timing_functions.py
+脚本的执行时间比以前长1或2秒。如果没有安装psutil包，也许会更长。
+
+可以看到程序执行完成后，输出结果如下
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    12   28.570 MiB    0.000 MiB   @profile
+    13                             def main():
+    14   28.570 MiB    0.000 MiB       obj = []
+    15  106.203 MiB   77.633 MiB       for i in range(10000):
+    16  106.203 MiB    0.000 MiB           obj = get_current_obj(obj)
+    17  106.203 MiB    0.000 MiB           if(i%100==0):
+    18  105.445 MiB   -0.758 MiB               print(memory_usage_psutil())
+
+从结果可以看出，内存使用是以MiB为单位衡量的，表示的mebibyte（1MiB = 1.05MB）。
+
+使用示例见： http://www.cnblogs.com/kaituorensheng/p/5669861.html
+
+最后，python2中通过guppy包可以知道在代码执行的每个阶段中，每种类型（str、tuple、dict等）分别创建了多少对象。在Python3中可以使用： objgraph
+1、使用objgraph.show_most_common_types(limit=10)，查看占据内存前10的对象变化关系；
+2、使用objgraph.show_growth()，观察对象增长情况。

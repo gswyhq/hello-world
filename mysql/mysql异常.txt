@@ -88,3 +88,21 @@ grant和revoke可以在几个层次上控制访问权限
 查看MySQL用户权限(来自机器‘192.168.3.103’上的root用户)：
 mysql> show grants for root@'192.168.3.103';
 
+MySQL登录时出现 Access denied for user 'root'@'xxx.xxx.xxx.xxx' (using password: YES) 的原因及解决办法。
+
+# mysql -u root -h 192.168.194.142 -p
+Enter password:
+ERROR 1045 (28000): Access denied for user 'root'@'192.168.194.142' (using password: YES)
+
+【解决办法】
+1. 先用localhost登录
+# mysql -u root -p
+Enter password:
+2. 执行授权命令
+mysql> grant all privileges on *.* to root@'%' identified by '123';
+Query OK, 0 rows affected (0.07 sec)
+3. 退出再试
+mysql> quit
+Bye
+再试登录：
+# mysql -u root -h 192.168.194.142 -p

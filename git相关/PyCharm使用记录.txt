@@ -51,6 +51,9 @@ gswyhq@gswyhq-pc:~$ sudo vim /etc/hosts
 文件下添加`0.0.0.0 account.jetbrains.com`
 重新粘贴验证码即可；
 
+# 重命名函数：
+在函数名处，右键，选择‘Change Signature’即可重命名函数；
+
 
 
 
