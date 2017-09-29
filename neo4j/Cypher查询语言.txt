@@ -20,6 +20,56 @@ create (n:User {name:"A", age:10})
 
 create (n:User {name:"A", age:10}) return n
 
+但是create是一直在创建新的；
+比如连续执行两次下面的命令
+CREATE (gp1:GoogleProfile1 {Id: 201401, Name:"Apple"})
+会创建两个相同的节点；
+CQL CREATE命令检查此节点是否可用，它只是在数据库中创建新节点。
+通过观察这些结果，我们可以说CREATE命令总是向数据库添加新的节点。
+
+连续多次执行下面的命令
+MERGE (gp2:GoogleProfile2{ Id: 201402,Name:"Nokia"})
+却只有一条数据；
+如果我们观察上面的查询结果，它只显示一行，因为CQL MERGE命令检查该节点在数据库中是否可用。 如果它不存在，它创建新节点。 否则，它不创建新的。
+通过观察这些结果，我们可以说，CQL MERGE命令将新的节点添加到数据库，只有当它不存在。
+
+
+Neo4j使用CQL MERGE命令 -
+创建节点，关系和属性
+为从数据库检索数据
+MERGE命令是CREATE命令和MATCH命令的组合。
+MERGE = CREATE + MATCH
+Neo4j CQL MERGE命令在图中搜索给定模式，如果存在，则返回结果
+
+如果它不存在于图中，则它创建新的节点/关系并返回结果。
+
+Neo4j CQL MERGE语法
+
+MERGE (<node-name>:<label-name>
+{
+   <Property1-name>:<Pro<rty1-Value>
+   .....
+   <Propertyn-name>:<Propertyn-Value>
+})
+
+语法说明：
+S.No.	语法元素	描述
+1。	MERGE	它是一个Neo4j CQL关键字。
+2。	<node-name>	它是节点或关系的名称。
+3。	<label-name>	它是节点或关系的标签名称。
+4。	<property_name>	它是节点或关系的属性名称。
+5。	<property_value>	它是节点或关系的属性值。
+6。	：	使用colon（:)运算符来分隔节点或关系的属性名称和值。
+
+注意 -
+Neo4j CQL MERGE命令语法与CQL CREATE命令类似。
+我们将使用这两个命令执行以下操作 -
+创建具有一个属性的配置文件节点：Id，名称
+创建具有相同属性的同一个Profile节点：Id，Name
+检索所有Profile节点详细信息并观察结果
+我们将使用CREATE命令执行这些操作
+
+参考：https://www.w3cschool.cn/neo4j/neo4j_cql_merge.html
 
 2).创建属性关系
 

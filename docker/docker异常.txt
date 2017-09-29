@@ -90,6 +90,7 @@ FATA[0037] Error response from daemon: ApplyLayer exit status 1 stdout:  stderr:
 请确保Docker容器中有足够的可用磁盘空间，通常是/var/lib/docker/graph。
 如果您的/var空间有限，您可以通过指定-g选项来更改docker根位置
 -g，--graph =“/var/lib/docker”
+OPTIONS="-g /data/docker -H unix:///var/run/docker.sock -H 0.0.0.0:4243 --selinux-enabled"
 用作Docker运行时根目录的路径
 
 

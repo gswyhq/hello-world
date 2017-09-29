@@ -22,7 +22,8 @@ gswyhq@gswyhq-pc:~$ sudo usermod -a -G docker $USER
 添加配置文件
 gswyhq@gswyhq-pc:~$ sudo vim /etc/default/docker
 在配置文件中添加或修改
-DOCKER="/usr/bin/docker"  
+DOCKER="/usr/bin/docker"
+OPTIONS=--graph="/data/docker" --selinux-enabled -H fd://
 重启docker
 gswyhq@gswyhq-pc:~$ sudo service docker restart
 

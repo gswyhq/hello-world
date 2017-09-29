@@ -210,4 +210,14 @@ mysql> truncate TABLE class_member;
 # 清空表数据（表结构还保留，仅仅清空数据）：
 TRUNCATE TABLE 表格名;
 
+# 更新数据：
+UPDATE question SET tag1=65 WHERE answer LIKE "%能赔偿"
+
+# 如果要清空表中的所有记录，可以使用下面的两种方法：
+　　DELETE FROM table1
+　　TRUNCATE TABLE table1
+# 其中第二条记录中的TABLE是可选的。
+
+# 如果要删除表中的部分记录，只能使用DELETE语句
+DELETE FROM question WHERE  tag1=65
 
