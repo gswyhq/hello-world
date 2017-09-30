@@ -74,5 +74,8 @@ branch.master.merge=refs/heads/master
 
 有时候会看到重复的变量名，那就说明它们来自不同的配置文件（比如 /etc/gitconfig 和 ~/.gitconfig），不过最终 Git 实际采用的是最后一个。
 
+# 防止每次都需要输入密码，可进行如下设置：
+git config --global credential.helper store
+这样，第一次正确输入密码之后，就不用每次都输入了；store 将凭据保存在磁盘上.
 
 

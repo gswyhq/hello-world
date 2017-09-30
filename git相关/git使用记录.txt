@@ -1026,3 +1026,8 @@ git push -u origin master
 例如，在 URL 中加上 #L52 可以高亮第52行。或者你也可以直接点击行数。
 多行高亮同样支持。你可以使用类似#L53-L60格式，或者在按住shift的同时点击。
 https://github.com/rails/rails/blob/master/activemodel/lib/active_model.rb#L53-L60 
+
+使用git clone命令clone项目时，如果repository的SSH端口不是标准22端口时（例如，SSH tunnel模式，等等），可以使用如下命令：
+git clone ssh://git@hostname:port/.../xxx.git
+举例如下：
+git clone ssh://git@10.137.20.113:2222/root/test.git
