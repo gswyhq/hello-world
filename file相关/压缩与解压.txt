@@ -100,6 +100,19 @@ gswyhq@gswyhq-pc:~$ unar 成语故事全集1-50集.zip -o chengyu
 
 # 批量解压（将当前目录下面的zip文件解压到目录`/home/gswyhq/下载`中）：
 gswyhq@gswyhq-pc:/media/gswyhq/B898E1E298E19F5E/$ ls *.zip |xargs -n1 unar -e GB18030 -o /home/gswyhq/下载/
+# 其中这里的-n1是数字的1，不是字母l。
+这个xagrs的-n1参数是什么意思呢？
+n1应该是指每次只传递一个参数给args命令；如下脚本对比，非常能说明问题：
+echo "1 2 3 4"|xargs -n1
+1
+2
+3
+4
+echo "1 2 3 4"|xargs -n2
+1 2
+3 4
+
+这样，若加n1参数，则*.tar.gz会拆成每个tar.gz文件后，一个一个传给tar tvfz命令
 
 6、tar解压到指定目录
 gswyhq@gswyhq-pc:~/yhb$ tar -xzvf /home/gswyhq/Downloads/jar.tar.gz -C /home/gswyhq/yhb/jar
