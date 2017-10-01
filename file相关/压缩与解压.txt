@@ -96,6 +96,11 @@ unar默认是解压到当前文件夹，也可以解压到指定文件夹：
 gswyhq@gswyhq-pc:~$ unar 成语故事全集1-50集.zip -o chengyu
 解压到指定文件夹‘chengyu’
 
+在ubuntu中如果解压zip包出现中文乱码，可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip或者 unar -e GB18030 xxx.zip 即可！
+
+# 批量解压（将当前目录下面的zip文件解压到目录`/home/gswyhq/下载`中）：
+gswyhq@gswyhq-pc:/media/gswyhq/B898E1E298E19F5E/$ ls *.zip |xargs -n1 unar -e GB18030 -o /home/gswyhq/下载/
+
 6、tar解压到指定目录
 gswyhq@gswyhq-pc:~/yhb$ tar -xzvf /home/gswyhq/Downloads/jar.tar.gz -C /home/gswyhq/yhb/jar
 gswyhq@gswyhq-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
