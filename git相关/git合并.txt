@@ -22,7 +22,7 @@ gswyhq@gswyhq-pc:~/qa_jar$ git diff master --stat
 第一步：创建我们的自定义merge driver：
 gswyhq@gswyhq-pc:~/qa_jar$ git config --global merge.ours.driver true
 
-第二步：在要被merge的分支上创建.gitattributes 文件，并且在文件中置顶不merge的文件名：
+第二步：在要被merge的分支,即'http'分支上创建.gitattributes 文件，并且在文件中置顶不merge的文件名：
 gswyhq@gswyhq-pc:~/qa_jar$ vim .gitattributes
 jar/sim.jar merge=ours
 jar/py.py merge=ours
@@ -145,3 +145,36 @@ git rebase --ontomaster 76cada^
     没有父提交的情况下不能 'squash'，也就是说`2e0b6531f`是由`42fb915`和`11497ad`合并而成，并不能再进行合并
     如果这个过程中有操作错误，可以使用 git rebase --abort来撤销修改，回到没有开始操作合并之前的状态。
     gswyhq@gswyhq-pc:~/yhb$ git rebase --abort
+
+# git merge 与 git rebase 的区别。
+假设当前项目有两个分支 local 和 upstream, local 和 upstream有共同的祖先A；
+local 是在A的基础上commit得到 C，upstream 是在A的基础上commit得到B；且工作环境处于 local 分支;
+git merge 会分别提取 B 和 C 不同于 A 的部分，将他们合并到一起，因此生成的结果 D 有两个祖先。
+但是，git rebase 的做法是找到从 A 到 B 的修改，并将这些修改作用于 C 上，所以 D 只有 C 这一个祖先。
+
+# ours 和 theirs 的用法，以及这两个代词在 git merge 与 git rebase 中的不同。
+假设项目中有文件 word.txt, 在版本 A, B 和 C 中的内容分别是 "astronauts", "boycott", "chocolate". 执行 merge 之后 word.txt 会变成下面的样子。
+<<<<<<< HEAD
+chocolate
+=======
+boycott
+>>>>>>> upstream
+rebase 得到的结果类似但并不相同。
+<<<<<<< HEAD
+boycott
+=======
+chocolate
+>>>>>>> C
+可以看出，<<<<<<< 和 >>>>>>> 清晰地标示出了冲突的部分。你需要将它们改成期望的样子。如果你想保留两个版本中的一个而不引入新的修订，就可以使用两个预先定义的代词。
+<<<<<<< 和 ======= 之间的部分称为 ours, ======= 和 >>>>>>> 之间则称为 theirs. 此时，你只需要键入合适的指令即可化解冲突，而不需要进入文本编辑器。
+在当前项目可以得到如下运行结果：
+# merge
+git checkout --ours word.txt    # => chocolate
+git checkout --theirs word.txt  # => boycott
+# rebase
+git checkout --ours word.txt    # => boycott
+git checkout --theirs word.txt  # => chocolate
+发现了什么不对劲的地方了么？没错！这是迄今为止 git 让我最困惑的一点：merge 和 rebase 对于 ours 和 theirs 的定义是完全相反的。
+在 merge 时，ours 指代的是当前分支，theirs 代表需要被合并的分支。而在 rebase 过程中，ours 指向了修改参考分支，theirs 却是当前分支。
+如果你仔细探究其中的原因，会发现 rebase 隐含了一个 git checkout upstream 的过程，将 HEAD 从 local 分支变成了 upstream 分支。
+git 会在 rebase 结束后撤销这个改变，但它已经不可避免地影响了冲突的状态，使 rebase 中 ours 和 theirs 的定义与 merge 截然相反。

@@ -221,3 +221,7 @@ UPDATE question SET tag1=65 WHERE answer LIKE "%能赔偿"
 # 如果要删除表中的部分记录，只能使用DELETE语句
 DELETE FROM question WHERE  tag1=65
 
+# 查找替换
+## 将将表 entity里面的 similar_word字段的'、'替换为‘,’ 
+UPDATE entity SET similar_word=REPLACE(similar_word, '、', ','); 
+
