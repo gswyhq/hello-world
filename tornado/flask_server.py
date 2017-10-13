@@ -1,52 +1,75 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import json
+import logging
 from flask import Flask, request
-from flask import jsonify
+from main2 import test_produce_answer
+
+app = Flask(__name__)
+
+from functools import wraps
+from flask import make_response
 
 
-def create_api(functions, port):
-    app = Flask(__name__)
-    if not isinstance(functions, list):
-        functions = [functions]
-    print(functions)
-    for f in functions:
-        def web_api():
-            data = request.get_json(force=True)
-            return jsonify(f(data))
-
-        app.add_url_rule('/' + f.__name__, f.__name__, web_api, methods=['POST'])
-        print('a api http://0.0.0.0:%s/%s create' % (port, f.__name__))
-    app.run(debug=False, host='0.0.0.0', port=port)
-
-
-def your_api(data):
-    print('使用your_api解析')
-    print(data)
-    return data
+def allow_cross_domain(fun):
+    """
+    允许跨越访问
+    :param fun:
+    :return:
+    """
+    @wraps(fun)
+    def wrapper_fun(*args, **kwargs):
+        rst = make_response(fun(*args, **kwargs))
+        rst.headers['Access-Control-Allow-Origin'] = '*'
+        rst.headers['Access-Control-Allow-Methods'] = 'PUT,GET,POST,DELETE'
+        allow_headers = "Referer,Accept,Origin,User-Agent"
+        rst.headers['Access-Control-Allow-Headers'] = allow_headers
+        return rst
+    return wrapper_fun
 
 
-def your_api_2(data):
-    print('使用your_api2解析')
-    print(data)
-    return data
+@app.route("/hello", methods=['GET', 'POST'])
+def hello():
+    if request.method == 'POST':
+        uid = request.form['uid'] or ''
+        text = request.form['text'] or ''
+    else:
+        uid, text = '', ''
+    return "Hello World!{}{}".format(uid, text)
 
+@app.route("/yhb", methods=['GET', 'POST'])
+@allow_cross_domain
+def yhb():
+    _ip = request.remote_addr or ''
+    logging.info("请求的主机ip: {}".format(_ip))
+    if request.method == 'POST':
+        uid = request.form.get('uid', default=_ip) or _ip # 没有uid时，默认为机器的ip
+        text = request.form.get('text', '')
+    elif request.method == 'GET':
+        uid = request.args.get('uid', _ip) or _ip
+        text = request.args.get('text', '')
+    else:
+        result = '请求方式应该为post, 不应该为：{}'.format(request.method)
+        data = {'code': 200, 'text': result}
+        return json.dumps(data, ensure_ascii=False)
+    if uid and text:
+        logging.info("请求的参数，uid: {} ,问题： {}".format(uid, text))
+        answer_list = test_produce_answer(text, uid)
+        data = {'code': 200, 'text': '\n'.join(answer_list), 'uid': uid}
+        return json.dumps(data, ensure_ascii=False)
+    else:
+        result = '请求的参数不对'
+        data = {'code': 200, 'text': result}
+        return json.dumps(data, ensure_ascii=False)
 
 def main():
-    create_api([your_api, your_api_2], 8811)
-
+    logging.basicConfig(level=logging.DEBUG,
+                format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S',
+                filename='yhb.log',
+                filemode='w')
+    app.run(host='0.0.0.0', port='5000')
 
 if __name__ == '__main__':
     main()
-
-# 使用http调用服务
-# import requests
-# import json
-# def api_call(url, data):
-#     r = requests.post(url, data = json.dumps(data) )
-#     result = r.json()
-#     return result
-# result = api_call('http://192.168.3.51:8811/your_api', '123456')
-# print(result)
-# result = api_call('http://192.168.3.51:8811/your_api_2', '123456')
-# print(result)
