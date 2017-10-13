@@ -138,4 +138,7 @@ $ git log
 
 # 在git历史版本中查找某个文件（即查看某个文件是什么时候被删除的）：
 gswyhq@gswyhq-pc:~$ git log -- flask_server.py
+# 或者在历史记录中模糊查找某个文件:
+gswyhq@gswyhq-pc:~$ git log --all -- "*flask*"
+
 
