@@ -135,3 +135,7 @@ $ git log
 * b7057a9 initial commit
 
 所以，如果你因为reset等操作丢失一个提交的时候，你总是可以把它找回来。除非你的操作已经被git当做垃圾处理掉了，一般是30天以后。
+
+# 在git历史版本中查找某个文件（即查看某个文件是什么时候被删除的）：
+gswyhq@gswyhq-pc:~$ git log -- flask_server.py
+
