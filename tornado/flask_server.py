@@ -73,3 +73,19 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# print("request.form: {}".format(request.form))
+# data_form = {}
+# for fieldname, value in request.form.items():
+#     data_form[fieldname] = value
+#
+# print("data_form: {}".format(data_form))
+# print("field_question_list: {}".format(request.form.getlist("field_question_list")))
+# print("request.args: {}".format(request.args))
+# print("request.values: {}".format(request.values))
+# print("request.data: {}".format(request.data))
+# print("request.json: {}".format(request.json))
+# print("request.get_json(): {}".format(request.get_json()))
+# print("jsonify(request.form): {}".format(jsonify(request.form)))
+#
+# print("request.get_json(force=True): {}".format(request.get_json(force=True)))

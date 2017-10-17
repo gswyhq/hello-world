@@ -1,0 +1,9 @@
+
+gswyhq@gswyhq-PC:~$ docker pull mongo
+
+# https://hub.docker.com/_/mongo/
+
+gswyhq@gswyhq-PC:~/docker/mongo$ docker run --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d mongo
+061812eacdcb335fee4c9cc55e5358411933323f80582d5f96affeeaf7b40179
+
+

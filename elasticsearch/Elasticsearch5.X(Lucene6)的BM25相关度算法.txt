@@ -1,0 +1,33 @@
+
+在以前的 Elasticsearch 版本中, 标准的算法是 Term Frequency/Inverse Document Frequency, 简写为 TF/IDF, Elasticsearch 前不久发布了 5.0 版本, 基于 Lucene 6, 默认使用了 BM25 评分算法.
+
+BM25 的 BM 是缩写自 Best Match, 25 貌似是经过 25 次迭代调整之后得出的算法. 它也是基于 TF/IDF 进化来的.
+总体而言, 主要还是分三部分, TF - IDF - Document Length
+
+score(q,d)  = IDF * ((k + 1) * f(q, D)) / (k * (1.0 - b + b * (|d|/avgDl)) + f(q, D))
+
+IDF 还是和之前的一样. 公式 IDF(q) = 1 + ln(numDocs/(docFreq + 1))
+
+f(q, D) 是 tf(term frequency)
+
+|d| 是文档的长度, avgdl 是平均文档长度.
+
+先不看 IDF 和 Document Length 的部分, 变成 tf * (k + 1) / (tf + k),
+
+相比传统的 TF/IDF (tf(q in d) = sqrt(termFreq)) 而言, BM25 抑制了 tf 对整体评分的影响程度, 虽然同样都是增函数, 但是, BM25 中, tf 越大,
+带来的影响无限趋近于 (k + 1), 这里 k 值通常取 [1.2, 2], 而传统的 TF/IDF 则会没有临界点的无限增长.
+
+而文档长度的影响, 同样的, 可以看到, 命中搜索词的情况下, 文档越短, 相关性越高, 具体影响程度又可以由公式中的 b 来调整, 当设值为 0 的时候,
+就跟之前 ‘TF/IDF’ 那篇提到的 "norms": { "enabled": false } 一样, 忽略文档长度的影响.
+
+综合起来,
+k = 1.2
+b = 0.75
+idf * (tf * (k + 1)) / (tf + k * (1 - b + b * (|d|/avgdl)))
+最后再对所有 term 求和. 就是 Elasticsearch 5 中一般查询的得分了.
+
+BM25 调优
+不像 TF/IDF ，BM25 有一个比较好的特性就是它提供了两个可调参数：
+k1: 这个参数控制着词频结果在词频饱和度中的上升速度。默认值为 1.2 。值越小饱和度变化越快，值越大饱和度变化越慢。
+b: 这个参数控制着字段长归一值所起的作用， 0.0 会禁用归一化， 1.0 会启用完全归一化。默认值为 0.75 。
+在实践中，调试 BM25 是另外一回事， k1 和 b 的默认值适用于绝大多数文档集合，但最优值还是会因为文档集不同而有所区别，为了找到文档集合的最优值，就必须对参数进行反复修改验证。
