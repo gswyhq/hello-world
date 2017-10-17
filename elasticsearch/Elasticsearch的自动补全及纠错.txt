@@ -1,0 +1,109 @@
+
+es实现自动补全及纠错需要三个步骤：创建映射，插入索引数据，搜索数据。
+
+# http://blog.csdn.net/xsdxs/article/details/52667794
+# https://elasticsearch.cn/article/142
+
+========================创建映射=========================
+curl -XPUT localhost:9200/index
+curl -XPUT localhost:9200/index/test/_mapping -d '{
+  "test" : {
+        "properties" : {
+            "name" : { "type" : "string" },
+            "name_suggest" : { "type" : "completion",
+                          "analyzer" : "simple",
+                          "search_analyzer" : "simple"
+            },
+        "tag_suggest" : { "type" : "completion",
+                          "analyzer" : "simple",
+                          "search_analyzer" : "simple"
+            }
+        }
+    }
+}'
+========================插入索引数据=========================
+curl -XPUT 'localhost:9200/index/test/1?refresh=true' -d '{
+    "name" : "xdy",
+    "name_suggest" : {
+        "input": ["xdy", "hdu"]
+    }
+}'
+
+curl -XPUT 'localhost:9200/index/test/2?refresh=true' -d '{
+    "name" : "lz",
+    "name_suggest" : {
+        "input": ["lz", "hdu"]
+    }
+}'
+
+curl -XPUT 'localhost:9200/index/test/3?refresh=true' -d '{
+    "name" : "xck",
+    "name_suggest" : {
+        "input": ["xck", "gbd"]
+    }
+}'
+
+curl -XPUT 'localhost:9200/index/test/4?refresh=true' -d '{
+    "name_suggest" : {
+        "input": [ "hz", "bdata", "cas"]
+    }
+}'
+
+curl -XPUT 'localhost:9200/index/test/5?refresh=true' -d '{
+    "tag_suggest" : {
+        "input": ["bfd", "bdata", "hadoop"]
+    }
+}'
+========================创建查询=========================
+curl -XPOST 'localhost:9200/index/_suggest?pretty' -d '{
+    "index-suggest" : {
+        "text" : "b",
+        "completion" : {
+            "field" : "name_suggest"
+        }
+    }
+}'
+
+
+# Python 接口实现自动补全
+
+from elasticsearch import Elasticsearch
+
+def suggest(tag, query, suggest_size=10):
+    # 设置条件
+    es_suggest_options = set_suggest_optional(query, tag, suggest_size)
+    # 发起检索。
+    es_client = Elasticsearch(hosts=["127.0.0.1:9200"], timeout=5000)
+    es_result = es_client.suggest(index='index',body=es_suggest_options)
+    # 得到结果。
+    final_results = get_suggest_list(es_result)
+    return final_results
+
+def get_suggest_list(es_result):
+    result_items = es_result['suggest'][0]["options"]
+    final_results = []
+    for item in result_items:
+        final_results.append(item['text'])
+    return final_results
+
+def set_suggest_optional(query, tag, suggest_size):
+    # 检索选项
+    es_suggest_options = {
+        "suggest": {
+            "text": query,
+            "completion": {
+                "field": tag,
+                "size": suggest_size
+            }
+        }
+    }
+    return es_suggest_options
+
+if __name__ == '__main__':
+    final_results = suggest('name_suggest', 'b', 2)
+    for item in final_results:
+        print (item)
+    print ('=========================================')
+    final_results = suggest('tag_suggest', 'b', 2)
+    for item in final_results:
+        print (item)
