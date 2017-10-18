@@ -35,3 +35,6 @@ gswyhq@gswyhq-PC:~$ lspci | grep -i nvidia
 gswyhq@gswyhq-PC:~$ sudo lshw -c video | grep configuration 
        configuration: driver=nouveau latency=0
 
+
+# 切换显卡驱动，也可以打开“启动器”，-> "驱动管理器"，进行对应的更改；
+

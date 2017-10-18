@@ -8,15 +8,18 @@ Step 1 查看哪些历史提交过文件占用空间较大
 　　verify-pack命令用于显示已打包的内容。
 
 step 2. 重写commit，删除大文件
-　　使用以下命令，删除历史提交过的大文件：
-　　git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch big-file.jar' --prune-empty --tag-name-filter cat -- --all
-　　上面脚本中的big-file.jar请换成你第一步查出的大文件名，或者这里直接写一个目录。
-　　filter-branch命令可以用来重写Git仓库中的提交
-　　--index-filter参数用来指定一条Bash命令，然后Git会检出（checkout）所有的提交， 执行该命令，然后重新提交。
-　　--all参数表示我们需要重写所有分支（或引用）。
-　　在重写提交的过程中，会有以下日志输出:
-　　Rewrite 6cdbb293d453ced07e6a07e0aa6e580e6a5538f4 (266/266)# Ref 'refs/heads/master' was rewritten
-　　如果显示 xxxxx unchanged, 说明repo里没有找到该文件, 请检查路径和文件名是否正确，重复上面的脚本，把所有你想删除的文件都删掉。
+    使用以下命令，删除历史提交过的大文件：
+    git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch big-file.jar' --prune-empty --tag-name-filter cat -- --all
+    上面脚本中的big-file.jar请换成你第一步查出的大文件名，或者这里直接写一个目录。
+    filter-branch命令可以用来重写Git仓库中每一个分支的提交
+    --force 假如遇到冲突也让git强制执行，
+    --index-filter参数用来指定一条Bash命令，然后Git会检出（checkout）所有的提交， 执行该命令，然后重新提交。在这里就是git rm -rf --cached --ignore-unmatch big-file.jar ，让git删除掉缓存的文件，如果有匹配的话。
+    --prune-empty 选项告诉git，如果因为重写导致某些commit变成了空（比如修改的文件全部被删除），那么忽略掉这个commit。
+    --tag-name-filter 表示对每一个tag如何重命名，重命名的命令紧跟在后面，当前的tag名会从标注输入送给后面的命令，用cat就表示保持tag名不变。
+    紧跟着的-- 表示分割符，最后的--all 参数表示我们需要重写所有分支（或引用）。
+    在重写提交的过程中，会有以下日志输出:
+    Rewrite 6cdbb293d453ced07e6a07e0aa6e580e6a5538f4 (266/266)# Ref 'refs/heads/master' was rewritten
+    如果显示 xxxxx unchanged, 说明repo里没有找到该文件, 请检查路径和文件名是否正确，重复上面的脚本，把所有你想删除的文件都删掉。
 
 step 3. 推送修改后的repo
 　　以强制覆盖的方式推送你的repo, 命令如下:
@@ -65,4 +68,3 @@ gswyhq@gswyhq-pc:~/hello-world$ git branch -D master
 gswyhq@gswyhq-pc:~/hello-world$ git branch -m master
 第六步：将本地强制推送到远程
 gswyhq@gswyhq-pc:~/hello-world$ git push -f origin master
-
