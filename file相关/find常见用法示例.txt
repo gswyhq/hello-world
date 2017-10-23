@@ -2,6 +2,9 @@
 在当前目录及子目录中，查找文件名包含‘shell’的txt文件
 gswyhq@gswyhq-pc:~/hello-world$ find . -name "*shell*.txt"
 
+# 在当前目录下查找所有的`__pycache__`目录，并删除
+gswyhq@gswyhq-PC:~$ find . -type d -name "__pycache__" | xargs rm -r
+
 将当前目录下文件名符合"20170*.txt"输出到当前目录下的test.tmp文件中
 gswyhq@gswyhq-pc:~$ find -name "20170*.txt" -exec 'cat' {} \; > test.tmp
 

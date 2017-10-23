@@ -120,6 +120,9 @@ zy@ubuntu:~$ git push origin jar:jar
 gswyhq@gswyhq-pc:~$ git clone git@172.19.1.100:AI/WhiteII # 将从远程主机克隆一个版本库；该命令会在本地主机生成一个目录，
 与远程主机的版本库同名。如果要指定不同的目录名，可以将目录名作为git clone命令的第二个参数。$ git clone <版本库的网址> <本地目录名>
 
+clone的时候，可以指定深度，如下，为1即表示只克隆最近一次commit.
+git clone git://xxoo --depth 1
+
 为了便于管理，Git要求每个远程主机都必须指定一个主机名。git remote命令就用于管理主机名。
 不带选项的时候，git remote命令列出所有远程主机。
 使用-v选项，可以参看远程主机的网址。

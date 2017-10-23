@@ -75,4 +75,9 @@ ubuntu@ip-172-31-14-6:~$ sudo service ssh restart
 ssh stop/waiting
 ssh start/running, process 12050
 
+# 有时候登录本机出现类似错误：
+Warning: Permanently added 'localhost' (ECDSA) to the list of known hosts.
+Permission denied (publickey).
+把公钥（id_dsa.pub）追加到授权的key中去即可：
+ubuntu@ip-172-31-13-157:~$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
