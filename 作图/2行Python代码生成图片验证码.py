@@ -1,0 +1,21 @@
+#!/usr/bin/python3
+# coding: utf-8
+
+# 安装
+# https://github.com/vcodeclub/graphic-verification-code
+# pip install graphic-verification-code
+
+import gvcode
+
+gvcode.generate()
+gvcode.base64()
+
+# ('iVBORw0KGgoAAAANSUhEUgAAAHgAAAAeCAIAAABoq03CAAACyklEQVR4nN1aO04kMRB9NdoIQUIAEVcgIuAEKyQyUsShIOUmmwEpZyAgG4SI+GRTBB48bn+6XXZ52uxTB6OWXS5XPb+y20PMDAAAEdnfPaOFn+M2VUZcVPb/b0BEbe27ubKDtab2jKvHzFE0ekGXEANGM7Mx1yK9rs0ZNcqVyvwu9Q4nmeWlsUMF79ClESQ12qRxa2JSgEmXmsqu1PhEMTSxFhltXVXyoUiOcFJS438mW7iqnWO9Q+73AJnMueH+XRI5O0qCpbLd2TJmp4X+gYVo82wNJveXlwMHbm9xc7N2Qxpl9UozrdEhRlT7Z1YAcHgIIqjTKMpNZt7ZwfGxJ27lo6jTvyTQBqlw25/LJYjw/o69Pf1wezg7w+enyavvSSebIDXlIqKQB4sFVit9XqcENzpQi1WV6Y8LX6OLtSl6dl+tyoxljeUh5fgWSmAOWX3pmLE0W333QpbvkZbvZTkb34wp7zoKTpJOXwAgwvk5Li7ADGY8PfmrZMS4ihy79dzzbRzjHNXcXXpqaJUrXyVTIou8qWrJMRGOjvD8LHZgzGa7QGPDvtxBUlPKjKBioIOJxB3Lh/6B5e5uc2RwP3D387EpB+6BSyV/5fvoEAcHa5/Mrs7BX4CB6UCHlVAKIphl6m25RMGy1cL0YsbHR5VX0GX0y8s6Ug8Pm1kR4fT0H3NVncyECQrAGG43r67KU2jCvbsLZiyX5b61uFEGglOZVySRlu36eui2dHktInWNKEcnGGd0De/cdee+cRqIr+DKVj0GV3GyqDHj+nrwgcw+9/eTfWPnqdYnlMdHnJzkNnbz64pP+FJkStQxZaHGFHSLYRRfX0A2oaJtXB3I/+Y5FCuBD7ZLqnGZqrRitNWplEx3fm+Q0r39fby9lWz4ep+wCNL8TV4Vhepha4A0bN39JayuDktrbME13jrKr6/CjrMw+jfeOlbiGyMXxYAIZpe8AAAAAElFTkSuQmCC',
+#  'QnCg')
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()
