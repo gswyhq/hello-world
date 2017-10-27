@@ -251,29 +251,7 @@ ubuntu@10-13-70-173:~$ sudo apt-get install python3.5-dev
 ubuntu@10-13-70-173:~$ sudo apt-get install libevent-dev
 ubuntu@10-13-70-57:~$ sudo apt-get install g++
 
-# 在执行python setup.py install 命令时出现以下错误提示：
-gswyhq@gswyhq-PC:~/semantics_match$ python3 setup.py install 
-running install
-error: can't create or remove files in install directory
 
-The following error occurred while trying to add or remove files in the
-installation directory:
-
-    [Errno 13] Permission denied: '/usr/local/lib/python3.5/dist-packages/test-easy-install-11574.write-test'
-
-解决办法:
-sudo python setup.py install
-
-# 对于python setup.py install安装的包的卸载：
-第一步，安装的时候记录安装文件
-python setup.py install --record files.txt
-第二步，删除安装文件即可
-cat files.txt | xargs rm -rf 
-或者,通过pip uninstall删除，如删除包`semantics_match`：
-gswyhq@gswyhq-PC:~/semantics_match$ sudo pip3 uninstall semantics_match
-
-# 直接从git上面安装某个项目：
-sudo pip3 install git+http://192.168.3.101/gswyhq/templates_match.git
 
 
 

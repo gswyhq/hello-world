@@ -1,0 +1,7 @@
+include semantics_match/model/wx_vector_char.pkl
+include semantics_match/data/kefu_weibo_doc_count_freq.json
+include semantics_match/data/defined_word_antonym.txt
+include semantics_match/data/user_word_synonym.txt
+include semantics_match/data/word_antonym.txt
+include semantics_match/data/word_synonym.txt
+

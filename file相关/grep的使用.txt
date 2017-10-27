@@ -11,6 +11,9 @@ grep -E "http"  . -R --exclude=*.{java,js}
 # 忽略多个隐藏目录：
 gswyhq@gswyhq-pc:~$ grep -R --include="*.py" --exclude-dir={.cache,.local,.deepinwine,.PyCharm2016.1,.cxoffice,.PyCharm50,.git,.navicat64}  "browser" .
 
+# 排除某些关键词的（在当前目录中搜索`semantic`，但不要有`semantics_match`）：
+grep "semantic" .|grep -v "semantics_match"
+
 # find与grep联合使用
 在当前目录下的log目录中，从所有io开头的文件中查找包含有"传入参数" 或 "返回数据"的行，并输出到文件`20170823备份日志.log`中：
 gswyhq@gswyhq-PC:~/yhb$ find log/ -name "io*"|xargs grep -e "传入参数" -e "返回数据" > 20170823备份日志.log

@@ -1,0 +1,100 @@
+
+自定义程序包的安装，可以通过setup.py文件来实现
+在项目目录的外头添加setup.py文件：
+gswyhq@gswyhq-PC:~/semantics_match$ tree
+.
+├── flask_server.py
+├── log
+├── MANIFEST.in
+├── README.md
+├── requirements.txt
+├── semantics_match
+│   ├── auxiliary
+│   │   ├── auxiliary_features.py
+│   │   ├── __init__.py
+│   │   ├── pinyin_corrector.py
+│   │   └── str_q2b.py
+│   ├── conf
+│   │   ├── answer_output_conf.py
+│   │   ├── global_variable.py
+│   │   ├── lucene_conf.py
+│   │   ├── mingcijieshi_conf.py
+│   │   ├── preprocess.py
+│   │   └── wmd_conf.py
+│   ├── data
+│   │   ├── defined_word_antonym.txt
+│   │   ├── kefu_weibo_doc_count_freq.json
+│   │   ├── user_word_synonym.txt
+│   │   ├── word_antonym.txt
+│   │   └── word_synonym.txt
+│   ├── __init__.py
+│   ├── logger
+│   │   └── logger.py
+│   ├── lucene
+│   │   ├── __init__.py
+│   │   ├── lucene_fuzzy_match.py
+│   │   ├── lucene_scoring_formula.py
+│   │   └── synonym_antonym.py
+│   ├── main
+│   │   ├── __init__.py
+│   │   ├── mingcijieshi.py
+│   │   ├── question_preprocess.py
+│   │   ├── score_sort.py
+│   │   ├── search_match.py
+│   │   ├── standard_similar_question.py
+│   │   └── text_preprocess.py
+│   ├── model
+│   │   └── wx_vector_char.pkl
+│   └── wmd
+│       ├── __init__.py
+│       ├── load_model.py
+│       ├── reload.py
+│       └── wmd_distance.py
+├── setup.py
+└── tests
+    ├── __init__.py
+    └── test_match.py
+
+11 directories, 40 files
+
+# 在执行python setup.py install 命令时出现以下错误提示：
+gswyhq@gswyhq-PC:~/semantics_match$ python3 setup.py install
+running install
+error: can't create or remove files in install directory
+
+The following error occurred while trying to add or remove files in the
+installation directory:
+
+    [Errno 13] Permission denied: '/usr/local/lib/python3.5/dist-packages/test-easy-install-11574.write-test'
+
+解决办法:
+sudo python setup.py install
+
+# 对于python setup.py install安装的包的卸载：
+第一步，安装的时候记录安装文件
+python setup.py install --record files.txt
+第二步，删除安装文件即可
+cat files.txt | xargs rm -rf
+或者,通过pip uninstall删除，如删除包`semantics_match`：
+gswyhq@gswyhq-PC:~/semantics_match$ sudo pip3 uninstall semantics_match
+
+# 直接从git上面安装某个项目：
+sudo pip3 install git+http://192.168.3.101/gswyhq/templates_match.git
+
+当然也可以通过某一次提交的版本（commit hash）, 分支名（branch name）, tag进行安装：
+
+安装某一次提交的版本:
+$ pip install git+git://github.com/aladagemre/django-notification.git@2927346f4c513a217ac8ad076e494dd1adbf70e1
+$ pip install git+ssh://git@github.com/aladagemre/django-notification.git@2927346f4c513a217ac8ad076e494dd1adbf70e1
+
+# 安装分支：
+$ pip install git+git://github.com/aladagemre/django-notification.git@cool-feature-branch
+
+# 通过源代码进行安装：
+$ pip install https://github.com/aladagemre/django-notification/archive/cool-feature-branch.tar.gz
+
+# 安装某个tag:
+$ pip install git+git://github.com/aladagemre/django-notification.git@v2.1.0
+
+# 通过tag的源代码进行安装：
+$ pip install https://github.com/aladagemre/django-notification/archive/v2.1.0.tar.gz
