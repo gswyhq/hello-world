@@ -94,6 +94,7 @@ $ pip install git+git://github.com/aladagemre/django-notification.git@cool-featu
 $ pip install https://github.com/aladagemre/django-notification/archive/cool-feature-branch.tar.gz
 
 # 安装某个tag:
+gswyhq@gswyhq-PC:~$ sudo pip3 install git+http://192.168.3.101/gswyhq/text_pretreatment.git@0.0.2
 $ pip install git+git://github.com/aladagemre/django-notification.git@v2.1.0
 
 # 通过tag的源代码进行安装：

@@ -178,3 +178,15 @@ git checkout --theirs word.txt  # => chocolate
 在 merge 时，ours 指代的是当前分支，theirs 代表需要被合并的分支。而在 rebase 过程中，ours 指向了修改参考分支，theirs 却是当前分支。
 如果你仔细探究其中的原因，会发现 rebase 隐含了一个 git checkout upstream 的过程，将 HEAD 从 local 分支变成了 upstream 分支。
 git 会在 rebase 结束后撤销这个改变，但它已经不可避免地影响了冲突的状态，使 rebase 中 ours 和 theirs 的定义与 merge 截然相反。
+
+
+pull代码时有时候会出现与本地冲突，(自动合并失败，修正冲突然后提交修正的结果)
+可以通过PyCharm来解决：
+1、File -> New Project -> 选择有冲突的项目目录
+2、VCS -> GIT -> Resolve Conflicts
+3、解决好冲突后，git commit，再push到远程；
+
+或者，报自动合并失败后，运行：
+使用 "git merge --abort" 终止合并
+这个时候会将已合并的（自动合并成功的）、合并有冲突的都回退到pull之前的状态。
+

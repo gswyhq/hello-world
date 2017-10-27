@@ -82,3 +82,17 @@ git config --global credential.helper store
 首先，打开终端，进入项目所在的文件夹；
 输入命令：git config http.postBuffer 524288000
 之前git中的配置是没有这一项的,执行完以上语句后输入git config -l可以看到配置项的最下面多出了一行我们刚刚配置的内容. (52428000=500×1024×1024,即500M)
+
+使用ssh-keygen 命令更改SSH Key 密码
+-p 选项请求修改私钥的密码，而不是创建一个新的私钥。程序会提示你输入原始密码。然后输入两遍新密码。
+-f{filename} 选项去指定密钥的名称。
+详细过程如下：
+gswyhq@gswyhq-PC:~$ cd .ssh/
+gswyhq@gswyhq-PC:~/.ssh$ ls
+config  id_rsa  id_rsa.pub  known_hosts
+gswyhq@gswyhq-PC:~/.ssh$ ssh-keygen -p -f id_rsa
+Enter old passphrase:
+Enter new passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved with the new passphrase.
+
