@@ -1,0 +1,25 @@
+
+git对于大文件的管理：
+
+1.安装
+于‘https://git-lfs.github.com/’下载，/home/gswyhq/Downloads/git-lfs-linux-amd64-2.3.4.tar.gz
+
+或者：
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+来源： https://packagecloud.io/github/git-lfs/install
+
+Git LFS向Git中添加了一条新命令lfs，支持以下参数：
+
+config：显示Git LFS的配置。
+init：初始化Git LFS。
+logs：显示git-lfs中的错误。
+track：向Git仓库中添加一个大文件；允许指定文件扩展名。
+untrack：从Git LFS中移除一个文件。
+push：把当前监控的文件推送到Git LFS服务器。
+status：显示产生改动的Git LFS对象的路径。
+如果要向现有仓库中添加一个大文件，你可以：
+
+git lfs track "*.pdf"
+git add file.pdf
+git commit -m "Add design file"
+git push origin master
