@@ -58,6 +58,12 @@ setup(
                     'scikit-learn==0.18.1',
                     'gensim==2.0.0',
                     'pyemd==0.4.3'
-                    ],
+                    'semantics_match>=0.0.4',
+                    'text_pretreatment',
+                      ],
+    dependency_links=[
+        'git+http://192.168.3.101/gswyhq/semantics_match.git/#egg=semantics-match-0.0.4',
+        'git+http://192.168.3.101/gswyhq/text_pretreatment.git/#egg=text-pretreatment-0.0.2',
+    ],
     test_suite='tests',  # 运行“python3 setup.py test” 即可测试当前目录下的tests目录中的单元测试文件
 )
