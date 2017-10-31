@@ -576,8 +576,7 @@ gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git log --pretty=oneline ambbr/intent/intentR
 用git show 命令查看具体的修改详情了
 gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git show 2debc4998e6e5fcf33c7b0e442c468a0b8ad2515 ambbr/intent/intentReMatch.py
 
-# 中文文件名显示乱码，可以通过以下方法来解决：
-gswyhq@gswyhq-pc:~/biji$ git config --global core.quotepath false
+
 gswyhq@gswyhq-pc:~/biji$ git status 
 位于分支 master
 未跟踪的文件:

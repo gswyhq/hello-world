@@ -45,7 +45,7 @@ ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 # 有时候反向连接报错：
 Warning: remote port forwarding failed for listen port 7770
 这个时候，需要在被反向连接到的机器上，找到对应的进程kill掉即可；
-ubuntu@ip-172-31-14-6:~/nlp_request_url$ sudo netstat -p|grep 7770
+ubuntu@ip-172-31-14-6:~/nlp_request_url$ sudo netstat -plant |grep 7770
 tcp      184      0 localhost:7770          localhost:41106         CLOSE_WAIT  20273/sshd: ubuntu
 ubuntu@ip-172-31-14-6:~/nlp_request_url$ kill -9 20273
 

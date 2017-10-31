@@ -6,10 +6,29 @@ gswyhq@gswyhq-PC:~/templates_match$ docker images
 REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
 redis                     latest              4e482b286430        4 months ago        99 MB
 
+    docker login : 登陆到一个Docker镜像仓库，如果未指定镜像仓库地址，默认为官方仓库 Docker Hub
+    docker logout : 登出一个Docker镜像仓库，如果未指定镜像仓库地址，默认为官方仓库 Docker Hub
+    语法
+        docker login [OPTIONS] [SERVER]
+        docker logout [OPTIONS] [SERVER]
+    OPTIONS说明：
+        -u :登陆的用户名
+        -p :登陆的密码
+    实例
+        登陆到Docker Hub: docker login -u 用户名 -p 密码
+        登出Docker Hub: docker logout
+
+# login 登录docker注册服务器
 gswyhq@gswyhq-PC:~/templates_match$ docker login -u AWS -p eyJwYXlsb2FkIjoiTlhJQlRaeDk5VUwxeFh0R2RrNmt4eitWaU14KzM0QjlzaWZEOCtIRFFuaVdQd0thcEkwOXMzNkUyaWF4OXllWktKbjFWdHhTTUJYaHU0eGRaUm8yOVBmMXlPa3pxaXd4ZjJ6L3lZb0gzY0pUT1lFOVAvbWNlREZMTDdxRk9kclluV25kc0l6YlkwMDhDaFZNbC9kd3BmSGl5Z0lIL1NhOXl6MWUvL2VRdk85N2YrQUl3c3NSa2lvSS8wWHJxTTFoY1FBaFVURkpRVmFZVmtJUnVxbmphU2hzSVRGZk1EdEIzQUNFOHVqUk85ejlsU0tlWC8weDJtRnA0SjFVQVVSNkdIRmk1UUYrbjE3WE1HNkNOT0gxTlhoaEE4RERpNStiNDQydGRwR0dxWkljckF4bjNDWWlRcGc4cEVXN0lZRHdmK2xHVE5KeTdGbVVXUktURTRxODBJYzBYeHRNNk93MDg2b092RW84VFBBVWlhMUx4K2NKSE9MZU1OOFcrdEp6VElPLzJmTFkzRWNkblcxdFFQaWhUMFNCWUZzeVRVSzJ2YjBjTTl4ZGlGdVB1dkY4aDFKWnkwZ3IzTkZkTlpRcVpLT0l0WVhVUHRUTzVHY0NCbExoeHMrS0M0bjhhRlVkLzdldnQ3eVp2SVM0OExiOWIwcEVPa2N0bGtOeUpwTlVpUGtMWFhUenRxa2VPdGpBNGUvQVdWWkp5YjVRbUlqUXFSQXpQUnJYYXVNRjBaeW9zTVFQdkZzKzBnaXRkOWlrbDZEbXdoaFlKUXVtMjJlYnRhaEhRai9mb3ExUHJkbnljY2N1ek5ZNUVZN2VhWWtFaDVFd0hVNkp5T2w5akU2VTc2M2VWanMyRGJBZldFOStZYzJST0Y0djBVUm9VQWpNM3A4cEtMVTJzMVNCQ0RPME5sd0E1YmgyM004dlMzVUYrZTgraVJGUVU1Z3Q5cXJyWE1WckJhNjlQTVJkK0tUU1hlUmh5eWpUMDc2T0hvWmozbkcyQ2h5SVpSQU9VbE9SWTBOWUt1ZmdNdGNOcWYzTzdOcmNyVUZzTmhWU2o0ekViMzZMeEJ4Mm5lbWVaMC9NYkswQXRmT3VMRy9HRGFHUnVIVjRrUFpjS3RqVWw1RytkMVlyVnJ1WlY4WjZZZkd1dHJkeWgxd24wekFTN2l5Q0xqZkJjNjVWMXZDczRJVTUzY1VpU0xFVUFBZkp0b3dhdGVkeG1OekxCL3JCV1NsVDBKMEg3RXhhUThHd2dub1hZMXlMWjJWWUkrVHFQMGdMRXBtVlJzOFNkU3JYVnlBOVY3ZzVYcHBqSllhQ0xqa0x5Nk1OSkM4TzZkMktpNldVTXUzU2VMN0F2S1NvV1JqS1dpeWc1d289IiwiZGF0YWtleSI6Ikd0Zk53STRBMFNDb2I5K3QxZXFDdm55aElGamhZM0hKMUFva0xmRWZPRkp5cWxBS0Nyd3BpVVVGSUhSS29nTGlDRHZEZExUNlBZUzkvYUdDIiwidmVyc2lvbiI6IjIiLCJ0eXBlIjoiRUNSX01BTkFHRURfREFUQV9LRVkiLCJleHBpcmF0aW9uIjoxNTA4ODgzNTM4fQ== https://899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn
 Login Succeeded
 
+# docker tag : 标记本地镜像，将其归入某一仓库。
+# 语法: docker tag old-image[:old-tag] new-image[:new-tag]
+# 将镜像redis:latest标记为 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:redis-latest 镜像。
 gswyhq@gswyhq-PC:~/templates_match$ docker tag redis:latest  899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:redis-latest
+
+# docker push : 将本地的镜像上传到镜像仓库,要先登陆到镜像仓库
+# 语法:docker push [OPTIONS] NAME[:TAG]
 gswyhq@gswyhq-PC:~/templates_match$ docker push 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:redis-latest
 The push refers to a repository [899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp]
 23e630c4c655: Pushed

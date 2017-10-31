@@ -34,6 +34,9 @@ $sudo git config --system core.editor vim
 我们又恰巧要操作git仓库hello-world，那么生效的优先级顺序是：
 (1)git_test/.git/config，(2)~/.gitconfig，(3)/etc/gitconfig，也就是说如果同一个配置同时出现在三个文件中时，(1)有效。
 
+# 中文文件名显示乱码，可以通过以下方法来解决：
+gswyhq@gswyhq-pc:~/biji$ git config --global core.quotepath false
+
 修改git log默认的时间显示方式:
 默认的显示时间格式是这样：
 commit 4cd50b7aacdb4b3d704ac91f589392a3eeecff80
