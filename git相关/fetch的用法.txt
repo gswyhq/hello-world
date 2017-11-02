@@ -1,0 +1,47 @@
+
+FETCH_HEAD指的是: 某个branch在服务器上的最新状态'.
+每一个执行过fetch操作的项目'都会存在一个FETCH_HEAD列表,
+这个列表保存在 .git/FETCH_HEAD 文件中, 其中每一行对应于远程服务器的一个分支.
+当前分支指向的FETCH_HEAD, 就是这个文件第一行对应的那个分支.
+
+一般来说, 存在两种情况:
+
+如果没有显式的指定远程分支, 则远程分支的master将作为默认的FETCH_HEAD.
+如果指定了远程分支, 就将这个远程分支作为FETCH_HEAD.
+常见的git fetch 使用方式包含以下四种:
+
+git fetch
+这一步其实是执行了两个关键操作:
+- 创建并更新所有远程分支的本地远程分支.
+- 设定当前分支的FETCH_HEAD为远程服务器的master分支 (上面说的第一种情况)
+
+需要注意的是: 和push不同, fetch会自动获取远程`新加入'的分支.
+
+git fetch origin
+同上, 只不过手动指定了remote.
+
+git fetch origin branch1
+设定当前分支的 FETCH_HEAD' 为远程服务器的branch1分支`.
+
+注意: 在这种情况下, 不会在本地创建本地远程分支, 这是因为:
+
+这个操作是git pull origin branch1的第一步, 而对应的pull操作,并不会在本地创建新的branch.
+
+一个附加效果是:
+
+这个命令可以用来测试远程主机的远程分支branch1是否存在, 如果存在, 返回0, 如果不存在, 返回128, 抛出一个异常.
+
+git fetch origin branch1:branch2
+只要明白了上面的含义, 这个就很简单了,
+
+首先执行上面的fetch操作
+使用远程branch1分支在本地创建branch2(但不会切换到该分支),
+如果本地不存在branch2分支, 则会自动创建一个新的branch2分支,
+如果本地存在branch2分支, 并且是`fast forward', 则自动合并两个分支, 否则, 会阻止以上操作.
+git fetch origin :branch2
+等价于: git fetch origin master:branch2
+
+git fetch只会将本地库所关联的远程库的commit id更新至最新
+git pull会将本地库更新至远程库的最新状态
+从结果上来看，git pull = git fetch + git merge
+
