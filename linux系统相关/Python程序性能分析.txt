@@ -1,4 +1,18 @@
 
+粗粒度的计算时间
+gswyhq@gswyhq-PC:~$ time curl http://localhost:8000/ -d '{"question": "你们干啥的", "uid": "123456"}'
+{"recommend_question": [], "choice_answer": [], "match_question": "", "code": 200, "recommend_end": "", "answer": "很抱歉没法回答您的问题\n咨询通讯类问题：请直接说明问题，例如：SIM卡无法使用？\n咨询优惠资讯：请输入“商家名称”，例如：莎莎\n联系人工客服：请输入“人工客服”", "id": -1, "html": "", "description": "替代闲聊的回复", "record": true, "recommend_head": "", "question": "你们干啥的", "tag1": -1, "from_code": 13, "uid": "123456"}
+
+real	0m0.021s
+user	0m0.008s
+sys	0m0.000s
+
+* Real 是时钟时间-程序从开始至结束的总时间。他包括期间其他进程所占用的时间片和进程被阻塞的时间(如IO等待的时间)
+* User 被测试程序在用户模式下所花的CPU时间。他是进程执行的正真的CPU时间。其他进程调度的时间片以及阻塞(如IO)的时间不包含在内。
+* Sys 是进程在内核中所花费的CPU时间。他表示进程在内核调用中所花的CPU时间，而程序的库调用仍然运行在用户空间下。
+  User+Sys表示程序所执行的CPU时间(不包括IO以及其他进程的CPU时间).
+如果sys和user加起来的时间比real时间要小很多，那么你可以猜想你的程序的大部分性能瓶颈应该是IO等待的问题。
+
 性能分析器主要有模块：
 cProfile、line_profiler、memory_profiler
 

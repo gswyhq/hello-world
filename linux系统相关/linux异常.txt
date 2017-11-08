@@ -16,3 +16,30 @@ FileNotFoundError: [Errno 2] No such file or directory: '/usr/lib/jvm'
 root@b06e71597f91:/# apt-get update
 root@b06e71597f91:/# apt-get install openjdk-8-jdk
 
+gswyhq@gswyhq-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
+报错：
+Benchmarking 127.0.0.1 (be patient)
+socket: Too many open files (24)
+解决方法：
+1、查看当前要以打开的文件个数
+gswyhq@gswyhq-PC:~$ ulimit -a
+open files                      (-n) 1024
+2、调整可以打开的文件数
+gswyhq@gswyhq-PC:~$ ulimit -n 65535
+3、重新执行刚才的命令
+gswyhq@gswyhq-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
+
+gswyhq@gswyhq-PC:~$ ab -c 2000 -n 20000 -k "http://127.0.0.1:8000/test"
+报错：
+apr_pollset_poll: The timeout specified has expired (70007)
+Total of 18724 requests completed
+解决方法：
+修改‘/etc/sysctl.conf’文件添加如下两行（若已经存在，则可以尝试继续增大）：
+gswyhq@gswyhq-PC:~$ sudo vim /etc/sysctl.conf
+net.nf_conntrack_max = 655360
+net.netfilter.nf_conntrack_tcp_timeout_established = 12000
+
+# 不重起服务器，让新配置生效
+gswyhq@gswyhq-PC:~$ sudo sysctl -p /etc/sysctl.conf
+
+
