@@ -1,0 +1,26 @@
+
+请求的时候报错：
+413 Request Entity Too Large
+
+原因是因为上传的数据文件太大，可以修改对应的配置文件：
+
+    upstream myapps {
+        server 127.0.0.1:8081;
+        server 127.0.0.1:8082;
+        server 127.0.0.1:8083;
+        server 127.0.0.1:8084;
+    }
+    server {
+        listen       8088;
+        server_name  localhost;
+
+        location / {
+            proxy_pass_header Server;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For  $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            proxy_pass http://myapps;
+            client_max_body_size    50m; # 上传文件的限制改为50m
+        }
+    }

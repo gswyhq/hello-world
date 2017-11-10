@@ -1,0 +1,8 @@
+
+1、中文对白语料：wget https://raw.githubusercontent.com/rustch3n/dgk_lost_conv/master/dgk_shooter_min.conv.zip
+    解压
+    unzip dgk_shooter_min.conv.zip
+    资料来源：
+    http://www.cnblogs.com/LittleHann/p/6426610.html
+
+

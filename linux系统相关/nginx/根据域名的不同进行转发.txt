@@ -1,0 +1,50 @@
+
+
+
+复制代码
+#配置负载均衡池
+#Demo1负载均衡池
+upstream book_pool{
+    server 127.0.0.1:8001;
+}
+#Demo2负载均衡池
+upstream movie_pool{
+    server 127.0.0.1:8002;
+}
+
+#Demo1端口转发
+server {
+    listen       80;
+    server_name  book.chanshuyi.com;
+    access_log logs/book.log;
+    error_log logs/book.error;
+
+    #将所有请求转发给demo_pool池的应用处理
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://book_pool;
+    }
+}
+#Demo2端口转发
+server {
+    listen       80;
+    server_name  movie.chanshuyi.com;
+    access_log logs/movie.log;
+    error_log logs/movie.error;
+
+    #将所有请求转发给demo_pool池的应用处理
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://movie_pool;
+    }
+}
+复制代码
+
+
+上面这段配置实现了：
+
+1、当用户访问的域名是：http://book.chanshuyi.com 时，我们自动将其请求转发给端口号为 8001 的 Tomcat 应用处理。
+
+2、当用户访问的域名是：http://movie.chanshuyi.com 时，我们自动将其请求转发给端口号为 8002 的 Tomcat 应用处理。
