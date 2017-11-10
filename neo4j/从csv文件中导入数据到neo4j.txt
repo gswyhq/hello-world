@@ -1,0 +1,136 @@
+
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head movies.csv
+movieId:ID,title,year:int,:LABEL
+tt0133093,"The Matrix",1999,Movie
+tt0234215,"The Matrix Reloaded",2003,Movie;Sequel
+tt0242653,"天龙八部",2003,Movie;武装
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head actors.csv
+personId:ID,name,:LABEL
+keanu,"Keanu Reeves",Actor
+laurence,"Laurence Fishburne",Actor
+carrieanne,"Carrie-Anne Moss",Actor
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head roles.csv
+:START_ID,role,:END_ID,:TYPE
+keanu,"Neo",tt0133093,ACTED_IN
+keanu,"Neo",tt0234215,ACTED_IN
+keanu,"Neo",tt0242653,ACTED_IN
+laurence,"Morpheus",tt0133093,ACTED_IN
+laurence,"Morpheus",tt0234215,ACTED_IN
+laurence,"Morpheus",tt0242653,ACTED_IN
+carrieanne,"Trinity",tt0133093,ACTED_IN
+carrieanne,"Trinity",tt0234215,ACTED_IN
+carrieanne,"关系",tt0242653,关系类型
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$
+
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker cp ../linshi linshi7474:/var/lib/neo4j/linshi
+gswyhq@gswyhq-PC:~/youhuibao$ docker exec -it linshi7474 /bin/bash
+
+"Neo4j-import"已被弃用，改为：“neo4j-admin import”
+bash-4.3# ./bin/neo4j-admin import --mode=csv --nodes=/var/lib/neo4j/linshi/movies.csv --nodes=/var/lib/neo4j/linshi/actors.csv --relationships="/var/lib/neo4j/linshi/roles.csv" --database=movies.db
+
+更多示例见： https://neo4j.com/docs/operations-manual/current/tutorial/import-tool/
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head /home/gswyhq/docker/neo4j/linshi/person.csv
+1,Charlie Sheen
+2,Oliver Stone
+3,Michael Douglas
+4,张三
+5,李四
+
+运行：
+    LOAD CSV FROM "file:///home/gswyhq/docker/neo4j/linshi/person.csv" AS line
+    MERGE (n:Person {id: toInteger(line[0])})
+    SET n.name = line[1]
+    RETURN n
+
+    会报错：
+    ERROR：Neo.ClientError.Statement.ExternalResourceFailed
+    Couldn't load the external resource at: file:/var/lib/neo4j/import/home/gswyhq/docker/neo4j/linshi/person.csv
+
+    原因是路径不对，更改路径及权限：
+    gswyhq@gswyhq-PC:/var/lib/neo4j/import$ docker cp /home/gswyhq/docker/neo4j/linshi/person.csv linshi7474:/var/lib/neo4j/import/person.csv
+    gswyhq@gswyhq-PC:/var/lib/neo4j/import$ docker exec -it linshi7474 /bin/bash
+    bash-4.3# cd /var/lib/neo4j/import
+    bash-4.3# ls
+    person.csv
+    bash-4.3# chmod 777 person.csv
+    bash-4.3#
+
+    再运行：
+    LOAD CSV FROM "file:///person.csv" AS line
+    MERGE (n:Person2 {id: toInteger(line[0])})
+    SET n.name = line[1]
+    RETURN n
+
+    就正常了
+
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head products.csv
+productID,productName,supplierID,categoryID,quantityPerUnit,unitPrice,unitsInStock,unitsOnOrder,reorderLevel,discontinued
+1,Chai,1,1,10 boxes x 20 bags,18.00,39,0,10,0
+2,Chang,1,1,24 - 12 oz bottles,19.00,17,40,25,0
+3,Aniseed Syrup,1,2,12 - 550 ml bottles,10.00,13,70,25,0
+4,Chef Anton's Cajun Seasoning,2,2,48 - 6 oz jars,22.00,53,0,0,0
+5,Chef Anton's Gumbo Mix,2,2,36 boxes,21.35,0,0,0,1
+6,Grandma's Boysenberry Spread,3,2,12 - 8 oz jars,25.00,120,0,25,0
+7,Uncle Bob's Organic Dried Pears,3,7,12 - 1 lb pkgs.,30.00,15,0,10,0
+8,Northwoods Cranberry Sauce,3,2,12 - 12 oz jars,40.00,6,0,0,0
+9,Mishi Kobe Niku,4,6,18 - 500 g pkgs.,97.00,29,0,0,1
+
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/products.csv" AS row
+CREATE (n:Product)
+SET n = row,
+  n.unitPrice = toFloat(row.unitPrice),
+  n.unitsInStock = toInteger(row.unitsInStock), n.unitsOnOrder = toInteger(row.unitsOnOrder),
+  n.reorderLevel = toInteger(row.reorderLevel), n.discontinued = (row.discontinued <> "0")
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head categories.csv
+categoryID,categoryName,description,picture
+1,Beverages,"Soft drinks, coffees, teas, beers, and ales",0x151C2F00020000000D000E0014002100FFFFFFFF4269746D617020496D616765005061696E742E5069637475726500010500000200000007000000504272757368000000000000000000A0290000424D98290000000000005600000028000000AC00000078000000010004000000000000000000880B0000880B0000080000
+2,Condiments,"Sweet and savory sauces, relishes, spreads, and seasonings",0x151C2F00020000000D000E0014002100FFFFFFFF4269746D617020496D616765005061696E742E5069637475726500010500000200000007000000504272757368000000000000000000A0290000424D98290000000000005600000028000000AC00000078000000010004000000000000000000880B0000880B0000080000
+
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/categories.csv" AS row
+CREATE (n:Category)
+SET n = row
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head suppliers.csv
+supplierID,companyName,contactName,contactTitle,address,city,region,postalCode,country,phone,fax,homePage
+1,Exotic Liquids,Charlotte Cooper,Purchasing Manager,49 Gilbert St.,London,NULL,EC1 4SD,UK,(171) 555-2222,NULL,NULL
+2,New Orleans Cajun Delights,Shelley Burke,Order Administrator,P.O. Box 78934,New Orleans,LA,70117,USA,(100) 555-4822,NULL,#CAJUN.HTM#
+3,Grandma Kelly's Homestead,Regina Murphy,Sales Representative,707 Oxford Rd.,Ann Arbor,MI,48104,USA,(313) 555-5735,(313) 555-3349,NULL
+
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/suppliers.csv" AS row
+CREATE (n:Supplier)
+SET n = row
+
+目前主要有以下几种数据插入方式：
+    Cypher CREATE 语句，为每一条数据写一个CREATE
+    Cypher LOAD CSV 语句，将数据转成CSV格式，通过LOAD CSV读取数据。
+    官方提供的Java API —— Batch Inserter
+    大牛编写的 Batch Import 工具
+    官方提供的 neo4j-import 工具；"Neo4j-import"已被弃用，改为：“neo4j-admin import”
+
+其中：
+CREATE语句
+    适用场景	1 ~ 1w nodes
+    速度	很慢 (1000 nodes/s)
+    优点	使用方便，可实时插入。
+    缺点	速度慢
+
+LOAD CSV语句
+    适用场景	1w ~ 10 w nodes
+    速度	一般 (5000 nodes/s)
+    优点	使用方便，可以加载本地/远程CSV；可实时插入。
+    缺点	需要将数据转换成CSV
+
+neo4j-admin import
+    适用场景	千万以上 nodes
+    速度		非常快 (数万 nodes/s)
+    优点 官方出品，比Batch Import占用更少的资源
+    缺点	需要转成CSV；必须停止neo4j；只能生成新的数据库，而不能在已存在的数据库中插入数据。
+
