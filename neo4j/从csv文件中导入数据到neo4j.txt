@@ -28,7 +28,7 @@ gswyhq@gswyhq-PC:~/docker/neo4j/linshi$
 
 
 gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker cp ../linshi linshi7474:/var/lib/neo4j/linshi
-gswyhq@gswyhq-PC:~/youhuibao$ docker exec -it linshi7474 /bin/bash
+gswyhq@gswyhq-PC:~/yhb$ docker exec -it linshi7474 /bin/bash
 
 "Neo4j-import"已被弃用，改为：“neo4j-admin import”
 bash-4.3# ./bin/neo4j-admin import --mode=csv --nodes=/var/lib/neo4j/linshi/movies.csv --nodes=/var/lib/neo4j/linshi/actors.csv --relationships="/var/lib/neo4j/linshi/roles.csv" --database=movies.db

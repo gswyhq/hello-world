@@ -140,6 +140,9 @@ macth (n:Person) where n.age=20 return n
 match ()-[r:rel]->() return rel
 上面代码返回rel关系数据,返回的结果如下图所示:
 
+# 根据标签进行限制搜索：
+MATCH p=()-[r:`保险责任`]->(n) where 'Baoxianzeren' in labels(n) and not 'Shiyi' in labels(n) return p
+
 3
 
 在匹配关系过程中有"-->"和"--"两者,后者是不要求方向的关系。下面看下代码:
