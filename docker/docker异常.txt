@@ -118,5 +118,10 @@ ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker start
 # systemctl start docker.service
 上述方法均无效后，直接卸载重装。
 
+# 删除容器出错：
+ubuntu@ip-172-31-11-15:~/zhongan_neo4j$ docker rm -v zhongan_neo4j_18000 
+Error response from daemon: Driver aufs failed to remove root filesystem aa7595e846a9754f8c0bdd084b0e91429a58ce87f24f2646970421e049dea061: rename /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20 /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20-removing: device or resource busy
+# 解决方法，使用 umount -l 解除占用即可：
+ubuntu@ip-172-31-11-15:~/zhongan_neo4j$ sudo umount -l /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20
 
 

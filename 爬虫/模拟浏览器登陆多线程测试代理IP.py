@@ -11,6 +11,13 @@ import json,time
 import queue,random
 import threading
 
+# gswyhq@gswyhq-PC:~/Downloads$ wget http://chromedriver.storage.googleapis.com/2.9/chromedriver_linux64.zip
+# gswyhq@gswyhq-PC:~/Downloads$ unzip chromedriver_linux64.zip
+# Archive:  chromedriver_linux64.zip
+#   inflating: chromedriver
+# gswyhq@gswyhq-PC:~/Downloads$ chmod +x chromedriver
+# gswyhq@gswyhq-PC:~/Downloads$ sudo mv -f chromedriver /usr/local/share/chromedriver
+
 class proxy_ip():
     """从http://www.proxy360.cn/default.aspx上爬取代理IP地址及其端口号
     reptile()根据url爬取ip及端口号，

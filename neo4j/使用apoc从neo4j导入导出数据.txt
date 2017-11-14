@@ -1,0 +1,101 @@
+
+apoc 是一个neo4j 的插件 ，支持多种算法，和导出
+
+首先下载 apoc（下载地址： https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar，
+不同版本的neo4j需要的插件版本也不同，具体映射关系见：https://github.com/neo4j-contrib/neo4j-apoc-procedures）,
+放到neo4j 目录下的plugins 目录下，重启neo4j就可以了，
+
+但是直接使用 call apoc.* 等命令会报错
+
+Neo.ClientError.Procedure.ProcedureRegistrationFailed
+apoc.export.graphml.query is not available due to having restricted access rights, check configuration.
+
+这是因为需要对neo4j进行配置
+在 neo4j conf目录下， 修改neo4j.conf 文件 ，添加
+下面两句：
+
+dbms.security.procedures.unrestricted=apoc.*
+apoc.import.file.enabled=true
+apoc.export.file.enabled=true
+#dbms.directories.plugins=plugins
+就可以正常使用了
+
+
+docker中使用示例：
+
+CALL apoc.export.csv.query("MATCH (a:Shiyi)RETURN a.name AS name", "/home/gswyhq/docker/neo4j/result.csv", {})
+
+ERROR Neo.ClientError.Procedure.ProcedureNotFound
+There is no procedure with the name `apoc.export.csv.query` registered for this database instance. Please ensure you've spelled the procedure name correctly and that the procedure is properly deployed.
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ mkdir plugins
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ pushd plugins
+~/docker/neo4j/linshi/plugins ~/docker/neo4j/linshi
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ popd
+~/docker/neo4j/linshi
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* neo4j
+
+运行：CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswyhq/docker/neo4j/result.csv", {})
+
+ERROR
+Neo.ClientError.Procedure.ProcedureCallFailed
+Failed to invoke procedure `apoc.export.csv.query`: Caused by: java.lang.RuntimeException: Export to files not enabled, please set apoc.export.file.enabled=true in your neo4j.conf
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true neo4j
+
+运行： CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswyhq/docker/neo4j/result.csv", {})
+
+ERROR
+Neo.ClientError.Procedure.ProcedureCallFailed
+Failed to invoke procedure `apoc.export.csv.query`: Caused by: java.io.FileNotFoundException: /home/gswyhq/docker/neo4j/result.csv (No such file or directory)
+
+原因是export的路径在neo4j的docker容器中不存在，修改路径名，重试：
+运行： CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/var/lib/neo4j/result.csv", {})
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker exec -it modest_lumiere /bin/bash
+bash-4.3# ls
+LICENSE.txt   LICENSES.txt  NOTICE.txt    README.txt    UPGRADE.txt   bin           certificates  conf          data          import        lib           logs          plugins       run
+bash-4.3# pwd
+/var/lib/neo4j
+bash-4.3# ls
+LICENSE.txt   LICENSES.txt  NOTICE.txt    README.txt    UPGRADE.txt   bin           certificates  conf          data          import        lib           logs          plugins       result.csv    run
+bash-4.3# head result.csv 
+"title","year"
+"The Matrix","1999"
+"The Matrix Reloaded","2003"
+"天龙八部","2003"
+
+
+CALL apoc.export.csv.all("/var/lib/neo4j/result_all.csv", {})
+
+bash-4.3# head result_all.csv 
+"_id","_labels","movieId","title","year","personId","name","id","_start","_end","_type","role"
+"0",":Movie","tt0133093","The Matrix","1999","","","",,,,
+"1",":Movie:Sequel","tt0234215","The Matrix Reloaded","2003","","","",,,,
+"2",":Movie:武装","tt0242653","天龙八部","2003","","","",,,,
+"3",":Actor","","","","keanu","Keanu Reeves","",,,,
+"4",":Actor","","","","laurence","Laurence Fishburne","",,,,
+"5",":Actor","","","","carrieanne","Carrie-Anne Moss","",,,,
+"6",":Person2","","","","","Charlie Sheen","1",,,,
+"7",":Person2","","","","","Oliver Stone","2",,,,
+"8",":Person2","","","","","Michael Douglas","3",,,,
+
+CALL apoc.export.cypher.all("/var/lib/neo4j/result_all.cypher",{})
+
+bash-4.3# head result_all.cypher 
+BEGIN
+CREATE (:`Movie`:`UNIQUE IMPORT LABEL` {`movieId`:"tt0133093", `title`:"The Matrix", `year`:1999, `UNIQUE IMPORT ID`:0});
+CREATE (:`Movie`:`Sequel`:`UNIQUE IMPORT LABEL` {`movieId`:"tt0234215", `title`:"The Matrix Reloaded", `year`:2003, `UNIQUE IMPORT ID`:1});
+CREATE (:`Movie`:`武装`:`UNIQUE IMPORT LABEL` {`movieId`:"tt0242653", `title`:"天龙八部", `year`:2003, `UNIQUE IMPORT ID`:2});
+CREATE (:`Actor`:`UNIQUE IMPORT LABEL` {`name`:"Keanu Reeves", `personId`:"keanu", `UNIQUE IMPORT ID`:3});
+CREATE (:`Actor`:`UNIQUE IMPORT LABEL` {`name`:"Laurence Fishburne", `personId`:"laurence", `UNIQUE IMPORT ID`:4});
+CREATE (:`Actor`:`UNIQUE IMPORT LABEL` {`name`:"Carrie-Anne Moss", `personId`:"carrieanne", `UNIQUE IMPORT ID`:5});
+CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:1, `name`:"Charlie Sheen", `UNIQUE IMPORT ID`:6});
+CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:2, `name`:"Oliver Stone", `UNIQUE IMPORT ID`:7});
+CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:3, `name`:"Michael Douglas", `UNIQUE IMPORT ID`:8});
+
+# 更多示例：https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_export_to_csv
+
+
+
