@@ -105,4 +105,10 @@ tag的使用
 	git push origin :refs/tags/<tagname>
 	两种语法作用完全相同。
 
+# 更新tag的提交信息：
+# 创建一个tag，并写上标注信息
+gswyhq@gswyhq-PC:~/yhb$ git tag -a zhongan_neo4j_20171120 -m "20171120稳定版本，无上传文档功能"
+# 发现标注信息不怎么好，更新一些标注信息
+gswyhq@gswyhq-PC:~/yhb$ git tag zhongan_neo4j_20171120 zhongan_neo4j_20171120 -f -m "众安航延险图谱展示，20171120稳定版本，无上传文档功能"
+已更新标签 'zhongan_neo4j_20171120'（曾为 08178c6）
 

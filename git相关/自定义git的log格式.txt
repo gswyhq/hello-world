@@ -1,0 +1,71 @@
+
+git多颜色输出
+git默认的输出是单一颜色的，不仅不够美观，也不容易阅读。
+实际上，git本身就支持用多种颜色来显示其输出的信息，只需在命令行中运行以下命令来修改git的设置，即可开启多颜色输出：
+
+git config --global color.status auto
+git config --global color.diff auto
+git config --global color.branch auto
+git config --global color.interactive auto
+执行以上命令后，git的status, diff和branch等诸命令的输出就都是带有颜色的了。
+
+自定义log格式
+完成上述步骤后，git log 命令的输出虽然有了点颜色，但还是显得枯燥。
+
+不要紧，强大的git提供了自定义log格式的功能，尝试输入以下命令：
+
+$ git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+这样有点长了，我们可以这样：
+$ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --"
+然后，我们就可以使用这样的短命令了：
+$ git lg
+上述命令将创建一个命令别名 lg，每次你使用命令 git lg 就相当于输入了刚才那一长串命令。现在，如果想看美观的多颜色输出，就使用 git lg，如果想看普通的log输出，就使用git log，二者互不干扰。
+
+如果你想让log输出某些特定的信息，可以自己调整 --pretty 参数的值，例如下面的命令将只显示commit的hash，提交时间，提交者姓名：
+git log --pretty=format:'%h %ar %an'
+
+把format后面单引号中的内容替换为你想要的格式，即可实现自定义的log输出格式。这里的%h, %ar等是一些git预定义的占位符，完整的列表如下：
+%H	commit hash
+%h	commit的短hash
+%T	tree hash
+%t	tree的短hash
+%P	parent hashes
+%p	parent的短hashes
+%an	作者名字
+%aN	mailmap中对应的作者名字 (.mailmap对应，详情参照git-shortlog(1)或者git-blame(1))
+%ae	作者邮箱
+%aE	作者邮箱 (.mailmap对应，详情参照git-shortlog(1)或者git-blame(1))
+%ad	日期 (–date= 指定的格式)
+%aD	日期, RFC2822格式
+%ar	日期, 相对格式(1 day ago)
+%at	日期, UNIX timestamp
+%ai	日期, ISO 8601 格式
+%cn	提交者名字
+%cN	提交者名字 (.mailmap对应，详情参照git-shortlog(1)或者git-blame(1))
+%ce	提交者 email
+%cE	提交者 email (.mailmap对应，详情参照git-shortlog(1)或者git-blame(1))
+%cd	提交日期 (–date= 指定的格式)
+%cD	提交日期, RFC2822格式
+%cr	提交日期, 相对格式(1 day ago)
+%ct	提交日期, UNIX timestamp
+%ci	提交日期, ISO 8601 格式
+%d	ref名称
+%e	encoding
+%s	commit信息标题
+%f	过滤commit信息的标题使之可以作为文件名
+%b	commit信息内容
+%N	commit notes
+%gD	reflog selector, e.g., refs/stash@{1}
+%gd	shortened reflog selector, e.g., stash@{1}
+%gs	reflog subject
+%Cred	切换到红色
+%Cgreen	切换到绿色
+%Cblue	切换到蓝色
+%Creset	重设颜色
+%C(…)	指定颜色, as described in color.branch.* config option
+%m	left, right or boundary mark
+%n	换行
+%%	a raw %
+%x00	print a byte from a hex code
+%w([<w>[,<i1>[,<i2>]]])	switch line wrapping, like the -w option of git-shortlog(1).
+
