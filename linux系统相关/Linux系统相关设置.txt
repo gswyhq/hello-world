@@ -15,3 +15,38 @@ Fri Aug 11 18:03:08 UTC 2017
 # 重新设置时间：
 ubuntu@ip-172-31-14-6:~$ sudo date  -s "2017-8-11 18:04:00"
 
+设置ls -l命令中显示的日期格式
+默认是：-rw-rw-r--  1 zy zy     51 Oct 25 14:05 updateqa_rg.json
+修改为：-rw-rw-r--  1 zy zy     51 2017-10-25 14:05:20 updateqa_rg.json
+1、临时更改显示样式，当回话结束后恢复原来的样式
+    export TIME_STYLE='+%Y-%m-%d %H:%M:%S'    # 直接在命令中执行即可
+2、永久改变显示样式，更改后的效果会保存下来
+    修改/etc/profile文件，在文件内容末尾加入
+    export TIME_STYLE='+%Y-%m-%d %H:%M:%S'
+    执行如下命令，使你修改后的/etc/profile文件配置内容生效
+    source /etc/profile
+3、若不应用于全局，也可以仅仅配置到用户目录文件 ~/.bash_profile  中
+zy@ubuntu:~$ vim ~/.bash_profile
+zy@ubuntu:~$ head ~/.bash_profile 
+export TIME_STYLE='+%Y-%m-%d %H:%M:%S' 
+# 使配置生效
+zy@ubuntu:~$ source ~/.bash_profile
+
+# 设置sudo为不需要密码
+gswyhq@gswyhq-PC:~$ sudo su -
+root@gswyhq-PC:~# visudo  # 等同于：vim /etc/sudoers
+添加一行：`gswyhq ALL=(ALL:ALL) NOPASSWD:ALL`
+root@gswyhq-PC:~#  tail /etc/sudoers
+# User privilege specification
+root	ALL=(ALL:ALL) ALL
+gswyhq ALL=(ALL:ALL) NOPASSWD:ALL
+
+# Allow members of group sudo to execute any command
+%sudo	ALL=(ALL:ALL) ALL
+
+# See sudoers(5) for more information on "#include" directives:
+
+#includedir /etc/sudoers.d
+
+root@gswyhq-PC:~# exit
+注销
