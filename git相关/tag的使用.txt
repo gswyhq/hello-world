@@ -112,3 +112,9 @@ gswyhq@gswyhq-PC:~/yhb$ git tag -a zhongan_neo4j_20171120 -m "20171120稳定版�
 gswyhq@gswyhq-PC:~/yhb$ git tag zhongan_neo4j_20171120 zhongan_neo4j_20171120 -f -m "众安航延险图谱展示，20171120稳定版本，无上传文档功能"
 已更新标签 'zhongan_neo4j_20171120'（曾为 08178c6）
 
+# 重命名tag名（先建一个tag的别名，再删除旧的tag名）
+git tag new_tag_name old_tag_name
+git tag -d old_tag_name
+
+# 更新tag名及提交的信息：
+git tag zhongan_hangyangxian_neo4j_20171124 zhongan_hangyangxian_neo4j -f -m "众安航延险知识图谱展示，支持6个特定Word文档条款上传后进行对应的问答, 20171124版本"

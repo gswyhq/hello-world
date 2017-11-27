@@ -38,4 +38,12 @@ colorscheme dracula  " 切换颜色方案， 要退出重启后才生效
 set background=dark  " 设置背景色  
 autocmd ColorScheme dracula highlight Normal ctermbg=235
 
+gswyhq@gswyhq-PC:~$ vim .vimrc
+set ts=4  # ts是tabstop的缩写，设TAB宽4个空格
+set expandtab
+set autoindent
+
+# 使修改的配置，立即生效
+gswyhq@gswyhq-PC:~$ source ~/.vimrc
+
 
