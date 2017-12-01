@@ -343,7 +343,13 @@ return n
 start r=rel(id) set r.label="test" return r
 上面的代码设置属性r的label属性值为"test"。
 
-
+# 修改实体的关系
+MATCH (n)-[r:`旧的关系类型`]->(m)
+CREATE (n)-[r2:`新的关系类型`]->(m)
+// 如果需要，复制属性
+SET r2 = r
+WITH r
+DELETE r
 
 14). delete
 

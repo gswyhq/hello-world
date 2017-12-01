@@ -22,6 +22,13 @@ bash-4.3# pwd
 bash-4.3# ./cypher-shell --help
 
 # 连接neo4j服务及用户名密码：
+bash-4.3# ./bin/cypher-shell -a bolt://localhost:8687 -u neo4j -p gswyhq
+Connection refused (连接失败，主要是因为在docker容器中开启的neo4j服务，对应服务主机名并不是localhost)
+bash-4.3# ./bin/cypher-shell -a bolt://172.17.0.1:8687 -u neo4j -p gswyhq
+Connected to Neo4j 3.2.1 at bolt://172.17.0.1:8687 as user neo4j.
+Type :help for a list of available commands or :exit to exit the shell.
+Note that Cypher queries must end with a semicolon.
+
 bash-4.3# ./cypher-shell -a bolt://localhost:7687 -u neo4j -p gswyhq
 	以用户neo4j连接到Neo4j 3.2.1在bolt：// localhost：7687。
 	键入`:help`可用命令的列表，或`:exit`退出shell。
@@ -45,3 +52,87 @@ Bye!
 bash-4.3# exit
 exit
 gswyhq@gswyhq-pc:~/docker/neo4j/movie$
+
+
+启动对应的neo4j服务后，进入neo4j安装目录，连接上对应的数据路径：
+gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j-shell -path /home/gswyhq/docker/neo4j/movie_graph/data
+
+neo4j-shell已被弃用，并被cyphell-shell替代。
+
+# 创建一个节点数据：
+neo4j-sh (?)$ CREATE (:Movie { title:"The Matrix",released:1997 }) ;
++-------------------+
+| No data returned. |
++-------------------+
+Nodes created: 1
+Properties set: 2
+Labels added: 1
+962 ms
+
+# 查询刚刚创建的数据：
+neo4j-sh (?)$ match (m:Movie) return m limit 2;
++-------------------------------------------+
+| m                                         |
++-------------------------------------------+
+| Node[0]{title:"The Matrix",released:1997} |
++-------------------------------------------+
+1 row
+329 ms
+
+
+# Create a node
+ neo4j-sh (?)$ mknode --cd
+
+ # where are we?
+ neo4j-sh (0)$ pwd
+ Current is (0)
+ (0)
+
+
+ # On the current node, set the key "name" to value "Jon"
+ neo4j-sh (0)$ set name "Jon"
+
+ # send a cypher query
+ neo4j-sh (Jon,0)$ match n where id(n) = 0 return n;
+ +---------------------+
+ | n                   |
+ +---------------------+
+ | Node[0]{name:"Jon"} |
+ +---------------------+
+ 1 row
+ 53 ms
+
+
+ # make an incoming relationship of type LIKES, create the end node with the node properties specified.
+ neo4j-sh (Jon,0)$ mkrel -c -d i -t LIKES --np "{'app':'foobar'}"
+
+ # where are we?
+ neo4j-sh (Jon,0)$ ls
+ *name =[Jon]
+ (me)<-[:LIKES]-(1)
+
+
+ # change to the newly created node
+ neo4j-sh (Jon,0)$ cd 1
+
+ # list relationships, including relationship id
+ neo4j-sh (1)$ ls -avr
+ (me)-[:LIKES,0]->(Jon,0)
+
+
+ # create one more KNOWS relationship and the end node
+ neo4j-sh (1)$ mkrel -c -d i -t KNOWS --np "{'name':'Bob'}"
+
+ # print current history stack
+ neo4j-sh (1)$ pwd
+ Current is (1)
+ (Jon,0)-->(1)
+
+
+ # verbose list relationships
+ neo4j-sh (1)$ ls -avr
+ (me)-[:LIKES,0]->(Jon,0)
+ (me)<-[:KNOWS,1]-(Bob,2)
+
+更多示例见：http://neo4j.com/docs/2.3.11/shell-matrix-example.html
+
