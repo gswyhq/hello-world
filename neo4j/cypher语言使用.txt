@@ -123,7 +123,8 @@ MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
             n.. 最小距离为n
             m..n 距离在m到n之间
 
-
+# 属性值为空时查询示例：
+MATCH (n)-[r1:`疾病`]->(n1),(n)-[r2:`赔偿规则`]->(n2),(n)-[r3:`相关条款`]->(n3) WHERE n.name='赔偿情况1'and n1.name = "恶性肿瘤" and r2.等待期 = "是" and r2.意外导致 is null and r2.首次发生 is null RETURN n2.name ,n3.name , r2.name,n.name
 
 a.创建
 

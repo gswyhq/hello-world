@@ -340,8 +340,14 @@ return n
 
 当然也可以set关系属性,例如:
 
-start r=rel(id) set r.label="test" return r
-上面的代码设置属性r的label属性值为"test"。
+start r=rel(id) set r.shuxing="test" return r
+上面的代码设置属性r的shuxing属性值为"test"。
+
+# 修改一个节点的类型（实质是删除旧类型，设置新类型）
+MATCH (n:Baoxianmingcheng) where n.name=~".*重大.*"
+REMOVE n:Baoxianmingcheng
+SET n:Baoxianchanpin
+RETURN n
 
 # 修改实体的关系
 MATCH (n)-[r:`旧的关系类型`]->(m)
