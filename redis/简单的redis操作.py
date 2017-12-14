@@ -268,6 +268,12 @@ sudo pip2 install redis-py-cluster
                          {'host': '172.19.1.106', 'port': '7005'},
                          {'host': '172.19.1.106', 'port': '7006'}]
 >>> rc = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
+
+# decode_responses=True: 防止get到的值为`bytes`
+# 默认情况下，publish的消息会被编码，当你获取消息时得到的是编码后的字节，如果你需要它自动解码，创建Redis client实例时需要指定decode_responses=True,
+# (译者注：不建议使用该选项，因为当存在pickle序列化的值时，client.get(key)时会出现解码失败的错误UnicodeDecodeError)
+
+
 >>> rc.set("foo", "bar")
 True
 >>> rc.get("foo")

@@ -1,6 +1,18 @@
 
 Cypher查询语言
 
+查询语言包括几部分：
+START：通过索引查找或者元素的ID值获取的图中的起始节点
+MATCH：图的匹配模式，匹配START的开始节点
+WHERE：过滤条件
+RETURN：返回所需的结果
+CREATE：创建节点或者关系
+DELETE：删除节点、关系或者属性
+SET：设置属性的值
+FOREACH：对list中的元素一次一个的执行操作( Performs updating actions once per element in a list)
+WITH：切分一个query成多个不同的部分
+
+
 http://shanshanpt.github.io/2016/02/17/Neo4j-1.html
 
 1.基本操作符
@@ -121,6 +133,17 @@ START r=rel(0) return r
 start n=node:node_idx(name = "A") return n
 start r=relationship:rel_idx(property ="some_value") return r
 
+例：有这么一个查询：通过索引找到一个名叫'John'的用户，并遍历图找到他的朋友的朋友，返回John和这些朋友的信息
+MATCH (john)-[:friend]->()-[:friend]->(fof)
+where john.name = 'John'
+RETURN john, fof
+
+ 接下来，我们增加过滤的功能
+下面的例子：通过节点的ID得到一个种类的列表，并遍历图找到这些种类的疾病，返回疾病名字是由‘严重’起始的种类和疾病信息
+START user=node(74,52)
+MATCH (user)-[:疾病]->(follower)
+WHERE follower.name =~ '严重.*'
+RETURN user, follower
 
 4).match
 
@@ -414,3 +437,141 @@ start a=node(id) return id(a)
 
 6> relationships函数用于返回一个路径中所有的关系.
 
+一、Neo4j-Cypher查询语言-操作符
+Cypher的操作符有三类：数学、等式和关系
+数学操作符：+,-,*,/和%。其中只有+能作用在字符串和集合上
+等式操作符：=,<>,<,>,<=,>=
+因为Neo4j是一种模式自由的图数据库，Cypher还有2个特殊的操作符？和！
+他们是被用在属性上面处理缺省值，在一个不存在的属性上进行比较，一般会报错。一般在对属性值做比较前需要先判断这个属性是否存在，而在使用？的情况下，如果属性缺失，比较总是返回true，相反，使用！，比较总是返回false
+例如：
+WHERE n.prop? = "foo"
+此断言类似oracle的语法实现为：WHERE n.prop is null or n.prop = "foo"
+它在属性n.prop缺失下返回true
+
+WHERE n.prop! = "foo"
+此断言类似oracle的语法实现为：WHERE n.prop is not null and n.prop = "foo"
+它在属性n.prop缺失下返回false
+
+警告：在同一个比较子句中同时使用？和！会带来不可预测的结果
+
+二、Cypher里的表达式包括：
+数值(integer or double)： 13， 40000, 3.14
+字符串： “hello world”
+布尔值： true, false, TRUE, FALSE
+识别码：n, x, rel, myFancyIdentifier, `A name with weird stuff in it[]!`
+属性： n.prop, x.prop, rel.thisProperty, myFancyIdentifier.`(weird property name)`
+可空属性(标记了？或！的属性)：n.prop?, n.prop!
+参数：{param}，{0}
+集合表达式：["a", "b"], [1,2,3], ["a", 2, n.property, {param}], [ ]
+函数调用：length(p), nodes(p)
+聚合函数：avg(xprop), count(*)
+关系类型：REL_TYPE, :`REL TYPE`, :REL1|REL2
+路径-模式：(a)-->()<--(b)
+
+三、标识符
+当你需要引用部分模式时，你需要利用命名来使用它。不同部分的命名就叫做标识符
+例如：
+START n=node(1) MATCH (n)-->(b) RETURN b
+n和b都是标识符
+标识符是大小写敏感的，由字母(a-z)、数字(0-9)和下划线组成，但是必须已字母开头。如果必须使用其他字符，可以利用反引号'`'来标识
+此规则同样适用于属性名
+
+四、备注
+利用双斜线(//)来增加备注(注释、COMMENT)
+备注的例子：
+START n=node(1) RETURN n //This is an end of line comment
+OR
+START n=node(1)
+//This is a whole line comment
+RETURN n
+
+不是备注的例子：
+START n=node(1) WHERE n.property = "//This is NOT a comment" RETURN n
+
+相关节点的模式(Patterns for related nodes)
+模式是由一个或者多个路径组成，路径直接用逗号分隔。一个路径就是一个节点和关系的序列，这个序列指定开始和结束的节点。例如(a)-->(b)
+这个路径开始于节点a，通过outgoing关系指向节点b
+路径可以随意地长，并且同一个节点可能在路径的不同部分出现
+节点标识必须带括号， 必须是：(a)-->(b)，不能是：a-->b
+如果你不在乎具体是哪个节点，不用指定它，只需用空括号来表示就OK了：(a)-->()-->(b)
+结合关系的模式(Working with relationships)
+如果需要指定两个节点之间的关系，可以如下做：(a)-[r]->(b)
+如果你不在乎关系的方向，你可以省去关系的箭头：(a)--(b)
+当你只关注特定关系类型时，你可以这么做：(a)-[:REL_TYPE]->(b)
+你也可以指定多个关系类型，罗列各个关系，用管道符号"|"连接：(a)-[r:TYPE1|TYPE2]->(b)。这个模式就是在节点a到节点b匹配关系TYPE1或者TYPE2。这两个关系的别名为r。多关系类型不能用在CREATE和CREATE UNIQUE子句中
+可选关系(Optional relationships)
+当关系存在，可选关系就能匹配到数据，但是不存在关系，则返回null。与SQL的外关联类似，Cypher如果匹配到关系，返回数据，如果没有匹配到返回null。可选关系只能用在MATCH子句中。
+
+控制关系的深度(Controlling depth)
+一个模式关系可以跨越多重的图关系，这种关系叫做可变深度关系。这种关系用"*"标识：(a)-[*]->(b)，这表示从节点a开始到节点b，中间是一种outgoing的关系，但不限定经过几次关系找到节点b。这是一个比较重的查询，依托于图的结构，可能遍历很多层关系，也可能遍历很少的关系。
+不过，可以设置关系匹配的最短路径和最长路径，关系标识为：-[:relType*minStep..maxStep]->
+例如：(a)-[*3..5]->(b) 表示从a到b包含最少3层关系，最多5层关系
+可变深度关系不能用于CREATE或CREATE UNIQUE
+指定路径标识符(Assigning to path identifiers)
+在图数据库里，路径是很重要的概念。路径是一个节点与关系的集合，描述图中的一个路径信息。可以用路径标识符指定一个路径：p=(a)-[*3..5]->(b)
+可以在MATCH，CREATE和CREATE UNIQUE子句中，但模式作为表达式时不能使用。在如下的一个查询中看下如何用于这三个子句中
+
+START me=node(3)
+MATCH p1 = (me)-[*2]-(friendOfFriend)
+CREATE (wife {name:"Gunhild"})
+CREATE p2 = (me)-[:MARRIED_TO]->(wife)
+CREATE UNIQUE p3 = (wife)-[:KNOWS]->(friendOfFriend)
+RETURN p1,p2,p3
+
+
+​​START me=node(3)
+match p2 = (me)-[r1:MARRIED_TO]->(wife)-[r2:KNOWS]->(friendOfFriend)
+where wife.name = "Gunhild"
+delete r1, r2, friendOfFriend, wife
+RETURN p2
+
+设置属性(Setting properties)
+节点和关系是重要的，但是Neo4j在节点和关系上使用属性，也可以用于稠密图模型(Neo4j uses properties on both of these to allow for far denser graphs models)
+单个属性在模式中用Map结构来表示，属性集合是把各个Map形式的属性放在大括号里，各个属性直接用逗号隔开：{ name: "Andres", sport: "BJJ" }。如果一个属性(Map)参数化(paramName)，那属性集合可以这样表示{paramName}
+Maps只能用在CREATE和CREATE UNIQUE子句中。
+在CREATE子句中，用于设置节点或者关系的属性。
+在CREATE UNIQUE子句中，它用于匹配图中相关的元素，可能成功，也可能不成功。如果模式元素中的属性能绝对匹配图中元素的属性(图元素可以有多余的其他属性，但不影响匹配)，那么匹配成功。
+如果在图元素中没有找到模式中的属性，那么这些属性就用来设置新创建元素的属性。
+
+
+断言函数(Predicate functions)
+函数名称	函数说明
+ALL(identifier in collection WHERE predicate)	判断一个断言(predicate)是否满足集合(collection)里的所有元素
+ANY(identifier in collection WHERE predicate)	判断一个断言(predicate)是否至少满足集合(collection)里的一个元素
+NONE(identifier in collection WHERE predicate)	如果集合(collection)里的元素不满足断言(predicate)则返回true
+SINGLE(identifier in collection WHERE predicate)	如果集合(collection)里的只有一个元素满足断言(predicate)则返回true
+
+标量函数(Scalar functions)
+函数名称	函数说明
+LENGTH( collection )	返回集合的元素个数
+TYPE( relationship )	返回关系的类型
+ID( property-container )	返回节点或者关系的ID
+COALESCE( expression [, expression]* )	返回expressions列表里第一个不为空的值
+HEAD( expression )	返回一个集合 (collection)  里的第一个元素
+LAST( expression )	返回一个集合 (collection)  里最后一个元素
+集合函数(Collection functions)
+
+函数名称	函数说明
+NODES( path )	返回一个路径的所有节点
+RELATIONSHIPS( path )	返回一个路径的所有关系
+EXTRACT( identifier in collection : expression )	返回一个结果集合：对集合(collection)的所有元素执行expression的操作得到的结果
+FILTER(identifier in collection : predicate)	返回集合(collection)中所有满足断言(predicate)的元素组成的集合
+TAIL( expression )	返回集合中除了第一个之外的所有元素
+RANGE( start, end [, step] )	返回从start开始，end结束(闭区间)内步长为step(非0)的所有整数数字
+
+数学函数(Mathematical functions)
+函数名称	函数说明
+ABS( expression )	返回expression得到的数值的绝对值
+ROUND( expression )	取整函数：返回小于等于expression得到的数值的最大整数(还是返回离expression得到的数值最近的整数？？)
+SQRT( expression )	返回expression得到的数值的平方根
+SIGN( expression )	符号函数：如果expression得到的数值，为0则返回0；为负数则返回-1；为正数则返回1
+
+聚合函数(Aggregate functions)
+函数名称	函数说明
+COUNT( expression )	返回expression得到的结果的个数，expression也可为"*"
+SUM( expression )	返回expression得到结果相加的和
+AVG( expression )	返回expression得到结果的平均值
+MAX( expression )	返回expression得到结果的最大值
+MIN( expression )	返回expression得到结果的最小值
+COLLECT( expression )	把expression得到的结果以list的形式返回
+所有的聚合操作都能使用DISTINCT操作

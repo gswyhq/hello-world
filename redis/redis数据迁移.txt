@@ -1,0 +1,133 @@
+
+方法一： 利用持久化迁移数据(需要重启服务)
+    通过迁移 dump.rdb 数据文件以达到数据迁移
+
+Redis持久化了解
+      为了让性能更加优异，Redis默认是把所有的数据都存在内存中的。但是当服务器重启或程序异常崩溃时，Redis的数据就会全部丢失。因此出现了持久化的概念。持久化就是将存在内存中的数据同步到磁盘来保证持久化。
+
+1、Redis持久化的方式
+    两种： RDB 和 AOF
+      RDB 持久化可以在指定的时间间隔内生成数据集的时间点快照（point-in-time snapshot）。
+      AOF 持久化记录服务器执行的所有写操作命令，并在服务器启动时，通过重新执行这些命令来还原数据集。 AOF 文件中的命令全部以 Redis 协议的格式来保存，新命令会被追加到文件的末尾。 Redis 还可以在后台对 AOF 文件进行重写（rewrite），使得 AOF 文件的体积不会超出保存数据集状态所需的实际大小。
+
+2、持久化的数据有什么用？
+      用于重启后的数据恢复。Redis是一个内存数据库，无论是RDB还是AOF，都只是其保证数据恢复的措施；所以Redis在利用RDB和AOF进行恢复的时候，都会读取RDB或AOF文件，重新加载到内存中。
+
+默认持久化了解
+        其中RDB就是point-in-time snapshot快照存储，也是默认的持久化方式。对于RDB可理解为半持久化模式，即按照一定的策略周期性的将数据保存到磁盘。对应产生的数据文件为dump.rdb，通过配置文件中的save参数来定义快照的周期。Redis的RDB文件不会坏掉，因为其写操作是在一个新进程中进行的。
+
+默认的持久化设置：
+save 900 1                          #当有一条Keys数据被改变时，900秒刷新到Disk一次
+save 300 10                        #当有10条Keys数据被改变时，300秒刷新到Disk一次
+save 60 10000                    #当有10000条Keys数据被改变时，60秒刷新到Disk一次
+
+利用持久化迁移数据(需要重启服务)
+
+# 若是通过docker运行redis实例，则需要进入对应的实例环境
+gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+root@2ef3dea30784:/data# ls
+dump.rdb
+root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379
+
+##########查看配置信息及当前存储的key值###########
+[root@web-yv2 ~]# redis-cli -h 10.160.35.86 -p 6379
+redis 10.160.35.86:6379> info
+...
+#########保存最新的key值################
+# SAVE  保存是阻塞主进程，客户端无法连接redis，等SAVE完成后，主进程才开始工作，客户端可以连接
+# Bgsave 命令用于在后台异步保存当前数据库的数据到磁盘。
+# BGSAVE  是fork一个save的子进程，在执行save过程中，原来的 Redis 进程(父进程)继续处理客户端请求，而子进程则负责将数据保存到磁盘，客户端可以正常链接redis，等子进程fork执行save完成后，通知主进程，子进程关闭。很明细BGSAVE方式比较适合线上的维护操作，两种方式的使用一定要了解清楚在谨慎选择。
+redis 10.160.35.86:6379> BGSAVE
+Background saving started
+##########查看是否保存成功##############
+# Lastsave 命令返回最近一次 Redis 成功将数据保存到磁盘上的时间，以 UNIX 时间戳格式表示。
+redis 10.160.35.86:6379> LASTSAVE
+(integer) 1420367903
+##########关闭redis服务器##############
+redis-cli -h 10.160.35.86 -p 6379 SHUTDOWN
+#########查看Redis的RDB文件###########
+[root@web-yv2 ~]# grep "dir" /etc/redis.conf        #查看RDB文件的存放位置
+...
+dir /var/lib/redis/                                #RDB文件存放于此
+...
+[root@web-yv2 ~]# find / -name dump.rdb            #查找dump文件
+/var/lib/redis/dump.rdb
+##########压缩redis文件并拷入另一台机器#########
+[root@web-yv2 ~]# tar zcvf redis.tar.gz /var/lib/redis
+[root@web-yv2 ~]# scp redis.tar.gz root@10.160.35.67:/var/lib/
+#########登陆10.160.35.67机器并做相应配置#######
+[root@web-yv1 ~]# vi /etc/redis.conf
+dir /var/lib/redis/                  #指定RDB文件路径
+#########解压缩RDB文件##########################
+[root@web-yv1 ~]# cd /var/lib/
+[root@web-yv1 ~]# tar xf redis.tar.gz
+#########重启Redis服务器########################
+[root@web-yv1 ~]# service redis restart
+
+方法二： 通过Python程序读写数据完成迁移（不需要重启服务，但需要能同时连接到两个服务上）
+
+# coding=utf-8
+import redis
+
+redis_from = redis.StrictRedis(host='127.0.0.1', port=6379, db=10)
+redis_to = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
+
+def main()
+    cnt = 0
+    for k in redis_from.keys():
+        data_type = redis_from.type(k)
+
+        if data_type == 'string':
+            v = redis_from.get(k)
+            redis_to.set(k, v)
+
+        elif data_type == 'list':
+            values = redis_from.lrange(k, 0, -1)
+            redis_to.lpush(k, values)
+
+        elif data_type == 'set':
+            values = redis_from.smembers(k)
+            redis_to.sadd(k, values)
+
+        elif data_type == 'hash':
+            keys = redis_from.hkeys(k)
+            for key in keys:
+                value = redis_from.hget(k, key)
+                redis_to.hset(k, key, value)
+
+        else:
+            print 'not known type'
+
+        cnt = cnt + 1
+
+    print ('total', cnt)
+
+if __name__ == '__main__':
+    main()
+
+info 命令可以查看 key 的总数量，以确保所有数据都写入成功
+
+# Keyspace
+db0:keys=41,expires=0,avg_ttl=0
+db10:keys=1,expires=1,avg_ttl=80109567
+
+方法三： redis-cli在shell下执行命令处理数据
+
+一、利用move命令，在同一个服务下的不同数据库间进行迁移
+# move(key, dbindex)：将当前数据库中的key转移到有dbindex索引的数据库
+1、将db2 中的所有数据迁移到db4
+root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379 -n 2 keys '*' | xargs -I '{}' redis-cli -h 127.0.0.1 -p 6379 -n 2 move '{}' 4
+命令解析
+redis-cli -n 2 keys '*' 表示获取db2中所有的keys
+xargs -I '{}' 表示讲上步操作的结果作为参数,保存在'{}'中, 再执行移动命令: redis-cli -n 2 move '{}' 4
+
+2、将DB1中键为detail_开头的数据移动到BD0
+redis-cli -p 6393  -n 1 keys "detail_*"  | xargs -i redis-cli -p 6393 -n 1 move {} 0
+
+二、利用migrate命令，在不同服务间进行数据库迁移
+# 将 127.0.0.1:6379上的db4 复制到192.168.3.105:6379的db6中
+root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379 -n 4 keys '*' | xargs -I '{}' redis-cli -h 127.0.0.1 -p 6379 -n 4 migrate 192.168.3.105 6379 '{}' 6 1000  COPY
+# MIGRATE HOST(目标主机) PORT(目标端口) KEY(需要移动的key) DISTINATION_DB(目标库中) timeout [COPY(拷贝本地数据,不删除)| REPLACE(覆盖目的主机上的键值) | 不填就等于复制本地后在删除本地数据 ]
+
+
+

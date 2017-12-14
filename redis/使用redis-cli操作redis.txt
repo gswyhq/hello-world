@@ -1,4 +1,13 @@
 
+若是通过docker运行redis实例，则需要进入对应的实例环境
+gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+root@2ef3dea30784:/data# ls
+dump.rdb
+root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379
+127.0.0.1:6379> select 7
+OK
+127.0.0.1:6379[7]> info
+
 # 连接redis:
 gswyhq@gswyhq-pc:~$ redis-cli 
 # 获取某个key的值

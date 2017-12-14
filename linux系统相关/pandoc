@@ -1,0 +1,66 @@
+#!/bin/bash
+
+#shell命令的自动补全
+
+_pandoc() {
+    local pre cur
+
+    COMPREPLY=()
+    #pre="$3"
+    #cur="$2"
+    pre=${COMP_WORDS[COMP_CWORD-1]}
+    cur=${COMP_WORDS[COMP_CWORD]}
+    READ_FORMAT="native json markdown markdown_strict markdown_phpextra
+    markdown_github textile rst html docbook opml mediawiki haddock latex"
+    WRITE_FORMAT="native json plain markdown markdown_strict
+    markdown_phpextra markdown_github rst html html5 latex beamer context
+    man mediawiki textileorg textinfo opml docbook opendocument odt docx
+    rtf epub epub3 fb2 asciidoc slidy slideous dzslides revealjs s5"
+
+    case "$pre" in
+    -f|-r )
+        COMPREPLY=( $( compgen -W "$READ_FORMAT" -- $cur ) )
+        return 0
+        ;;
+    -t|-w )
+        COMPREPLY=( $( compgen -W "$WRITE_FORMAT" -- $cur ) )
+        return 0
+    esac
+
+    complete_options() {
+        local opts i
+        opts="-f -r -t -w -o --output -v --version -h --help"
+        for i in "${COMP_WORDS[@]}"
+        do
+            if [ "$i" == "-f" -o "$i" == "-r" ]
+            then
+                opts="$opts"" -R -S --filter -p"
+                break
+            fi
+        done
+
+        for i in "${COMP_WORDS[@]}"
+        do
+            if [ "$i" == "-t" -o "$i" == "-w" ]
+            then
+                opts="$opts"" -s --template --toc"
+                break
+            fi
+        done
+        echo "$opts"
+    }
+
+    case "$cur" in
+    -* )
+        COMPREPLY=( $( compgen -W "$(complete_options)" -- $cur) )
+        ;;
+    * )
+        COMPREPLY=( $( compgen -A file ))
+    esac
+}
+complete -F _pandoc pandoc
+
+#运行程序的方式：
+#$ . ./pandoc # 加载上面的程序
+#$ pandoc -[Tab][Tab] # 试一下补全能用不
+#来源：https://segmentfault.com/a/1190000002968878
