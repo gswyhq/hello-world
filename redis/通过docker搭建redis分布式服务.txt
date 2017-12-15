@@ -1,0 +1,278 @@
+
+一、运行单节点实例：
+1)、本地实例
+gswyhq@gswyhq-PC:~$ docker pull redis
+gswyhq@gswyhq-PC:~$ mkdir redis_3.2.9
+gswyhq@gswyhq-PC:~$ cd redis_3.2.9
+gswyhq@gswyhq-PC:~/redis_3.2.9$ mkdir data_7000 data_7001 data_7002
+gswyhq@gswyhq-PC:~/redis_3.2.9$
+
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7000 --net=host -v $PWD/data_7000:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.51 --cluster-node-timeout 15000 --port 7000 --cluster-config-file nodes.conf
+567ddec018fe7a22ef52575668c02b3ae1442cb2ed9989660a13c10c53651518
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7001 --net=host -v $PWD/data_7001:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.51 --cluster-node-timeout 15000 --port 7001 --cluster-config-file nodes.conf
+e09374862665415cb7c206d7a2de94493ab08c1f188b607e78198e18f4562c73
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7002 --net=host -v $PWD/data_7002:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.51 --cluster-node-timeout 15000 --port 7002 --cluster-config-file nodes.conf
+e86cffb4f13ea8667b5d5c0111623c357bfa69a4afffdd75877ff6cbf92c9312
+
+2）、远程实例
+gswyhq@gswyhq-PC:~/redis_3.2.9$ ssh zy@192.168.3.105
+zy@ubuntu:~$ docker pull redis
+zy@ubuntu:~$ mkdir redis_3.2.9
+zy@ubuntu:~$ cd redis_3.2.9
+zy@ubuntu:~/redis_3.2.9$ mkdir data_7003 data_7004 data_7005
+zy@ubuntu:~/redis_3.2.9$
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7003 --net=host -v $PWD/data_7003:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.105 --cluster-node-timeout 15000 --port 7003 --cluster-config-file nodes.conf
+61813247e63c9535e329708f61b45f1c8cc45b3085a3e460fc72692867eb443f
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7004 --net=host -v $PWD/data_7004:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.105 --cluster-node-timeout 15000 --port 7004 --cluster-config-file nodes.conf
+ad16ba409132c766e0b87eeeca5f2d0f851b7462347923627cb60c45c3e0f93a
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7005 --net=host -v $PWD/data_7005:/data -d redis redis-server --cluster-enabled yes --bind 192.168.3.105 --cluster-node-timeout 15000 --port 7005 --cluster-config-file nodes.conf
+d5bc0cdf74270f1f33129a77a9deda6995fe056e60c8b865f4f4bacde0c1f702
+
+注意：
+1、Host模式
+--net=host
+如果启动容器的时候使用host模式，那么这个容器将不会获得一个独立的Network Namespace，而是和宿主机共用一个Network Namespace。
+容器将不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口。但是，容器的其他方面，如文件系统、进程列表等还是和宿主机隔离的。
+
+二、创建集群：
+1)、获取集群创建的工具
+redis-trib.rb是redis官方推出的管理redis集群的工具，集成在redis的源码src目录下，是基于redis提供的集群命令封装成简单、便捷、实用的操作工具。
+redis-trib.rb是redis作者用ruby完成的。
+redis-trib.rb具有以下功能：
+    1、create：创建集群
+    2、check：检查集群
+    3、info：查看集群信息
+    4、fix：修复集群
+    5、reshard：在线迁移slot
+    6、rebalance：平衡集群节点slot数量
+    7、add-node：将新节点加入集群
+    8、del-node：从集群中删除节点
+    9、set-timeout：设置集群节点间心跳连接的超时时间
+    10、call：在集群全部节点上执行命令
+    11、import：将外部redis数据导入集群
+（具体详情可参见：http://blog.csdn.net/huwei2003/article/details/50973967）
+
+打开redis源码页面：https://github.com/antirez/redis
+找到`redis-trib.rb`文件，点击`Raw`获取文件的下载地址（redis的版本是3.2.9）：
+gswyhq@gswyhq-PC:~/redis_3.2.9$ wget https://raw.githubusercontent.com/antirez/redis/3.2.9/src/redis-trib.rb redis-trib.rb
+
+2）、准备ruby环境
+因为是执行的ruby的脚本，需要ruby的环境；
+gswyhq@gswyhq-PC:~$ docker pull ruby
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run -it --rm --name my-running-script -v $PWD/redis-trib.rb:/usr/src/myapp/redis-trib.rb -w /usr/src/myapp ruby:latest ruby redis-trib.rb create --replicas 1 192.168.3.51:7000 192.168.3.51:7001 192.168.3.51:7002 192.168.3.105:7003 192.168.3.105:7004 192.168.3.105:7005
+/usr/local/lib/ruby/site_ruby/2.4.0/rubygems/core_ext/kernel_require.rb:59:in `require': cannot load such file -- redis (LoadError)
+	from /usr/local/lib/ruby/site_ruby/2.4.0/rubygems/core_ext/kernel_require.rb:59:in `require'
+	from redis-trib.rb:25:in `<main>'
+报错，说明Ruby的redis接口没有安装，可以通过sudo gem install redis 进行安装
+
+准备具有redis接口的ruby环境（通过编写Dockerfile，创建自定义ruby镜像）：
+gswyhq@gswyhq-PC:~/redis_3.2.9$ vim Dockerfile
+gswyhq@gswyhq-PC:~/redis_3.2.9$ head -n 300 Dockerfile
+FROM ruby:latest
+
+RUN gem install redis
+
+ADD ./redis-trib.rb /usr/local
+
+RUN cd /usr/local
+
+以上即是自定义ruby镜像对应的Dockerfile文件内容；
+
+gswyhq@gswyhq-PC:~/redis_3.2.9$ ls
+data_7000  data_7001  data_7002  Dockerfile  redis-trib.rb
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker build -t ruby_redis .
+Sending build context to Docker daemon  68.1 kB
+Step 1/4 : FROM ruby:latest
+ ---> 2a867526d472
+Step 2/4 : RUN gem install redis
+ ---> Running in e863b2e950c5
+Successfully installed redis-4.0.1
+1 gem installed
+ ---> add009097ca8
+Removing intermediate container e863b2e950c5
+Step 3/4 : ADD ./redis-trib.rb /usr/local
+ ---> 0ed606631f14
+Removing intermediate container be8e9b2463af
+Step 4/4 : RUN cd /usr/local
+ ---> Running in 8c5a08153e98
+ ---> a34abde1bfac
+Removing intermediate container 8c5a08153e98
+Successfully built a34abde1bfac
+
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker images |grep redis
+ruby_redis                                             latest              a34abde1bfac        About a minute ago   687 MB
+
+创建集群命令：
+redis-trib create --replicas 1 192.168.3.51:7000 192.168.3.51:7001 192.168.3.51:7002 192.168.3.105:7003 192.168.3.105:7004 192.168.3.105:7005
+命令的意义如下：
+给定 redis-trib.rb 程序的命令是 create ， 这表示我们希望创建一个新的集群。
+选项 --replicas 1 表示我们希望为集群中的每个主节点创建一个从节点。
+之后跟着的其他参数则是实例的地址列表， 我们希望程序使用这些地址所指示的实例来创建新集群。
+简单来说， 以上命令的意思就是让 redis-trib 程序创建一个包含三个主节点和三个从节点的集群。
+接着， redis-trib 会打印出一份预想中的配置给你看， 如果你觉得没问题的话， 就可以输入 yes
+
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run -it --rm --name my-running-script -v $PWD/redis-trib.rb:/usr/src/myapp/redis-trib.rb -w /usr/src/myapp ruby_redis:latest ruby redis-trib.rb create --replicas 1 192.168.3.51:7000 192.168.3.51:7001 192.168.3.51:7002 192.168.3.105:7003 192.168.3.105:7004 192.168.3.105:7005
+>>> Creating cluster
+>>> Performing hash slots allocation on 6 nodes...
+Using 3 masters:
+192.168.3.51:7000
+192.168.3.105:7003
+192.168.3.51:7001
+Adding replica 192.168.3.105:7004 to 192.168.3.51:7000
+Adding replica 192.168.3.51:7002 to 192.168.3.105:7003
+Adding replica 192.168.3.105:7005 to 192.168.3.51:7001
+M: 222f9d6752f5111f4d4b4812297749dacce0bd80 192.168.3.51:7000
+   slots:0-5460 (5461 slots) master
+M: 40078f9d22418e6356e53f5f885b024374917e7d 192.168.3.51:7001
+   slots:10923-16383 (5461 slots) master
+S: 60a552fd65ace6d0e45c0d49cdc9f702b7ae3de8 192.168.3.51:7002
+   replicates 7ade837dd76a2fddece37c00f39070b5daa398e0
+M: 7ade837dd76a2fddece37c00f39070b5daa398e0 192.168.3.105:7003
+   slots:5461-10922 (5462 slots) master
+S: 3d4141465880afb649296a8fe16661ce45ff2a9b 192.168.3.105:7004
+   replicates 222f9d6752f5111f4d4b4812297749dacce0bd80
+S: 4c0ddde50d5e625a6c88f5eca7e07b817109ec27 192.168.3.105:7005
+   replicates 40078f9d22418e6356e53f5f885b024374917e7d
+Can I set the above configuration? (type 'yes' to accept): yes
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join....................................
+
+创建集群时一直处于"Waiting for the cluster to join...................................."的状态，
+则需要创建节点实例是添加：--bind 0.0.0.0; 另外需要用docker运行redis实例时添加‘--net=host’，其意义见上文。
+
+创建集群时报某个err slot 0 is already busy (redis::commanderror)
+这是由于之间创建集群没有成功,需要将nodes.conf和dir里面的文件全部删除(注意不要删除了redis.conf)
+
+docker stop redis_cluster_7000 redis_cluster_7001 redis_cluster_7002
+docker rm -v redis_cluster_7000 redis_cluster_7001 redis_cluster_7002
+sudo rm -r data_7000/* data_7001/* data_7002/*
+
+docker stop redis_cluster_7003 redis_cluster_7004 redis_cluster_7005
+docker rm -v redis_cluster_7003 redis_cluster_7004 redis_cluster_7005
+sudo rm -r data_7003/* data_7004/* data_7005/*
+
+重新新建redis实例及构建集群：
+远程：
+zy@ubuntu:~/redis_3.2.9$ docker stop redis_cluster_7003 redis_cluster_7004 redis_cluster_7005
+redis_cluster_7003
+redis_cluster_7004
+redis_cluster_7005
+zy@ubuntu:~/redis_3.2.9$ docker rm -v redis_cluster_7003 redis_cluster_7004 redis_cluster_7005
+redis_cluster_7003
+redis_cluster_7004
+redis_cluster_7005
+zy@ubuntu:~/redis_3.2.9$ ls
+data_7003  data_7004  data_7005
+zy@ubuntu:~/redis_3.2.9$ sudo rm -r data_7003/* data_7004/* data_7005/*
+[sudo] password for zy: 
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7003 --net=host -v $PWD/data_7003:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7003 --cluster-config-file nodes.conf
+c7535aed523f145249313bb9246c93565b2e57593733812ade0338dc7152a22c
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7004 --net=host -v $PWD/data_7004:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7004 --cluster-config-file nodes.conf
+5cf54f77049e532344ce1b74059f39424f4701529e27032e158c08b391886b01
+zy@ubuntu:~/redis_3.2.9$ docker run --name redis_cluster_7005 --net=host -v $PWD/data_7005:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7005 --cluster-config-file nodes.conf
+923a8dfa8adc115309b19c50482411551a9e871ed062622e66952c011da88a41
+zy@ubuntu:~/redis_3.2.9$ docker ps |grep redis
+923a8dfa8adc        redis                          "docker-entrypoint.sh"   8 seconds ago       Up 7 seconds                                                                     redis_cluster_7005
+5cf54f77049e        redis                          "docker-entrypoint.sh"   8 seconds ago       Up 8 seconds                                                                     redis_cluster_7004
+c7535aed523f        redis                          "docker-entrypoint.sh"   8 seconds ago       Up 8 seconds                                                                     redis_cluster_7003
+
+本地：
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker rm -v redis_cluster_7000 redis_cluster_7001 redis_cluster_7002
+redis_cluster_7000
+redis_cluster_7001
+redis_cluster_7002
+gswyhq@gswyhq-PC:~/redis_3.2.9$
+gswyhq@gswyhq-PC:~/redis_3.2.9$ sudo rm -r data_7000/* data_7001/* data_7002/*
+gswyhq@gswyhq-PC:~/redis_3.2.9$ ls
+data_7000  data_7001  data_7002  Dockerfile  redis-trib.rb
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7000 --net=host -v $PWD/data_7000:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7000 --cluster-config-file nodes.conf
+0492db5492dd6618ee9feef9067b28304d6624b87125466c32c6d5562a4c1567
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7001 --net=host -v $PWD/data_7001:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7001 --cluster-config-file nodes.conf
+ce26a168ed400e3c62db112277d9e31bec4153dfa1567e0a66df58edf86bd359
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run --name redis_cluster_7002 --net=host -v $PWD/data_7002:/data -d redis redis-server --cluster-enabled yes --bind 0.0.0.0 --cluster-node-timeout 15000 --port 7002 --cluster-config-file nodes.conf
+79744e05d41b712053b5980ab9e8f42db59cc7f4f18fe98e2f10f010c9075f34
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker run -it --rm --name my-running-script -v $PWD/redis-trib.rb:/usr/src/myapp/redis-trib.rb -w /usr/src/myapp ruby_redis:latest ruby redis-trib.rb create --replicas 1 192.168.3.51:7000 192.168.3.51:7001 192.168.3.51:7002 192.168.3.105:7003 192.168.3.105:7004 192.168.3.105:7005
+>>> Creating cluster
+>>> Performing hash slots allocation on 6 nodes...
+Using 3 masters:
+192.168.3.51:7000
+192.168.3.105:7003
+192.168.3.51:7001
+Adding replica 192.168.3.105:7004 to 192.168.3.51:7000
+Adding replica 192.168.3.51:7002 to 192.168.3.105:7003
+Adding replica 192.168.3.105:7005 to 192.168.3.51:7001
+M: 42d0a4a2255c078e6f9a8012b178974225912fa6 192.168.3.51:7000
+   slots:0-5460 (5461 slots) master
+M: ac341b33c790079b9f5e914b83eb8d3fee04ef38 192.168.3.51:7001
+   slots:10923-16383 (5461 slots) master
+S: c896067626224335c63952975df8fd7617843064 192.168.3.51:7002
+   replicates c68d7ab50f975182b53ee6b1f33b0bafe9800ac8
+M: c68d7ab50f975182b53ee6b1f33b0bafe9800ac8 192.168.3.105:7003
+   slots:5461-10922 (5462 slots) master
+S: 4acea17958ba3b9a35621b8329ade2c87ba46c71 192.168.3.105:7004
+   replicates 42d0a4a2255c078e6f9a8012b178974225912fa6
+S: f977a184dd0e1974813053f26c7c24179ac8e16d 192.168.3.105:7005
+   replicates ac341b33c790079b9f5e914b83eb8d3fee04ef38
+Can I set the above configuration? (type 'yes' to accept): yes
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join......
+>>> Performing Cluster Check (using node 192.168.3.51:7000)
+M: 42d0a4a2255c078e6f9a8012b178974225912fa6 192.168.3.51:7000
+   slots:0-5460 (5461 slots) master
+   1 additional replica(s)
+M: ac341b33c790079b9f5e914b83eb8d3fee04ef38 192.168.3.51:7001
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: c896067626224335c63952975df8fd7617843064 192.168.3.51:7002
+   slots: (0 slots) slave
+   replicates c68d7ab50f975182b53ee6b1f33b0bafe9800ac8
+S: 4acea17958ba3b9a35621b8329ade2c87ba46c71 192.168.3.105:7004
+   slots: (0 slots) slave
+   replicates 42d0a4a2255c078e6f9a8012b178974225912fa6
+M: c68d7ab50f975182b53ee6b1f33b0bafe9800ac8 192.168.3.105:7003
+   slots:5461-10922 (5462 slots) master
+   1 additional replica(s)
+S: f977a184dd0e1974813053f26c7c24179ac8e16d 192.168.3.105:7005
+   slots: (0 slots) slave
+   replicates ac341b33c790079b9f5e914b83eb8d3fee04ef38
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+gswyhq@gswyhq-PC:~/redis_3.2.9$
+
+三、使用集群：
+1）、在一个节点上设置一个key：
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker exec -it redis_cluster_7000 /bin/bash
+root@gswyhq-PC:/data# redis-cli -h 192.168.3.51 -p 7000 -c
+192.168.3.51:7000> set foo abdf
+-> Redirected to slot [12182] located at 192.168.3.51:7001
+OK
+192.168.3.51:7001>
+
+2)、另开一个终端，连接另外一个节点，获取对应的key值（会自动重定向到对应的节点上）：
+gswyhq@gswyhq-PC:~/redis_3.2.9$ docker exec -it redis_cluster_7000 /bin/bash
+root@gswyhq-PC:/data# redis-cli -h 192.168.3.105 -p 7005 -c
+192.168.3.105:7005> get foo
+-> Redirected to slot [12182] located at 192.168.3.51:7001
+"abdf"
+192.168.3.51:7001>
+
+在set 和 get 的时候都报错
+192.168.3.51:7005> set foo 2323
+(error) MOVED 12182 192.168.3.51:7002
+表示 foo 的插槽值是12182 , 我们查看上面的集群信息可以看到 12182在7002这个实例上(提示也是这么说的)那么我们用7002连接试试
+Oh~~~~  这个时候设置成功了!   ╮(╯▽╰)╭
+难道我们每次在set的时候都要重新打开一个Redis客户端去吗?
+其实，redis-cli 提供了一个参数–c
+redis-cli -c
+指定了这个参数之后,redis-cli会根据插槽值做一个重定向,连接到指定的redis实例上面
+192.168.3.51:7005> exit
+root@gswyhq-PC:/data# redis-cli -h 192.168.3.51 -p 7005 -c
+192.168.3.51:7005> get foo
+-> Redirected to slot [12182] located at 192.168.3.51:7002
+(nil)
