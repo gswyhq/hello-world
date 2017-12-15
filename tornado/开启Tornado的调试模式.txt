@@ -1,0 +1,107 @@
+
+开启Tornado的调试模式方便调试与测试
+
+默认用 Tornado 写程序，修改完代码需要将文件上传，然后重启 Supervisord （supervisorctl reload），修改的程序才能生效。但这样比较麻烦，因为需要SSH到服务器进行重启操作。Tornado 自带的调试模式可以让我们轻松不少。
+
+开启调试模式也很简单，只需要 import 一个模块即可。
+
+import tornado.autoreload
+
+现在将修改的文件上传之后，不需要再重启，修改的结果就会显示出来了。
+
+另外也可以在 settings 加入 debug选项：
+
+import tornado.httpserver
+import tornado.ioloop
+import tornado.options
+import tornado.web
+
+settings = {'debug' : True}
+
+define("debug",default=True,help="Debug Mode",type=bool)
+
+def main():
+    tornado.options.parse_command_line()
+    application = tornado.web.Application([
+        (r"/", MainHandler),
+        (r"/nowamagic/", NowaMagicHandler),
+    ],**settings)
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(options.port)
+    tornado.ioloop.IOLoop.instance().start()
+
+Tornado 官方教程(https://tornado-zh.readthedocs.io/zh/latest/)上的 settings 是这样的：
+
+settings = {
+    "cookie_secret": "61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+    "login_url": "/login",
+    "xsrf_cookies": True,
+}
+
+application = tornado.web.Application([
+    (r"/", MainHandler),
+    (r"/login", LoginHandler),
+], **settings)
+
+
+当然也设置settings字典可以这样：
+
+settings = dict(
+    cookie_secret= "61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+    login_url= "/login",
+    xsrf_cookies= True,
+)
+
+
+settings可以设置什么？
+#设置templates路径：
+template_path = os.path.join(os.path.dirname(__file__), "templates")
+
+#设置静态文件解析路径：
+static_path = os.path.join(os.path.dirname(__file__), "static"),
+
+#设置防跨站请求攻击：
+xsrf_cookies = True,
+#默认为False，即不可防御。
+
+#设置登陆路径，未登陆用户在操作时跳转会用到这个参数：
+login_url = "/login-do",
+#默认为@tornado.web.authenticated
+
+#设置调试模式：
+debug = True,
+#默认为False，即不是调试模式。
+
+#设置cookie密钥：
+cookie_secret = "dskfhisdjklagkfdklag;lkjasdklgjkldsjaklgjkldsfksdklf"
+#默认为字符串"secure cookies"
+
+#设置是否自动编码：在2.0以上需要设置此项来兼容您之前的APP
+autoescape = None,
+#不设置默认为自动编码。
+
+#设置template_loader，可以从独立的路径中导入template：
+template_loader=utils.ZipLoader,
+#其中utils为自己定义的模块，ZipLoader是tornado.template.BaseLoader的子类。
+
+#设置gzip压缩：
+gzip=True
+
+#设置静态路径头部：
+static_url_prefix = "/mystatic/",
+#默认是"/static/"
+
+#设置静态文件处理类：
+static_handler_class = MyStaticFileHandler,
+#默认是tornado.web.StaticFileHandler
+
+#设置静态文件的参数：
+static_handler_args = { "key1":"value1", "key2":"value2"  }
+#默认为空字典。
+
+#设置日志处理函数
+log_function = your_fun,
+# 日志处理函数your_fun，按照自己的意图记录日志。
+
+
+调试模式的缺点是：只感知.py文件的改变，模版的改变不会加载，有些特殊的错误，比如import的错误，就会直接让服务下线，到时候还得手动重启。还有就是调试模式和 HTTPServer 的多进程模式不兼容。在调试模式下，你必须将 HTTPServer.start 的参数设为不大于 1 的数字。

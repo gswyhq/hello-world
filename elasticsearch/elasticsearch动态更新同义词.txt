@@ -13,6 +13,30 @@ gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target
 elasticsearch-analysis-dynamic-synonym-5.2.0--.zip
 gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ unzip elasticsearch-analysis-dynamic-synonym-5.2.0--.zip -d  elasticsearch-analysis-dynamic-synonym-5.2.0
 
+若出现以下错误，则是对应的Java开发环境没有安装：
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.3.2:compile (default-compile) on project elasticsearch-analysis-dynamic-synonym: Compilation failure
+[ERROR] Unable to locate the Javac Compiler in:
+[ERROR]   /usr/lib/jvm/java-8-openjdk-amd64/jre/../lib/tools.jar
+[ERROR] Please ensure you are using JDK 1.4 or above and
+[ERROR] not a JRE (the com.sun.tools.javac.Main class is required).
+[ERROR] In most cases you can change the location of your Java
+[ERROR] installation by setting the JAVA_HOME environment variable.
+[ERROR]
+
+gswyhq@gswyhq-PC:~$ java -version
+Picked up _JAVA_OPTIONS:   -Dawt.useSystemAAFontSettings=gasp
+openjdk version "1.8.0_141"
+OpenJDK Runtime Environment (build 1.8.0_141-8u141-b15-3-b15)
+OpenJDK 64-Bit Server VM (build 25.141-b15, mixed mode)
+
+已经安装了Java运行时，但是为了开发Java应用程序，您需要JDK，因此您必须安装OpenJDK devel软件包
+
+openjdk-8-jre包仅包含Java运行时环境。
+gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jre
+
+如果你想开发Java程序，那么请安装openjdk-8-jdk包。
+gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jdk
+
 # 二、分词插件‘pinyin’
 gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
 gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-pinyin
