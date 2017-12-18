@@ -1,0 +1,54 @@
+Nginx如何启用ETag，提高访问速度
+
+ETag全称EntityTags，HTTP协议规格说明中定义“ETag”为“被请求变量的实体值”。我们也可以把ETag理解为是一个客户端与服务器关联的记号。这个记号告诉客户端，当前网页在上次请求之后是否有发生变化，当发生变化时，ETag的值重新计算，并返回200状态码。如果没有变化，返回304状态码。从而不会重新加载整个页面信息。
+
+以下会告诉你，Nginx如何开启ETag。
+
+步骤1
+       确认Nginx版本，命令：Nginx安装目录/sbin/nginx–v，
+
+
+
+版本为1.7.3及更高，继续步骤2；版本为1.7.3以下，1.3.3及以上，进行步骤3；版本为1.3.3以下，不支持ETag，请升级您的Nginx。
+
+步骤2
+       确认没有关闭ETag：打开Nginx的配置文件nginx.conf(默认位置Nginx安装目录/conf/)，确保其中没有出现etagoff;，下为出现的情况，请将此行删除。
+
+http {
+    etag off;
+}
+
+确认没有使用ngx_headers_more清除ETag头：同样在配置文件中不能出现如下语句的任意一句，如果出现请将其删除。
+more_set_headers -s 404 -t 'ETag';
+more_clear_headers 'ETag';
+
+重新启动Nginx，就启用ETag功能了。
+
+步骤3
+
+查看是否开启了gzip，且是否和etag出现冲突，出现冲突去步骤4，没有去步骤2。
+打开Nginx的配置文件nginx.conf(默认位置Nginx安装目录/conf/)，其中出现gzip on；语句证明开启了gzip，如图
+
+http {
+    gzip on;
+}
+
+
+
+开启gzip时，可能与etag出现冲突，用浏览器多次请求此网站的静态元素，如果只返回200，不返回304，证明存在冲突，请去步骤4；没有冲突去步骤2。
+
+步骤4
+        请关闭gzip，即将上一步中的gzipon;改为gzip off；然后去步骤2。
+
+若不想关闭gzip，并要开启ETag，同时仍要坚持使用当前的Nginx版本，只能修改源码并重新编译。
+下载此版本安装包并解压，将其目录下/src/http/modules/ngx_http_gzip_filter_module.c
+文件中约309行左右的ngx_http_clear_etag(r);一行注释掉或删掉。如下图
+
+
+如果没有找到ngx_http_clear_etag(r);而是发现ngx_http_weak_etag(r);如下图，证明此Nginx
+
+没有gzip和etag冲突的问题，不必进行任何修改。
+重新编译源码安装Nginx，解决这个冲突，然后去步骤2。
+
+以上来源：
+http://cache.baiducontent.com/c?m=9f65cb4a8c8507ed4fece763105392230e54f7253eddd4027fa3c215cc790801013db2e5703f1704d1c068225cef1f53b6a56d2e7d1420c6cc8edb1fcabbe3797cd97d63&p=c07ac64ad49811a05bec97374e4b8f&newp=9a64c64ad49611a05bec97391351a5231610db2151d7d6176b82c825d7331b001c3bbfb423241b01d9c7776300ab4f59e1fb3d713d012ba3dda5c91d9fb4c57479dd&user=baidu&fm=sc&query=nginx++etag+Cache&qid=8239b1950000149d&p1=5

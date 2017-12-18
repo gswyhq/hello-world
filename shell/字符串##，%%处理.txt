@@ -1,0 +1,34 @@
+
+
+file=/dir1/dir2/dir3/my.file.txt
+我們可以用 ${ } 分別替換獲得不同的值：
+${file#*/}：拿掉第一條 / 及其左邊的字串：dir1/dir2/dir3/my.file.txt
+${file##*/}：拿掉最後一條 / 及其左邊的字串：my.file.txt
+${file#*.}：拿掉第一個 . 及其左邊的字串：file.txt
+${file##*.}：拿掉最後一個 . 及其左邊的字串：txt
+
+${file%/*}：拿掉最後條 / 及其右邊的字串：/dir1/dir2/dir3
+${file%%/*}：拿掉第一條 / 及其右邊的字串：(空值)
+${file%.*}：拿掉最後一個 . 及其右邊的字串：/dir1/dir2/dir3/my.file
+${file%%.*}：拿掉第一個 . 及其右邊的字串：/dir1/dir2/dir3/my
+
+测试结果如下：
+
+gswyhq@gswyhq-PC:~$ file=/dir1/dir2/dir3/my.file.txt
+gswyhq@gswyhq-PC:~$ echo ${file#*/}
+dir1/dir2/dir3/my.file.txt
+gswyhq@gswyhq-PC:~$ echo ${file##*/}
+my.file.txt
+gswyhq@gswyhq-PC:~$ echo ${file#*.}
+file.txt
+gswyhq@gswyhq-PC:~$ echo ${file##*.}
+txt
+gswyhq@gswyhq-PC:~$ echo ${file%/*}
+/dir1/dir2/dir3
+gswyhq@gswyhq-PC:~$ echo ${file%%/*}
+
+gswyhq@gswyhq-PC:~$ echo ${file%.*}
+/dir1/dir2/dir3/my.file
+gswyhq@gswyhq-PC:~$ echo ${file%%.*}
+/dir1/dir2/dir3/my
+

@@ -1,0 +1,106 @@
+#!/usr/bin/python3
+# coding: utf-8
+
+
+import urllib, urllib.request
+import sys
+import time
+
+class DefaultErrorHandler(urllib.request.HTTPDefaultErrorHandler):
+    """用来保证请求中记录Http状态
+"""
+    def http_error_default(self, req, fp, code, msg, headers):
+        result = urllib.request.HTTPError(
+            req.get_full_url(), code, msg, headers, fp)
+        result.status = code
+        return result
+
+class Sample():
+    """想下载的某个资源"""
+    url = None
+    contentLength = 0
+    etag = None
+    lastModified = 'Wed, 22 Feb 2017 15:12:57 GMT'
+    data = None
+    path = None
+
+    def __init__(self, url, contentLength=0, etag=None, lastModified=None):
+        self.url = url
+        self.contentLength = contentLength
+        self.etag = etag
+        self.lastModified = lastModified
+        self.status = 200
+        self.Expires = None
+
+    def __repr__(self):
+        # print("self.etag: `{}`".format(self.etag))
+        return repr("Http Status={}; Length={}; Last Modified Time={}; eTag={}".format(self.status, self.contentLength, self.lastModified, self.etag))
+
+    def downloadSample(self):
+        request = urllib.request.Request(self.url)
+        request.add_header('User-Agent', 'MyHTTPWebServicesApp/1.1')
+        # request.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
+        # request.add_header('Accept-encoding', 'gzip')
+        # request.add_header('User-Agent', "Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en)")
+        if self.lastModified:
+            request.add_header('If-Modified-Since', self.lastModified)
+        if self.Expires:
+            request.add_header('Expires', self.Expires)
+        if self.etag:
+            print("设置发送etag: `{}`".format(self.etag))
+            request.add_header('If-None-Match', self.etag)
+
+        # request.add_header('Connection', 'keep-alive')
+
+        # “max-age”
+        # 指令指定从请求的时间开始，允许获取的响应被重用的最长时间（单位：秒）。例如，“max-age=60”表示可在接下来的 60 秒缓存和重用响应。
+        request.add_header('Cache-Control', 'max-age=60')
+
+        # request.add_header('Pragma', 'no-store')
+
+        # request.add_header('PRIVATE-TOKEN', 'ZRB-x-g2ss4syqfvys3z')
+        request.add_header('Cookie', '_gitlab_session=822cdd7f7253b6a81bce949d178caa2f')  # 添加此项，可使得两次获取到的etag一致; 另外可以防止实际status是404,却返回了200
+        # request.add_header('no-cache', False)
+        # request.add_header('no-store', True)
+        conn = urllib.request.build_opener(DefaultErrorHandler()).open(request)
+
+        if hasattr(conn, 'headers'):
+            # save ETag, if the server sent one
+            self.etag = conn.headers.get('ETag')
+            # save Last-Modified header, if the server sent one
+            self.lastModified = conn.headers.get('Last-Modified')
+
+            self.contentLength = conn.headers.get("content-length")
+            self.Expires = conn.headers.get('Expires')
+            print(("Expires: {}; lastmodified: {}".format(self.Expires, self.lastModified)))
+
+        if hasattr(conn, 'status'):
+            self.status = conn.status
+            print("status=%d" % self.status)
+
+        self.data = conn.read()
+        # print(self.data)
+
+        if self.status == 304:
+            print("内容是一样的，所以没有任何回报！")
+
+        if not self.contentLength:
+            self.contentLength = len(self.data)
+
+        conn.close()
+
+def main():
+    url = 'http://www.sina.com.cn'
+    # url = 'https://www.baidu.com/'
+    # url = 'http://192.168.3.101/web1/chat_bot_demo/raw/xincheng_zhongjixian/input/xincheng/kg_xincheng_zhongjixian.txt'
+    # url = 'https://raw.githubusercontent.com/bells/elasticsearch-analysis-dynamic-synonym/master/pom.xml'
+    sample = Sample(url)
+    sample.downloadSample()
+    print(sample)
+    sample.downloadSample()
+    print(sample)
+
+    # 有些网站却不能获取对应的304状态，可能是对应的nginx服务禁用了etag，或者是其他的；
+
+if __name__ == '__main__':
+    main()
