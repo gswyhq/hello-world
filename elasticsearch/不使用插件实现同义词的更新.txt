@@ -1,0 +1,175 @@
+
+资料来源： https://www.elastic.co/guide/cn/elasticsearch/guide/cn/using-synonyms.html
+
+创建了一个使用 my_synonym_filter 的自定义分析器。
+同义词可以使用 synonym 参数来内嵌指定，或者必须 存在于集群每一个节点上的同义词文件中。
+同义词文件路径由 synonyms_path 参数指定，应绝对或相对于 Elasticsearch config 目录。参照 更新停用词（Updating Stopwords） 的技巧，可以用来刷新的同义词列表。
+
+https://www.elastic.co/guide/cn/elasticsearch/guide/cn/using-stopwords.html#updating-stopwords
+
+更新停用词（Updating Stopwords）、同义词
+一、想要更新分析器的停用词列表有多种方式：1、分析器在创建索引时；2、当集群节点重启时候；3、关闭的索引重新打开的时候。
+
+二、如果你使用 stopwords/synonyms 参数以内联方式指定停用词/同义词，那么你只能通过关闭索引，更新分析器的配置update index settings API，然后在重新打开索引才能更新停用词/同义词。
+更新分析器的配置：
+curl -XPUT 'localhost:9200/twitter/_settings?pretty' -H 'Content-Type: application/json' -d'
+{
+    "index" : {
+        "number_of_replicas" : 2
+    }
+}
+'
+
+
+如果你使用 stopwords_path/synonyms_path 参数指定停用词/同义词的文件路径 ，那么更新停用词/同义词就简单了。你只需更新文件(在每一个集群节点上)，然后通过下面两种方法之中的任何一个操作来强制重新创建分析器:
+
+方法1：关闭和重新打开索引 (参考 索引的开与关)，
+curl -XPOST 'localhost:9200/my_index/_close?pretty'
+curl -XPOST 'localhost:9200/my_index/_open?pretty'
+
+方法2：重启集群下的每个节点。
+
+
+当然，更新的停用词/同义词不会改变任何已经存在的索引。这些停用词/同义词的只适用于新的搜索或更新文档。如果要改变现有的文档，则需要重新索引数据。参考 重新索引你的数据 。
+尽管可以增加新的类型到索引中，或者增加新的字段到类型中，但是不能添加新的分析器或者对现有的字段做改动。 如果你那么做的话，结果就是那些已经被索引的数据就不正确， 搜索也不能正常工作。
+对现有数据的这类改变最简单的办法就是重新索引：用新的设置创建新的索引并把文档从旧的索引复制到新的索引。
+字段 _source 的一个优点是在Elasticsearch中已经有整个文档。你不必从源数据中重建索引，而且那样通常比较慢。
+
+为了有效的重新索引所有在旧的索引中的文档，用 scroll 从旧的索引检索批量文档 ， 然后用 bulk API 把文档推送到新的索引中。
+
+批量重新索引
+同时并行运行多个重建索引任务，但是你显然不希望结果有重叠。正确的做法是按日期或者时间 这样的字段作为过滤条件把大的重建索引分成小的任务：
+
+curl -XGET localhost:9200/old_index/_search?scroll=1m
+{
+    "query": {
+        "range": {
+            "date": {
+                "gte":  "2014-01-01",
+                "lt":   "2014-02-01"
+            }
+        }
+    },
+    "sort": ["_doc"],
+    "size":  1000
+}
+
+curl -XGET '192.168.3.105:9200/test2/_search?scroll=1m' -d'
+{
+    "query": {
+        "range": {
+            "date": {
+                "gte":  "2014-01-01",
+                "lt":   "2014-02-01"
+            }
+        }
+    },
+    "sort": ["_doc"],
+    "size":  1000
+}
+'
+使用scroll api将数据批量查出来
+GET /my_index/_search?scroll=1m
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort":["_doc"],
+  "size":1
+}
+采用bulk api将scroll查询出来的一批数据，批量写入新的索引中
+POST /_bulk
+{"index":{"_index":"my_index_new","_type":"my_type","_id":"2"}}
+{"title":"2017-01-02"}
+重复上面的两个步骤，把所有的数据都写入新的索引
+GET /_search/scroll
+{
+  "scroll":"1m",
+  "scroll_id":"DnF1ZXJ5VGhlbkZldGNoBQAAAAAAAC6bFlhIb1FOME82U3llb202bER1Zm95VkEAAAAAAAAumBZYSG9RTjBPNlN5ZW9tNmxEdWZveVZBAAAAAAAALpwWWEhvUU4wTzZTeWVvbTZsRHVmb3lWQQAAAAAAAC6ZFlhIb1FOME82U3llb202bER1Zm95VkEAAAAAAAAumhZYSG9RTjBPNlN5ZW9tNmxEdWZveVZB"
+}
+POST /_bulk
+{"index":{"_index":"my_index_new","_type":"my_type","_id":"...."}}
+{"title":"..."}
+
+def queryInES( esinstance):
+    search_body={"query":{"match_all":{}}}
+    page = esinstance.search(index='my_index', body=search_body, search_type='scan', doc_type='Tweet', scroll='5s', size=1000)
+    sid=page['_scroll_id']
+    scroll_size = page['hits']['hits']
+
+    while(scroll_size>0):
+        pg = es.scroll(scroll_id=sid, scroll='30s')
+        scroll_size = len(pg['hits']['hits'])
+        print "scroll size: " + str(scroll_size)
+        sid = pg['_scroll_id']
+        data=pg['hits']['hits']
+        ... ...
+
+        for i in range(0, scroll_size):
+            data[i]['_source']['attributes']['senti']={"label":label, "score": score, "confidence": confidence}
+
+    helpers.bulk(client=esinstance, actions=data)
+
+索引别名和零停机编辑
+在前面提到的，重建索引的问题是必须更新应用中的索引名称。 索引别名就是用来解决这个问题的！
+
+索引 别名 就像一个快捷方式或软连接，可以指向一个或多个索引，也可以给任何一个需要索引名的API来使用。别名 带给我们极大的灵活性，允许我们做下面这些：
+
+在运行的集群中可以无缝的从一个索引切换到另一个索引
+给多个索引分组 (例如， last_three_months)
+给索引的一个子集创建 视图
+在后面我们会讨论更多关于别名的使用。现在，我们将解释怎样使用别名在零停机下从旧索引切换到新索引。
+
+有两种方式管理别名： _alias 用于单个操作， _aliases 用于执行多个原子级操作。
+
+在本章中，我们假设你的应用有一个叫 my_index 的索引。事实上， my_index 是一个指向当前真实索引的别名。真实索引包含一个版本号： my_index_v1 ， my_index_v2 等等。
+
+首先，创建索引 my_index_v1 ，然后将别名 my_index 指向它：
+curl -XPUT 'localhost:9200/my_index_v1?pretty'
+curl -XPUT 'localhost:9200/my_index_v1/_alias/my_index?pretty'
+
+你可以检测这个别名指向哪一个索引：
+curl -XGET 'localhost:9200/*/_alias/my_index?pretty'
+
+或哪些别名指向这个索引：
+curl -XGET 'localhost:9200/my_index_v1/_alias/*?pretty'
+
+两者都会返回下面的结果：
+
+{
+    "my_index_v1" : {
+        "aliases" : {
+            "my_index" : { }
+        }
+    }
+}
+然后，我们决定修改索引中一个字段的映射。当然，我们不能修改现存的映射，所以我们必须重新索引数据。 首先, 我们用新映射创建索引 my_index_v2 ：
+curl -XPUT 'localhost:9200/my_index_v2?pretty' -H 'Content-Type: application/json' -d'
+{
+    "mappings": {
+        "my_type": {
+            "properties": {
+                "tags": {
+                    "type":   "string",
+                    "index":  "not_analyzed"
+                }
+            }
+        }
+    }
+}
+'
+
+然后我们将数据从 my_index_v1 索引到 my_index_v2 ，下面的过程在 重新索引你的数据 中已经描述过。一旦我们确定文档已经被正确地重索引了，我们就将别名指向新的索引。
+
+一个别名可以指向多个索引，所以我们在添加别名到新索引的同时必须从旧的索引中删除它。这个操作需要原子化，这意味着我们需要使用 _aliases 操作：
+curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions": [
+        { "remove": { "index": "my_index_v1", "alias": "my_index" }},
+        { "add":    { "index": "my_index_v2", "alias": "my_index" }}
+    ]
+}
+'
+你的应用已经在零停机的情况下从旧索引迁移到新索引了。
+
+

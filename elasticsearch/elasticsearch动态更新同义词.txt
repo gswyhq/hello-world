@@ -37,6 +37,9 @@ gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jre
 如果你想开发Java程序，那么请安装openjdk-8-jdk包。
 gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jdk
 
+卸载所有openjdk安装，这是非常危险的，包括PyCharm Professional等都会卸载；
+sudo apt-get remove openjdk*
+
 # 二、分词插件‘pinyin’
 gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
 gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-pinyin

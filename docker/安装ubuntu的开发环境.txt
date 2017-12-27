@@ -9,7 +9,7 @@ root@50d8508bb70c:/# sudo apt-get update
 root@50d8508bb70c:/# apt-get install python3-pip
 5、退出容器，并将容器保存为新的ubuntu镜像
 root@50d8508bb70c:/# exit
-gswyhq@gswyhq-pc:~$ docker commit 50d8508bb70c ubuntu:0627
+gswyhq@gswyhq-pc:~$ docker commit -m "说明等等" 50d8508bb70c ubuntu:0627
     或者注明一些信息，如：
     ubuntu@ip-172-31-13-157:~$ docker commit -m "安装pyltp, mammoth" ebe08d2d402b ubuntu:1031
     sha256:b37a6b4f8f4cfc6029abef5bed483d62d8941144d814422120cec3f4745d2fa7

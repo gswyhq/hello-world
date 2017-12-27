@@ -97,5 +97,9 @@ CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:3, `name`:"Michael Douglas", `UNI
 
 # 更多示例：https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_export_to_csv
 
+CALL apoc.export.csv.query("MATCH (u:User)-[r:RATED]->(m:Movie) RETURN u.name, r.rating, m.title LIMIT 10", "results.csv", {})
+CALL apoc.export.csv.query("MATCH (a:Person) RETURN a.name AS name", "/home/xyzuser/neo4j-community-3.2.6/test/result.csv", {})
+
+
 
 

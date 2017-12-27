@@ -1,5 +1,22 @@
 
+sed 's/要被替换的字符串/新的字符串/g'
+$ sed 's/test/mytest/g' example-----在整行范围内把test替换为mytest。
+如果没有g标记，则只有每行第一个匹配的test被替换成mytest。
+
+sed -i 's/被替换的内容/要替换成的内容/' file        -i 直接修改并保存
+
 sed 's/ruby/bird/g'    #替换ruby为bird
+
+用sed替换xml文件中的变量。一般在sed 中替换都用单引号，如下边
+
+sed -i ‘s/10/1000/g’ test.xml
+但是如果需要把1000改成变量，如
+sed -i ’s/10/$num/g‘ test.xml
+这样就不成功。
+
+此时需要把单引号改成双引号,并把分隔符/替换成#就可以,如下边例子
+$num=1000
+sed -i "s#10#$num#g" test.xml
 
 sed是一个很好的文件处理工具，本身是一个管道命令，主要是以行为单位进行处理，可以将数据行进行替换、删除、新增、选取等特定工作，下面先了解一下sed的用法
 sed命令行格式为：
@@ -82,3 +99,13 @@ sed命令行格式为：
      ruby is me,welcome to my blog.
      end
      bye
+
+对文件批量重命名：
+ for i in `ls`; do mv -f $i `echo $i | sed 's/test/mytest/g'`; done
+或者写个脚本，显得更加清晰：
+for file in `ls`
+do
+    newfile =`echo $i | sed 's/test/mytest/g'`
+    mv $file $newfile
+done
+

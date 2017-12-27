@@ -2,6 +2,7 @@
 系统时间不对：
 方法1：直接改时区
 ubuntu@ip-172-31-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+docker cp /usr/share/zoneinfo/Asia ubuntu1220:/usr/share/zoneinfo/Asia
 
 方法2：若改时区后还不对，则可以：
 ubuntu@ip-172-31-14-6:~$ date

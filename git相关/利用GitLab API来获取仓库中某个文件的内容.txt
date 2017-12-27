@@ -1,0 +1,19 @@
+
+GitLab API并不是随意可以访问的，是在验证访问权限之后才返回对应结果。访问权限的验证是通过private_token来实现的。
+每个GitLab账号都对应有一个private_token值，通过传递这个参数，GitLab服务器就能判断对应的这个账号具有什么样的访问权限。如果没有权限，会返回401 Unauthorized。
+private_token的信息可以在登录GitLab之后，[Profile Settings] -> [Account]界面查看。
+
+
+import requests
+uri = 'http://192.168.3.101/gswyhq/ModelData/raw/xincheng_zhongjixian/data/保险常见名词解释.txt?private_token=CeyrY48yDYsxy-soNRxT'
+result = requests.get(uri)
+
+print(result.status_code)
+print(result.text)
+print(type(result.content))
+print(result.encoding)
+
+
+其他：
+payload = {'key1': 'value1', 'key2': 'value2'}
+>>> r = requests.get("http://httpbin.org/get", params=payload)

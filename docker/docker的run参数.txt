@@ -71,3 +71,13 @@ USER
 WORKDIR
 容器中默认的工作目录是根目录（/）。开发人员可以通过Dockerfile的WORKDIR来设定默认工作目录，操作人员可以通过"-w"来覆盖默认的工作目录。
 
+net
+网络模式，可以在docker客户端的--net参数中指定这些值
+    net: "bridge"
+    net: "none"
+    net: "container:[name or id]"
+    net: "host"
+net,若是在docker-compose.yml文件中，则需要如下定义：
+    network_mode:
+      "host"
+

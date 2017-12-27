@@ -212,3 +212,57 @@ gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo /etc/init.d/supervisor reload
 port=127.0.0.1:9001        ; 这个是侦听的IP和端口，侦听所有IP用 :9001或*:9001。
 改为：port=*:9001
 
+问题：
+root@942adfc9da78:/zheshang# supervisord -c /etc/supervisor/conf.d/tornado.conf
+Error: .ini file does not include supervisord section
+For help, use /usr/bin/supervisord -h
+解决方法： 在`/etc/supervisor/conf.d/tornado.conf`文件中末尾添加一行：
+[supervisord]
+
+问题：
+root@942adfc9da78:/zheshang# supervisorctl reload /etc/supervisor/conf.d/tornado.conf
+error: <class 'socket.error'>, [Errno 2] No such file or directory: file: /usr/lib/python2.7/socket.py line: 228
+root@942adfc9da78:/zheshang# supervisorctl reread
+error: <class 'socket.error'>, [Errno 2] No such file or directory: file: /usr/lib/python2.7/socket.py line: 228
+
+解决方法：
+有可能是supervisor已经启动，不正常关闭导致的
+ps ax | grep supervisord
+记下pid号码，kill掉，然后supervisord启动，再service supervisorctl reload重启supervisorctl
+
+root@942adfc9da78:/zheshang# supervisorctl reload /etc/supervisor/conf.d/tornado.conf
+error: <class 'socket.error'>, [Errno 2] No such file or directory: file: /usr/lib/python2.7/socket.py line: 228
+# 启动supervisord
+root@942adfc9da78:/zheshang# supervisord
+/usr/lib/python2.7/dist-packages/supervisor/options.py:297: UserWarning: Supervisord is running as root and it is searching for its configuration file in default locations (including its current working directory); you probably want to specify a "-c" argument specifying an absolute path to a configuration file for improved security.
+  'Supervisord is running as root and it is searching '
+root@942adfc9da78:/zheshang# echo $?
+0
+root@942adfc9da78:/zheshang# supervisorctl reload /etc/supervisor/conf.d/tornado.conf
+Restarted supervisord
+root@942adfc9da78:/zheshang# echo $?
+0
+
+
+supervisord是服务端，是个deamon，supervisorctl是客户。
+
+SUPERVISORD管理
+/usr/bin/supervisord -c /etc/supervisord.conf
+Supervisord安装完成后有两个可用的命令行supervisor和supervisorctl，命令使用解释如下：
+
+supervisord，初始启动Supervisord，启动、管理配置中设置的进程。
+supervisorctl stop programxxx，停止某一个进程(programxxx)，programxxx为[program:blogdemon]里配置的值，这个示例就是blogdemon。
+supervisorctl start programxxx，启动某个进程
+supervisorctl restart programxxx，重启某个进程
+supervisorctl stop all，停止全部进程，注：start、restart、stop都不会载入最新的配置文件。
+supervisorctl reload，载入最新的配置文件，并按新的配置启动、管理所有进程。
+
+# 设置supervisor开机自启动
+root@942adfc9da78:/etc/init.d# update-rc.d supervisor defaults
+root@942adfc9da78:/etc/init.d# ps -aux|grep supervisor
+root        57  0.0  0.0  15084  1024 ?        S+   02:28   0:00 grep --color=auto supervisor
+root@942adfc9da78:/etc/init.d# /etc/init.d/supervisor start
+Starting supervisor: Unlinking stale socket /var/run/supervisor.sock
+supervisord.
+root@942adfc9da78:/etc/init.d# echo $?
+0

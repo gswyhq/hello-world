@@ -1,0 +1,78 @@
+
+安装
+Ubuntu系统下：apt-get install supervisor，通过这种方式安装后，自动设置为开机启动
+也可以通过 pip install supervisor 进行安装，但是需要手动启动，然后设置为开机启动（不推荐这种安装方式）
+
+
+# 手动设置supervisor开机自启动
+
+root@942adfc9da78:/var/run# vim /etc/init.d/supervisord
+root@942adfc9da78:/var/run# chmod +x /etc/init.d/supervisord
+root@942adfc9da78:/var/run# cd /etc/init.d/
+root@942adfc9da78:/etc/init.d# update-rc.d supervisord defaults
+insserv: warning: script 'supervisord' missing LSB tags and overrides
+root@942adfc9da78:/etc/init.d# echo $?
+0
+
+# /etc/init.d/supervisord的内容如下，需要注意SUPERVISORD，PIDFILE，OPTS的路径
+root@942adfc9da78:/etc/init.d# head -n 3000 /etc/init.d/supervisord
+----------------------------------------------以下为`/etc/init.d/supervisord`的全部内容------------------------------------
+#! /bin/bash -e
+
+SUPERVISORD=/usr/bin/supervisord
+PIDFILE=/var/run/supervisord.pid
+OPTS="-c /etc/supervisor/supervisord.conf"
+
+test -x $SUPERVISORD || exit 0
+
+. /lib/lsb/init-functions
+
+export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/sbin:/sbin"
+
+case "$1" in
+  start)
+    log_begin_msg "Starting Supervisor daemon manager..."
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $SUPERVISORD -- $OPTS || log_end_msg 1
+    log_end_msg 0
+    ;;
+  stop)
+    log_begin_msg "Stopping Supervisor daemon manager..."
+    start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE || log_end_msg 1
+    log_end_msg 0
+    ;;
+
+  restart|reload|force-reload)
+    log_begin_msg "Restarting Supervisor daemon manager..."
+    start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $PIDFILE
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $SUPERVISORD -- $OPTS || log_end_msg 1
+    log_end_msg 0
+    ;;
+
+  *)
+    log_success_msg "Usage: /etc/init.d/supervisor
+{start|stop|reload|force-reload|restart}"
+    exit 1
+esac
+
+exit 0
+----------------------------------------------以上为`/etc/init.d/supervisord`的全部内容------------------------------------
+
+或者/etc/rc.local里面添加如下内容：
+/usr/bin/python /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+
+需要注意的是，rc.local是 init进程调用的， docker里面的容器压根没有这些；若需要在docker容器内实现开机启动，就需要在容器启动时执行指令
+CMD、ENTRYPOINT
+
+#gswyhq@gswyhq-PC:~/xincheng_zhongjixian$ docker run -i -t --restart=always --detach --name=zheshang18060 -p 18060:8000 --volume=$PWD:/zheshang --workdir=/zheshang ubuntu:1220 /bin/bash start.sh
+#942adfc9da782378405acf3f8857fd57ab5f5902c8bff62c890afb60cfa0d626
+
+vim start.sh
+#!/bin/bash
+
+cp supervisor_tornado.conf /etc/supervisor/conf.d/supervisor_tornado.conf
+cp nginx_nlp.conf /etc/nginx/conf.d/nginx_nlp.conf
+
+service nginx start
+service supervisor start
+
+

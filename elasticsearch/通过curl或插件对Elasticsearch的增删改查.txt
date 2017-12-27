@@ -1,0 +1,6 @@
+
+增加一条数据：
+gswyhq@gswyhq-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"answer": "保险公司完成保险收费、保单打印的保险成交过程。", "timestamp": "2017-12-26T13:59:37.416041", "question": "出单", "description": "保险常见名词解释"}'
+
+通过制定的id进行删除：
+删除id为AWCWwRuPPcvSZereEA8y的数据：gswyhq@gswyhq-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'

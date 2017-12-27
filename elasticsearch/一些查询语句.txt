@@ -143,3 +143,27 @@
   }
 }
 
+其他：
+"aggs" : {
+    "max_price": {
+        "max": {
+            "script": {
+                "lang": "groovy",
+                "inline": "_score"
+            }
+        }
+    }
+}
+在Elasticsearch 5.x, 启动的时候会报下面的警告：
+[WARN ][o.e.d.s.g.GroovyScriptEngineService] [groovy] scripts are deprecated, use [painless] scripts instead
+正确用法是:
+"aggs" : {
+    "max_price": {
+        "max": {
+            "script": {
+                "lang": "painless",
+                "inline": "_score"
+            }
+        }
+    }
+}

@@ -378,7 +378,96 @@ random_score子句不包含任何的filter，因此它适用于所有文档。
     }
 }
 
+其他示例：
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match_phrase": {
+          "question": "出单"
+        }
+      },
+      "boost": "5",
+      "functions": [
+        {
+          "filter": {
+            "match_phrase": {
+              "question": "出单"
+            }
+          },
+          "random_score": {},
+          "weight": 2
+        }
+      ],
+      "max_boost": 42,
+      "score_mode": "max",
+      "boost_mode": "multiply",
+      "min_score": 4
+    }
+  }
+}
 
 
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match_phrase": {
+          "question": "出单"
+        }
+      },
+      "script_score": {
+        "script": {
+          "params": {
+            "a": 5,
+            "b": 1.2
+          },
+          "source": "params.a / Math.pow(params.b, doc['likes'].value)"
+        }
+      }
+    }
+  }
+}
+
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match_phrase": {
+          "question": "出单"
+        }
+      },
+      "boost": "3",
+      "random_score": {},
+      "boost_mode": "multiply"
+    }
+  }
+}
+
+title 查询语句的重要性是 content 查询的 2 倍，因为它的权重提升值为 2 。
+没有设置 boost 的查询语句的值为 1 。
+查询时的权重提升 是可以用来影响相关度的主要工具，任意类型的查询都能接受 boost 参数。 将 boost 设置为 2 ，并不代表最终的评分 _score 是原值的两倍；
+实际的权重值会经过归一化和一些其他内部优化过程。尽管如此，它确实想要表明一个提升值为 2 的句子的重要性是提升值为 1 语句的两倍。
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": {
+              "query": "quick brown fox",
+              "boost": 2
+            }
+          }
+        },
+        {
+          "match": {
+            "content": "quick brown fox"
+          }
+        }
+      ]
+    }
+  }
+}
 
 

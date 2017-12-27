@@ -25,6 +25,9 @@ gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ unzip /home/gswyhq/elas
 gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0/plugins$ ls
 elasticsearch-analysis-ik-5.3.0
 
+当然，也可以直接下载zip文件：
+wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v5.6.4/elasticsearch-analysis-ik-5.6.4.zip
+wget https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v5.6.4/elasticsearch-analysis-pinyin-5.6.4.zip
 
 若bash: mvn: 未找到命令，则需要：
 gswyhq@gswyhq-pc:~$ sudo apt-get install maven

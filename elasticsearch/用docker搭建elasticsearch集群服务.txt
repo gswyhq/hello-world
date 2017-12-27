@@ -1,0 +1,113 @@
+
+Configuration
+
+docker-host-01
+
+eth0: 192.168.1.10
+Docker version 1.4.1, build 5bc2ff8/1.4.1
+docker-host-02
+
+eth0: 192.168.1.20
+Docker version 1.4.1, build 5bc2ff8/1.4.1
+Building the Cluster
+
+On Docker Host 01
+
+docker run -d \
+  -p 9200:9200 \
+  -p 9300:9300 \
+  ehazlett/elasticsearch \
+  --cluster.name=unicast \
+  --network.publish_host=192.168.1.10 \
+  --discovery.zen.ping.multicast.enabled=false \
+  --discovery.zen.ping.unicast.hosts=192.168.1.20 \
+  --discovery.zen.ping.timeout=3s \
+  --discovery.zen.minimum_master_nodes=1
+On Docker Host 02
+
+docker run -d \
+  -p 9200:9200 \
+  -p 9300:9300 \
+  ehazlett/elasticsearch \
+  --cluster.name=unicast \
+  --network.publish_host=192.168.1.20 \
+  --discovery.zen.ping.multicast.enabled=false \
+  --discovery.zen.ping.unicast.hosts=192.168.1.10 \
+  --discovery.zen.ping.timeout=3s \
+  --discovery.zen.minimum_master_nodes=1
+
+# 集群名称，默认为elasticsearch
+cluster.name: birdESCluster
+
+#  默认情况下，ElasticSearch使用0.0.0.0地址（也就是说如果这个机子有几个网卡，则ElasticSearch都可以通过这些IP来使用其服务。所以如果我们的服务器有网卡绑定在外网时一定要注意设置ElasticSearch的属性），并为http传输开启9200-9300端口，为节点到节点的通信开启9300-9400端口，也可以自行设置IP地址：
+network.bind_host: 192.168.0.1
+
+# publish_host设置其他节点连接此节点的地址，如果不设置的话，则自动获取，publish_host的地址必须为真实地址：
+network.publish_host: 192.168.0.1
+
+# bind_host和publish_host可以一起设置：（如果不想外网访问ES，可以设置这个）
+network.host: 192.168.0.1
+
+# 可以定制该节点与其他节点交互的端口：
+transport.tcp.port: 9300
+
+# 节点间交互时，可以设置是否压缩，转为为不压缩：
+transport.tcp.compress: true
+
+# 可以为Http传输监听定制端口：
+http.port: 9200
+
+# 设置内容的最大长度：
+http.max_content_length: 100mb
+
+# 禁止HTTP
+http.enabled: false
+
+# 允许在N个节点启动后恢复过程：
+gateway.recover_after_nodes: 1
+
+# 设置初始化恢复过程的超时时间：
+gateway.recover_after_time: 5m
+
+# 下面几个是集群自动发现机制
+elasticsearch的集群是内嵌自动发现功能的。
+意思就是说，你只需要在每个节点配置好了集群名称，节点名称，互相通信的节点会根据es自定义的服务发现协议去按照多播的方式来寻找网络上配置在同样集群内的节点。
+和其他的服务发现功能一样，es是支持多播和单播的。
+多播是需要看服务器是否支持的，由于其安全性，其实现在基本的云服务（比如阿里云）是不支持多播的，所以即使你开启了多播模式，你也仅仅只能找到本机上的节点。
+单播模式安全，也高效，但是缺点就是如果增加了一个新的机器的话，就需要每个节点上进行配置才生效了。
+
+# 设置ping其他节点时的超时时间，网络比较慢时可将该值设大：
+# 是设置了节点与节点之间的连接ping时长
+discovery.zen.ping.timeout: 3s
+
+# 禁止当前节点发现多个集群节点，默认值为true：
+# 这个设置把组播的自动发现给关闭了，为了防止其他机器上的节点自动连入。
+discovery.zen.ping.multicast.enabled: false
+
+# 设置新节点被启动时能够发现的主节点列表, 这个设置了自动发现的节点。：
+discovery.zen.ping.unicast.hosts: ["10.0.0.28:9300", "10.0.0.28:9500"]
+
+# 设置是否可以通过正则或者_all删除或者关闭索引
+action.destructive_requires_name 默认false 允许 可设置true不允许
+
+# 这个设置为了避免脑裂。比如3个节点的集群，如果设置为2，那么当一台节点脱离后，不会自动成为master。
+discovery.zen.minimum_master_nodes:2
+
+# 这个关闭了自动创建索引。为的也是安全考虑，否则即使是内网，也有很多扫描程序，一旦开启，扫描程序会自动给你创建很多索引。
+action.auto_create_index: false
+
+自动选举
+elasticsearch集群一旦建立起来以后，会选举出一个master，其他都为slave节点。
+但是具体操作的时候，每个节点都提供写和读的操作。就是说，你不论往哪个节点中做写操作，这个数据也会分配到集群上的所有节点中。
+
+这里有某个节点挂掉的情况，如果是slave节点挂掉了，那么首先关心，数据会不会丢呢？不会。如果你开启了replicate，那么这个数据一定在别的机器上是有备份的。
+别的节点上的备份分片会自动升格为这份分片数据的主分片。这里要注意的是这里会有一小段时间的yellow状态时间。
+
+如果是主节点挂掉怎么办呢？当从节点们发现和主节点连接不上了，那么他们会自己决定再选举出一个节点为主节点。
+但是这里有个脑裂的问题，假设有5台机器，3台在一个机房，2台在另一个机房，当两个机房之间的联系断了之后，每个机房的节点会自己聚会，推举出一个主节点。
+这个时候就有两个主节点存在了，当机房之间的联系恢复了之后，这个时候就会出现数据冲突了。
+解决的办法就是设置参数：
+
+discovery.zen.minimum_master_nodes
+为3(超过一半的节点数)，那么当两个机房的连接断了之后，就会以大于等于3的机房的master为主，另外一个机房的节点就停止服务了。
+

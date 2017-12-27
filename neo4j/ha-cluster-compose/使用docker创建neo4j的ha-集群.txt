@@ -1,0 +1,50 @@
+
+Neo4j HA主要提供以下两个功能：
+
+容错数据库架构 保存多个数据副本，即使硬件故障，也能保证可读写。
+水平方向扩展以读为主架构 读操作负载均衡。
+Neo4j HA模式总有单个master，零个或多个slave。
+
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ wget https://raw.githubusercontent.com/neo4j/docker-neo4j/1f73186d4ace2935f180daa9a1bf39e3b411a848/test/ha-cluster-compose.yml
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
+ERROR:
+        Can't find a suitable configuration file in this directory or any
+        parent. Are you in the right directory?
+
+        Supported filenames: docker-compose.yml, docker-compose.yaml
+
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ ls
+ha-cluster-compose.yml
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ mv ha-cluster-compose.yml docker-compose.yml
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
+Creating network "neo4jhacluster_lan" with the default driver
+Creating read-placeholder ...
+Creating neo4jhacluster_slave1_1 ...
+Creating core-placeholder ...
+Creating neo4jhacluster_slave1_1
+Creating read-placeholder
+Creating read-placeholder ... done
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ echo $?
+0
+gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker ps |grep neo4j
+fb03bbbe5de8        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 16 seconds       7473-7474/tcp, 7687/tcp                                      read-placeholder
+509b7515a564        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 17 seconds       7473-7474/tcp, 7687/tcp                                      core-placeholder
+234b739f3e53        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 17 seconds       7473-7474/tcp, 7687/tcp                                      neo4jhacluster_slave1_1
+
+至此，单机上的集群即创建成功；
+
+Neo4j HA配置参数：
+ha.server_id : 大于等于0的整数且唯一，必须参数
+ha.server : 自动发现，当作为master时，主机和端口绑定，如my-domain.com:6001
+ha.discovery.enabled : 是否使用ha.discovery.url定义群集
+ha.discovery.url : 如果ha.discovery.enabled真，用于定义集群，如file://my.server:8080/my-cluster
+ha.initial_hosts : 如果ha.discovery.enabled假，其他成员以逗号分隔加入到集群的列表。如果没有可用成员，将创建一个新的集群。
+ha.cluster_server : 自动发现。主机与端口绑定，集群管理通讯。
+ha.pull_interval : 多少间隔时间slave从master主动拉取数据更新。在写事务时默认是不定期更新。
+ha.read_timeout : 等待master响应超时时间，默认20s
+ha.lock_read_timeout :
+ha.state_switch_timeout : 最大多长时间，master/slave进行优雅的角色切换
+ha.max_concurrent_channels_per_slave : 最大并发信道数量
+
+参考：http://www.ttlsa.com/nosql/neo4j-ha-3/
+http://neo4j.com/docs/operations-manual/current/tutorial/highly-available-cluster/
