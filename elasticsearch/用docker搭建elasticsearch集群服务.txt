@@ -65,6 +65,7 @@ http.enabled: false
 
 # 允许在N个节点启动后恢复过程：
 gateway.recover_after_nodes: 1
+这将阻止 Elasticsearch 在存在至少 1 个节点（数据节点或者 master 节点）之前进行数据恢复。 这个值的设定取决于个人喜好：整个集群提供服务之前你希望有多少个节点在线？这种情况下，我们设置为 1，这意味着至少要有 1 个节点，该集群才可用。
 
 # 设置初始化恢复过程的超时时间：
 gateway.recover_after_time: 5m
@@ -111,3 +112,13 @@ elasticsearch集群一旦建立起来以后，会选举出一个master，其他�
 discovery.zen.minimum_master_nodes
 为3(超过一半的节点数)，那么当两个机房的连接断了之后，就会以大于等于3的机房的master为主，另外一个机房的节点就停止服务了。
 
+动态修改es配置：
+由于 ELasticsearch 是动态的，你可以很容易的添加和删除节点， 但是这会改变这个法定个数。 你不得不修改每一个索引节点的配置并且重启你的整个集群只是为了让配置生效，这将是非常痛苦的一件事情。
+基于这个原因， minimum_master_nodes （还有一些其它配置）允许通过 API 调用的方式动态进行配置。 当你的集群在线运行的时候，你可以这样修改配置：
+PUT /_cluster/settings
+{
+    "persistent" : {
+        "discovery.zen.minimum_master_nodes" : 2
+    }
+}
+这将成为一个永久的配置，并且无论你配置项里配置的如何，这个将优先生效。当你添加和删除 master 节点的时候，你需要更改这个配置。

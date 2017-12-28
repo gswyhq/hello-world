@@ -79,6 +79,16 @@ class ReIndex():
 
     def create_index(self, _index, alias_name, body=BAOXIAN_INDEX_MAPPINGS_AND_SETTINGS):
         self.es.indices.create(index=_index, ignore=400, body=body)  # 创建索引
+        if self.es.indices.exists_alias(name=alias_name):
+            # 判断某个别名是否已经存在
+            # alias_dict = self.es.indices.get_alias(name=alias_name)  # 检测这个别名指向哪一个索引
+            # alias_dict = self.es.indices.get_alias(index=_index)  # 检测哪些别名指向这个索引
+            # alias_dict = self.es.indices.get_alias(name)  # 根据索引，或别名，查询对应的指向关系
+            # 返回数据结构都是： {'baike_v2': {'aliases': {'baike_alias': {}}},'baike_v3': {'aliases': {'baike_alias': {}}}}
+            # index_list = [k for k in alias_dict.keys()]
+            # self.es.indices.delete_alias(index=index_list, name=alias_name)  # 删除索引及别名的指向
+            self.es.indices.delete_alias(index='_all', name=alias_name)  # 删除别名指向所有的索引
+
         self.es.indices.put_alias(_index, name=alias_name)  # 给索引取别名
 
     def bulk_add_data(self, _index, _doc_type, dict_data=None):

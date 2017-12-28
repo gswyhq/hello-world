@@ -1,0 +1,182 @@
+
+
+实现步骤:
+
+安装gollum 和 github-markdown
+gswyhq@gswyhq-PC:~$ sudo apt-get install ruby
+gswyhq@gswyhq-PC:~$ sudo apt-get install rubygems
+gswyhq@gswyhq-PC:~$ sudo apt-get  install   ruby-dev
+gswyhq@gswyhq-PC:~$ sudo gem install gollum
+gswyhq@gswyhq-PC:~$ sudo gem install github-markdown
+
+选择一个目录克隆wiki
+在gitlab网站wiki/Git Access页面内找项目连接地址(打开wiki页面点击右侧的`  Clone repository`即可获取对应的地址)
+如：http://192.168.3.101/gswyhq/data-system-framework/wikis/git_access
+git clone git @git.xxxxxxx.org:xxxx/name.wiki.git
+
+进入目录
+cd name.wiki
+git查看项目日志
+git log
+回退版本, 找到相应的版本哈希复制下来
+git reset --hard 哈希值
+最后将修改push到服务器上就ok了.从此以后可以和代码一样在本地写wiki后再推到服务器了
+
+在项目git的目录（含有.git目录）执行
+gswyhq@gswyhq-PC:~/data-system-framework.wiki$ gollum --css --allow-uploads --mathjax --h1-title
+以上使用了一些参数，分别是使用自定义 custom.css 文件（在git初始化目录），增加上传功能，支持 LaTeX 公式，markdown的一级标题为全文标题。
+
+在浏览器中访问以下地址来创建wiki内容：
+http://localhost:4567
+
+gollum的一些注意点
+gollum命令必须在git目录下使用
+使用git来提交内容时一定要commit之后才会生效
+git必须在master分支提交
+wiki的目录结构最好事先设计好，否则文件会非常乱
+
+
+语法参考： https://www.cnblogs.com/moshang-zjn/p/5757430.html
+
+一、文本的排版
+
+     为了让文本/文档的结构清晰明了，我们需要一下标题结构和文本格式。Wiki 主要的文本编辑语法用到的是Markdown。Markdown语法兼容HTML，可以直接在文档里用HTML撰写，只是有一些区块元素<div><table><pre><p>等标签，必须在前后加空行与其他内容分开。
+
+1.标题
+
+1.1 类Atx形式
+
+# 一级标题
+
+## 二级标题
+
+### 三级标题
+
+#### 四级标题
+
+注：#后有一空格
+
+效果图：
+
+
+
+1.2 类Setext形式
+
+利用底线=和-，构建两级标题，例如：
+
+一级标题
+
+=====
+
+二级标题
+
+--------
+
+效果图：
+
+
+
+1.3 直接使用HTML
+
+在Markdown语法中可以直接使用非区块的标签，所以HTML标题标签是可以在markdown中直接使用，例如：
+
+<h1>一级标题</h1>
+<h2>二级标题</h2>
+<h3>三级标题</h3>
+
+效果图：
+
+
+
+2. 段落
+
+    创建段落时，需要在段前和断后插入一行空行。例如：
+
+This is a beautiful girl and
+
+she is learning the Markdown.May be she will know the
+
+difference between
+
+ Markdown and HTML.When she know how to use it, she will love it.
+
+效果图：
+
+
+
+3.区块
+
+使用>符号，在每行的最前面加上>.例如：
+
+>This is a beautiful girl and she is learning the Markdown.
+>
+>May be she will know the difference between Markdown and HTML.
+>
+>
+>When she know how to use it, she will love it.
+效果图：
+
+
+
+4.强调
+
+使用*，_设置强调的文字。例如：
+
+This is a beautiful girl and she is learning the *Markdown*.May be she will know the _difference_ between _Markdown_ and *HTML*.When she know how to use it, she will love it.
+
+效果图：
+
+
+
+5.列表（有序和无序）
+
+5.1 无序列表
+
+无序列表需要利用星号、加号、减号做列表标记，符号后加一空格。例如：
+
+* first item
+* second item
++ third item
++ forth item
+- fifth item
+- sixth item
+
+效果图：
+
+
+
+5.2 有序列表
+
+有序列表只需使用数字接着一个英文句号
+
+6.链接
+
+格式：[link](地址)，例如：This is a [行内链接](http://i.cnblogs.com)。
+
+效果图：
+
+
+
+7.分隔线
+
+利用三个以上的*，-，_(星号，减号，底线)建立分隔线。例如：
+******
+这是一条分隔线
+____
+这也是一条分隔线
+
+效果图：
+
+
+
+8.反斜杠：markdown 中可以利用反斜杠来插入一些具有其他意义的符号，例如:具有强调的星号。
+
+\*无强调\*
+
+*有强调*
+
+效果图：
+
+
+
+
