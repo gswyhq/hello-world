@@ -167,3 +167,18 @@
         }
     }
 }
+
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match_phrase": {
+          "question": "出单"
+        }
+      },
+      "boost": "5",
+      "random_score": {},  # 随机搜索，每次的结果并不一致
+      "boost_mode": "multiply"
+    }
+  }
+}
