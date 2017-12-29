@@ -23,6 +23,13 @@ file_names = ['/home/gswyhq/Downloads/test/lpa30-n100-0.5rep1.dat',
  '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep3.dat',
  '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep4.dat']
 
+def step1(data):
+    '''
+    第一步：把第1-10列中随机2列求和变为1列(最后得到5列)；把第11-20列中随机2列求和变为1列(最后得到5列)；把第21-30列中随机2列求和变为1列(最后得到5列)；最后得到15列；
+    :param data:
+    :return:
+    '''
+
 for file_name in file_names:
     data = pd.read_table(file_name, sep='     ')
     print(data.shape)

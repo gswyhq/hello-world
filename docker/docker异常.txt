@@ -124,4 +124,22 @@ Error response from daemon: Driver aufs failed to remove root filesystem aa7595e
 # 解决方法，使用 umount -l 解除占用即可：
 ubuntu@ip-172-31-11-15:~/zhongan_neo4j$ sudo umount -l /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20
 
+gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
+正在读取软件包列表... 完成
+正在分析软件包的依赖关系树
+正在读取状态信息... 完成
+E: 无法定位软件包 docker.io
+E: 无法按照 glob ‘docker.io’ 找到任何软件包
+E: 无法按照正则表达式 docker.io 找到任何软件包
+
+更改配置软件源：
+gswyhq@gswyhq-pc:~$ sudo vim /etc/apt/sources.list
+deb [by-hash=force] http://mirrors.aliyun.com/deepin unstable main contrib non-free
+# deb [by-hash=force] http://packages.deepin.com/deepin unstable main contrib non-free
+# deb-src http://packages.deepin.com/deepin unstable main contrib non-free
+
+gswyhq@gswyhq-pc:~$ sudo apt-get update
+gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
+
+
 
