@@ -1,0 +1,9 @@
+
+docker 容器启动不了，报错：
+max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+
+解决方法，在宿主机上运行下命令即可：
+zy@ubuntu:~/docker/elasticsearch$ sudo sysctl -w vm.max_map_count=262144
+
+
+
