@@ -16,6 +16,7 @@
 
 """
 import pandas as pd
+import random
 from itertools import combinations
 
 file_names = ['/home/gswyhq/Downloads/test/lpa30-n100-0.5rep1.dat',
@@ -23,16 +24,100 @@ file_names = ['/home/gswyhq/Downloads/test/lpa30-n100-0.5rep1.dat',
  '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep3.dat',
  '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep4.dat']
 
-def step1(data):
+def group(ls, n):
+    """
+    从数组ls中随机n个值，直到数组为空
+    :param ls: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    :param n: 2
+    :return: [[4, 2], [3, 6], [5, 1], [7, 8], [9, 0]]
+    """
+    rets = []
+    while(set(ls)-set(sum(rets, []))):
+        new_group = random.sample(set(ls)-set(sum(rets, [])), n)
+        rets.append(new_group)
+    return rets
+# import pandas as pd
+# df =pd.DataFrame(data=[[1,2,3,2],[5,6,7,4], [9,1,2,4]])
+# df
+# Out[33]:
+#    0  1  2  3
+# 0  1  2  3  2
+# 1  5  6  7  4
+# 2  9  1  2  4
+t10 = group([t for t in range(10)], 2)
+t20 = group([t for t in range(10, 20)], 2)
+t30 = group([t for t in range(20, 30)], 2)
+ins = [t10, t20, t30]
+ds1 = {}
+for t, ts in enumerate(ins):
+    for t2, tts in enumerate(ts):
+        for k in tts:
+            ds1[k] = t*10 + t2
+
+def step1(x):
     '''
     第一步：把第1-10列中随机2列求和变为1列(最后得到5列)；把第11-20列中随机2列求和变为1列(最后得到5列)；把第21-30列中随机2列求和变为1列(最后得到5列)；最后得到15列；
     :param data:
-    :return:
+    :re10turn:
     '''
+    return ds1.get(x)
+
+
+t10 = group([t for t in range(10)], 5)
+t20 = group([t for t in range(10, 20)], 5)
+t30 = group([t for t in range(20, 30)], 5)
+ins = [t10, t20, t30]
+ds2 = {}
+for t, ts in enumerate(ins):
+    for t2, tts in enumerate(ts):
+        for k in tts:
+            ds2[k] = t * 10 + t2
+
+
+def step2(x):
+    '''
+    第二步：把第1-10列中随机5列求和变为1列(最后得到2列)；把第11-20列中随机5列求和变为1列(最后得到2列)；把第21-30列中随机5列求和变为1列(最后得到2列)；最后得到6列；
+    :param data:
+    :re10turn:
+    '''
+    return ds2.get(x)
+
+def step3(x):
+    '''
+    第三步：求第1-10列总分；求第11-20列总分；求第21-30列总分；最后得到3列；
+    :param data:
+    :re10turn:
+    '''
+    return int(x/10)
+
+def step4(df, path_or_buf):
+    '''
+    第四步：另存文件，即可得到4个含有24（15+6+3）列数据的文件。
+    DataFrame.to_csv(path_or_buf=None, sep=', ', na_rep='', float_format=None, columns=None, header=True, index=True, index_label=None, mode='w', encoding=None, compression=None, quoting=None, quotechar='"', line_terminator='\n', chunksize=None, tupleize_cols=False, date_format=None, doublequote=True, escapechar=None, decimal='.', **kwds)
+Write DataFrame to a comma-separated values (csv) file
+    :param data:
+    :re10turn:
+    '''
+    df.to_csv(path_or_buf)
 
 for file_name in file_names:
-    data = pd.read_table(file_name, sep='     ')
-    print(data.shape)
+    df = pd.read_table(file_name, sep='     ', names=[t for t in range(30)])
+    print(df.shape)
+    grouped = df.groupby(step1, axis=1)
+    t1 = grouped.agg('sum')
+
+
+    grouped = df.groupby(step2, axis=1)
+    t2 = grouped.agg('sum')
+
+
+    grouped = df.groupby(step3, axis=1)
+    t3 = grouped.agg('sum')
+
+    t4 = pd.concat([t1, t2, t3], axis=1)
+
+    path_or_buf = file_name.replace('lpa30-n100-0.5', 'result_')
+    step4(t4, path_or_buf)
 
     # data = pd.read_table('Z:/test.txt', header=None, encoding='gb2312', delim_whitespace=True, index_col=0)
     # header=None:没有每列的column name，可以自己设定
@@ -52,6 +137,7 @@ for file_name in file_names:
     # weights这个是每个样本的权重，具体可以看官方文档说明。
     # random_state这个在之前的文章已经介绍过了。
     # axis是选择抽取数据的行还是列。axis = 0的时是抽取行，axis = 1时是抽取列（也就是说axis = 1时，在列中随机抽取n列，在axis = 0时，在行中随机抽取n行）
+    # apply()对dataframe的内容进行批量处理, 这样要比循环来得快。如df.apply(func,axis=0,.....) func：定义的函数，axis=0时为对列操作，=1时为对行操作。
 
 
 def main():

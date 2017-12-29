@@ -252,6 +252,10 @@ ubuntu@10-13-70-173:~$ sudo apt-get install libevent-dev
 ubuntu@10-13-70-57:~$ sudo apt-get install g++
 
 
+pip install 一直都是超时，pip install timed out
+可使用国内镜像源来加速python pypi包的安装
+pip install 包名 -i https://pypi.douban.com/simple
+gswyhq@gswyhq-pc:~$ sudo pip3 install pandas -i https://pypi.douban.com/simple
 
 
 
