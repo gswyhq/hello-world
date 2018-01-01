@@ -101,7 +101,17 @@ Write DataFrame to a comma-separated values (csv) file
     df.to_csv(path_or_buf, sep='\t', header=False, index=False)
 
 for file_name in file_names:
-    df = pd.read_table(file_name, sep='     ', names=[t for t in range(30)])
+    with open(file_name)as f:
+        data = f.readlines()
+        new_data = [t.strip().split()[:30] for t in data]
+    new_file_name = file_name.replace('dat', 'csv')
+    with open(new_file_name, 'w', encoding='utf8')as f:
+        for line in new_data:
+            print(','.join(line), file=f)
+
+# for file_name in file_names:
+#     df = pd.read_table(file_name, sep='     ', names=[t for t in range(30)])
+    df = pd.read_table(new_file_name, sep=',', names=[t for t in range(30)])
     print(df.shape)
     grouped = df.groupby(step1, axis=1)
     t1 = grouped.agg('sum')

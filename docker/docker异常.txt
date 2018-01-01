@@ -63,9 +63,17 @@ ubuntu@ip-172-31-14-6:~$ docker -v
 Docker version 1.6.2, build 7c8fca2
 版本1.6.2不允许从主机复制到容器，您需要升级到至少1.8的支持。
 
-# pull镜像报错：
+# pull镜像速度慢，报错：
 Error response from daemon: Get https://registry-1.docker.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 可在 https://www.daocloud.io 注册账号 使用Docker 加速器；
+
+swyhq@gswyhq-pc:~/hello-world/docker$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io
+Error: Unsupported OS, please set registry-mirror manually.
+
+修改Docker配置文件/etc/default/docker如下：
+
+DOCKER_OPTS="--registry-mirror=http://aad0405c.m.daocloud.io"
+使用service docker restart重启Docker服务即可。
 
 curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io Copy
 该脚本可以将 --registry-mirror 加入到你的 Docker 配置文件 /etc/docker/daemon.json 中。适用于 Ubuntu14.04、Debian、CentOS6 、CentOS7、Fedora、Arch Linux、openSUSE Leap 42.1，其他版本可能有细微不同。更多详情请访问文档。
