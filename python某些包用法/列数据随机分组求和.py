@@ -98,7 +98,7 @@ Write DataFrame to a comma-separated values (csv) file
     :param data:
     :re10turn:
     '''
-    df.to_csv(path_or_buf)
+    df.to_csv(path_or_buf, sep='\t', header=False, index=False)
 
 for file_name in file_names:
     df = pd.read_table(file_name, sep='     ', names=[t for t in range(30)])
@@ -167,3 +167,6 @@ if __name__ == '__main__':
 # data.ix[-1] #取DataFrame中最后一行，返回的是Series类型，这个一样，行索引不能是数字时才可以使用
 # data.tail(1)   #返回DataFrame中的最后一行
 # data.head(1)   #返回DataFrame中的第一行
+
+
+
