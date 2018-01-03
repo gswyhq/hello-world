@@ -17,3 +17,17 @@ print(result.encoding)
 其他：
 payload = {'key1': 'value1', 'key2': 'value2'}
 >>> r = requests.get("http://httpbin.org/get", params=payload)
+
+# 获取某个get服务，所有的项目情况
+response = requests.get('http://192.168.3.101/api/v3/projects', params={'private_token':'CeyrY48yDYsxy-soNRxT'})
+response.json()
+
+# 获取项目id为1，master分支，项目路径为`conf/__init__.py`的文件内容：
+response = requests.get('http://192.168.3.101/api/v3/projects/1/repository/files?file_path=conf/__init__.py&ref=master&private_token=CeyrY48yDYsxy-soNRxT')
+import base64
+data = response.json().get('content')
+len(data)
+Out[10]: 128
+base64.b64decode(data)
+Out[11]: b"#!/usr/bin/python3\n# coding: utf-8\n\ndef main():\n    pass\n\n\nif __name__ == '__main__':\n    main()"
+

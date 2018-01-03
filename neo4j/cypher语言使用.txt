@@ -294,6 +294,22 @@ start n=node:node_auto_index(name="C") return n,n.name;
 start a = node(*) where a.name="a" set a.name="A" return a,a.name ;
 start n=node(0) set n.name="Root",n.ID="001" ; //给默认的根节点添加name,ID属性，便于查询。
 
+对数值型的属性值修改：
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] set n.name=n.name-10000, n.Name=n.Name-10000, n.alias=n.alias-10000  RETURN distinct n
+
+集合：
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] with distinct n.name as name RETURN name
+
+# 去重之后在过滤：
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] with distinct n.name as name, n.Name as Name, n.alias as alias where name>20180102 RETURN name
+
+# 先集合，在查找：
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] with collect(n) as name MATCH (m) where m.name =20171231 RETURN count(m)
+
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] with collect(n) as name MATCH (m) where m in name RETURN count(m)
+
+MATCH p=(n1)-[r]->(n) where type(r) in ['开始时间','结束时间' ] with collect(n) as name MATCH (m) where m in name set m.name=m.name+10000, m.Name=m.Name+10000, m.alias=m.alias+10000 RETURN m
+
 删除：
 删除所有节点和关系：
 START n=node(*)

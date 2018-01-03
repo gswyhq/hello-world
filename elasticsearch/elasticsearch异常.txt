@@ -66,19 +66,3 @@ network.publish_host: 192.168.0.1
 network.host: 192.168.0.1
 这个参数是用来同时设置bind_host和publish_host上面两个参数。
 
-
-The working solution was to run docker run --rm -p 9200:9200 -p 9300:9300 --name=es elasticsearch:latest -Des.network.host=0.0.0.0
-
-Example:
-
-docker run -d -p 9200:9200 -p 9300:9300 elasticsearch:2 \
-        elasticsearch \
-            -Des.discovery.zen.ping.unicast.hosts=192.168.99.100,192.168.99.101 \
-            -Des.discovery.zen.minimum_master_nodes=2 \
-            -Des.network.publish_host=192.168.99.100
-docker run -d -p 9200:9200 -p 9300:9300 elasticsearch:2 \
-    elasticsearch \
-    -Des.discovery.zen.ping.unicast.hosts=192.168.99.100,192.168.99.101 \
-    -Des.discovery.zen.minimum_master_nodes=2 \
-    -Des.network.publish_host=192.168.99.101
-

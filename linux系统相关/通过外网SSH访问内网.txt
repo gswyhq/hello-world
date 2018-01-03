@@ -91,4 +91,22 @@ tcp      175      0 127.0.0.1:7770          127.0.0.1:40771         CLOSE_WAIT  
 tcp6       0      0 ::1:7770                :::*                    LISTEN      29810/sshd: ubuntu
 ubuntu@ip-172-31-14-6:~/shanglishi$ kill -9 29810
 
+如果SSH连接和应用的连接这两个连接的方向一致，那我们就说它是本地转发。
+ssh -L <local port>:<remote host>:<remote port> <SSH hostname>
 
+如果SSH连接和应用的连接这两个连接的方向不同，那我们就说它是远程转发。
+ssh -R <local port>:<remote host>:<remote port> <SSH hostname>
+
+另外本地转发命令中的 <remote host> 和 <SSH hostname> 可以是不同的主机。
+
+ssh -i .zyg.pem -NfL  172.31.13.157:3307:ucloud.c1t9kbuexy3c.rds.cn-north-1.amazonaws.com.cn:3306 ubuntu@54.223.152.240
+
+ubuntu@ip-172-31-14-6:~$ telnet ucloud.c1t9kbuexy3c.rds.cn-north-1.amazonaws.com.cn 3306
+Trying 172.31.0.68...
+Connected to ec2-52-80-141-61.cn-north-1.compute.amazonaws.com.cn.
+Escape character is '^]'.
+N
+5.6.37-log'U7PlP-/B�A[)W^OR04V7Kmysql_native_password
+Connection closed by foreign host.
+
+更多资料参考：http://blog.csdn.net/a351945755/article/details/21785647
