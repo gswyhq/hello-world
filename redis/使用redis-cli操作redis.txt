@@ -146,3 +146,21 @@ info：提供服务器的信息和统计
 monitor：实时转储收到的请求
 slaveof：改变复制策略设置
 config：在运行时配置Redis服务器
+
+# 批量操作，执行文件中的命令
+root@2ef3dea30784:/data# head d1.txt
+set myk12 v1
+zadd zset12 0 a 1 b 3 c
+sadd sset12 e f g hh
+set myk22 v2
+hset myset12 k1 v1
+hmset myset22 k2 v2 k3 v3 k4 v4
+set myk32 v3
+# redis-cli中只支持dos格式的换行符 \r\n ，如果你在Linux下、Mac下或者Windows下创建的文件，最好都转个码。没有转码的文件,执行会失败。
+下面是转码指令, 只需要在命令后加入要转码的文件即可：
+gswyhq@gswyhq-PC:~/docker/redis/data$ sudo unix2dos d1.txt
+root@2ef3dea30784:/data# head d1.txt| redis-cli -p 6379 -h 172.17.0.3 -n 0 --pipe
+All data transferred. Waiting for the last reply...
+Last reply received from server.
+errors: 0, replies: 7
+

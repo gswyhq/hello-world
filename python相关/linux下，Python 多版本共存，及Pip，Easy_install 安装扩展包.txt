@@ -17,7 +17,9 @@ Python2与Python3共存
 安装超时：
 root@8f71c2b955d0:/# pip3 --default-timeout=100 install pyltp
 
- 
+# 将程序包（pytrie为例）安装到指定目录（下示例中安装到当前目录）
+gswyhq@gswyhq-PC:~/nlp_layer/oto_qa$ sudo pip3 install --target . pytrie
+
 
 区分：
 

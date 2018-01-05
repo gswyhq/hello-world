@@ -155,6 +155,14 @@ tornadoes:tornado-8000           STOPPED    May 08 07:09 PM
 
 如果修改了 /etc/supervisord.conf ,,需要执行 supervisorctl reload 来重新加载配置文件，否则会感觉没有生效
 
+# 重新加载时候，有时候会报错：
+zy@ubuntu:~/yhb$ supervisorctl reload /etc/supervisor/conf.d/tornado.conf
+error: <class 'socket.error'>, [Errno 13] Permission denied: file: /usr/lib/python2.7/socket.py line: 228
+
+# 解决方法是采用root用户来运行即可：
+zy@ubuntu:~/yhb$ sudo supervisorctl reload /etc/supervisor/conf.d/tornado.conf
+Restarted supervisord
+
 有时候会报错：
 FATAL      Exited too quickly (process log may have details)
 

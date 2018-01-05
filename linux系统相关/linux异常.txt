@@ -43,3 +43,10 @@ net.netfilter.nf_conntrack_tcp_timeout_established = 12000
 gswyhq@gswyhq-PC:~$ sudo sysctl -p /etc/sysctl.conf
 
 
+安装unix2dos和dos2unix
+gswyhq@gswyhq-PC:~$ sudo apt-get install tofrodos
+运行这两行
+gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/todos /usr/bin/unix2dos
+gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
+
+

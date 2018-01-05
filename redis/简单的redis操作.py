@@ -58,13 +58,12 @@ True
 >>> p.set('hello','redis')
 >>> p.sadd('faz','baz')
 >>> p.incr('num')
+# 一次性执行上边的三个命令
 >>> p.execute()
 [True, 1, 1]
 >>> r.get('hello')
 'redis'
 管道的命令可以写在一起，如：
-
-
 >>> p.set('hello','redis').sadd('faz','baz').incr('num').execute()
 1
 >>> p.set('hello','redis').sadd('faz','baz').incr('num').execute()
