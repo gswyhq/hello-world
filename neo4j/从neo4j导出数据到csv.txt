@@ -1,0 +1,136 @@
+
+CALL apoc.export.csv.all( "/var/lib/neo4j/data/all.csv", {})
+
+_id	_labels	name	Name	_start	_end	_type	since
+0	:Person	Euler
+1	:Person	Bernoulli
+2	:Xianzhong:Xincheng	重疾险	重疾险
+3	:Qingjing:Xincheng	战争
+				0	1	KNOWS	1768
+				2	3	免赔条款	1768
+
+
+USING PERIODIC COMMIT 10
+LOAD CSV FROM "file:///test.csv" AS line
+match (from:airplane{id:line[0]),(to:position{id:[1]})
+merge (from)-[r:fly{miles:line[2],time:line[3],price:line[4]}]-(to)
+return r
+
+https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_export_to_csv
+
+apoc.export.csv.query(query,file,config)
+apoc.export.csv.all(file,config)
+apoc.export.csv.data(nodes,rels,file,config)
+apoc.export.csv.graph(graph,file,config)
+
+数据作为Cypher语句导出到给定文件。
+可以选择三种导出格式：
+neo4j-shell：用于Neo4j Shell，部分用于apoc.cypher.runFile
+cypher-shell：用于Cypher shell
+plain：不输出开始/提交/等待只是简单的Cypher
+要更改导出格式，您必须将其设置为像{format：“cypher-shell”}这样的配置参数。
+默认情况下，格式是neo4j-shell。
+
+可以在四种cypher导出格式之间进行选择：要更改cypher导出格式，必须将其设置为{cypherFormat：“updateAll”}这样的配置参数
+create：全部创建:CREATE
+updateAll：MERGE而不是CREATE
+addStructure：MATCH 节点+ MERGE 关系
+updateStructure：节点和实体均采用：MERGE + MATCH
+默认情况下格式是：create
+
+format和cypherFormat可以在相同的查询中使用，从而可以完全控制确切的导出格式：
+call apoc.export.cypher.query(
+"MATCH (p1:Person)-[r:KNOWS]->(p2:Person) RETURN p1,r,p2",
+"/tmp/friendships.cypher",
+{format:'plain',cypherFormat:'updateStructure'})
+
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/all_cypher.csv", {format:'plain'})
+
+web端运行：CALL apoc.export.cypher.all("/var/lib/neo4j/data/jiaoyinkanglian-cypher.txt", {format:'plain',cypherFormat:'create'})
+运行结果：
+file	source	format	nodes	relationships	properties	time	rows
+"/var/lib/neo4j/data/jiaoyinkanglian-cypher.txt"	"database: nodes(105), rels(138)"	"cypher"	105	138	315	63	0
+
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/xincheng-cypher.txt", {format:'plain',cypherFormat:'create'})
+file	source	format	nodes	relationships	properties	time	rows
+"/var/lib/neo4j/data/xincheng-cypher.txt"	"database: nodes(1118), rels(1859)"	"cypher"	1118	1859	5981	253	0
+
+
+format:neo4j-shell导出的数据：
+BEGIN
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
+CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+COMMIT
+BEGIN
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+COMMIT
+SCHEMA AWAIT
+
+
+format:cypher-shell导出的数据：
+:BEGIN
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
+CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+:COMMIT
+:BEGIN
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+:COMMIT
+:BEGIN
+
+
+format:plain导出的数据：
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
+CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
+MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 20000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
+DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+
+plain格式导出的数据可以通过管道的命令导入：
+web端（http://localhost:7474/browser/）运行下面命令导出数据到文件：
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/some-cypher.txt", {format:'plain',cypherFormat:'create'})
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi/data/databases$ docker exec -it linshi7474 /bin/bash
+bash-4.4# cat /var/lib/neo4j/data/some-cypher.txt |/var/lib/neo4j/bin/cypher-shell -a bolt://172.17.0.5:7687 -u neo4j -p gswyhq
+
+
+config: {format:'plain',cypherFormat:'create'}时的导出数据：
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
+CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
+CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
+MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 20000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
+DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+
+config: {format:'plain',cypherFormat:'updateAll'}时的导出数据：
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}) SET n.`name`="Euler", n:`Person`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) SET n.`name`="Bernoulli", n:`Person`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) SET n.`Name`="重疾险", n.`name`="重疾险", n:`Xincheng`, n:`Xianzhong`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) SET n.`name`="战争", n:`Xincheng`, n:`Qingjing`;
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) MERGE (n1)-[r:`KNOWS`]->(n2) SET r.`since`=1768;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) MERGE (n1)-[r:`免赔条款`]->(n2) SET r.`since`=1768;
+MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 20000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
+DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+
+config: {format:'plain',cypherFormat:'addStructure'}时的导出数据：
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}) ON CREATE SET n.`name`="Euler", n:`Person`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) ON CREATE SET n.`name`="Bernoulli", n:`Person`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) ON CREATE SET n.`Name`="重疾险", n.`name`="重疾险", n:`Xincheng`, n:`Xianzhong`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) ON CREATE SET n.`name`="战争", n:`Xincheng`, n:`Qingjing`;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
+
+config: {format:'plain',cypherFormat:'updateStructure'}时的导出数据：
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) MERGE (n1)-[r:`KNOWS`]->(n2) ON CREATE SET r.`since`=1768;
+MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) MERGE (n1)-[r:`免赔条款`]->(n2) ON CREATE SET r.`since`=1768;
+

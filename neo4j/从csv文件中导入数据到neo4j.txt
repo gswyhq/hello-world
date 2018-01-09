@@ -108,6 +108,119 @@ LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/suppliers.csv" AS ro
 CREATE (n:Supplier)
 SET n = row
 
+# 其他示例：
+USING PERIODIC COMMIT 300 LOAD CSV WITH HEADERS FROM "file:///test.csv" AS line
+MERGE (a:airplane{name:line.name,type:line.type,id:line.id})
+
+USING PERIODIC COMMIT 10
+LOAD CSV FROM "file:///test.csv" AS line
+create (a:airplane{name:line[0],id:line[1],type:line[2]})
+
+USING PERIODIC COMMIT 10
+LOAD CSV FROM "file:///test.csv" AS line
+match (from:airplane{id:line[0]),(to:position{id:[1]})
+merge (from)-[r:fly{miles:line[2],time:line[3],price:line[4]}]-(to)
+return r
+
+Import cypher-shell
+# web端导出数据：CALL apoc.export.cypher.all("/var/lib/neo4j/data/some-cypher.txt", {format:'plain',cypherFormat:'create'})
+# 将导出的数据导入到neo4j
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi/data$ docker exec -it linshi7474 /bin/bash
+bash-4.4# pwd
+/var/lib/neo4j
+bash-4.4# time ./bin/cypher-shell -u neo4j -p gswyhq -a bolt://192.168.3.250:7687 < /var/lib/neo4j/data/some-cypher.txt
+# 请注意，neo4j-shell已被弃用，并被cypher-shell取代。
+
+其他的一些示例：
+
+
+在CSV文件中有些字段是空的NULL，我们在用load csv时可以判断下再做处理
+例如：
+LOAD CSV WITH HEADERS from “file” as line
+WITH line
+, case when line.FirstNodeID is not null then [line] else [] end as NodeOneID
+, case when line.SecondNodeID is not null then [line] else [] end as NodeTwoID
+foreach(x in NodeOneID | CREATE (n1:NodeOne { ID : x.FirstNodeID }))
+foreach(x in NodeTwoID | CREATE (n2:NodeTwo { ID : x.SecondNodeID }))
+
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi/data$ docker cp /home/gswyhq/docker/neo4j/linshi/data/all.csv linshi7474:/var/lib/neo4j/import/all.csv
+web端（http://192.168.3.250:7474/browser/）运行：
+LOAD CSV WITH HEADERS FROM "file:///all.csv" AS line
+WITH line
+, case when line._id is not null then [line] else [] end as nodes
+, case when line._start is not null then [line] else [] end as relationships
+foreach(csvLine in nodes | MERGE (n:NodeOne { _id: csvLine._id, name :  csvLine.name ,title :  csvLine.title ,released :  toInt(csvLine.released) ,tagline :  csvLine.tagline ,born :  toInt(csvLine.born) }))
+foreach(csvLine in relationships | MERGE (n1 {_id: csvLine._start})-[:r {roles: csvLine.roles}]->(n2 {_id: csvLine._end}) )
+
+
+USING PERIODIC COMMIT 10000 LOAD CSV FROM  "http://apps.dealopia.com/offshoreleaks/offshore_leaks_csvs-20170104/Intermediaries.csv" AS line
+WITH line where line[9] is not null
+MERGE (i:Intermediateries{name:line[1],internal_id:line[2],address:line[3],
+valid_until:line[4],country_codes:line[5],countries:line[6],status:line[7],node_id:line[8],sourceID:line[9]})
+
+USING PERIODIC COMMIT 10000 LOAD CSV FROM  "http://apps.dealopia.com/offshoreleaks/offshore_leaks_csvs-20170104/Intermediaries.csv" AS line
+WITH line,coalesce(line[9],"NoId") as sourceID
+MERGE (i:Intermediateries{name:line[1],internal_id:line[2],address:line[3],
+valid_until:line[4],country_codes:line[5],countries:line[6],status:line[7],node_id:line[8],sourceID:sourceID})
+
+USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM  "http://apps.dealopia.com/offshoreleaks/offshore_leaks_csvs-20170104/Intermediaries.csv" AS line
+MERGE (i:Intermediateries{internal_id:line.internal_id})
+ON CREATE SET i += apoc.map.clean(row.properties,['internal_id'],[])
+
+USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM  "http://apps.dealopia.com/offshoreleaks/offshore_leaks_csvs-20170104/Intermediaries.csv" AS line
+MERGE (i:Intermediateries{internal_id:line.internal_id})
+ON CREATE SET i.name = line.name,i.address = line.address, i.valid_until = line.valid_until,
+i.country_codes = line.country_code, i.countries = line.countries,i.status = line.status,i.node_id = line.node_id,
+i.sourceID = line.sourceID,i.note = line.note
+
+
+
+# 通过LOAD CSV 创建节点、关系，并设置labels：
+LOAD CSV WITH HEADERS FROM 'file:///testfile.csv' AS line
+CREATE (x:line.label)
+# 上面这样写会报错，只能下面这样写：
+USING PERIODIC COMMIT 1000
+LOAD CSV WITH HEADERS FROM 'file:///testfile.csv' AS LINE
+CREATE (n:load {lab:line.label, prop:line.prop});
+
+CREATE INDEX ON :load(lab);
+
+MATCH (n:load {lab:'label1'})
+SET n:label1
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'label2'})
+SET n:label2
+REMOVE n:load
+REMOVE n.lab;
+
+
+可变参数解释：
+1、USING PERIODIC COMMIT 300
+使用自动提交，每满300条提交一次，防止内存溢出
+2、WITH HEADERS
+从文件中读取第一行作为参数名，只有在使用了该参数后，才可以使用line.name这样的表示方式，否则需使用line[0]的表示方式
+3、AS line
+为每行数据重命名
+4、MERGE
+用merge比用create好一点，可以防止数据重复；导入node时一般用create语句，导入关系时一般用merge语句，防止重复导入
+
+可能遇到的问题：
+1、导入后中文乱码
+因为neo4j是utf-8的，而widows下的CSV默认保存是ANSI的，需要用记事本另存为成UTF-8的
+
+2、如何导入关系
+在neo4j中，虽然有一个自增的id属性，但是要想使用它还是很麻烦的，尤其是在web管理端
+因此在使用CSV创建关系时，需要我们自己指定或添加一个属性来作为“主键”，在创建关系时根据该属性来获取节点，并添加关系
+
+USING PERIODIC COMMIT 10
+LOAD CSV FROM "file:///test.csv" AS line
+match (from:airplane{id:line[0]),(to:position{id:[1]})
+merge (from)-[r:fly{miles:line[2],time:line[3],price:line[4]}]-(to)
+return r
+
+
 目前主要有以下几种数据插入方式：
     Cypher CREATE 语句，为每一条数据写一个CREATE
     Cypher LOAD CSV 语句，将数据转成CSV格式，通过LOAD CSV读取数据。

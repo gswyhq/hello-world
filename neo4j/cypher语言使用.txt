@@ -66,6 +66,9 @@ MATCH(m:Person) WHERE m.klout = 199 REMOVE m:Kaa RETURN m
 重命名某个节点的标签：
 MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
 
+# 给所有节点添加一个label:
+match (n) set n:AddLabel return count(n)
+
  2）创建关联
 
             match (a),(b)
@@ -122,6 +125,14 @@ MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
             ..n 最大距离为n
             n.. 最小距离为n
             m..n 距离在m到n之间
+
+        查询所有节点的labels:
+        方法1： call db.labels
+        方法2： MATCH (n)
+                 WITH DISTINCT labels(n) AS labels
+                 UNWIND labels AS label
+                 RETURN DISTINCT label
+                 ORDER BY label
 
 # 属性值为空时查询示例：
 MATCH (n)-[r1:`疾病`]->(n1),(n)-[r2:`赔偿规则`]->(n2),(n)-[r3:`相关条款`]->(n3) WHERE n.name='赔偿情况1'and n1.name = "恶性肿瘤" and r2.等待期 = "是" and r2.意外导致 is null and r2.首次发生 is null RETURN n2.name ,n3.name , r2.name,n.name
@@ -426,6 +437,158 @@ RETURN Person.name;
 CREATE CONSTRAINT ON (a:Person) ASSERT a.name IS UNIQUE;
 创建索引。
 CREATE INDEX ON :Person(name);
+Neo4j的CQL提供“CREATE INDEX”命令创建的节点或关系的属性索引。
+
+创建索引的语法：
+CREATE INDEX ON :<label_name> (<property_name>)
+注意：
+冒号（:)操作符是用来指一个节点或关系标签名称。
+上述语法描述了它的<PROPERTY_NAME> <LABEL_NAME>节点或关系创建一个新的索引。
+示例-
+CREATE INDEX ON :Customer (name)
+
+# 删除索引
+Neo4j的CQL提供了“DROP INDEX”命令删除节点的关系或关系的现有索引。
+DROP INDEX语法：
+DROP INDEX ON :<label_name> (<property_name>)
+注意：-
+冒号（:)操作符是用来指一个节点或关系标签名称。
+上面的语法描述它丢弃创建的现有指数节点或关系的<PROPERTY_NAME> <LABEL_NAME>。
+示例-
+DROP INDEX ON :Customer (name)
+
+# 创建唯一约束
+Neo4j的CQL提供了“创建约束”命令创建的节点或关系的属性的唯一约束。
+创建唯一约束语法
+CREATE CONSTRAINT ON (<label_name>)
+ASSERT <property_name> IS UNIQUE
+语法说明
+S.No.	语法元素	描述
+1。	CREATE CONSTRAINT ON	这是一个Neo4j的CQL关键字，创建约束。
+2。	<LABEL_NAME>	这是一个节点或关系的标签名称。
+3。	ASSERT	这是一个Neo4j的CQL关键字，断言。
+4。	<PROPERTY_NAME>	这是一个节点或关系的属性名。
+5。	IS UNIQUE	这是一个Neo4j的CQL关键字通知Neo4j的数据库服务器上创建一个唯一约束。
+示例：
+CREATE CONSTRAINT ON (cc:CreditCard)
+ASSERT cc.number IS UNIQUE
+
+# 删除唯一约束
+Neo4j的CQL提供了“DROP约束”命令从一个节点或关系的属性删除现有的唯一约束。
+删除唯一约束语法：
+DROP CONSTRAINT ON (<label_name>)
+ASSERT <property_name> IS UNIQUE
+语法说明
+S.No.	语法元素	描述
+1。	DROP CONSTRAINT ON	这是一个Neo4j的CQL关键字。
+2。	<LABEL_NAME>	这是一个节点或关系的标签名称。
+3。	ASSERT	这是一个Neo4j的CQL关键字，断言。
+4。	<PROPERTY_NAME>	这是一个节点或关系的属性名。
+5。	IS UNIQUE	这是一个Neo4j的CQL关键字通知Neo4j的数据库服务器上创建一个唯一约束。
+示例：
+DROP CONSTRAINT ON (cc:CreditCard)
+ASSERT cc.number IS UNIQUE
+
+MATCH (cust:Customer),(cc:CreditCard)
+WHERE cust.id = "1001" AND cc.id= "5001"
+CREATE (cust)-[r:DO_SHOPPING_WITH{shopdate:"12/12/2014",price:55000}]->(cc)
+RETURN r
+
+# 对搜索的结果进行排序：
+# 升序排列
+MATCH (emp:Employee)
+RETURN emp.empid,emp.name,emp.salary,emp.deptno
+ORDER BY emp.name
+
+# 降序排列
+MATCH (emp:Employee)
+RETURN emp.empid,emp.name,emp.salary,emp.deptno
+ORDER BY emp.name DESC
+
+# 合并查询结果：
+UNION子句，它结合并返回来自两个组结果共同行到单个组结果。 它不会从两个节点返回重复的行。
+结果列有限制，并从两个结果集的列名称应该是相同的（Neo4j的“AS”子句用于给一些别名。），列的数据类型应该是相同的。
+
+MATCH (cc:CreditCard)
+RETURN cc.id as id,cc.number as number,cc.name as name,
+   cc.valid_from as valid_from,cc.valid_to as valid_to
+UNION
+MATCH (dc:DebitCard)
+RETURN dc.id as id,dc.number as number,dc.name as name,
+   dc.valid_from as valid_from,dc.valid_to as valid_to
+
+# UNION ALL子句
+它结合并返回两个结果集的所有行成一个单一的结果集。 它还返回由两个节点重复行。
+结果列有限制，并从两个结果集的列名称应该是相同的（Neo4j的“AS”子句用于给一些别名。），列的数据类型应该是相同的。
+MATCH (cc:CreditCard)
+RETURN cc.id as id,cc.number as number,cc.name as name,
+   cc.valid_from as valid_from,cc.valid_to as valid_to
+UNION ALL
+MATCH (dc:DebitCard)
+RETURN dc.id as id,dc.number as number,dc.name as name,
+   dc.valid_from as valid_from,dc.valid_to as valid_to
+
+UNION ALL子句不过滤它们重复行。 如果我们使用UNION子句，则过滤重复行。
+
+# 对查询结果数量进行限制
+# 返回开始的两条数据：
+MATCH (emp:Employee)
+RETURN emp
+LIMIT 2
+
+# 返回最后的两条数据：
+MATCH (emp:Employee)
+RETURN emp
+SKIP 2
+
+# 创建之前先搜索
+MERGE命令创建命令和MATCH命令的组合。
+MERGE = CREATE + MATCH
+Neo4j的CQL MERGE图中的给定模式命令搜索，如果存在则返回结果
+如果它不在图中存在，则它创建新的节点/关系并返回结果。
+
+Neo4j的CQL MERGE语法
+MERGE (<node-name>:<label-name>
+{
+   <Property1-name>:<Pro<rty1-Value>
+   .....
+   <Propertyn-name>:<Propertyn-Value>
+})
+示例：
+MERGE (gp2:GoogleProfile2{ Id: 201402,Name:"Nokia"})
+
+# 对空的属性进行搜索：
+# Id属性不应该包含空值，它不返回NULL值的行。
+MATCH (e:Employee)
+WHERE e.id IS NOT NULL
+RETURN e.id,e.name,e.sal,e.deptno
+
+# ID值为NULL它只返回NULL值的行。
+MATCH (e:Employee)
+WHERE e.id IS NULL
+RETURN e.id,e.name,e.sal,e.deptno
+
+# 字符串函数：大写
+MATCH (e:Employee)
+RETURN e.id,UPPER(e.name),e.sal,e.deptno
+
+# 字符串函数：小写
+MATCH (e:Employee)
+RETURN e.id,LOWER(e.name),e.sal,e.deptno
+
+# 字符串函数：分片（e.name列，这个字符串函数返回仅名称的头两个字母。）
+MATCH (e:Employee)
+RETURN e.id,SUBSTRING(e.name,0,2),e.sal,e.deptno
+
+
+
+
+
+
+
+
+
+
 查看所有的节点数和边数
 MATCH (n) RETURN count(n);
 MATCH ()-->() RETURN count(*);

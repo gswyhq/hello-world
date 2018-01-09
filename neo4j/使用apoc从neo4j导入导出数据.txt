@@ -34,7 +34,7 @@ gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ pushd plugins
 gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar
 gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ popd
 ~/docker/neo4j/linshi
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* neo4j
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* neo4j:3.2.5
 
 运行：CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswyhq/docker/neo4j/result.csv", {})
 

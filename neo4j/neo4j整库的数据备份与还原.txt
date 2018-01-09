@@ -1,0 +1,22 @@
+
+
+Neo4j 的neo4j-admin 工具提供 dump 和 load 功能，格式如下：
+	neo4j-admin dump --database=<database> --to=<destination-path>
+	neo4j-admin load --from=<archive-path> --database=<database> [–force]
+注意：无论备份 与 还原 都必须关闭Neo4j
+例子：
+A电脑关闭Neo4j 后，在neo4j-home/bin目录下运行：
+	$neo4j-home> bin/neo4j-admin dump --database=graph.db --to=/backups/graph.db/2016-10-02.dump
+	$neo4j-home> ls /backups/graph.db
+	$neo4j-home> 2016-10-02.dump
+备份文件 2016-10-02.dump就准备好了。
+将 2016-10-02.dump复制到B电脑，在关闭Neo4j后运行：
+	$neo4j-home> bin/neo4j stop
+	Stopping Neo4j… stopped
+	$neo4j-home> bin/neo4j-admin load --from=/backups/graph.db/2016-10-02.dump --database=graph.db --force
+这样就恢复完毕了。
+可以 使用match查看下，B电脑的数据库内容 已经完全从A电脑数据库中迁移过来了
+注意：
+如果还原后数据库无法启动，则到 neo4j.conf中将如下属性前的#号去掉，使其生效
+
+dbms.allow_format_migration=true
