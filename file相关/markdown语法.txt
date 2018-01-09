@@ -138,7 +138,14 @@ http://example.com/ or address@example.com
 
 [jane-eyre-douban]: http://img3.douban.com/mpic/s1108264.jpg`
 
-        这里写图片描述 
+        这里写图片描述
+
+# 插入本地图片（图片位置：当前目录/static/image/framework.png）示例：
+## 架构图
+![image](/static/image/framework.png)
+* * *
+
+
 ## 6. 代码块 - 如果在一个行内需要引用代码，只要用反引号`引起来就好，如下： Use the `printf()` function. - 用TAB键起始的段落，会被认为是代码块，如下： echo “hello world”; - 如果TAB不管用的话，需要使用三个反引号` 例如： 下面连高亮都做了。
 <php>
     echo "hello world";

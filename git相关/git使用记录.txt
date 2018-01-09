@@ -177,6 +177,10 @@ gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git status # 当前状态
 修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
 gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git add statemachine.py 
 #git add命令主要用于把我们要提交的文件的信息添加到索引库中。当我们使用git commit时，git将依据索引库中的内容来进行文件的提交。
+
+若git add 操作之后(文件由工作区移到暂存区)，想反悔（此时还未运行git commit,提交到版本库）时可以运行：
+git reset -- statemachine.py  # 将文件从暂存区，移动到工作区（文件内容与在暂存区时的内容一致）
+
 gswyhq@gswyhq-pc:~/WhiteII/WhiteII/archives$ git status 
 位于分支 master
 您的分支与上游分支 'origin/master' 一致。

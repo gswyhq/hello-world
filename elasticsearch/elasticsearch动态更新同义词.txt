@@ -156,7 +156,10 @@ dyn_body = {
                 }
             }
         }
-    }
+    },
+    "aliases": {
+                "alias_baike": {},  # 新建一个别名
+            }
 }
 
 es = Elasticsearch(host='localhost', port='9200')
