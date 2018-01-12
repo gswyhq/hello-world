@@ -134,6 +134,35 @@ match (n) set n:AddLabel return count(n)
                  RETURN DISTINCT label
                  ORDER BY label
 
+CALL db.labels() YIELD label
+match (n) where labels(n) = label
+RETURN n.name, label
+
+
+# 遍历所有属性，并统计包括该属性的节点数：
+CALL db.propertyKeys() YIELD propertyKey AS prop
+MATCH (n)
+WHERE n[prop] IS NOT NULL RETURN prop, count(n) AS numNodes
+
+# 变量查询到的节点：
+MATCH p=(n:Abc) RETURN EXTRACT(n in nodes(p) | n.name) as name
+
+# 统计标签对应的节点数：
+CALL db.labels() YIELD label
+RETURN count(label) AS numLabels
+
+# 统计标签中，包含某个字符串的标签数：
+CALL db.labels() YIELD label
+WHERE label CONTAINS 'ing'
+RETURN count(label) AS numLabels
+
+# 查询所有的关系类型：
+call db.relationshipTypes()
+
+# 遍历两个列表搜索：
+WITH [1,2,3,4,5,6] as listA, [1,2,3] as listB
+RETURN FILTER( n IN listA WHERE NOT n IN listB ) as listC
+
 # 属性值为空时查询示例：
 MATCH (n)-[r1:`疾病`]->(n1),(n)-[r2:`赔偿规则`]->(n2),(n)-[r3:`相关条款`]->(n3) WHERE n.name='赔偿情况1'and n1.name = "恶性肿瘤" and r2.等待期 = "是" and r2.意外导致 is null and r2.首次发生 is null RETURN n2.name ,n3.name , r2.name,n.name
 
@@ -580,13 +609,43 @@ RETURN e.id,LOWER(e.name),e.sal,e.deptno
 MATCH (e:Employee)
 RETURN e.id,SUBSTRING(e.name,0,2),e.sal,e.deptno
 
+# 复制一条关系：
+MATCH (n1)-[r:FOLLOWS]->(n2)
+WITH collect(n2) as endNodes,n1
+FOREACH(i in range(0,length(endNodes)-1) | foreach(a in [endNodes[i]] |
+ create (n1)-[:NEW_FOLLOWS]->(a)
+))
 
+# 复制一条关系，包括复制关系的属性：
+MATCH (a)-[r:FOLLOWS]->(c)
+WITH COLLECT(r) AS rels, a, c
+FOREACH (rel in rels |
+       CREATE (a)-[r:NEW_FOLLOWS]->(c)
+       SET r+=rel
+)
 
+# 创建新的点，可能会重复创建：
+match (n2)-[r2]->(n3) where n2.name='Hugo Weaving'
+WITH COLLECT(n2) AS n2s, r2, n3
+FOREACH(n2 in n2s|
+create (copy:Newnode)
+set copy=n2)
 
+match (n:Node {name: 'abc'})
+with n as map
+create (copy:Node {name: 'def'})
+set copy.property1 = map.property1, copy.property2 = map.property2
+return copy
 
-
-
-
+call apoc.periodic.iterate('
+match (r:Label {`domain key` : 'unit-B2'})-[:isPredecessorOf*0..]->(n:`T-Base`)
+return distinct n as map
+','
+create (copy:`T-Base`)
+set copy = map, copy.`domain key` = map.`domain key` + '-copy'
+with map, copy
+create (copy)-[:isCopyOf]->(map)
+',{batchSize:10000,iterateList:true})
 
 
 查看所有的节点数和边数

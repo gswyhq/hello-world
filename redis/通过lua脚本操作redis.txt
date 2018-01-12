@@ -1,0 +1,46 @@
+
+Lua脚本
+
+EVAL
+EVAL和EVALSHA用Redis内置的Lua编译器执行脚本。
+EVAL脚本第一个参数是eval代表Lua程序的运行环境上下文；第二个参数是具体命令；第三个开始代表Redis的key names。参数能通过Lua的关键字全局变量KEYS、ARGV得到。例如：
+
+192.168.3.250:6379> eval "return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}" 2 key1 key2 first second
+1) "key1"
+2) "key2"
+3) "first"
+4) "second"
+
+Lua函数redis.call()和redis.pcall()
+两个函数基本一样，唯一不同的是如果Redis命令调用出错的话，redis.call()将返回具体的错误信息，redis.pcall()将返回Lua table的包装错误。
+
+gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0
+192.168.3.250:6379> get "123456:description"
+"\"template\""
+# 使用lua脚本也可达到同样效果：
+192.168.3.250:6379> eval "return redis.call('get', '123456:description')" 0
+"\"template\""
+# 例如：给foo赋值为“bar”。
+192.168.3.250:6379> eval "return redis.call('set', 'foo', 'bar')" 0
+OK
+192.168.3.250:6379> get foo
+"bar"
+192.168.3.250:6379> eval "return redis.call('set', keys[1], '12345')" 1 foo
+(error) ERR Error running script (call to f_61a102e3332847a58f2d805cb92dd6ca4f4e0d10): @enable_strict_lua:15: user_script:1: Script attempted to access unexisting global variable 'keys'
+# keys需要大写
+192.168.3.250:6379> eval "return redis.call('set', KEYS[1], '12345')" 1 foo
+OK
+192.168.3.250:6379> get foo
+"12345"
+192.168.3.250:6379> exit
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('get', 'foo')" 0
+"12345"
+
+# lua方式通配符查找
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('keys', '123456:*')" 0
+1) "123456:description"
+2) "123456:question"
+# lua方式通配符删除
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('del', unpack(redis.call('keys',ARGV[1])))" 0 '123456:*'
+(integer) 2

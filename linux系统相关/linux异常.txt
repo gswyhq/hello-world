@@ -48,17 +48,3 @@ gswyhq@gswyhq-PC:~$ sudo apt-get install tofrodos
 运行这两行
 gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/todos /usr/bin/unix2dos
 gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
-
-手动释放系统内存：
-gswyhq@gswyhq-PC:~/yhb$ sudo -i
-root@gswyhq-PC:~# free -h
-              total        used        free      shared  buff/cache   available
-Mem:            15G        8.1G        3.4G        191M        4.1G        7.0G
-Swap:          4.0G          0B        4.0G
-root@gswyhq-PC:~# echo 3 > /proc/sys/vm/drop_caches
-root@gswyhq-PC:~# free -h
-              total        used        free      shared  buff/cache   available
-Mem:            15G        8.1G        6.5G        188M        1.0G        7.0G
-Swap:          4.0G          0B        4.0G
-
-

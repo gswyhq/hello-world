@@ -5,7 +5,7 @@
 import pickle
 import gensim
 from gensim.models import word2vec
-
+from collections import OrderedDict
 
 MODEL_FILE = '/home/gswyhq/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
 # 模型来源：  https://weibo.com/p/23041816d74e01f0102x77v?luicode=20000061&lfid=4098518198740187&featurecode=newtitle
@@ -17,14 +17,30 @@ def load_model(model_file=MODEL_FILE):
         with open(model_file, "rb")as f:
             w2v_model = pickle.load(f, encoding='iso-8859-1')  # 此处耗内存 60.8 MiB
     elif model_file.endswith('.bin'):
+        # 注意：不可能继续训练从C格式加载的矢量，因为隐藏的权重，词汇频率和二叉树丢失::
         w2v_model = gensim.models.KeyedVectors.load_word2vec_format(model_file, binary=True)
     elif model_file.endswith('.model'):
+        # 此种方式加载成功的模型，可用于增量训练
         w2v_model = word2vec.Word2Vec.load(model_file)
     else:
         raise ValueError("模型文件路径有误：{}".format(model_file))
     return w2v_model
 
+def model2pkl(w2v_model, model_file='./model.pkl'):
+    """
+    将模型保存为pkl格式的模型文件
+    :param pickle: 模型的保存路径
+    :return: 
+    """
+    w2v_char_model = OrderedDict()
+    for key in w2v_model.index2word:
+        w2v_char_model[key] = w2v_model[key]
+    pickle.dump(w2v_char_model, open(model_file, "wb"))
+
 w2v_model = load_model(model_file=MODEL_FILE)  # 字向量模型
+
+# w2v_model.save('./model/wiki_ida.pkl') # 保存到文件wiki_ida.pkl中
+# model = gensim.models.ldamodel.LdaModel.load('./model/wiki_ida.pkl') # 从文件wiki_ida.pkl中读出结果数据
 
 # 得到与一个词最相关的若干词及相似程度
 w2v_model.most_similar(u'重疾险')

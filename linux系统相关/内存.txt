@@ -7,3 +7,18 @@ top 命令小技巧
 1、输入大写P，则结果按CPU占用降序排序。
 2、输入大写M，结果按内存占用降序排序。
 3、按数字 1 则可以显示所有CPU核心的负载情况。
+
+
+手动释放系统内存：
+gswyhq@gswyhq-PC:~/yhb$ sudo -i
+root@gswyhq-PC:~# free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G        8.1G        3.4G        191M        4.1G        7.0G
+Swap:          4.0G          0B        4.0G
+root@gswyhq-PC:~# echo 3 > /proc/sys/vm/drop_caches
+root@gswyhq-PC:~# free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G        8.1G        6.5G        188M        1.0G        7.0G
+Swap:          4.0G          0B        4.0G
+
+

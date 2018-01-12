@@ -2,6 +2,39 @@
 1 //删除当前数据库中的所有Key  
 2 flushdb  
 3 //删除所有数据库中的key  
-4 flushall 
+4 flushall
+
+1. DEL 直接加键名称
+DEL key1 key2 key3
+
+2. 批量删除key
+可用keys ‘str*’ 列出要删除的key，接linux管道删除（linux命令行执行）
+# 下面是删除2数据库中s开头的键：
+redis-cli -n 2 keys "s*" | xargs redis-cli -n 2 del
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.105 -p 6379 -n 0 keys "4844953951ce4903a6d548f0faee8231:*" |xargs redis-cli -h 192.168.3.105 -p 6379 -n 0 del
+(integer) 4
+
+3. lua脚本中执行删除
+keys * 命令在数据量很大的情况下，直接在redis cli中执行会严重影响服务器性能，更好的方式是在lua脚本中执行
+eval方式执行redis lua
+gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+# lua方式通配符查找
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('keys', '123456:*')" 0
+1) "123456:description"
+2) "123456:question"
+# lua方式通配符删除
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('del', unpack(redis.call('keys',ARGV[1])))" 0 '123456:*'
+(integer) 2
+
+或者：
+root@2ef3dea30784:/data# redis-cli -h 192.168.3.105 -p 6379 -n 0
+192.168.3.105:6379> eval "return redis.call('keys', 'bde88be49f504c6e8afff265a02eed7b:*')" 0
+1) "bde88be49f504c6e8afff265a02eed7b:question"
+2) "bde88be49f504c6e8afff265a02eed7b:recq"
+3) "bde88be49f504c6e8afff265a02eed7b:templates"
+192.168.3.105:6379> eval "return redis.call('del', unpack(redis.call('keys',ARGV[1])))" 0 'bde88be49f504c6e8afff265a02eed7b:*'
+(integer) 3
+192.168.3.105:6379>
+
 
 

@@ -37,6 +37,21 @@ time.ctime() 当前时间的字符串形式
 time.struct_time(tm_year=2014, tm_mon=1, tm_mday=9, tm_hour=12, tm_min=53, tm_sec=13, tm_wday=3, tm_yday=9, tm_isdst=0)
 >>> time.ctime()
 'Thu Jan 09 12:53:19 2014'
+#获取当前时间
+time_now = int(time.time())
+#转换成localtime
+time.localtime(time_now)
+Out[3]: time.struct_time(tm_year=2018, tm_mon=1, tm_mday=11, tm_hour=8, tm_min=51, tm_sec=28, tm_wday=3, tm_yday=11, tm_isdst=0)
+
+# time格式转换为datetime格式：
+datetime.datetime.fromtimestamp(time.time())  
+Out[5]: datetime.datetime(2018, 1, 11, 8, 53, 59, 977699)
+
+# datetime格式转为time格式:
+print(time.mktime(datetime.datetime.now().timetuple()))
+print(time.time())
+1515632319.0
+1515632319.1558268
 
 struct_time转换为字符串：
 >>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())

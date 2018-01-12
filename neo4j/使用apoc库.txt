@@ -1,0 +1,162 @@
+
+参考： https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_graph_refactoring
+
+# 查看某一函数的帮助信息, 如查看`apoc.date.format`的用法:
+CALL apoc.help("apoc.date.format")
+╒══════════╤══════════════════╤══════════════════════════════════════════════════════════════════════╤══════════════════════════════════════════════════════════════════════╤═══════╤════════╕
+│"type"    │"name"            │"text"                                                                │"signature"                                                           │"roles"│"writes"│
+╞══════════╪══════════════════╪══════════════════════════════════════════════════════════════════════╪══════════════════════════════════════════════════════════════════════╪═══════╪════════╡
+│"function"│"apoc.date.format"│"apoc.date.format(12345,('ms|s|m|h|d'),('yyyy-MM-dd HH:mm:ss zzz'),('T│"apoc.date.format(time :: INTEGER?, unit = ms :: STRING?, format = yyy│null   │null    │
+│          │                  │Z')) get string representation of time value optionally using the spec│y-MM-dd HH:mm:ss :: STRING?, timezone =  :: STRING?) :: (STRING?)"    │       │        │
+│          │                  │ified unit (default ms) using specified format (default ISO) and speci│                                                                      │       │        │
+│          │                  │fied time zone (default current TZ)"                                  │                                                                      │       │        │
+└──────────┴──────────────────┴──────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────┴───────┴────────┘
+
+# 创建节点和关系，并且可以动态设定标签和属性
+通过apoc.create.node和apoc.create.relationship你可以动态的计算节点标签，关系类型和任意的属性。
+
+标签是一个String数组
+属性就是一个Map
+UWNIND {batch} as row
+CALL apoc.create.node(row.labels, row.properties) yield node
+RETURN count(*)
+
+在apoc.create.*方法中，也提供了设置／更新／删除属性和标签的功能。
+
+UWNIND {batch} as row
+MATCH (from) WHERE id(n) = row.from
+MATCH (to:Label) where to.key = row.to
+CALL apoc.create.relationship(from, row.type, row.properties, to) yield rel
+RETURN count(*)
+
+# 批量提交和更新
+大量的提交Transaction是有问题的。你可以用2G-4G的heap来更新百万条记录，但当量级更大了之后就会很困难了。
+这时，apoc.periodic.iterate可以提供很大的帮助。
+它的原理很简单：你有两个Cypher语句，第一条语句能够提供可操纵的数据并产生巨大的数据流，第二条语句执行真正的更新操作，它对每一个数据都进行一次更新操作，但是它只在处理一定数量的数据后才创建一个新的Transaction。
+打个比方，假如你第一条语句返回了五百万个需要更新的节点，如果使用内部语句的话，那么每一个节点都会进行一次更新操作。但是如果你设置批处理大小为10k的话，那么每一个Transaction会批量更新10k的节点。
+如果你的更新操作是相互独立的话（创建节点，更新属性或者更新独立的子图），那么你可以添加parallel:true来充分利用cpu。
+
+比方说，你想计算多个物品的评分，并通过批处理的方式来更新属性，你应该按下面这样操作
+call apoc.periodic.iterate('
+MATCH (n:User)-[r1:LIKES]->(thing)<-[r2:RATED]-(m:User) WHERE id(n)<id(m) RETURN thing, avg( r1.rating + r2.rating ) as score
+','
+WITH {thing} as t SET t.score = {score}
+', {batchSize:10000, parallel:true})
+
+其他：
+call apoc.periodic.iterate("match (r:Label {`domain key` : 'unit-B2'})-[:isPredecessorOf*0..]->(n:`T-Base`) return distinct n as map","
+create (copy:`T-Base`) set copy = map, copy.`domain key` = map.`domain key` + '-copy'  with map, copy create (copy)-[:isCopyOf]->(map)",{batchSize:10000,iterateList:true})
+
+# 动态创建或者操作Map，并赋给属性
+尽管Cypher为列表提供了相当遍历的操作，如range, collect, unwind, reduce, extract, filter, size等，但Map在有的时候也是需要进行创建和更改的。
+apoc.map.*提供了一系列的方法来简化这个过程。
+通过其他数据创建Map：
+RETURN apoc.map.fromPairs([["alice",38],["bob",42],...​])
+// {alice:38, bob: 42, ...}
+RETURN apoc.map.fromLists(["alice","bob",...],[38,42])
+// {alice:38, bob: 42, ...}
+// groups nodes, relationships, maps by key, good for quick lookups by that key
+RETURN apoc.map.groupBy([{name:"alice",gender:"female"},{name:"bob",gender:"male"}],"gender")
+// {female:{name:"alice",gender:"female"}, male:{name:"bob",gender:"male"}}
+RETURN apoc.map.groupByMulti([{name:"alice",gender:"female"},{name:"bob",gender:"male"},{name:"Jane",gender:"female"}],"gender")
+// {female:[{name:"alice",gender:"female"},{name:"jane",gender:"female"}], male:[{name:"bob",gender:"male"}]}
+
+更新Map:
+RETURN apoc.map.merge({alice: 38},{bob:42})
+// {alice:38, bob: 42}
+RETURN apoc.map.setKey({alice:38},"bob",42)
+// {alice:38, bob: 42}
+RETURN apoc.map.removeKey({alice:38, bob: 42},"alice")
+// {bob: 42}
+RETURN apoc.map.removeKey({alice:38, bob: 42},["alice","bob","charlie"])
+// {}
+// remove the given keys and values, good for data from load-csv/json/jdbc/xml
+RETURN apoc.map.clean({name: "Alice", ssn:2324434, age:"n/a", location:""},["ssn"],["n/a",""])
+// {name:"Alice"}
+
+# 时间日期的解析：
+RETURN apoc.date.fields('2015年01月02日 03时04分05秒 EET', 'yyyy年MM月dd日 HH时mm分ss秒 zzz')
+或者：RETURN apoc.date.fields('2015年01月02日 03时04分05秒', 'yyyy年MM月dd日 HH时mm分ss秒')
+返回结果：
+{
+  "weekdays": 5,
+  "years": 2015,
+  "seconds": 5,
+  "zoneid": "EET",
+  "minutes": 4,
+  "hours": 3,
+  "months": 1,
+  "days": 2
+}
+
+# 返回当前时间戳：
+return apoc.date.currentTimestamp()
+1515736856502
+
+# 当前时间戳减1年：
+return apoc.date.add(apoc.date.currentTimestamp(), 'ms', -365, 'd')
+
+# 当前时间戳转换为天：
+return apoc.date.convert(apoc.date.currentTimestamp(), 'ms', 'd')
+返回值：17543
+17543/365
+Out[10]: 48.06301369863014
+2018-48
+Out[11]: 1970
+
+# apoc.date.parse(e.datetime,'h') < apoc.date.parse('2016-06-01 00:00:00','h')
+
+
+# 解析当前时间戳：
+return apoc.date.format(apoc.date.currentTimestamp())
+╒════════════════════════════════════════════════╕
+│"apoc.date.format(apoc.date.currentTimestamp())"│
+╞════════════════════════════════════════════════╡
+│"2018-01-12 06:11:20"                           │
+└────────────────────────────────────────────────┘
+
+# return apoc.date.format(apoc.date.currentTimestamp(),'ms', 'yyyy年MM月dd日 HH时mm分ss秒')
+╒══════════════════════════════════════════════════════════════════════╕
+│"apoc.date.format(apoc.date.currentTimestamp(),'ms', 'yyyy年MM月dd日 HH时m│
+│m分ss秒')"                                                              │
+╞══════════════════════════════════════════════════════════════════════╡
+│"2018年01月12日 06时13分20秒"                                               │
+└──────────────────────────────────────────────────────────────────────┘
+
+# 时间戳转换成指定时区的日期：
+return apoc.date.format(apoc.date.currentTimestamp(),'ms', 'yyyy年MM月dd日 HH时mm分ss秒','GMT+8:00')
+╒══════════════════════════════════════════════════════════════════════╕
+│"apoc.date.format(apoc.date.currentTimestamp(),'ms', 'yyyy年MM月dd日 HH时m│
+│m分ss秒','GMT+8:00')"                                                   │
+╞══════════════════════════════════════════════════════════════════════╡
+│"2018年01月12日 14时19分24秒"                                               │
+└──────────────────────────────────────────────────────────────────────┘
+
+# 指定日期，转换为时间戳（单位为秒）：
+return apoc.date.parse('2015/03/25 03-15-59','s','yyyy/MM/dd HH-mm-ss')
+apoc.date.parse('2015/03/25 03-15-59','s','yyyy/MM/dd HH-mm-ss')
+1427253359
+
+# 指定日期，转换为时间戳（单位为毫秒）：
+return apoc.date.parse('2015/03/25 03-15-59','ms','yyyy/MM/dd HH-mm-ss')
+apoc.date.parse('2015/03/25 03-15-59','ms','yyyy/MM/dd HH-mm-ss')
+1427253359000
+
+# 查询指定日期范围的节点：
+match(n) where n.updatetime is not null and  n.updatetime > apoc.date.parse('2016-06-01 00:00:00','ms') return n limit 2
+
+
+# 对查询出的时间戳进行解析：
+MATCH (n) WHERE n.updatetime is not null return  apoc.date.format(n.updatetime,'ms', 'yyyy年MM月dd日 HH时mm分ss秒','GMT-8:00')
+
+# 与某个节点联通的所有节点：
+MATCH (user:Movie) WHERE id(user) = 100
+CALL apoc.path.subgraphNodes(user, {}) YIELD node
+RETURN node;
+
+# 从远程的json文件中加载数据：
+WITH "https://api.stackexchange.com/2.2/questions?pagesize=100&order=desc&sort=creation&tagged=neo4j&site=stackoverflow&filter=!5-i6Zw8Y)4W7vpy91PMYsKM-k9yzEsSC1_Uxlf" AS url
+CALL apoc.load.json(url) YIELD value
+UNWIND value.items AS item
+RETURN item.title, item.owner, item.creation_date, keys(item)
+

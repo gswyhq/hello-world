@@ -5,4 +5,17 @@
     资料来源：
     http://www.cnblogs.com/LittleHann/p/6426610.html
 
+2、120G+训练好的word2vec模型（中文词向量）
+https://weibo.com/p/23041816d74e01f0102x77v?luicode=20000061&lfid=4098518198740187&featurecode=newtitle
+MODEL_FILE = '/home/gswyhq/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
+下载链接：链接: https://pan.baidu.com/s/1o7MWrnc 密码:wzqv
 
+3、训练好的模型
+http://spaces.ac.cn/archives/4304/
+链接: https://pan.baidu.com/s/1dF7oTH3 密码: uw4r
+
+包含文件：word2vec_wx, word2vec_wx.syn1neg.npy, word2vec_wx.syn1.npy, word2vec_wx.wv.syn0.npy，4个文件都是Gensim加载模型所必需的。
+具体每个文件的含义我也没弄清楚，word2vec_wx大概是模型声明，word2vec_wx.wv.syn0.npy应该就是我们所说的词向量表，word2vec_wx.syn1.npy是隐层到输出层的参数（Huffman树的参数），word2vec_wx.syn1neg.npy就不大清楚了～
+
+如果你只关心词向量，也可以下载C版本的格式（跟C版本Word2Vec兼容，只包含词向量）：
+链接: https://pan.baidu.com/s/1nv3ANLB 密码: dgfw

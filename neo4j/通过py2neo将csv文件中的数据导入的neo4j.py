@@ -33,7 +33,8 @@ def expot_data(cid, data):
         if _id and not _start and not _end:
             property_dict = {k: v for k, v in zip(node_property, node_property_value) if v}
             _cid = "{}_{}".format(cid.lower(), _id)
-            node = Node(*_labels, _cid=_cid, **property_dict)
+            updatetime = int(time.time() * 1000)  # 与 neo4j的timestamp()一致
+            node = Node(*_labels, _cid=_cid, updatetime=updatetime, **property_dict)
             # graph.merge(node)
             nodes.setdefault(_cid, node)
             tx.create(node)
