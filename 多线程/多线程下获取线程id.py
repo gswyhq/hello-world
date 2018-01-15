@@ -7,6 +7,14 @@ import ctypes
 import time
 import requests
 
+# getpid()得到本身进程id，getppid()得到父进程进程id，如果已经是父进程，得到系统进程id
+print("父进程id: {}, 当前进程id: {}, threading: {}, 当前线程id: {}, 当前线程对应主线程id: {}".format(os.getppid(), os.getpid(),
+                                                                                           threading.get_ident(),
+                                                                                           threading.current_thread().ident,
+                                                                                           threading.main_thread().ident))
+
+
+
 def pthread_level1(i):
     print ("任务号 :%s"%i)
     #获取threading对象的标识ident

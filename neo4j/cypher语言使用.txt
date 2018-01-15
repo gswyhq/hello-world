@@ -138,6 +138,8 @@ CALL db.labels() YIELD label
 match (n) where labels(n) = label
 RETURN n.name, label
 
+# 查询只有两个标签的节点：
+MATCH (n:Jiaoyinkanglian)with  labels(n) as ln, n where length(ln) =2 return ln, n.name
 
 # 遍历所有属性，并统计包括该属性的节点数：
 CALL db.propertyKeys() YIELD propertyKey AS prop
@@ -211,6 +213,12 @@ create (invite:Invite {time:timestamp()})-[:TO_CIRCLE]->(circle)
 create (invite)-[:INVITED_BY]->(member1)
 create (invite)-[:INVITED]->(member2)
 return member1, member2, invite, circle;
+
+merge (le:Baoxianmingcheng {name:"安康重疾险"})
+create (db:Qingjing{name:"原位癌"})
+create
+  (le)-[:`责任免除` {name:"指恶性细胞不受控制的进行性增长和扩散。"}]->(db)
+RETURN le, db
 
 MATCH (u:user {id : "10662"})-[r:has_profile]->(p:profile), (u2:user)-[r2:has_profile]->(p2:profile)
 WHERE
