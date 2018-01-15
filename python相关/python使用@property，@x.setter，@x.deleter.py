@@ -5,13 +5,19 @@ Created on Sun Sep  4 22:32:51 2016
 Python 之 @property
 """
 
+# @property可以将python定义的函数“当做”属性访问，从而提供更加友好访问方式，但是有时候setter/deleter也是需要的。
+# 1》只有@property表示只读。
+# 2》同时有@property和@x.setter表示可读可写。(这里的x，是指被装饰函数的函数名)
+# 3》同时有@property和@x.setter和@x.deleter表示可读可写可删除。
+
+
 #定义类Student，拥有变量名name和score
 class Student(object):
   def __init__(self,name,score):
       self.name = name
       self.score = score
 #这样，我们可以在类外修改Student的实例的成员变量:
-s1 = Student()
+s1 = Student('张三', 231)
 s1.name = "Lily"
 s1.score = 9999 # 这里的定义是不合理的
 
@@ -30,7 +36,7 @@ class Student(object):
         self._score = score
 #上述代码定义了score成员的set和get函数。（可能实际应用时，修改分数比较常见）
 #现在，我们改变参数的代码是这样的：
-s1 = Student()
+s1 = Student('张三', 231)
 s1.set_score(9999) #这里会抛出异常
 #上述的第二种方式实现了set函数的参数检查，但是修改score的代码从简单的 s1.score = 90 变成了 s1.set_score(90) .我们怎么样才能做到既检验输入的参数又使得修改score的代码不变呢？
 
@@ -52,6 +58,12 @@ class Student(object):
         self._score = score
     @property
     def name(self): return self._name
+
+    #删除私有属性
+    @private.deleter
+    def private(self):
+        del self.__private
+
 s1 = Student("Lily", 90)
 #s1.name = "Luly"
 s1.score = 100

@@ -53,7 +53,7 @@ print(time.time())
 1515632319.0
 1515632319.1558268
 
-struct_time转换为字符串：
+time转换为字符串：
 >>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 '2014-01-09 12:59:00'
 >>> time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())
@@ -61,7 +61,7 @@ struct_time转换为字符串：
 In[12]: datetime.strftime(datetime.now(),'%Y-%m-%d %H:%M:%S %f')
 Out[12]: '2017-04-14 14:56:09 093717'
 
-将格式字符串转换为时间戳：
+# string 转换为time：
 >>> a = "Sat Mar 28 22:24:24 2009"
 >>> b = time.mktime(time.strptime(a,"%a %b %d %H:%M:%S %Y"))
 >>> b

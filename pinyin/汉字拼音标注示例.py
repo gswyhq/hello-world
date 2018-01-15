@@ -143,5 +143,10 @@ Out[31]: ['ni', 'hao', 'gswyhq']
 In [32]: lazy_pinyin('你好abcこんにちは')
 Out[32]: ['ni', 'hao', 'abcこんにちは']
 
+def pinyin_sorted(iterable, reverse=False):
+    """对中文按拼音进行排序
+    """
+    pinyin_iterable = [(word, ''.join(lazy_pinyin(word))) for word in iterable]
+    return [word for word, _ in sorted(pinyin_iterable, key=lambda x:x[1], reverse=reverse)]
 
 
