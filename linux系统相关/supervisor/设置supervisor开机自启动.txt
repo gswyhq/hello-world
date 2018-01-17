@@ -63,7 +63,7 @@ exit 0
 需要注意的是，rc.local是 init进程调用的， docker里面的容器压根没有这些；若需要在docker容器内实现开机启动，就需要在容器启动时执行指令
 CMD、ENTRYPOINT
 
-#gswyhq@gswyhq-PC:~/xincheng_zhongjixian$ docker run -i -t --restart=always --detach --name=zheshang18060 -p 18060:8000 --volume=$PWD:/zheshang --workdir=/zheshang ubuntu:1220 /bin/bash start.sh
+#gswyhq@gswyhq-PC:~/xinch_zhongjixian$ docker run -i -t --restart=always --detach --name=zheshang18060 -p 18060:8000 --volume=$PWD:/zheshang --workdir=/zheshang ubuntu:1220 /bin/bash start.sh
 #942adfc9da782378405acf3f8857fd57ab5f5902c8bff62c890afb60cfa0d626
 
 vim start.sh

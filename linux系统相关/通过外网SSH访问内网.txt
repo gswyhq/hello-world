@@ -41,6 +41,7 @@ ubuntu@ip-172-31-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
 
 autossh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
+nohup ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166 &
 
 # 有时候反向连接报错：
 Warning: remote port forwarding failed for listen port 7770

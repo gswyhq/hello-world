@@ -5,7 +5,7 @@ private_token的信息可以在登录GitLab之后，[Profile Settings] -> [Accou
 
 
 import requests
-uri = 'http://192.168.3.101/gswyhq/ModelData/raw/xincheng_zhongjixian/data/保险常见名词解释.txt?private_token=CeyrY48yDYsxy-soNRxT'
+uri = 'http://192.168.3.101/gswyhq/ModelData/raw/xinch_zhongjixian/data/保险常见名词解释.txt?private_token=CeyrY48yDYsxy-soNRxT'
 result = requests.get(uri)
 
 print(result.status_code)

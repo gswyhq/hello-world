@@ -23,5 +23,5 @@ service supervisor start
 # 需要添加此项， 不然启动容器的时候，一直在重启
 /bin/bash
 
-#gswyhq@gswyhq-PC:~/xincheng_zhongjixian$ docker run -it --restart=always --detach --name=xincheng_zhongjixian_18000 -e MYDIR=/xincheng_zhongjixian -p 18000:8000 --volume=$PWD:/xincheng_zhongjixian --workdir=/xincheng_zhongjixian -v /etc/localtime:/etc/localtime ubuntu:1221 /xincheng_zhongjixian/start.sh
+#gswyhq@gswyhq-PC:~/xinch_zhongjixian$ docker run -it --restart=always --detach --name=xinch_zhongjixian_18000 -e MYDIR=/xinch_zhongjixian -p 18000:8000 --volume=$PWD:/xinch_zhongjixian --workdir=/xinch_zhongjixian -v /etc/localtime:/etc/localtime ubuntu:1221 /xinch_zhongjixian/start.sh
 #7ba49adfd9ea465fdf6cf3a397a690064f4f57bf9df3927fd4020421053bea56

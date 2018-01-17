@@ -92,7 +92,7 @@ class Sample():
 def main():
     url = 'http://www.sina.com.cn'
     # url = 'https://www.baidu.com/'
-    # url = 'http://192.168.3.101/web1/chat_bot_demo/raw/xincheng_zhongjixian/input/xincheng/kg_xincheng_zhongjixian.txt'
+    # url = 'http://192.168.3.101/web1/chat_bot_demo/raw/xinch_zhongjixian/input/xinch/kg_xinch_zhongjixian.txt'
     # url = 'https://raw.githubusercontent.com/bells/elasticsearch-analysis-dynamic-synonym/master/pom.xml'
     sample = Sample(url)
     sample.downloadSample()

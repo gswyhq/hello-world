@@ -46,14 +46,14 @@ call apoc.export.cypher.query(
 
 CALL apoc.export.cypher.all("/var/lib/neo4j/data/all_cypher.csv", {format:'plain'})
 
-web端运行：CALL apoc.export.cypher.all("/var/lib/neo4j/data/jiaoyinkanglian-cypher.txt", {format:'plain',cypherFormat:'create'})
+web端运行：CALL apoc.export.cypher.all("/var/lib/neo4j/data/jykl-cypher.txt", {format:'plain',cypherFormat:'create'})
 运行结果：
 file	source	format	nodes	relationships	properties	time	rows
-"/var/lib/neo4j/data/jiaoyinkanglian-cypher.txt"	"database: nodes(105), rels(138)"	"cypher"	105	138	315	63	0
+"/var/lib/neo4j/data/jykl-cypher.txt"	"database: nodes(105), rels(138)"	"cypher"	105	138	315	63	0
 
-CALL apoc.export.cypher.all("/var/lib/neo4j/data/xincheng-cypher.txt", {format:'plain',cypherFormat:'create'})
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/xinch-cypher.txt", {format:'plain',cypherFormat:'create'})
 file	source	format	nodes	relationships	properties	time	rows
-"/var/lib/neo4j/data/xincheng-cypher.txt"	"database: nodes(1118), rels(1859)"	"cypher"	1118	1859	5981	253	0
+"/var/lib/neo4j/data/xinch-cypher.txt"	"database: nodes(1118), rels(1859)"	"cypher"	1118	1859	5981	253	0
 
 
 format:neo4j-shell导出的数据：
