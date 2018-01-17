@@ -20,3 +20,5 @@ gswyhq@gswyhq-PC:~/yhb$ find log/ -name "io*"|xargs grep -e "传入参数" -e "�
 或：
 gswyhq@gswyhq-PC:~/yhb$ find log/ -name "io*"|xargs grep -E "传入参数|返回数据" > 20170823备份日志.log
 
+# 使用 -l 选项可以只显示文件名：
+gswyhq@gswyhq-PC:~/output$ grep -l "http" *.json

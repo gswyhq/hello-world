@@ -146,7 +146,14 @@ Out[32]: ['ni', 'hao', 'abcこんにちは']
 def pinyin_sorted(iterable, reverse=False):
     """对中文按拼音进行排序
     """
-    pinyin_iterable = [(word, ''.join(lazy_pinyin(word))) for word in iterable]
-    return [word for word, _ in sorted(pinyin_iterable, key=lambda x:x[1], reverse=reverse)]
+    return sorted(iterable, key=lambda word:''.join(lazy_pinyin(word)), reverse=reverse)
 
+
+# 中文字符排序（并不等同于拼音排序）：
+import locale
+from functools import cmp_to_key
+locale.setlocale(locale.LC_COLLATE, 'zh_CN.UTF8')
+a = ['重大疾病保险金', '轻症疾病保险金', '癌症特别关爱金', '身故保险金', '全残保险金', '生命特别关爱金', '身故或全残保险金']
+b = sorted(a, key=cmp_to_key(lambda a, b: (a > b) - (a < b)), reverse=True)  # 等同于： sorted(a, reverse=True)
+# Out[60]: ['重大疾病保险金', '轻症疾病保险金', '身故或全残保险金', '身故保险金', '癌症特别关爱金', '生命特别关爱金', '全残保险金']
 

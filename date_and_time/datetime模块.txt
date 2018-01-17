@@ -371,6 +371,16 @@ now = datetime.now()
 aDay = timedelta(days=1)
 now = now + aDay
 print now.strftime('%Y-%m-%d')
+
+# 增加一年：
+start_time
+Out[40]: datetime.datetime(2017, 1, 1, 0, 0)
+start_time.year
+Out[41]: 2017
+start_time.replace(start_time.year+1)
+Out[42]: datetime.datetime(2018, 1, 1, 0, 0)
+
+
 python计算昨天时间：
 
 from datetime import datetime
@@ -397,3 +407,17 @@ d1 = datetime.now()
 time.sleep(10)
 eclipseTimes = datetime.now() - d1
 print eclipseTimes.total_seconds()
+
+# 获取月初，月末日期：
+# 使用time模块的time.localtime()获取当前日期，使用calendar模块calendar.monthrange的来获取指定月份的天数。即可得到月初日期和月末日期
+import calendar
+import time
+day_now = time.localtime()
+wday, monthRange = calendar.monthrange(day_now.tm_year, day_now.tm_mon)
+calendar.monthrange(day_now.tm_year, day_now.tm_mon) # 得到本月的天数 第一返回为月第一日为星期几（0-6）, 第二返回为此月天数
+Out[28]: (0, 31)
+
+# 获取当月的第一天和最后一天
+firstDay = datetime.date(year=year, month=month, day=1)
+lastDay = datetime.date(year=year, month=month, day=monthRange)
+

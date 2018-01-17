@@ -42,6 +42,8 @@ gswyhq@gswyhq-PC:~$ vim .vimrc
 set ts=4  # ts是tabstop的缩写，设TAB宽4个空格
 set expandtab
 set autoindent
+set hls # 打开查找高亮
+set nohls # 关闭查找高亮
 
 # 使修改的配置，立即生效
 gswyhq@gswyhq-PC:~$ source ~/.vimrc
