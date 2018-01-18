@@ -43,6 +43,9 @@ autossh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 nohup ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166 &
 
+当然也可以在docker容器中运行， 如：
+root@1798fefb267f:/jiaoyin# nohup autossh -NR 18090:192.168.3.131:18090 ubuntu@54.223.152.240 &
+
 # 有时候反向连接报错：
 Warning: remote port forwarding failed for listen port 7770
 这个时候，需要在被反向连接到的机器上，找到对应的进程kill掉即可；

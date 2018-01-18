@@ -44,3 +44,23 @@ ServerAliveInterval 60
 ClientAliveInterval 60
 方法三：如果您只想让当前的 ssh 保持连接，可以使用以下的命令：
 $ ssh -o ServerAliveInterval=60 user@sshserver
+
+
+方法1、依赖ssh客户端定时发送心跳。
+#打开
+sudo vim /etc/ssh/ssh_config
+# 添加
+ServerAliveInterval 20
+ServerAliveCountMax 999
+即每隔20秒，向服务器发出一次心跳。若超过999次请求，都没有发送成功，则会主动断开与服务器端的连接。
+
+方法2、更改服务器端，即在ssh远端。
+# 打开
+sudo vim/etc/ssh/sshd_config
+# 添加
+ClientAliveInterval 30
+ClientAliveCountMax 6
+
+ClientAliveInterval表示每隔多少秒，服务器端向客户端发送心跳，是的，你没看错。
+ClientAliveInterval表示上述多少次心跳无响应之后，会认为Client已经断开。
+所以，总共允许无响应的时间是60*3=180秒。
