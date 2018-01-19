@@ -1,4 +1,19 @@
 
+方法一：
+通过docker运行：
+docker pull gitlab/gitlab-ce
+sudo docker run --detach \
+    --hostname gitlab.example.com \
+    --publish 443:443 --publish 80:80 --publish 22:22 \
+    --name gitlab \
+    --restart always \
+    --volume /srv/gitlab/config:/etc/gitlab \
+    --volume /srv/gitlab/logs:/var/log/gitlab \
+    --volume /srv/gitlab/data:/var/opt/gitlab \
+    gitlab/gitlab-ce:latest
+参考资料：https://docs.gitlab.com/omnibus/docker/
+
+方法二：
 1. 安装配置依赖项
 
 如想使用Postfix来发送邮件,在安装期间请选择'Internet Site'. 您也可以用sendmai或者 配置SMTP服务 并 使用SMTP发送邮件.
@@ -41,4 +56,23 @@ http://192.168.3.101/gswyhq/qa_jar/protected_branches
 # 添加成员：
 点击项目进入项目主页，点击右侧的小三角，选择`Members`，添加成员；
 
+# 若需支持大文件管理：
+https://docs.gitlab.com/ce/workflow/lfs/manage_large_binaries_with_git_lfs.html
+安装：
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
+参考资料：https://coding.net/help/doc/git/git-lfs.html
+
+git lfs默认情况下，他们的存储在安装了gitlab的服务器上；
+若安装的是gitlab，开启功能只是需要修改 gitlab.rb里面的两行，然后gitlab-ctl restart重启。
+In /etc/gitlab/gitlab.rb:
+gitlab_rails['lfs_enabled'] = false  # 启用/禁用git lfs支持；
+gitlab_rails['lfs_storage_path'] = "/mnt/storage/lfs-objects"  # 设置lfs对象的存储位置
+# 目前，不支持将GitLab Git LFS对象存储在非本地存储（如S3存储桶）上
+
+如果要向现有仓库中添加一个大文件，你可以：
+git lfs track "*.pdf"
+git add file.pdf
+git commit -m "Add design file"
+git push origin master
 

@@ -259,5 +259,3 @@ pip install 一直都是超时，pip install timed out
 pip install 包名 -i https://pypi.douban.com/simple
 gswyhq@gswyhq-pc:~$ sudo pip3 install pandas -i https://pypi.douban.com/simple
 
-
-

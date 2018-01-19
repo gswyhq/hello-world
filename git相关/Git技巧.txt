@@ -145,3 +145,16 @@ $ git lg
 
 $ git config --global alias.st status ：用st代替status
 
+git 自动补全：
+root@5e5b7a877731:/# wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash ~/.git-completion.bash
+修改主目录下的 .bashrc 文件
+root@5e5b7a877731:/# vim ~/.bashrc
+在文件的最后一行，加上如下代码：
+source ~/.git-completion.bash
+root@5e5b7a877731:/# source ~/.bashrc
+或者：将如下行放到.bash_profile 文件中
+if [ -f ~/.git-completion.bash ]; then
+. ~/.git-completion.bash
+fi
+将其立即生效：
+source ~/.bash_profile

@@ -101,3 +101,20 @@ $ pip install git+git://github.com/aladagemre/django-notification.git@v2.1.0
 $ pip install https://github.com/aladagemre/django-notification/archive/v2.1.0.tar.gz
 
 # 更多示例见：https://pip.pypa.io/en/latest/reference/pip_install/#examples
+
+
+导出本机的安装包到requirements.txt文件
+pip3 freeze > requirements.txt
+安装requirements.txt依赖
+pip install -r requirements.txt
+
+# freeze是导出本机所有的Python包，若仅仅导出某个项目的依赖包，可以使用`pipreqs`; 使用之前需先进行安装：
+gswyhq@gswyhq-PC:~/nlp_layer$ sudo pip3 install pipreqs
+gswyhq@gswyhq-PC:~/nlp_layer$ pipreqs /home/gswyhq/nlp_layer  # 导出某个项目的依赖包
+INFO: Successfully saved requirements file in /home/gswyhq/nlp_layer/requirements.txt
+
+在requirements.txt文件中指定 branch names、 commit hash 或者 a tag name:
+-e git://git.myproject.org/MyProject.git@master#egg=MyProject
+-e git://git.myproject.org/MyProject.git@v1.0#egg=MyProject
+-e git://git.myproject.org/MyProject.git@da39a3ee5e6b4b0d3255bfef95601890afd80709#egg=MyProject
+更多详情：http://pip.readthedocs.io/en/1.1/requirements.html

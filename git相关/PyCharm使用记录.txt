@@ -54,7 +54,7 @@ gswyhq@gswyhq-pc:~$ sudo vim /etc/hosts
 # 重命名函数：
 在函数名处，右键，选择‘Change Signature’即可重命名函数；
 
-
+如果你更习惯工作于控制台环境下，也可以将Pycharm设置成为控制台模式。在主菜单中选择Tools → Run Python Console...来加载控制台;
 
 
 
