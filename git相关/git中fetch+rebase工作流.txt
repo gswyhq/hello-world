@@ -1,17 +1,13 @@
 
 
 用fetch+rebase (相比pull+merge工作流更干净，不容易出错)
-比如dev是你的公共开发分支
-git checkout dev  # 本地切到公共分支
-git pull              # 将本地的dev更新
-git checkout -b bug_101026  # 新建一个主题分支（一个bug，一个功能什么的）
+比如dev是你的本地开发分支, 要把本地dev分支合并到origin/master
+git checkout dev  # 本地切到dev分支
+做了些事情（一个bug，一个功能什么的）
 ... # 改动.. commit.. 测试...
-git fetch origin      # 更新upstream
-git rebase origin/dev  # 将你的commits移到的末尾
-git checkout dev  # 切换到公共分支
-git pull              # 更新公共分支
-git rebase bug_101026  # 将你的主题分支加到公共分支的末尾
-git push               # 推送
+git fetch origin master     # 更新远程master分支到本地远程master分支.
+git rebase origin/master # 将你的commits移到origin/master的末尾
+git push origin dev # 推送dev分支到远程
 
 # 解决冲突
 在rebase的过程中，也许会出现冲突(conflict). 在这种情况，Git会停止rebase并会让你去解决 冲突；在解决完冲突后，用"git-add"命令去更新这些内容的索引(index), 然后，你无需执行 git-commit,只要执行:

@@ -77,3 +77,49 @@ searchable.
 
 其他简单类型——long、double、date等等——也接受index参数，但相应的值只能是no和not_analyzed，它们的值不能被分析。
 
+# 创建索引时，设置同义词，索引别名
+# 注意：设置索引别名'aliases'，需与‘settings’同时存在，且同义词部分不能为空，否则设置别名无效
+# mappings，下的key，经测试可以随便写
+curl -XPUT 'http://localhost:9200/baike_faq' -d '
+{
+  "mappings": {
+    "asdfasdfasdf": {
+      "properties": {
+        "query_question": {
+          "analyzer": "synonym",
+          "include_in_all": "true",
+          "type": "text",
+          "boost": 8
+        }
+      }
+    }
+  },
+  "aliases": {
+    "xinch_alias": {}
+  },
+  "settings": {
+    "index": {
+      "analysis": {
+        "filter": {
+          "synonym": {
+            "synonyms": [
+              "保险, ",
+              "客户, 顾客"
+            ],
+            "type": "synonym"
+          }
+        },
+        "analyzer": {
+          "synonym": {
+            "tokenizer": "ik_max_word",
+            "use_smart": "true",
+            "filter": [
+              "synonym"
+            ],
+            "type": "custom"
+          }
+        }
+      }
+    }
+  }
+}'

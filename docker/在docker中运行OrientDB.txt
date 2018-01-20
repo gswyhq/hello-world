@@ -1,0 +1,73 @@
+
+# pull镜像：
+gswyhq@gswyhq-PC:~/nlp_layer$ docker pull orientdb:2.2.31
+
+如何使用这个图像
+当OrientDB启动时，要求输入root密码。 root用户能够管理OrientDB服务器：创建新的数据库，管理用户和角色。可以使用环境属性将根密码传递给容器：
+$ docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=rootpwd orientdb
+该Studio可以通过http：//<docker-host>：2480访问（例如：http：//localhost：2480）
+若使用本机id（如：http://192.168.3.250:2480）打开，则可能有弹出身份验证的情况出现。
+若使用镜像：orientdb:3.0.0RC1，则不会出现身份验证的问题。
+
+Studio是OrientDB管理的Web界面，与OrientDB发行版捆绑在一起。（http://orientdb.com/docs/last/Studio-Home-page.html)
+连接到现有数据库(https://www.w3cschool.cn/orientdb/orientdb_studio.html)
+要登录，请从数据库列表中选择一个数据库，并使用任何数据库用户。 默认情况下（用户名/密码）reader / reader可以从数据库中读取记录，writer / writer可以读取，创建，更新和删除记录，而admin / admin具有所有权限。
+
+进入终端：
+gswyhq@gswyhq-PC:~/hello-world$: docker exec -it orientdb /orientdb/bin/console.sh
+# 连接服务器实例
+orientdb> connect remote:192.168.3.250 root
+Enter password:
+
+Connecting to remote Server instance [remote:192.168.3.250] with user 'root'...OK
+# 连接成功后，列出数据库：
+orientdb {server=remote:192.168.3.250/}> list databases
+
+
+Found 0 databases:
+
+
+
+附上持久性卷
+Docker镜像包含一个具有基本配置的OrientDB安装。
+如果您需要提供自己的配置文件夹来覆盖OrientDB容器中包含的配置文件夹，只需连接配置文件夹的持久卷即可。
+提供配置文件夹可以与Ansible，Chef或Puppet等软件配置工具集成。
+
+$ docker run -d --name orientdb -p 2424:2424 -p 2480:2480 \
+    -v <config_path>:/orientdb/config \
+    -v <databases_path>:/orientdb/databases \
+    -v <backup_path>:/orientdb/backup \
+    -e ORIENTDB_ROOT_PASSWORD=rootpwd \
+    orientdb
+注：不要提供一个空的配置文件夹作为卷，因为OrientDB将启动一个非常小的配置。
+
+运行OrientDB工具
+OrientDB映像包含完整的Fledge安装，所以可以运行控制台
+$ docker run --rm -it orientdb /orientdb/bin/console.sh
+甚至是etl:
+$ docker run  --rm -it -v <config_path>:/orientdb/config orientdb /orientdb/bin/oetl.sh ../config/oetl-con
+
+覆盖配置参数
+任何配置设置都可以在启动时使用-D选项前缀来指定。例如，在分布式配置中启动OrientDB将以这种方式工作：
+
+$ docker run -d --name orientdb -p 2424:2424 -p 2480:2480 \
+    -v <config_path>:/orientdb/config \
+    -v <databases_path>:/orientdb/databases \
+    -v <backup_path>:/orientdb/backup \
+    -e ORIENTDB_ROOT_PASSWORD=rootpwd \
+    -e ORIENTDB_NODE_NAME=odb1 \
+    orientdb /orientdb/bin/server.sh  -Ddistributed=true
+
+环境
+环境参数（如堆大小）可以通过命令行传递：
+
+$ docker run -d --name orientdb -p 2424:2424 -p 2480:2480 \
+    -e ORIENTDB_ROOT_PASSWORD=rootpwd \
+    orientdb /orientdb/bin/server.sh -Xmx8g
+
+其他：
+修改config/orientdb-server-config.xml，设置用户登录密码
+<users>
+    <user resources="*" password="orientdb" name="orientdb"/>
+    <user resources="connect,server.listDatabases,server.dblist" password="spark" name="guest"/>
+</users>
