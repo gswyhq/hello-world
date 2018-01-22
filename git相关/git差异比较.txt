@@ -1,4 +1,5 @@
 
+
 # 显示与之前某次commit有哪些不同的文件：
 gswyhq@gswyhq-pc:~/qa_jar$ git diff 6c0311a8da6d848e04c40446ea25386824d37b7b --stat
  conf/pub_default.py   |  5 +++++
@@ -12,5 +13,5 @@ gswyhq@gswyhq-PC:~/yhb$ gitk dialogue_managem/global_variable.py
 # 使用的命令git add file1 是把文件从工作区提交到暂存区，git commit -m "prompty" file1 是把文件从暂存区提交到了版本库
   git diff 比较的是工作区和暂存区的差别
   git diff --cached 比较的是暂存区和版本库的差别
-  git diff HEAD 可以查看工作区和版本库的差别
+  git diff HEAD 可以查看工作区和版本库的差别(HEAD代表的是本地最近的一次commit)
 
