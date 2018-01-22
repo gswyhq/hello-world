@@ -199,3 +199,108 @@ if __name__ == '__main__':
     # '1.MySQL默认表的第一个timestamp字段为NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP属性。
     # 2.MySQL只允许一个timestamp字段拥有[DEFAULT CURRENT_TIMESTAMP |ON UPDATE CURRENT_TIMESTAMP]属性'
 # cursor.execute('create table dj1 (a char(1), b TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP , c TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP )')
+
+
+QA_TABLE_CONF = {
+    "table_name": "yhb_qa",
+    "field_list": ['id', 'qa_id', 'uid', 'question', 'answer', 'similar_question', 'tag1', 'tag2', 'create_time', 'modify_time'],
+    "create_table_sql": '''CREATE TABLE yhb_qa(
+                            id int(10) AUTO_INCREMENT PRIMARY KEY COMMENT '唯一自增id',
+                            qa_id int(10) NOT NULL  COMMENT '标准问题对应的id',
+                            uid VARCHAR(20) COMMENT '用户id',
+                            question varchar(100) NOT NULL unique COMMENT '问题',
+                            answer text NOT NULL COMMENT '答案',
+                            similar_question text COMMENT '相似问题',
+                            tag1 tinytext COMMENT '一级问题分类',
+                            tag2 tinytext COMMENT '二级问题分类',
+                            create_time DATETIME NOT NULL COMMENT '创建时间',
+                            modify_time TIMESTAMP COMMENT '修改时间',
+                            UNIQUE  INDEX (question)
+                            )DEFAULT CHARSET=utf8;'''
+}
+
+# jll建的一对一问答表
+QUESTTION_TABLE_CONF = {
+    "table_name": "question",
+    "field_list": ['id', 'question', 'answer', 'similar_question', 'tag1', 'tag2', 'created', 'updated'],
+    "create_table_sql":
+            '''CREATE TABLE `question` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `question` VARCHAR(100) NOT NULL,
+              `answer` VARCHAR(1000) NOT NULL,
+              `similar_question` TEXT NOT NULL,
+              `tag1` INT(11) NOT NULL,
+              `tag2` INT(11) NOT NULL,
+              `created` DATETIME NOT NULL,
+              `updated` DATETIME NOT NULL,
+              PRIMARY KEY (`id`),
+              UNIQUE INDEX `question` (`question`),
+              INDEX `ix_question_answer` (`answer`)
+            )
+            COLLATE='utf8_general_ci'
+            ENGINE=InnoDB
+            ;'''
+}
+
+ENTITY_TABLE_CONF = {
+    "table_name": "entity",
+    "field_list": ['id', 'word', 'similar_word', 'created', 'updated'],
+    "create_table_sql":
+        '''CREATE TABLE `entity` (
+          `id` INT(11) NOT NULL AUTO_INCREMENT,
+          `word` VARCHAR(50) NOT NULL,
+          `similar_word` text,
+          `created` DATETIME NOT NULL,
+          `updated` DATETIME NOT NULL,
+          PRIMARY KEY (`id`),
+          UNIQUE INDEX `word` (`word`)
+        )
+        COLLATE='utf8_general_ci'
+        ENGINE=InnoDB
+        ;'''
+}
+# insert  into entity (word,similar_word,created,updated) values ('今天','金色',now(),now());
+
+SYNONYMS_TABLE_CONF = {
+    "table_name": "synonyms",
+    "field_list": ['id', 'uid', 'standard', 'synonyms', 'label', 'tag', 'create_time', 'modify_time'],
+    "create_table_sql": '''CREATE TABLE synonyms(
+                            id int(10) AUTO_INCREMENT PRIMARY KEY COMMENT '唯一自增id',
+                            uid VARCHAR(20) COMMENT '用户id',
+                            standard varchar(20) NOT NULL unique COMMENT '标准词',
+                            synonyms text COMMENT '同义词',
+                            label varchar(20) NOT NULL DEFAULT '无意义词' COMMENT '词在知识库中的类别',
+                            tag tinytext COMMENT '词分类',
+                            create_time DATETIME NOT NULL COMMENT '创建时间',
+                            modify_time TIMESTAMP COMMENT '修改时间'
+                            )DEFAULT CHARSET=utf8;'''
+}
+
+NEW_QUESTION_TABLE_CONF = {
+    "table_name": "new_question",
+    "field_list": ['id', 'uid', 'question', 'answer', 'create_time', 'modify_time'],
+    "create_table_sql": '''CREATE TABLE new_question(
+                            id int(10) AUTO_INCREMENT PRIMARY KEY COMMENT '唯一自增id',
+                            uid VARCHAR(20) COMMENT '用户id',
+                            question varchar(100) NOT NULL unique COMMENT '新问题',
+                            answer text COMMENT '答案',
+                            create_time DATETIME NOT NULL COMMENT '创建时间',
+                            modify_time TIMESTAMP COMMENT '修改时间'
+                            )DEFAULT CHARSET=utf8;'''
+}
+
+# qa数据可视化
+QA_DATA_VISUALIZATION = {
+    "table_name": "qa_visualization",
+    "field_list": ['id', 'sid', 'uid', 'start_time', 'update_time', 'from_code', 'other', 'consume'],
+    "create_table_sql": '''CREATE TABLE `qa_visualization`(
+                            `id` int(10) AUTO_INCREMENT PRIMARY KEY COMMENT '唯一自增id,会话id',
+                            `sid` VARCHAR(20) COMMENT '会话id',
+                            `uid` VARCHAR(20) COMMENT '用户id',
+                            `start_time` DATETIME NOT NULL COMMENT '会话开始时间',
+                            `update_time` DATETIME NOT NULL COMMENT '当前对话时间',
+                            `from_code` int(2) NOT NULL COMMENT '回复来源',
+                            `other` text COMMENT '其他信息',
+                            `consume` int(5) COMMENT '对话耗时，单位：ms'
+                            )DEFAULT CHARSET=utf8;'''
+}
