@@ -71,6 +71,7 @@ def read_t2(csv_file):
 
 def write_t(t_csv_file):
     with open(t_csv_file, 'w', newline='', encoding='utf_8_sig') as csvfile:
+        # 如果没有指定newline =''，嵌入在引用字段中的换行符将不会被正确解释，并且在使用\ r \ n结点的平台上写入额外的\ r将被添加。 指定newline =''应该总是安全的，因为csv模块执行自己的（通用）换行处理。
         csvfile.write(codecs.BOM_UTF8.decode('utf8'))  # 防止写入csv文件，在windows中文会乱码, 或者在写文件时定义编码为：utf_8_sig
         spamwriter = csv.writer(csvfile, delimiter=' ',
                                 quotechar=',', quoting=csv.QUOTE_MINIMAL)

@@ -1,0 +1,19 @@
+
+Docker Remote API是一个取代远程命令行界面（rcli）的REST API。
+
+pycharm中使用remote interpreter，需要用到remote api
+
+docker开启api端口，docker启用加速
+
+需要在docker配置文件中修改信息:
+vim /etc/default/docker
+DOCKER_OPTS="-H tcp://0.0.0.0:2375  -H unix:///var/run/docker.sock"
+使用netstat -anp| grep 2375,端口没占用起来就用
+docker -d -H uninx:///var/run/docker.sock  -H tcp://0.0.0.0:2375 &    去启动docker。
+
+
+
+docker速度太慢，加入加速
+DOCKER_OPTS="--registry-mirror=http://aad04xxc.m.daocloud.io -H tcp://0.0.0.0:2375  -H unix:///var/run/docker.sock"
+
+这是daocloud的加速，自己去注册个用自己的就可以了。

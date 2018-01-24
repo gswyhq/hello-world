@@ -1,0 +1,144 @@
+
+1、数据导出表或表中的字段：
+Mongodb中的mongoexport工具可以把一个collection导出成JSON格式或CSV格式的文件。可以通过参数指定导出的数据项，也可以根据指定的条件导出数据。
+mongoexport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 -f 字段 -q 条件导出 --csv -o 文件名
+上面的参数好理解，重点说一下：
+-f    导出指字段，以字号分割，-f name,email,age导出name,email,age这三个字段
+-q    可以根查询条件导出，-q '{ "uid" : "100" }' 导出uid为100的数据
+--csv 表示导出的文件格式为csv的，这个比较有用，因为大部分的关系型数据库都是支持csv，在这里有共同点
+
+参数说明：
+-h:指明数据库宿主机的IP
+--port：指明数据库宿主机端口号
+-u:指明数据库的用户名
+-p:指明数据库的密码
+-d:指明数据库的名字
+-c:指明collection的名字
+-f:指明要导出那些列
+-o:指明到要导出的文件名
+-q:指明导出数据的过滤条件
+
+-d:指明使用的库，本例中为test
+-c:指明要导出的集合，本例中为students
+-o:指明要导出的文件名，本例中为students.dat
+从上面的结果可以看出，我们在导出数据时没有显示指定导出样式 ，默认导出了JSON格式的数据。如果我们需要导出CSV格式的数据，则需要使用--csv参数
+
+some-mongo： 是一个docker实例
+gswyhq@gswyhq-PC:~/docker/mongo$ docker run --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d mongo:3.6.2
+
+gswyhq@gswyhq-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoexport -h 192.168.3.130 --port 27017 -d pages -c "百度知道-保险相关问答" -o pages_百度知道-保险相关问答.json
+2018-01-23T08:59:56.518+0000	connected to: 192.168.3.130:27017
+2018-01-23T08:59:57.515+0000	[........................]                      pages.百度知道-保险相关问答  0/75320  (0.0%)
+2018-01-23T08:59:58.515+0000	[#####...................]                      pages.百度知道-保险相关问答  16000/75320  (21.2%)
+2018-01-23T08:59:59.515+0000	[#####...................]                      pages.百度知道-保险相关问答  16000/75320  (21.2%)
+2018-01-23T09:00:00.515+0000	[#######.................]                      pages.百度知道-保险相关问答  24000/75320  (31.9%)
+2018-01-23T09:00:01.515+0000	[#######.................]                      pages.百度知道-保险相关问答  24000/75320  (31.9%)
+2018-01-23T09:00:02.515+0000	[############............]                      pages.百度知道-保险相关问答  40000/75320  (53.1%)
+2018-01-23T09:00:03.515+0000	[###############.........]                      pages.百度知道-保险相关问答  48000/75320  (63.7%)
+2018-01-23T09:00:04.515+0000	[#################.......]                      pages.百度知道-保险相关问答  56000/75320  (74.3%)
+2018-01-23T09:00:05.147+0000	[########################]                      pages.百度知道-保险相关问答  75320/75320  (100.0%)
+2018-01-23T09:00:05.147+0000	exported 75320 records
+# 导出的数据在容器`some-mongo`中，再从容器中复制出来即可：
+gswyhq@gswyhq-PC:~/yhb$ docker cp some-mongo:/pages_百度知道-保险相关问答.json .
+
+其他示例：
+[root@localhost mongodb]# ./bin/mongoexport -d test -c students --csv -f classid,name,age -o students_csv.dat
+-csv：指明要导出为csv格式
+-f：指明需要导出classid、name、age这3列的数据
+
+# 根据条件导出数据
+[root@localhost mongodb]# mongoexport -d tank -c users -q '{uid:{$gt:1}}' -o tank/users.json
+connected to: 127.0.0.1
+exported 3 records
+
+#,导出整张表
+[root@localhost mongodb]# mongoexport -d tank -c users -o /home/zhangy/mongodb/tank/users.dat
+
+2、导入表，或者表中部分字段：
+Mongodb中的mongoimport工具可以把一个特定格式文件中的内容导入到指定的collection中。该工具可以导入JSON格式数据，也可以导入CSV格式数据。
+参数说明：
+-h:指明数据库宿主机的IP
+-u:指明数据库的用户名
+-p:指明数据库的密码
+-d:指明数据库的名字
+-c:指明collection的名字
+-f:指明要导入那些列
+
+[root@localhost mongodb]# ./bin/mongoimport -d test -c students students.dat
+参数说明：
+-d:指明数据库名，本例中为test
+-c:指明collection名，本例中为students
+
+上面演示的是导入JSON格式的文件中的内容，如果要导入CSV格式文件中的内容，则需要通过--type参数指定导入格式，具体如下所示：
+先删除数据
+Js代码  收藏代码
+> db.students.remove()
+> db.students.find()
+>
+再导入之前导出的students_csv.dat文件
+
+[root@localhost mongodb]# ./bin/mongoimport -d test -c students --type csv --headerline --file students_csv.dat
+connected to: 127.0.0.1
+imported 10 objects
+[root@localhost mongodb]#
+参数说明：
+-type:指明要导入的文件格式
+-headerline:指明第一行是列名，不需要导入
+-file：指明要导入的文件
+
+gswyhq@gswyhq-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoimport -h 192.168.3.250 -d pages -c "百度知道-保险相关问答" /pages_百度知道-保险相关问答.json
+2018-01-23T09:12:09.144+0000	connected to: 192.168.3.250
+2018-01-23T09:12:11.242+0000	imported 75320 documents
+
+其他示例：
+#,还原整表导出的非csv文件
+mongoimport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 --upsert --drop 文件名
+重点说一下--upsert，其他参数上面的命令已有提到，--upsert 插入或者更新现有数据
+#,还原部分字段的导出文件
+mongoimport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 --upsertFields 字段 --drop 文件名
+--upsertFields根--upsert一样
+#,还原导出的csv文件
+mongoimport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 --type 类型 --headerline --upsert --drop 文件名
+
+#,还原导出的表数据
+[root@localhost mongodb]# mongoimport -d tank -c users --upsert tank/users.dat
+connected to: 127.0.0.1
+Tue Dec 3 08:26:52.852 imported 4 objects
+#,部分字段的表数据导入
+[root@localhost mongodb]# mongoimport -d tank -c users  --upsertFields uid,name,sex  tank/users.dat
+connected to: 127.0.0.1
+Tue Dec  3 08:31:15.179 imported 4 objects
+#,还原csv文件
+[root@localhost mongodb]# mongoimport -d tank -c users --type csv --headerline --file tank/users.csv
+connected to: 127.0.0.1
+Tue Dec 3 08:37:21.961 imported 4 objects
+
+3，mongodump备份数据库
+mongodump -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -o 文件存在路径
+如果没有用户，可以去掉-u和-p。
+如果导出本机的数据库，可以去掉-h。
+如果是默认端口，可以去掉--port。
+如果想导出所有数据库，可以去掉-d。
+
+# 导出所有数据库
+[root@localhost mongodb]# mongodump -h 127.0.0.1 -o /home/zhangy/mongodb/
+
+# 导出指定数据库
+[root@localhost mongodb]# mongodump -h 192.168.1.108 -d tank -o /home/zhangy/mongodb/
+
+4, mongorestore还原数据库
+mongorestore -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 --drop 文件存在路径
+--drop的意思是，先删除所有的记录，然后恢复。
+
+# 恢复所有数据库到mongodb中
+[root@localhost mongodb]# mongorestore /home/zhangy/mongodb/  #这里的路径是所有库的备份路径
+
+# 还原指定的数据库
+[root@localhost mongodb]# mongorestore -d tank /home/zhangy/mongodb/tank/  #tank这个数据库的备份路径
+
+[root@localhost mongodb]# mongorestore -d tank_new /home/zhangy/mongodb/tank/  #将tank还有tank_new数据库中
+
+这二个命令，可以实现数据库的备份与还原，文件格式是json和bson的。无法指写到表备份或者还原。
+
+
+

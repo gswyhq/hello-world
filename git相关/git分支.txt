@@ -7,3 +7,7 @@ gswyhq@gswyhq-pc:~/yhb$ git branch -m wmd wmd_match
 gswyhq@gswyhq-pc:~/yhb$ git push origin :wmd
 gswyhq@gswyhq-pc:~/yhb$ git push origin wmd_match:wmd_match
 
+git如何通过commit-id来确定分支名:
+gswyhq@gswyhq-PC:~/yhb$ git branch --contains 44585a441690c7b129dcd45fb3bea5009b709df2
+  zhishidian_2
+

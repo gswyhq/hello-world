@@ -168,6 +168,9 @@ RETURN FILTER( n IN listA WHERE NOT n IN listB ) as listC
 # 属性值为空时查询示例：
 MATCH (n)-[r1:`疾病`]->(n1),(n)-[r2:`赔偿规则`]->(n2),(n)-[r3:`相关条款`]->(n3) WHERE n.name='赔偿情况1'and n1.name = "恶性肿瘤" and r2.等待期 = "是" and r2.意外导致 is null and r2.首次发生 is null RETURN n2.name ,n3.name , r2.name,n.name
 
+# 查询某个节点的关系数：
+MATCH (n)-[r]->(n2) where length(()-->(n))=0 and length((n)-->())=1 and length(()-->(n2))=1 and Length((n2)-->())=0  return n, r, n2
+
 a.创建
 
 CREATE (id:label {key:value})
