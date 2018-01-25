@@ -1,0 +1,83 @@
+
+
+# 容器内不能输入中文，挂载含有中文字符的文件到docker，出现中文乱码问题：
+gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo /bin/bash
+root@2802d82a4733:/# echo $LANG
+
+# 查看docker容器编码格式：执行locale命令；可以看到当前编码格式为POSIX，而这种编码格式不支持中文
+root@2802d82a4733:/# locale
+LANG=
+LANGUAGE=
+LC_CTYPE="POSIX"
+LC_NUMERIC="POSIX"
+LC_TIME="POSIX"
+LC_COLLATE="POSIX"
+LC_MONETARY="POSIX"
+LC_MESSAGES="POSIX"
+LC_PAPER="POSIX"
+LC_NAME="POSIX"
+LC_ADDRESS="POSIX"
+LC_TELEPHONE="POSIX"
+LC_MEASUREMENT="POSIX"
+LC_IDENTIFICATION="POSIX"
+LC_ALL=
+# locale -a查看容器所有语言环境
+root@2802d82a4733:/# locale -a
+C
+C.UTF-8
+POSIX
+root@2802d82a4733:/# exit
+exit
+解决方法：
+C.UTF-8可以支持中文，只需要把容器编码设置为C.UTF-8即可
+1.临时修改：
+    root@2802d82a4733:/# locale
+    root@2802d82a4733:/# locale -a
+    root@2802d82a4733:/# export LANG=C.UTF-8 (有的是zh_CN.UTF-8)
+    root@2802d82a4733:/# export LC_ALL=C.UTF-8
+    # 让设定生效
+    root@2802d82a4733:/# source /etc/profile
+
+2.永久修改：修改Dockerfile
+    在Dockerfile中添加一行
+    ENV LANG C.UTF-8
+    重新制作docker镜像，docker run -ti [镜像] 进入容器后执行locale发现编码格式已经被修改为C.UTF-8，之前出现的中文文件名乱码问题也没有了。
+
+3.永久修改2：
+# 更新源
+root@db835fa8e5de:~# apt-get update
+# 下载安装中文字体
+root@db835fa8e5de:~# apt-get install  -y language-pack-zh-hans
+root@db835fa8e5de:~#  apt-get install -y language-pack-zh-hant
+root@db835fa8e5de:~# cd /usr/share/locales/
+root@db835fa8e5de:/usr/share/locales# ./install-language-pack zh_CN
+root@db835fa8e5de:/usr/share/locales# locale-gen
+Generating locales (this might take a while)...
+  zh_CN.GB2312... done
+  zh_CN.UTF-8... done
+  zh_HK.UTF-8... done
+  zh_SG.UTF-8... done
+  zh_TW.UTF-8... done
+root@db835fa8e5de:/usr/share/locales# vim /etc/profile
+末尾添加一行：export LANG=zh_CN.UTF-8
+root@8b79b4483485:~# vim .bashrc
+末尾添加两行：
+export LC_ALL=zh_CN.utf8
+export LANG=zh_CN.UTF-8
+root@8b79b4483485:~# source .bashrc
+
+root@db835fa8e5de:/usr/share/locales# source /etc/profile
+root@db835fa8e5de:/usr/share/locales# locale
+LANG=zh_CN.UTF-8
+LANGUAGE=
+LC_CTYPE="zh_CN.UTF-8"
+LC_NUMERIC="zh_CN.UTF-8"
+# 退出，提交保存为一个新的镜像：
+gswyhq@gswyhq-pc:~/docker/ubuntu$ docker commit db835fa8e5de ubuntu:0629-2
+
+# 不能输入中文
+解决方法：登录容器时设定一下LANG 环境变量 docker exec -it CONTAINER env LANG=C.UTF-8 bash
+然后就可以输入中文了
+gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+root@2802d82a4733:/# asf访问法
+

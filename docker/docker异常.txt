@@ -148,6 +148,3 @@ deb [by-hash=force] http://mirrors.aliyun.com/deepin unstable main contrib non-f
 
 gswyhq@gswyhq-pc:~$ sudo apt-get update
 gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
-
-
-
