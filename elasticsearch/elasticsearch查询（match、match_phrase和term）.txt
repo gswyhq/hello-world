@@ -103,6 +103,7 @@ multi_match
     }
   }
 }
+
 但是multi_match就涉及到匹配评分的问题了。
 
 我们希望完全匹配的文档占的评分比较高，则需要使用best_fields
@@ -240,5 +241,13 @@ must_not: 文档必须不匹配条件
 }
 
 来源：http://www.cnblogs.com/yjf512/p/4897294.html
+
+控制返回字段的参数fields已经被stored_fields替代。stored_fields参数只会返回存储的fields————他将不会从_source中获取值。
+示例：
+{'query': {'match': {'query_question': {'minimum_should_match': '30%',
+    'query': '恢复的效力你知道是什么意思啊'}}},
+ 'size': 20,
+ 'stored_fields': ['_source']}
+
 
 

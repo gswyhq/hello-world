@@ -24,7 +24,7 @@ mongoexport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 -f
 从上面的结果可以看出，我们在导出数据时没有显示指定导出样式 ，默认导出了JSON格式的数据。如果我们需要导出CSV格式的数据，则需要使用--csv参数
 
 some-mongo： 是一个docker实例
-gswyhq@gswyhq-PC:~/docker/mongo$ docker run --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d mongo:3.6.2
+gswyhq@gswyhq-PC:~/docker/mongo$ docker run -e LANG=C.UTF-8 --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d mongo:3.6.2
 gswyhq@gswyhq-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoexport -h 192.168.3.130 --port 27017 -d pages -c "百度知道-保险相关问答" -o pages_百度知道-保险相关问答.json
 2018-01-23T08:59:56.518+0000	connected to: 192.168.3.130:27017
 2018-01-23T08:59:57.515+0000	[........................]                      pages.百度知道-保险相关问答  0/75320  (0.0%)
@@ -128,6 +128,16 @@ root@2802d82a4733:~# /usr/bin/mongodump -h 192.168.3.130 -o /mongodb_192_168_3_1
 
 # 导出指定数据库
 [root@localhost mongodb]# mongodump -h 192.168.1.108 -d tank -o /home/zhangy/mongodb/
+
+root@b8780dcc5b2f:/data/db# mkdir mongodb_192_168_3_130
+root@b8780dcc5b2f:~# /usr/bin/mongodump -h 192.168.3.130 -d page -o /data/db/mongodb_192_168_3_130
+2018-01-27T01:19:17.296+0000	writing page.保险条款 to
+2018-01-27T01:19:17.554+0000	done dumping page.保险条款 (21 documents)
+root@b8780dcc5b2f:~# cd /data/db/mongodb_192_168_3_130/
+root@b8780dcc5b2f:/data/db/mongodb_192_168_3_130# ls
+page
+root@b8780dcc5b2f:/data/db/mongodb_192_168_3_130/page$ ls
+保险条款.bson  保险条款.metadata.json
 
 4, mongorestore还原数据库
 mongorestore -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 --drop 文件存在路径
