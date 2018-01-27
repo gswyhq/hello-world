@@ -12,3 +12,12 @@ ssh-copy-id [-i [identity_file]] [user@]machine
 ssh-copy-id user@server
 ssh-copy-id -i ~/.ssh/id_rsa.pub user@server
 
+通过ssh-copy-id的方式实现ssh免密码登录：
+命令： ssh-copy-id -i ~/.ssh/id_rsa.put <romte_ip>
+gswyhq@gswyhq-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub yang131
+常见错误：
+    [root@test ~]# ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.91.135
+    -bash: ssh-copy-id: command not found //提示命令不存在
+    解决办法：yum -y install openssh-clients
+当然也可以通过scp将内容写到对方的文件中
+    命令：scp -p ~/.ssh/id_rsa.pub root@<remote_ip>:/root/.ssh/authorized_keys

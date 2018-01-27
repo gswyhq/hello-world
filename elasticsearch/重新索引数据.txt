@@ -130,6 +130,20 @@ PUT /dobbyindex
   }
 }
 
+# 重命名索引：
+1、复制索引一个新的名字
+POST /_reindex
+{
+  "source": {
+    "index": "twitter"
+  },
+  "dest": {
+    "index": "new_twitter"
+  }
+}
+2、删除旧的索引
+DELETE /twitter
+
 实例展示elasticsearch集群生态,分片以及水平扩展.
 https://www.cnblogs.com/dennisit/p/4133131.html
 

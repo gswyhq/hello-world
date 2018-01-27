@@ -1,0 +1,310 @@
+
+es几种分词器的特性：
+1）standard分词器
+      es默认的分词器，对中文支持不友好，会将中文分成单字，这样在查询多个汉字时就匹配不到doc，所以针对中文字段可使用ik
+2）ik分词器
+      需要单独安装ik插件，有ik_smart和ik_max_word两种分词粒度，其中ik_max_word粒度更细，但如果ik识别不出的词，就不会分出
+3）pinyin分词器
+      需要安装插件，可支持拼音全拼、简拼和首字母查询
+鉴于以上分词器的特性，在全局检索时可能需要使用几种分词器同时工作，那这种需求该如何来处理呢？答案是使用multi_field
+以下为multi_field的mapping：
+
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{
+    "mappings": {
+     "my_type" : {
+            "properties" : {
+                "item_name" : {
+                    "type" : "text",
+                    "fields" : {
+                        "item_name_ik" : {"type" : "text", "analyzer" :"ik_max_word"},
+                        "item_name_not" : {"type" : "text", "index" : "not_analyzed"},
+                        "item_name_standard" : {"type" : "text"}
+                    }
+                },
+               "brand_name" : {
+                    "type" : "text",
+                    "fields" : {
+                        "brand_name_ik" : {"type" : "text", "analyzer" :"ik_max_word"},
+                        "brand_name_not" : {"type" : "text", "index" : "not_analyzed"},
+                        "brand_name_standard" : {"type" : "text"}
+                    }
+                },
+                "c_name" : {
+                    "type" : "text",
+                    "fields" : {
+                        "c_name_ik" : {"type" : "text", "analyzer" :"ik_max_word"},
+                        "c_name_not" : {"type" : "text", "index" : "not_analyzed"},
+                        "c_name_standard" : {"type" : "text"}
+                    }
+                }
+            }
+        }
+    }
+}
+'
+
+# 添加数据：
+curl -XPUT 'localhost:9200/my_index/my_type/1?pretty' -H 'Content-Type: application/json' -d'
+{
+  "item_name": "两全保险是什么意思",
+    "brand_name": "康联重疾险能保什么",
+    "c_name":"恶性肿瘤能否赔偿重大疾病保险金"
+}
+'
+
+curl -XPUT 'localhost:9200/my_index/my_type/2?pretty' -H 'Content-Type: application/json' -d'
+{
+  "item_name": "恶性肿瘤能否赔偿重大疾病保险金",
+    "brand_name": "保险是骗人的吗",
+    "c_name":"什么是意外伤害保险"
+}
+'
+
+对每个需要查询的字段分别设置不同的分词器，查询时的json如下：
+{
+  "from": 0,
+  "size": 20,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "fuzzy": {
+            "item_name.item_name_ik": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "item_name.item_name_not": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "item_name.item_name_standard": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "brand_name.brand_name_ik": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "brand_name.brand_name_not": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "brand_name.brand_name_standard": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "c_name.c_name_ik": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "c_name.c_name_not": {
+              "value": "西"
+            }
+          }
+        },
+        {
+          "fuzzy": {
+            "c_name.c_name_standard": {
+              "value": "西"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+这样就会针对所有分词的情况，查询到含有关键字“西”的文档，如果觉得这样写的结构比较麻烦，也可使用multi_match
+如下：
+{
+  "query": {
+    "multi_match": {
+      "query": "两全的保险",
+      "type": "best_fields",
+      "fields": [
+        "brand_name.brand_name_standard",
+        "item_name.item_name_standard",
+        "c_name.c_name_standard"
+      ],
+      "tie_breaker": 0.3,
+      "minimum_should_match": "30%"
+    }
+  }
+}
+
+tie_breaker参数会让dis_max查询的行为更像是dis_max和bool的一种折中。它会通过下面的方式改变分值计算过程：
+    取得最佳匹配查询子句的_score。
+    将其它每个匹配的子句的分值乘以tie_breaker。
+    将以上得到的分值进行累加并规范化。
+通过tie_breaker参数，所有匹配的子句都会起作用，只不过最佳匹配子句的作用更大。
+tie_breaker的取值范围是0到1之间的浮点数，取0时即为仅使用最佳匹配子句(译注：和不使用tie_breaker参数的dis_max查询效果相同)，取1则会将所有匹配的子句一视同仁。它的确切值需要根据你的数据和查询进行调整，但是一个合理的值会靠近0，(比如，0.1 -0.4)，来确保不会压倒dis_max查询具有的最佳匹配性质。
+
+match查询支持minimum_should_match参数，它能够让你指定有多少词条必须被匹配才会让该文档被当做一个相关的文档。尽管你能够指定一个词条的绝对数量，但是通常指定一个百分比会更有意义，因为你无法控制用户会输入多少个词条：
+GET /my_index/my_type/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query":                "quick brown dog",
+        "minimum_should_match": "75%"
+      }
+    }
+  }
+}
+当以百分比的形式指定时，minimum_should_match会完成剩下的工作：在上面拥有3个词条的例子中，75%会被向下舍入到66.6%，即3个词条中的2个。无论你输入的是什么，至少有2个词条被匹配时，该文档才会被算作最终结果中的一员。
+也能够通过minimum_should_match参数来控制should语句需要匹配的数量，该参数可以是一个绝对数值或者一个百分比：
+
+GET /my_index/my_type/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "title": "brown" }},
+        { "match": { "title": "fox"   }},
+        { "match": { "title": "dog"   }}
+      ],
+      "minimum_should_match": 2
+    }
+  }
+}
+以上查询的而结果仅包含以下文档：
+title字段包含： "brown" AND "fox" 或者 "brown" AND "dog" 或者 "fox" AND "dog"
+
+
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "my_type": {
+      "properties": {
+        "text": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type":     "text",
+              "analyzer": "english"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+'
+
+text字段使用标准分析器,standard,标准分析器对中文分成单字；
+text.english字段使用英文分析器。
+索引两个文件，一个与fox，另一个foxes。
+查询text和text.english字段并合并分数。
+文本字段在第一个文档中包含术语fox，在第二个文档中包含foxes。 text.english字段包含这两个文件的fox, 因为fox在foxes。
+查询字符串也由标准分析器分析文本字段，英文分析器为text.english字段。 词干字段允许查询fox也匹配只包含foxes的文件。 这使我们能尽可能多地匹配文档。 通过查询未定序的文本字段，可以提高与fox匹配的文档的相关性得分。
+
+curl -XPUT 'localhost:9200/my_index/my_type/1?pretty' -H 'Content-Type: application/json' -d'
+{ "text": "quick brown fox" }
+'
+curl -XPUT 'localhost:9200/my_index/my_type/2?pretty' -H 'Content-Type: application/json' -d'
+{ "text": "quick brown foxes" }
+'
+curl -XGET 'localhost:9200/my_index/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "multi_match": {
+      "query": "quick brown foxes",
+      "fields": [
+        "text",
+        "text.english"
+      ],
+      "type": "most_fields"
+    }
+  }
+}
+'
+
+
+multi_match 查询为能在多个字段上反复执行相同查询提供了一种便捷方式。
+注意
+multi_match 多匹配查询的类型有多种，其中的三种恰巧与 了解我们的数据 中介绍的三个场景对应，即： best_fields 、 most_fields 和 cross_fields （最佳字段、多数字段、跨字段）。
+
+默认情况下，查询的类型是 best_fields ， 这表示它会为每个字段生成一个 match 查询，然后将它们组合到 dis_max 查询的内部，如下：
+
+{
+  "dis_max": {
+    "queries":  [
+      {
+        "match": {
+          "title": {
+            "query": "Quick brown fox",
+            "minimum_should_match": "30%"
+          }
+        }
+      },
+      {
+        "match": {
+          "body": {
+            "query": "Quick brown fox",
+            "minimum_should_match": "30%"
+          }
+        }
+      },
+    ],
+    "tie_breaker": 0.3
+  }
+}
+上面这个查询用 multi_match 重写成更简洁的形式：
+
+{"query": {
+    "multi_match": {
+        "query":                "Quick brown fox",
+        "type":                 "best_fields",
+        "fields":               [ "title", "body" ],
+        "tie_breaker":          0.3,
+        "minimum_should_match": "30%"
+    }
+    }
+}
+
+best_fields 类型是默认值，可以不指定。
+如 minimum_should_match 或 operator 这样的参数会被传递到生成的 match 查询中。
+
+查询字段名称的模糊匹配
+字段名称可以用模糊匹配的方式给出：任何与模糊模式正则匹配的字段都会被包括在搜索条件中， 例如可以使用以下方式同时匹配 book_title 、 chapter_title 和 section_title （书名、章名、节名）这三个字段：
+{"query": {
+    "multi_match": {
+        "query":  "Quick brown fox",
+        "fields": "*_title"
+    }}
+}
+
+提升单个字段的权重
+可以使用 ^ 字符语法为单个字段提升权重，在字段名称的末尾添加 ^boost ， 其中 boost 是一个浮点数：
+{"query": {
+    "multi_match": {
+        "query":  "Quick brown fox",
+        "fields": [ "*_title", "chapter_title^2" ]
+    }}
+}
+
+chapter_title 这个字段的 boost 值为 2 ，而其他两个字段 book_title 和 section_title 字段的默认 boost 值为 1 。
+
+参考资料：
+https://www.cnblogs.com/luckcs/articles/7053029.html

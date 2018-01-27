@@ -25,7 +25,6 @@ mongoexport -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 -f
 
 some-mongo： 是一个docker实例
 gswyhq@gswyhq-PC:~/docker/mongo$ docker run --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d mongo:3.6.2
-
 gswyhq@gswyhq-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoexport -h 192.168.3.130 --port 27017 -d pages -c "百度知道-保险相关问答" -o pages_百度知道-保险相关问答.json
 2018-01-23T08:59:56.518+0000	connected to: 192.168.3.130:27017
 2018-01-23T08:59:57.515+0000	[........................]                      pages.百度知道-保险相关问答  0/75320  (0.0%)
@@ -122,6 +121,10 @@ mongodump -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -o 文件存�
 
 # 导出所有数据库
 [root@localhost mongodb]# mongodump -h 127.0.0.1 -o /home/zhangy/mongodb/
+
+gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+root@2802d82a4733:/# mkdir mongodb_192_168_3_130
+root@2802d82a4733:~# /usr/bin/mongodump -h 192.168.3.130 -o /mongodb_192_168_3_130
 
 # 导出指定数据库
 [root@localhost mongodb]# mongodump -h 192.168.1.108 -d tank -o /home/zhangy/mongodb/

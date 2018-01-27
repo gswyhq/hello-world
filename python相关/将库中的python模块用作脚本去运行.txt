@@ -1,0 +1,28 @@
+
+Python的-m参数
+意思是将库中的python模块用作脚本去运行。
+
+3、常用例子
+python -m SimpleHTTPServer    #python2中启动一个简单的http服务器
+python -m http.server    #python3中启动一个简单的http服务器
+$ python -m pyftpdlib -i localhost -p 8021 -d /home/someone  # 启动一个FTP服务
+# See python -m pyftpdlib -h
+
+4、将模块当做脚本去启动有什么用？
+
+python xxx.py
+python -m xxx.py
+这是两种加载py文件的方式:
+1叫做直接运行
+2相当于import,叫做当做模块来启动
+
+不同的加载py文件的方式，主要是影响sys.path这个属性。sys.path相当于Linux中的PATH
+
+>>> import sys
+>>> sys.path
+['', 'D:\\Python3\\lib\\site-packages\\django-1.10.1-py3.5.egg', 'D:\\Python3\\l
+ib\\site-packages\\psycopg2-2.6.2-py3.5-win32.egg', 'D:\\Python3\\python35.zip',
+ 'D:\\Python3\\DLLs', 'D:\\Python3\\lib', 'D:\\Python3', 'D:\\Python3\\lib\\site
+-packages']
+这就是当前Python解析器运行的环境，Python解析器会在这些目录下去寻找依赖库。
+

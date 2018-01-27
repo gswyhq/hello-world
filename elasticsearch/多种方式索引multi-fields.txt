@@ -1,0 +1,148 @@
+
+对一个field设置多种索引方式。比如，一个字符串设置为”text”类型用于进行全文检索，同时又给它设置”keyword”类型用于排序或聚合。
+
+#对需要设置的字段，在'type'属性后增加"fields":
+#其中的"raw"为自定义的名称,想象它是city的一个分身。
+
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "my_type": {
+      "properties": {
+        "city": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type":  "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+'
+
+# 插入数据
+curl -XPUT 'localhost:9200/my_index/my_type/1?pretty' -H 'Content-Type: application/json' -d'
+{
+  "city": "New York"
+}
+'
+curl -XPUT 'localhost:9200/my_index/my_type/2?pretty' -H 'Content-Type: application/json' -d'
+{
+  "city": "York"
+}
+'
+
+# 查询并排序
+# 查询字段为city，使用它的text类型.排序使用了city.raw
+
+curl -XGET 'localhost:9200/my_index/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "city": "york"
+    }
+  },
+  "sort": {
+    "city.raw": "asc"
+  },
+  "aggs": {
+    "Cities": {
+      "terms": {
+        "field": "city.raw"
+      }
+    }
+  }
+}
+'
+
+资料来源： https://www.elastic.co/guide/cn/elasticsearch/guide/cn/multi-fields.html#
+被解析的字符串字段也是多值字段， 但是很少会按照你想要的方式进行排序。如果你想分析一个字符串，如 fine old art ， 这包含 3 项。我们很可能想要按第一项的字母排序，然后按第二项的字母排序，诸如此类，但是 Elasticsearch 在排序过程中没有这样的信息。
+你可以使用 min 和 max 排序模式（默认是 min ），但是这会导致排序以 art 或是 old ，任何一个都不是所希望的。
+为了以字符串字段进行排序，这个字段应仅包含一项： 整个 not_analyzed 字符串。 但是我们仍需要 analyzed 字段，这样才能以全文进行查询
+一个简单的方法是用两种方式对同一个字符串进行索引，这将在文档中包括两个字段： analyzed 用于搜索， not_analyzed 用于排序
+但是保存相同的字符串两次在 _source 字段是浪费空间的。 我们真正想要做的是传递一个 单字段 但是却用两种方式索引它。
+所有的 _core_field 类型 (strings, numbers, Booleans, dates) 接收一个 fields 参数
+该参数允许你转化一个简单的映射如：
+
+"tweet": {
+    "type":     "string",
+    "analyzer": "english"
+}
+为一个多字段映射如：
+
+"tweet": {
+    "type":     "string",
+    "analyzer": "english",
+    "fields": {
+        "raw": {
+            "type":  "string",
+            "index": "not_analyzed"
+        }
+    }
+}
+
+
+
+tweet 主字段与之前的一样: 是一个 analyzed 全文字段。
+
+
+
+新的 tweet.raw 子字段是 not_analyzed.
+
+现在，至少只要我们重新索引了我们的数据，使用 tweet 字段用于搜索，tweet.raw 字段用于排序：
+
+GET /_search
+{
+    "query": {
+        "match": {
+            "tweet": "elasticsearch"
+        }
+    },
+    "sort": "tweet.raw"
+}
+拷贝为 CURL在 SENSE 中查看
+警告
+以全文 analyzed 字段排序会消耗大量的内存。获取更多信息请看 聚合与分析 。
+
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "my_type": {
+      "properties": {
+        "text": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type":     "text",
+              "analyzer": "english"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+'
+curl -XPUT 'localhost:9200/my_index/my_type/1?pretty' -H 'Content-Type: application/json' -d'
+{ "text": "quick brown fox" }
+'
+curl -XPUT 'localhost:9200/my_index/my_type/2?pretty' -H 'Content-Type: application/json' -d'
+{ "text": "quick brown foxes" }
+'
+curl -XGET 'localhost:9200/my_index/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "multi_match": {
+      "query": "quick brown foxes",
+      "fields": [
+        "text",
+        "text.english"
+      ],
+      "type": "most_fields"
+    }
+  }
+}
+'
