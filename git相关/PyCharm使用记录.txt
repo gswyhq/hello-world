@@ -40,6 +40,11 @@ sudo mv /home/gswyhq/resources_cn.jar /usr/lib/pycharm-community/lib/resources_e
 # 取消默认的右击运行unittest
 File-> Settings -> Tools -> Python Integrated Tools -> Default test runner ,将`Unittests`改为`py.test`即可；
 
+# 重命名函数：
+在函数名处，右键，选择‘Change Signature’即可重命名函数；
+
+如果你更习惯工作于控制台环境下，也可以将Pycharm设置成为控制台模式。在主菜单中选择Tools → Run Python Console...来加载控制台;
+
 
 # 专业版安装：
 1、深度商店搜索`PyCharm Professional`，安装；
@@ -51,10 +56,26 @@ gswyhq@gswyhq-pc:~$ sudo vim /etc/hosts
 文件下添加`0.0.0.0 account.jetbrains.com`
 重新粘贴验证码即可；
 
-# 重命名函数：
-在函数名处，右键，选择‘Change Signature’即可重命名函数；
+Pycharm专业版永久激活：
+step1:
+下载jar包：https://pan.baidu.com/s/1qZlkuiK
+密码:  6wq5
 
-如果你更习惯工作于控制台环境下，也可以将Pycharm设置成为控制台模式。在主菜单中选择Tools → Run Python Console...来加载控制台;
+step2:
+下载完毕后， 将其放入pycharm在你本地的安装目录bin下。
+并且修改两个以 vmoptions为结尾的启动文件如图所示:
+
+并且在两个文件后追加 "-javaagent:/usr/lib/pycharm-professional/bin/JetbrainsCrack-2.6.10-release-enc.jar"
+gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo mv /home/gswyhq/Downloads/JetbrainsCrack-2.6.10-release-enc.jar .
+gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm.vmoptions
+gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm64.vmoptions
+
+step3:
+重启idea
+注意！如果之前已经存在注册码，可以直接跳到第4步，如果没有注册码，则填写下面的注册码！
+BIG3CLIK6F-eyJsaWNlbnNlSWQiOiJCSUczQ0xJSzZGIiwibGljZW5zZWVOYW1lIjoibGFuIHl1IiwiYXNzaWduZWVOYW1lIjoiIiwiYXNzaWduZWVFbWFpbCI6IiIsImxpY2Vuc2VSZXN0cmljdGlvbiI6IkZvciBlZHVjYXRpb25hbCB1c2Ugb25seSIsImNoZWNrQ29uY3VycmVudFVzZSI6ZmFsc2UsInByb2R1Y3RzIjpbeyJjb2RlIjoiQUMiLCJwYWlkVXBUbyI6IjIwMTctMTEtMjMifSx7ImNvZGUiOiJETSIsInBhaWRVcFRvIjoiMjAxNy0xMS0yMyJ9LHsiY29kZSI6IklJIiwicGFpZFVwVG8iOiIyMDE3LTExLTIzIn0seyJjb2RlIjoiUlMwIiwicGFpZFVwVG8iOiIyMDE3LTExLTIzIn0seyJjb2RlIjoiV1MiLCJwYWlkVXBUbyI6IjIwMTctMTEtMjMifSx7ImNvZGUiOiJEUE4iLCJwYWlkVXBUbyI6IjIwMTctMTEtMjMifSx7ImNvZGUiOiJSQyIsInBhaWRVcFRvIjoiMjAxNy0xMS0yMyJ9LHsiY29kZSI6IlBTIiwicGFpZFVwVG8iOiIyMDE3LTExLTIzIn0seyJjb2RlIjoiREMiLCJwYWlkVXBUbyI6IjIwMTctMTEtMjMifSx7ImNvZGUiOiJEQiIsInBhaWRVcFRvIjoiMjAxNy0xMS0yMyJ9LHsiY29kZSI6IlJNIiwicGFpZFVwVG8iOiIyMDE3LTExLTIzIn0seyJjb2RlIjoiUEMiLCJwYWlkVXBUbyI6IjIwMTctMTEtMjMifSx7ImNvZGUiOiJDTCIsInBhaWRVcFRvIjoiMjAxNy0xMS0yMyJ9XSwiaGFzaCI6IjQ3NzU1MTcvMCIsImdyYWNlUGVyaW9kRGF5cyI6MCwiYXV0b1Byb2xvbmdhdGVkIjpmYWxzZSwiaXNBdXRvUHJvbG9uZ2F0ZWQiOmZhbHNlfQ==-iygsIMXTVeSyYkUxAqpHmymrgwN5InkOfeRhhPIPa88FO9FRuZosIBTY18tflChACznk3qferT7iMGKm7pumDTR4FbVVlK/3n1ER0eMKu2NcaXb7m10xT6kLW1Xb3LtuZEnuis5pYuEwT1zR7GskeNWdYZ0dAJpNDLFrqPyAPo5s1KLDHKpw+VfVd4uf7RMjOIzuJhAAYAG+amyivQt61I9aYiwpHQvUphvTwi0X0qL/oDJHAQbIv4Qwscyo4aYZJBKutYioZH9rgOP6Yw/sCltpoPWlJtDOcw/iEWYiCVG1pH9AWjCYXZ9AbbEBOWV71IQr5VWrsqFZ7cg7hLEJ3A==-MIIEPjCCAiagAwIBAgIBBTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE1MTEwMjA4MjE0OFoXDTE4MTEwMTA4MjE0OFowETEPMA0GA1UEAwwGcHJvZDN5MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9
+
+step4: 验证是否是有效期是否截止到2099年    点击 pycharm的help->about查看:
 
 
 
