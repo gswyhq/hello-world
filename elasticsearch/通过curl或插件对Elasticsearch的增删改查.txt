@@ -4,3 +4,30 @@ gswyhq@gswyhq-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"
 
 通过制定的id进行删除：
 删除id为AWCWwRuPPcvSZereEA8y的数据：gswyhq@gswyhq-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'
+
+通过下面的命令可以查看所有的索引：
+curl -XGET 'localhost:9200/_cat/indices?v'
+
+查看集群状态
+curl 'localhost:9200/_cat/health?v'
+
+通过下面的命令，可以查询节点的列表：
+curl 'localhost:9200/_cat/nodes?v'
+
+创建名为`customer`的索引：
+curl -XPUT 'localhost:9200/customer?pretty'
+
+在索引`customer`里设置类型`external`并插入一条数据：
+curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
+{
+  "name": "John Doe"
+}'
+
+上面的例子中，为我们创建了一个文档，并且id自动设置为1.
+ES不需要再索引文档前，不需要明确的创建索引，如果执行上面的命令，索引不存在，也会自动的创建索引。
+
+通过id进行查询：
+curl -XGET 'localhost:9200/customer/external/1?pretty'
+
+删除索引`customer`：
+curl -XDELETE 'localhost:9200/customer?pretty'
