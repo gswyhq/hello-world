@@ -86,6 +86,7 @@ discovery.zen.ping.timeout: 3s
 discovery.zen.ping.multicast.enabled: false
 
 # 设置新节点被启动时能够发现的主节点列表, 这个设置了自动发现的节点。：
+#打开单播发现集群机制，列表中都是相应可以成为master节点的ip地址（写3个就可以了，不用都写），这个list列表地址书写方式比较灵活，加上端口也行（记得是集群间的通信端口默认9300）。
 discovery.zen.ping.unicast.hosts: ["10.0.0.28:9300", "10.0.0.28:9500"]
 
 # 设置是否可以通过正则或者_all删除或者关闭索引

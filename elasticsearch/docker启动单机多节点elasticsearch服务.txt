@@ -1,0 +1,34 @@
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_master_5.6.4_9200 -p 9200:9200 -p 9300:9300 -v $PWD/config_master:/usr/share/elasticsearch/config -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+
+cluster.name: elasticsearch_cluster
+node.name: master
+node.master: true
+network.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+discovery.zen.ping.unicast.hosts: ["192.168.3.250:9300"]
+
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_1_5.6.4_9201 -p 9201:9200 -p 9301:9300 -v $PWD/config_node_1:/usr/share/elasticsearch/config -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+
+cluster.name: elasticsearch_cluster
+node.name: slave1
+node.master: false
+network.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+discovery.zen.ping.unicast.hosts: ["192.168.3.250:9300"]
+
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_2_5.6.4_9202 -p 9202:9200 -p 9302:9300 -v $PWD/config_node_2:/usr/share/elasticsearch/config -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+
+cluster.name: elasticsearch_cluster
+node.name: slave2
+node.master: false
+network.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+discovery.zen.ping.unicast.hosts: ["192.168.3.250:9300"]
+
+

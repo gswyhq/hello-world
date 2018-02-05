@@ -8,6 +8,21 @@ gswyhq@gswyhq-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"
 通过下面的命令可以查看所有的索引：
 curl -XGET 'localhost:9200/_cat/indices?v'
 
+针对索引`dingnuo`的`title`字段进行查询：
+curl -XGET 'localhost:9200/dingnuo/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "match": {
+            "title": "elasticsearch"
+        }
+    }
+}
+'
+
+
+获取索引`dingnuo`的详情：
+curl -XGET 'http://192.168.3.250:9200/dingnuo/_settings'
+
 查看集群状态
 curl 'localhost:9200/_cat/health?v'
 
