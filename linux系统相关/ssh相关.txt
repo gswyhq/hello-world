@@ -81,3 +81,11 @@ Permission denied (publickey).
 把公钥（id_dsa.pub）追加到授权的key中去即可：
 ubuntu@ip-172-31-13-157:~$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
+ssh 登陆异常：
+gswyhq@gswyhq-pc:~$ ssh gswyhq@192.168.1.132
+ssh: connect to host 192.168.1.132 port 22: Connection refused
+造成这个错误的原因可能是被登陆的主机（192.168.1.132）上ssh-server未安装或者未启动。
+ubuntu 11.10 默认安装openssh-client，但是木有安装server
+运行 ps -e | grep ssh，查看是否有sshd进程
+如果没有，说明server没启动，通过 /etc/init.d/ssh -start 启动server进程，如果提示ssh不存在 那么就是没安装server
+通过 sudo apt-get install openssh-server命令安装即可
