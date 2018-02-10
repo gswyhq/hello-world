@@ -1,0 +1,89 @@
+
+
+通过下面的命令可以查看所有的索引：
+curl -XGET 'localhost:9200/_cat/indices?v'
+
+查看索引`dingding7500_faq`的段信息：
+gswyhq@gswyhq-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
+
+
+
+获取索引`dingding`的详情：
+curl -XGET 'http://192.168.3.250:9200/dingding/_settings'
+
+创建名为`customer`的索引：
+curl -XPUT 'localhost:9200/customer?pretty'
+
+删除索引`customer`：
+curl -XDELETE 'localhost:9200/customer?pretty'
+
+
+若不需要删除原索引别名，仅仅添加一个索引别名：
+gswyhq@gswyhq-PC:~$ curl -XPOST '192.168.3.105:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions": [
+        { "add":    { "index": "dingding_faq", "alias": "dingding_faq_alias" }
+        }
+    ]
+}
+'
+
+# 若仅仅是删除一个索引的别名：
+curl -XPOST '192.168.3.105:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions": [
+        { "remove": { "index": "dingding_faq", "alias": "dingding_faq_alias" }
+        }
+    ]
+}
+'
+
+# 检测别名`dingding_faq_alias`指向哪一个索引：
+curl -XGET 'localhost:9200/*/_alias/dingding_faq_alias?pretty'
+
+# 哪些别名指向索引`dingding_faq`：
+curl -XGET 'localhost:9200/dingding_faq/_alias/*?pretty'
+
+# 其他，关闭，开启索引
+curl -XPOST 'localhost:9200/my_index/_close?pretty'
+curl -XPOST 'localhost:9200/my_index/_open?pretty'
+
+# 更新索引设置
+# number_of_replicas是在索引中的的设置，用来定义复制分片的数量，而不是现在活动的复制节点的数量。
+curl -XPUT 'localhost:9200/baike/_settings?pretty' -H 'Content-Type: application/json' -d'
+{
+    "index" : {
+        "number_of_replicas" : 1
+    }
+}
+'
+
+如果使用 stopwords 参数以内嵌方式指定停用词，那么你只能通过关闭索引，更新分析器的配置update index settings API，然后在重新打开索引才能更新停用词。
+更新的停用词不会改变任何已经存在的索引。这些停用词的只适用于新的搜索或更新文档。如果要改变现有的文档，则需要重新索引数据。
+
+# 创建一个索引dobbyindex.一个索引默认指派5个主分片,实例中我们设定4个主分片和2个复制分片（每个主分片有2个复制分片对应）：
+PUT /dobbyindex
+{
+  "settings": {
+    "number_of_shards": 4,
+    "number_of_replicas": 2
+  }
+}
+
+# 重命名索引：
+1、复制索引一个新的名字(分词等索引信息并不一定存在，仅仅复制数据)
+POST /_reindex
+{
+  "source": {
+    "index": "twitter"
+  },
+  "dest": {
+    "index": "new_twitter"
+  }
+}
+2、删除旧的索引
+DELETE /twitter
+
+如删除索引`dingding500_020913_faq`：
+gswyhq@gswyhq-PC:~$ curl -XDELETE localhost:9200/dingding500_020913_faq
+

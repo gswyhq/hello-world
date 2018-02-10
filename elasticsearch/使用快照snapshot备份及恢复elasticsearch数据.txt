@@ -1,0 +1,246 @@
+
+一：snapshot是增量备份，对未发生变化的index重复备份几乎没有资源消耗。
+二： 删除snapshot不会对其它snapshot产生影响。
+
+把 Elasticsearch 索引数据转移到 HDFS 上，以解决 Elasticsearch 上的磁盘空间；而在我们需要的时候，又可以从 HDFS 上把索引恢复回来继续使用。
+我们可以利用snapshot/restore两个api做到这一点。
+快照和恢复模块可以将单个索引或者整个集群做一个快照并存放到远程仓库上。目前支持共享文件系统仓库和官方通过插件方式提供的其他仓库。
+注：如果想使用HDFS作为快照的存储介质，必须事先安装repository-hdfs插件（官方还提供了S3,HDFS,Azure,GoogleCloudStorage对应插件）
+
+root@81e692d0a377:/usr/share/elasticsearch# ./bin/elasticsearch-plugin install repository-hdfs
+
+使用HDFS作为快照的存储介质， 创建第一个snapshot_1，备份索引my_index
+curl -XPUT 'localhost:9200/_snapshot/hdfs_repository/snapshot_1?wait_for_completion=true' -d
+'{
+  "indices": "my_index",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}'
+
+除了hdfs外还有共享的文件系统仓库（fs）等
+
+Elasticsearch集群备份，以及在不同集群之间迁移数据
+Elasticsearch也提供了备份集群中索引数据的策略——snapshot API.它会备份整个集群的当前状态和数据，并保存到集群中各个节点共享的仓库中。这个备份的进程是增量备份的，在第一次备份的基础上进行的第二次备份只备份新变化的数据。官方文档
+
+系统：ubuntu
+
+备份ES数据的三个步骤：
+
+集群–多节点时需要挂载一个共享目录建立一个共享目录，这个共享目录要求集群中的所有节点都能感知到。如何创建共享仓目录后面补充。
+在每个节点的$ELASTICSEARCH_HOME/config/elasticsearch.yml中添加path.repo: /mnt/es_backup 配置，并重启节点，其中/mnt/es_backup 目录为每个节点的仓库目录，最好chmod 777 /mnt/es_backup，以保证elasticsearch有权限写入数据
+为每个节点创建仓库，仓库位置为 /mnt/es_backup
+添加索引快照(snapshot)
+查看备份状态。
+1.创建共享目录：
+何为共享仓库，其实就是集群中各个节点都能感知到并将数据写入到该仓库的文件。一般一个节点部署在一个服务器上，在哪里，怎样创建一个文件让各个节点都能往里面写数据呢？
+
+使用sshfs在ES集群中每个节点的相同位置挂载一个共享目录。
+
+// 在每个节点上安装sshfs
+ sudo apt-get install sshfs
+
+// 选定一个节点的一个目录作为共享目录
+mkdir /data/backup
+chmod -R 777 /data
+// 在每个节点的相同位置创建目录，并挂载共享目录
+mkdir /mnt/backup
+chmod -R 777 /mnt
+sshfs $user@192.168.x.x:/data/backup /mnt/backup -o allow_other
+
+// 测试运行ES的用户是否有对共享目录的写权限
+sudo -u elasticsearch touch /mnt/backup/test
+
+其中参数-o allow_other 解决了不同节点往共享仓库中写数据的权限问题。
+
+2.修改elasticsearch.yml文件，添加path.repo配置
+在elasticsearch.yml中增加path.repo: /mnt/backup，配置共享仓库的位置，重启节点
+
+3. 创建了共享目录后就可以在这个共享目录下为集群创建共享仓库
+
+// 创建仓库
+PUT _snapshot/my_backup
+{
+    "type": "fs",
+    "settings": {
+        "location": "/mnt/backup",
+        "compress": true
+    }
+}
+
+4.备份索引数据。
+
+// 针对具体的index创建快照备份，其中snapshot_name 是快照的名字。
+PUT _snapshot/my_backup/snapshot_name
+{
+    "indices": "index_1, index_2"
+}
+
+// 5.查看备份状态
+GET _snapshot/my_backup/snapshot_name/_status
+
+6.在不同集群之间迁移数据
+
+ // 备份创建好之后，在共享目录/root/backup里是这样的：
+-rw-r--r-- 1 root root   31 12月 15 22:14 index
+drwxr-xr-x 3 root root 4096 12月 15 22:14 indices
+-rw-r--r-- 1 root root   83 12月 15 22:14 metadata-snapshot_name
+-rw-r--r-- 1 root root  181 12月 15 22:14 snapshot-snapshot_name
+
+7.在迁移目标的集群上重复上面创建仓库的操作,即步骤2，3
+
+// 8.（将源集群的备份内容（/root/backup里的所有文件），复制到迁移目标的集群仓库目录里）
+// 类似批量导入，所以只需要在主节点中恢复仓库中的数据即可？
+
+// 9.使用RESTful API进行备份的恢复，如果索引已经存在目标的集群，需要先关闭索引，恢复数据后在开启
+POST /index_name/_close
+POST _snapshot/my_backup/snapshot_name/_restore
+POST /index_name/_open
+// 10.查看恢复的状态
+GET _snapshot/my_backup/snapshot_name/_status
+
+
+
+1、仓库注册
+    在创建或恢复仓库数据之前，首先需要到ElasticSearch里进行注册，如下命令用my_backup注册一个共享文件系统，快照数据将存放在/mount/backups/my_bakup上：
+
+$ curl -XPUT 'http://localhost:9200/_snapshot/my_backup' -d '
+   "type": "fs",（共享的文件系统仓库）
+   "settings": {
+       "location": "/mount/backups/my_backup", （快照存放位置）
+       "compress": true （快照是否压缩，默认true）
+   }
+'
+
+curl -XPUT 'localhost:9200/_snapshot/my_backup?pretty' -H 'Content-Type: application/json' -d'
+{
+  "type": "fs",
+  "settings": {
+    "location": "my_backup_location"
+  }
+}
+'
+
+
+2、查看仓库信息：
+$ curl -XGET 'http://localhost:9200/_snapshot/my_backup?pretty'
+返回结果：
+{
+  "my_backup" : {
+    "type" : "fs",
+    "settings" : {
+      "compress" : "true",
+      "location" : "/mount/backups/my_backup"
+    }
+  }
+}
+
+curl -XGET 'localhost:9200/_snapshot/my_backup?pretty'
+
+要检索有关多个存储库的信息，请指定以逗号分隔的存储库列表。
+指定存储库名称时也可以使用*通配符。
+例如，以下请求将检索有关以repo开头或包含备份的所有快照存储库的信息：
+curl -XGET 'localhost:9200/_snapshot/repo*,*backup*?pretty'
+
+要检索有关所有注册的快照存储库的信息，请省略存储库名称或指定_all：
+curl -XGET 'localhost:9200/_snapshot?pretty'
+curl -XGET 'localhost:9200/_snapshot/_all?pretty'
+
+
+3、创建快照
+    同一个集群中，一个仓库中可以存放多个快照。快照在集群中的名称是唯一的。使用下面命令创建快照名为snapshot_1的快照：
+$ curl -XPUT "localhost:9200/_snapshot/my_backup/snapshot_1"-d '{
+    "indices": "index_1,index_2",
+    "ignore_unavailable": "true",
+    "include_global_state": false
+}'
+
+存储库可以包含同一群集的多个快照。
+快照由群集内的唯一名称标识。
+可以通过执行以下命令来创建存储库my_backup中名称为snapshot_1的快照：
+curl -XPUT 'localhost:9200/_snapshot/my_backup/snapshot_1?wait_for_completion=true&pretty'
+
+wait_for_completion参数指定在快照初始化（默认）或等待快照完成之后请求是否应该立即返回。
+在快照初始化期间，有关所有先前快照的信息将加载到内存中，这意味着在大型存储库中，即使wait_for_completion参数设置为false，该命令也可能需要几秒（甚至几分钟）才会返回。
+
+默认情况下，创建集群中所有打开和启动索引的快照。 通过指定快照请求正文中的索引列表，可以更改此行为。
+curl -XPUT 'localhost:9200/_snapshot/my_backup/snapshot_2?wait_for_completion=true&pretty' -H 'Content-Type: application/json' -d'
+{
+  "indices": "index_1,index_2",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}
+'
+
+4、查看快照信息：
+$ curl -XGET "localhost:9200/_snapshot/my_backup/snapshot_1"
+
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_1?pretty'
+
+与存储库类似，可以一次查询多个快照的相关信息，并支持通配符：
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_*,some_other_snapshot?pretty'
+
+当前存储在存储库中的所有快照可以使用以下命令列出：
+curl -XGET 'localhost:9200/_snapshot/my_backup/_all?pretty'
+
+当前正在运行的快照可以使用以下命令来检索：
+curl -XGET 'localhost:9200/_snapshot/my_backup/_current?pretty'
+
+使用以下命令可以从存储库中删除快照：
+curl -XDELETE 'localhost:9200/_snapshot/my_backup/snapshot_2?pretty'
+
+可以使用以下命令删除存储库：
+curl -XDELETE 'localhost:9200/_snapshot/my_fs_backup?pretty'
+
+5、快照恢复
+使用以下命令可以恢复快照：
+curl -XPOST 'localhost:9200/_snapshot/my_backup/snapshot_1/_restore?pretty'
+
+$ curl -XPOST "localhost:9200/_snapshot/my_backup/snapshot_1/_restore"-d '{
+    "indices": "index_1,index_2",
+    "ignore_unavailable": "true",
+    "include_global_state": false,
+    "rename_pattern": "index_(.+)",
+    "rename_replacement": "restored_index_$1"
+}'
+
+默认情况下，快照中的所有索引都会恢复，并且不会恢复集群状态。
+可以选择应该还原的索引，也可以通过在还原请求主体中使用索引和include_global_state选项来恢复全局集群状态。
+索引列表支持多索引语法。
+rename_pattern和rename_replacement选项也可用于使用支持引用原始文本的正则表达式对restore中的索引进行重命名，如此处所述。
+将include_aliases设置为false以防止别名与相关索引一起恢复
+curl -XPOST 'localhost:9200/_snapshot/my_backup/snapshot_1/_restore?pretty' -H 'Content-Type: application/json' -d'
+{
+  "indices": "index_1,index_2",
+  "ignore_unavailable": true,
+  "include_global_state": true,
+  "rename_pattern": "index_(.+)",
+  "rename_replacement": "restored_index_$1"
+}
+'
+rename_pattern和rename_replacement用于重命名index，因为无法将index还原到open的index。
+"ignore_unavailable": true忽略有问题的shard，
+"include_global_state": false快照里不放入集群global信息。
+
+在还原期间更改索引设置
+在还原过程中，大多数索引设置都可以被覆盖。
+例如，以下命令将恢复索引index_1而不创建任何副本，同时切换回默认刷新间隔：
+curl -XPOST 'localhost:9200/_snapshot/my_backup/snapshot_1/_restore?pretty' -H 'Content-Type: application/json' -d'
+{
+  "indices": "index_1",
+  "index_settings": {
+    "index.number_of_replicas": 0
+  },
+  "ignore_index_settings": [
+    "index.refresh_interval"
+  ]
+}
+'
+
+6、监控快照创建或恢复过程
+$ curl -XGET "localhost:9200/_snapshot/my_backup/snapshot_1/_status"
+curl -XGET 'localhost:9200/_snapshot/_status?pretty'
+curl -XGET 'localhost:9200/_snapshot/my_backup/_status?pretty'
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_1/_status?pretty'
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_1,snapshot_2/_status?pretty'
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_1?pretty'
+curl -XGET 'localhost:9200/_snapshot/my_backup/snapshot_1/_status?pretty'

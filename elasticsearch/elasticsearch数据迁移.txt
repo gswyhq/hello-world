@@ -10,11 +10,13 @@ Status: Downloaded newer image for taskrabbit/elasticsearch-dump:latest
 Example:
 # 从一个机器迁移索引及数据到另一个机器:
 # 第一步： 拷贝analyzer如分词
-gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.250:9200/mingcijieshi   --output=http://192.168.3.105:9200/mingcijieshi   --type=analyzer
+gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.145:9200/dingding500_faq   --output=http://192.168.3.133:18200/dingding500_faq   --type=analyzer
 # 第二步： 拷贝映射
-gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.250:9200/mingcijieshi   --output=http://192.168.3.105:9200/mingcijieshi   --type=mapping
+gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.105:9200/mingcijieshi   --output=http://192.168.3.133:9200/mingcijieshi   --type=mapping
 # 第三步： 拷贝数据
-gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.250:9200/mingcijieshi   --output=http://192.168.3.105:9200/mingcijieshi   --type=data
+gswyhq@gswyhq-PC:~$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input=http://192.168.3.105:9200/mingcijieshi   --output=http://192.168.3.133:9200/mingcijieshi   --type=data
+
+以上数据迁移的时候，会丢失对应的索引别名信息；
 
 docker run --rm -ti taskrabbit/elasticsearch-dump \
   --input=http://192.168.3.250:9200/my_index \
@@ -145,3 +147,27 @@ elasticdump \
   --output=http://es.com:9200/api/search \
   --output-index=my_index \
   --type=mapping
+
+
+# 当是单机，单节点时，且版本也一致，可以直接复制对应索引的数据到另外服务器：
+1、查询索引对应是uuid:
+gswyhq@gswyhq-PC:~$ curl -XGET 'localhost:9200/_cat/indices?v'
+health status index                            uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   blog                             u9cPLNNbTXKJfkXkPfrJ8A   5   1          1            0      5.4kb          5.4kb
+yellow open   my_index                         i6cQ1GVaTC2hvpizSZv27Q   5   1          2            0     13.9kb         13.9kb
+yellow open   baike                            B5_0Mbb-S1aHtKKJp1mbhw   5   1       4814            0      8.7mb          8.7mb
+yellow open   ceshi_baike                      IPY7GXKlQgiLqN4E_CRN-w   5   1          3            0     21.7kb         21.7kb
+yellow open   dingding500_faq                   mI8GODPAQ--NMgUIwqFDkw   5   1     139053            0     93.4mb         93.4mb
+yellow open   dingding7500_faq                  1ijC2x6DQf2TMxUgbVDQ4Q   5   1    1647769            0    702.2mb        702.2mb
+yellow open   baike_faq                        H3Q7LAUcQICWBrQXTFl-SQ   5   1          0            0       960b           960b
+yellow open   jykl_noun_explanation NI693MdwSEuT9ejZk4g1Rw   5   1      46556            0    277.4mb        277.4mb
+yellow open   xinxin_faq                     biFkTYQAT2myWlTsXQYwGw   5   1       1145            0      1.7mb          1.7mb
+yellow open   jykl_faq              iIrJ4GrXSdiwKFNeocXRbg   5   1      46556        18956    451.2mb        451.2mb
+
+2、复制数据目录
+gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata/nodes/0/indices$ ls
+1ijC2x6DQf2TMxUgbVDQ4Q  biFkTYQAT2myWlTsXQYwGw  i6cQ1GVaTC2hvpizSZv27Q  IPY7GXKlQgiLqN4E_CRN-w  NI693MdwSEuT9ejZk4g1Rw
+B5_0Mbb-S1aHtKKJp1mbhw  H3Q7LAUcQICWBrQXTFl-SQ  iIrJ4GrXSdiwKFNeocXRbg  mI8GODPAQ--NMgUIwqFDkw  u9cPLNNbTXKJfkXkPfrJ8A
+gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata/nodes/0/indices$ scp -r B5_0Mbb-S1aHtKKJp1mbhw new40:/home/ubuntu/docker/elasticsearch/esdata/nodes/0/indices/
+
+以上会保留索引的别名信息。
