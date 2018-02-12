@@ -5,11 +5,8 @@ gswyhq@gswyhq-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"
 通过制定的id进行删除：
 删除id为AWCWwRuPPcvSZereEA8y的数据：gswyhq@gswyhq-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'
 
-通过下面的命令可以查看所有的索引：
-curl -XGET 'localhost:9200/_cat/indices?v'
-
-针对索引`dingnuo`的`title`字段进行查询：
-curl -XGET 'localhost:9200/dingnuo/_search?pretty' -H 'Content-Type: application/json' -d'
+针对索引`dingding`的`title`字段进行查询：
+curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: application/json' -d'
 {
     "query": {
         "match": {
@@ -19,18 +16,11 @@ curl -XGET 'localhost:9200/dingnuo/_search?pretty' -H 'Content-Type: application
 }
 '
 
-
-获取索引`dingnuo`的详情：
-curl -XGET 'http://192.168.3.250:9200/dingnuo/_settings'
-
 查看集群状态
 curl 'localhost:9200/_cat/health?v'
 
 通过下面的命令，可以查询节点的列表：
 curl 'localhost:9200/_cat/nodes?v'
-
-创建名为`customer`的索引：
-curl -XPUT 'localhost:9200/customer?pretty'
 
 在索引`customer`里设置类型`external`并插入一条数据：
 curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
@@ -38,11 +28,31 @@ curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
   "name": "John Doe"
 }'
 
+# 创建自增id, 并添加数据
+curl -XPOST 'localhost:9200/dingding_faq/流程' -H 'Content-Type: application/json' -d'
+{"answer": "流程-公募基金", "query_question": "我想了解公募基金", "question": "我想了解公募基金", "tag1": "流程", "intent": "other", "tag2": "公募基金"}'
+
+# 需要注意的是，创建操作可以使用POST，也可以使用PUT。区别在于POST是作用在一个集合资源之上的（/articles），而PUT操作是作用在一个具体资源之上的（/articles/123），比如说很多资源使用数据库自增主键作为标识信息，而创建的资源的标识信息到底是什么只能由服务端提供，这个时候就必须使用POST。
+# _index 、 _type 和 _id 的组合可以唯一标识一个文档。所以，确保创建一个新文档的最简单办法是，使用索引请求的 POST 形式让 Elasticsearch 自动生成唯一 _id :
+
 上面的例子中，为我们创建了一个文档，并且id自动设置为1.
 ES不需要再索引文档前，不需要明确的创建索引，如果执行上面的命令，索引不存在，也会自动的创建索引。
 
 通过id进行查询：
 curl -XGET 'localhost:9200/customer/external/1?pretty'
 
-删除索引`customer`：
-curl -XDELETE 'localhost:9200/customer?pretty'
+更新数据
+ 更新文档: 修改id=1的name属性，并直接增加属性和属性值
+
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d ' {
+    "doc": {
+        "name": "xyd",
+        "age": 20
+    }
+}'
+
+ 更新索引–脚本方式
+
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
+    "script": "ctx._source.age += 5"
+}'

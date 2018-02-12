@@ -1,0 +1,58 @@
+
+sshfs是基于fuse构建的ssh文件系统客户端程序，通过它远程主机的配置无需作任何改变，就可以透过SSH协议来挂载远程文件系统了，非常方便及安全。
+
+一、sshfs的安装:
+sudo apt-get install sshfs
+
+二、挂载
+sshfs的远程文件挂载，需要结合ssh免密码登录一起实施。假设现在有A、B、C三台服务器的日志，需要挂载到D服务器。首先需要将D服务器的公钥写入A、B、C三台服务器。
+
+把远程服务器的 /mydata/logs/目录下的所有文件，挂载到D服务器，在D服务器的/mydata/logs/目录下为每个服务器建一个目录。（ip_address_A代表A服务器的ip地址，需要自行替换）
+
+//把A服务器的 /mydata/logs/ 目录 挂载到 D服务器的 /mydata/logs/A/ 目录
+在D服务器上运行：
+sshfs root@ip_address_A:/mydata/logs/ /mydata/logs/A/
+
+
+其他示例：
+    在 /mnt/tecmint 目录下挂载远程的文件系统。视你的情况挂载目录可以是任何目录。
+    下面的命令行将会在本地的 /mnt/tecmint 目录下挂载一个叫远程的一个 /home/tecmint 目录。（不要忘了使用你的 IP 地址和挂载点替换 x.x.x.x）。
+    $ sudo sshfs -o allow_other tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint
+    如果你的 Linux 服务器配置为基于 SSH 密钥授权，那么你将需要使用如下所示的命令行指定你的公共密钥的路径。
+    $ sudo sshfs -o allow_other,IdentityFile=~/.ssh/id_rsa tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint
+
+
+其他两台服务器的挂载方法一样。挂载成功后，可以使用 mount命令查看挂载情况：
+
+mount -l
+可以看到挂载的情况：
+root@ip_address_A:/mydata/logs/on /mydata/logs/A type fuse.sshfs (rw,nosuid,nodev)
+root@ip_address_B:/mydata/logs/on /mydata/logs/B type fuse.sshfs (rw,nosuid,nodev)
+root@ip_address_C:/mydata/logs/on /mydata/logs/C type fuse.sshfs (rw,nosuid,nodev)
+
+也可以使用df -h命令查看磁盘的挂载情况。另外，想要开机自动挂载目录，可以编辑/etc/fstab文件，加入以下几行：
+sshfs#root@ip_address_A:/mydata/logs/ /mydata/logs/A fuse defaults,auto,allow_other 0 0
+sshfs#root@ip_address_B:/mydata/logs/ /mydata/logs/B fuse defaults,auto,allow_other 0 0
+sshfs#root@ip_address_C:/mydata/logs/ /mydata/logs/C fuse defaults,auto,allow_other 0 0
+其中，allow_other参数代表该设置对其他用户也生效。也必须先把ssh自动登录配置好了，让root用户能够使用root身份登录远程主机。
+
+如果你的服务器配置为基于 SSH 密钥的认证方式，请加入如下行：
+sshfs#tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint fuse.sshfs IdentityFile=~/.ssh/id_rsa defaults 0 0
+接下来，你需要更新 fstab 文件使修改生效。
+$ sudo mount -a
+
+挂载成功后，就可以在服务器D直接查看所有服务器的日志了，在D服务器的/mydata/logs/目录输入以下命令。（假设A、B、C三台服务器的/mydata/logs/目录下都有log.txt这个文件）
+tail -f */log.txt
+日志的输出中，会标出日志是在哪台服务器的，例如：
+
+==> A/log.txt <==
+get log message from A
+假如只想查看日志中包含关键字 a b c的日志，可以这样查看
+
+ tail -f */log.txt | grep 'a b c'
+日志的输出会有一定的延时。
+需要注意的是，取消挂载时，不要直接删除挂载目录，请使用以下命令取消挂载：
+
+fusermount -u /mydata/logs/A
+或者直接使用umount命令取消挂载。
+# umount /mnt/tecmint
