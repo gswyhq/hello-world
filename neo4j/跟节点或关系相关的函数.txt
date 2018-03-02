@@ -1,0 +1,61 @@
+
+1，通过id函数，返回节点或关系的ID
+
+MATCH (:Person { name: 'Oliver Stone' })-[r]->(movie)
+RETURN id(r);
+2，通过type函数，查询关系的类型
+
+MATCH (:Person { name: 'Oliver Stone' })-[r]->(movie)
+RETURN type(r);
+3，通过lables函数，查询节点的标签
+
+MATCH (:Person { name: 'Oliver Stone' })-[r]->(movie)
+RETURN lables(movie);
+4，通过keys函数，查看节点或关系的属性键
+
+MATCH (a)
+WHERE a.name = 'Alice'
+RETURN keys(a)
+5，通过properties()函数，查看节点或关系的属性
+
+CREATE (p:Person { name: 'Stefan', city: 'Berlin' })
+RETURN properties(p)
+
+
+更新图形
+
+set子句，用于对更新节点的标签和实体的属性；remove子句用于移除实体的属性和节点的标签；
+
+1，创建一个完整的Path
+
+由于Path是由节点和关系构成的，当路径中的关系或节点不存在时，Neo4j会自动创建；
+
+CREATE p =(vic:Worker:Person{ name:'vic',title:"Developer" })-[:WORKS_AT]->(neo)<-[:WORKS_AT]-(michael:Worker:Person { name: 'Michael',title:"Manager" })
+RETURN p
+变量neo代表的节点没有任何属性，但是，其有一个ID值，通过ID值为该节点设置属性和标签
+
+
+
+2，为节点增加属性
+
+通过节点的ID获取节点，Neo4j推荐通过where子句和ID函数来实现。
+
+match (n)
+where id(n)=7
+set n.name = 'neo'
+return n;
+3，为节点增加标签
+
+match (n)
+where id(n)=7
+set n:Company
+return n;
+
+
+4，为关系增加属性
+
+match (n)<-[r]-(m)
+where id(n)=7 and id(m)=8
+set r.team='Azure'
+return n;
+

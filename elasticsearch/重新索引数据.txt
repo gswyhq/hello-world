@@ -104,6 +104,37 @@ curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json'
 }
 '
 
+curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions" : [
+        { "add" : { "indices" : ["test1", "test2"], "alias" : "alias1" } }
+    ]
+}
+'
+
+curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions" : [
+        { "add" : { "index" : "test*", "alias" : "all_test_indices" } }
+    ]
+}
+'
+
+curl -XPUT 'localhost:9200/test?pretty'
+curl -XPUT 'localhost:9200/test_2?pretty'
+# 给索引添加别名，并删除索引(一个或多个)
+curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+{
+    "actions" : [
+        { "add":  { "index": "test_2", "alias": "test" } },
+        { "remove_index": { "index": "test" } },
+        {"remove_index": {"indices": ['xinxin_20180227_193218', 'xinxin_20180228_085415']}}
+
+    ]
+}
+'
+
+
 实例展示elasticsearch集群生态,分片以及水平扩展.
 https://www.cnblogs.com/dennisit/p/4133131.html
 

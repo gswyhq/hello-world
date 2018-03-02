@@ -12,7 +12,7 @@ MODEL_FILE = '/home/gswyhq/data/model/word2vec/news_12g_baidubaike_20g_novel_90g
 
 def load_model(model_file=MODEL_FILE):
     """加载向量模型"""
-    logger.info("加载向量模型: {}".format(model_file))
+#    logger.info("加载向量模型: {}".format(model_file))
     if model_file.endswith('.pkl'):
         with open(model_file, "rb")as f:
             w2v_model = pickle.load(f, encoding='iso-8859-1')  # 此处耗内存 60.8 MiB
@@ -123,8 +123,11 @@ w2v_model['男孩'].shape
 
 
 def main():
-    pass
-
+    ds = {word: w2v_model[word] for word in w2v_model.index2word}
+    pkl_file = '/home/gswyhq/yhb/model/news_12g_baidubaike_20g_novel_90g_embedding_64.pkl'
+    with open(pkl_file, "wb")as f:
+        # Latin1是ISO-8859-1的别名
+        pickle.dump(ds, f)
 
 if __name__ == '__main__':
     main()

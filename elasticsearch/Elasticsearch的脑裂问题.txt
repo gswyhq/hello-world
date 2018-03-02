@@ -1,0 +1,130 @@
+
+假设集群维护一个单个索引并有一个分片和一个复制节点。节点1在启动时被选举为主节点并保存主分片，而节点2保存复制分片；
+如果在两个节点之间的通讯中断了，两个节点都相信对方已经挂了。节点1不需要做什么，因为它本来就被选举为主节点。但是节点2会自动选举它自己为主节点，因为它相信集群的一部分没有主节点了。
+在elasticsearch集群，是有主节点来决定将分片平均的分布到节点上的。节点2保存的是复制分片，但它相信主节点不可用了。所以它会自动提升复制节点为主节点。
+现在集群在一个不一致的状态了。打在节点1上的索引请求会将索引数据分配在主节点，同时打在节点2的请求会将索引数据放在分片上。在这种情况下，分片的两份数据分开了，
+如果不做一个全量的重索引很难对它们进行重排序。在更坏的情况下，一个对集群无感知的索引客户端（例如，使用REST接口的）,这个问题非常透明难以发现，
+无论哪个节点被命中索引请求仍然在每次都会成功完成。问题只有在搜索数据时才会被隐约发现：取决于搜索请求命中了哪个节点，结果都会不同。
+
+要预防脑裂问题，我们需要看的一个参数就是 discovery.zen.minimum_master_nodes。这个参数决定了在选主过程中需要 有多少个节点通信。
+缺省配置是1.一个基本的原则是这里需要设置成 N/2+1, N是急群中节点的数量。 例如在一个三节点的集群中， minimum_master_nodes应该被设为 3/2 + 1 = 2(四舍五入)。
+
+让我们想象下之前的情况下如果我们把 discovery.zen.minimum_master_nodes 设置成 2（2/2 + 1）。当两个节点的通信失败了，节点1会失去它的主状态，同时节点2也不会被选举为主。
+没有一个节点会接受索引或搜索的请求，让所有的客户端马上发现这个问题。而且没有一个分片会处于不一致的状态。
+
+我们可以调的另一个参数是 discovery.zen.ping.timeout。它的默认值是3秒并且它用来决定一个节点在假设集群中的另一个节点响应失败的情况时等待多久。
+在一个慢速网络中将这个值调的大一点是个不错的主意。这个参数不止适用于高网络延迟，还能在一个节点超载响应很慢时起作用。
+
+建议配置一个3节点集群。这样你可以设置minimum_master_nodes为2，减少了脑裂的可能性，但仍然保持了高可用的优点：你可以承受一个节点失效但集群还是正常运行的。
+
+可以设置 node.data 参数来选择这个节点是否需要保存数据。缺省值是“true”，意思是默认每个elasticsearch节点同时也会作为一个数据节点。
+
+可以添加一个新节点并把 node.data 参数设置为“false”。这样这个节点不会保存任何分片，但它仍然可以被选为主（默认行为）。
+
+主节点
+在192.168.3.145主机上：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir config_master
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir master_data
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ vim config_master/elasticsearch.yml
+
+cluster.name: elasticsearch_cluster
+node.name: master
+node.master: true
+node.data: false
+network.host: 0.0.0.0
+network.publish_host: 192.168.3.145
+
+# 设置节点之间交互的tcp端口，默认是9300。
+transport.tcp.port: 9300
+
+# 设置对外服务的http端口，默认为9200。
+http.port: 9200
+
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# 这个设置为了避免脑裂。比如3个节点的集群，如果设置为2，那么当一台节点脱离后，不会自动成为master。
+# discovery.zen.minimum_master_nodes: 2
+
+
+# 设置ping其他节点时的超时时间，网络比较慢时可将该值设大：
+# 是设置了节点与节点之间的连接ping时长
+# discovery.zen.ping_timeout: 120s
+
+discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "192.168.3.105:9301"]
+# discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300"]
+
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_master_5.6.4_9200 -p 9200:9200 -p 9300:9300 -v "$PWD/master_data":/usr/share/elasticsearch/data -v $PWD/config_master/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+f379af5c5d0e8e6ec1d99e8908bde45943d36e777ef17d6816d89382527a4610
+
+添加数据节点1
+在192.168.3.145主机上：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir config_node_1
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir slave1_data
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ vim config_node_1/elasticsearch.yml
+
+cluster.name: elasticsearch_cluster
+node.name: slave1
+node.master: false
+node.data: true
+network.host: 0.0.0.0
+network.publish_host: 192.168.3.145
+# 设置节点之间交互的tcp端口，默认是9300。
+transport.tcp.port: 9301
+
+# 设置对外服务的http端口，默认为9200。
+http.port: 9201
+
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# 这个设置为了避免脑裂。比如3个节点的集群，如果设置为2，那么当一台节点脱离后，不会自动成为master。
+# discovery.zen.minimum_master_nodes: 2
+
+# 设置ping其他节点时的超时时间，网络比较慢时可将该值设大：
+# 是设置了节点与节点之间的连接ping时长
+# discovery.zen.ping_timeout: 120s
+
+discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "192.168.3.105:9301"]
+# discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300"]
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_1_5.6.4_9201 -p 9201:9201 -p 9301:9301 -v "$PWD/slave1_data":/usr/share/elasticsearch/data -v $PWD/config_node_1/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+f218c94f3ebbd60151995bde7315d57744fbcfb8c8052c409968b38102318215
+
+
+添加数据节点2
+在192.168.3.105机器上：
+zy@ubuntu:~/docker/elasticsearch$ mkdir config_node_2
+zy@ubuntu:~/docker/elasticsearch$ mkdir slave2_data
+zy@ubuntu:~/docker/elasticsearch$ vim config_node_2/elasticsearch.yml
+
+cluster.name: elasticsearch_cluster
+node.name: slave2
+node.master: false
+node.data: true
+network.host: 0.0.0.0
+network.publish_host: 192.168.3.105
+# 设置节点之间交互的tcp端口，默认是9300。
+transport.tcp.port: 9301
+
+# 设置对外服务的http端口，默认为9200。
+http.port: 9201
+
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# 这个设置为了避免脑裂。比如3个节点的集群，如果设置为2，那么当一台节点脱离后，不会自动成为master。
+# discovery.zen.minimum_master_nodes: 2
+
+
+# 设置ping其他节点时的超时时间，网络比较慢时可将该值设大：
+# 是设置了节点与节点之间的连接ping时长
+# discovery.zen.ping_timeout: 120s
+
+discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "192.168.3.105:9301"]
+# discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300"]
+
+zy@ubuntu:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_2_5.6.4_9201 -p 9201:9201 -p 9301:9301 -v "$PWD/slave2_data":/usr/share/elasticsearch/data -v $PWD/config_node_2/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+4934b34ba3baac621acc0e95e7c22131d75266894eeda732e8d52e9e221edf7f
+

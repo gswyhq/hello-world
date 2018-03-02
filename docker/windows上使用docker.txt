@@ -1,11 +1,30 @@
 ﻿
-下载：
-https://download.docker.com/win/stable/DockerToolbox.exe
+机器必须具有运行Windows 7或更高版本的64位操作系统;
+    可以安装Docker Toolbox，它使用Oracle Virtual Box而不是Hyper-V。
+    Docker Toolbox的下载地址：
+    https://download.docker.com/win/stable/DockerToolbox.exe
+若机器是Windows10 版本大于或等于 1703，os版本大于或等于 15063；启用Hyper-V软件包就可以使Docker for Windows工作。
+    较新的Docker for Windows解决方案的优点之一是它使用本地虚拟化（使用Hyper-V进行虚拟化），不需要VirtualBox来运行Docker。
+    下载：https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe
 
 
+启用 Hyper-V 以在 Windows 10 上创建虚拟机。
+    检查要求：
+        Windows 10 企业版、专业版或教育版
+        具有二级地址转换 (SLAT) 的 64 位处理器。
+        CPU 支持 VM 监视器模式扩展（Intel CPU 上的 VT-c）。
+        最小 4 GB 内存。
+    请勿在 Windows 10 家庭版上安装 Hyper-V 角色。
+        打开设置 > 更新和安全 > 激活，从 Windows 10 家庭版升级到 Windows 10 专业版。
 
+    手动启用 Hyper-V ：
+        右键单击 Windows 按钮并选择“应用和功能”。
+        选择“打开或关闭 Windows 功能”。
+        选择“Hyper-V”，然后单击“确定”。
+        安装完成后，系统会提示你重启计算机。
 
-双击下载在文件安装;
+以下是‘Docker Toolbox’的安装示例：
+双击下载的文件（DockerToolbox.exe）安装;
 桌面会有两个快捷键;
 双击Docker Quickstart Terminal，然后会做一些默认的工作
 

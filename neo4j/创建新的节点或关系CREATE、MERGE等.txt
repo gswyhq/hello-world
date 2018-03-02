@@ -1,0 +1,89 @@
+
+# 根据id查询两个节点，并创建一个节点及两条关系（多次运行会重复创建）
+MATCH (a:Baoxianmingcheng),(b)
+WHERE id(a)=3127 and id(b)=3161
+CREATE (quancan:Baoxianjin{name:"身故或全残保险金",alias:"身故或全残保险金", Name:"身故或全残保险金"}),
+(a)-[r1:`保险金类型`]->(quancan),
+(quancan)-[r2:`理赔申请`]->(b)
+RETURN a, quancan, b
+
+# creage改为mgrge，可以避免重复创建
+MATCH (a:Baoxianmingcheng),(b)
+WHERE id(a)=3127 and id(b)=3161
+MERGE (a)-[r1:`保险金类型`]->(quancan:Baoxianjin{name:"身故或全残保险金",alias:"身故或全残保险金", Name:"身故或全残保险金"})-[r2:`理赔申请`]->(b)
+RETURN a, quancan, b
+
+merge在查找时，如果找到则返回，如果没找到则创建。可以避免创建重复的节点
+merge (m:School {name:"SCDX"})
+on create set m.address="chegndu"
+return m;
+
+MATCH (m:School { name:"CDLG" })
+MATCH (p:Person { name:"jiaj" })
+MERGE (p)-[r:ACTED_IN]->(m)
+ON CREATE SET r.roles =['teacher']
+RETURN p,r,m ;
+
+MERGE 会检查关联两边的方向，如果没有匹配到关系，则创建一个新的方向的关系。
+CREATE (y:Year { year:2014 })
+MERGE (y)<-[:IN_YEAR]-(m10:Month { month:10 })
+MERGE (y)<-[:IN_YEAR]-(m11:Month { month:11 })
+RETURN y,m10,m11 ;
+
+
+
+Merge子句的作用有两个：当模式（Pattern）存在时，匹配该模式；当模式不存在时，创建新的模式，功能是match子句和create的组合。在merge子句之后，可以显式指定on creae和on match子句，用于修改绑定的节点或关系的属性。
+
+通过merge子句，你可以指定图形中必须存在一个节点，该节点必须具有特定的标签，属性等，如果不存在，那么merge子句将创建相应的节点。
+
+1，通过merge子句匹配搜索模式
+
+匹配模式是：一个节点有Person标签，并且具有name属性；如果数据库不存在该模式，那么创建新的节点；如果存在该模式，那么绑定该节点；
+
+MERGE (michael:Person { name: 'Michael Douglas' })
+RETURN michael;
+2，在merge子句中指定on create子句
+
+如果需要创建节点，那么执行on create子句，修改节点的属性；
+
+ERGE (keanu:Person { name: 'Keanu Reeves' })
+ON CREATE SET keanu.created = timestamp()
+RETURN keanu.name, keanu.created
+3，在merge子句中指定on match子句
+
+如果节点已经存在于数据库中，那么执行on match子句，修改节点的属性；
+
+MERGE (person:Person)
+ON MATCH SET person.found = TRUE , person.lastAccessed = timestamp()
+RETURN person.name, person.found, person.lastAccessed
+4，在merge子句中同时指定on create 和 on match子句
+
+MERGE (keanu:Person { name: 'Keanu Reeves' })
+ON CREATE SET keanu.created = timestamp()
+ON MATCH SET keanu.lastSeen = timestamp()
+RETURN keanu.name, keanu.created, keanu.lastSeen
+5，merge子句用于match或create一个关系
+
+MATCH (charlie:Person { name: 'Charlie Sheen' }),(wallStreet:Movie { title: 'Wall Street' })
+MERGE (charlie)-[r:ACTED_IN]->(wallStreet)
+RETURN charlie.name, type(r), wallStreet.title
+6，merge子句用于match或create多个关系
+
+MATCH (oliver:Person { name: 'Oliver Stone' }),(reiner:Person { name: 'Rob Reiner' })
+MERGE (oliver)-[:DIRECTED]->(movie:Movie)<-[:ACTED_IN]-(reiner)
+RETURN movie
+7，merge子句用于子查询
+
+复制代码
+MATCH (person:Person)
+MERGE (city:City { name: person.bornIn })
+RETURN person.name, person.bornIn, city;
+
+MATCH (person:Person)
+MERGE (person)-[r:HAS_CHAUFFEUR]->(chauffeur:Chauffeur { name: person.chauffeurName })
+RETURN person.name, person.chauffeurName, chauffeur;
+
+MATCH (person:Person)
+MERGE (city:City { name: person.bornIn })
+MERGE (person)-[r:BORN_IN]->(city)
+RETURN person.name, person.bornIn, city;

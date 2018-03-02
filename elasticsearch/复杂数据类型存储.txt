@@ -1,0 +1,46 @@
+
+
+# 字典数据
+gswyhq@gswyhq-PC:~/process_control$ curl -XPUT 'localhost:9200/my_index/my_index/3?pretty' -H 'Content-Type: application/json' -d'
+{
+  "region": "US",
+  "manager": {
+    "age":     30,
+    "name": {
+      "first": "John",
+      "last":  "Smith"
+    }
+  }
+}
+'
+
+gswyhq@gswyhq-PC:~/process_control$ curl -XGET 'localhost:9200/my_index/my_index/3'
+{"_index":"my_index","_type":"my_index","_id":"3","_version":1,"found":true,"_source":
+{
+  "region": "US",
+  "manager": {
+    "age":     30,
+    "name": {
+      "first": "John",
+      "last":  "Smith"
+    }
+  }
+}
+}
+
+# 列表数据
+gswyhq@gswyhq-PC:~/process_control$ curl -XPUT 'localhost:9200/my_index/my_index/4?pretty' -H 'Content-Type: application/json' -d'
+{
+  "region": "1234",
+  "entity": ["中国", "歇息"]
+}
+'
+
+gswyhq@gswyhq-PC:~/process_control$ curl -XGET 'localhost:9200/my_index/my_index/4'
+{"_index":"my_index","_type":"my_index","_id":"4","_version":1,"found":true,"_source":
+{
+  "region": "1234",
+  "entity": ["中国", "歇息"]
+}
+
+

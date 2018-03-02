@@ -129,7 +129,7 @@ hmget(key, field1, …,field N)：返回名称为key的hash中field i对应的va
 hmset(key, field1, value1,…,field N, value N)：向名称为key的hash中添加元素field i<—>value i
 hincrby(key, field, integer)：将名称为key的hash中field的value增加integer
 hexists(key, field)：名称为key的hash中是否存在键为field的域
-hdel(key, field)：删除名称为key的hash中键为field的域
+hdel(key, field)：删除名称为key的hash中键为field的域， 如： hdel phone_login 13928853463
 hlen(key)：返回名称为key的hash中元素个数
 hkeys(key)：返回名称为key的hash中所有键
 hvals(key)：返回名称为key的hash中所有键对应的value

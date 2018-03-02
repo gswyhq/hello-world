@@ -66,3 +66,40 @@ network.publish_host: 192.168.0.1
 network.host: 192.168.0.1
 这个参数是用来同时设置bind_host和publish_host上面两个参数。
 
+有时候报错：
+Caused by: while scanning a simple key
+ in 'reader', line 9, column 1:
+    discovery.zen.minimum_master_nodes:2
+    ^
+could not find expected ':'
+ in 'reader', line 11, column 1:
+    discovery.zen.ping.multicast.ena ...
+    ^
+解决方案：
+参数冒号后加空格,或者是数组中间加空格
+例如:
+# discovery.zen.minimum_master_nodes: 3
+
+有时候报错：
+[2018-03-02T01:46:36,072][WARN ][o.e.b.ElasticsearchUncaughtExceptionHandler] [master] uncaught exception in thread [main]
+org.elasticsearch.bootstrap.StartupException: java.lang.IllegalArgumentException: unknown setting [discovery.zen.ping.multicast.enabled] please check that any required plugins are installed, or check the breaking changes documentation for removed settings
+
+解决方案：
+es1.0 版本的集群的discovery默认采用的是组播（multicast）模式，但是在es2.2版本中已去除该模式，虽然提供了multicast的插件，但是官方说不建议采用multicast的模式，故我们只能采用单播(unicast)模式。
+删除`elasticsearch.yml`文件中如下的配置即可
+# 禁止当前节点发现多个集群节点，默认值为true：
+# 这个设置把组播的自动发现给关闭了，为了防止其他机器上的节点自动连入。
+discovery.zen.ping.multicast.enabled: false
+
+有时候报错：
+org.elasticsearch.bootstrap.StartupException: java.lang.IllegalArgumentException: unknown setting [discovery.zen.ping.timeout] did you mean any of [discovery.zen.ping_timeout, discovery.zen.fd.ping_timeout, discovery.zen.join_timeout, discovery.zen.publish_timeout, discovery.zen.commit_timeout]?
+`elasticsearch.yml`文件中如下的配置
+discovery.zen.ping.timeout: 120s
+改为：
+discovery.zen.ping_timeout: 120s
+
+有时候报错：
+org.elasticsearch.cluster.block.ClusterBlockException: blocked by: [SERVICE_UNAVAILABLE/1/state not recovered / initialized];\n
+`elasticsearch.yml`文件中如下的配置
+network.host: 0.0.0.0
+http.port: 9200

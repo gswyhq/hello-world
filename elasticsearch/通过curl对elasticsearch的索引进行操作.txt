@@ -6,7 +6,8 @@ curl -XGET 'localhost:9200/_cat/indices?v'
 查看索引`dingding7500_faq`的段信息：
 gswyhq@gswyhq-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
 
-
+# 按照正则匹配删除索引
+curl -XDELETE 'localhost:9200/logs_2013*'
 
 获取索引`dingding`的详情：
 curl -XGET 'http://192.168.3.250:9200/dingding/_settings'
@@ -87,3 +88,62 @@ DELETE /twitter
 如删除索引`dingding500_020913_faq`：
 gswyhq@gswyhq-PC:~$ curl -XDELETE localhost:9200/dingding500_020913_faq
 
+当索引变得更“老”，它们到达一个几乎不会再被访问的时间点。 我们可以在这个阶段删除它们，但也许你想将它们留在这里以防万一有人在半年后还想要访问它们。
+这些索引可以被关闭。它们还会存在于集群中，但它们不会消耗磁盘空间以外的资源。重新打开一个索引要比从备份中恢复快得多。
+在关闭之前，值得我们去刷写索引来确保没有事务残留在事务日志中。一个空白的事务日志会使得索引在重新打开时恢复得更快：
+
+POST /logs_2014-01-*/_flush # 刷写（Flush）所有`logs_2014-01-*`正则匹配到的的索引来清空事务日志。
+POST /logs_2014-01-*/_close # 关闭所有`logs_2014-01-*`正则匹配到的索引.
+POST /logs_2014-01-*/_open # 当你需要再次访问它们时，使用 open API 来重新打开它们。
+
+# 关闭、打开索引 my_index
+curl -XPOST 'localhost:9200/my_index/_close?pretty'
+curl -XPOST 'localhost:9200/my_index/_open?pretty'
+
+
+curl -XGET 'localhost:9200/xinxin_20180227_141500/_settings,_mappings,_aliases?pretty'
+
+别名可以帮助我们更加透明地在索引间切换。 当创建索引时，你可以将 logs_current 指向当前索引来接收新的日志事件， 当检索时，更新 last_3_months 来指向所有最近三个月的索引：
+POST /_aliases
+{
+  "actions": [
+    { "add":    { "alias": "logs_current",  "index": "logs_2014-10" }},
+    { "remove": { "alias": "logs_current",  "index": "logs_2014-09" }},
+    { "add":    { "alias": "last_3_months", "index": "logs_2014-10" }},
+    { "remove": { "alias": "last_3_months", "index": "logs_2014-07" }}
+  ]
+}
+
+将 logs_current 由九月切换至十月。
+将十月添加到 last_3_months 并且删掉七月。
+
+# 根据时间工具生成索引名
+# 格式： <static_name{date_math_expr{date_format|time_zone}}>
+# 编码映射： {'{': '%7B', '|': '%7C', '>': '%3E', '<': '%3C', ':': '%3A', '+': '%2B', '}': '%7D', ',': '%2C', '/': '%2F'}
+
+es_index = '<static_name{date_math_expr{date_format|time_zone}}>'
+static_name = 'clogstash-'
+date_math_expr = 'now/s-1d'
+date_format = 'YYYY.MM.dd'
+date_format = "yyyyMMdd_HHmmss"
+time_zone = '+08:00'
+
+es_index = es_index.replace('static_name', static_name)
+es_index = es_index.replace('date_math_expr', date_math_expr)
+es_index = es_index.replace('date_format', date_format)
+es_index = es_index.replace('time_zone', time_zone)
+
+for char, encod_char in PERCENT_ENCODING_CHARACTERS.items():
+    es_index = es_index.replace(char, encod_char)
+
+gswyhq@gswyhq-PC:~$ curl -XPUT 'localhost:9200/%3Clogstash-%7Bnow%2FM-1M%7BYYYY.MM%7D%7D%3E'
+{"acknowledged":true,"shards_acknowledged":true,"index":"logstash-2018.01"}
+等同于：
+gswyhq@gswyhq-PC:~$ curl -XPUT 'localhost:9200/logstash-2018.01'
+{"acknowledged":true,"shards_acknowledged":true,"index":"logstash-2018.01"}
+
+# 删除过期索引
+# DELETE /<logs-{now-30d/d}*> with URI encoding:
+DELETE /%3Clogs-%7Bnow-30d%2Fd%7D*%3E
+
+curl -XGET 'localhost:9200/xinxin_20180228*/_aliases?pretty'
