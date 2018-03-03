@@ -243,5 +243,17 @@ gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_ali
 gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_stats"
 
 
+更新数据
+ 更新文档: 修改id=1的name属性，并直接增加属性和属性值
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d ' {
+    "doc": {
+        "name": "xyd",
+        "age": 20
+    }
+}'
 
+ 更新索引–脚本方式
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
+    "script": "ctx._source.age += 5"
+}'
 
