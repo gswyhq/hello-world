@@ -227,8 +227,20 @@ curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json'
 }
 '
 
+插入数据
+ 单条插入-指定id
+curl -XPOST 'localhost:9200/customer/external/1?pretty' -d' {"name": "John Doe" }'
+ 单条插入-不指定id
+curl -XPOST 'localhost:9200/customer/external?pretty' -d' {"name": "Jane Doe" }'
+ 批量插入：
+curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary “@accounts.json"
 
+# 查询某个索引的文档总数：
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_count"
+{"count":55,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 
+# 查询某个索引的状态：
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_stats"
 
 
 

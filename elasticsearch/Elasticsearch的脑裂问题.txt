@@ -128,3 +128,48 @@ discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "
 zy@ubuntu:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_2_5.6.4_9201 -p 9201:9201 -p 9301:9301 -v "$PWD/slave2_data":/usr/share/elasticsearch/data -v $PWD/config_node_2/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
 4934b34ba3baac621acc0e95e7c22131d75266894eeda732e8d52e9e221edf7f
 
+更新集群主节点的数量
+curl -XPUT 'localhost:9200/_cluster/settings?flat_settings=true&pretty' -H 'Content-Type: application/json' -d'
+ {
+     "transient" : {
+         "discovery.zen.minimum_master_nodes" : 2
+     }
+ }
+ '
+
+默认生成的索引是有一份副本文件的
+这种情况虽然健康值为绿色，但是当中两个节点宕机的极端情况下，会出现数据丢失的风险。
+可以通过elasticsearch-kopf插件进行修改副本分片数达到所有节点分片数一致。
+修改number_of_replicas
+修改后
+如果想自定义导入数据时的分片数量，可以在logstash目录下新建/config/logstash-simple.conf文件，对output到es的数据格式进行自定义。通过新建json配置文件来对索引格式自定义。
+"number_of_replicas":"4",  对应副本分片数（可更改）
+"number_of_shards":"4" 对应主分片数（索引创建就无法更改）
+
+https://www.jianshu.com/p/a164b86445b6?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
+
+今天发现logstash没有任何数据写入elasticsearch，检查logs，发现报错high disk watermark [10%] exceeded on [asfasdf112xzvdx][flag=smasher] free:2.8gb[9.2%], shards will be relocated away from this node.
+
+原因可能是机器剩余磁盘空间不足，低于elasticsearch的shard设置，没办法了删除部分没用的数据。
+
+更新2015-12-16
+
+可以在shell用命令关闭这个检查
+
+curl -XPUT localhost:9200/_cluster/settings -d '{
+
+    "transient" : {
+
+        "cluster.routing.allocation.disk.threshold_enabled" : false
+
+    }
+
+}'
+
+Elasticsearch使用两个配置参数决定分片是否能存放到某个节点上。cluster.routing.allocation.disk.watermark.low：控制磁盘使用的低水位。
+默认为85%，意味着如果节点磁盘使用超过85%，则ES不允许在分配新的分片。当配置具体的大小如100MB时，表示如果磁盘空间小于100MB不允许分配分片。
+cluster.routing.allocation.disk.watermark.high：控制磁盘使用的高水位。默认为90%，意味着如果磁盘空间使用高于90%时，ES将尝试分配分片到其他节点。
+上述两个配置可以使用API动态更新，ES每隔30s获取一次磁盘的使用信息，该值可以通过cluster.info.update.interval来设置。
+
+当多主机分布式集群时候，若某台主机硬盘不足的情况下，可能导致对应的es数据写入不进去；导致查看集群状态的时候，是yellow，该主机没有分片数据；
+
