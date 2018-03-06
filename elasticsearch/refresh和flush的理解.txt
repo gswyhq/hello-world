@@ -1,0 +1,26 @@
+
+refresh和flush的理解
+
+　　在索引数据的时候，要保证被索引的文档能够立即被搜索到，就要涉及到_refresh 和_flush这两个方法。
+
+　　1、fresh
+
+　　　　当索引一个文档，文档先是被存储在内存里面，默认1秒后，会进入文件系统缓存，这样该文档就可以被搜索到，但是该文档还没有存储到磁盘上，如果机器宕机了，数据就会丢失。
+
+　　　　因此fresh实现的是从内存到文件系统缓存的过程。
+
+　　2、flush
+
+　　　　flush是用于translog的。
+
+　　　　ES为了数据的安全，在接受写入文档的时候，在写入内存buffer的同时，会写一份translog日志，从而在出现程序故障或磁盘异常时，保证数据的安全。
+
+　　　　flush会触发lucene commit,并清空translog日志文件。
+
+　　　　translog的flush是ES在后头自动运行的。默认情况下ES每隔5s会去检测要不要flush translog，默认条件是：每 30 分钟主动进行一次 flush，或者当 translog 文件大小大于 512MB主动进行一次 flush。
+
+　　　　每次 index、bulk、delete、update 完成的时候，一定触发flush translog 到磁盘上，才给请求返回 200 OK。这个改变提高了数据安全性，但是会对写入的性能造成不小的影响。
+
+　　　　在写入效率优先的情况下，可以在 index template 里设置如下参数："index.translog.durability":"async" 和 "index.translog.sync_interval":30s (默认是5s)。
+
+
