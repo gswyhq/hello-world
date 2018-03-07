@@ -32,6 +32,7 @@ __init__.so可以从Python导入，但这还不足以使目录成为Python的一
 要解决这个问题，我们可以在构建项目的其余部分后从源代码树中复制__init__.py文件。
 一个很好的方法是覆盖setup.py中的build_ext类：
 gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py build_ext
+# 注意：setup.py 文件所在目录中，不能存在__init__.py文件
 gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
 .
 ├── build
