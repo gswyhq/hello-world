@@ -103,3 +103,12 @@ org.elasticsearch.cluster.block.ClusterBlockException: blocked by: [SERVICE_UNAV
 `elasticsearch.yml`文件中如下的配置
 network.host: 0.0.0.0
 http.port: 9200
+
+# 一次请求超过一万条记录时候，会报错：
+Result window is too large, from + size must be less than or equal to: [10000] but was [30000].
+ES默认的分页机制一个不足的地方是，比如有5010条数据，当你仅想取第5000到5010条数据的时候，ES也会将前5000条数据加载到内存当中，所以ES为了避免用户的过大分页请求造成ES服务所在机器内存溢出，默认对深度分页的条数进行了限制，默认的最大条数是10000条，这是正是问题描述中当获取第10000条数据的时候报Result window is too large异常的原因。
+要解决这个问题，可以使用下面的方式来改变ES默认深度分页的index.max_result_window 最大窗口值
+curl -XPUT http://127.0.0.1:9200/my_index/_settings -d '{ "index" : { "max_result_window" : 500000}}'
+其中my_index为要修改的index名，500000为要调整的新的窗口数。将该窗口调整后，便可以解决无法获取到10000条后数据的问题。
+注意事项
+通过上述的方式解决了我们的问题，但也引入了另一个需要我们注意的问题，窗口值调大了后，虽然请求到分页的数据条数更多了，但它是用牺牲更多的服务器的内存、CPU资源来换取的。
