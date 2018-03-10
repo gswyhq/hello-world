@@ -12,7 +12,7 @@ index_name_alias='xinxin_templates_question_alias'
 
 function usage() {
         echo "使用方法:"
-        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：192.168.3.145:9200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
+        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：52.80.187.77:18200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
         exit 1
 }
 
@@ -52,6 +52,11 @@ do
         esac
 done
 
+if [ $opt == '?' ];then
+    echo "输入命令应该带有选项及参数！ 使用 -h 选项可以查看帮助。"
+    exit
+fi
+
 echo "${input_host_port} 上的索引 ${index_name} 迁移到 ${output_host_port}"
 
 # 从一个机器迁移索引及数据到另一个机器:
@@ -67,14 +72,14 @@ docker run --rm -ti taskrabbit/elasticsearch-dump   --input="http://${input_host
 # 以上数据迁移的时候，会丢失对应的索引别名信息；
 
 #若不需要删除原索引别名，仅仅添加一个索引别名：
-curl -XPOST "${output_host_port}/_aliases?pretty" -H 'Content-Type: application/json' -d'
-{
-    "actions": [
-        { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" }
-        }
-    ]
-}
-'
+#curl -XPOST "${output_host_port}/_aliases?pretty" -H 'Content-Type: application/json' -d'
+#{
+#    "actions": [
+#        { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" }
+#        }
+#    ]
+#}
+#'
 
 # 需要注意的是，json数据里变量要用''括起来
 
@@ -91,7 +96,37 @@ echo "${input_host_port} 上的索引 ${index_name} 成功迁移到 ${output_hos
 #'
 
 # 检测别名`dingding_faq_alias`指向哪一个索引：
-#curl -XGET 'localhost:9200/*/_alias/dingding_faq_alias?pretty'
+str=$(printf "%-150s" "别名指向：")
+echo "${str// /-}"
+echo "在 ${output_host_port} 索引别名 ${index_name_alias} 的指向结果： "
+echo "curl -XGET '${output_host_port}/*/_alias/${index_name_alias}?pretty'"
+curl -XGET "${output_host_port}/*/_alias/${index_name_alias}?pretty"
 
 # 哪些别名指向索引`dingding_faq`：
 #curl -XGET 'localhost:9200/dingding_faq/_alias/*?pretty'
+
+
+str=$(printf "%-150s" "添加索引别名：")
+echo "${str// /-}"
+
+echo "curl -XPOST ${output_host_port}/_aliases?pretty -H Content-Type: application/json -d'"
+echo '{'
+echo '   "actions": ['
+echo '         { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" } '
+echo '         }'
+echo '      ]'
+echo '   }'
+echo "'"
+
+
+str=$(printf "%-150s" "切换索引别名：")
+echo "${str// /-}"
+echo "curl -XPOST ${output_host_port}/_aliases?pretty -H Content-Type: application/json -d'"
+echo '{'
+echo '   "actions": ['
+echo '         { "remove":    { "index": "旧的索引名", "alias": "'${index_name_alias}'" }}, '
+echo '         { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" }} '
+echo '      ]'
+echo '   }'
+echo "'"
+
