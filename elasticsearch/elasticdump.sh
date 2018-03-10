@@ -52,9 +52,12 @@ do
         esac
 done
 
-if [ $opt == '?' ];then
-    echo "输入命令应该带有选项及参数！ 使用 -h 选项可以查看帮助。"
+if [ $# -le 0 ];then
+    echo "输入命令应该带有选项及参数！ "
+    usage
     exit
+else
+    echo "输入的参数个数： $#"
 fi
 
 echo "${input_host_port} 上的索引 ${index_name} 迁移到 ${output_host_port}"
