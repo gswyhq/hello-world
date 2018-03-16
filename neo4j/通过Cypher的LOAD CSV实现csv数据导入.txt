@@ -1,0 +1,174 @@
+
+基于Cypher导入数据
+
+　　通过Cypher的LOAD CSV实现数据导入
+　　（1）创建节点
+　　import_csv.cypher如下：
+
+// Create customers
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:customers.csv" AS row
+CREATE (:Customer {companyName: row.CompanyName, customerID: row.CustomerID, fax: row.Fax, phone: row.Phone});
+
+// Create products
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:products.csv" AS row
+CREATE (:Product {productName: row.ProductName, productID: row.ProductID, unitPrice: toFloat(row.UnitPrice)});
+
+// Create suppliers
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:suppliers.csv" AS row
+CREATE (:Supplier {companyName: row.CompanyName, supplierID: row.SupplierID});
+
+// Create employees
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:employees.csv" AS row
+CREATE (:Employee {employeeID:row.EmployeeID,  firstName: row.FirstName, lastName: row.LastName, title: row.Title});
+
+// Create categories
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:categories.csv" AS row
+CREATE (:Category {categoryID: row.CategoryID, categoryName: row.CategoryName, description: row.Description});
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
+MERGE (order:Order {orderID: row.OrderID}) ON CREATE SET order.shipName =  row.ShipName;
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+　　（2）创建索引
+　　对刚创建的节点建立索引，以便在下一步创建边关系的时候能快速检索到各点。
+
+CREATE INDEX ON :Product(productID);
+
+CREATE INDEX ON :Product(productName);
+
+CREATE INDEX ON :Category(categoryID);
+
+CREATE INDEX ON :Employee(employeeID);
+
+CREATE INDEX ON :Supplier(supplierID);
+
+CREATE INDEX ON :Customer(customerID);
+
+CREATE INDEX ON :Customer(customerName);
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+　　（3）创建边关系
+　　首先创建products和employees的边关系。
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
+MATCH (order:Order {orderID: row.OrderID})
+MATCH (product:Product {productID: row.ProductID})
+MERGE (order)-[pu:PRODUCT]->(product)
+ON CREATE SET pu.unitPrice = toFloat(row.UnitPrice), pu.quantity = toFloat(row.Quantity);
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
+MATCH (order:Order {orderID: row.OrderID})
+MATCH (employee:Employee {employeeID: row.EmployeeID})
+MERGE (employee)-[:SOLD]->(order);
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
+MATCH (order:Order {orderID: row.OrderID})
+MATCH (customer:Customer {customerID: row.CustomerID})
+MERGE (customer)-[:PURCHASED]->(order);
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+　　其次，创建products, suppliers, and categories的边关系.
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:products.csv" AS row
+MATCH (product:Product {productID: row.ProductID})
+MATCH (supplier:Supplier {supplierID: row.SupplierID})
+MERGE (supplier)-[:SUPPLIES]->(product);
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:products.csv" AS row
+MATCH (product:Product {productID: row.ProductID})
+MATCH (category:Category {categoryID: row.CategoryID})
+MERGE (product)-[:PART_OF]->(category);
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+　　然后，创建employees之间的“REPORTS_TO”关系。
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:employees.csv" AS row
+MATCH (employee:Employee {employeeID: row.EmployeeID})
+MATCH (manager:Employee {employeeID: row.ReportsTo})
+MERGE (employee)-[:REPORTS_TO]->(manager);
+1
+2
+3
+4
+5
+　　最后，为优化查询速度，在orders上创建唯一性约束：
+
+CREATE CONSTRAINT ON (o:Order) ASSERT o.orderID IS UNIQUE;
+1
+　　此外，也可以通过运行整个脚本一次性完成所上述工作：
+
+bin/neo4j-shell -path northwind.db -file import_csv.cypher.

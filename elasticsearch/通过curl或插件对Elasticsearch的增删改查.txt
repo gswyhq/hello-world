@@ -56,3 +56,22 @@ curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d ' {
 curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
     "script": "ctx._source.age += 5"
 }'
+
+# 查询多个id的记录：
+gswyhq@gswyhq-PC:~/dialogue_management_system/wiki$ curl -XGET 'localhost:9200/xinxin_templates_question_alias/_mget?pretty' -H 'Content-Type: application/json' -d'
+{
+    "ids" : ["1", "2"]
+}
+'
+
+# 查询某个字段的多个记录
+curl -XGET 'localhost:9200/xinxin_templates_question_alias/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "terms": {
+      "模板id": [
+        1,2,3,4      ]
+    }
+  }
+} '
+

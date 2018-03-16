@@ -2,6 +2,7 @@
 # -*- coding:utf8 -*- #
 
 import csv
+import time
 from py2neo import Graph, Node, Relationship, Transaction, Subgraph
 
 def expot_data(cid, data):
@@ -52,6 +53,7 @@ def expot_data(cid, data):
             tx.create(a_knows_b)
         else:
             raise ValueError("数据有误： {}".format(line))
+    print(len(nodes), len(relationships))
     # sub_graph = Subgraph(nodes=nodes, relationships=relationships)
     # graph.create(sub_graph)
     tx.commit()
@@ -89,8 +91,8 @@ def main():
                  ['', '', '', '', '', '', '', '23', '0', 'PRODUCED', '']
                  ]
 
-    # data = read_data(file_path)
-    expot_data('abc', data)
+    # data = read_data('/home/gswyhq/docker/neo4j/linshi/data/jykl_all2.csv')
+    expot_data('Jiaoyinkanglian', data)
 
 if __name__ == '__main__':
     main()

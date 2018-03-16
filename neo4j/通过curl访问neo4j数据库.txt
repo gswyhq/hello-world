@@ -1,0 +1,46 @@
+
+如下访问会报错：
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels?user=neo4j&password=gswyhq"
+{
+  "errors" : [ {
+    "code" : "Neo.ClientError.Security.Unauthorized",
+    "message" : "No authentication header supplied."
+  } ]
+
+主要原因是未经认证；
+
+第一步：获取编译的登录用户名及密码；
+import base64
+base64.b64encode(b"neo4j:gswyhq")
+Out[14]: b'bmVvNGo6Z3N3eWhx'
+
+第二步：通过获取的密钥`bmVvNGo6Z3N3eWhx`进行认证访问， 如下，获取所有节点的labels
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+[ "Fenzhijigou", "JIBINGZHONGLEI", "ZHONGDAJIBING", "BAOLIULEIXING", "BAOXIANJIN", "QINGKUANG", "Didian", "Huikang", "Yiyuan", "BAOXIANMINGCHENG", "GUANXI", "TIME", "XIANGGUANTIAOKUAN", "JIBING", "STRING", "JIANEJIAOQING", "QINGZHENGJIBING", "QINGJING", "Zunxianghuikang" ]
+
+或者：
+import requests
+r = requests.get('http://localhost:47474/db/data/labels', headers = {'authorization':"Basic bmVvNGo6Z3N3eWhx"})
+r.json()
+Out[18]:
+['BAOXIANJIN',
+ 'Didian',
+ 'BAOXIANMINGCHENG',
+ 'JIBINGZHONGLEI',
+ 'QINGJING',
+ 'QINGZHENGJIBING',
+ 'JIBING',
+ 'XIANGGUANTIAOKUAN',
+ 'GUANXI',
+ 'TIME',
+ 'ZHONGDAJIBING',
+ 'Zunxianghuikang',
+ 'JIANEJIAOQING',
+ 'Fenzhijigou',
+ 'BAOLIULEIXING',
+ 'Huikang',
+ 'STRING',
+ 'Yiyuan',
+ 'QINGKUANG']
+
+更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels

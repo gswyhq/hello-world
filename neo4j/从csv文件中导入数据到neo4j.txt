@@ -69,6 +69,30 @@ gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head /home/gswyhq/docker/neo4j/linshi/pe
 
     就正常了
 
+LOAD CSV FROM 导入导出路径问题：
+在使用load csv导入文件时一直出问题
+LOAD CSV WITH HEADERS FROM "?G:\importData.csv"
+AS line
+return line.n
+
+后来才发现原来neo4j默认的设置是把文件导入的根目录限制在当前库的import文件夹下：
+dbms.directories.import=import
+
+dbms.directories.import 设置file:///与Cypher LOAD CSV子句一起使用的URL 的根目录。这必须设置为数据库服务器的文件系统上的单个目录，
+并将使所有从file:///URL相对于指定目录加载的请求（类似于unix chroot的操作）。默认值为import。
+这是一种安全措施，可防止数据库访问标准导入目录之外的文件。设置dbms.directories.import为空删除此安全措施，而是允许访问系统上的任何文件。这是不推荐的。
+
+文件URL将相对于dbms.directories.import目录解析。例如，一个文件的URL通常会看起来像file:///myfile.csv或file:///myproject/myfile.csv。
+如果dbms.directories.import设置为默认值导入，则使用上述URL LOAD CSV将分别从<NEO4J_HOME> /import/myfile.csv和<NEO4J_HOME> import / myproject / myfile.csv读取。
+如果设置为/ data / csv，则使用上述URL LOAD CSV将分别从/data/csv/myfile.csv和/data/csv/myproject/myfile.csv读取
+找到当前数据库的目录，若发现没有import目录，需要自己手动创建。
+然后放入csv文件，接下来就可以进行导入操作了：
+
+USING PERIODIC COMMIT 1000
+LOAD CSV FROM "file:///node.csv" AS line
+create (a:Node{name:line[0]})
+
+在LOAD CSV前面加上USING PERIODIC COMMIT 1000，1000表示每1000行的数据进行一次Transaction提交，提升性能。
 
 gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ head products.csv
 productID,productName,supplierID,categoryID,quantityPerUnit,unitPrice,unitsInStock,unitsOnOrder,reorderLevel,discontinued
@@ -219,6 +243,136 @@ LOAD CSV FROM "file:///test.csv" AS line
 match (from:airplane{id:line[0]),(to:position{id:[1]})
 merge (from)-[r:fly{miles:line[2],time:line[3],price:line[4]}]-(to)
 return r
+
+# 通过“CALL apoc.export.csv.all( "/var/lib/neo4j/data/all.csv", {})” 导出的csv数据，重新导入到neo4j;
+# 导出的数据样例如下：
+_id	_labels	name	Name	_start	_end	_type	since
+0	:Person	Euler
+1	:Person	Bernoulli
+2	:Xianzhong:Xincheng	重疾险	重疾险
+3	:Qingjing:Xincheng	战争
+				0	1	KNOWS	1768
+				2	3	免赔条款	1768
+
+LOAD CSV WITH HEADERS  FROM "/var/lib/neo4j/data/jykl_all_node.csv" AS line
+MERGE (p:line._labels{id:line._id,name:line.name,alias:line.alias})
+
+# 文件存放位置： /var/lib/neo4j/import/jykl_all_node.csv
+LOAD CSV WITH HEADERS  FROM "file:///jykl_all_node.csv" AS line
+MERGE (p:Abc{id:line._id,name:line.name,alias:line.alias})
+
+
+USING PERIODIC COMMIT 1000
+LOAD CSV WITH HEADERS FROM 'file:///testfile.csv' AS LINE
+CREATE (n:load {lab:line.label, prop:line.prop});
+
+CREATE INDEX ON :load(lab);
+
+MATCH (n:load {lab:'label1'})
+SET n:label1
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'label2'})
+SET n:label2
+REMOVE n:load
+REMOVE n.lab;
+
+
+labels_set = {'Baoxianjin',
+ 'Baoxianmingcheng',
+ 'Boolean',
+ 'Jiaoyinkanglian',
+ 'Jibing',
+ 'Jibingzhonglei',
+ 'Peichangqingkuang',
+ 'Qingjing',
+ 'Text',
+ 'Tiaokuantiaomu'}
+
+for label in labels_set:
+    print('''MATCH (n:load {{lab:'{0}'}})
+SET n:{0}
+REMOVE n:load
+REMOVE n.lab;\n\n'''.format(label))
+
+
+LOAD CSV WITH HEADERS  FROM "file:///jykl_all_node.csv" AS line
+MERGE (p:Abc{id:line._id,name:line.name,alias:line.alias})
+
+第一步：
+LOAD CSV WITH HEADERS  FROM "file:///jykl_all_node.csv" AS line
+MERGE (n:load {lab:line.label, id:line._id,name:line.name,alias:line.alias});
+
+第二步：
+CREATE INDEX ON :load(lab);
+
+第三步：
+MATCH (n:load {lab:'Jibing'})
+SET n:Jibing
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Peichangqingkuang'})
+SET n:Peichangqingkuang
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Baoxianjin'})
+SET n:Baoxianjin
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Boolean'})
+SET n:Boolean
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Jiaoyinkanglian'})
+SET n:Jiaoyinkanglian
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Qingjing'})
+SET n:Qingjing
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Tiaokuantiaomu'})
+SET n:Tiaokuantiaomu
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Jibingzhonglei'})
+SET n:Jibingzhonglei
+REMOVE n:load
+REMOVE n.lab;
+
+MATCH (n:load {lab:'Text'})
+SET n:Text
+REMOVE n:load
+REMOVE n.lab;
+MATCH (n:load {lab:'Baoxianmingcheng'})
+SET n:Baoxianmingcheng
+REMOVE n:load
+REMOVE n.lab;
+
+
+
+"_id","_labels","name","alias","Name","_start","_end","_type","相关条款"
+"105",":Baoxianmingcheng:Jiaoyinkanglian","安康重疾险","安康重疾险","安康重疾险",,,,
+
+
+
+# 正常情况下，节点与关系需要分开在不同的csv文件中导入，导入节点：
+LOAD CSV WITH HEADERS  FROM "file:///person_Format.csv" AS line
+MERGE (p:person{id:line.id,name:line.name,age:line.age})
+
+WITH HEADERS表明csv文件的第一行是属性名。
+# 导入关系：
+LOAD CSV WITH HEADERS FROM "file:///PersonRel_Format.csv" AS line
+match (from:person{id:line.from_id}),(to:person{id:line.to_id})
+merge (from)-[r:rel{property1:line.property1,property2:line.property2}]->(to)
 
 
 目前主要有以下几种数据插入方式：

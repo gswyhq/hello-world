@@ -24,6 +24,12 @@ MERGE (p)-[r:ACTED_IN]->(m)
 ON CREATE SET r.roles =['teacher']
 RETURN p,r,m ;
 
+match (n{name:"未分类疾病"})
+match (n1:JIBING)-[r:`定义`]->()
+merge (n)-[r2:`疾病`]->(n1)
+return count(n1)
+
+
 MERGE 会检查关联两边的方向，如果没有匹配到关系，则创建一个新的方向的关系。
 CREATE (y:Year { year:2014 })
 MERGE (y)<-[:IN_YEAR]-(m10:Month { month:10 })
