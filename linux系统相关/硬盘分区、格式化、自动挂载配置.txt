@@ -24,7 +24,7 @@
  # sudo vim /etc/fstab        
  # 添加以下内容
  # /host was on /dev/sdb during installation
-  UUID=0f648388-edae-4d54-b5ac-7afe9ce16b72 /host      ext4  defaults    0     3
+  UUID=0f648388-edae-4d54-b5ac-7afe9ce16b72 /devdata      ext4  defaults    0     3
 
 
 

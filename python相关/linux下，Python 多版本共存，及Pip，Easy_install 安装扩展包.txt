@@ -3,7 +3,14 @@ linux下，Python 多版本共存，及Pip，Easy_install 安装扩展包
 
 Python2与Python3共存
 
- 
+pip3 的安装：
+sudo apt-get install python3-pip
+
+pip3 的卸载：
+sudo apt-get remove python3-pip
+
+pip 的安装：
+sudo apt-get install python-pip
 
 安装Python3后，建立ln，使用Python（Python2），Python3 来区分两个版本
 

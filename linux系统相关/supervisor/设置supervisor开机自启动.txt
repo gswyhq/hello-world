@@ -3,6 +3,7 @@
 Ubuntu系统下：apt-get install supervisor，通过这种方式安装后，自动设置为开机启动
 也可以通过 pip install supervisor 进行安装，但是需要手动启动，然后设置为开机启动（不推荐这种安装方式）
 
+另外，若通过pip安装，supervisor python3中不支持，也就是说，不能通过"pip3 install supervisor"安装，只能是通过“pip2 install supervisor”
 
 # 手动设置supervisor开机自启动
 

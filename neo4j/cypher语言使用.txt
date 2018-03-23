@@ -134,6 +134,15 @@ match (n) set n:AddLabel return count(n)
                  RETURN DISTINCT label
                  ORDER BY label
 
+        # Coalesce:返回表达式中第一个非空值。
+        # 有alias属性，则返回alias属性，否则返回name属性；
+        match  (n) -[r:定义]-(n2) where n.name= "重大疾病保险金" return coalesce(n2.alias, n2.name)
+
+        # 对关系进行排序，输出第一个非空的关系：
+        UNWIND["释义","定义","相关条款"] AS x
+        match (n)-[r]->(n2)where n.name='轻症疾病保险金' and type(r)=x
+        RETURN type(r), n2.name limit 1
+
 CALL db.labels() YIELD label
 match (n) where labels(n) = label
 RETURN n.name, label
@@ -170,6 +179,39 @@ MATCH (n)-[r1:`疾病`]->(n1),(n)-[r2:`赔偿规则`]->(n2),(n)-[r3:`相关条�
 
 # 查询某个节点的关系数：
 MATCH (n)-[r]->(n2) where length(()-->(n))=0 and length((n)-->())=1 and length(()-->(n2))=1 and Length((n2)-->())=0  return n, r, n2
+
+# 拆解一个列表：
+UNWIND[1,2,3] AS x
+RETURN x
+
+WITH [1, 2] AS a,[3, 4] AS b
+UNWIND (a + b) AS x
+RETURN x
+
+WITH [[1, 2],[3, 4], 5] AS nested
+UNWIND nested AS x
+UNWIND x AS y
+RETURN y
+
+WITH [] AS list
+UNWIND
+   CASE
+      WHEN list = []
+         THEN [null]
+      ELSE list
+   END AS emptylist
+RETURN emptylist
+
+
+# 拆解并去重：
+WITH [1,1,2,2] AS coll UNWIND coll AS x
+WITH DISTINCT x
+RETURN collect(x) AS SET
+
+Collect将所有值收集到一个集合list中。
+查询：
+START n=node(2,3,4)
+RETURN collect(n.property)
 
 a.创建
 
@@ -277,6 +319,16 @@ WITH count(m25) AS male25
 MATCH (f25:user)-[:gender]->(male:gender {type:"female"})
 where  tofloat(f25.birthday) < (timestamp()-788923800000)
 WITH count(f25) AS female25, male25
+
+联合查询：
+MATCH (a)-[:`包含疾病`]->(b)
+where a.name='重大疾病'
+RETURN a.name as ZHONGDAJIBING, b.name, "" as QINGZHENGJIBING
+UNION
+MATCH (a)-[:`包含疾病`]->(b)
+where a.name='轻症疾病'
+RETURN '' as ZHONGDAJIBING, b.name, a.name as QINGZHENGJIBING
+
 
 在Neo4j Browser中使用参数
 Neo4j Browser是Neo4j内置的浏览器，用于管理数据库，更新数据库和查询数据，再命令窗体中，通过“:”能够引用内置的命令，例如，通过 ":param"能够定义参数，并能够在下一个Cypher语句中引用参数。

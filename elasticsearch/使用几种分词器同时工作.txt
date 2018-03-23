@@ -1,4 +1,10 @@
 
+# 在浏览器中打开如下，即可测试“你好，欢迎您中国”的分词效果；
+http://192.168.3.105:9200/_analyze?analyzer=ik_max_word&&text=你好，欢迎您中国
+
+# 也可以测试某个索引对应的自定义分析器的效果：
+http://192.168.3.105:9200/all_baoxian_templates_answer_20180322_180412/_analyze?analyzer=my_synonyms&&text=你好，欢迎您中国
+
 es几种分词器的特性：
 1）standard分词器
       es默认的分词器，对中文支持不友好，会将中文分成单字，这样在查询多个汉字时就匹配不到doc，所以针对中文字段可使用ik

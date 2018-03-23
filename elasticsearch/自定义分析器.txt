@@ -1,0 +1,65 @@
+
+分析器 实际上是将以下三个功能封装到了一个包里：
+
+1、字符过滤器
+首先，字符串按顺序通过每个字符过滤器 。他们的任务是在分词前整理字符串。一个字符过滤器可以用来去掉HTML，或者将 & 转化成 `and`。
+2、分词器
+其次，字符串被 分词器 分为单个的词条。一个简单的分词器遇到空格和标点的时候，可能会将文本拆分成词条。
+3、Token 过滤器
+最后，词条按顺序通过每个 token 过滤器 。这个过程可能会改变词条（例如，小写化 Quick ），删除词条（例如， 像 a`， `and`， `the 等无用词），或者增加词条（例如，像 jump 和 leap 这种同义词）。
+
+
+创建一个自定义分析器：
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{
+    "settings": {
+        "analysis": {
+            # 字符过滤器 用来 整理 一个尚未被分词的字符串。
+            # 使用 html清除 字符过滤器移除HTML部分。
+            # 使用一个自定义的 映射 字符过滤器把 & 替换为 " 和 " ：
+            "char_filter": {
+                "&_to_and": {
+                    "type":       "mapping",
+                    "mappings": [ "&=> 和 "]
+            }},
+            "filter": {
+                "my_stopwords": {
+                    "type":       "stop",
+                    "stopwords": [ "the", "a" ]
+            }},
+            "analyzer": {
+                "my_analyzer": {
+                    "type":         "custom",
+                    "char_filter":  [ "html_strip", "&_to_and" ],
+                    "tokenizer":    "standard",  # 使用 标准 分词器分词。
+                    # 小写词条，使用 小写 词过滤器处理。
+                    # 使用自定义 停止 词过滤器移除自定义的停止词列表中包含的词：
+                    "filter":       [ "lowercase", "my_stopwords" ]
+            }}
+}}}
+'
+
+Custom 分词器
+    是自定义的analyzer。允许多个零到多个tokenizer，零到多个 Char Filters. custom analyzer 的名字不能以 "_"开头.
+
+tokenizer	通用的或者注册的tokenizer.
+filter	通用的或者注册的token filters
+char_filter	通用的或者注册的 character filters
+
+
+# 索引被创建以后，使用 analyze API 来 测试这个新的分析器：
+curl -XGET 'localhost:9200/my_index/_analyze?analyzer=my_analyzer&pretty' -H 'Content-Type: application/json' -d'
+The quick & brown fox
+'
+
+# 将分析器应用到某个字段上：
+curl -XPUT 'localhost:9200/my_index/_mapping/my_type?pretty' -H 'Content-Type: application/json' -d'
+{
+    "properties": {
+        "title": {
+            "type":      "string",
+            "analyzer":  "my_analyzer"
+        }
+    }
+}
+'

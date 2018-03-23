@@ -1,0 +1,34 @@
+
+示例1：
+MATCH (n)
+RETURN
+CASE n.eyes
+WHEN 'blue'
+THEN 1
+WHEN 'brown'
+THEN 2
+ELSE 3 END AS result
+
+示例2：
+MATCH (n)
+RETURN
+CASE
+WHEN n.eyes = 'blue'
+THEN 1
+WHEN n.age < 40
+THEN 2
+ELSE 3 END AS result
+
+示例3：
+MATCH (n)
+RETURN n.name,
+CASE n.age
+WHEN n.age IS NULL THEN -1
+ELSE n.age - 10 END AS age_10_years_ago
+
+示例4：
+MATCH (n)
+RETURN n.name,
+CASE
+WHEN n.age IS NULL THEN -1
+ELSE n.age - 10 END AS age_10_years_ago

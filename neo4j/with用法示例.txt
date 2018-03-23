@@ -1,0 +1,28 @@
+
+1.1 对聚合结果过滤
+
+MATCH (david { name: "David" })--(otherPerson)-->()
+WITH otherPerson, count(*) AS foaf
+WHERE foaf > 1
+RETURN otherPerson
+
+代码块解释：（1）match与”David”关联（无向）的otherPerson；（2）然后return出度大于1的otherPerson。
+
+1.2 对collect的元素进行排序
+
+MATCH (n)
+WITH n
+ORDER BY n.name DESC LIMIT 3
+RETURN collect(n.name)
+
+代码块解释：（1）match所有人；（2）对所有人的name进行降序排列，并取top-3；（3）返回top-3的name并组成collect：返回结果为：[“Emil”,”David”,”Ceasar”]
+
+1.3 在路径搜索的时候限制分支数
+
+MATCH (n { name: "Anders" })--(m)
+WITH m
+ORDER BY m.name DESC LIMIT 1
+MATCH (m)--(o)
+RETURN o.name
+
+代码块解释：（1）从”Anders”出发，找到关联（无向）的所有人的集合m；（2）对集合m按照name降序排列，取top-1；（3）返回与top-1关联（无向）的所有人的name。
