@@ -202,10 +202,10 @@ http://localhost:9100/?auth_user=elastic&auth_password=changeme
 其中elastic是默认账号，changeme是初始密码，均可以在x-pack插件中进行修改。
 
 # 无账号密码，不可访问
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xincheng_three_tuple_alias/_count?
-{"error":{"root_cause":[{"type":"security_exception","reason":"missing authentication token for REST request [/xincheng_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}}],"type":"security_exception","reason":"missing authentication token for REST request [/xincheng_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}},"status":401}gswyhq@gswyhq-PC:~/docker/elasticsearch$
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xinxin_three_tuple_alias/_count?
+{"error":{"root_cause":[{"type":"security_exception","reason":"missing authentication token for REST request [/xinxin_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}}],"type":"security_exception","reason":"missing authentication token for REST request [/xinxin_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}},"status":401}gswyhq@gswyhq-PC:~/docker/elasticsearch$
 # 通过user选项带上账号密码，返回正常数据
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xincheng_three_tuple_alias/_count? --user elastic:changeme
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xinxin_three_tuple_alias/_count? --user elastic:changeme
 {"count":934,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 
 ES官方的Python客户端可以通过http_auth配置账号密码：
