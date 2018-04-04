@@ -142,3 +142,132 @@ sudo bin/elasticsearch-plugin install x-pack
 
 注意
 如果配置文件不在/etc/elasticsearch中，则需要通过通过ES_PATH_CONF = <path>设置环境变量ES_PATH_CONF来指定配置文件的位置。
+
+
+
+安装示例：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker exec -it elasticsearch5.6.4_9200_data /bin/bash
+root@81e692d0a377:/usr/share/elasticsearch# ./bin/elasticsearch-plugin install file:///usr/share/elasticsearch/data/x-pack-5.6.4.zip
+-> Downloading file:///usr/share/elasticsearch/data/x-pack-5.6.4.zip
+[=================================================] 100%  
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@     WARNING: plugin requires additional permissions     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+* java.io.FilePermission \\.\pipe\* read,write
+* java.lang.RuntimePermission accessClassInPackage.com.sun.activation.registries
+* java.lang.RuntimePermission getClassLoader
+* java.lang.RuntimePermission setContextClassLoader
+* java.lang.RuntimePermission setFactory
+* java.security.SecurityPermission createPolicy.JavaPolicy
+* java.security.SecurityPermission getPolicy
+* java.security.SecurityPermission putProviderProperty.BC
+* java.security.SecurityPermission setPolicy
+* java.util.PropertyPermission * read,write
+* java.util.PropertyPermission sun.nio.ch.bugLevel write
+* javax.net.ssl.SSLPermission setHostnameVerifier
+See http://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+for descriptions of what these permissions allow and the associated risks.
+
+Continue with installation? [y/N]y
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@        WARNING: plugin forks a native controller        @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+This plugin launches a native controller that is not subject to the Java
+security manager nor to system call filters.
+
+Continue with installation? [y/N]y
+-> Installed x-pack
+root@81e692d0a377:/usr/share/elasticsearch#
+
+
+由于只要安装好elasticsearch后，输入正确的ip地址和端口，并有head插件就可以看到索引库，所以如果别人知道IP和和端口，那么数据就完全裸奔在别人面前。所以在elasticsearch5.x之后官方都建议用x-pack框架，安装x-pack框架后，每次进去都需要用户名和密码，需要访问这样的url：http://localhost:9100/?auth_user=elastic&auth_password=changeme。安装x-pack后用户名和密码默认为elastic和changeme。
+
+就是elasticsearch-head插件在安装x-pack插件之后就无法使用，原因是因为elastic公司在x-pack中加入了安全模块(security机制)
+
+这个时候需要在elasticseach.yml中增加下面几行配置即可解决。
+
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+http.cors.allow-headers: "Authorization"
+
+# 注意引号的前后都要给个空格。
+
+root@81e692d0a377:/usr/share/elasticsearch/config# echo 'http.cors.allow-headers: "Authorization"' >> elasticsearch.yml
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker restart elasticsearch5.6.4_9200_data
+
+然后在每次使用head插件的时候，按照如下的格式输入：
+
+http://localhost:9100/?auth_user=elastic&auth_password=changeme
+
+其中elastic是默认账号，changeme是初始密码，均可以在x-pack插件中进行修改。
+
+# 无账号密码，不可访问
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xincheng_three_tuple_alias/_count?
+{"error":{"root_cause":[{"type":"security_exception","reason":"missing authentication token for REST request [/xincheng_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}}],"type":"security_exception","reason":"missing authentication token for REST request [/xincheng_three_tuple_alias/_count?]","header":{"WWW-Authenticate":"Basic realm=\"security\" charset=\"UTF-8\""}},"status":401}gswyhq@gswyhq-PC:~/docker/elasticsearch$
+# 通过user选项带上账号密码，返回正常数据
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -XGET localhost:9200/xincheng_three_tuple_alias/_count? --user elastic:changeme
+{"count":934,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
+
+ES官方的Python客户端可以通过http_auth配置账号密码：
+
+from elasticsearch import Elasticsearch
+es = Elasticsearch(['localhost'], http_auth=('elastic', 'changeme'), port=9200)
+es.info()
+Out[16]:
+{'cluster_name': 'elasticsearch',
+ 'cluster_uuid': 'xbqg6_eURnu_NjvOxgGqlQ',
+ 'name': 'QLRgwkP',
+ 'tagline': 'You Know, for Search',
+ 'version': {'build_date': '2017-10-31T18:55:38.105Z',
+  'build_hash': '8bbedf5',
+  'build_snapshot': False,
+  'lucene_version': '6.6.1',
+  'number': '5.6.4'}}
+
+其他：
+
+能够成功连接上就没问题了。
+x-pack也可以创建一个权限组，然后创建用户，给这个用户分配权限。
+官方文档参考地址:https://www.elastic.co/guide/en/x-pack/5.4/logstash.html
+
+1.设置权限组
+
+http://localhost:9200/_xpack/security/role/logstash_writer/
+
+{
+
+ "cluster": ["manage_index_templates","monitor"],
+
+ "indices": [
+
+    {
+
+     "names": [ "logstash-*","indexdb*" ],
+
+     "privileges":["write","delete","create_index"]
+
+    }
+
+  ]
+
+}
+
+
+
+2.给用户授权,这里的logstash_internal为用户名。
+
+http://localhost:9200/_xpack/security/user/logstash_internal
+
+
+
+{
+
+ "password" : "changeme",
+
+ "roles" : [ "logstash_writer"],
+
+ "full_name" : "Internal Logstash User"
+
+}
+
+
