@@ -20,6 +20,22 @@ from tornado.httpserver import HTTPServer
 '''
 # 在表单中还要注意，有一个action=/file，表示的是要将表单的内容提交给/file路径所对应的程序来处理。
 
+# 前端展示代码2（上传文件及文本输入.html）：
+'''
+<!DOCTYPE html>
+<html><meta charset=utf-8><title>上传标注的意图文件</title>
+    <body>
+        <form id="upload-form" action="/file" method="post" enctype="multipart/form-data" >
+            <!-- 带边框的表单 -->
+                <legend></legend>   <!--- 定义fieldset元素的标签 --->
+                项目id：<input type="text" size="30" name="pid" ><br>
+        <input type="file" id="upload" name="upload" /> <br />
+        <input type="submit" value="上传" />
+        </form>
+    </body>
+</html>
+'''
+
 SAVE_PATH = '.'
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -50,8 +66,8 @@ class FileUploadHandler(tornado.web.RequestHandler):
             "msg": "文件上传成功",
         }
         try:
-            file_metas = self.request.files.get('upload', [])  # 提取表单中‘name’为‘file’的文件元数据
-
+            file_metas = self.request.files.get('upload', [])  # 提取表单中‘name’为‘upload’的文件元数据
+            pid = self.get_argument("pid", 'unknown_project')  # 提取表单中‘name’为‘pid’的参数值
             uid = self.request.headers.get('uid', '')
             for meta in file_metas:
                 file_name = meta['filename']

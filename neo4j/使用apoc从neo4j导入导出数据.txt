@@ -2,8 +2,11 @@
 apoc 是一个neo4j 的插件 ，支持多种算法，和导出
 
 首先下载 apoc（下载地址： https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar，
+或者：https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases
 不同版本的neo4j需要的插件版本也不同，具体映射关系见：https://github.com/neo4j-contrib/neo4j-apoc-procedures）,
 放到neo4j 目录下的plugins 目录下，重启neo4j就可以了，
+
+APOC针对不同的版本的neo4j使用方法不一定一样（https://neo4j-contrib.github.io/neo4j-apoc-procedures/， https://neo4j-contrib.github.io/neo4j-apoc-procedures/index32.html；等）
 
 但是直接使用 call apoc.* 等命令会报错
 

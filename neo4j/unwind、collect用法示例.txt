@@ -1,0 +1,22 @@
+
+Cypher为列表提供了相当遍历的操作，如range, collect, unwind, reduce, extract, filter, size等
+
+# range, 可用于生成一个列表:
+RETURN range(0, 10), range(2, 18, 3)
+
+# Collect将所有值收集到一个集合list中。
+WITH [1, 1, 2, 2] AS coll
+UNWIND coll AS x
+WITH DISTINCT x
+RETURN collect(x) AS SET
+
+# unwind,将一个列表拆解为单个值：
+UNWIND[1,2,3] AS x
+RETURN x
+
+
+WITH ['John', 'Mark', 'Jonathan', 'Bill'] AS somenames
+UNWIND somenames AS names
+WITH names AS candidate
+WHERE candidate STARTS WITH 'Jo'
+RETURN candidate

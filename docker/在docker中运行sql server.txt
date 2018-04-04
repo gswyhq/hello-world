@@ -1,0 +1,57 @@
+
+# 第一步，拉取镜像
+gswyhq@gswyhq-PC:~/docker/redis/data$ docker pull microsoft/mssql-server-linux
+
+# 第二步，运行实例
+gswyhq@gswyhq-PC:~/docker/redis/data$ docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux:latest
+329fe1c7772a8714ea403d0f8cea54728a8fddaa075b7a5bb2a9063faee97063
+
+其中ACCEPT_EULA=Y的意思是同意许可协议，必选；MSSQL_SA_PASSWORD为密码(这里设置的密码是：`yourStrong(!)Password`)，要求是最少8位的强密码，要有大写字母，小写字母，数字以及特殊符号
+
+# 第三步，命令行连接
+gswyhq@gswyhq-PC:~$ docker exec -it 329fe1c7772a /bin/bash
+root@329fe1c7772a:/# cd /opt/mssql-tools/
+root@329fe1c7772a:/opt/mssql-tools# ./bin/sqlcmd -S localhost -U SA -P 'yourStrong(!)Password'
+1>
+或者：
+root@329fe1c7772a:/opt/mssql-tools# ./bin/sqlcmd -H 192.168.3.145:1433 -U SA -P 'yourStrong(!)Password'
+# 这里可以将冒号改为逗号，如：192.168.3.145,1433
+
+寻求帮助：
+root@329fe1c7772a:/opt/mssql-tools# ./bin/sqlcmd -?
+Microsoft (R) SQL Server Command Line Tool
+Version 17.0.0001.1 Linux
+Copyright (c) 2012 Microsoft. All rights reserved.
+
+usage: sqlcmd            [-U login id]          [-P password]
+  [-S server or Dsn if -D is provided]
+  [-H hostname]          [-E trusted connection]
+  [-N Encrypt Connection][-C Trust Server Certificate]
+  [-d use database name] [-l login timeout]     [-t query timeout]
+  [-h headers]           [-s colseparator]      [-w screen width]
+  [-a packetsize]        [-e echo input]        [-I Enable Quoted Identifiers]
+  [-c cmdend]
+  [-q "cmdline query"]   [-Q "cmdline query" and exit]
+  [-m errorlevel]        [-V severitylevel]     [-W remove trailing spaces]
+  [-u unicode output]    [-r[0|1] msgs to stderr]
+  [-i inputfile]         [-o outputfile]
+  [-k[1|2] remove[replace] control characters]
+  [-y variable length type display width]
+  [-Y fixed length type display width]
+  [-p[1] print statistics[colon format]]
+  [-R use client regional setting]
+  [-K application intent]
+  [-M multisubnet failover]
+  [-b On error batch abort]
+  [-D Dsn flag, indicate -S is Dsn]
+  [-X[1] disable commands, startup script, environment variables [and exit]]
+  [-x disable variable substitution]
+  [-? show syntax summary]
+
+
+# 第四步，安装客户端（此客户端暂无Linux版本）
+navicat Premium中文版：http://download3.navicat.com/download/navicat111_premium_cs.tar.gz
+解压，运行‘start_navicat.sh’
+
+deepin系统可以在深度商店搜索“Sqlectron”，安装；
+Sqlectron是一款轻量级SQL数据库管理客户端，通过简洁的标签排列数据库列表，可以配置和保存连接参数，支持数据库搜索

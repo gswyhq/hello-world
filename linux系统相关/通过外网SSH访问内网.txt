@@ -113,4 +113,19 @@ N
 5.6.37-log'U7PlP-/B�A[)W^OR04V7Kmysql_native_password
 Connection closed by foreign host.
 
+
+# 本地端口转发（访问本地18474端口，就等同于访问7474端口）：
+gswyhq@gswyhq-PC:~$ ssh -g -L 18474:localhost:7474 localhost
+gswyhq@gswyhq-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub gswyhq@192.168.3.145
+gswyhq@gswyhq-PC:~$ autossh -g -NL 18474:localhost:7474 localhost &
+
+# 或者在192.168.3.145机器上执行：
+gswyhq@gswyhq-PC:~$ nohup autossh -g -NL 18474:192.168.3.145:7474 192.168.3.145 &
+
+-C：压缩数据传输。
+-f ：后台认证用户/密码，通常和-N连用，不用登录到远程主机。
+-N ：不执行脚本或命令，通常与-f连用。
+-g ：在-L/-R/-D参数中，允许远程主机连接到建立的转发的端口，如果不加这个参数，只允许本地主机建立连接。
+-L 本地端口:目标IP:目标端口
+
 更多资料参考：http://blog.csdn.net/a351945755/article/details/21785647

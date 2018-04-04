@@ -44,3 +44,4 @@ Out[18]:
  'QINGKUANG']
 
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels
+

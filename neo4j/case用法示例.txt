@@ -32,3 +32,4 @@ RETURN n.name,
 CASE
 WHEN n.age IS NULL THEN -1
 ELSE n.age - 10 END AS age_10_years_ago
+

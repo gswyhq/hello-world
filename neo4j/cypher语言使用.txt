@@ -134,6 +134,29 @@ match (n) set n:AddLabel return count(n)
                  RETURN DISTINCT label
                  ORDER BY label
 
+        # 查询所有节点的关系：
+        CALL db.relationshipTypes()
+
+        # 查询所有节点的属性：
+        call db.propertyKeys()
+
+        # 查询所有的关系数：
+        MATCH ()-->() RETURN count(*);
+
+        # 查询下有什么样的节点，并返回节点的关系及属性等：
+        // What kind of nodes exist
+        // Sample some nodes, reporting on property and relationship counts per node.
+        MATCH (n) WHERE rand() <= 0.1
+        RETURN
+        DISTINCT labels(n),
+        count(*) AS SampleSize,
+        avg(size(keys(n))) as Avg_PropertyCount,
+        min(size(keys(n))) as Min_PropertyCount,
+        max(size(keys(n))) as Max_PropertyCount,
+        avg(size( (n)-[]-() ) ) as Avg_RelationshipCount,
+        min(size( (n)-[]-() ) ) as Min_RelationshipCount,
+        max(size( (n)-[]-() ) ) as Max_RelationshipCount
+
         # Coalesce:返回表达式中第一个非空值。
         # 有alias属性，则返回alias属性，否则返回name属性；
         match  (n) -[r:定义]-(n2) where n.name= "重大疾病保险金" return coalesce(n2.alias, n2.name)
@@ -143,9 +166,39 @@ match (n) set n:AddLabel return count(n)
         match (n)-[r]->(n2)where n.name='轻症疾病保险金' and type(r)=x
         RETURN type(r), n2.name limit 1
 
+        # 重命名关系：
+        match(n1)-[r:`联系人1 `]->(n2) delete r merge (n1)-[r2:`联系人1`]->(n2) return n1, r2, n2
+
+
 CALL db.labels() YIELD label
 match (n) where labels(n) = label
 RETURN n.name, label
+
+CALL db.labels() YIELD label  with DISTINCT label
+match (n) where label in labels(n)
+RETURN n.name, label
+
+# 查询某些类别的标签
+# 方法1：
+match(n) where any(l in labels(n) where l in ['Didian', 'Jigou']) return n limit 20
+
+# 方法2：
+OPTIONAL MATCH (n1:Label1)
+WITH collect(distinct n1) as c1
+OPTIONAL MATCH (n2:Label2)
+WITH collect(distinct n2) + c1 as c2
+OPTIONAL MATCH (n3:Label3)
+WITH collect(distinct n3) + c2 as c3
+UNWIND c3 as nodes
+RETURN count(nodes),labels(nodes)
+
+# 方法3：
+MATCH (n:Male)
+WHERE n.name =~ '.ail.'
+RETURN n
+UNION MATCH (n:Female)
+WHERE n.name =~ '.ail.'
+RETURN n
 
 # 查询只有两个标签的节点：
 MATCH (n:Jiaoyinkanglian)with  labels(n) as ln, n where length(ln) =2 return ln, n.name

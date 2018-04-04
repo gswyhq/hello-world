@@ -1,0 +1,16 @@
+
+有时候报错：
+redis.exceptions.ResponseError: MISCONF Redis is configured to save RDB snapshots, but is currently not able to persist on disk. Commands that may modify the data set are disabled. Please check Redis logs for details about the error.
+
+这个错误信息是Redis客户端工具在保存数据时候抛出的异常信息。
+很多人都是建议“config set stop-writes-on-bgsave-error no”。这样做其实是不好的，这仅仅是让程序忽略了这个异常，使得程序能够继续往下运行，但实际上数据还是会存储到硬盘失败！造成这个问题的原因，往往是内存被耗尽。
+Redis在保存数据到硬盘时为了避免主进程假死，需要Fork一份主进程，然后在Fork进程内完成数据保存到硬盘的操作，如果主进程使用了4GB的内存，Fork子进程的时候需要额外的4GB，此时内存就不够了，Fork失败，进而数据保存硬盘也失败了。
+解决方案：
+gswyhq@gswyhq-PC:~/yhb$ docker exec -it redis6379 /bin/bash
+root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379 -n 8
+127.0.0.1:6379[8]> CONFIG GET stop-writes-on-bgsave-error
+1) "stop-writes-on-bgsave-error"
+2) "yes"
+
+127.0.0.1:6379[8]> CONFIG set stop-writes-on-bgsave-error no
+OK

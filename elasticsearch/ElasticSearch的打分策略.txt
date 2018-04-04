@@ -113,7 +113,7 @@ http://lucene.apache.org/core/4_0_0/core/org/apache/lucene/search/similarities/T
 查询id号为‘29723’对应的‘question’字段，分词的结果及每个词的term_freq值；
 gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'localhost:9200/yhb/log_qa/29723/_termvectors?fields=question&pretty'
 
-在页面“http://localhost:9100/”搜索时，"yhb/log_qa/_search"改为“yhb/log_qa/_search?explain”也可以查看详细的分数信息
+在页面“http://localhost:9100/”搜索时，"yhb/log_qa/_search"改为“yhb/log_qa/_search?explain”也可以查看详细的分数信息, 即可查看分数详情
 
 指定节点查询：
 gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=1&preference=_only_nodes:ubQ7NbI2QOKn_dePpe7W8A'

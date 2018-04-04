@@ -1,0 +1,253 @@
+
+# 为节点创建索引：
+CREATE INDEX ON :Person(name)
+
+# 查询现有的索引（仅仅查询到CREATE方法创建的索引，apoc.index插件的方法不能用此方法）：
+call db.indexes()
+
+# 使用刚才创建的索引进行搜索：
+MATCH (p:Person { name: 'Joel Silver' })
+RETURN p
+
+# 删除索引：
+DROP INDEX ON :Person(name)
+
+自动添加索引，在neo4j 3.x需要使用apoc插件来实现；下面是apoc插件使用索引的方法（包括手动创建索引，自动创建索引）
+neo4j 2.x版本自动创建索引，需要修改配置文件（conf/neo4j.properties）：
+node_auto_indexing=true
+node_keys_indexable=name,ki
+relationship_auto_indexing=true
+relationship_keys_indexable=name,ki
+
+apoc插件的使用文档：https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_triggers_examples
+
+# 为节点手动添加索引：
+示例1：
+match (p:Person) call apoc.index.addNode(p,["name","age"]) RETURN count(*);
+// 129s for 1M People
+call apoc.index.nodes('Person','name:name100*') YIELD node, weight return * limit 2
+
+示例2：
+MATCH (a:Airport)
+CALL apoc.index.addNode(a,['name'])
+RETURN count(*)
+
+该语句将创建与本例中的节点的标签名称相同名称的节点索引Airport，并将节点的属性添加到索引。
+一旦添加了，使用apoc.index.list检查节点索引是否存在：
+CALL apoc.index.list（）
+通常，apoc.index.addNode将被用作节点创建的一部分，例如， LOAD CSV期间。还有apoc.index.addNodes用于一次添加多个节点的列表。
+
+注意
+如果您在一次查找中组合多个属性或使用不区分大小写或模糊匹配全文查询，那么这样做是有意义的。在所有其他情况下，应该使用内置的模式索引。
+一旦创建了节点索引，我们就可以开始使用它了（搜索name属性值含‘inter’字符的节点，不区分大小写）：
+CALL apoc.index.nodes('Airport','name:inter*') YIELD node AS airport, weight
+RETURN airport.name, weight
+LIMIT 10
+
+Apoc索引查询不仅返回节点和关系，而且还有一个权重，这是从底层Lucene索引返回的分数。结果也按该分数排序。这对于部分和模糊文本搜索特别有用。
+
+要删除Airport索引:
+CALL apoc.index.remove('Airport')
+
+您也可以计算包含信息的地图并将其添加到索引，而不是节点或关系属性的键值对。因此，您可以通过来自邻居或关系的信息找到节点或关系。
+
+# 添加样例数据：
+CREATE (company:Company {name:'Neo4j,Inc.'})
+CREATE (company)<-[:WORKS_AT {since:2013}]-(:Employee {name:'Mark'})
+CREATE (company)<-[:WORKS_AT {since:2014}]-(:Employee {name:'Martin'})
+
+# 创建复杂的索引：
+MATCH (company:Company)<-[worksAt:WORKS_AT]-(employee)
+WITH company, { name: company.name, employees:collect(employee.name),startDates:collect(worksAt.since)} as data
+CALL apoc.index.addNodeMap(company, data)
+RETURN count(*)
+These could be example searches that all return the same result node.
+
+# 使用索引，对数据进行搜索（下面的查询，返回的结果是一致的）：
+CALL apoc.index.nodes('Company','name:Ne* AND employees:Ma*')
+CALL apoc.index.nodes('Company','employees:Ma*')
+CALL apoc.index.nodes('Company','startDates:[2013 TO 2014]')
+
+
+# 手动为关系的属性创建索引：
+MATCH (:Flight)-[r:DESTINATION]->(:Airport)
+CALL apoc.index.addRelationship(r,['taxi_time'])
+RETURN count(*)
+该语句将创建与关系类型具有相同名称的关系索引，在此情况下为DESTINATION，并通过其关系的属性将关系添加到索引中。
+
+使用apoc.index.relationships，我们可以找到类型DESTINATION，属性taxi_time=11 的关系。我们可以选择也返回开始和结束节点。
+CALL apoc.index.relationships('DESTINATION','taxi_time:11') YIELD rel, start AS flight, end AS airport
+RETURN flight.flight_num, airport.name;
+
+
+# 为关系的属性添加索引：
+MATCH ()-[r:MY_RELATIONSHIPS]->()
+CALL apoc.index.addRelationship(r,['user'])
+RETURN count(*)
+
+# 根据属性进程查询：
+CALL apoc.index.relationships('MY_RELATIONSHIPS','userid:userid') YIELD rel, start , end
+RETURN rel, start, end
+
+注意：
+索引的手动关系不仅按其属性存储关系，还存储起始节点和结束节点。
+这就是为什么我们可以使用这些信息来重新选择关系，不仅是属性，还有那些非常强大的节点。
+
+使用apoc.index.in，我们可以将节点与传入关系（终端节点）连接起来，以获得所有DESTINATION关系的起始节点。例如，查找所有抵达'SALT LAKE CITY INTERNATIONAL'的航班，出租车时间为7分钟，我们将使用：
+MATCH (a:Airport {name:'SALT LAKE CITY INTERNATIONAL'})
+CALL apoc.index.in(a,'DESTINATION','taxi_time:7') YIELD node AS flight
+RETURN flight
+
+apoc.index.out则相反，它接受并绑定终端节点并返回关系的起始节点。
+MATCH (a:Airport {name:'SALT LAKE CITY INTERNATIONAL'})
+CALL apoc.index.out(a,'DESTINATION','taxi_time:7') YIELD node AS flight
+RETURN flight
+
+真正有用的是快速找到具有多个关系（成千上万到数百万）的节点之间的关系子集是apoc.index.between。在这里，您绑定了开始节点和结束节点，并提供关系的属性。
+
+MATCH (f:Flight {flight_num:6147})
+MATCH (a:Airport {name:'SALT LAKE CITY INTERNATIONAL'})
+CALL apoc.index.between(f,'DESTINATION',a,'taxi_time:7') YIELD rel, weight
+RETURN *
+
+为了使用全文搜索功能，我们必须首先通过指定我们想要索引的所有属性来索引我们的数据。在这里，我们创建了一个名为“locations”的全文索引（我们将在索引中搜索时使用该名称）和我们的数据：
+CALL apoc.index.addAllNodes('locations',{
+  Company: ["name", "description"],
+  Person:  ["name","address"],
+  Address: ["address"]})
+
+我们现在可以使用这个索引来搜索数据库中的节点。最简单的情况是搜索特定单词的所有数据。
+无论单词存在于哪个属性中，都可以找到在其任何索引属性中具有该单词的任何节点。
+如果您在通话中使用姓名，则会发现所有事件（但仅限于100个结果）：
+CALL apoc.index.search("locations", 'name')
+
+为了在法国搜索具有地址的人，我们使用以下内容：
+CALL apoc.index.search("locations", "Person.address:France")
+
+全文和图形搜索
+例如，我们可以在数据库中搜索包含单词“Paris”的地址，然后找到在这些地址注册的所有公司：
+CALL apoc.index.search("locations", "Address.address:Paris~") YIELD node AS addr
+MATCH (addr)<-[:HAS_ADDRESS]-(company:Company)
+RETURN company LIMIT 50
+
+代字号（〜）指示索引搜索过程进行模糊匹配，即使拼写稍微偏离，我们也可以找到“Paris”。
+我们可能会注意到，有些地址包含不在法国巴黎的“Paris”一词。例如，某处可能有巴黎街。
+
+我们可以进一步指定我们希望文本包含巴黎这个词和法国这个词：
+CALL apoc.index.search("locations", "+Address.address:Paris~ +France~")
+YIELD node AS addr
+MATCH (addr)<-[:HAS_ADDRESS]-(company:Company)
+RETURN company LIMIT 50
+
+复杂的搜索
+当我们看看巴黎的不同实体如何相互连接时。我们可以通过在巴黎找到所有具有地址的实体来实现这一点，然后创建所有这些实体对并在每对这两对之间找到最短路径：
+CALL apoc.index.search("locations", "+Address.address:Paris~ +France~") YIELD node AS addr
+MATCH (addr)<-[:HAS_ADDRESS]-(company:Company)
+WITH collect(company) AS companies
+
+// 创建唯一一对
+UNWIND companies AS x UNWIND companies AS y
+WITH x, y WHERE ID(x) < ID(y)
+
+MATCH path = shortestPath((x)-[*..10]-(y))
+RETURN path
+
+索引配置
+索引的默认配置是：
+{
+  "type": "fulltext",
+  "to_lower_case": "true",
+  "provider": "lucene"
+}
+
+apoc.index.addAllNodes(<name>, <labelPropsMap>, <option>) 允许使用options参数默认为空映射来优化索引。允许使用Neo4j手动索引的所有标准选项以及apoc特定选项;
+索引配置参数：
+参数	值	描述
+type    fulltext/exact  索引的类型（模糊/精确）；exact采用Lucene keyword analyzer. fulltext采用white-space tokenizer in its analyzer.
+to_lower_case   false/true  如果在编制索引之前应将条款转换为小写；type=fulltext时生效，在新建索引和查询时会自动进行字母的大小写转换，默认为小写
+analyzer    classname   用于此索引的lucene分析器的类名；自定义Lucene Analyzer，注意：to_lower_case配置会默认将查询参数转换为小写.如果自定义analyzer索引写入的字母为大写，查询结果将会不匹配
+similarity  classname   用于此索引的lucene相似度的类名
+autoUpdate  true/false  如果这个索引应该跟踪图形更新
+
+注意
+创建索引后，索引配置无法更改。然而，apoc.index.addAllNodes的后续调用将删除索引（如果存在）并在之后创建它。
+
+
+
+
+手动索引的自动索引跟踪
+如上所述，apoc.index.addAllNodes（）填充全文索引。 但它不会跟踪对图形所做的更改并将这些更改反映到索引中。 你将不得不定期重建该索引。
+或者，也可以使用自动索引跟踪，使索引与图形更改保持同步。
+要启用此功能，需要两步配置方法。
+第一步：
+    在 neo4j.conf 文件中设置：
+    apoc.autoIndex.enabled=true
+    此全局设置将初始化事务处理程序，以负责反映添加的节点，已删除的节点以及已更改的属性对索引的更改。
+第二步：
+    除了使用apoc.autoIndex.enabled启用全局索引跟踪外，在初始创建索引时，通过在选项中设置autoUpdate：true，每个单独的索引必须配置为“可跟踪”：
+
+    CALL apoc.index.addAllNodes('locations',{
+      Company: ["name", "description"],
+      Person:  ["name","address"],
+      Address: ["address"]}, {autoUpdate:true})
+
+    默认情况下，索引跟踪是同步完成的。这意味着对全文索引的更新是与原始更改相同的事务的一部分（例如，更改节点属性）。虽然这保证了即时一致性，但对性能有影响。
+    或者，您可以决定在单独的线程中通过在neo4j.conf中设置此标志来异步执行索引更新
+    apoc.autoIndex.async=true
+    启用此设置后，索引更新将被馈送到使用事务批处理异步使用的缓冲队列。配料可以使用进一步配置
+
+    注意
+    请注意，如果启用自动索引跟踪，则会对性能产生影响。
+
+全文索引跟踪的实例：
+    首先必须保证 apoc.autoIndex.enabled=true
+    1、创建一些节点 - 注意还没有索引。
+    UNWIND ["Johnny Walker", "Jim Beam", "Jack Daniels"] as name CREATE (:Person{name:name})
+
+    2、现在我们将它们索引:
+    CALL apoc.index.addAllNodes('people', { Person:["name"]}, {autoUpdate:true})
+
+    3、检查我们是否可以找到“Johnny” - 我们期望得到一个结果：
+    CALL apoc.index.search("people", "Johnny") YIELD node, weight
+    RETURN node.name, weight
+
+    4、增加一些人 - 注意，我们有另一个 "Johnny":
+
+    UNWIND ["Johnny Rotten", "Axel Rose"] as name CREATE (:Person{name:name})
+
+    5、我们再次搜索“Johnny”，期待两个结果：
+    CALL apoc.index.search("people", "Johnny") YIELD node, weight
+    RETURN node.name, weight
+
+
+
+如查询relationship的自动索引：
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+
+查询索引使用的关系的属性列表：
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+
+查询索引使用的节点的属性列表：
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+
+如查询节点的自动索引
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+
+运行curl报错：
+{
+  "errors" : [ {
+    "code" : "Neo.ClientError.Security.Unauthorized",
+    "message" : "No authentication header supplied."
+  } ]
+}
+
+主要原因是未经认证；
+
+第一步：获取编译的登录用户名及密码；
+import base64
+base64.b64encode(b"neo4j:gswyhq")
+Out[14]: b'bmVvNGo6Z3N3eWhx'
+
+第二步：通过获取的密钥`bmVvNGo6Z3N3eWhx`进行认证访问， 如下，获取所有节点的labels
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+

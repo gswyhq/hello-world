@@ -1,0 +1,38 @@
+
+
+测试数据：
+CREATE (adam:User { name: 'Adam' }),(pernilla:User { name: 'Pernilla' }),(david:User { name: 'David'
+  }),
+  (adam)-[:FRIEND]->(pernilla),(pernilla)-[:FRIEND]->(david)
+
+优化查询速度，需要查看查询的瓶颈时，可以在match之前添加‘profile’这样，就可以看到对应的查询瓶颈：
+profile match p=(n1)-[*0..2]-(n2)-[r:`今日投资行业一级名称`]->(n3) match (n1)--(n4) where n1.name = "招商银行"   return p
+
+方法1：
+MATCH (user:User { name: 'Adam' })-[r1:FRIEND]-(friend)
+MATCH (friend)-[r2:FRIEND]-(friend_of_a_friend)
+RETURN friend_of_a_friend.name AS fofName
+
+方法2：
+MATCH (user:User { name: 'Adam' })-[r1:FRIEND]-(friend),(friend)-[r2:FRIEND]-(friend_of_a_friend)
+RETURN friend_of_a_friend.name AS fofName
+# 方法2等同于方法3，因限定条件更苛刻，故查询结果一般情况下比方法1少。
+
+方法3：
+MATCH (user:User { name: 'Adam' })-[r1:FRIEND]-()-[r2:FRIEND]-(friend_of_a_friend)
+RETURN friend_of_a_friend.name AS fofName
+
+方法4：
+match (n)-[r:`包含疾病`]->(n2) where n2.name='恶性肿瘤'
+optional match (n2)-[r2:`释义`]->(n3)
+return n2.name, n3.name
+# 当关系“(n)-[r:`包含疾病`]->(n2)”存在，但“(n2)-[r2:`释义`]->(n3) ”不存在时，该查询语句也能查询出来结果；只不过此时n3.name 的值是 null
+
+方法5：
+MATCH (n:Male)
+WHERE n.name =~ '.ail.'
+RETURN n
+UNION MATCH (n:Female)
+WHERE n.name =~ '.ail.'
+RETURN n
+# 并行查询，两个子句的返回值应该一致
