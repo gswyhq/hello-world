@@ -1,0 +1,111 @@
+
+第一步：创建仓库
+# 进入容器：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker exec -it elasticsearch5.6.4_9200_data /bin/bash
+
+# 创建备份目录：
+root@81e692d0a377:/usr/share/elasticsearch/data# mkdir data_bak
+
+# 修改权限
+# 是使用 elasticsearch 用户启动的，要保证共享目录对 elasticsearch 用户有读写权限，要不然创建仓库和快照的时候会报访问拒绝500错误。
+root@81e692d0a377:/usr/share/elasticsearch/data# chown -R elasticsearch:elasticsearch data_bak
+
+# 修改ES的配置文件，添加仓库路径，重启服务
+root@81e692d0a377:/usr/share/elasticsearch/data# cd ../config/
+root@81e692d0a377:/usr/share/elasticsearch/config# echo 'path.repo: ["/usr/share/elasticsearch/data/data_bak"] ' >> elasticsearch.yml
+gswyhq@gswyhq-PC:~$ docker restart elasticsearch5.6.4_9200_data
+
+# 注册快照仓库到ES
+gswyhq@gswyhq-PC:~$ curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup -d '
+{
+    "type": "fs",
+    "settings": {
+        "location": "/usr/share/elasticsearch/data/data_bak"
+    }
+}'
+
+{"acknowledged":true}
+
+给我们的仓库取一个名字，在本例它叫 my_backup 。
+我们指定仓库的类型应该是一个共享文件系统。
+最后，我们提供一个已挂载的设备作为目的地址。
+
+# 查看仓库信息；
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XGET localhost:9200/_snapshot/my_backup
+{"my_backup":{"type":"fs","settings":{"location":"/usr/share/elasticsearch/data/data_bak"}}}
+
+max_snapshot_bytes_per_sec
+当快照数据进入仓库时，这个参数控制这个过程的限流情况。默认是每秒 20mb 。
+max_restore_bytes_per_sec
+当从仓库恢复数据时，这个参数控制什么时候恢复过程会被限流以保障你的网络不会被占满。默认是每秒 `20mb`。
+假设我们有一个非常快的网络，而且对额外的流量也很 OK，那我们可以增加这些默认值：
+
+POST _snapshot/my_backup/
+{
+    "type": "fs",
+    "settings": {
+        "location": "/mount/backups/my_backup",
+        "max_snapshot_bytes_per_sec" : "50mb",
+        "max_restore_bytes_per_sec" : "50mb"
+    }
+}
+
+注意我们用的是 POST 而不是 PUT 。这会更新已有仓库的设置。
+
+第二步： 快照所有打开的索引
+一个仓库可以包含多个快照。 每个快照跟一系列索引相关（比如所有索引，一部分索引，或者单个索引）。当创建快照的时候，你指定你感兴趣的索引然后给快照取一个唯一的名字。
+让我们从最基础的快照命令开始：
+
+curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup/snapshot_1
+这个会备份所有打开的索引到 my_backup 仓库下一个命名为 snapshot_1 的快照里。这个调用会立刻返回，然后快照会在后台运行。
+
+提示
+通常你会希望你的快照作为后台进程运行，不过有时候你会希望在你的脚本中一直等待到完成。这可以通过添加一个 wait_for_completion 标记实现：
+
+curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup/snapshot_1?wait_for_completion=true
+这个会阻塞调用直到快照完成。注意大型快照会花很长时间才返回。
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup/snapshot_1?wait_for_completion=true
+{"snapshot":{"snapshot":"snapshot_1","uuid":"teI-jVJ8Qx6QxdUd2HUUwg","version_id":5060499,"version":"5.6.4","indices":["all_baoxian_faq_20180408_172310",".monitoring-es-6-2018.04.09","all_baoxian_cypher_show_three_tuple_20180409_112554",".monitoring-es-6-2018.04.11","all_baoxian_faq_20180410_092530","xinxin_20180228_161807","test_templates_question_20180315_190610","xiashuqiumei_faq_20180408_211923","all_baoxian_templates_question_20180409_112553",".watcher-history-6-2018.04.09","all_baoxian_faq_20180410_105437","all_baoxian_templates_answer_20180410_092549","ceshi_baike","xinxin_templates_answer_20180316_113811","all_baoxian_templates_entity_synonyms_20180409_112555",".monitoring-es-6-2018.04.08","xinxin_faq_20180310_123739","baike_faq",".monitoring-es-6-2018.04.10","xinxin_three_tuple_20180305_165407","xinxin_faq_20180309_141941","all_baoxian_templates_answer_20180410_092517","xinxin_templates_answer_20180316_113704",".triggered_watches","all_baoxian_faq_20180410_100758",".watcher-history-6-2018.04.08",".watcher-history-6-2018.04.13","xiashuqiumei_faq_20180408_210737","all_baoxian_templates_answer_20180410_100753","blog","jykl_noun_explanation","all_baoxian_faq_20180410_100839","xinxin_faq_20180309_135046","jrtz_kg_entity_synonyms_20180404_111151","xinxin_faq_20180310_164320","xinxin_templates_question_20180310_184924","my_index","xinxin_templates_question_20180309_151024",".watcher-history-6-2018.04.12","xinxin_templates_entity_synonyms_20180310_170234","xinxin_0224",".watches","xinxin_faq_20180310_130853","xinxin_templates_answer_20180316_115630","xinxin_kg_entity_synonyms_20180305_165409","faq_20180309_135713","xinxin_20180228_163448",".monitoring-es-6-2018.04.12","xinxin_faq_20180309_140202","baike","xinxin_templates_faq_correlation_20180305_211717","dingding500_faq",".watcher-history-6-2018.04.11","jykl_faq",".security","test_0225",".watcher-history-6-2018.04.04","all_baoxian_kg_entity_synonyms_20180330_153744","xinxin_20180228_162122","xinxin_jibing_kg_entity_synonyms_20180309_153629","all_baoxian_templates_answer_20180410_105431","xiashuqiumei_faq_20180408_211151",".monitoring-alerts-6","test_2","dingding7500_faq",".watcher-history-6-2018.04.10","all_baoxian_templates_answer_20180410_100833",".monitoring-es-6-2018.04.13"],"state":"SUCCESS","start_time":"2018-04-13T09:57:00.077Z","start_time_in_millis":1523613420077,"end_time":"2018-04-13T10:01:07.883Z","end_time_in_millis":1523613667883,"duration_in_millis":247806,"failures":[],"shards":{"total":272,"failed":0,"successful":272}}}
+
+快照指定索引
+默认行为是备份所有打开的索引。 不过如果你在用 Marvel，你不是真的想要把所有诊断相关的 .marvel 索引也备份起来。可能你就压根没那么大空间备份所有数据。
+这种情况下，你可以在快照你的集群的时候指定备份哪些索引：
+curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup/snapshot_2 -d '
+{
+    "indices":  "index_1,index_2"
+}'
+或者使用通配符：
+gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup/snapshot_2 -d '
+{
+    "indices": "all_baoxian_templates_answer*,baike"
+}'
+{"accepted":true}
+
+这个快照命令现在只会备份 index1 和 index2 了。
+
+# 要获得单个快照的信息，直接对仓库和快照名发起一个 GET 请求：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XGET localhost:9200/_snapshot/my_backup/snapshot_1
+
+# 要获取一个仓库中所有快照的完整列表，使用 _all 占位符替换掉具体的快照名称：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XGET localhost:9200/_snapshot/my_backup/_all
+
+# 删除快照
+最后，我们需要一个命令来删除所有不再有用的旧快照 。这只要对仓库/快照名称发一个简单的 DELETE HTTP 调用：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XDELETE localhost:9200/_snapshot/my_backup/snapshot_1
+用 API 删除快照很重要，而不能用其他机制（比如手动删除，或者用 S3 上的自动清除工具）。因为快照是增量的，有可能很多快照依赖于过去的段。delete API 知道哪些数据还在被更多近期快照使用，然后会只删除不再被使用的段。
+但是，如果你做了一次人工文件删除，你将会面临备份严重损坏的风险，因为你在删除的是可能还在使用中的数据。
+
+# 监控快照进度
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XGET localhost:9200/_snapshot/my_backup/snapshot_1/_status
+# 一个正在运行的快照会显示 IN_PROGRESS 作为状态。
+
+# 取消一个快照
+最后，你可能想取消一个快照或恢复。 因为它们是长期运行的进程，执行操作的时候一个笔误或者过错就会花很长时间来解决——而且同时还会耗尽有价值的资源。
+要取消一个快照，在他进行中的时候简单的删除快照就可以：
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XDELETE localhost:9200/_snapshot/my_backup/snapshot_1
+这个会中断快照进程。然后删除仓库里进行到一半的快照。
+
+
+第三步：恢复数据
+curl -u elastic:web12008 -XPOST localhost:9200/_snapshot/my_backup/snapshot_1/_restore

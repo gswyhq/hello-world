@@ -224,6 +224,176 @@ Out[16]:
   'lucene_version': '6.6.1',
   'number': '5.6.4'}}
 
+# 数据迁移时的登录认证：
+gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti taskrabbit/elasticsearch-dump   --input="http://192.168.3.105:9200/jrtz_kg_entity_synonyms_20180404_111151"   --output="http://elastic:web12008@192.168.3.145:9200/jrtz_kg_entity_synonyms_20180404_111151"  --type=data
+
+# requests 请求时的登录验证
+r = requests.get(url='http://localhost:9200/all_baoxian_templates_question_alias/_count', auth=('elastic', 'web12008'))
+r.json()
+Out[9]:
+{'_shards': {'failed': 0, 'skipped': 0, 'successful': 5, 'total': 5},
+ 'count': 52}
+
+X-Pack有三个内置用户，默认密码都是`changeme`：
+名字  描述
+elastic 内置超级用户。查看内置角色。
+kibana  用户Kibana用来连接Elasticsearch并与之通信。
+logstash_system 用户Logstash在Elasticsearch中存储监控信息时使用。
+
+swyhq@gswyhq-PC:~$ curl -XGET 'localhost:9200/_xpack/security/user/logstash_system' --user elastic:changeme
+{"logstash_system":{"username":"logstash_system","roles":["logstash_system"],"full_name":null,"email":null,"metadata":{"_reserved":true},"enabled":true}}
+
+# 重新设置默认用户“elastic”的密码
+curl -XPUT 'localhost:9200/_xpack/security/user/elastic/_password?pretty' -H 'Content-Type: application/json' --user elastic:changeme -d'
+{
+  "password": "elasticpassword"
+}
+'
+
+curl -XPUT 'localhost:9200/_xpack/security/user/kibana/_password?pretty' -H 'Content-Type: application/json' -d'
+{
+  "password": "kibanapassword"
+}
+'
+
+curl -XPUT 'localhost:9200/_xpack/security/user/logstash_system/_password?pretty' -H 'Content-Type: application/json' -d'
+{
+  "password": "logstashpassword"
+}
+'
+
+若‘logstash_system’被禁用了，可以通过以下方法启用：
+curl -XPUT 'localhost:9200/_xpack/security/user/logstash_system/_enable?pretty'
+
+添加一个用户名为‘jacknich’密码为‘j@rV1s’的新用户：
+curl -XPOST 'localhost:9200/_xpack/security/user/jacknich?pretty' -H 'Content-Type: application/json' -d'
+{
+  "password" : "j@rV1s",
+  "roles" : [ "admin", "other_role1" ],
+  "full_name" : "Jack Nicholson",
+  "email" : "jacknich@example.com",
+  "metadata" : {
+    "intelligence" : 7
+  }
+}
+'
+
+查看用户名为‘jacknich’用户除密码之外的信息：
+curl -XGET 'localhost:9200/_xpack/security/user/jacknich?pretty'
+
+# 查看多个用户（逗号分割列表）除密码之前的信息：
+curl -XGET 'localhost:9200/_xpack/security/user/jacknich,rdinero?pretty'
+
+# 或者，省略用户名以检索所有用户：
+curl -XGET 'localhost:9200/_xpack/security/user?pretty'
+
+禁用用户`jacknich`：
+curl -XPUT 'localhost:9200/_xpack/security/user/jacknich/_disable?pretty'
+
+启用用户`jacknich`：
+curl -XPUT 'localhost:9200/_xpack/security/user/jacknich/_enable?pretty'
+
+删除用户`jacknich`：
+curl -XDELETE 'localhost:9200/_xpack/security/user/jacknich?pretty'
+
+禁用默认密码功能
+提供changeme的默认密码是为了方便您快速设置您的Elasticsearch堆栈。 在生产中运行时不应使用它。
+一旦您更改了内置用户的密码，您应该通过将xpack.security.authc.accept_default_password 设置为false来禁用默认密码支持。
+
+内部用户
+X-Pack安全性有三个内部用户（_system，_xpack和_xpack_security）负责在Elasticsearch集群内进行的操作。
+这些用户只能由来自群集内的请求使用。 出于这个原因，它们不能用于对API进行认证，也没有密码来管理或重置。
+
+# 管理用户`my_admin_role`的权限：
+curl -XPOST 'localhost:9200/_xpack/security/role/my_admin_role?pretty' -H 'Content-Type: application/json' -d'
+{
+  "cluster": ["all"],
+  "indices": [
+    {
+      "names": [ "index1", "index2" ],
+      "privileges": ["all"],
+      "field_security" : { // 可选
+        "grant" : [ "title", "body" ]
+      },
+      "query": "{\"match\": {\"title\": \"foo\"}}" // 可选
+    }
+  ],
+  "run_as": [ "other_user" ], // 可选
+  "metadata" : { // 可选
+    "version" : 1
+  }
+}
+'
+
+# 查看`my_admin_role`用户的权限：
+curl -XGET 'localhost:9200/_xpack/security/role/my_admin_role?pretty'
+
+# 查看 "r1", "r2", and "my_admin_role"用户的权限
+curl -XGET 'localhost:9200/_xpack/security/role/r1,r2,my_admin_role?pretty'
+
+# 查看所有用户的权限：
+curl -XGET 'localhost:9200/_xpack/security/role?pretty'
+
+# 删除`my_admin_role`用户：
+curl -XDELETE 'localhost:9200/_xpack/security/role/my_admin_role?pretty'
+
+# 清除`my_admin_role`用户的本地缓存：
+curl -XPOST 'localhost:9200/_xpack/security/role/my_admin_role/_clear_cache?pretty'
+
+# 确定登录用户是否具有指定的特权列表
+curl -XGET 'localhost:9200/_xpack/security/user/_has_privileges?pretty' -H 'Content-Type: application/json' -d'
+{
+  "cluster": [ "monitor", "manage" ],
+  "index" : [
+    {
+      "names": [ "suppliers", "products" ],
+      "privileges": [ "read" ]
+    },
+    {
+      "names": [ "inventory" ],
+      "privileges" : [ "read", "write" ]
+    }
+  ]
+}
+'
+
+Users控制(命令行)
+
+（1）查询所有User：
+curl -XGET -u elastic 'localhost:9200/_xpack/security/user'
+
+（2）增加User：
+curl -XPOST -u elastic 'localhost:9200/_xpack/security/user/demo' -d '{   "password" : "123456",   "full_name" : " demo",   "email" : “demo@163.com",  "roles" : [ "clicks_admin" ] }'
+
+（3）查询具体User：
+curl -XGET -u elastic 'localhost:9200/_xpack/security/user/demo'
+
+（4）删除具体User：
+curl -XDELETE -u elastic 'localhost:9200/_xpack/security/user/demo'
+
+Roles控制(命令行)
+
+（1）查询所有Roles：
+curl -XGET -u elastic 'localhost:9200/_xpack/security/role'
+
+（2）增加Roles：
+curl -XPOST -u elastic 'localhost:9200/_xpack/security/role/clicks_admin' -d '{   "indices" : [     {       "names" : [ "events*" ],       "privileges" : [ "all" ]     },     {       "names" : [ ".kibana*" ],       "privileges" : [ "manage", "read", "index" ]     }   ] }’
+
+（3）查询具体Roles：
+curl -XGET -u elastic 'localhost:9200/_xpack/security/role/clicks_admin'
+
+（4）删除具体Roles：
+curl -XDELETE -u elastic 'localhost:9200/_xpack/security/role/clicks_admin'
+
+
+匿名用户设置：
+xpack.security.authc:
+  anonymous:
+    username: anonymous_user
+    roles: role1, role2
+    authz_exception: true
+
+
 其他：
 
 能够成功连接上就没问题了。

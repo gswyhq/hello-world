@@ -1,0 +1,125 @@
+
+Swarm -- 搭建Docker集群
+
+Swarm介绍
+
+Docker自诞生以来，其容器特性以及镜像特性给DevOps爱好者带来了诸多方便。然而在很长的一段时间内，Docker只能在单host上运行，其跨host的部署、运行与管理能力颇受外界诟病。跨host能力的薄弱，直接导致Docker容器与host的紧耦合，这种情况下，Docker容器的灵活性很难令人满意，容器的迁移、分组等都成为很难实现的功能点。
+
+Swarm是Docker公司在2014年12月初新发布的容器管理工具。和Swarm一起发布的Docker管理工具还有Machine以及Compose。
+
+Swarm是一套较为简单的工具，用以管理Docker集群，使得Docker集群暴露给用户时相当于一个虚拟的整体。Swarm使用标准的Docker API接口作为其前端访问入口，换言之，各种形式的Docker Client(dockerclient in go, docker_py, docker等)均可以直接与Swarm通信。Swarm几乎全部用Go语言来完成开发，并且还处于一个Alpha版本，目前在github上发布的版本仅有v0.1.0-rc1。然而Swarm的发展十分快速，功能和特性的变更迭代还非常频繁。因此，可以说Swarm还不推荐被用于生产环境中，但可以肯定的是Swarm是一项很有前途的技术。
+
+端口监听
+
+Swarm是通过监听2375端口进行通信的，所以在使用Swarm进行集群管理之前，需要设置一下2375端口的监听。这里有两种方法，一种是通过修改docker配置文件方式，另一种是通过一个轻量级的代理容器进行监听。
+
+修改配置文件修改监听端口（推荐）
+
+由于我是使用Centos7安装的docker，所以下面的配置是适用于Centos7的。
+打开配置文件/etc/sysconfig/docker：
+
+ vim /etc/sysconfig/docker
+1
+修改配置项OPTIONS中的值，若OPTIONS中没有值，则直接添加-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock，否则在已有参数后面添加，比如下面这样：
+
+OPTIONS='--selinux-enabled --log-driver=journald
+    --signature-verification=false
+    -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock'
+1
+2
+3
+修改完之后保存文件，然后重启docker服务
+
+systemctl restart docker
+1
+注意：需要对所有要加入集群的docker节点都进行上面的修改配置文件的操作。
+
+使用docker-proxy代理服务
+
+默认情况下，Docker引擎只侦听套接字。 我们可以重新配置引擎以使用TLS，或者您可以使用代理容器。 这是一个非常轻量级的容器，它只是将请求从TCP转发到Docker监听的Unix套接字。
+
+先通过docker pull命令下载镜像
+
+docker pull docker.io/shipyard/docker-proxy
+1
+然后启动容器：
+
+docker run -ti -d -p 2375:2375 \
+    --restart=always \
+    --hostname=$HOSTNAME \
+    --name shipyard-proxy \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -e PORT=2375 \
+    docker.io/shipyard/docker-proxy:latest
+1
+2
+3
+4
+5
+6
+7
+注意：该代理服务容器也需要在每个要加入集群的docker节点上启动，同时要保证该容器的正常运行，如果容器停止则无法发现节点。
+
+搭建Docker集群
+
+拉取Swarm镜像
+
+docker pull docker.io/swarm
+1
+生成唯一token
+
+在任意的docker节点创建一个全世界唯一的token（集群ID）,记住这个token后面需要用到。（这里用的发现服务是dockhub内置的，当然还有其他的比如etcd、consul等。）
+
+docker run --rm swarm create
+
+rw4d3ac32aa6a86b341e3asd69e2cd0b
+1
+2
+3
+执行上面的命令之后，会生成一个token。
+
+启动Swarn Manager
+
+docker run -ti -d -p 2376:2375 \
+    --restart=always \
+    --name shipyard-swarm-manager \
+    docker.io/swarm:latest \
+    manage --host tcp://0.0.0.0:2375 \
+    token://rw4d3ac32aa6a86b341e3asd69e2cd0b
+1
+2
+3
+4
+5
+6
+Swarn Manager 只需要启动一个，所以可选取一个docker节点进行启动，我这里是在我这块的主机10.0.11.150上启动的。
+
+启动Swarm Agent
+
+启动Swarm agent，将当前docker节点加入到集群中，Swarm Agent需要在每一个要加入到集群中的docker节点上启动。
+
+docker run -ti -d \
+    --restart=always \
+    --name shipyard-swarm-agent \
+    docker.io/swarm:latest \
+    join --addr [docker node ip]:2375 \
+    token://rw4d3ac32aa6a86b341e3asd69e2cd0b
+1
+2
+3
+4
+5
+6
+注：上面这条命令中的[docker node ip]项需要更换为要加入集群的docker节点的真实IP。
+
+查看docker节点情况
+
+可以使用命令查看docker节点情况（任意docker节点上都可以执行）：
+
+docker run --rm swarm list token://rw4d3ac32aa6a86b341e3asd69e2cd0b
+1
+查看docker集群详情
+
+可以使用命令查看docker集群的详情（可在任意docker节点上执行,IP地址是装了Swarm Master主机的IP）：
+
+docker -H 10.0.11.150:2376 info

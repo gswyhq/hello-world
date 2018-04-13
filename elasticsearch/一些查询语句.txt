@@ -182,3 +182,15 @@
     }
   }
 }
+
+elasticsearch in 语句
+SQL语句示例
+select * from table where t_id in (1,2,3,4)
+对应es查询语句
+GET /index/type/_search
+{
+  "query": {
+    "terms": {
+      "t_id": [  1,2,3,4      ]
+    }
+  }
