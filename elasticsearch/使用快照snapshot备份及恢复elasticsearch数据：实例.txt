@@ -16,7 +16,7 @@ root@81e692d0a377:/usr/share/elasticsearch/config# echo 'path.repo: ["/usr/share
 gswyhq@gswyhq-PC:~$ docker restart elasticsearch5.6.4_9200_data
 
 # 注册快照仓库到ES
-gswyhq@gswyhq-PC:~$ curl -u elastic:web12008 -XPUT localhost:9200/_snapshot/my_backup -d '
+gswyhq@gswyhq-PC:~$ curl -u elastic:changeme -XPUT localhost:9200/_snapshot/my_backup -d '
 {
     "type": "fs",
     "settings": {
@@ -109,3 +109,10 @@ gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -u elastic:web12008 -XDELETE local
 
 第三步：恢复数据
 curl -u elastic:web12008 -XPOST localhost:9200/_snapshot/my_backup/snapshot_1/_restore
+{"error":{"root_cause":[{"type":"snapshot_restore_exception","reason":"[my_backup:snapshot_2/rL2dpV8oQD-NIlZ-yzopeg] cannot restore index [all_baoxian_templates_answer_20180410_105431] because it's open"}],"type":"snapshot_restore_exception","reason":"[my_backup:snapshot_2/rL2dpV8oQD-NIlZ-yzopeg] cannot restore index [all_baoxian_templates_answer_20180410_105431] because it's open"},"status":500}
+报错，说明索引是打开的，先关闭，等备份恢复之后再打开：
+curl -X POST “http://127.0.0.1:9200/mytest/_close” 先关闭
+curl -X POST “http://127.0.0.1:9200/mytest/_open”
+
+gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -u elastic:changeme -XPOST localhost:9200/_snapshot/my_backup/snapshot_2/_restore
+{"accepted":true}
