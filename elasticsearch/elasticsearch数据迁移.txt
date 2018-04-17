@@ -179,3 +179,9 @@ gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata/nodes/0/indices$ scp -r B5_0Mbb-S
 
 # 更多的数据迁移使用帮助：
 https://www.npmjs.com/package/elasticdump
+
+批量迁移：
+# 导出数据到文件
+gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti -v "$PWD/data:/data" taskrabbit/elasticsearch-dump /bin/multielasticdump --input="http://192.168.3.105:9200" --output="/data/jykl"
+# 从文件中导入数据到es
+gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti -v "$PWD/data:/data" taskrabbit/elasticsearch-dump /bin/multielasticdump --direction=load --output="http://elastic:web1_2008@192.168.3.145:9200" --input="/data/jykl"

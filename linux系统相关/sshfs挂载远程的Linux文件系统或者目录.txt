@@ -1,0 +1,147 @@
+
+SSHFS（Secure SHell FileSystem）是一个客户端，可以让我们通过 SSH 文件传输协议（SFTP）挂载远程的文件系统并且在本地机器上和远程的目录和文件进行交互。
+
+SFTP 是一种通过 SSH 协议提供文件访问、文件传输和文件管理功能的安全文件传输协议。因为 SSH 在网络中从一台电脑到另一台电脑传输文件的时候使用数据加密通道，并且 SSHFS 内置在 FUSE（用户空间的文件系统）内核模块，允许任何非特权用户在不修改内核代码的情况下创建他们自己的文件系统。
+
+步骤 1：在 Linux 系统上安装 SSHFS
+默认情况下，sshfs 包不存在所有的主流 Linux 发行版中，你需要在你的 Linux 系统中安装 SSHFS 及其依赖。
+$ sudo apt-get install sshfs     【基于 Debian/Ubuntu 的系统】
+步骤 2：创建 SSHFS 挂载目录
+当你安装 SSHFS 包之后，你需要创建一个挂载点目录，在这儿你将要挂载你的远程文件系统。例如，我们在 /mnt/tecmint 下创建挂载目录。
+
+# mkdir /mnt/tecmint
+$ sudo mkdir /mnt/tecmint     【基于 Debian/Ubuntu 的系统】
+
+192.168.3.145机器上操作：
+gswyhq@gswyhq-PC:~$ cd /
+gswyhq@gswyhq-PC:/$ sudo mkdir remote_131_data
+gswyhq@gswyhq-PC:/$ sudo chown -R gswyhq:gswyhq remote_131_data
+
+步骤 3：使用 SSHFS 挂载远程的文件系统
+当你已经创建你的挂载点目录之后，现在使用 root 用户运行下面的命令行，在 /mnt/tecmint 目录下挂载远程的文件系统。视你的情况挂载目录可以是任何目录。
+
+下面的命令行将会在本地的 /mnt/tecmint 目录下挂载一个叫远程的一个 /home/tecmint 目录。（不要忘了使用你的 IP 地址和挂载点替换 x.x.x.x）。
+
+192.168.3.131机器上创建目录：
+/data/yanghq/sharedata/145
+
+192.168.3.145机器上操作：
+gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
+fusermount: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf
+
+# 出现allow_other参数不正常的解决方法
+错误信息如下：
+gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
+fusermount: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf
+解决方法，安装提示，在/etc/fuse.conf中取消‘user_allow_other’行的注释，或添加user_allow_other
+gswyhq@gswyhq-PC:/remote_131_data$ sudo vim /etc/fuse.conf
+添加如下信息，并保存：
+user_allow_other
+继续运行挂载：
+gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
+
+# 其中，allow_other参数代表该设置对其他用户也生效。也必须先把ssh自动登录配置好了，让root用户能够使用root身份登录远程主机。
+
+
+# sshfs tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint
+$ sudo sshfs -o allow_other tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint      【基于 Debian/Ubuntu 的系统】
+如果你的 Linux 服务器配置为基于 SSH 密钥授权，那么你将需要使用如下所示的命令行指定你的公共密钥的路径。
+
+# sshfs -o IdentityFile=~/.ssh/id_rsa tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint
+$ sudo sshfs -o allow_other,IdentityFile=~/.ssh/id_rsa tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint     【基于 Debian/Ubuntu 的系统】
+
+步骤 4：验证远程的文件系统挂载成功
+如果你已经成功的运行了上面的命令并且没有任何错误，你将会看到挂载在 /mnt/tecmint 目录下的远程的文件和目录的列表
+
+# cd /mnt/tecmint
+# ls
+[root@ tecmint]# ls
+12345.jpg                       ffmpeg-php-0.6.0.tbz2                Linux                                           news-closeup.xsl     s3.jpg
+cmslogs                         gmd-latest.sql.tar.bz2               Malware                                         newsletter1.html     sshdallow
+epel-release-6-5.noarch.rpm     json-1.2.1                           movies_list.php                                 pollbeta.sql
+ffmpeg-php-0.6.0                json-1.2.1.tgz                       my_next_artical_v2.php                          pollbeta.tar.bz2
+步骤 5：使用 df -h 命令检查挂载点
+如果你运行 df -h命令，你将会看到远程文件系统的挂载点。
+
+gswyhq@gswyhq-PC:/remote_131_data$ df -h
+文件系统                                         容量  已用  可用 已用% 挂载点
+udev                                             7.8G     0  7.8G    0% /dev
+tmpfs                                            1.6G  2.0M  1.6G    1% /run
+/dev/sda4                                        161G   34G  119G   22% /
+tmpfs                                            7.9G  146M  7.7G    2% /dev/shm
+tmpfs                                            5.0M  4.0K  5.0M    1% /run/lock
+tmpfs                                            7.9G     0  7.9G    0% /sys/fs/cgroup
+/dev/sda5                                        577G  109G  439G   20% /home
+/dev/sda1                                        256M   37M  220M   15% /boot/efi
+tmpfs                                            1.6G   24K  1.6G    1% /run/user/1000
+yanghq@192.168.3.131:/data/yanghq/sharedata/145  3.6T  710G  2.8T   21% /remote_131_data
+
+步骤 6：永久挂载远程文件系统
+为了永久的挂载远程的文件系统，你需要修改一个叫 /etc/fstab 的文件。照着做，使用你最喜欢的编辑器打开文件。
+
+# vi /etc/fstab
+$ sudo vi /etc/fstab     【基于 Debian/Ubuntu 的系统】
+移动到文件的底部并且添加下面的一行，保存文件并退出。下面条目表示使用默认的设置挂载远程的文件系统。
+sshfs#yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data fuse defaults,auto,allow_other,nonempty 0 0
+#这就要求必须先把ssh自动登录配置好了，让root用户能够使用user身份登录远程主机，另外allow_other这个参数很重要，没有这个参数的话，挂载过来的目录只有root能够访问。
+
+# 下面条目表示使用默认的设置挂载远程的文件系统。
+sshfs#tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint fuse.sshfs defaults 0 0
+确保服务器之间允许 SSH 无密码登录，这样系统重启之后才能自动挂载文件系统。
+
+如果你的服务器配置为基于 SSH 密钥的认证方式，请加入如下行：
+
+sshfs#tecmint@x.x.x.x:/home/tecmint/ /mnt/tecmint fuse.sshfs IdentityFile=~/.ssh/id_rsa defaults 0 0
+接下来，你需要更新 fstab 文件使修改生效。
+
+或者添加认证：
+# 切换到root用户，生成秘钥文件：
+zy@ubuntu:~$ sudo -i
+root@ubuntu:~# ssh-keygen
+# 将公钥文件拷贝到远程，这样就可以实现无密码登录了：
+root@ubuntu:~# ssh-copy-id -i /root/.ssh/id_rsa.pub yanghq@192.168.3.131
+
+
+# mount -a
+$ sudo mount -a   【基于 Debian/Ubuntu 的系统】
+
+步骤 7：卸载远程的文件系统
+为了卸载远程的文件系统，只需要发出以下的命令即可。
+
+# umount /mnt/tecmint
+目前为止就这样了，如果你在挂载远程文件系统的时候遇到任何问题或者需要任何帮助，请通过评论联系我们，如果你感觉这篇文章非常有用，请分享给你的朋友们。
+
+gswyhq@gswyhq-PC:/remote_131_data$ sudo mount -a
+fuse: mountpoint is not empty
+fuse: if you are sure this is safe, use the 'nonempty' mount option
+
+产生这种问题的原因是因为如果挂载目录下的文件名和挂载后的产生的文件名如果相同的话，系统会产生困扰，所以最好避免这种情况的发生。当然如果你确定安全的话就在挂载时加上nonempty命令就可以了。
+sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
+
+
+卸载挂载时出现异常：
+gswyhq@gswyhq-PC:/remote_131_data$ sudo umount /remote_131_data
+umount: /remote_131_data: target is busy
+        (In some cases useful info about processes that
+         use the device is found by lsof(8) or fuser(1).)
+# 显示设备或资源忙，强制卸载也不行；主要是因为有进程占用了。这时，可以使用fuser命令来查看：
+# fuser能识别出正在对某个文件或端口访问的进程
+# -v: 含义是:verbose output,详细的输出信息
+gswyhq@gswyhq-PC:/remote_131_data$ fuser -vm /remote_131_data
+                     用户     进程号 权限   命令
+/remote_131_data:    root     kernel mount /remote_131_data
+                     gswyhq     1620 ..c.. bash
+# 即可知道是pid=1620 的dataserver占用了该目录
+# 停止对应服务，即可umount成功
+gswyhq@gswyhq-PC:~$ Kill -9 1620
+# 或者使用用 -k参数即可
+# 说明: -k：含义: kill processes accessing the named file
+gswyhq@gswyhq-PC:/remote_131_data$ fuser -k /remote_131_data
+# 重新卸载：
+gswyhq@gswyhq-PC:~$ sudo umount /remote_131_data
+
+
+挂载异常：
+gswyhq@gswyhq-PC:~$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
+fuse: bad mount point `/remote_131_data': Transport endpoint is not connected
+有时候是因为已经被挂载了，才会出险此错误；卸载挂载，再重新挂载即可

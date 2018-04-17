@@ -116,3 +116,13 @@ curl -X POST “http://127.0.0.1:9200/mytest/_open”
 
 gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -u elastic:changeme -XPOST localhost:9200/_snapshot/my_backup/snapshot_2/_restore
 {"accepted":true}
+
+# 恢复部分数据：
+此api额外参数，
+POST http://127.0.0.1:9200/_snapshot/my_backup/snapshot_1/_restore
+{
+    "indices": "index_1",
+    "rename_pattern": "index_(.+)",
+    "rename_replacement": "restored_index_$1"
+}
+参数indices 设置只恢复index_1索引，参数rename_pattern 和rename_replacement 用来正则匹配要恢复的索引，并且重命名。和备份一样，api会立刻返回值，然后在后台执行恢复，使用wait_for_completion 标记强制同步执行。

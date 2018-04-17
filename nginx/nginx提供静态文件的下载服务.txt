@@ -1,0 +1,14 @@
+
+首先修改Nginx的配置文件
+
+server {
+       listen 9999;
+       server_name localhost;
+       location / {
+          root  /web; #这里填写你的静态文件存储根目录
+          access_log   on;
+          autoindex  on;
+       }
+    }
+
+# sudo service nginx reload 加载新配置，就可以在网站的9999端口的页面中显示指定的静态文件目录中的所有文件；点击想下载的文件即可自动下载了。
