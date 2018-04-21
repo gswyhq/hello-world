@@ -12,7 +12,7 @@ index_name_alias='xinxin_templates_question_alias'
 
 function usage() {
         echo "使用方法:"
-        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：52.80.187.77:18200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
+        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：elastic:web12008@52.80.187.77:18200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
         exit 1
 }
 
@@ -63,14 +63,21 @@ fi
 echo "${input_host_port} 上的索引 ${index_name} 迁移到 ${output_host_port}"
 
 # 从一个机器迁移索引及数据到另一个机器:
+
+echo "第0步： 拷贝settings"
+docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=settings
+
 echo "第一步： 拷贝analyzer如分词"
-docker run --rm -ti taskrabbit/elasticsearch-dump   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=analyzer
+docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=analyzer
 
 echo "第二步： 拷贝映射"
-docker run --rm -ti taskrabbit/elasticsearch-dump   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=mapping
+docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=mapping
 
 echo "第三步： 拷贝数据"
-docker run --rm -ti taskrabbit/elasticsearch-dump   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=data
+docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=data
+
+# 若需要提供对应的登录认证：
+# gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://192.168.3.105:9200/jrtz_kg_entity_synonyms_20180404_111151"   --output="http://elastic:web12008@192.168.3.145:9200/jrtz_kg_entity_synonyms_20180404_111151"  --type=data
 
 # 以上数据迁移的时候，会丢失对应的索引别名信息；
 
@@ -127,9 +134,11 @@ echo "${str// /-}"
 echo "curl -XPOST ${output_host_port}/_aliases?pretty -H Content-Type: application/json -d'"
 echo '{'
 echo '   "actions": ['
-echo '         { "remove":    { "index": "旧的索引名", "alias": "'${index_name_alias}'" }}, '
-echo '         { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" }} '
+echo '         { "add":    { "index": "'${index_name}'", "alias": "'${index_name_alias}'" }}, '
+echo '         { "remove":    {"alias": "'${index_name_alias}'",  "index": "旧的索引名" }} '
 echo '      ]'
 echo '   }'
 echo "'"
+
+# curl -XGET 52.80.187.77:18200/jrtz_kg_entity_synonyms_alias/_count?
 

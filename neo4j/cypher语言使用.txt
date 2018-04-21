@@ -169,6 +169,25 @@ match (n) set n:AddLabel return count(n)
         # 重命名关系：
         match(n1)-[r:`联系人1 `]->(n2) delete r merge (n1)-[r2:`联系人1`]->(n2) return n1, r2, n2
 
+# 属性字符串替换
+match(n)where id(n)=1493 set n.name = replace(n.name, '你好', "××") return n.name
+
+以上，若id:1493对应的n.name属性值为int类型的数据就会报错，改成下面这样就好了：
+match(n)where n.name =~ '.*你好.*' set n.name = replace(n.name, '你好', "××") return n.name
+
+# 属性值的修改：
+方法1：
+match(y) SET y.points = y.points + 2
+
+方法2：
+如果你有一个像下面这样的参数（把它复制到neo4j浏览器（如：http://192.168.3.145:7474/browser/）来创建一个参数）。
+:param someMapping: {a:1, b:2}
+
+下面的查询将在属性a的值为2，且节点类型为SomeLabel的节点上创建属性b，并将该节点上的属性a的值设置为1（属性a的值设置为1，并不是在原有的基础上+1； `+=`意为添加属性b ）。
+MATCH (n:SomeLabel) WHERE n.a = 2
+SET n+= $someMapping
+RETURN n
+
 
 CALL db.labels() YIELD label
 match (n) where labels(n) = label

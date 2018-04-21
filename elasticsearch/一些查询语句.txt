@@ -143,6 +143,29 @@
   }
 }
 
+列表数据的查询：
+faq_ids字段是一个object对象，确切来说是一个列表，如："faq_ids": ["faq_6783","faq_6783"]
+查询faq_ids字段中，存在值‘faq_6783’：
+{'aggs': {},
+ 'from': 0,
+ 'query': {'bool': {'must': [{'term': {'faq_ids.keyword': 'faq_6783'}}],
+                    'must_not': [],
+                    'should': []}},
+ 'size': 10,
+ 'sort': []}
+
+查询faq_ids字段中，存在值‘faq_6783’或‘faq_6384’：
+{'aggs': {},
+ 'from': 0,
+ 'query': {'bool': {'must': [],
+                    'must_not': [],
+                    'should': [{'term': {'faq_ids.keyword': 'faq_6783'}},
+                               {'term': {'faq_ids.keyword': 'faq_6784'}}]}},
+ 'size': 10,
+ 'sort': []}
+
+
+
 其他：
 "aggs" : {
     "max_price": {
@@ -182,6 +205,37 @@
     }
   }
 }
+
+
+# match_phrase 短语匹配查询，它匹配相对顺序一致的所有指定词语； 可能是因为“未成年人”是单个词语，所以搜索不到"未成年人身故赔付"；这个时候可以使用
+# 可以使用 match_phrase 的一种特殊形式， match_phrase_prefix 查询：
+# 这种查询的行为与 match_phrase 查询一致，不同的是它将查询字符串的最后一个词作为前缀使用
+{
+  "size": 100,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "query_question": {
+              "boost": 3,
+              "query": "未成年人"
+            }
+          }
+        },
+        {
+          "match_phrase_prefix": {
+            "query_question": {
+              "boost": 3,
+              "query": "未成年人"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
 
 elasticsearch in 语句
 SQL语句示例

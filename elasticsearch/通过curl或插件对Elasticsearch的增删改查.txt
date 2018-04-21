@@ -16,6 +16,12 @@ curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: applicatio
 }
 '
 
+# 查询索引‘all_baoxian_kg_entity_synonyms_alias’，任意_type，id为22 的记录：
+gswyhq@gswyhq-PC:~/dialogue_management_system$ curl -XGET 192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_all/22 -u elastic:web12008
+{"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":1,"found":true,"_source":{"timestamp":"2018-04-17T19:07:25.518866","实体标准词":"恶性肿瘤","实体类型":"Jibing","实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","肝癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","乳腺癌","食道癌","肾癌","白血病"]}}
+
+
+
 查看集群状态
 curl 'localhost:9200/_cat/health?v'
 
@@ -50,6 +56,26 @@ curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d ' {
         "age": 20
     }
 }'
+
+修改某条记录的数据，即通过post方法重新提交即可；
+修改索引`all_baoxian_kg_entity_synonyms_alias`，类型‘all_baoxian’, id为22的数据：
+curl -XPOST -u elastic:web12008 'localhost:9200/all_baoxian_kg_entity_synonyms_alias/all_baoxian/22' -d ' {
+"timestamp":"2018-04-17T19:07:25.518866",
+"实体标准词":"恶性肿瘤",
+"实体类型":"Jibing",
+"实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","肝癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","食道癌","肾癌","白血病"]
+}'
+返回结果：{"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":2,"result":"updated","_shards":{"total":2,"successful":1,"failed":0},"created":false}
+
+或者，仅仅提交修改的字段：
+修改索引`all_baoxian_kg_entity_synonyms_alias`，类型‘all_baoxian’, id为22，`实体同义词`字段的数据：
+gswyhq@gswyhq-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baoxian_kg_entity_synonyms_alias/all_baoxian/22/_update' -d ' {
+"doc":{
+    "实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","食道癌","肾癌","白血病"]
+    }
+}'
+
+返回结果：{"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":9,"result":"updated","_shards":{"total":2,"successful":1,"failed":0}}
 
  更新索引–脚本方式
 
