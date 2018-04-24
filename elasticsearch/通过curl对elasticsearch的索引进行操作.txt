@@ -3,6 +3,9 @@
 通过下面的命令可以查看所有的索引：
 curl -XGET 'localhost:9200/_cat/indices?v'
 
+查看以“all_baoxian"开头的索引：
+gswyhq@gswyhq-PC:~/yhb$ curl -XGET -u elastic:web12008 '192.168.3.145:9200/_cat/indices/all_baoxian*'
+
 查看索引`dingding7500_faq`的段信息：
 gswyhq@gswyhq-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
 
