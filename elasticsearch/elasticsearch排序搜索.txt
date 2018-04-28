@@ -1,0 +1,65 @@
+
+允许在指定的字段(fields)上添加一个或多个排序。每个排序也可以是反向的(reversed)。排序定义在每个字段水平(field level)上，用打分排序用特定的域名_score，用索引序号排序用_doc。
+order选项可以有如下值：
+asc：升序排列
+desc：降序排列
+在使用_score时默认使用降序，使用其它排序时默认为asc升序。
+
+Elasticsearch支持用数组或多值字段排序。mode选项控制在排序文档时选取数组中的哪个值。mode选项能有如下值：
+min：选取最小值
+max：选取最大值
+sum：使用数值的和作为排序值。只能用于基于数字的数组字段
+avg：使用数值的均值作为排序值。同上
+median：使用数值的中位数作为排序值。同上
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "标准模板.keyword": "定义"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  },
+  "from": 0,
+  "size": 10,
+  "sort": [
+    {
+      "timestamp": {
+        "order": "asc"
+      }
+    },
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "_doc": {
+        "order": "desc"
+      }
+    }
+  ],
+  "aggs": {}
+}
+
+
+缺失值(Missing Values)
+
+missing变量指定了(specifies)缺失某个字段的文档应该如何处理(treated)：missing值会被设为_last,_first,或者自定义值（将会当做缺失值的文档的排序值）。例如：
+
+{
+    "sort" : [
+        { "price" : {"missing" : "_last"} },
+    ],
+    "query" : {
+        "term" : { "user" : "kimchy" }
+    }
+}
+
+【注意】如果嵌套的内部对象不匹配nested_filter那么就会用缺失值
