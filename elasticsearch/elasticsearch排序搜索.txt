@@ -63,3 +63,132 @@ missing变量指定了(specifies)缺失某个字段的文档应该如何处理(t
 }
 
 【注意】如果嵌套的内部对象不匹配nested_filter那么就会用缺失值
+
+gswyhq@gswyhq-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_*/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
+{
+    "aggs" : {
+        "intent" : {
+            "terms" : {
+                "field" : "intent",
+                "order" : { "_count" : "asc" }
+            }
+        }
+    }
+}
+'
+
+
+
+假定的查询如下：
+{
+    "from": 0,
+    "size": 0,
+    "_source": {
+        "includes": [
+            "AVG"
+        ],
+        "excludes": []
+    },
+    "aggregations": {
+        "newtype": {
+            "terms": {
+                "field": "newtype",
+                "size": 200
+            },
+            "aggregations": {
+                "AVG(num)": {
+                    "avg": {
+                        "field": "num"
+                    }
+                }
+            }
+        }
+    }
+}
+其语义类似这个sql 语句：
+
+SELECT avg(num) FROM twitter group by newtype
+也就是按newtype 字段进行group by,然后对num求平均值。在我们实际的业务系统中，这种统计需求也是最多的。
+
+
+gswyhq@gswyhq-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_templates_question_alias/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
+{
+    "aggs" : {
+        "intent" : {
+            "terms" : {
+                "field" : "intent.keyword",
+                "order" : { "_count" : "asc" },
+                "size": 2
+            }
+        }
+    }
+}
+'
+
+# 按照字段‘必选实体’（是一个object, list）的长度进行升序排列：
+curl -XPOST localhost:9200/all_baoxian_templates_question_alias/_search -u elastic:web12008 -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "script": "doc['必选实体.keyword'].values.size()",
+      "type": "number",
+      "order": "asc"
+    }
+  }
+}'
+
+curl -XPOST localhost:9200/website/blog/1/_update?pretty -d '{
+   "script" : {
+       "inline": "ctx._source.tags.add(params.new_tag)",
+       "params" : {
+          "new_tag" : "tag2"
+       }
+   }
+}'
+
+
+# 按照intent字段的字符串长度进行降序排列
+curl -XPOST localhost:9200/all_baoxian_templates_question_alias/_search -u elastic:web12008 -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "script": "doc['intent.keyword'].value.length()",
+      "type": "number",
+      "order": "desc"
+    }
+  }
+}'
+
+To filter by length, I can use a script filter in a similar way:
+
+POST /test_index/_search
+{
+   "query": {
+      "filtered": {
+         "query": {
+            "match_all": {}
+         },
+         "filter": {
+            "script": {
+               "script": "doc['name'].value.length() > 3",
+               "params": {}
+            }
+         }
+      }
+   },
+   "sort": {
+      "_script": {
+         "script": "doc['name'].value.length()",
+         "type": "number",
+         "order": "asc"
+      }
+   }
+}
+
+P.S .:如果任何姓氏将包含空格，则可能需要在该字段上使用“index”：“not_analyze”。

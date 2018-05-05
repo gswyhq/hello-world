@@ -248,3 +248,56 @@ GET /index/type/_search
       "t_id": [  1,2,3,4      ]
     }
   }
+
+# 精确搜索某个字段：
+{'aggs': {},
+ 'from': 0,
+ 'query': {'bool': {'must': [{'term': {'标准模板.keyword': '定义'}}],
+                    'must_not': [],
+                    'should': [{'term': {'必选实体.keyword': 'Baoxianchanpin'}},
+                               {'term': {'可选实体.keyword': 'Baoxianchanpin'}}]}},
+ 'size': 1,
+ 'sort': []}
+
+ # 带权重，精确搜索某个字段
+{'aggs': {},
+ 'from': 0,
+ 'query': {'bool': {'must': [{'term': {'标准模板.keyword': '定义'}}],
+                    'must_not': [],
+                    'should': [{'term': {'必选实体.keyword': {'boost': 3,
+                                                          'term': 'Baoxianchanpin'}}}]}},
+ 'size': 10,
+ 'sort': []}
+
+
+
+    {
+        "query" : {
+            "match_all" : {}
+        },
+        "facets" : {
+            "stat1" : {
+                "statistical" : {
+                    "script" : "doc['title'].value.length()
+                    //"script" : "_source.title.length() //ALTERNATIVE which isn't cached
+                }
+            }
+        }
+    }
+
+
+
+{
+    "query" : {}
+            "match_all" : {}
+        },
+   "aggs": {
+      "必选实体": {
+         "terms": {
+            "script": "_source.必选实体.length()",
+            "lang": "groovy",
+            "params": {}
+         }
+      }
+   }
+}
