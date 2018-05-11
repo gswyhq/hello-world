@@ -298,3 +298,9 @@ serverurl=unix:///tmp/supervisor.sock ; 这个是supervisorctl本地连接superv
 - directory：supervisord在生成子进程的时候会切换到该目录
 - umask：设置进程的umask
 - serverurl：是否允许子进程和内部的HTTP服务通讯，如果设置为AUTO，supervisor会自动的构造一个url
+
+若需要设置自定义的环境变量environment，则需要 supervisor的版本 > 3.2;
+而通过apt-get install supervisor 安装的版本是3.2；
+通过pip3 install supervisor,则报不支持；这个时候可以通过下面方法安装：
+root@f7b1a03cc95e:/etc/supervisor# pip3 install git+https://github.com/Supervisor/supervisor
+

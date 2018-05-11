@@ -140,6 +140,88 @@ curl -XPOST localhost:9200/all_baoxian_templates_question_alias/_search -u elast
   }
 }'
 
+# 多级排序
+# 先安装分数进行排序，再按照字段‘必选实体’（是一个object, list）的长度进行升序排列
+curl -XPOST localhost:9200/all_baoxian_templates_question_alias/_search -u elastic:web12008 -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "type": "number",
+        "order": "asc",
+        "script": "doc['必选实体.keyword'].values.size()"
+      }
+    }
+  ]
+}'
+
+# 搜索结果忽略TF/IDF
+{
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "type": "number",
+        "order": "asc",
+        "script": "doc['必选实体.keyword'].values.size()"
+      }
+    }
+  ],
+  "aggs": {},
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "constant_score": {
+            "query": {
+              "term": {
+                "必选实体.keyword": "Fuwuxiangmu"
+              }
+            }
+          }
+        },
+        {
+          "constant_score": {
+            "query": {
+              "term": {
+                "可选实体.keyword": "Fuwuxiangmu"
+              }
+            }
+          }
+        }
+      ],
+      "must": [
+        {
+          "constant_score": {
+            "boost":   2 ,
+            "query": {
+              "term": {
+                "标准模板.keyword": "定义"
+              }
+            }
+          }
+        }
+      ],
+      "must_not": []
+    }
+  },
+  "size": 50,
+  "from": 0
+}
+
+
 curl -XPOST localhost:9200/website/blog/1/_update?pretty -d '{
    "script" : {
        "inline": "ctx._source.tags.add(params.new_tag)",

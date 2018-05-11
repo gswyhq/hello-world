@@ -98,10 +98,55 @@ CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:1, `name`:"Charlie Sheen", `UNIQU
 CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:2, `name`:"Oliver Stone", `UNIQUE IMPORT ID`:7});
 CREATE (:`Person2`:`UNIQUE IMPORT LABEL` {`id`:3, `name`:"Michael Douglas", `UNIQUE IMPORT ID`:8});
 
+
+# 从json文件中导入数据到neo4j:
+call apoc.load.json("https://onodo.org/api/visualizations/21/nodes/") yield value
+create (n:Person) set n+=value
+with count(*) as nodes
+call apoc.load.json("https://onodo.org/api/visualizations/21/relations/") yield value
+match (a:Person {id:value.source_id})
+match (b:Person {id:value.target_id})
+call apoc.create.relationship(a,value.relation_type,{},b) yield rel
+return nodes, count(*) as relationships
+
+
 # 更多示例：https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_export_to_csv
 
 CALL apoc.export.csv.query("MATCH (u:User)-[r:RATED]->(m:Movie) RETURN u.name, r.rating, m.title LIMIT 10", "results.csv", {})
 CALL apoc.export.csv.query("MATCH (a:Person) RETURN a.name AS name", "/home/xyzuser/neo4j-community-3.2.6/test/result.csv", {})
+
+
+导出数据：
+CALL apoc.export.cypher.all("/var/lib/neo4j/guoxinzhengquan_all.cypher",{})
+导出文件："/var/lib/neo4j/guoxinzhengquan_all.cypher"
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ docker exec -it guoxinzhengquan_47474 /bin/bash
+bash-4.4# pwd
+/var/lib/neo4j
+bash-4.4# ls
+LICENSE.txt                 README.txt                  certificates                guoxinzhengquan_all.cypher  logs
+LICENSES.txt                UPGRADE.txt                 conf                        import                      plugins
+NOTICE.txt                  bin                         data                        lib                         run
+bash-4.4#
+
+导入数据：
+gswyhq@gswyhq-PC:~/hello-world/neo4j$ docker exec -it multiple_projects_7474 /bin/bash
+# 更改neo4j配置，使之运行通过shell端操作
+bash-4.4# vi conf/neo4j.conf
+# Enable a remote shell server which Neo4j Shell clients can log in to.
+dbms.shell.enabled=true
+# The network interface IP the shell will listen on (use 0.0.0.0 for all interfaces).
+dbms.shell.host=127.0.0.1
+# The port the shell will listen on, default is 1337.
+dbms.shell.port=1337
+
+或者在启动neo4j容器时，设置对应-e参数：
+gswyhq@gswyhq-PC:~/docker/neo4j/multiple_projects$ docker run --detach --name=multiple_projects_7474  -e NEO4J_AUTH=neo4j/gswyhq -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=127.0.0.1 -e NEO4J_dbms_shell_port=1337 neo4j:3.2.5
+a4f825189aec36369c38a97e6de83441e7dc8415013e283a87b0eb378334c07b
+gswyhq@gswyhq-PC:~/docker/neo4j/guoxinzhengquan$ docker cp guoxinzhengquan_all.cypher multiple_projects_7474:/var/lib/neo4j/
+gswyhq@gswyhq-PC:~/docker/neo4j/multiple_projects$ docker exec -it multiple_projects_7474 /bin/bash
+bash-4.4# pwd
+/var/lib/neo4j
+bash-4.4# ./bin/neo4j-shell -host 127.0.0.1 -port 1337 -file /var/lib/neo4j/guoxinzhengquan_all.cypher
 
 
 

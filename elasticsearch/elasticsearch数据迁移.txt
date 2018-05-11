@@ -180,6 +180,10 @@ gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata/nodes/0/indices$ scp -r B5_0Mbb-S
 # 更多的数据迁移使用帮助：
 https://www.npmjs.com/package/elasticdump
 
+# 单个索引数据迁移：
+# 导出数据到文件：
+gswyhq@gswyhq-PC:~$ docker run --rm  -ti -v $PWD/data:/data taskrabbit/elasticsearch-dump --input=http://192.168.3.105:9200/all_baoxian_templates_answer_alias   --output=/data/all_baoxian_templates_answer_alias.json   --type=data
+
 批量迁移：
 # 导出数据到文件
 gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti -v "$PWD/data:/data" taskrabbit/elasticsearch-dump /bin/multielasticdump --input="http://192.168.3.105:9200" --output="/data/jykl"

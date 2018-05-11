@@ -559,6 +559,13 @@ where wife.name = "Gunhild"
 delete r1, r2, friendOfFriend, wife
 RETURN p2
 
+查询两个节点间最短路径对应的所有实体关系列表：
+MATCH p=(n0)-[*]->(n9)
+where  n0.name = "尊享惠康" and n9.name="恶性肿瘤"
+WITH extract(rel in relationships(p) | [STARTNODE(rel).name, type(rel), endnode(rel).name]) as relationshipLabels
+RETURN distinct relationshipLabels
+
+
 设置属性(Setting properties)
 节点和关系是重要的，但是Neo4j在节点和关系上使用属性，也可以用于稠密图模型(Neo4j uses properties on both of these to allow for far denser graphs models)
 单个属性在模式中用Map结构来表示，属性集合是把各个Map形式的属性放在大括号里，各个属性直接用逗号隔开：{ name: "Andres", sport: "BJJ" }。如果一个属性(Map)参数化(paramName)，那属性集合可以这样表示{paramName}

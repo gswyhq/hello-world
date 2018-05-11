@@ -1,0 +1,55 @@
+
+安装
+Ubuntu系统下：apt-get install supervisor，通过这种方式安装后，自动设置为开机启动
+也可以通过 pip install supervisor 进行安装，但是需要手动启动，然后设置为开机启动（不推荐这种安装方式）
+
+supervisord 的配置文件默认位于 /etc/supervisord.conf，内容如下（;后面为注释）,特别需要注意：‘；’前面必选有个空格。
+
+
+报错1：
+root@f7b1a03cc95e:/usr/bin# /usr/local/bin/supervisorctl status
+unix:///var/run/supervisor.sock no such file
+root@f7b1a03cc95e:/usr/bin# whereis supervisor.sock
+supervisor: /etc/supervisor
+解决方案：
+root@f7b1a03cc95e:/usr/bin# touch /var/run/supervisor.sock
+root@f7b1a03cc95e:/usr/bin# chmod 777 /var/run/supervisor.sock
+root@f7b1a03cc95e:/usr/bin# service supervisor restart
+
+报错2:
+root@f7b1a03cc95e:/usr/bin# /usr/local/bin/supervisorctl status
+unix:///var/run/supervisor.sock refused connection
+原因，supervisor服务未启动；
+解决方案：
+    启动supervisor
+    supervisord                                   #默认去找$PWD/supervisord.conf，也就是当前目录
+    supervisord                                   #默认$PWD/etc/supervisord.conf，也就当前目录下的etc目录
+    supervisord                                   #默认去找/etc/supervisord.conf的配置文件
+    supervisord -c /home/supervisord.conf         #到指定路径下去找配置文件
+
+root@f7b1a03cc95e:/etc/supervisor# supervisord
+/usr/local/lib/python3.5/dist-packages/supervisor/options.py:471: UserWarning: Supervisord is running as root and it is searching for its configuration file in default locations (including its current working directory); you probably want to specify a "-c" argument specifying an absolute path to a configuration file for improved security.
+  'Supervisord is running as root and it is searching '
+Unlinking stale socket /var/run/supervisor.sock
+
+# 如果说supervisord是supervisor的服务端程序，那么supervisorctl就是client端程序了。
+
+报错3：
+root@f7b1a03cc95e:/etc/supervisor/conf.d# supervisorctl status
+bash: /usr/bin/supervisorctl: 没有那个文件或目录
+解决方法：
+root@f7b1a03cc95e:/etc/supervisor/conf.d# whereis supervisorctl
+supervisorctl: /usr/local/bin/supervisorctl
+root@f7b1a03cc95e:/etc/supervisor/conf.d# ln -s /usr/local/bin/supervisorctl /usr/bin/supervisorctl
+
+
+
+若需要设置自定义的环境变量environment，则需要 supervisor的版本 > 3.2;
+而通过apt-get install supervisor 安装的版本是3.2；
+通过pip3 install supervisor,则报不支持；这个时候可以通过下面方法安装：
+root@f7b1a03cc95e:/etc/supervisor# pip3 install git+https://github.com/Supervisor/supervisor
+
+# 注意：在你的env变量前加上‘ENV_’
+environment=ES_HOST="%(ENV_ES_HOST)s",ES_PORT="%(ENV_ES_PORT)s",NEO4J_HOST="%(ENV_NEO4J_HOST)s",NEO4J_HTTP_PORT="%(ENV_NEO4J_HTTP_PORT)s",NEO4J_BOLT_PORT="%(ENV_NEO4J_BOLT_PORT)s",REDIS_HOST="%(ENV_REDIS_HOST)s",REDIS_PORT="%(ENV_REDIS_PORT)s",LINLIN_BOT_URL="%(ENV_LINLIN_BOT_URL)s"
+
+
