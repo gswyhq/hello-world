@@ -114,6 +114,11 @@ curl -u elastic:web12008 -XPOST localhost:9200/_snapshot/my_backup/snapshot_1/_r
 curl -X POST “http://127.0.0.1:9200/mytest/_close” 先关闭
 curl -X POST “http://127.0.0.1:9200/mytest/_open”
 
+关闭/打开，所有的索引
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -X POST http://127.0.0.1:9200/*/_close
+gswyhq@gswyhq-PC:~/docker/elasticsearch$ curl -X POST http://127.0.0.1:9200/*/_open
+
+
 gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -u elastic:changeme -XPOST localhost:9200/_snapshot/my_backup/snapshot_2/_restore
 {"accepted":true}
 

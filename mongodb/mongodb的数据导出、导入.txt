@@ -40,6 +40,33 @@ gswyhq@gswyhq-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoexport -h 192.1
 # 导出的数据在容器`some-mongo`中，再从容器中复制出来即可：
 gswyhq@gswyhq-PC:~/yhb$ docker cp some-mongo:/pages_百度知道-保险相关问答.json .
 
+mongodump备份数据库
+1，常用命令格
+mongodump -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -o 文件存在路径
+
+如果没有用户谁，可以去掉-u和-p。
+如果导出本机的数据库，可以去掉-h。
+如果是默认端口，可以去掉–port。
+如果想导出所有数据库，可以去掉-d。
+
+2,导出所有数据库
+root@b8780dcc5b2f:/# /usr/bin/mongodump -h 192.168.3.130 --port 27017 -o /home/zhangy/mongodb/
+
+3,导出指定数据库
+root@b8780dcc5b2f:/# /usr/bin/mongodump -h 192.168.3.130 --port 27017 -d book_dingding -o /home/zhangy/mongodb/
+
+mongorestore还原数据库
+
+1,常用命令格式
+mongorestore -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 --drop 文件存在路径
+–drop的意思是，先删除所有的记录，然后恢复。
+
+2,恢复所有数据库到mongodb中
+[root@localhost mongodb]# mongorestore /home/zhangy/mongodb/  #这里的路径是所有库的备份路径
+
+3,还原指定的数据库
+root@b8780dcc5b2f:/# /usr/bin/mongorestore -d kg_dingding /home/zhangy/mongodb/kg_dingding/  #tank这个数据库的备份路径
+
 其他示例：
 [root@localhost mongodb]# ./bin/mongoexport -d test -c students --csv -f classid,name,age -o students_csv.dat
 -csv：指明要导出为csv格式

@@ -1,0 +1,28 @@
+
+第一步：建好了一个备份仓库：my_backup（详情见使用快照snapshot备份及恢复elasticsarch数据：实例）
+
+第二步：编写备份快照脚本：
+
+#!/bin/bash
+
+# snapshot_name=`date +%Y%m%d%H%M%S`
+snapshot_name=`date +%Y%m%d`
+curl -XPUT localhost:9200/_snapshot/my_backup/snapshot_${snapshot_name}
+
+# 删除前一天的快照
+last_snapshot_name=`date +%Y%m%d --date="-1 day"`
+curl -XDELETE localhost:9200/_snapshot/my_backup/snapshot_${last_snapshot_name}
+
+第三步：设置定时任务：
+# ”crontab -l" 查看crontab 中所有部署的内容
+zy@ubuntu:~$ crontab -l
+no crontab for zy
+
+# ”crontab -e" 进入crontab 编辑状态
+zy@ubuntu:~$ crontab -e
+
+# 添加如下内容：
+30 1 * * * /bin/bash /home/zy/docker/elasticsearch/snapshot_es_data.sh
+
+#上面的例子表示每晚的1:30执行脚本：/home/zy/docker/elasticsearch/snapshot_es_data.sh。
+
