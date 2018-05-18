@@ -75,6 +75,7 @@ X-Pack将尝试在Elasticsearch中自动创建一些索引。默认情况下，E
 
 action.auto_create_index: .security,.monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*
 
+
 重要
 如果您使用的是Logstash或Beats，那么您的action.auto_create_index设置中很可能需要额外的索引名称，具体值取决于您的本地配置。
 如果您不确定环境的正确值，则可以考虑将值设置为*，以便自动创建所有索引。
