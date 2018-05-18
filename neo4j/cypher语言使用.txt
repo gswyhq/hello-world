@@ -69,6 +69,9 @@ MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
 # 给所有节点添加一个label:
 match (n) set n:AddLabel return count(n)
 
+# 给某些相关联节点打上标签：
+MATCH p=(n)-[*1..9]-(n2) where id(n)=79 FOREACH (n IN nodes(p) | SET n:Abcd ) return p
+
  2）创建关联
 
             match (a),(b)
