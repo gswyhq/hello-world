@@ -1,0 +1,68 @@
+
+Docker 1.13出来已经有一段时间了，新版本添加了许多有用的命令，本文作者从处女座的洁癖（此处有雾）出发，告诉大家一些整理环境的小技巧。打扫房间再也不需费时又费力了，简单的命令，就可以轻松地把物品分门别类（容器、镜像、网络、存储卷……）地整理好^_^
+在1.13版本中，Docker向CLI添加了一些有用的命令，让环境更加整洁。你可能已经体验了很长时间乱糟糟的开发环境——无用的容器，挂起的Docker镜像，弃置的volume，被遗忘的网络……所有这些过时的事物占据了宝贵的资源，最终导致环境无法使用。在之前的文章中曾经提到用各种各样的命令保持环境的整洁，例如：
+
+docker rm -f $(docker ps -aq)
+
+强制地删除所有正在运行的、暂停的以及终止的容器。同样地，也有命令可以删除挂起的镜像、网络和volume。
+
+尽管上述命令解决了问题，但是它们要么专有，要么冗长或者难用。而新加入的命令直截了当又简单好用，现在就开始一一介绍吧。
+
+管理命令
+为了整理CLI，Docker 1.13引进了新的管理命令，如下：
+
+system
+container
+image
+plugin
+secret
+Docker的老版本中已经有了 network, node, service, swarm 和 volume 。这些新命令组子命令过去作为root命令直接实现。举个例子：
+
+docker exec -it [container-name] [some-command]
+
+exec 命令现在是 container 下面的一个子命令，这个命令相当于：
+
+docker container exec -it [container-name] [some-command]
+
+个人猜测为了兼容性的考虑，旧语句眼下还会使用一段时间。
+
+Docker系统
+现在有一个新管理命令 system 。它有4个子命令分别是 df, events, info 和 prune 。命令 docker system df 提供Docker整体磁盘使用率的概况，包括镜像、容器和（本地）volume。所以我们现在随时都可以查看Docker使用了多少资源。
+
+如果之前的命令展示出 docker 已经占用了太多空间，我们会开始清理。有一个包办一切的命令：
+
+docker system prune
+docker system prune(会将停止使用的镜像也给删除掉)
+
+
+这个命令会删除当前没有被使用的一切项目，它按照一种正确的序列进行清理，所以会达到最大化的输出结果。首先删除没有被使用的容器，然后是volume和网络，最后是挂起的镜像。通过使用 y 回复来确认操作。如果想在脚本中使用这个命令，可以使用参数 --force 或者 -f 告诉Docker不要发来确认请求。
+
+Docker容器
+我们已经知道许多 docker container 的子命令。它们过去（现在也是）是 docker 的直接子命令。可以通过下面的命令得到完整的子命令列表：
+
+docker container --help
+
+在列表中会看到一个 prune 命令。如果使用它，那么只会删除无用的容器。因此这条命令比 docker system prune 命令更局限。使用 --force 或者 -f 同意可以让CLI不再进行确认请求。
+
+Docker网络
+这里也有一个 prune 命令：
+
+docker network prune
+
+删除所有孤立的网络。
+
+Docker Volume
+volume也有新的 prune 命令了：
+
+docker volume prune
+docker volume prune（不会删除停止使用的镜像）
+
+删除所有（本地）没有被容器使用的volume。
+
+Docker镜像
+新的镜像命令也是 prune 子命令。--force 用法如上面一样， --all 可以删除所有不用的镜像，不只挂起的镜像。
+
+docker image prune --force --all
+
+这个命令可以删除所有不使用的镜像并且不再请求确认。
+

@@ -441,4 +441,35 @@ http://localhost:9200/_xpack/security/user/logstash_internal
 
 }
 
+运行时报错：
+{"log":"[2018-05-21T06:45:35,558][ERROR][o.e.x.s.a.f.SecurityActionFilter] [vd2NYJ2] blocking [cluster:monitor/stats] operation due to expired license. Cluster health, cluster stats and indices stats \n","stream":"stdout","time":"2018-05-21T06:45:35.558447133Z"}
 
+是因为证书过期了,需要注册申请一个license.
+
+申请地址: https://register.elastic.co/marvel_register
+
+注册后将以email的方式发送，通过链接下载license json文件.
+
+根据文档提示请求api并指定新的证书
+
+$ curl -XPUT -u elastic:changeme 'http://192.168.2.110:9200/_xpack/license?acknowledge=true' -H "Content-Type: application/json" -d @hakim-zhao-705a2a54-84d9-4ea8-b4ca-23b9d75b4ead-v5.json
+{"acknowledged":true,"license_status":"valid"}
+
+查看最新证书状态:
+
+gswyhq@gswyhq-PC:~$ curl --user elastic:web12008 'http://192.168.3.145:9200/_xpack/license'
+{
+  "license" : {
+    "status" : "expired",
+    "uid" : "9a211725-5501-480a-895d-6e391503479a",
+    "type" : "trial",
+    "issue_date" : "2018-04-13T10:40:35.125Z",
+    "issue_date_in_millis" : 1523616035125,
+    "expiry_date" : "2018-05-13T10:40:35.125Z",
+    "expiry_date_in_millis" : 1526208035125,
+    "max_nodes" : 1000,
+    "issued_to" : "elasticsearch",
+    "issuer" : "elasticsearch",
+    "start_date_in_millis" : -1
+  }
+}
