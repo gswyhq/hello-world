@@ -22,7 +22,7 @@ curl -XPUT 'localhost:9200/customer?pretty'
 curl -XDELETE 'localhost:9200/customer?pretty'
 
 # 删除索引，也可以通过正则进行匹配，如删除以`faq`开头的索引：
-curl -XDELETE '52.80.187.77:18200/faq*?pretty'
+curl -XDELETE '152.180.187.77:18200/faq*?pretty'
 
 
 若不需要删除原索引别名，仅仅添加一个索引别名：
@@ -66,7 +66,7 @@ curl -XPUT 'localhost:9200/baike/_settings?pretty' -H 'Content-Type: application
 '
 
 # 查询某个索引的所有文档数：
-curl -XGET 52.80.187.77:18200/zhonghanrenshou_cypher_show_three_tuple_alias/_count?
+curl -XGET 152.180.187.77:18200/zhonghanrenshou_cypher_show_three_tuple_alias/_count?
 
 # 索引状态：
 localhost:9200/my_index/_stats

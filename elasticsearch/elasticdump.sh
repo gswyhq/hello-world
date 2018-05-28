@@ -12,7 +12,7 @@ index_name_alias='xinxin_templates_question_alias'
 
 function usage() {
         echo "使用方法:"
-        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：elastic:web12008@52.80.187.77:18200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
+        echo "  ./elasticdump.sh [-h] [-i <源数据地址，如：192.168.3.105:9200>] [-o <目标地址，如：elastic:web12008@152.180.187.77:18200>] [-n <待迁移es数据索引名>] [-a <新建的索引别名>]"
         exit 1
 }
 
@@ -140,5 +140,5 @@ echo '      ]'
 echo '   }'
 echo "'"
 
-# curl -XGET 52.80.187.77:18200/jrtz_kg_entity_synonyms_alias/_count?
+# curl -XGET 152.180.187.77:18200/jrtz_kg_entity_synonyms_alias/_count?
 

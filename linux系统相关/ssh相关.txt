@@ -7,7 +7,7 @@ gswyhq@gswyhq-pc:~$ scp zy@192.168.3.105:/home/zy/hello.py hello.py   # 将服�
 3、拷贝本地文件到服务器
 gswyhq@gswyhq-pc:~$ scp ./yhb/hello.py zy@192.168.3.105:/home/zy/hello.py
 或者：
-ubuntu@ip-172-31-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.tar ubuntu@52.80.24.45:/data/docker/ubuntu/ubuntu0815-export.tar
+ubuntu@ip-172-31-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.tar ubuntu@152.180.24.45:/data/docker/ubuntu/ubuntu0815-export.tar
 
 4、通过密钥验证用户身份（登陆时候不需要输入密码）
 方法一：$ ssh-keygen
@@ -46,7 +46,7 @@ zy@192.168.3.103's password:
 
 
 通过SSH使用PEM文件登录
-gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@52.80.41.112
+gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -57,7 +57,7 @@ Load key "zy.pem": bad permissions
 Permission denied (publickey).
 如果出现报错说明这个问题是文件的权限太大了，需要给小点 
 gswyhq@gswyhq-pc:~$ sudo chmod 600 zy.pem 
-gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@52.80.41.112
+gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
 
 
 
