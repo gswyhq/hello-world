@@ -43,5 +43,10 @@ Out[18]:
  'Yiyuan',
  'QINGKUANG']
 
+执行单个cpyher语句事务的http请求
+
+查询neo4j节点总数的例子
+curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "match (n) return count(n)" } ]}'
+
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels
 

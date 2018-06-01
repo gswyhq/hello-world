@@ -39,3 +39,13 @@ gswyhq@gswyhq-pc:~$ source .bashrc
 gswyhq@gswyhq-pc:~$ baidu 你好
 gswyhq@gswyhq-pc:~$ cmd_help unzip
 
+有时候退出，重新登录服务器，之前的设置并没有生效；说明没有~/.bash_profile文件，或者文件中没有执行.bashrc文件。
+(.bash_profile文件是用户登陆终端的时候会自动执行的文件，一般此文件中会调用.bashrc)
+如果是这样，需要打开（如果没有的话先创建）文件：
+~/.bash_profile
+在里面加入一行：
+source ~/.bashrc
+
+就ok了。
+
+

@@ -20,6 +20,23 @@ Elasticsearch中使用的默认相似度算法，称为词频/逆文档频率或
 curl -XPUT localhost:9200/test -d '{ "settings": { "number_of_shards": 1 }}'
 如果您只有一个分片，则本分片的IDF是全局IDF。
 
+index.number_of_shards: 每一个索引分的分片数量. 一旦索引创建,就不可以修改了.
+分片数一般根据你的节点数(node)来设置,他内部自动会将分片均衡的分到各个节点上.
+
+index.number_of_replicas:每个分片需要备份的数量.索引创建后,这个值可以随时变动,不影响索引内容.
+
+例如,我现有两个node节点,每个node的配置都是:
+
+index.number_of_shards: 5
+index.number_of_replicas:1
+
+创建索引后的分配情况就是: master节点,分到2,4分片(shards), 另一个node节点则分配到1,3,5分片.
+
+其中它会为每个分片创建一个备份(replicas),然后将备份同步到非自己的这个节点.也就是说master的分片2,4会备份到另一个节点的2,4里面.
+
+注意：索引建立后，分片个数是不可以更改的
+副本数量, 看你的并发量, 副本越多可以分散查询压力, 但是会占用更多存储.
+
 第二个解决方法是将？search_type = dfs_query_then_fetch添加到您的搜索请求中。
 dfs表示分布式频率搜索，它告诉Elasticsearch首先从每个分片中检索本分片的IDF，以便计算整个索引的全局IDF。
 curl -XPOST http://localhost:9200/test/_search?search_type=query_then_fetch -d '
@@ -41,4 +58,12 @@ curl -XPOST http://localhost:9200/test/_search?search_type=query_then_fetch -d '
 小窍门
 在生产中不要使用dfs_query_then_fetch。因为真的没有必要，只需拥有足够的数据就可以确保您的词频分布良好。
 没有理由为您运行的每个查询添加此额外的DFS步骤。
+
+
+es中有个叫preference的东西，他决定了哪些shard会被用来执行搜索操作，两个document排序，field值相同；不同的shard上，可能排序不同；每次请求轮询打到不同的replica shard上；每次页面上看到的搜索结果（默认按得分）的排序都不一样。
+这就是bouncing result，也就是跳跃的结果。
+有两个index上，而且数据完全一样；
+但是这两个index中的数据在各自share上的分配，不会完全一样，每次搜索排序会不一样，如果是在同一个索引下出现类似情况，
+解决方案就是将preference设置为一个字符串，比如说user_id，让每个user每次搜索的时候，都使用同一个replica shard去执行，就不会看到bouncing results了。
+但是在不同的索引上，由于share分配的数据不均匀，除非的通过将‘number_of_shards’设置为1。
 

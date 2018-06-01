@@ -288,6 +288,12 @@ Collect将所有值收集到一个集合list中。
 START n=node(2,3,4)
 RETURN collect(n.property)
 
+MATCH (n:Jibing) where n.name in ["恶性肿瘤", "瘫痪"] OPTIONAL MATCH (n)-[r:`疾病组别`]->(n2) RETURN length(collect(n.name)) >= length(["恶性肿瘤", "瘫痪"]) , length(collect(n2.name))
+
+MATCH (n:Jibing) where n.name in ["恶性肿瘤", "瘫痪"] OPTIONAL MATCH (n)-[r:`疾病组别`]->(n2)  return collect(DISTINCT n.name),length( collect(DISTINCT n2.name))
+
+MATCH (n:Jibing) where n.name in ["恶性肿瘤1", "瘫痪"] OPTIONAL MATCH (n)-[r:`定义`]->(n2)  return length(collect(DISTINCT n.name)) = length(["恶性肿瘤1", "瘫痪"]) and length( collect(DISTINCT n2.name)) = length(["恶性肿瘤1", "瘫痪"])
+
 a.创建
 
 CREATE (id:label {key:value})

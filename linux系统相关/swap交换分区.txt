@@ -1,0 +1,74 @@
+Linux 将物理内存分为内存段，叫做页面。交换是指内存页面被复制到预先设定好的硬盘空间(叫做交换空间)的过程，目的是释放对于页面的内存。物理内存和交换空间的总大小是可用的虚拟内存的总量。
+
+交换空间通常是一个磁盘分区，但是也可以是一个文件。用户可以在安装 Arch Linux 的时候创建交换空间，或者在安装后的任何时间建立交换空间。对于 RAM 小于 1GB 的用户，交换空间通常是推荐的，但是对于拥有大量的物理内存的用户来说是否使用主要看个人口味了(尽管它对于休眠到硬盘支持是必须的)。
+
+要检查交换空间的状态，使用
+
+$ swapon -s
+或者：
+
+$ free -m
+
+ubuntu@ip-172-31-13-170:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+udev             30G     0   30G   0% /dev
+tmpfs           6.0G  8.7M  6.0G   1% /run
+/dev/xvda1       99G  3.0G   92G   4% /
+tmpfs            30G     0   30G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs            30G     0   30G   0% /sys/fs/cgroup
+cgmfs           100K     0  100K   0% /run/cgmanager/fs
+tmpfs           6.0G     0  6.0G   0% /run/user/1000
+
+交换文件
+相比于使用一个磁盘分区作为交换空间，使用交换文件可以更方便地随时调整大小或者移除。当磁盘空间有限（例如常规大小的SSD）时，使用交换文件更加理想。
+
+手动方式
+建立交换文件
+# 用root账号，使用 fallocate 命令来创建一个所需大小的交换文件（M = Mebibytes, G = Gibibytes）。例如，创建一个32 GB的交换文件：
+ubuntu@ip-172-31-13-170:~$ sudo fallocate -l 32G /swapfile
+
+# 为交换文件设置权限：（交换文件全局可读是一个巨大的本地漏洞）
+ubuntu@ip-172-31-13-170:~$ sudo chmod 600 /swapfile
+
+# 创建好交换文件后，将其格式化：
+ubuntu@ip-172-31-13-170:~$ sudo mkswap /swapfile
+Setting up swapspace version 1, size = 32 GiB (34359734272 bytes)
+no label, UUID=e6e9061b-ad5c-4955-8257-d17d4069dcf3
+
+# 启用交换文件：
+ubuntu@ip-172-31-13-170:~$ sudo swapon /swapfile
+
+# 最后，编辑 /etc/fstab， 在其中添加如下的一行：
+ubuntu@ip-172-31-13-170:~$ sudo vim /etc/fstab
+/swapfile none swap defaults 0 0
+
+# 检查交换空间的状态
+ubuntu@ip-172-31-13-170:~$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            59G        665M         58G        8.6M        444M         58G
+Swap:           31G          0B         31G
+ubuntu@ip-172-31-13-170:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+udev             30G     0   30G   0% /dev
+tmpfs           6.0G  8.7M  6.0G   1% /run
+/dev/xvda1       99G   35G   60G  38% /
+tmpfs            30G     0   30G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs            30G     0   30G   0% /sys/fs/cgroup
+cgmfs           100K     0  100K   0% /run/cgmanager/fs
+tmpfs           6.0G     0  6.0G   0% /run/user/1000
+
+
+
+删除交换文件
+如果要删除一个交换文件，必须先停用它。
+
+作为root运行：
+
+# swapoff -a
+然后即可删除它：
+
+# rm -rf /swapfile
+最后从 /etc/fstab 中删除相关条目
+

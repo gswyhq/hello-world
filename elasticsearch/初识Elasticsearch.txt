@@ -1,0 +1,762 @@
+初识Elasticsearch
+
+一、简介
+
+Elasticsearch，简单点理解，就是在Lucene的基础上封装了一层分布式架构，它有如下特点：
+
+处理方式灵活。Elasticsearch 是实时全文索引，不需要像 storm 那样预先编程才能使用；
+配置简易上手。Elasticsearch 全部采用 JSON 接口，目前业界通用的配置语法设计；
+集群线性扩展。Elasticsearch 集群可以扩展到上百台服务器，处理PB级结构化或非结构化数据；
+检索性能高效。虽然每次查询都是实时计算，但是优秀的设计和实现基本可以达到百亿级数据查询的秒级响应；
+二、基本概念
+
+2.1 索引（Index）
+
+ElasticSearch把数据存放到一个或者多个索引中。如果用关系型数据库模型对比，索引的地位与数据库实例(Database)相当。索引存放和读取的基本单元是文档（Document）。ElasticSearch内部用Apache Lucene实现索引中数据的读写。要知道，在ElasticSearch中被视为单独的一个索引，在Lucene中可能不止一个。这是因为在分布式体系中，ElasticSearch会用到分片（shards）和备份（replicas）机制将一个索引存储多份。
+
+2.2 文档（Document）
+
+在ElasticSearch的世界中，文档(Document)是主要的存在实体(在Lucene中也是如此)。所有的ElasticSearch应用需求到最后都可以统一建模成一个检索模型：检索相关文档。文档(Document)由一个或者多个域(Field)组成，每个域(Field)由一个域名(此域名非彼域名)和一个或者多个值组成(有多个值的值称为多值域(multi-valued))。在ElasticSeach中，每个文档(Document)都可能会有不同的域(Field)集合；也就是说文档(Document)是没有固定的模式和统一的结构。文档(Document)之间保持结构的相似性即可(Lucene中的文档(Document)也秉持着相同的规定)。实际上，ElasticSearch中的文档(Document)就是Lucene中的文档(Document)。从客户端的角度来看，文档(Document)就是一个JSON对象(关于JSON格式的相关信息,请参看hhtp://en.wikipedia.org/wiki/JSON)。
+
+2.3 文档类型（Type）
+
+每个文档在ElasticSearch中都必须设定它的类型。文档类型使得同一个索引中在存储结构不同文档时，只需要依据文档类型就可以找到对应的参数映射(Mapping)信息，方便文档的存取。
+
+2.4 节点（Node）
+
+单独一个ElasticSearch服务器实例称为一个节点。对于许多应用场景来说，部署一个单节点的ElasticSearch服务器就足够了。但是考虑到容错性和数据过载，配置多节点的ElasticSearch集群是明智的选择。
+
+2.5 集群（Cluster）
+
+集群是多个ElasticSearch节点的集合。这些节点齐心协力应对单个节点无法处理的搜索需求和数据存储需求。集群同时也是应对由于部分机器(节点)运行中断或者升级导致无法提供服务这一问题的利器。ElasticSearch提供的集群各个节点几乎是无缝连接(所谓无缝连接，即集群对外而言是一个整体，增加一个节点或者去掉一个节点对用户而言是透明的<个人理解，仅供参考>)。在ElasticSearch中配置一个集群非常简单，在我们看来，这是在与同类产品中竞争所体现出的最大优势。
+
+2.6 分片（Shard）
+
+前面已经提到，集群能够存储超出单机容量的信息。为了实现这种需求，ElasticSearch把数据分发到多个存储Lucene索引的物理机上。这些Lucene索引称为分片索引，这个分发的过程称为索引分片(Sharding)。在ElasticSearch集群中，索引分片(Sharding)是自动完成的，而且所有分片索引(Shard)是作为一个整体呈现给用户的。需要注意的是，尽管索引分片这个过程是自动的，但是在应用中需要事先调整好参数。因为集群中分片的数量需要在索引创建前配置好，而且服务器启动后是无法修改的，至少目前无法修改。
+
+2.7 副本（Replica）
+
+通过索引分片机制(Sharding)可以向ElasticSearch集群中导入超过单机容量的数据，客户端操作任意一个节点即可实现对集群数据的读写操作。当集群负载增长，用户搜索请求阻塞在单个节点上时，通过索引副本(Replica)机制就可以解决这个问题。索引副本(Replica)机制的的思路很简单：为索引分片创建一份新的拷贝，它可以像原来的主分片一样处理用户搜索请求。同时也顺便保证了数据的安全性。即如果主分片数据丢失，ElasticSearch通过索引副本使得数据不丢失。索引副本可以随时添加或者删除，所以用户可以在需要的时候动态调整其数量。
+
+2.8 时间之门（Gateway）
+
+在运行的过程中，ElasticSearch会收集集群的状态、索引的参数等信息。这些数据被存储在Gateway中。
+
+三、文档操作
+
+3.1 插入Doc
+
+curl -XPUT 'http://localhost:9200/{index}/{type}/{id}' -d
+'{
+    "field" : "content",
+    ...
+}'
+1
+2
+3
+4
+5
+在插入的过程中index会自动创建，一个Doc由_index、_type、_id唯一指定（如果不指定ID，则会自动生成）。另外，在插入的过程中可以通过?version=、?timestamp=、?ttl=指定一些参数。具体参看《Index API》
+
+3.2 获取Doc
+
+一个Document是由_index、_type、_id三个属性唯一标识。
+
+curl -XGET 'http://localhost:9200/website/blog/001'
+1
+还可以通过/_source只显示Doc的内容:
+
+curl -XGET 'http://localhost:9200/website/blog/1/_source'
+
+{
+  "title": "My first blog entry",
+  "text":  "Just trying this out...",
+  "date":  "2014/01/01"
+}
+1
+2
+3
+4
+5
+6
+7
+pretty
+在任意的查询字符串中增加pretty参数。会让Elasticsearch美化输出JSON结果以便更加容易阅读
+3.3 删除Doc
+
+curl -XDELETE 'http://localhost:9200/twitter/tweet/1'
+1
+3.4 更新Doc
+
+执行PUT操作，如果已经存在，就相当于更新操作：
+
+curl -XPUT 'http://localhost:9200/website/blog/001' -d
+'{
+  "field": "value",
+  ...
+}'
+1
+2
+3
+4
+5
+可以看到输出结果：
+
+{
+"_index": "website",
+"_type": "blog",
+"_id": "001",
+"_version": 2,
+"created": false
+}
+1
+2
+3
+4
+5
+6
+7
+created: false创建失败， 是因为已经存在指定文档。
+
+在内部，Elasticsearch已经标记旧文档为删除并添加了一个完整的新文档。旧版本文档不会立即消失，但你也不能去访问它。Elasticsearch会在你继续索引更多数据时清理被删除的文档。
+
+3.5 检查文档是否存在
+
+$ curl -i -XHEAD 'http://localhost:9200/website/blog/001'
+
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 0
+1
+2
+3
+4
+5
+3.6 Multi Get
+
+Multi Get使用关键字_mget，可以一次获取多个文档，而且这些文档可以跨索引、跨类型。
+
+curl 'localhost:9200/_mget' -d '{
+    "docs" : [
+        {
+            "_index" : "INDEX1",
+            "_type" : "type",
+            "_id" : "3"
+        },
+        {
+            "_index" : "INDEX2",
+            "_type" : "type",
+            "_id" : "1"
+        }
+    ]
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+curl 'localhost:9200/{index}/_mget' -d '{
+    "docs" : [
+        {
+            "_type" : "type",
+            "_id" : "1"
+        },
+        {
+            "_type" : "type",
+            "_id" : "2"
+        }
+    ]
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+curl 'localhost:9200/{index}/{type}/_mget' -d '{
+    "ids" : ["1", "2"]
+}'
+1
+2
+3
+3.7 Bulk
+
+Bulk API使用关键字_bulk，允许我们通过一次请求来实现多个文档的create、index、update或delete。
+
+bulk的请求结构如下：
+
+{ action: { metadata }}\n
+{ request body        }\n
+{ action: { metadata }}\n
+{ request body        }\n
+...
+1
+2
+3
+4
+5
+加入我们把一个批量请求写在一个文件bulk_format中：
+
+{"create":{"_index":"website","_type":"blog","_id":"004"}}
+{"title":"The Hero","text":"I have been watching the TV Series...","date":"2015/09/11"}
+{"delete":{"_index":"website","_type":"blog","_id":"001"}}
+1
+2
+3
+4
+执行批量请求（--data-binary保留换行符）：
+
+$ curl -s -XPOST localhost:9200/_bulk --data-binary @bulk_format
+1
+四、索引操作
+
+4.1 创建索引
+
+$ curl -XPUT 'http://localhost:9200/twitter/'
+
+$ curl -XPUT 'http://localhost:9200/twitter/' -d '{
+    "settings" : {
+        "number_of_shards" : 3,
+        "number_of_replicas" : 2
+    }
+}'
+
+curl -XPUT localhost:9200/test -d '{
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "mappings" : {
+        "type1" : {
+            "_source" : { "enabled" : false },
+            "properties" : {
+                "field1" : { "type" : "string", "index" : "not_analyzed" }
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+4.2 删除索引
+
+$ curl -XDELETE 'http://localhost:9200/twitter/'
+1
+4.3 获取索引信息
+
+$ curl -XGET localhost:9200/movie
+
+$ curl -XGET localhost:9200/movie/_aliases
+
+$ curl -XGET localhost:9200/movie/_mapping
+
+$ curl -XGET localhost:9200/movie/_setting
+1
+2
+3
+4
+5
+6
+7
+Get到的是索引的aliases、mappings、setting等信息。
+
+4.4 Open/Close索引
+
+关闭一个索引之后，将不能read/write。
+
+curl -XPOST 'localhost:9200/my_index/_close'
+
+curl -XPOST 'localhost:9200/my_index/_open'
+1
+2
+3
+五、检索
+
+5.1 概述
+
+ElasticSearch中的检索主要分为两类：确切值、全文检索
+
+确切值：这类检索就是给定某个field的一个确定的值或一个范围，进行完全匹配。
+全文检索：全文检索会计算每个文档与查询语句的相关性，会给出一个相关性评分_score。
+在Elasticsearch中，每一个字段的数据都是默认被索引的，用于快速检索。字段是否被索引由"index"参数控制，它的取值有三个：
+
+值	解释
+analyzed	首先分析这个字符串，然后索引。换言之，以全文形式索引此字段。
+not_analyzed	索引这个字段，使之可以被搜索，但是索引内容和指定值一样。不分析此字段。
+no	不索引这个字段。这个字段不能为搜索到。
+string类型字段默认值是analyzed，用于全文检索。其他简单类型——long、double、date等只能取no和not_analyzed，它们的值不能被分析。
+
+
+
+对于string型字段，在被分析之后，所得的结果（单词）会用来建立倒排索引。在进行检索时，检索字符串也会经过相同的分析器，然后用所得的结果在倒排索引中进行匹配，匹配的越多相关性_score打分越高。
+
+$ curl -XGET 'localhost:9200/_analyze?analyzer=standard&pretty' -d 'The quick brown foxes jumped over the lazy dog'
+1
+5.2 检索API
+
+搜索的关键字是_search，我们可以跨索引、跨类型进行搜索（假设gb，us是索引，user,tweet是类型）：
+
+/_search         # 在所有索引的所有类型中搜索
+
+/gb/_search      # 在索引gb的所有类型中搜索
+
+/gb,us/_search   # 在索引gb和us的所有类型中搜索
+
+/g*,u*/_search   # 在以g或u开头的索引的所有类型中搜索
+
+/gb/user/_search  # 在索引gb的类型user中搜索
+
+/gb,us/user,tweet/_search  # 在索引gb和us的类型为user和tweet中搜索
+
+/_all/user,tweet/_search   # 在所有索引中的搜索类型user和tweet的文档
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+利用字符串查询
+通过查询字符串进行搜索就是 通过HTTP参数传递查询的关键字：
+
+$ curl -XGET localhost:9200/movie/_search?q=runtime:90
+1
+q：查询
+fields：指定返回的字段
+timeout：指定超时时间
+size：指定返回的结果数
+sort：指定按某字段排序，fieldName:desc/asc
+analyzer：指定分析器
+利用DSL查询（结构化查询语句）
+所谓结构化查询语句是指通过JSON请求体来指定查询条件。
+
+curl -XGET localhost:9200/movie/info/_search -d '{
+  "query": {
+    "term": {
+      "runtime": 90
+    }
+  }
+}'
+1
+2
+3
+4
+5
+6
+7
+Elasticsearch检索分为两部分：Query 和 Filter。两者的区别在于：filter是不计算相关性的，同时可以cache。因此，filter速度要快于query。
+
+from/size：用于结果分页，默认from 0 , size 10
+sort：根据一个或多个字段进行排序
+fields：只返回每个结果的指定字段
+常用的查询过滤语句:
+
+query：
+
+term : 主要用于精确匹配哪些值，比如数字，日期，布尔值或 not_analyzed的字符串(未经分析的文本数据类型)
+terms : 跟 term 类似，但 terms 允许指定多个匹配条件。 如果某个字段指定了多个值，那么文档需要一起去做匹配。
+match : 标准查询，不管你需要全文本查询还是精确查询基本上都可以用它。
+multi_match：在match查询的基础上同时搜索多个字段
+match_all : 空查询，返回所有文档
+range ： 范围查询
+regexp ：正则匹配
+prefix ： 前缀匹配
+ids：根据id查询文档
+filtered：通过 filtered 可以在请求体中同时包含 "query" 和 "filter" 子句。
+bool ： 一种复合查询，把其余类型的查询包裹进来。支持must（相当于AND），must_not（相当于NOT），should（相当于OR）。
+filter：
+
+同上
+and
+or
+not
+5.3. 聚合（Aggregation）
+
+假设有一个索引 movie 存储了一组电影相关信息，格式如下：
+
+{
+    "name": "Avengers: Age of Ultron",
+    "rating": 7.8,
+    "description": "When Tony Stark and Bruce Banner try to jump-start a dormant peacekeeping...",
+    "stars": ["Joss Whedon","Robert Downey Jr","Chris Evans","Mark Ruffalo"],
+    "type": ["Action","Adventure","Sci-Fi"],
+    "runtime": 141
+}
+1
+2
+3
+4
+5
+6
+7
+8
+Min Aggregation：找出播放时间最短的电影
+$ curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "min_runtime": {
+            "min" : {
+                "field":"runtime"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Max Aggregation：找出评分最高的电影
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "max_rating": {
+            "max" : {
+                "field":"rating"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Sum Aggregation：求所有电影的播放时间的总和
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "intraday_return": {
+            "sum" : {
+                "field":"runtime"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Avg Aggregation：求所有电影的平均评分
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "avg_rating": {
+            "avg" : {
+                "field":"rating"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Stats Aggregation：统计所有电影的rating字段，包括min，max，sum，avg.
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "ratings_stats": {
+            "stats" : {
+                "field":"rating"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Filter Aggregation：先条件过滤再求平均。（搜索+聚合）
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "runtime_products": {
+            "filter":{"term":{"runtime":90}},
+            "aggs" : {
+                "avg_rating":{
+                    "avg":{"field":"rating"}
+                }
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+Terms Aggregation：统计各种类型的电影的数量。
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "types": {
+            "terms" : {
+                "field":"type"
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Range Aggregation：统计评分在小于3、3到5、5到8、8到10的电影的数量。
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "rating_ranges": {
+            "range" : {
+                "field":"rating",
+                "ranges":[
+                    {"to":3},
+                    {"from":3,"to":5},
+                    {"from":5,"to":8},
+                    {"from":8,"to":10}
+                ]
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+Histogram Aggregation：以3为步长，统计评分在0-3、3-6、6-9、9-12的电影的数量。
+curl 'localhost:9200/movie/_search?fields=aggregations&pretty' -d '
+{
+    "aggs" : {
+        "ratings": {
+            "histogram" : {
+                "field":"rating",
+                "interval":3
+            }
+        }
+    }
+}'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+六、集群管理与监控
+
+6.1 监控
+
+cluster级别的API总是以http://localhost:9200/_cluster/开头。
+
+6.1.1、查看集群 health 状态
+
+curl -XGET 'http://localhost:9200/_cluster/health?pretty'
+
+#也可以查看某个索引的 health 状态：
+
+curl -XGET 'http://localhost:9200/_cluster/health/movie'
+1
+2
+3
+4
+5
+6.1.2、查看集群state
+
+curl -XGET 'http://localhost:9200/_cluster/state'
+1
+该命令会输出所有的nodes和shards的状态信息，但是由于太多，可读性不高。
+
+6.1.3. 查看集群的stats
+
+$ curl -XGET localhost:9200/_cluster/stats
+1
+统计信息包括shards、nodes、docs、store、还有操作系统CPU、内存、进程、JVM、文件系统等相关统计信息。
+
+6.1.4. 查看节点的stats
+
+curl -XGET 'http://localhost:9200/_nodes/stats'
+1
+6.1.5. 查看节点信息
+
+curl -XGET 'http://localhost:9200/_nodes'
+1
+6.2 格式化输出
+
+ElasticSearch提供了_cat命令用以格式化输出，将JSON结果以列表的形式输出。
+
+输出集群健康状态：
+
+$ curl 'localhost:9200/_cat/health'
+1
+输出当前的master节点：
+
+$ curl 'localhost:9200/_cat/master'
+1
+输出所有的nodes信息：
+
+$ curl 'localhost:9200/_cat/nodes'
+1
+输出所有doc数：
+
+$ curl 'localhost:9200/_cat/count'
+1
+输出索引别名：
+
+$ curl 'localhost:9200/_cat/aliases?v'
+1
+输出所有索引的状态和统计数据：
+
+$ curl 'localhost:9200/_cat/indices'
+1
+输出每个节点的shards分配情况：
+
+$ curl 'localhost:9200/_cat/allocation'
+1
+输出每个shard的统计信息：
+
+$ curl 'localhost:9200/_cat/shards'
+1
+输出当前recovery的进度：
+
+$ curl 'localhost:9200/_cat/recovery'
+1
+6.3 集群管理
+
+6.3.1、重定向（reroute）
+
+重定向是指手动控制shard的分布，包括三种操作：
+
+移动（move）:把分片从一节点移动到另一个节点。可以指定索引名和分片号。
+取消（cancel）:取消分配一个分片。可以指定索引名和分片号。node参数可以指定在那个节点取消正在分配的分片。allow_primary参数支持取消分配主分片。
+分配（allocate）:分配一个未分配的分片到指定节点。可以指定索引名和分片号。node参数指定分配到那个节点。allow_primary参数可以强制分配主分片，不过这样可能导致数据丢失。
+$ curl -XPOST 'localhost:9200/_cluster/reroute' -d '
+    {"commands":[{
+        "move":{
+            "index":"movie",
+            "shard":2,
+            "from_node":"eng1.lycc.eseng2.09",
+            "to_node":"eng1.lycc.eseng2.08"
+            }
+        }]
+    }'
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+6.3.2、关闭（shutdown）
+
+关闭所有节点
+
+curl -XPOST 'http://localhost:9200/_shutdown'
+1
+关闭指定节点
+
+curl -XPOST 'http://localhost:9200/_cluster/nodes/nodeId1,nodeId2/_shutdown'
+1
+延迟关闭
+
+curl -XPOST 'http://localhost:9200/_cluster/nodes/_local/_shutdown?delay=10s'
+1
+
