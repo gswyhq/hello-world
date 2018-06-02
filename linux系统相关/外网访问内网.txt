@@ -1,0 +1,13 @@
+
+第一步：内网反向代理到外网：
+nohup autossh -NR 7772:192.168.3.103:22 ubuntu@54.222.11.43 > /dev/null 2>&1 &
+
+第二步：外网本地代理
+复制 ～/.ssh/id_rsa.pub 文件的内容到 ～/.ssh/authorized_keys
+外网本地代理：
+ubuntu@54.222.11.43:~$ ssh -fCNL *:18002:localhost:7772 localhost
+
+第三步：外网访问内网
+gswyhq@gswyhq-PC:~$ ssh -p 18002 zy@54.222.11.43
+
+
