@@ -48,5 +48,23 @@ Out[18]:
 查询neo4j节点总数的例子
 curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "match (n) return count(n)" } ]}'
 
+执行多个cpyher语句事务的http请求
+我们在同一个http请求中也可以发送多个cpyher语句，响应的结果体中会包含每个cpyher语句结果。
+一个例子如下：
+
+curl -XPOST http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json" -d '{
+  "statements" : [ {
+    "statement" : "match (n) RETURN id(n) limit 1"
+  }, {
+    "statement" : "match (n ) where n.name = {props}.name RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "恶性肿瘤"
+      }
+    }
+  } ]
+}'
+
+
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels
 
