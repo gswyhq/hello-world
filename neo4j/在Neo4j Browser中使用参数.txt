@@ -1,0 +1,24 @@
+
+Neo4j Browser是Neo4j内置的浏览器，用于管理数据库，更新数据库和查询数据，再命令窗体中，通过“:”能够引用内置的命令，例如，通过 ":param"能够定义参数，并能够在下一个Cypher语句中引用参数。
+
+1，通过:param命令定义参数
+
+在Neo4j Browser中，输入第一个命令，通过:param 命令定义参数，
+例如，定义参数events，该参数是一个JSON字符串，键events是参数名，其值是一个数组，包含两个数组元素。
+$ :param events: [ {  year : 2014, id : 1}, {year : 2014, id: 2 } ]
+
+2, 通过$param引用参数
+
+紧接着，输入Cypher语句，通过$param引用参数
+UNWIND子句把列表式的数据展开成一行一行的数据，每一个行都包含更新所需要的全部信息，列表式的数据，可以通过参数来传递。
+通过$events引用参数，UNWIND子句把events数组中的两个元素展开，每个元素执行一次Cypher语句，由于Cypher的语句结构固定，因此，执行计划被缓存起来，在执行数据更新任务时，参数被UNWIND子句展开，复用执行计划，提高数据更新的速度。
+
+UNWIND $events AS event
+MERGE (y:Year { year: event.year })
+MERGE (y)<-[:IN]-(e:Event { id: event.id })
+RETURN e.id AS x
+ORDER BY x
+
+3，查看创建的图形
+
+参数是一个列表格式的数据，在参数events中，两个event的year属性都是2014，因此，MERGE子句只会创建一个Year节点；由于两个event的id属性不同，因此MERGE子句会创建两个Event节点，并创建Year节点和Event节点之间的关系
