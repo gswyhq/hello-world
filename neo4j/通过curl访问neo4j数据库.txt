@@ -65,6 +65,16 @@ curl -XPOST http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyh
   } ]
 }'
 
+curl -XPOST http://192.168.3.145:7478/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json" -d '{
+  "statements" : [ {
+    "statement" : "match (n) RETURN id(n) limit 1"
+  }, {
+    "statement" : "CREATE (n:Baodan) set n = {props} RETURN n",
+    "parameters" : {
+      "props" : {"投保人联系地址": "ANDES ST SAN GABRIEL CA", "联系方式": ["15601810001", "85226960000"], "保单状态": "40", "手机1": "15601810001", "分公司": "广东", "缴费期限": "5年", "缴费方式": "年缴", "首次回访时间": "", "手机2": "", "投保人年龄": "46", "代理人电话号码": "", "营销人代理人": "汇丰银行深圳", "产品名称": "AKFRB02", "备注": "", "是否为银保通": "N", "保单号": "2786102", "证件号码": "H10101010", "投保人": "JING LI", "渠道": "Bank & Post", "ANP": "1708", "电话1": "(852)26960000", "回访状态": "初始", "回访完成时间": "",
+      "SSC": "GDSZSZ(深圳深圳)", "上级营销人代理人": "陈雯一"}
+    }
+  } ]
+}'
 
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels
-

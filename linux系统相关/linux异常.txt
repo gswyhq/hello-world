@@ -48,3 +48,11 @@ gswyhq@gswyhq-PC:~$ sudo apt-get install tofrodos
 运行这两行
 gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/todos /usr/bin/unix2dos
 gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
+
+当远程登录主机时出现Pseudo-terminal will not be allocated because stdin is not a terminal. 错误。
+原因：用脚本调用或者程序调用ssh登陆远程的时候出现的这个情况。
+解决方案:
+写登陆脚本ssh的时候加个参数
+ssh -t -t user@10.242.1.1
+或者
+ssh user@10.242.1.1 -tt

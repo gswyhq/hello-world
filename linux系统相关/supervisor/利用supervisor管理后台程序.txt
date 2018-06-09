@@ -274,3 +274,12 @@ Starting supervisor: Unlinking stale socket /var/run/supervisor.sock
 supervisord.
 root@942adfc9da78:/etc/init.d# echo $?
 0
+
+# 若某个配置文件更新了，仅仅是reload是不行的，需要更新配置到supervisord
+# 更新新的配置到supervisord
+root@a0a294877eab:# supervisorctl update
+intent: stopped
+intent: updated process group
+# 重新启动配置中的所有程序
+root@a0a294877eab:# supervisorctl reload
+Restarted supervisord

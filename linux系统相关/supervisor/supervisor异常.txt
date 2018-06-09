@@ -52,4 +52,13 @@ root@f7b1a03cc95e:/etc/supervisor# pip3 install git+https://github.com/Superviso
 # 注意：在你的env变量前加上‘ENV_’
 environment=ES_HOST="%(ENV_ES_HOST)s",ES_PORT="%(ENV_ES_PORT)s",NEO4J_HOST="%(ENV_NEO4J_HOST)s",NEO4J_HTTP_PORT="%(ENV_NEO4J_HTTP_PORT)s",NEO4J_BOLT_PORT="%(ENV_NEO4J_BOLT_PORT)s",REDIS_HOST="%(ENV_REDIS_HOST)s",REDIS_PORT="%(ENV_REDIS_PORT)s",LINLIN_BOT_URL="%(ENV_LINLIN_BOT_URL)s"
 
+# 启动时报错：
+root@14afcbc79eae:/taibao_poc# supervisord 
+/usr/local/lib/python3.5/dist-packages/supervisor/options.py:471: UserWarning: Supervisord is running as root and it is searching for its configuration file in default locations (including its current working directory); you probably want to specify a "-c" argument specifying an absolute path to a configuration file for improved security.
+  'Supervisord is running as root and it is searching '
+  Error: The directory named as part of the path /var/log/supervisor/supervisord.log does not exist
+原因：日志目录不存在
+解决方法，创建日志目录：
+root@14afcbc79eae:/var/log# mkdir supervisor
+
 

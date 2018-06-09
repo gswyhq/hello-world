@@ -77,6 +77,41 @@ gswyhq@gswyhq-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baox
 
 返回结果：{"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":9,"result":"updated","_shards":{"total":2,"successful":1,"failed":0}}
 
+数据的更新，还可以通过_update端点，编写内嵌脚本（inline script）来实现。
+
+或者更新某个指定字段（若字段不存在则添加）：
+示例1， 添加`myfield`字段：
+gswyhq@gswyhq-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
+    "script": "ctx[\"_source\"][\"myfield\"]=\"测试\"",
+    "lang": "python",
+    "params": {}
+}'
+
+示例2，更新`可选实体`字段：
+gswyhq@gswyhq-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
+    "script": "ctx[\"_source\"][\"可选实体\"]=[\"Baoxianchanpin\", \"Jibing\"]",
+    "lang": "python",
+    "params": {}
+}'
+
+示例3，跟字段`kexuan`（是一个列表，字段名不能是中文），添加一个值；（注意，如果值存在，它仍然会添加它）
+curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty' -d'
+{
+    "script" : {
+        "inline": "ctx._source.kexuan.add(params.tag)",
+        "lang": "painless",
+        "params" : {
+            "tag" : "Qingjing"
+        }
+    }
+}'
+
+# 删除id为0的记录，对应的`tag`字段：
+curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty' -d'
+{
+    "script" : "ctx._source.remove(\"tag\")"
+}'
+
  更新索引–脚本方式
 
 curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
@@ -101,3 +136,54 @@ curl -XGET 'localhost:9200/xinxin_templates_question_alias/_search?pretty' -H 'C
   }
 } '
 
+API还允许使用HEAD检查文档的存在，例如：
+curl -XHEAD 'localhost:9200/twitter/tweet/0?pretty'
+
+过滤source
+默认情况下，get操作返回_source字段的内容，除非已使用stored_fields参数或禁用_source字段。您可以使用_source参数关闭_source检索：
+curl -XGET 'localhost:9200/twitter/tweet/0?_source=false&pretty'
+
+如果只需要完整的_source中的一个或两个字段，则可以使用_source_include＆_source_exclude参数来包含或过滤出所需的部分。这对于大文档特别有用，其中部分检索可以节省网络开销。两个参数都以逗号分隔的字段或通配符表达式列表。例：
+curl -XGET 'localhost:9200/twitter/tweet/1?_source_include=*.id&_source_exclude=user&pretty'
+
+# 执行一个脚本来增加计数器
+curl -XPOST 'localhost:9200/test/type1/1/_update?pretty' -d'
+{
+    "script" : {
+        "inline": "ctx._source.counter += params.count",
+        "lang": "painless",
+        "params" : {
+            "count" : 4
+        }
+    }
+}'
+
+除了_source，通过ctx映射可以使用以下变量：_index，_type，_id，_version，_routing，_parent和_now（当前时间戳）。 我们还可以向文档中添加一个新字段：
+更改执行的操作。如果标记字段包含绿色，此示例将删除文档，否则不执行任何操作（noop）：
+curl -XPOST 'localhost:9200/test/type1/1/_update?pretty' -d'
+{
+    "script" : {
+        "inline": "if (ctx._source.tags.contains(params.tag)) { ctx.op = \"delete\" } else { ctx.op = \"none\" }",
+        "lang": "painless",
+        "params" : {
+            "tag" : "green"
+        }
+    }
+}'
+
+一次查询多个不同的索引数据
+多GET API允许基于索引，类型（可选）和id（可能路由）获取多个文档。该响应包括具有所有提取的文档的docs数组，每个元素在结构上类似于由get API提供的文档。这里是一个例子：
+curl 'localhost:9200/_mget' -d '{
+    "docs" : [
+        {
+            "_index" : "bnkhb_intent_20180516_094436",
+            "_type" : "intent",
+            "_id" : "1"
+        },
+        {
+            "_index" : "bnkhb_templates_answer_alias",
+            "_type" : "bnkhb",
+            "_id" : "2"
+        }
+    ]
+}'

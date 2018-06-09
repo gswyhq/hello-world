@@ -13,9 +13,16 @@ C:\Users\Lenovo\Downloads>pscp zy@192.168.3.103:/home/zy/yhb/zhiy.pem zhiy.pem
 zy@192.168.3.103's password:
 zhiy.pem                | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
 
-C:\Users\Lenovo\Downloads>
+本地脚本放到远程服务器运行：
+C:\Users\Lenovo\Desktop\6.5\测试>putty.exe -ssh zy@192.168.3.103 -m "dump_log.sh"
+
+主要在于-m参数，其后面跟着的是当前目录下存在的一个shell脚本，记住了不是在【远程】的计算上，而是在当前目录中
 
 通过密钥文件登录：
+指定SSH秘钥
+    这个参数用于指定需要使用的SSH秘钥文件，假如远程主机采用秘钥文件的方式来进行身份验证，则可以使用如下指令来建立session：
+    putty.exe -ssh xxx@yyyy -i  privatekey.ppk
+    只要将以上的”privatekey.ppk“换成你自己的文件即可。
 
 linux 通过ssh-gen生成的pem格式 和putty使用的ppk格式可以互相转换
 pem->ppk

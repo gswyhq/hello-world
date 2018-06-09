@@ -145,3 +145,8 @@ gswyhq@gswyhq-PC:~$ sudo umount /remote_131_data
 gswyhq@gswyhq-PC:~$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
 fuse: bad mount point `/remote_131_data': Transport endpoint is not connected
 有时候是因为已经被挂载了，才会出险此错误；卸载挂载，再重新挂载即可
+
+异常：
+ls: cannot access 'remote_131_data': Transport endpoint is not connected
+解决方法：
+zy@ubuntu:~$ sudo umount /home/zy/remote_131_data

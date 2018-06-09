@@ -1,0 +1,18 @@
+
+# 假设图谱中标签为Jibingzhonglei，有不同的几个；每一个对应关系`包含疾病`超过25个时，下表达式，查询到n的结果，可能只有一个；
+MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) RETURN n LIMIT 25
+
+# 改成下式，可以查询出多个n:
+MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) RETURN n, count(*) limit 25
+return 语句包含一个非聚合条目（ n 节点）和一个聚合函数（ count ）。这意味着在使用 n 节点分组结果，使每一个Jibingzhonglei的结果为一行。也可以在 order by 语句中使用聚合值排序整个结果集
+
+# 对结果进行排序（默认升序）
+MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) RETURN n, count(*) order by count(*) limit 25
+
+# 降序
+MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) RETURN n, count(*) order by count(*) desc limit 25
+
+MATCH p=(n:Baoxianchanpin)-[*..3]-() where any(u in nodes(p)where u.name='安康无忧' ) RETURN n LIMIT 25
+使用 NODES（p）Cypher 函数提取给定路径上的所有节点集。然后使用 ANY 函数对节点集中的每一个元素判断。如果在给定
+的可迭代集中每一个元素匹配了`安康无忧`， ANY 函数将会返回 true ，如果在路径 p 上的没有一个节点是`安康无忧`，则这条路径将被放弃。
+

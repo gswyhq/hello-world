@@ -28,6 +28,14 @@ optional match (n2)-[r2:`释义`]->(n3)
 return n2.name, n3.name
 # 当关系“(n)-[r:`包含疾病`]->(n2)”存在，但“(n2)-[r2:`释义`]->(n3) ”不存在时，该查询语句也能查询出来结果；只不过此时n3.name 的值是 null
 
+方法4.1:
+match p=(n:Jiaofeifangshi)-[*..2]-(n1)  where n.name='趸缴'
+and any(r IN relationships(p) WHERE type(r)= '缴别')
+OPTIONAL MATCH (n)-[:`缴别`]->(n1)
+return n.name,
+n1.name
+# match查询的结果包含`OPTIONAL MATCH`查询的结果，这个时候，`OPTIONAL MATCH`查询无效，返回的还是match查询的结果；
+
 方法5：
 MATCH (n:Male)
 WHERE n.name =~ '.ail.'
@@ -36,3 +44,15 @@ UNION MATCH (n:Female)
 WHERE n.name =~ '.ail.'
 RETURN n
 # 并行查询，两个子句的返回值应该一致
+
+方法6：
+Cypher 查询中的多个模式使用逗号（，）作为分隔符分开。作为结果的节点必须匹配所有逗号隔开的模式，相当于一个 “ 并 ” （ AND ）语句。
+MATCH (n:Baoxianchanpin)-[r:`保险种类`]->(n2), (n)-[r2:`保障项目`]->(n3) where n.name='康倍保' RETURN n,n2, n3
+以上示例，只有n节点同时拥有r、r2两个关系时，才会查询出结果。
+
+方法7：
+查询在深圳没有分支机构，但在广东有分支机构：
+match (n)-[r1:`隶属于`]->(n1)-[r2:`分支机构`]->(n2) where n.name='深圳' and n1.name='广东省' and not (n)-[r2:`分支机构`]->(n2) return n2
+
+# 断言某个属性是否存在：
+MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) where not n.alias is null return n

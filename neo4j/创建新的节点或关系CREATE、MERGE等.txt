@@ -1,4 +1,24 @@
 
+create (n:Baoxianchanpin{name:"百年康倍保"})-[r:`保险种类`]->(n2{name:'医疗险'})  RETURN n,n2
+# 新建两个节点及关系，若节点已经存在，则会另外新建一个与之前已存在的相独立的节点及关系
+
+# 创建唯一的（ create unique ） Cypher 命令
+MATCH (n:Baoxianchanpin:Bainianrenshou {name:"百年康倍保"}) create UNIQUE (n)-[r:`保险种类`]->(n2{name:'医疗险'})  RETURN n,n2
+若节点n存在，则在此基础上创建新的关系r及节点n2; 若节点n不存在，则不创建关系r及节点n2;
+
+MATCH (n:Baoxianchanpin:Bainianrenshou {name:"百年康倍保"})-[r:`保险种类`]->() create UNIQUE (n)-[r:`保险种类`]->(n2{name:'医疗险'})  RETURN n,n2
+# 不论关系r是否已经存在，都会报语法错误，查询的关系跟创建的关系不能一致；
+
+# 改成下面这样，若match能查询出结果，则会创建一个新的关系r，否则不会创建（比如，存在n,不存在r2时，不会创建r）
+MATCH (n:Baoxianchanpin:Bainianrenshou {name:"百年康倍保"})-[r2:`保险种类`]->() create UNIQUE (n)-[r:`保险种类`]->(n2{name:'医疗险'})  RETURN n,n2
+
+
+MATCH (us:Country)
+        WHERE us.name = 'United States'
+        CREATE UNIQUE (us)-[:STATE]->(ca {name:'California'})
+        RETURN ca
+
+
 # 根据id查询两个节点，并创建一个节点及两条关系（多次运行会重复创建）
 MATCH (a:Baoxianmingcheng),(b)
 WHERE id(a)=3127 and id(b)=3161

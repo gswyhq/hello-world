@@ -1,0 +1,97 @@
+
+MATCH (s:page)
+WITH s
+OPTIONAL MATCH (s)<-[r:pagetag]-(tag)
+WITH s,r,tag
+Where s.pagename contains 'juniors'or tag.name contains 'math'
+return distinct s.pagename
+
+MATCH (n:page)<-[r:pagetag]-(tag)
+WITH n,r,tag
+WHERE r IS NULL AND (n.title CONTAINS 'java' or tag.name IN ["java"])
+OR NOT r is NULL AND (n.title CONTAINS 'java')
+return distinct n.name
+
+MATCH (n)
+RETURN
+CASE n.eyes
+WHEN 'blue'
+THEN 1
+WHEN 'brown'
+THEN 2
+ELSE 3 END AS result
+
+MATCH (n)
+RETURN
+CASE
+WHEN n.eyes = 'blue'
+THEN 1
+WHEN n.age < 40
+THEN 2
+ELSE 3 END AS result
+
+MATCH (n)
+RETURN n.name,
+CASE n.age
+WHEN n.age IS NULL THEN -1
+ELSE n.age - 10 END AS age_10_years_ago
+
+MATCH (n)
+RETURN n.name,
+CASE
+WHEN n.age IS NULL THEN -1
+ELSE n.age - 10 END AS age_10_years_ago
+
+MATCH (person:Person{name: "John"})
+SET person.salary =
+CASE person.type
+WHEN 'Teacher' THEN 50000
+WHEN 'Assistant' THEN 40000
+WHEN 'Student' THEN 0
+ELSE NULL
+END
+RETURN person
+
+MATCH (u1:user {username: "pewpewlasers"}), (u2:user {username: "pewpew2"})
+MERGE (u1)-[y:KNOWS]->(u2)
+ON CREATE SET y.connected = 1
+WITH y, has(y.connected) AS connected
+REMOVE y.connected
+WITH y, connected
+OPTIONAL MATCH (x)-[zz:LIKES]->(yy)
+FOREACH(ignoreMe IN CASE WHEN yy IS null THEN [] ELSE [1] END |
+    MERGE x-[:LOVES]->(yy))
+WITH zz, connected
+RETURN zz, connected
+
+MATCH (n)
+OPTIONAL MATCH (n)-[:likes]->(p)
+RETURN n
+, coalesce(p, 'nobody')
+, coalesce(labels(p),'nothing')
+
+
+Cypher提供FOREACH语句，用来遍历列表中的每一个元素并分别执行更新操作。于是，一个包含0个元素或者1个元素的列表则可以看成一个条件表达式。因为当0个元素的时候，就不会执行遍历，而当1个元素的时候，就只执行一次遍历。
+
+LOAD CSV FROM {url} AS row
+MATCH (o:Organization {name:row.org})
+FOREACH (_ IN case when row.type = 'Person' then [1] else [] end|
+   MERGE (p:Person {name:row.name})
+   CREATE (p)-[:WORKS_FOR]->(o)
+)
+FOREACH (_ IN case when row.type = 'Agency' then [1] else [] end|
+   MERGE (a:Agency {name:row.name})
+   CREATE (a)-[:WORKS_FOR]->(o)
+)
+
+需要注意的是，在FOREACH内部创建的变量无法在外部访问。你需要再重新查询一次，或者你需要再FOREACH内完成全部更新操作。
+
+MATCH (charlie:Person { name: 'Charlie Sheen' }),(martin:Person { name: 'Martin Sheen' }), p =
+shortestPath((charlie)-[*]-(martin))
+WHERE NONE (r IN relationships(p) WHERE type(r)= 'FATHER')
+RETURN p
+
+match p=(n:Didian)-[*..2]-(n1)  where n.name='深圳'
+and any(r IN relationships(p) WHERE type(r)= '营销服务部')
+return  length(p), n.name, n1.name
+

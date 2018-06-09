@@ -35,3 +35,5 @@ MATCH (m)--(o)
 RETURN o.name
 
 代码块解释：（1）从”Anders”出发，找到关联（无向）的所有人的集合m；（2）对集合m按照name降序排列，取top-1；（3）返回与top-1关联（无向）的所有人的name。
+
+MATCH (n1)-[r]->(n:Qingjing) with labels(n1) as l, count(*) as count where count > 1  RETURN l, count

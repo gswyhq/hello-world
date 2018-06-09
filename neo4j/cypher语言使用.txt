@@ -854,6 +854,10 @@ WITH person, count(*) AS appearances, collect(m.title) AS movies
 WHERE appearances > 1
 RETURN person.name, appearances, movies
 
+
+可以在查询的开始，使用 CYPHER 关键词跟着Neo4j 版本指定需要的 Neo4j 版本：
+cypher 3.2 MATCH (n1)-[r]->(n:Qingjing)return n
+
 # http://neo4j.com/docs/2.2.0/query-functions-scalar.html
 13.1. Predicates
 ALL
