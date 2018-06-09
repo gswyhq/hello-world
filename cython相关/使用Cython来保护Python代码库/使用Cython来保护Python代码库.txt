@@ -8,7 +8,7 @@
 因此，对复杂模块/包结构的支持是相当有限的，我们必须做一些额外的工作来实现所需的结果。
 我们必须克服的第一个障碍是很难用Cython编译整个Python包（如“包含__init__.py文件的目录”）。
 想象一下下面的结构:
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
 .
 ├── mypkg
 │   ├── bar.py
@@ -31,9 +31,9 @@ __init__.so可以从Python导入，但这还不足以使目录成为Python的一
 无法导入包不是唯一的问题 - 其中的代码也无法执行包相对导入（例如.foo import foo），这会破坏其功能。
 要解决这个问题，我们可以在构建项目的其余部分后从源代码树中复制__init__.py文件。
 一个很好的方法是覆盖setup.py中的build_ext类：
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py build_ext
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py build_ext
 # 注意：setup.py 文件所在目录中，不能存在__init__.py文件
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
 .
 ├── build
 │   ├── lib.linux-x86_64-3.5
@@ -76,8 +76,8 @@ gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库
 └── setup.py
 
 12 directories, 27 files
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ rm -r build
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ rm -r build
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
 .
 ├── mypkg
 │   ├── bar.py
@@ -97,13 +97,13 @@ gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库
 目前Python存档的标准是wheel格式（.whl），其目的是替换.egg格式。所以，
 让我们尝试用python setup.py bdist_wheel创建wheel格式！ 命令完成后，应该有一个包含wheel文件的dist文件夹。
 打开就能产生这样的东西：
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py bdist_wheel
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ python3 setup.py bdist_wheel
 
 显然，归档不仅包含编译代码，还包含源代码。有一种方法可以解决这个问题，但是它似乎是反直觉的。
 我们需要在调用setup时删除packages参数中的包名。这样，仍然可以构建扩展并包含在wheel中，但源代码将不会在其中。
 
 构建的wheel的内容应该如下所示：
-gswyhq@gswyhq-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
+gswewf@gswewf-pc:~/hello-world/cython相关/使用Cython来保护Python代码库/src$ tree
 .
 ├── build
 │   ├── bdist.linux-x86_64

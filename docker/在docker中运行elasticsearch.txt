@@ -1,18 +1,18 @@
 
 elasticsearch
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch9200 -p 9200:9200 -p 9300:9300 elasticsearch
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch9200 -p 9200:9200 -p 9300:9300 elasticsearch
 
 以上启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
 但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
 这个时候需要进入容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
 # config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker cp elasticsearch.yml elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker restart elasticsearch9200
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker cp elasticsearch.yml elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker restart elasticsearch9200
 
 使用集群时，需要修改宿主机的 vm.max_map_count的值：
 sysctl -w vm.max_map_count=262144
@@ -44,40 +44,40 @@ elasticsearch镜像包括EXPOSE 9200 9300（默认http.port）
 
 # 安装分词工具：
 运行一个elasticsearch容器并进入容器
-gswyhq@gswyhq-pc:~$ docker run -d --name elasticsearch9200 -p 9200:9200 -p 9300:9300 elasticsearch
-gswyhq@gswyhq-pc:~$ docker exec -it elasticsearch9200 /bin/bash
+gswewf@gswewf-pc:~$ docker run -d --name elasticsearch9200 -p 9200:9200 -p 9300:9300 elasticsearch
+gswewf@gswewf-pc:~$ docker exec -it elasticsearch9200 /bin/bash
 # 查看容器内elasticsearch的版本号：
 root@77140794378f:/usr/share/elasticsearch# elasticsearch -V
 Version: 5.5.1, Build: 19c13d0/2017-07-18T20:44:24.823Z, JVM: 1.8.0_141
-gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ git checkout v5.5.1
+gswewf@gswewf-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ git checkout v5.5.1
 之前的 HEAD 位置是 1a62eb1... update es to 5.4.3
 HEAD 目前位于 8da12f3... update es to 5.5.1
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ git branch 
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ git branch 
 * （头指针分离于 v5.5.1）
   master
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn clean
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn compile
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn package
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ cd target/releases/
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ ls
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn clean
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn compile
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn package
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ cd target/releases/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ ls
 elasticsearch-analysis-ik-5.5.1.zip
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ unzip elasticsearch-analysis-ik-5.5.1.zip -d elasticsearch-analysis-ik-5.5.1
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ unzip elasticsearch-analysis-ik-5.5.1.zip -d elasticsearch-analysis-ik-5.5.1
 Archive:  elasticsearch-analysis-ik-5.5.1.zip
    creating: elasticsearch-analysis-ik-5.5.1/
   inflating: elasticsearch-analysis-ik-5.5.1/elasticsearch-analysis-ik-5.5.1.jar  
   inflating: elasticsearch-analysis-ik-5.5.1/httpclient-4.5.2.jar  
   inflating: elasticsearch-analysis-ik-5.5.1/httpcore-4.4.4.jar 
 ...
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ docker cp elasticsearch-analysis-ik-5.5.1 elasticsearch9200:/usr/share/elasticsearch/plugins/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ docker cp elasticsearch-analysis-ik-5.5.1 elasticsearch9200:/usr/share/elasticsearch/plugins/
 # 在elasticsearch容器中的目录结构如：
 root@7607544fb564:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.5.1# ls
 commons-codec-1.9.jar	 config				      httpclient-4.5.2.jar  plugin-descriptor.properties
 commons-logging-1.2.jar  elasticsearch-analysis-ik-5.5.1.jar  httpcore-4.4.4.jar
 
 # 同步所有远程的tags到本地：
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ git fetch --tags
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ git checkout v5.5.1
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ git fetch --tags
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ git checkout v5.5.1
 Note: checking out 'v5.5.1'.
 
 You are in 'detached HEAD' state. You can look around, make experimental
@@ -90,27 +90,27 @@ do so (now or later) by using -b with the checkout command again. Example:
   git checkout -b <new-branch-name>
 
 HEAD 目前位于 1c7c1a4... update es to 5.5.1
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ git branch 
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ git branch 
 * （头指针分离于 v5.5.1）
   master
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn clean
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn compile
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn package
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn clean
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn compile
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn package
 ...
-[INFO] Building zip: /home/gswyhq/github_projects/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.5.1.zip
+[INFO] Building zip: /home/gswewf/github_projects/elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.5.1.zip
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 ...
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ cd target/releases/
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ ls
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ cd target/releases/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ ls
 elasticsearch-analysis-pinyin-5.5.1.zip
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ unzip elasticsearch-analysis-pinyin-5.5.1.zip -d elasticsearch-analysis-pinyin-5.5.1
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ unzip elasticsearch-analysis-pinyin-5.5.1.zip -d elasticsearch-analysis-pinyin-5.5.1
 Archive:  elasticsearch-analysis-pinyin-5.5.1.zip
    creating: elasticsearch-analysis-pinyin-5.5.1/
   inflating: elasticsearch-analysis-pinyin-5.5.1/elasticsearch-analysis-pinyin-5.5.1.jar  
   inflating: elasticsearch-analysis-pinyin-5.5.1/plugin-descriptor.properties  
   inflating: elasticsearch-analysis-pinyin-5.5.1/nlp-lang-1.7.jar 
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ docker cp elasticsearch-analysis-pinyin-5.5.1 elasticsearch9200:/usr/share/elasticsearch/plugins/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ docker cp elasticsearch-analysis-pinyin-5.5.1 elasticsearch9200:/usr/share/elasticsearch/plugins/
 root@7607544fb564:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.5.1# ls
 elasticsearch-analysis-pinyin-5.5.1.jar  nlp-lang-1.7.jar  plugin-descriptor.properties
 
@@ -118,14 +118,14 @@ elasticsearch-analysis-pinyin-5.5.1.jar  nlp-lang-1.7.jar  plugin-descriptor.pro
 
 # 安装elasticsearch插件：
 docker pull mobz/elasticsearch-head:5-alpine
-gswyhq@gswyhq-pc:~/docker/elasticsearch-head$ docker run -d --name elasticsearch-head9100 -p 9100:9100 mobz/elasticsearch-head:5-alpine
+gswewf@gswewf-pc:~/docker/elasticsearch-head$ docker run -d --name elasticsearch-head9100 -p 9100:9100 mobz/elasticsearch-head:5-alpine
 浏览器打开‘http://localhost:9100/’即可。
 
 有时候启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
 但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
 这个时候需要进入`elasticsearch`容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
 # config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
 http.cors.enabled: true
 http.cors.allow-origin: "*"

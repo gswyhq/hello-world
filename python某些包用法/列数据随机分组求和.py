@@ -19,10 +19,10 @@ import pandas as pd
 import random
 from itertools import combinations
 
-file_names = ['/home/gswyhq/Downloads/test/lpa30-n100-0.5rep1.dat',
- '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep2.dat',
- '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep3.dat',
- '/home/gswyhq/Downloads/test/lpa30-n100-0.5rep4.dat']
+file_names = ['/home/gswewf/Downloads/test/lpa30-n100-0.5rep1.dat',
+ '/home/gswewf/Downloads/test/lpa30-n100-0.5rep2.dat',
+ '/home/gswewf/Downloads/test/lpa30-n100-0.5rep3.dat',
+ '/home/gswewf/Downloads/test/lpa30-n100-0.5rep4.dat']
 
 def group(ls, n):
     """

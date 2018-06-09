@@ -8,32 +8,32 @@
 
 # 用git合并分支时，如何保持某些文件不被合并
 假设现在有两个分支，需要将http分支合并到master，但忽略文件‘jar/sim.jar’和‘jar/py.py’
-gswyhq@gswyhq-pc:~/qa_jar$ git branch 
+gswewf@gswewf-pc:~/qa_jar$ git branch 
 * http
   master
 
 # 查看当前`http`分支跟`master`分支有哪些文件不同：
-gswyhq@gswyhq-pc:~/qa_jar$ git diff master --stat
+gswewf@gswewf-pc:~/qa_jar$ git diff master --stat
  jar/py.py             |  12 +++++++-----
  jar/sim.jar           | Bin 8553547 -> 8553547 bytes
  tornado_jar_server.py |   2 +-
  3 files changed, 8 insertions(+), 6 deletions(-)
 
 第一步：创建我们的自定义merge driver：
-gswyhq@gswyhq-pc:~/qa_jar$ git config --global merge.ours.driver true
+gswewf@gswewf-pc:~/qa_jar$ git config --global merge.ours.driver true
 
 第二步：在要被merge的分支,即'http'分支上创建.gitattributes 文件，并且在文件中置顶不merge的文件名：
-gswyhq@gswyhq-pc:~/qa_jar$ vim .gitattributes
+gswewf@gswewf-pc:~/qa_jar$ vim .gitattributes
 jar/sim.jar merge=ours
 jar/py.py merge=ours
 
 第三步：回到要合并到的`master`分支
-gswyhq@gswyhq-pc:~/qa_jar$ git checkout master 
+gswewf@gswewf-pc:~/qa_jar$ git checkout master 
 切换到分支 'master'
 您的分支与上游分支 'origin/master' 一致。
 
 第四步：将`http`分支合并到`master`分支：
-gswyhq@gswyhq-pc:~/qa_jar$ git merge http 
+gswewf@gswewf-pc:~/qa_jar$ git merge http 
 自动合并 tornado_jar_server.py
 Merge made by the 'recursive' strategy.
  tornado_jar_server.py | 2 +-
@@ -49,17 +49,17 @@ cherry-pick是作为一个新的commit, 合并过来的commit`62ecb3`在本分�
 
 # 有时候一个分支明明比另一个分值领先，但查看未合并分支时，发现有旧的分支没有合并；
 # 这个时候，可以先查找旧分支上未合并的commit 的hash值，再把对应的commit合并过来即可
-    gswyhq@gswyhq-pc:~/yhb$ git branch
+    gswewf@gswewf-pc:~/yhb$ git branch
       dev
     * dingdang
       wmd_template
-    gswyhq@gswyhq-pc:~/yhb$ git branch --no-merged
+    gswewf@gswewf-pc:~/yhb$ git branch --no-merged
       wmd_template
-    gswyhq@gswyhq-pc:~/yhb$ git merge e880911049
+    gswewf@gswewf-pc:~/yhb$ git merge e880911049
     Merge made by the 'recursive' strategy.
      wmd/qa_chat_wmd.py | 1 +
      1 file changed, 1 insertion(+)
-    gswyhq@gswyhq-pc:~/yhb$ git branch --no-merged
+    gswewf@gswewf-pc:~/yhb$ git branch --no-merged
 
 # 合并某个分支上的一系列commits
 假设你需要合并feature分支的commit76cada ~62ecb3 到master分支。
@@ -71,10 +71,10 @@ git rebase --ontomaster 76cada^
 
 合并多个commit示例：
 1、查看当前的日志，找出不需要合并的 commit 的 hash 值
-    gswyhq@gswyhq-pc:~/yhb$ git log
+    gswewf@gswewf-pc:~/yhb$ git log
     commit 2e0b6531fc555883884cd0e6dfab98c13e5feb43
     Merge: 4a9da01 d9d3650
-    Author: gswyhqyang <gswyhqyang@web1.co>
+    Author: gswewfyang <gswewfyang@web1.co>
     Date:   2017-07-24 15:17:48 +0800
 
         合并线上运行版本
@@ -92,13 +92,13 @@ git rebase --ontomaster 76cada^
         20170722模板
 
     commit 4a9da0103bbea7ec98c75209014966be3b81292b
-    Author: gswyhqyang <gswyhqyang@web1.co>
+    Author: gswewfyang <gswewfyang@web1.co>
     Date:   2017-07-06 20:51:48 +0800
 
         debug：融合答案
 
 2、rebase不需要合并的 commit 的 hash，进入到 vi 的编辑模式（示例，将 2e0b6531f 、 d9d36509d3e 和 4cd50b7aacd 合并成一个 commit）
-    gswyhq@gswyhq-pc:~/yhb$ git rebase -i 4a9da0103b
+    gswewf@gswewf-pc:~/yhb$ git rebase -i 4a9da0103b
 
     pick 11497ad 你我贷项目个性化配置
     pick 42fb915 你我贷项目个性化配置
@@ -144,7 +144,7 @@ git rebase --ontomaster 76cada^
 4、注意事项：
     没有父提交的情况下不能 'squash'，也就是说`2e0b6531f`是由`42fb915`和`11497ad`合并而成，并不能再进行合并
     如果这个过程中有操作错误，可以使用 git rebase --abort来撤销修改，回到没有开始操作合并之前的状态。
-    gswyhq@gswyhq-pc:~/yhb$ git rebase --abort
+    gswewf@gswewf-pc:~/yhb$ git rebase --abort
 
 # git merge 与 git rebase 的区别。
 假设当前项目有两个分支 local 和 upstream, local 和 upstream有共同的祖先A；

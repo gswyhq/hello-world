@@ -1,10 +1,10 @@
 
 一、安装cython:
-gswyhq@gswyhq-pc:~$ sudo apt-get install cython
-gswyhq@gswyhq-pc:~$ cython -V
+gswewf@gswewf-pc:~$ sudo apt-get install cython
+gswewf@gswewf-pc:~$ cython -V
 Cython version 0.25.2
 # 并且安装对应的python包
-gswyhq@gswyhq-pc:~$ sudo pip3 install Cython
+gswewf@gswewf-pc:~$ sudo pip3 install Cython
 
 二、 使用
 
@@ -27,20 +27,20 @@ setup(
 )
 3. 执行python程序
 
-gswyhq@gswyhq-pc:~/hello-world/cython相关$ ls
+gswewf@gswewf-pc:~/hello-world/cython相关$ ls
 cython的安装、使用.txt  hello.pyx  setup.py
-gswyhq@gswyhq-pc:~/hello-world/cython相关$ python3 setup.py build_ext --inplace
+gswewf@gswewf-pc:~/hello-world/cython相关$ python3 setup.py build_ext --inplace
 running build_ext
 cythoning hello.pyx to hello.c
 building 'hello' extension
 creating build
 creating build/temp.linux-x86_64-3.5
 x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -I/usr/include/python3.5m -c hello.c -o build/temp.linux-x86_64-3.5/hello.o
-x86_64-linux-gnu-gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,relro -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 build/temp.linux-x86_64-3.5/hello.o -o /home/gswyhq/hello-world/cython相关/hello.cpython-35m-x86_64-linux-gnu.so
-gswyhq@gswyhq-pc:~/hello-world/cython相关$ ls
+x86_64-linux-gnu-gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,relro -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 build/temp.linux-x86_64-3.5/hello.o -o /home/gswewf/hello-world/cython相关/hello.cpython-35m-x86_64-linux-gnu.so
+gswewf@gswewf-pc:~/hello-world/cython相关$ ls
 build  cython的安装、使用.txt  hello.c  hello.cpython-35m-x86_64-linux-gnu.so  hello.pyx  setup.py
-gswyhq@gswyhq-pc:~/hello-world/cython相关$ cd build/
-gswyhq@gswyhq-pc:~/hello-world/cython相关/build$ ls
+gswewf@gswewf-pc:~/hello-world/cython相关$ cd build/
+gswewf@gswewf-pc:~/hello-world/cython相关/build$ ls
 temp.linux-x86_64-3.5
 
 执行的结果会生成两个文件：hello.c 和 hello.so( 用PyObject* 封装好的文件)及一个目录build
@@ -48,10 +48,10 @@ hello.c 及build目录都可以删除掉；
 
 4. 用python调用 hello.so,调用文件为test.py
 将`hello.cpython-35m-x86_64-linux-gnu.so`随便移动到某个位置，添加到路径即可导入，测试；
-gswyhq@gswyhq-pc:~/hello-world/cython相关$ mv hello.cpython-35m-x86_64-linux-gnu.so /home/gswyhq/
+gswewf@gswewf-pc:~/hello-world/cython相关$ mv hello.cpython-35m-x86_64-linux-gnu.so /home/gswewf/
 
 import sys
-sys.path.append('/home/gswyhq')
+sys.path.append('/home/gswewf')
 import hello
 hello.say_hello_to('你好，中国')
 Hello 你好，中国!

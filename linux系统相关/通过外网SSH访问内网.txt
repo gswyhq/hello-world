@@ -37,7 +37,7 @@ ssh -p <portb2> usra@B.B.B.B
 至此方案完成。
 
 示例（将18007端口的访问转发到7770端口）：
-ubuntu@ip-172-31-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
+ubuntu@ip-172-33-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
 
 autossh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
 ssh -NfR 18100:192.168.3.103:18100 root@106.75.141.166
@@ -49,9 +49,9 @@ root@1798fefb267f:/jiaoyin# nohup autossh -NR 18090:192.168.3.131:18090 ubuntu@5
 # 有时候反向连接报错：
 Warning: remote port forwarding failed for listen port 7770
 这个时候，需要在被反向连接到的机器上，找到对应的进程kill掉即可；
-ubuntu@ip-172-31-14-6:~/nlp_request_url$ sudo netstat -plant |grep 7770
+ubuntu@ip-172-33-14-6:~/nlp_request_url$ sudo netstat -plant |grep 7770
 tcp      184      0 localhost:7770          localhost:41106         CLOSE_WAIT  20273/sshd: ubuntu
-ubuntu@ip-172-31-14-6:~/nlp_request_url$ kill -9 20273
+ubuntu@ip-172-33-14-6:~/nlp_request_url$ kill -9 20273
 
 附：
 
@@ -87,13 +87,13 @@ curl http://10.13.101.154:8802/ -d '{"question": "a卡在哪里能用", "uid": "
 zy@ubuntu:~/yhb$ ssh -i zy.pem -NfR 7770:192.168.3.101:80 ubuntu@152.180.62.217
 zy@ubuntu:~/yhb$ Warning: remote port forwarding failed for listen port 7770
 # 在代理机器上（ubuntu@152.180.62.217），查找占用的进程，kill掉即可：
-ubuntu@ip-172-31-14-6:~/shanglishi$ sudo netstat -plant|grep 7770
+ubuntu@ip-172-33-14-6:~/shanglishi$ sudo netstat -plant|grep 7770
 tcp        0      0 127.0.0.1:7770          0.0.0.0:*               LISTEN      29810/sshd: ubuntu
 tcp      175      0 127.0.0.1:7770          127.0.0.1:40773         CLOSE_WAIT  29810/sshd: ubuntu
 tcp      175      0 127.0.0.1:7770          127.0.0.1:40772         CLOSE_WAIT  29810/sshd: ubuntu
 tcp      175      0 127.0.0.1:7770          127.0.0.1:40771         CLOSE_WAIT  29810/sshd: ubuntu
 tcp6       0      0 ::1:7770                :::*                    LISTEN      29810/sshd: ubuntu
-ubuntu@ip-172-31-14-6:~/shanglishi$ kill -9 29810
+ubuntu@ip-172-33-14-6:~/shanglishi$ kill -9 29810
 
 如果SSH连接和应用的连接这两个连接的方向一致，那我们就说它是本地转发。
 ssh -L <local port>:<remote host>:<remote port> <SSH hostname>
@@ -105,7 +105,7 @@ ssh -R <local port>:<remote host>:<remote port> <SSH hostname>
 
 ssh -i .zyg.pem -NfL  172.31.13.157:3307:ucloud.c1t9kbuexy3c.rds.cn-north-1.amazonaws.com.cn:3306 ubuntu@54.223.152.240
 
-ubuntu@ip-172-31-14-6:~$ telnet ucloud.c1t9kbuexy3c.rds.cn-north-1.amazonaws.com.cn 3306
+ubuntu@ip-172-33-14-6:~$ telnet ucloud.c1t9kbuexy3c.rds.cn-north-1.amazonaws.com.cn 3306
 Trying 172.31.0.68...
 Connected to ec2-52-80-141-61.cn-north-1.compute.amazonaws.com.cn.
 Escape character is '^]'.
@@ -115,12 +115,12 @@ Connection closed by foreign host.
 
 
 # 本地端口转发（访问本地18474端口，就等同于访问7474端口）：
-gswyhq@gswyhq-PC:~$ ssh -g -L 18474:localhost:7474 localhost
-gswyhq@gswyhq-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub gswyhq@192.168.3.145
-gswyhq@gswyhq-PC:~$ autossh -g -NL 18474:localhost:7474 localhost &
+gswewf@gswewf-PC:~$ ssh -g -L 18474:localhost:7474 localhost
+gswewf@gswewf-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub gswewf@192.168.3.145
+gswewf@gswewf-PC:~$ autossh -g -NL 18474:localhost:7474 localhost &
 
 # 或者在192.168.3.145机器上执行：
-gswyhq@gswyhq-PC:~$ nohup autossh -g -NL 18474:192.168.3.145:7474 192.168.3.145 &
+gswewf@gswewf-PC:~$ nohup autossh -g -NL 18474:192.168.3.145:7474 192.168.3.145 &
 
 -C：压缩数据传输。
 -f ：后台认证用户/密码，通常和-N连用，不用登录到远程主机。

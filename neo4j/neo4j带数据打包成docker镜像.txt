@@ -6,18 +6,18 @@ neo4j带数据打包成docker镜像
 3，使用docker commit命令打包成镜像；
 4，拉取镜像开始使用，若不设置用户名/密码；则为commit之前容器对应的用户名/密码。
 
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474 --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/gswyhq --env NEO4J_dbms_allow__format__migration=true 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:neo4j_3.2.5
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474 --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/gswewf --env NEO4J_dbms_allow__format__migration=true 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:neo4j_3.2.5
 
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker cp data xinxin_all_baoxian_7474:/var/lib/neo4j/
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker cp data xinxin_all_baoxian_7474:/var/lib/neo4j/
 
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker commit -m "信诚四款保险产品neo4j数据" xinxin_all_baoxian_7474 xinxin_all_baoxian_neo4j:20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker commit -m "信诚四款保险产品neo4j数据" xinxin_all_baoxian_7474 xinxin_all_baoxian_neo4j:20180504
 sha256:ed3a5a949c3cf997c5a34362ca2c2f411d2c78a20535d83d91330892a44d2404
 
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474_2 --publish=7474:7474 --publish=7687:7687 xinxin_all_baoxian_neo4j:20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474_2 --publish=7474:7474 --publish=7687:7687 xinxin_all_baoxian_neo4j:20180504
 a1f7e0dc2edeed4d30ba36dd2b9d800d8de9251423ae933b9e0aa063cb8de26a
 
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker tag xinxin_all_baoxian_neo4j:20180504 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker push 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker tag xinxin_all_baoxian_neo4j:20180504 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker push 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
 yanghq@gpu2:~$ docker pull 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
 yanghq@gpu2:~$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474_2 --publish=7474:7474 --publish=7687:7687 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp:xinxin_neo4j_20180504
 

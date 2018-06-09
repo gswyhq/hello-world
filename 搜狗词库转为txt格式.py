@@ -352,12 +352,12 @@ if __name__ == '__main__':
     '歇后语集锦【官方推荐】.scel',
     '饮食大全【官方推荐】.scel',
     ]
-    o=['/home/gswyhq/sougouxibao/细胞词库全收集@AElee/89个节日.scel']
+    o=['/home/gswewf/sougouxibao/细胞词库全收集@AElee/89个节日.scel']
     for f in o:
         deal(f)
         
     #保存结果  
-    f = open('/home/gswyhq/sougouxibao/sougou.txt','w')
+    f = open('/home/gswewf/sougouxibao/sougou.txt','w')
     for count,py,word in GTable:
         #GTable保存着结果，是一个列表，每个元素是一个元组(词频,拼音,中文词组)，有需要的话可以保存成自己需要个格式
         #我没排序，所以结果是按照上面输入文件的顺序

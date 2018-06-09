@@ -27,7 +27,7 @@ class EncodingFormatter(logging.Formatter):
             result = result.encode(self.encoding or 'utf-8')
         return result
 
-def send_log_error(toaddrs='gswyhq@126.com', subject=u'邮件标题',contents=u'这是程序发送的测试邮件正文'):
+def send_log_error(toaddrs='gswewf@126.com', subject=u'邮件标题',contents=u'这是程序发送的测试邮件正文'):
     """利用logging模块发送邮件
 
     参数：
@@ -48,7 +48,7 @@ def send_log_error(toaddrs='gswyhq@126.com', subject=u'邮件标题',contents=u'
     root.error(contents)
 
 def main():
-    send_log_error(toaddrs='gswyhq@126.com', subject=u'邮件标题',contents=u'这是程序发送的测试邮件正文')
+    send_log_error(toaddrs='gswewf@126.com', subject=u'邮件标题',contents=u'这是程序发送的测试邮件正文')
 
 if __name__ == "__main__":
     main()

@@ -40,41 +40,41 @@ git reset --hard 版本号
 
 commit之后，pull了远程代码之后，想撤销本次的pull操作；
 第一步：通过git log获取pull之前的版本号
-gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git log
+gswewf@gswewf-pc:~/ambbr-ai/ambbr$ git log
 commit 61d534e4a52dbf54b2ba137d7312c139e6399474
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Fri Nov 25 14:02:30 2016 +0800
 
     debug initiative
 
 commit 7a2ce91c4ec67e13fc440445b64db62e3328e12b
 Merge: 9ba7af3 88b0eae
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Thu Nov 24 16:53:36 2016 +0800
 
     Merge branch 'dev' of 172.26.1.167:ai/new-ambbr-ai into dev
 
 第二步：回退到pull之前的版本
-gswyhq@gswyhq-pc:~/ambbr-ai/ambbr$ git reset --hard 61d534e4a52dbf54b2ba137d7312c139e6399474
+gswewf@gswewf-pc:~/ambbr-ai/ambbr$ git reset --hard 61d534e4a52dbf54b2ba137d7312c139e6399474
 HEAD 现在位于 61d534e debug initiative
 
 回退版本：
 第一步查看历史记录
-gswyhq@gswyhq-pc:~/hello-world$ git log
+gswewf@gswewf-pc:~/hello-world$ git log
 commit ac16836ae865ab521950e32470b774a601a78c34
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Wed Feb 22 22:27:56 2017 +0800
 
     添加linux相关操作命令记录
 
 commit d37e24978f952cdb5d8243af3ce2d2ec41223a2a
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Fri Feb 17 21:46:27 2017 +0800
 
     添加.gitignore文件
 
 commit 19a886f11500fa8a15be15dcb736f38aabb11f0f
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Wed Jun 3 22:50:47 2015 +0800
 
     第二次更改
@@ -82,7 +82,7 @@ Date:   Wed Jun 3 22:50:47 2015 +0800
     添加了，print（“你好！”）
 
 commit 3d2ab6bdb1fc0ef15fd3d2c85ee29587af7dcb80
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Wed Jun 3 22:47:51 2015 +0800
 
     第一次更改
@@ -90,13 +90,13 @@ Date:   Wed Jun 3 22:47:51 2015 +0800
     第一次更改，什么都没有写。
 
 第二步：回退到指定版本：
-gswyhq@gswyhq-pc:~/hello-world$ git reset --hard 19a886f11500fa8a15be15dcb736f38aabb11f0f
+gswewf@gswewf-pc:~/hello-world$ git reset --hard 19a886f11500fa8a15be15dcb736f38aabb11f0f
 HEAD 现在位于 19a886f 第二次更改
 
 第三步：查看回退效果，发现回退到指定版本号之后的提交都没有了（这应该是跟撤销的最大区别吧）；
-gswyhq@gswyhq-pc:~/hello-world$ git log
+gswewf@gswewf-pc:~/hello-world$ git log
 commit 19a886f11500fa8a15be15dcb736f38aabb11f0f
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Wed Jun 3 22:50:47 2015 +0800
 
     第二次更改
@@ -104,7 +104,7 @@ Date:   Wed Jun 3 22:50:47 2015 +0800
     添加了，print（“你好！”）
 
 commit 3d2ab6bdb1fc0ef15fd3d2c85ee29587af7dcb80
-Author: gswyhq <gswyhq@126.com>
+Author: gswewf <gswewf@126.com>
 Date:   Wed Jun 3 22:47:51 2015 +0800
 
     第一次更改
@@ -112,7 +112,7 @@ Date:   Wed Jun 3 22:47:51 2015 +0800
     第一次更改，什么都没有写。
 # 并且回退之后并没有显示要提交的东西，仅仅是比远程的落后了，故这个时候需要把本次回退提交（push）到远程，否则下次pull一下，本次回退就白忙活了；
 # 但直接push会报错，因为本地版本落后于远程的版本，这个时候需要强制push，或者刚才删除远程的对应分支后再push。
-gswyhq@gswyhq-pc:~/hello-world$ git status
+gswewf@gswewf-pc:~/hello-world$ git status
 位于分支 master
 您的分支落后 'origin/master' 共 2 个提交，并且可以快进。
   （使用 "git pull" 来更新您的本地分支）
@@ -147,8 +147,8 @@ $ git log
 所以，如果你因为reset等操作丢失一个提交的时候，你总是可以把它找回来。除非你的操作已经被git当做垃圾处理掉了，一般是30天以后。
 
 # 在git历史版本中查找某个文件（即查看某个文件是什么时候被删除的）：
-gswyhq@gswyhq-pc:~$ git log -- flask_server.py
+gswewf@gswewf-pc:~$ git log -- flask_server.py
 # 或者在历史记录中模糊查找某个文件:
-gswyhq@gswyhq-pc:~$ git log --all -- "*flask*"
+gswewf@gswewf-pc:~$ git log --all -- "*flask*"
 
 

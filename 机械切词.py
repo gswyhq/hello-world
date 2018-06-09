@@ -10,7 +10,7 @@
 import string
 __dict = {}
    
-def load_dict(dict_file='/home/gswyhq/gow69/data/words.dic'):
+def load_dict(dict_file='/home/gswewf/gow69/data/words.dic'):
     #加载词库，把词库加载成一个key为首字符，value为相关词的列表的字典
    
     words = [line.strip().split() for line in open(dict_file)]

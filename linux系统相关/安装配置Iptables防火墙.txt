@@ -1,6 +1,6 @@
 
 第一步,首先确定你的系统已经安装Iptables.打开终端,输入
-gswyhq@gswyhq-pc:~$ whereis iptables
+gswewf@gswewf-pc:~$ whereis iptables
 iptables: /sbin/iptables /usr/share/iptables /usr/share/man/man8/iptables.8.gz
 这说明已经安装了iptables
 
@@ -10,7 +10,7 @@ sudo apt-get install iptables
 
 第二步：查看Iptables目前的配置信息
 
-gswyhq@gswyhq-pc:~$ sudo iptables -L
+gswewf@gswewf-pc:~$ sudo iptables -L
 Chain INPUT (policy ACCEPT)
 target     prot opt source               destination         
 
@@ -65,7 +65,7 @@ sudo ufw allow from 172.16.0.0/12
 sudo ufw allow from 192.168.0.0/16
 
 重启ufw使得新规则生效:
-gswyhq@gswyhq-pc:~$ sudo ufw reload
+gswewf@gswewf-pc:~$ sudo ufw reload
 
 # 删除防火墙的某条规则：
 方法一：
@@ -76,7 +76,7 @@ sudo ufw delete allow 22/tcp
 
 方法二：
 查看现有的防火墙规则
-gswyhq@gswyhq-pc:~/yhb$ sudo ufw status numbered
+gswewf@gswewf-pc:~/yhb$ sudo ufw status numbered
 Status: active
 
      To                         Action      From
@@ -93,7 +93,7 @@ Status: active
 
 按序号，删除某条规则：
 比如删除序号为1的防火墙：
-gswyhq@gswyhq-pc:~/yhb$ sudo ufw delete 1
+gswewf@gswewf-pc:~/yhb$ sudo ufw delete 1
 Deleting:
  allow from 192.168.3.48 to any port 8005
 Proceed with operation (y|n)? y                   
@@ -102,7 +102,7 @@ iptables: Bad rule (does a matching rule exist in that chain?).
 iptables: Bad rule (does a matching rule exist in that chain?).
 
 Rule deleted
-gswyhq@gswyhq-pc:~/yhb$ sudo ufw status numbered
+gswewf@gswewf-pc:~/yhb$ sudo ufw status numbered
 Status: active
 
      To                         Action      From
@@ -117,12 +117,12 @@ Status: active
 [ 8] 7474                       ALLOW IN    Anywhere  
 
 开放端口后，还是报错：
-gswyhq@gswyhq-pc:~/yhb curl http://119.137.53.18:8000 -d '{"question": "a在哪里能用", "uid": "123456"}'
+gswewf@gswewf-pc:~/yhb curl http://119.137.53.18:8000 -d '{"question": "a在哪里能用", "uid": "123456"}'
 curl: (7) Failed to connect to 119.137.53.18 port 8000: 拒绝连接
 
 
 测试能否连接某个主机
-gswyhq@gswyhq-pc:~/yhb ping 106.75.141.166
+gswewf@gswewf-pc:~/yhb ping 106.75.141.166
 PING 106.75.141.166 (106.75.141.166) 56(84) bytes of data.
 64 bytes from 106.75.141.166: icmp_seq=1 ttl=53 time=7.04 ms
 64 bytes from 106.75.141.166: icmp_seq=2 ttl=53 time=6.99 ms
@@ -132,13 +132,13 @@ PING 106.75.141.166 (106.75.141.166) 56(84) bytes of data.
 
 测试某个端口号能否联通
  telnet服务器是通过xinetd（超级Internet守护进程）来管理的，所以要先安装xinetd。安装命令如下：
-gswyhq@gswyhq-pc:~$ sudo apt-get install xinetd
+gswewf@gswewf-pc:~$ sudo apt-get install xinetd
 安装telnet服务器
-输入以下命令安装：gswyhq@gswyhq-pc:~$ sudo apt-get install telnetd
+输入以下命令安装：gswewf@gswewf-pc:~$ sudo apt-get install telnetd
 
 安装telnet客户端
    为了测试服务器，我们在linux本机安装telnet客户端来进行测试
-   gswyhq@gswyhq-pc:~$ telnet 127.0.0.1 8000
+   gswewf@gswewf-pc:~$ telnet 127.0.0.1 8000
 Trying 127.0.0.1...
 Connected to 127.0.0.1.
 Escape character is '^]'.
@@ -146,7 +146,7 @@ Escape character is '^]'.
 从以上结果可以看出telnet能连接成功；
 
 查看本机的外网ip：
-gswyhq@gswyhq-pc:~/yhb curl ifconfig.me/all
+gswewf@gswewf-pc:~/yhb curl ifconfig.me/all
 ip_addr: 119.137.53.186
 remote_host: 
 user_agent: curl/7.50.1

@@ -1,20 +1,20 @@
 
 系统时间不对：
 方法1：直接改时区
-ubuntu@ip-172-31-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ubuntu@ip-172-33-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 docker cp /usr/share/zoneinfo/Asia ubuntu1220:/usr/share/zoneinfo/Asia
 
 方法2：若改时区后还不对，则可以：
-ubuntu@ip-172-31-14-6:~$ date
+ubuntu@ip-172-33-14-6:~$ date
 Fri Aug 11 09:59:49 UTC 2017
 # 更改时区：
-ubuntu@ip-172-31-14-6:~$ sudo vim /etc/timezone
-ubuntu@ip-172-31-14-6:~$ head /etc/timezone
+ubuntu@ip-172-33-14-6:~$ sudo vim /etc/timezone
+ubuntu@ip-172-33-14-6:~$ head /etc/timezone
 Asia/shanghai
-ubuntu@ip-172-31-14-6:~$ date
+ubuntu@ip-172-33-14-6:~$ date
 Fri Aug 11 18:03:08 UTC 2017
 # 重新设置时间：
-ubuntu@ip-172-31-14-6:~$ sudo date  -s "2017-8-11 18:04:00"
+ubuntu@ip-172-33-14-6:~$ sudo date  -s "2017-8-11 18:04:00"
 
 设置ls -l命令中显示的日期格式
 默认是：-rw-rw-r--  1 zy zy     51 Oct 25 14:05 updateqa_rg.json
@@ -34,20 +34,20 @@ export TIME_STYLE='+%Y-%m-%d %H:%M:%S'
 zy@ubuntu:~$ source ~/.bash_profile
 
 # 设置sudo为不需要密码
-gswyhq@gswyhq-PC:~$ sudo su -
-root@gswyhq-PC:~# visudo  # 等同于：vim /etc/sudoers
-添加一行：`gswyhq ALL=(ALL:ALL) NOPASSWD:ALL`
-root@gswyhq-PC:~#  tail /etc/sudoers
+gswewf@gswewf-PC:~$ sudo su -
+root@gswewf-PC:~# visudo  # 等同于：vim /etc/sudoers
+添加一行：`gswewf ALL=(ALL:ALL) NOPASSWD:ALL`
+root@gswewf-PC:~#  tail /etc/sudoers
 # User privilege specification
 root	ALL=(ALL:ALL) ALL
 
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
-gswyhq ALL=(ALL:ALL) NOPASSWD:ALL
+gswewf ALL=(ALL:ALL) NOPASSWD:ALL
 
 # See sudoers(5) for more information on "#include" directives:
 
 #includedir /etc/sudoers.d
 
-root@gswyhq-PC:~# exit
+root@gswewf-PC:~# exit
 注销

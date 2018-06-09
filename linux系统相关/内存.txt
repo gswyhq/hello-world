@@ -10,13 +10,13 @@ top 命令小技巧
 4、按小写字母c,可显示程序的运行路径，即显示命令名称和完整命令行
 
 手动释放系统内存：
-gswyhq@gswyhq-PC:~/yhb$ sudo -i
-root@gswyhq-PC:~# free -h
+gswewf@gswewf-PC:~/yhb$ sudo -i
+root@gswewf-PC:~# free -h
               total        used        free      shared  buff/cache   available
 Mem:            15G        8.1G        3.4G        191M        4.1G        7.0G
 Swap:          4.0G          0B        4.0G
-root@gswyhq-PC:~# echo 3 > /proc/sys/vm/drop_caches
-root@gswyhq-PC:~# free -h
+root@gswewf-PC:~# echo 3 > /proc/sys/vm/drop_caches
+root@gswewf-PC:~# free -h
               total        used        free      shared  buff/cache   available
 Mem:            15G        8.1G        6.5G        188M        1.0G        7.0G
 Swap:          4.0G          0B        4.0G

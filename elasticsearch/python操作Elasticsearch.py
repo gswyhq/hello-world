@@ -264,18 +264,18 @@ class exportEsData():
 #    }
 # }
 # 查看连接：
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200
 #
 # 查看集群的状态:
-# gswyhq@gswyhq-pc:~$ curl -XGET 172.26.1.128:9200/_cluster/health?pretty
+# gswewf@gswewf-pc:~$ curl -XGET 172.26.1.128:9200/_cluster/health?pretty
 #
 # # http://sg552.iteye.com/blog/1567047
 #
 # 查询所有的 index, type:
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200/_search?pretty=true
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200/_search?pretty=true
 #
 # 查询musicinfo这个index下的所有type:
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200/musicinfo/_search
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200/musicinfo/_search
 #
 # 查询ai_depart这个index下的ai_test这个type下的所有记录
 # curl 172.26.1.128:9200/ai_depart/ai_test/_search?pretty=true
@@ -289,13 +289,13 @@ class exportEsData():
 #
 # 查询ai_depart这个index下的ai_test这个type下的id为207388的记录：
 # 在任意的查询字符串中增加pretty参数，类似于上面的例子。会让Elasticsearch美化输出(pretty-print)JSON响应以便更加容易阅读。_source字段不会被美化，它的样子与我们输入的一致。
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?pretty
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?pretty
 #
 # 请求个别字段：
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?_source=id,title
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?_source=id,title
 #
 # 只想得到_source字段而不要其他的元数据
-# gswyhq@gswyhq-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?_source
+# gswewf@gswewf-pc:~$ curl 172.26.1.128:9200/musicinfo/music/207388?_source
 #
 #
 # http://172.26.1.128:9200/musicinfo/music/_search?title=%22%E7%9B%B8%E5%AE%B9%22

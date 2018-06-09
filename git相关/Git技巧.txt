@@ -93,7 +93,7 @@ git gc --aggressive --prune=now
 译者注：我们知道，分支只是对提交的一个引用，所以，每当从当前分支创建一个分支时，被创建的分支都会延续之前的历史，但是这种方式却不会，是一个完完全全干净的git分支，没有任何的提交！
 
 # 查看4天内，某个author改了些什么
-git log --since '4 day ago' --oneline --author gswyhqyang@web1.co
+git log --since '4 day ago' --oneline --author gswewfyang@web1.co
 
 # 比较暂存区和版本库差异
 git diff --staged

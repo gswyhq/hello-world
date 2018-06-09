@@ -1,13 +1,13 @@
 1、登陆服务器（192.168.3.105）
-gswyhq@gswyhq-pc:~$ ssh zy@192.168.3.105
+gswewf@gswewf-pc:~$ ssh zy@192.168.3.105
 
 2、复制服务器上文件到本地
-gswyhq@gswyhq-pc:~$ scp zy@192.168.3.105:/home/zy/hello.py hello.py   # 将服务器上我文件‘/home/zy/hello.py’ 拷贝到当前目录
+gswewf@gswewf-pc:~$ scp zy@192.168.3.105:/home/zy/hello.py hello.py   # 将服务器上我文件‘/home/zy/hello.py’ 拷贝到当前目录
 
 3、拷贝本地文件到服务器
-gswyhq@gswyhq-pc:~$ scp ./yhb/hello.py zy@192.168.3.105:/home/zy/hello.py
+gswewf@gswewf-pc:~$ scp ./yhb/hello.py zy@192.168.3.105:/home/zy/hello.py
 或者：
-ubuntu@ip-172-31-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.tar ubuntu@152.180.24.45:/data/docker/ubuntu/ubuntu0815-export.tar
+ubuntu@ip-172-33-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.tar ubuntu@152.180.24.45:/data/docker/ubuntu/ubuntu0815-export.tar
 
 4、通过密钥验证用户身份（登陆时候不需要输入密码）
 方法一：$ ssh-keygen
@@ -17,7 +17,7 @@ ubuntu@ip-172-31-14-6:~$ scp -i .zy.pem /data/docker/ubuntu/ubuntu0815-export.ta
         将本地生成的id_rsa.pub公钥复制到服务器主机上，并将内容追加到~/.ssh/authorized_keys中
         $ cat id_rsa.pub >> ~/.ssh/authorized_keys
 方法二：ssh-copy-id 将key写到远程机器的 ~/ .ssh/authorized_key.文件中
-        gswyhq@gswyhq-pc:~$ ssh-copy-id zy@192.168.3.105
+        gswewf@gswewf-pc:~$ ssh-copy-id zy@192.168.3.105
 
 反向代理：
 ssh -NfR 8001:192.168.3.105:8000 root@106.75.141.166
@@ -29,24 +29,24 @@ autossh -M 5678 -NfR 19999:localhost:22 zy@192.168.3.105
 -M 5678参数，负责通过5678端口监视连接状态，连接有问题时就会自动重连，-f参数使用程序后台运行
 设置重启、开机自动启动autossh
 sudo vi /etc/rc.local 在exit 0前面输入：
-autossh -M 5678 -NfR 19999:localhost:22 用户名@203.195.xxx.xxx -o BatchMode=yes -i /home/gswyhq/.ssh/id_rsa
+autossh -M 5678 -NfR 19999:localhost:22 用户名@203.195.xxx.xxx -o BatchMode=yes -i /home/gswewf/.ssh/id_rsa
 -o BatchMode不用输入yes，-i密钥的绝对路径
 
 使用别名登陆服务器
 1、编辑~/.ssh/config文件，添加如下内容
-gswyhq@gswyhq-pc:~/.ssh$ tail -f config 
+gswewf@gswewf-pc:~/.ssh$ tail -f config 
 Host        zy103
     HostName        192.168.3.103
     Port            22
     User            zy
     IdentityFile    ~/.ssh/id_rsa
 2、采用别名“zy103”登陆
-gswyhq@gswyhq-pc:~/.ssh$ ssh zy103
+gswewf@gswewf-pc:~/.ssh$ ssh zy103
 zy@192.168.3.103's password: 
 
 
 通过SSH使用PEM文件登录
-gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
+gswewf@gswewf-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -56,22 +56,22 @@ This private key will be ignored.
 Load key "zy.pem": bad permissions
 Permission denied (publickey).
 如果出现报错说明这个问题是文件的权限太大了，需要给小点 
-gswyhq@gswyhq-pc:~$ sudo chmod 600 zy.pem 
-gswyhq@gswyhq-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
+gswewf@gswewf-pc:~$ sudo chmod 600 zy.pem 
+gswewf@gswewf-pc:~$ ssh -i zy.pem ubuntu@152.180.41.112
 
 
 
 更多示例，可参考：http://www.cnblogs.com/eshizhan/archive/2012/07/16/2592902.html
 
 # ssh登录后经常很快自动断开：
-ubuntu@ip-172-31-14-6:~$ sudo vim /etc/ssh/sshd_config
+ubuntu@ip-172-33-14-6:~$ sudo vim /etc/ssh/sshd_config
 ClientAliveInterval 30
 ClientAliveCountMax 5
 # 重启ssh服务使生效：
-ubuntu@ip-172-31-14-6:~$ sudo service sshd reload 
+ubuntu@ip-172-33-14-6:~$ sudo service sshd reload 
 sshd: unrecognized service
 改成：
-ubuntu@ip-172-31-14-6:~$ sudo service ssh restart
+ubuntu@ip-172-33-14-6:~$ sudo service ssh restart
 ssh stop/waiting
 ssh start/running, process 12050
 
@@ -79,10 +79,10 @@ ssh start/running, process 12050
 Warning: Permanently added 'localhost' (ECDSA) to the list of known hosts.
 Permission denied (publickey).
 把公钥（id_dsa.pub）追加到授权的key中去即可：
-ubuntu@ip-172-31-13-157:~$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+ubuntu@ip-172-33-13-157:~$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 ssh 登陆异常：
-gswyhq@gswyhq-pc:~$ ssh gswyhq@192.168.1.132
+gswewf@gswewf-pc:~$ ssh gswewf@192.168.1.132
 ssh: connect to host 192.168.1.132 port 22: Connection refused
 造成这个错误的原因可能是被登陆的主机（192.168.1.132）上ssh-server未安装或者未启动。
 ubuntu 11.10 默认安装openssh-client，但是木有安装server

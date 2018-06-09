@@ -1,13 +1,13 @@
 
 docker安装好后，从Docker Hub上pull一个Neo4j的镜像
-gswyhq@gswyhq-pc:~$ sudo docker pull neo4j
+gswewf@gswewf-pc:~$ sudo docker pull neo4j
 
 启动一个Neo4j的容器, 需要在你的Home目录下建立一个/neo4j/data文件夹
 # 默认端口启动neo4j
-gswyhq@gswyhq-pc:~$ sudo docker run --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data neo4j
+gswewf@gswewf-pc:~$ sudo docker run --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data neo4j
 
 这里采用17474端口启动：
-gswyhq@gswyhq-pc:~$ sudo docker run --publish=17474:7474 --publish=17687:7687 --volume=$HOME/neo4j/data:/data neo4j
+gswewf@gswewf-pc:~$ sudo docker run --publish=17474:7474 --publish=17687:7687 --volume=$HOME/neo4j/data:/data neo4j
 
 浏览器打开：http://localhost:17474/browser/
 需要设置host:
@@ -17,7 +17,7 @@ Password：neo4j
 点击`Connect`，会让设置新密码；
 下次重新连接时，输入新密码即可；
 
-gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+gswewf@gswewf-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
 
 若需要自定义配置，则将配置文件放在`$HOME/neo4j/conf`目录下即可；配置文件示例：
 https://stackoverflow.com/questions/41568829/unexpectedupgradingstoreversionexception-expected-v0-a-3-but-file-is-versio 中的`_myNeo4j.conf`文件；
@@ -45,11 +45,11 @@ NEO4J_dbms_memory_heap_maxSize：Neo4j的堆大小，默认为512M
 NEO4J_dbms_txLog_rotation_retentionPolicy：逻辑日志的保留策略，默认为100M大小
 NEO4J_dbms_allowFormatMigration：设置为true以启用升级，默认为false
 
-gswyhq@gswyhq-pc:~/docker/neo4j/zheshang$ sudo docker run --detach  --name=zheshang47474 --publish=47474:7474 --publish=47687:7687    --volume=$PWD/data:/data --env NEO4J_dbms_memory_heap_maxSize=5120M --env NEO4J_AUTH=neo4j/gswyhq neo4j
+gswewf@gswewf-pc:~/docker/neo4j/zheshang$ sudo docker run --detach  --name=zheshang47474 --publish=47474:7474 --publish=47687:7687    --volume=$PWD/data:/data --env NEO4J_dbms_memory_heap_maxSize=5120M --env NEO4J_AUTH=neo4j/gswewf neo4j
 
 # 有时候Linux导入Windows中neo4j数据，会出现错误：
 {"log":"2017-09-14 11:41:38.155+0000 ERROR Neo4j cannot be started, because the database files require upgrading and upgrades are disabled in configuration. Please set 'dbms.allow_format_migration' to 'true' in your configuration file and try again.\n","stream":"stdout","time":"2017-09-14T11:41:38.155538983Z"}
 只需要按照提示将dbms.allow_format_migration 设置为 true 即可；
 
-gswyhq@gswyhq-PC:~/docker/neo4j/zheshang$ sudo docker run --detach  --name=zheshang47474 --publish=47474:7474 --publish=47687:7687    --volume=$PWD/data:/data --env NEO4J_dbms_memory_heap_maxSize=5120M --env NEO4J_AUTH=neo4j/gswyhq --env NEO4J_dbms_allow__format__migration=true neo4j
+gswewf@gswewf-PC:~/docker/neo4j/zheshang$ sudo docker run --detach  --name=zheshang47474 --publish=47474:7474 --publish=47687:7687    --volume=$PWD/data:/data --env NEO4J_dbms_memory_heap_maxSize=5120M --env NEO4J_AUTH=neo4j/gswewf --env NEO4J_dbms_allow__format__migration=true neo4j
 

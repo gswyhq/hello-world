@@ -5,7 +5,7 @@ import configparser
 
 #读取配置文件
 config=configparser.ConfigParser()
-config.read("/home/gswyhq/有限状态机（FSM）/IpConfig.ini") #可以是一个不存在的文件，意味着准备新建配置文件。
+config.read("/home/gswewf/有限状态机（FSM）/IpConfig.ini") #可以是一个不存在的文件，意味着准备新建配置文件。
 
 #写入宿舍配置文件
 try:

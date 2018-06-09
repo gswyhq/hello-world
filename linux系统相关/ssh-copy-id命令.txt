@@ -14,7 +14,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub user@server
 
 通过ssh-copy-id的方式实现ssh免密码登录：
 命令： ssh-copy-id -i ~/.ssh/id_rsa.put <romte_ip>
-gswyhq@gswyhq-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub yang131
+gswewf@gswewf-PC:~$ ssh-copy-id -i ~/.ssh/id_rsa.pub yang131
 常见错误：
     [root@test ~]# ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.91.135
     -bash: ssh-copy-id: command not found //提示命令不存在

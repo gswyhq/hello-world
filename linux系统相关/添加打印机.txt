@@ -1,6 +1,6 @@
  启动器 -> 打印设置 -> 添加
 
-gswyhq@gswyhq-PC:~$ hp-info
+gswewf@gswewf-PC:~$ hp-info
 
 HP Linux Imaging and Printing System (ver. 3.16.11)
 Device Information Utility ver. 5.2
@@ -12,10 +12,10 @@ under certain conditions. See COPYING file for more details.
 
 error: No device found that support this feature.
 
-gswyhq@gswyhq-PC:~$ hp-setup -i 192.168.3.76
+gswewf@gswewf-PC:~$ hp-setup -i 192.168.3.76
 
 # 安装hp插件
-gswyhq@gswyhq-PC:~$ sudo hp-plugin
+gswewf@gswewf-PC:~$ sudo hp-plugin
 
 # 参考资料：http://www.mintos.org/hardware/hplip-skill.html
 wget https://ncu.dl.sourceforge.net/project/hplip/hplip/3.17.10/hplip-3.17.10.run

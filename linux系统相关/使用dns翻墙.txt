@@ -2,13 +2,13 @@
 git clone https://github.com/dowsnature/dowsDNS.git
 
 将 conf/config.json 中的 Local_dns_server 的值改为电脑的 0.0.0.0
-gswyhq@gswyhq-pc:~/github_projects/dowsDNS$ vim conf/config.json 
+gswewf@gswewf-pc:~/github_projects/dowsDNS$ vim conf/config.json 
 
-gswyhq@gswyhq-pc:~$ sudo apt-get install firewalld
+gswewf@gswewf-pc:~$ sudo apt-get install firewalld
 # Firewall开启53端口命令：
-gswyhq@gswyhq-pc:~$ sudo firewall-cmd --add-port=53/udp --permanent
+gswewf@gswewf-pc:~$ sudo firewall-cmd --add-port=53/udp --permanent
 
-gswyhq@gswyhq-pc:~$ sudo apt-get install resolvconf
+gswewf@gswewf-pc:~$ sudo apt-get install resolvconf
 
 在 /etc/resolvconf/resolv.conf.d/base 里添加 nameserver 127.0.0.1
 

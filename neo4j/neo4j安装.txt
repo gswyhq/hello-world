@@ -1,16 +1,16 @@
 
 https://neo4j.com/download/，下载：Download Community Edition
 
-/home/gswyhq/下载/neo4j-community-3.0.4-unix.tar.gz
+/home/gswewf/下载/neo4j-community-3.0.4-unix.tar.gz
 
 # 解压
-gswyhq@gswyhq-pc:/usr/local$ sudo tar -xf '/home/gswyhq/下载/neo4j-community-3.0.4-unix.tar.gz'
+gswewf@gswewf-pc:/usr/local$ sudo tar -xf '/home/gswewf/下载/neo4j-community-3.0.4-unix.tar.gz'
 
 # 切换到root用户
-gswyhq@gswyhq-pc:/usr/local$ sudo -i
+gswewf@gswewf-pc:/usr/local$ sudo -i
 
 # 安装
-root@gswyhq-pc:/usr/local/neo4j-community-3.0.4# ./bin/neo4j console
+root@gswewf-pc:/usr/local/neo4j-community-3.0.4# ./bin/neo4j console
 
 # 设置密码，在浏览器中打开：http://localhost:7474/browser/
 # 默认用户名密码是：Default username/password: neo4j/neo4j
@@ -48,8 +48,8 @@ graph = Graph("http://localhost:7474/db/data/")
 
 http://neo4j.com/download-thanks/?edition=community&flavour=unix&release=3.0.1&_ga=1.177659493.1710540997.1464707968
 下载社区版（community）
-gswyhq@gswyhq-pc:~$ tar -xf /home/gswyhq/下载/neo4j-community-3.0.1-unix.tar.gz
-gswyhq@gswyhq-pc:~$ sudo cp -r neo4j-community-3.0.1 /usr/local/neo4j
+gswewf@gswewf-pc:~$ tar -xf /home/gswewf/下载/neo4j-community-3.0.1-unix.tar.gz
+gswewf@gswewf-pc:~$ sudo cp -r neo4j-community-3.0.1 /usr/local/neo4j
 
     Open up your terminal/shell.
     Extract the contents of the archive, using:

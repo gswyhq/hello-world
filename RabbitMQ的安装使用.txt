@@ -1,59 +1,59 @@
 
 
 先安装erlang(rabbitmq，发现是用erlang写的)：
-gswyhq@gswyhq-pc:~$ sudo apt-get install erlang-nox
+gswewf@gswewf-pc:~$ sudo apt-get install erlang-nox
 
 安装rabbitmq
-gswyhq@gswyhq-pc:~$ sudo apt-get install rabbitmq-server
+gswewf@gswewf-pc:~$ sudo apt-get install rabbitmq-server
 
 # 查找安装目录：
-gswyhq@gswyhq-pc:~$ sudo find / -name rabbitmq
+gswewf@gswewf-pc:~$ sudo find / -name rabbitmq
 
 # 查看日志信息：
-gswyhq@gswyhq-pc:/var/log/rabbitmq$ less startup_log 
+gswewf@gswewf-pc:/var/log/rabbitmq$ less startup_log 
 
 # 使用rabbitmqctl控制台命令（位于/usr/lib/rabbitmq/bin>）来创建vhost
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl add_vhost gswyhq_mq
-Creating vhost "gswyhq_mq" ...
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl add_vhost gswewf_mq
+Creating vhost "gswewf_mq" ...
 
-# 添加用户和密码(用户名：gswyhq, 密码：123456)
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl add_user gswyhq 123456
-Creating user "gswyhq" ...
+# 添加用户和密码(用户名：gswewf, 密码：123456)
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl add_user gswewf 123456
+Creating user "gswewf" ...
 
 # 给声明了的vhost，给它分配访问权限。
-# 用户名为gswyhq的用户就可以访问vitrual host为gswyhq_mq的资源了，并且具备读写的权限。
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl set_permissions -p gswyhq_mq gswyhq ".*" ".*" ".*"
-Setting permissions for user "gswyhq" in vhost "gswyhq_mq" ...
+# 用户名为gswewf的用户就可以访问vitrual host为gswewf_mq的资源了，并且具备读写的权限。
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmqctl set_permissions -p gswewf_mq gswewf ".*" ".*" ".*"
+Setting permissions for user "gswewf" in vhost "gswewf_mq" ...
 
 # 安装python的pika
-gswyhq@gswyhq-pc:~$ sudo pip3 install pika
+gswewf@gswewf-pc:~$ sudo pip3 install pika
 
 # 查询状态：
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ ./rabbitmqctl status
-Status of node 'rabbit@gswyhq-pc' ...
-Error: unable to connect to node 'rabbit@gswyhq-pc': nodedown
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ ./rabbitmqctl status
+Status of node 'rabbit@gswewf-pc' ...
+Error: unable to connect to node 'rabbit@gswewf-pc': nodedown
 
 # 编辑配置文件，取消三行注释
-root@gswyhq-pc:~# vim /etc/rabbitmq/rabbitmq-env.conf
+root@gswewf-pc:~# vim /etc/rabbitmq/rabbitmq-env.conf
 NODENAME=rabbit
 NODE_IP_ADDRESS=127.0.0.1
 NODE_PORT=5672
 
 # kill 掉之前的rabbitmq, 重启服务：
-root@gswyhq-pc:/usr/lib/rabbitmq/bin# ./rabbitmq-server restart
+root@gswewf-pc:/usr/lib/rabbitmq/bin# ./rabbitmq-server restart
 
 # 启用web管理插件
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmq-plugins enable rabbitmq_management
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo rabbitmq-plugins enable rabbitmq_management
 
 # 也可以直接编辑文件/etc/rabbitmq/enabled_plugins
-root@gswyhq-pc:~# vim /etc/rabbitmq/enabled_plugins
+root@gswewf-pc:~# vim /etc/rabbitmq/enabled_plugins
 [rabbitmq_management, rabbitmq_visualiser].
 
 # 查看安装插件列表
-root@gswyhq-pc:/usr/lib/rabbitmq/bin# ./rabbitmq-plugins list
+root@gswewf-pc:/usr/lib/rabbitmq/bin# ./rabbitmq-plugins list
 
 # kill 再启动
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmq-server start
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmq-server start
 
 # 登陆web界面：
 浏览器中输入：http://127.0.0.1:15672/
@@ -100,11 +100,11 @@ connection.close()
 # http://www.rabbitmq.com/tutorials/tutorial-one-python.html
 
 # 删除所有的队列
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl stop_app
-[sudo] gswyhq 的密码：
-Stopping node 'rabbit@gswyhq-pc' ...
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl reset 
-Resetting node 'rabbit@gswyhq-pc' ...
-gswyhq@gswyhq-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl start_app
-Starting node 'rabbit@gswyhq-pc' ...
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl stop_app
+[sudo] gswewf 的密码：
+Stopping node 'rabbit@gswewf-pc' ...
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl reset 
+Resetting node 'rabbit@gswewf-pc' ...
+gswewf@gswewf-pc:/usr/lib/rabbitmq/bin$ sudo ./rabbitmqctl start_app
+Starting node 'rabbit@gswewf-pc' ...
 

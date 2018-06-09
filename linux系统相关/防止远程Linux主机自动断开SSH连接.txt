@@ -8,11 +8,11 @@
 # ClientAliveInterval指定了服务器端向客户端请求消息的时间间隔, 默认是0, 不发送。设置60表示每分钟发送一次, 然后客户端响应, 这样就保持长连接了。
 # ClientAliveCountMax表示服务器发出请求后客户端没有响应的次数达到一定值, 就自动断开。正常情况下, 客户端不会不响应，使用默认值3即可。
 # 启用客户端活动检查，每30秒检查一次，3次不活动断开连接
-ubuntu@ip-172-31-13-157:/etc/ssh$ sudo vim sshd_config
+ubuntu@ip-172-33-13-157:/etc/ssh$ sudo vim sshd_config
 ClientAliveInterval 30
 ClientAliveCountMax 5
 # 重新加载ssd配置，让配置生效
-ubuntu@ip-172-31-13-157:/etc/ssh$ sudo service sshd reload
+ubuntu@ip-172-33-13-157:/etc/ssh$ sudo service sshd reload
 
 编辑本地SSH配置文件：
 $ vim ~/.ssh/config    # 当前登陆用户生效

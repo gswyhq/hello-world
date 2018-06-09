@@ -4,10 +4,10 @@
 curl -XGET 'localhost:9200/_cat/indices?v'
 
 查看以“all_baoxian"开头的索引：
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET -u elastic:web12008 '192.168.3.145:9200/_cat/indices/all_baoxian*'
+gswewf@gswewf-PC:~/yhb$ curl -XGET -u elastic:web12008 '192.168.3.145:9200/_cat/indices/all_baoxian*'
 
 查看索引`dingding7500_faq`的段信息：
-gswyhq@gswyhq-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
+gswewf@gswewf-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
 
 # 按照正则匹配删除索引
 curl -XDELETE 'localhost:9200/logs_2013*'
@@ -26,7 +26,7 @@ curl -XDELETE '152.180.187.77:18200/faq*?pretty'
 
 
 若不需要删除原索引别名，仅仅添加一个索引别名：
-gswyhq@gswyhq-PC:~$ curl -XPOST '192.168.3.105:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
+gswewf@gswewf-PC:~$ curl -XPOST '192.168.3.105:9200/_aliases?pretty' -H 'Content-Type: application/json' -d'
 {
     "actions": [
         { "add":    { "index": "dingding_faq", "alias": "dingding_faq_alias" }
@@ -98,7 +98,7 @@ POST /_reindex
 DELETE /twitter
 
 如删除索引`dingding500_020913_faq`：
-gswyhq@gswyhq-PC:~$ curl -XDELETE localhost:9200/dingding500_020913_faq
+gswewf@gswewf-PC:~$ curl -XDELETE localhost:9200/dingding500_020913_faq
 
 当索引变得更“老”，它们到达一个几乎不会再被访问的时间点。 我们可以在这个阶段删除它们，但也许你想将它们留在这里以防万一有人在半年后还想要访问它们。
 这些索引可以被关闭。它们还会存在于集群中，但它们不会消耗磁盘空间以外的资源。重新打开一个索引要比从备份中恢复快得多。
@@ -148,10 +148,10 @@ es_index = es_index.replace('time_zone', time_zone)
 for char, encod_char in PERCENT_ENCODING_CHARACTERS.items():
     es_index = es_index.replace(char, encod_char)
 
-gswyhq@gswyhq-PC:~$ curl -XPUT 'localhost:9200/%3Clogstash-%7Bnow%2FM-1M%7BYYYY.MM%7D%7D%3E'
+gswewf@gswewf-PC:~$ curl -XPUT 'localhost:9200/%3Clogstash-%7Bnow%2FM-1M%7BYYYY.MM%7D%7D%3E'
 {"acknowledged":true,"shards_acknowledged":true,"index":"logstash-2018.01"}
 等同于：
-gswyhq@gswyhq-PC:~$ curl -XPUT 'localhost:9200/logstash-2018.01'
+gswewf@gswewf-PC:~$ curl -XPUT 'localhost:9200/logstash-2018.01'
 {"acknowledged":true,"shards_acknowledged":true,"index":"logstash-2018.01"}
 
 # 删除过期索引

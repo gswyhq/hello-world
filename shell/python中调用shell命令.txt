@@ -2,5 +2,5 @@
 In[55]: import os
 In[57]: t=os.popen('pwd')
 In[59]: t.readlines()
-Out[59]: ['/home/gswyhq/yhb\n']
+Out[59]: ['/home/gswewf/yhb\n']
 

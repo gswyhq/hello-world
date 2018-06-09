@@ -28,11 +28,11 @@ lrwxrwxrwx 1 zy zy 0 Jun 22 09:20 exe -> /usr/bin/python3.5
 注意cwd，即是你要查找的进程所在路径。
 
 或者：
-gswyhq@gswyhq-PC:~/yhb$ ps -aux|grep tornado_server.py
-gswyhq   18997 35.8  3.0 550020 492992 pts/2   S+   20:44   0:03 python3 tornado_server.py
-gswyhq   19010  0.0  0.0  14528   984 pts/3    S+   20:44   0:00 grep tornado_server.py
-gswyhq@gswyhq-PC:~/yhb$ lsof -p 18997
+gswewf@gswewf-PC:~/yhb$ ps -aux|grep tornado_server.py
+gswewf   18997 35.8  3.0 550020 492992 pts/2   S+   20:44   0:03 python3 tornado_server.py
+gswewf   19010  0.0  0.0  14528   984 pts/3    S+   20:44   0:00 grep tornado_server.py
+gswewf@gswewf-PC:~/yhb$ lsof -p 18997
 ......
 COMMAND   PID   USER   FD      TYPE DEVICE SIZE/OFF     NODE NAME
-python3 18997 gswyhq  cwd       DIR    8,5     4096  6164369 /home/gswyhq/process_control
-python3 18997 gswyhq  rtd       DIR    8,4     4096        2 /
+python3 18997 gswewf  cwd       DIR    8,5     4096  6164369 /home/gswewf/process_control
+python3 18997 gswewf  rtd       DIR    8,4     4096        2 /

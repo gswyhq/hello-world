@@ -3,12 +3,12 @@
 # 目的:Document Clustering with Python
 # http://brandonrose.org/clustering
 # https://gist.github.com/balamuru/4727614
-# 作者:      gswyhq
+# 作者:      gswewf
 #
 # 日期:      2016-01-02
 # 版本:      Python 3.3.5
 # 系统:      win32
-# Email:     gswyhq@126.com
+# Email:     gswewf@126.com
 #-------------------------------------------------------------------------------
 
 import logging

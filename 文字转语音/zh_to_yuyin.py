@@ -6,7 +6,7 @@ def generate_dict():
     dic = {}
     # 文件`unicode_pinyin.txt`的链接
     # https://pan.baidu.com/share/link?shareid=1866601421&uk=4013012087；密码：fge1
-    with open("/home/gswyhq/data/unicode_pinyin.txt") as f:
+    with open("/home/gswewf/data/unicode_pinyin.txt") as f:
         for i in f.readlines():
             dic[i.split()[0]] = i.split()[1]
     return dic
@@ -24,7 +24,7 @@ def chinese_to_pinyin(x):
             y += 'XXXX '
     return y
 
-vioce_file='/home/gswyhq/ekho-7.5.1/ekho-data/pinyin/{}.wav'
+vioce_file='/home/gswewf/ekho-7.5.1/ekho-data/pinyin/{}.wav'
 
 def make_vioce(x):
     pygame.mixer.init()

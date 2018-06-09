@@ -129,7 +129,7 @@ class NewQuestion():
 
         return False
 
-    def entity_insert_executemany_record(self, entity_file='/home/gswyhq/yhb/input/同义词导入模板.xls', status=1, **kwargs):
+    def entity_insert_executemany_record(self, entity_file='/home/gswewf/yhb/input/同义词导入模板.xls', status=1, **kwargs):
         """
         向MySQL数据库中，写入同义词
         :param uid: 

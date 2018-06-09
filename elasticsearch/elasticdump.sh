@@ -6,9 +6,9 @@ index_name='xinxin_templates_question_20180309_151024'
 index_name_alias='xinxin_templates_question_alias'
 
 # 获取使用帮助：
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./elasticdump.sh -h
+#gswewf@gswewf-PC:~/yhb/es_search$ ./elasticdump.sh -h
 
-# gswyhq@gswyhq-PC:~/yhb/es_search$ ./elasticdump.sh -i 192.168.3.105:9200 -o 192.168.3.145:9200 -n xinxin_templates_question_20180309_184614 -a xinxin_templates_question_alias
+# gswewf@gswewf-PC:~/yhb/es_search$ ./elasticdump.sh -i 192.168.3.105:9200 -o 192.168.3.145:9200 -n xinxin_templates_question_20180309_184614 -a xinxin_templates_question_alias
 
 function usage() {
         echo "使用方法:"
@@ -77,7 +77,7 @@ echo "第三步： 拷贝数据"
 docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://${input_host_port}/${index_name}"   --output="http://${output_host_port}/${index_name}"   --type=data
 
 # 若需要提供对应的登录认证：
-# gswyhq@gswyhq-PC:~/yhb/es_search$ docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://192.168.3.105:9200/jrtz_kg_entity_synonyms_20180404_111151"   --output="http://elastic:web12008@192.168.3.145:9200/jrtz_kg_entity_synonyms_20180404_111151"  --type=data
+# gswewf@gswewf-PC:~/yhb/es_search$ docker run --rm -ti taskrabbit/elasticsearch-dump:v3.3.11   --input="http://192.168.3.105:9200/jrtz_kg_entity_synonyms_20180404_111151"   --output="http://elastic:web12008@192.168.3.145:9200/jrtz_kg_entity_synonyms_20180404_111151"  --type=data
 
 # 以上数据迁移的时候，会丢失对应的索引别名信息；
 

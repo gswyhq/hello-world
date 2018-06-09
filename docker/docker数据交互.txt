@@ -3,8 +3,8 @@
      b）可以直接修改在dota volumes进行变动
      c）变动data volumes不包括更新一个镜像
      d）volumes将一直存在知道没有容器使用它们
-如，宿主机目录`/home/gswyhq/yhb`与容器目录`/yhb`数据关联起来了；
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswyhq/yhb:/yhb -p 8000:8000 -w /yhb ubuntu:0701 /bin/bash
+如，宿主机目录`/home/gswewf/yhb`与容器目录`/yhb`数据关联起来了；
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswewf/yhb:/yhb -p 8000:8000 -w /yhb ubuntu:0701 /bin/bash
 
 docker默认是实现可读可写的volume，不过我们也可以自定义为只读
 docker run -d -P --name web -v /src/webapp:/opt/webapp:ro tra
@@ -36,6 +36,6 @@ data volumes备份、恢复或迁移
   docker run --volumes-from dbdata2 -v $(pwd):/backup centos tar xvf /backup/backup.tar
 
 # 向容器内复制文件：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl
+gswewf@gswewf-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl
 # 将容器内的文件复制到当前目录：
-gswyhq@gswyhq-pc:~/hello-world/docker$ docker cp b874b4c27fe0:/ubuntu/abc.py .
+gswewf@gswewf-pc:~/hello-world/docker$ docker cp b874b4c27fe0:/ubuntu/abc.py .

@@ -23,9 +23,9 @@
 
 主节点
 在192.168.3.145主机上：
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir config_master
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir master_data
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ vim config_master/elasticsearch.yml
+gswewf@gswewf-PC:~/docker/elasticsearch$ mkdir config_master
+gswewf@gswewf-PC:~/docker/elasticsearch$ mkdir master_data
+gswewf@gswewf-PC:~/docker/elasticsearch$ vim config_master/elasticsearch.yml
 
 cluster.name: elasticsearch_cluster
 node.name: master
@@ -55,14 +55,14 @@ discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "
 # discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300"]
 
 
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_master_5.6.4_9200 -p 9200:9200 -p 9300:9300 -v "$PWD/master_data":/usr/share/elasticsearch/data -v $PWD/config_master/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+gswewf@gswewf-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_master_5.6.4_9200 -p 9200:9200 -p 9300:9300 -v "$PWD/master_data":/usr/share/elasticsearch/data -v $PWD/config_master/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
 f379af5c5d0e8e6ec1d99e8908bde45943d36e777ef17d6816d89382527a4610
 
 添加数据节点1
 在192.168.3.145主机上：
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir config_node_1
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ mkdir slave1_data
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ vim config_node_1/elasticsearch.yml
+gswewf@gswewf-PC:~/docker/elasticsearch$ mkdir config_node_1
+gswewf@gswewf-PC:~/docker/elasticsearch$ mkdir slave1_data
+gswewf@gswewf-PC:~/docker/elasticsearch$ vim config_node_1/elasticsearch.yml
 
 cluster.name: elasticsearch_cluster
 node.name: slave1
@@ -89,7 +89,7 @@ http.cors.allow-origin: "*"
 discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300", "192.168.3.145:9301", "192.168.3.105:9301"]
 # discovery.zen.ping.unicast.hosts: ["192.168.3.145:9300"]
 
-gswyhq@gswyhq-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_1_5.6.4_9201 -p 9201:9201 -p 9301:9301 -v "$PWD/slave1_data":/usr/share/elasticsearch/data -v $PWD/config_node_1/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
+gswewf@gswewf-PC:~/docker/elasticsearch$ docker run -d --name elasticsearch_cluster_node_1_5.6.4_9201 -p 9201:9201 -p 9301:9301 -v "$PWD/slave1_data":/usr/share/elasticsearch/data -v $PWD/config_node_1/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml -v /etc/localtime:/etc/localtime -v $PWD/plugins_5.6.4/elasticsearch-analysis-ik-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.6.4 -v $PWD/plugins_5.6.4/elasticsearch-analysis-pinyin-5.6.4:/usr/share/elasticsearch/plugins/elasticsearch-analysis-pinyin-5.6.4 elasticsearch:5.6.4
 f218c94f3ebbd60151995bde7315d57744fbcfb8c8052c409968b38102318215
 
 

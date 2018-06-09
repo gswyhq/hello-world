@@ -14,21 +14,21 @@ ${file%%.*}：拿掉第一個 . 及其右邊的字串：/dir1/dir2/dir3/my
 
 测试结果如下：
 
-gswyhq@gswyhq-PC:~$ file=/dir1/dir2/dir3/my.file.txt
-gswyhq@gswyhq-PC:~$ echo ${file#*/}
+gswewf@gswewf-PC:~$ file=/dir1/dir2/dir3/my.file.txt
+gswewf@gswewf-PC:~$ echo ${file#*/}
 dir1/dir2/dir3/my.file.txt
-gswyhq@gswyhq-PC:~$ echo ${file##*/}
+gswewf@gswewf-PC:~$ echo ${file##*/}
 my.file.txt
-gswyhq@gswyhq-PC:~$ echo ${file#*.}
+gswewf@gswewf-PC:~$ echo ${file#*.}
 file.txt
-gswyhq@gswyhq-PC:~$ echo ${file##*.}
+gswewf@gswewf-PC:~$ echo ${file##*.}
 txt
-gswyhq@gswyhq-PC:~$ echo ${file%/*}
+gswewf@gswewf-PC:~$ echo ${file%/*}
 /dir1/dir2/dir3
-gswyhq@gswyhq-PC:~$ echo ${file%%/*}
+gswewf@gswewf-PC:~$ echo ${file%%/*}
 
-gswyhq@gswyhq-PC:~$ echo ${file%.*}
+gswewf@gswewf-PC:~$ echo ${file%.*}
 /dir1/dir2/dir3/my.file
-gswyhq@gswyhq-PC:~$ echo ${file%%.*}
+gswewf@gswewf-PC:~$ echo ${file%%.*}
 /dir1/dir2/dir3/my
 

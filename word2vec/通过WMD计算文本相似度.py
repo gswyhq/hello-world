@@ -18,7 +18,7 @@ calc = WMD(embeddings, nbow, vocabulary_min=2)
 origin = "first"
 print(calc.nearest_neighbors(origin))
 
-model_file = '/home/gswyhq/yhb/model/wx_vector_char.pkl'
+model_file = '/home/gswewf/yhb/model/wx_vector_char.pkl'
 
 with open(model_file, "rb")as f:
     w2v_model = pickle.load(f, encoding='iso-8859-1')  # 此处耗内存 60.8 MiB

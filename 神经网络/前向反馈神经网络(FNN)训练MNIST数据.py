@@ -10,7 +10,7 @@ import gzip
 
 # 来源： http://blog.topspeedsnail.com/archives/10377
 
-data_path = '/home/gswyhq/MNIST_data'  # 下载于：http://yann.lecun.com/exdb/mnist/
+data_path = '/home/gswewf/MNIST_data'  # 下载于：http://yann.lecun.com/exdb/mnist/
 
 class NeuralNet(object):
     # 初始化神经网络，sizes是神经网络的层数和每层神经元个数

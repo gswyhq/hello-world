@@ -1,6 +1,6 @@
 
 粗粒度的计算时间
-gswyhq@gswyhq-PC:~$ time curl http://localhost:8000/ -d '{"question": "你们干啥的", "uid": "123456"}'
+gswewf@gswewf-PC:~$ time curl http://localhost:8000/ -d '{"question": "你们干啥的", "uid": "123456"}'
 {"recommend_question": [], "choice_answer": [], "match_question": "", "code": 200, "recommend_end": "", "answer": "很抱歉没法回答您的问题\n咨询通讯类问题：请直接说明问题，例如：SIM卡无法使用？\n咨询优惠资讯：请输入“商家名称”，例如：莎莎\n联系人工客服：请输入“人工客服”", "id": -1, "html": "", "description": "替代闲聊的回复", "record": true, "recommend_head": "", "question": "你们干啥的", "tag1": -1, "from_code": 13, "uid": "123456"}
 
 real	0m0.021s

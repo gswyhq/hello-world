@@ -8,7 +8,7 @@ import jieba
 import gensim
 from gensim.models.word2vec import LineSentence
 
-stopword_zh_file = '/home/gswyhq/data/jieba_dict/stopwords.txt'
+stopword_zh_file = '/home/gswewf/data/jieba_dict/stopwords.txt'
 
 def read_source_file(source_file_name):
     try:
@@ -86,11 +86,11 @@ def main():
     # separated_file = "d:\\data\\dk_spe_file_20170216.txt" # separeted words file
     # model_path = "information_model0830" # model file
 
-    kefu_file = '/home/gswyhq/data/log/kefu/result.txt'
+    kefu_file = '/home/gswewf/data/log/kefu/result.txt'
     filename = kefu_file
     user_dic_file = ''
-    separated_file = '/home/gswyhq/data/log/kefu/result_jieba.txt'
-    model_path = '/home/gswyhq/data/log/kefu/information_model'
+    separated_file = '/home/gswewf/data/log/kefu/result_jieba.txt'
+    model_path = '/home/gswewf/data/log/kefu/information_model'
     source_separated_words_file = separate_word(filename, user_dic_file, separated_file)
     # source_separated_words_file = separated_file    # if separated word file exist, don't separate_word again
     build_model(source_separated_words_file, model_path)# if model file is exist, don't buile modl

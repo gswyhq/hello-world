@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-# 安装：gswyhq@gswyhq-PC:~$ sudo pip3 install python-pptx -i https://pypi.douban.com/simple
+# 安装：gswewf@gswewf-PC:~$ sudo pip3 install python-pptx -i https://pypi.douban.com/simple
 
 # 参考资料： http://blog.csdn.net/u011932355/article/details/73287248
 

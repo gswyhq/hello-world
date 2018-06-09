@@ -1,5 +1,5 @@
 
-gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+gswewf@gswewf-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
 
 通过镜像名为`neo4j`,tag为`3.2`的镜像，启动一个容器
 
@@ -26,8 +26,8 @@ gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=1747
 -P, --publish-all=false    随机指定容器暴露的端口    
 当使用-P时，Docker会在主机中随机从49153 和65535之间查找一个未被占用的端口绑定到容器。
 你可以使用`docker port 容器名`来查找这个随机绑定端口。并且每重启一次这个容器，都会随机生成一个新的port；
-gswyhq@gswyhq-pc:~$ sudo docker run -P redis
-gswyhq@gswyhq-pc:~$ sudo docker port 6cfa9da94df2
+gswewf@gswewf-pc:~$ sudo docker run -P redis
+gswewf@gswewf-pc:~$ sudo docker port 6cfa9da94df2
 6379/tcp -> 0.0.0.0:32770
 
 -i, --interactive=false   打开STDIN，用于控制台交互    
@@ -45,10 +45,10 @@ docker run --restart=always --name docker_restart -d centos /bin/sh -c "while tr
 # 向已经运行的容器添加重启策略：
 docker update --restart=always <CONTAINER ID>
 # 或者更新之前的重启策略：
-gswyhq@gswyhq-pc:~$ docker update --restart=no yhb0717_yhb_1 yhb0717_docker-neo4j_1 yhb0717_docker-redis_1 qbzz17474 
+gswewf@gswewf-pc:~$ docker update --restart=no yhb0717_yhb_1 yhb0717_docker-neo4j_1 yhb0717_docker-redis_1 qbzz17474 
 
 # 可以通过查询对应的run参数：
-gswyhq@gswyhq-pc:~$ docker inspect e7185e2bb696
+gswewf@gswewf-pc:~$ docker inspect e7185e2bb696
         "HostConfig": {
             "RestartPolicy": {
                 "Name": "always",  # 重启策略
@@ -60,7 +60,7 @@ gswyhq@gswyhq-pc:~$ docker inspect e7185e2bb696
 /var/lib/docker/Container/容器ID，在目录下的hostconfig.json文件中，参数"RestartPolicy":{"Name":"always","MaximumRetryCount":0}，
 修改了这个参数`always`为`no`。
 用 service docker restart 命令重启了我的docker引擎。
-root@gswyhq-pc:/var/lib/docker/containers/8845ad7492c1a06fe4dc24aca984a00dbd2bfbc3454c74702055a64c9d42fa1a# vim hostconfig.json 
+root@gswewf-pc:/var/lib/docker/containers/8845ad7492c1a06fe4dc24aca984a00dbd2bfbc3454c74702055a64c9d42fa1a# vim hostconfig.json 
 
 操作人员可以通过-e来设定任意的环境变量，甚至覆盖已经存在的环境变量，或者是在Dockerfile中通过ENV设定的环境变量。
 docker run -e LANG=C.UTF-8 unbuntu /bin/bash

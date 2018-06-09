@@ -5,7 +5,7 @@ git config是用于进行一些配置设置，有三种不同的方式来指定�
 3) sudo git config --system    针对一个系统，因为是针对整个系统的，所以必须使用sudo
 
 1) 第一种默认当前目录是一个git仓库，假设我们有一个仓库叫hello-world，它所修改配置保存在hello-world/.git/config
-gswyhq@gswyhq-pc:~/hello-world$ less .git/config
+gswewf@gswewf-pc:~/hello-world$ less .git/config
 [core]
         repositoryformatversion = 0
         filemode = true
@@ -14,13 +14,13 @@ gswyhq@gswyhq-pc:~/hello-world$ less .git/config
 
 如果我们想修改bare为false，最简单的办法就是直接用vim打开hello-world/.git/config文件进行修改，
 另一种办法就是使用git config来修改:
-gswyhq@gswyhq-pc:~/hello-world$ git config core.bare false
+gswewf@gswewf-pc:~/hello-world$ git config core.bare false
 
 2) 第2种是适用于当前用户，也就是说只要是这个用户操作任何git仓库，那么这个配置都会生效，这种配置保存在~/.gitconfig当中
-gswyhq@gswyhq-pc:~$ less .gitconfig 
+gswewf@gswewf-pc:~$ less .gitconfig 
 [user]
-        email = gswyhq@126.com
-        name = gswyhq
+        email = gswewf@126.com
+        name = gswewf
 
 同样可以直接编辑，也可以命令行设置
 $git config --global user.name "I Love You"
@@ -35,7 +35,7 @@ $sudo git config --system core.editor vim
 (1)git_test/.git/config，(2)~/.gitconfig，(3)/etc/gitconfig，也就是说如果同一个配置同时出现在三个文件中时，(1)有效。
 
 # 中文文件名显示乱码，可以通过以下方法来解决：
-gswyhq@gswyhq-pc:~/biji$ git config --global core.quotepath false
+gswewf@gswewf-pc:~/biji$ git config --global core.quotepath false
 
 修改git log默认的时间显示方式:
 默认的显示时间格式是这样：
@@ -43,24 +43,24 @@ commit 4cd50b7aacdb4b3d704ac91f589392a3eeecff80
 Author: web1 <web1@web1.co>
 Date:   Sat Jul 22 14:22:38 2017 +0800
 修改默认的时间格式：
-gswyhq@gswyhq-pc:~/yhb20170717$ git config --global log.date iso8601
+gswewf@gswewf-pc:~/yhb20170717$ git config --global log.date iso8601
 commit 4cd50b7aacdb4b3d704ac91f589392a3eeecff80
 Author: web1 <web1@web1.co>
 Date:   2017-07-22 14:22:38 +0800
 改回默认格式的命令：
-gswyhq@gswyhq-pc:~/yhb20170717$ git config log.date default 
+gswewf@gswewf-pc:~/yhb20170717$ git config log.date default 
 # 有时候改了日期格式，但还是无效，可能是之前设置了本项目的日期格式，这时可以：
-ubuntu@ip-172-31-8-214:~/dingdang$ git config --global log.date iso8601
+ubuntu@ip-172-33-8-214:~/dingdang$ git config --global log.date iso8601
 改为： 
-ubuntu@ip-172-31-8-214:~/dingdang$ git config log.date iso8601
+ubuntu@ip-172-33-8-214:~/dingdang$ git config log.date iso8601
 
 查看配置信息
 要检查已有的配置信息，可以使用 git config --list 命令：
-gswyhq@gswyhq-pc:~/hello-world$ git config --list 
+gswewf@gswewf-pc:~/hello-world$ git config --list 
 core.quotepath=false
-user.email=gswyhqyang@web1.co
-user.name=gswyhqyang
-alias.gswyhq=commit --author='gswyhq <gswyhq@126.com>' -m '增加记录' 
+user.email=gswewfyang@web1.co
+user.name=gswewfyang
+alias.gswewf=commit --author='gswewf <gswewf@126.com>' -m '增加记录' 
 merge.ours.driver=true
 http.postbuffer=524288000
 log.date=iso8601
@@ -68,9 +68,9 @@ core.repositoryformatversion=0
 core.filemode=true
 core.bare=false
 core.logallrefupdates=true
-user.email=gswyhq@126.com
-user.name=gswyhq
-remote.origin.url=https://github.com/gswyhq/hello-world.git
+user.email=gswewf@126.com
+user.name=gswewf
+remote.origin.url=https://github.com/gswewf/hello-world.git
 remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
 branch.master.remote=origin
 branch.master.merge=refs/heads/master
@@ -90,10 +90,10 @@ git config --global credential.helper store
 -p 选项请求修改私钥的密码，而不是创建一个新的私钥。程序会提示你输入原始密码。然后输入两遍新密码。
 -f{filename} 选项去指定密钥的名称。
 详细过程如下：
-gswyhq@gswyhq-PC:~$ cd .ssh/
-gswyhq@gswyhq-PC:~/.ssh$ ls
+gswewf@gswewf-PC:~$ cd .ssh/
+gswewf@gswewf-PC:~/.ssh$ ls
 config  id_rsa  id_rsa.pub  known_hosts
-gswyhq@gswyhq-PC:~/.ssh$ ssh-keygen -p -f id_rsa
+gswewf@gswewf-PC:~/.ssh$ ssh-keygen -p -f id_rsa
 Enter old passphrase:
 Enter new passphrase (empty for no passphrase):
 Enter same passphrase again:

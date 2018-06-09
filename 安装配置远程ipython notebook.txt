@@ -6,7 +6,7 @@
 1.创建登陆密码
 
 先在服务器端启动远程ipython，生成自定义密码的sha1
-gswyhq@ubuntu:~$ ipython
+gswewf@ubuntu:~$ ipython
 Python 2.7.6 (default, Jun 22 2015, 17:58:13) 
 Type "copyright", "credits" or "license" for more information.
 
@@ -29,7 +29,7 @@ Out[2]: 'sha1:b9df8a62540a:7b55bf7db46abd0c018d7625e5d8be6c50ab9faa'
 
 使用openssl创建一个自签名证书，由于是自签名所以浏览器会提示警告，选择信任exception即可。如果不想引起警告，需具备合格证compliant certificate，可参照tutorial
 
-gswyhq@ubuntu:~$ openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
+gswewf@ubuntu:~$ openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout mycert.pem -out mycert.pem
 Generating a 1024 bit RSA private key
 ............++++++
 ..................................++++++
@@ -51,27 +51,27 @@ Common Name (e.g. server FQDN or YOUR name) []:.
 Email Address []:.
 error, no objects specified in config file
 problems making Certificate Request
-gswyhq@ubuntu:~$ 
+gswewf@ubuntu:~$ 
 
 记住mycert.pem的位置，一会要用到，可通过pwd查看
 
 3.创建ipython notebook服务器
 
-gswyhq@ubuntu:~$ ipython profile create nbserver
-[ProfileCreate] Generating default config file: u'/home/gswyhq/.ipython/profile_nbserver/ipython_config.py'
-[ProfileCreate] Generating default config file: u'/home/gswyhq/.ipython/profile_nbserver/ipython_kernel_config.py'
+gswewf@ubuntu:~$ ipython profile create nbserver
+[ProfileCreate] Generating default config file: u'/home/gswewf/.ipython/profile_nbserver/ipython_config.py'
+[ProfileCreate] Generating default config file: u'/home/gswewf/.ipython/profile_nbserver/ipython_kernel_config.py'
 
 
 命令行会有输出，告诉你生成的文件在哪里. 
 此时可以将 mycert.pem 证书移到 ipython notebook的文件夹，将相关的东西放在一起。
 
-gswyhq@ubuntu:~$ mv mycert.pem .ipython/mycert.pem
-gswyhq@ubuntu:~$ ls
+gswewf@ubuntu:~$ mv mycert.pem .ipython/mycert.pem
+gswewf@ubuntu:~$ ls
 
 4.修改配置文件
 
 生成的配置文件在 
-/home/gswyhq/.ipython/profile_nbserver/ipython_kernel_config.py 
+/home/gswewf/.ipython/profile_nbserver/ipython_kernel_config.py 
 
 在开始部分，复制粘贴下面的内容
 
@@ -81,7 +81,7 @@ c = get_config()
 c.IPKernelApp.pylab = 'inline'  # if you want plotting support always
 
 # Notebook config
-c.NotebookApp.certfile = u'/home/gswyhq/.ipython/mycert.pem'
+c.NotebookApp.certfile = u'/home/gswewf/.ipython/mycert.pem'
 c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False
 c.NotebookApp.password = u'sha1:b9df8a62540a:7b55bf7db46abd0c018d7625e5d8be6c50ab9faa'

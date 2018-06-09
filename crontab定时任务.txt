@@ -1,17 +1,17 @@
 查看crontab服务状态：
-gswyhq@gswyhq-pc:~$ sudo service cron status
+gswewf@gswewf-pc:~$ sudo service cron status
 
 重新载入crontab配置：
-gswyhq@gswyhq-pc:~$ sudo service cron reload
+gswewf@gswewf-pc:~$ sudo service cron reload
 
 重启crontab服务：
-gswyhq@gswyhq-pc:~$ sudo service cron restart
+gswewf@gswewf-pc:~$ sudo service cron restart
 
 启动服务：
-gswyhq@gswyhq-pc:~$ sudo service cron start
+gswewf@gswewf-pc:~$ sudo service cron start
 
 关闭crontab服务：
-gswyhq@gswyhq-pc:~$ sudo service cron stop
+gswewf@gswewf-pc:~$ sudo service cron stop
 
 
 切换到root用户，查看当前有哪些定时任务；即”crontab -l" 查看crontab 中所有部署的内容;

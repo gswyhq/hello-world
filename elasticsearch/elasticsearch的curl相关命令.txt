@@ -1,9 +1,9 @@
 
 # 删除索引：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XDELETE localhost:9200/my_index
+gswewf@gswewf-pc:~/docker/elasticsearch$ curl -XDELETE localhost:9200/my_index
 
 # 新建索引：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/my_index -d '{ "settings": { "number_of_shards": 1 }}'
+gswewf@gswewf-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/my_index -d '{ "settings": { "number_of_shards": 1 }}'
 或者：curl -XPUT localhost:9200/abc
 
 # 定义映射：
@@ -28,7 +28,7 @@ curl -XPOST localhost:9200/_bulk --data-binary @data.json
 如果在路径中设置了index或者type，那么在JSON中就不需要设置了。如果在JSON中设置，会覆盖掉路径中的配置。
 比如下面的例子中，文件中定义了索引为test,类型为type1；而我们在路径中定义了默认的选项，索引为test333,类型为type333。执行命令后，发现文件中的配置会覆盖掉路径中的配置。这样也提供了统一的默认配置以及个性化的特殊配置的需求。
 
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ head data.json 
+gswewf@gswewf-pc:~/docker/elasticsearch$ head data.json 
 { "index": { "_id": 1 }}
 { "title": "The quick brown fox" }
 { "index": { "_id": 2 }}
@@ -39,7 +39,7 @@ gswyhq@gswyhq-pc:~/docker/elasticsearch$ head data.json
 { "title": "Brown fox brown dog" }
 { "index": { "_id": 3, "_index":"test3", "_type":"type3"}}
 { "title": "香蕉" }
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPOST localhost:9200/my_index/my_type/_bulk --data-binary @data.json
+gswewf@gswewf-pc:~/docker/elasticsearch$ curl -XPOST localhost:9200/my_index/my_type/_bulk --data-binary @data.json
 结果如下：
 _index	_type	_id	_score	title
 my_index	my_type	1	1	The quick brown fox
@@ -236,11 +236,11 @@ curl -XPOST 'localhost:9200/customer/external?pretty' -d' {"name": "Jane Doe" }'
 curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary “@accounts.json"
 
 # 查询某个索引的文档总数：
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_count"
+gswewf@gswewf-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_count"
 {"count":55,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 
 # 查询某个索引的状态：
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_stats"
+gswewf@gswewf-PC:~/yhb$ curl -XGET "localhost:9200/xinxin_templates_question_alias/_stats"
 
 
 更新数据

@@ -30,7 +30,7 @@ def get_cookie(url='http://zhidao.baidu.com/question/75367260.html',write=0):
         print('{}={}'.format(item.name,item.value))
 
 def save_cookie(url='http://zhidao.baidu.com/question/75367260.html',
-            filename='/home/gswyhq/gow69/cookie.txt'):
+            filename='/home/gswewf/gow69/cookie.txt'):
     """保存Cookie到文件"""
     #设置保存cookie的文件，同级目录下的cookie.txt
     
@@ -49,7 +49,7 @@ def save_cookie(url='http://zhidao.baidu.com/question/75367260.html',
     # ignore_expires的意思是如果在该文件中cookies已经存在，则覆盖原文件写入
 
 def  get_cookie_openurl(url='http://zhidao.baidu.com/question/75367260.html',
-            filename='/home/gswyhq/gow69/cookie.txt'):
+            filename='/home/gswewf/gow69/cookie.txt'):
     """从文件中获取Cookie并访问"""
  
     #创建MozillaCookieJar实例对象
@@ -110,7 +110,7 @@ if __name__=="__main__":
     url='http://zhidao.baidu.com/question/744456942700491092.html'
     save_cookie(url)
     html=get_cookie_openurl(url)
-    file =os.path.join('/home/gswyhq/gow69/',os.path.split(url)[-1])
+    file =os.path.join('/home/gswewf/gow69/',os.path.split(url)[-1])
     with open (file,'w',encoding='utf-8')as f:
         print(html,  file=f)
     ask, answer=parse_html(html)

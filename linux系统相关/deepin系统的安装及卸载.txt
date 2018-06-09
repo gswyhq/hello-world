@@ -46,11 +46,11 @@ sudo apt-get update
 sudo apt-get upgrade
 
 # 或者：
-gswyhq@gswyhq-pc:~$ sudo mv /var/lib/dpkg/info /var/lib/dpkg/info.bak
-[sudo] gswyhq 的密码：
-gswyhq@gswyhq-pc:~$ sudo mkdir /var/lib/dpkg/info
-gswyhq@gswyhq-pc:~$ sudo apt-get update 
+gswewf@gswewf-pc:~$ sudo mv /var/lib/dpkg/info /var/lib/dpkg/info.bak
+[sudo] gswewf 的密码：
+gswewf@gswewf-pc:~$ sudo mkdir /var/lib/dpkg/info
+gswewf@gswewf-pc:~$ sudo apt-get update 
 
 # 或者修复安装报错软件
-gswyhq@gswyhq-pc:~$ sudo apt-get -f install deepin-desktop-base
+gswewf@gswewf-pc:~$ sudo apt-get -f install deepin-desktop-base
 

@@ -1,5 +1,5 @@
 安装mysql数据库，仅仅需一条命令：
-gswyhq@gswyhq-pc:~$ sudo apt-get install mysql-server mysql-client
+gswewf@gswewf-pc:~$ sudo apt-get install mysql-server mysql-client
 中间会让输入一次root用户的密码；
 
 sudo apt-get update
@@ -32,8 +32,8 @@ Have fun using MySQL Server.
 下面介绍三种方式对MySQL进行启动/停止/重启操作：
 
 切换到mysql用户启动：
-gswyhq@gswyhq-pc:~$ sudo su - mysql
-mysql@gswyhq-pc:~$ /etc/init.d/mysql start
+gswewf@gswewf-pc:~$ sudo su - mysql
+mysql@gswewf-pc:~$ /etc/init.d/mysql start
  
 启动mysql：
 方式一：sudo /etc/init.d/mysql start 
@@ -51,7 +51,7 @@ mysql@gswyhq-pc:~$ /etc/init.d/mysql start
 方式三：sudo service mysql restart
 
 若需要指定用户启动：
-gswyhq@gswyhq-pc:/usr/local/mysql/bin$ ls -l
+gswewf@gswewf-pc:/usr/local/mysql/bin$ ls -l
 总用量 1053800
 -rwxr-xr-x 1 root mysql   8139737 2月   2  2016 innochecksum
 -rwxr-xr-x 1 root mysql    191516 2月   2  2016 lz4_decompress
@@ -90,10 +90,10 @@ gswyhq@gswyhq-pc:/usr/local/mysql/bin$ ls -l
 -rwxr-xr-x 1 root mysql   5200000 2月   2  2016 resolveip
 -rwxr-xr-x 1 root mysql   5262140 2月   2  2016 resolve_stack_dump
 -rwxr-xr-x 1 root mysql     99124 2月   2  2016 zlib_decompress
-gswyhq@gswyhq-pc:/usr/local/mysql/bin$ sudo ./mysqld_safe --user=mysql
+gswewf@gswewf-pc:/usr/local/mysql/bin$ sudo ./mysqld_safe --user=mysql
 
 # 终止指定用户的：
-gswyhq@gswyhq-pc:/usr/local/mysql/bin$ sudo ./mysqladmin -u mysql -p shutdown
+gswewf@gswewf-pc:/usr/local/mysql/bin$ sudo ./mysqladmin -u mysql -p shutdown
 
 一. MySQL密码的恢复方法之一 
 如果忘记了MySQL的root密码，可以用以下方法重新设置： 
@@ -116,7 +116,7 @@ sudo apt-get remove --purge mysql-\*
 第二步：重新安装，中间会要求设置root用户的密码，设置为：123456
 sudo apt-get install mysql-server mysql-client
 
-gswyhq@gswyhq-pc:/tmp$ ps -aux|grep mysql
+gswewf@gswewf-pc:/tmp$ ps -aux|grep mysql
 mysql     4228  0.0  0.0   4300  1572 ?        Ss   10:28   0:00 /bin/sh /usr/bin/mysqld_safe
 mysql     4575  0.0  1.4 729264 117264 ?       Sl   10:28   0:00 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --log-error=/var/log/mysql/error.log --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --port=3306
 
@@ -151,7 +151,7 @@ rm system.reg
 
 navicat中文乱码的问题：
 进入mysql:
-gswyhq@gswyhq-pc:~$ mysql -u root -p
+gswewf@gswewf-pc:~$ mysql -u root -p
 查看mysql字符编码
 mysql> show variables like 'character%';
 +--------------------------+----------------------------+
@@ -193,17 +193,17 @@ mysql> show variables like 'character%';
 mysql> exit
 Bye
 # 重启mysql服务：
-gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
-[sudo] gswyhq 的密码：
+gswewf@gswewf-pc:~$ sudo /etc/init.d/mysql restart
+[sudo] gswewf 的密码：
 [ ok ] Restarting mysql (via systemctl): mysql.service.
 
 但重启后，发现修改的默认编码无效，这个时候编辑配置文件
-gswyhq@gswyhq-pc:~$ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf 
+gswewf@gswewf-pc:~$ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf 
 末尾添加两行：
 character-set-server=utf8
 collation-server=utf8_general_ci
 重启mysql：
-gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
+gswewf@gswewf-pc:~$ sudo /etc/init.d/mysql restart
 [ ok ] Restarting mysql (via systemctl): mysql.service.
 再次进入mysql查看编码，显示正常：
 mysql> show variables like 'character%';

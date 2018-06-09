@@ -19,10 +19,10 @@ root@10-13-101-154:~# locale-gen --purge
 添加字体：
 1、下载好字体
 2、新建目录
-gswyhq@gswyhq-pc:/usr/share/fonts$ sudo mkdir local
-[sudo] gswyhq 的密码：
+gswewf@gswewf-pc:/usr/share/fonts$ sudo mkdir local
+[sudo] gswewf 的密码：
 3、将下载的字体复制到fonts目录下的某个子目录中
-gswyhq@gswyhq-pc:/usr/share/fonts/local$ sudo cp /home/gswyhq/Downloads/simsun/simsun.ttc .
+gswewf@gswewf-pc:/usr/share/fonts/local$ sudo cp /home/gswewf/Downloads/simsun/simsun.ttc .
 
 
 

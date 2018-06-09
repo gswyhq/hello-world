@@ -1,7 +1,7 @@
 
 1、解压rar文件
 sudo apt-get install unrar
-gswyhq@gswyhq-pc:~/input$ unrar x graph.v205.db.rar
+gswewf@gswewf-pc:~/input$ unrar x graph.v205.db.rar
 解压到当前目录：unrar e update.rar
 # 参数 e 表示解压到当前目录．
 解压到指定目录：unrar x update.rar update/
@@ -10,15 +10,15 @@ gswyhq@gswyhq-pc:~/input$ unrar x graph.v205.db.rar
 2、压缩为rar文件
 sudo apt-get install rar
 将 20170223.pdf 压缩成：20170223.rar
-gswyhq@gswyhq-pc:~/doc$ rar a 20170223.rar 20170223.pdf
+gswewf@gswewf-pc:~/doc$ rar a 20170223.rar 20170223.pdf
 
 3、解压zip文件
 sudo apt-get install unzip
 unzip [参数] <压缩文件> [压缩包中将被释放的文件]
 解压到当前目录
-gswyhq@gswyhq-pc:~/doc$ unzip API使用文档20170223.zip 
+gswewf@gswewf-pc:~/doc$ unzip API使用文档20170223.zip 
 解压到指定目录：
-gswyhq@gswyhq-pc:~/Downloads$ unzip demo20170315.zip -d demo20170315
+gswewf@gswewf-pc:~/Downloads$ unzip demo20170315.zip -d demo20170315
 
 解压zip压缩包文件
     -P <密码> zip压缩包的密码
@@ -49,9 +49,9 @@ gswyhq@gswyhq-pc:~/Downloads$ unzip demo20170315.zip -d demo20170315
 sudo apt-get install zip
 zip [参数] <压缩包> <源文件>
 将目录或文件“__MACOSX”压缩为：  __MACOSX.zip
-gswyhq@gswyhq-pc:~/doc$ zip __MACOSX.zip __MACOSX
+gswewf@gswewf-pc:~/doc$ zip __MACOSX.zip __MACOSX
 若缺失了r参数则仅仅压缩当前目录，而不包括目录内的子文件及子目录
-gswyhq@gswyhq-pc:~$ zip -r demo20170315.zip chat_bot_demo
+gswewf@gswewf-pc:~$ zip -r demo20170315.zip chat_bot_demo
 
 # zip -P 123456 test.zip test.txt
 -P 123456 是加密密码
@@ -93,13 +93,13 @@ test.txt 是被压缩的文件
 可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip
 或者 unar -e GB18030 xxx.zip 即可！
 unar默认是解压到当前文件夹，也可以解压到指定文件夹：
-gswyhq@gswyhq-pc:~$ unar 成语故事全集1-50集.zip -o chengyu
+gswewf@gswewf-pc:~$ unar 成语故事全集1-50集.zip -o chengyu
 解压到指定文件夹‘chengyu’
 
 在ubuntu中如果解压zip包出现中文乱码，可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip或者 unar -e GB18030 xxx.zip 即可！
 
-# 批量解压（将当前目录下面的zip文件解压到目录`/home/gswyhq/下载`中）：
-gswyhq@gswyhq-pc:/media/gswyhq/B898E1E298E19F5E/$ ls *.zip |xargs -n1 unar -e GB18030 -o /home/gswyhq/下载/
+# 批量解压（将当前目录下面的zip文件解压到目录`/home/gswewf/下载`中）：
+gswewf@gswewf-pc:/media/gswewf/B898E1E298E19F5E/$ ls *.zip |xargs -n1 unar -e GB18030 -o /home/gswewf/下载/
 # 其中这里的-n1是数字的1，不是字母l。
 这个xagrs的-n1参数是什么意思呢？
 n1应该是指每次只传递一个参数给args命令；如下脚本对比，非常能说明问题：
@@ -115,8 +115,8 @@ echo "1 2 3 4"|xargs -n2
 这样，若加n1参数，则*.tar.gz会拆成每个tar.gz文件后，一个一个传给tar tvfz命令
 
 6、tar解压到指定目录
-gswyhq@gswyhq-pc:~/yhb$ tar -xzvf /home/gswyhq/Downloads/jar.tar.gz -C /home/gswyhq/yhb/jar
-gswyhq@gswyhq-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
+gswewf@gswewf-pc:~/yhb$ tar -xzvf /home/gswewf/Downloads/jar.tar.gz -C /home/gswewf/yhb/jar
+gswewf@gswewf-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
 tar -zxvf japan.tar.gz -C /tmp/ 解压到指定目录 /tmp/
 tar -xf 360热点.tar ##将压缩文件“360热点.tar”解压到同目录下的“360热点”文件夹中，其目录结构不变
 
@@ -138,7 +138,7 @@ v是详细信息
 f是指定文件
 
 7、压缩成tar.gz文件
-gswyhq@gswyhq-pc:~/服务器上的文件$ tar -czvf /home/gswyhq/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswyhq/服务器上的文件/360热点.tar.gz’
+gswewf@gswewf-pc:~/服务器上的文件$ tar -czvf /home/gswewf/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswewf/服务器上的文件/360热点.tar.gz’
 
 8、7z解压缩
 7z x 360热点.7z  #将压缩文件“360热点.7z”解压到同目录下的“360热点”文件夹中，其目录结构不变

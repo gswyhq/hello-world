@@ -5,16 +5,16 @@ CRF++安装需要：C++ compiler (gcc 3.0 or higher)
 wget https://doc-08-74-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/u5tvetovn5sj8lo32vdlk8bicvl9kauv/1496066400000/13553212398903315502/*/0B4y35FiV1wh7QVR6VXJ5dWExSTQ?e=download
 
 2、解压到目的路径：
-gswyhq@gswyhq-pc:~$ tar -zxvf CRF++-0.58.tar.gz
-gswyhq@gswyhq-pc:~$ sudo mv /home/gswyhq/CRF++-0.58 /usr/local/CRF++-0.58
-gswyhq@gswyhq-pc:~$ cd /usr/local/CRF++-0.58/
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ sudo chown -R gswyhq:gswyhq ../CRF++-0.58
+gswewf@gswewf-pc:~$ tar -zxvf CRF++-0.58.tar.gz
+gswewf@gswewf-pc:~$ sudo mv /home/gswewf/CRF++-0.58 /usr/local/CRF++-0.58
+gswewf@gswewf-pc:~$ cd /usr/local/CRF++-0.58/
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ sudo chown -R gswewf:gswewf ../CRF++-0.58
 
 3、编译、安装：
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ ./configure 
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ make
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ sudo su
-root@gswyhq-pc:/usr/local/CRF++-0.58# make install
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ ./configure 
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ make
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ sudo su
+root@gswewf-pc:/usr/local/CRF++-0.58# make install
 
 4、修改配置
 执行命令时会报错：
@@ -22,11 +22,11 @@ crf_learn: error while loading shared libraries: libcrfpp.so.0: cannot open shar
 
 这时需要在配置文件中做一下修改。
 修改文件/etc/ld.so.conf文件
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ sudo vim /etc/ld.so.conf
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ sudo vim /etc/ld.so.conf
 # 在里面加入
 include /usr/local/lib
 # 刷新lib库
-gswyhq@gswyhq-pc:/usr/local/CRF++-0.58$ sudo /sbin/ldconfig -v
+gswewf@gswewf-pc:/usr/local/CRF++-0.58$ sudo /sbin/ldconfig -v
 
 # 至此，重新执行对应的crf命令即可；
 

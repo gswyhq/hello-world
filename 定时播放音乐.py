@@ -3,7 +3,7 @@
 import time  
 import sys  
   
-soundFile = '/home/gswyhq/有限状态机（FSM）/音乐.wav'  
+soundFile = '/home/gswewf/有限状态机（FSM）/音乐.wav'  
 
   
 def soundStart():  

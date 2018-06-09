@@ -127,7 +127,7 @@ def change_csv_file():
     writer.writerows(lines)
 
 def main():
-    csv_file = '/home/gswyhq/yhb/input/众安航延险知识图谱展示测试集_result.csv'
+    csv_file = '/home/gswewf/yhb/input/众安航延险知识图谱展示测试集_result.csv'
     write_t1(csv_file)
 
     read_t2(csv_file)

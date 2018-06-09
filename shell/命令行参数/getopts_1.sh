@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_1.sh -a
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_1.sh -b
+#gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_1.sh -a
+#gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_1.sh -b
 
 # 这里仅解析 -a 选项，选项字符串中的第一个字符为冒号(:)，表示抑制错误报告
 while getopts ":a" opt

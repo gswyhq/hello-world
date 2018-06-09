@@ -96,8 +96,8 @@ DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` I
 plain格式导出的数据可以通过管道的命令导入：
 web端（http://localhost:7474/browser/）运行下面命令导出数据到文件：
 CALL apoc.export.cypher.all("/var/lib/neo4j/data/some-cypher.txt", {format:'plain',cypherFormat:'create'})
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi/data/databases$ docker exec -it linshi7474 /bin/bash
-bash-4.4# cat /var/lib/neo4j/data/some-cypher.txt |/var/lib/neo4j/bin/cypher-shell -a bolt://172.17.0.5:7687 -u neo4j -p gswyhq
+gswewf@gswewf-PC:~/docker/neo4j/linshi/data/databases$ docker exec -it linshi7474 /bin/bash
+bash-4.4# cat /var/lib/neo4j/data/some-cypher.txt |/var/lib/neo4j/bin/cypher-shell -a bolt://172.17.0.5:7687 -u neo4j -p gswewf
 
 
 config: {format:'plain',cypherFormat:'create'}时的导出数据：

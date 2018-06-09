@@ -18,11 +18,11 @@ def send_email(to_email_list=None, subject=None, contents=None, attachments=None
     """发送邮件
 
     使用示例：
-        send_email(to_email_list='gswyhq@126.com', subject='测试邮件', contents='无',
-                attachments=['/home/gswyhq/ambbr-ai/ambbr/test/use_yagmail_send_email.py'], cc='zhou_li@gow.cn')
+        send_email(to_email_list='gswewf@126.com', subject='测试邮件', contents='无',
+                attachments=['/home/gswewf/ambbr-ai/ambbr/test/use_yagmail_send_email.py'], cc='zhou_li@gow.cn')
 
     参数：
-        to_email_list: 收件人邮箱，如果不指定to_email_list参数，则发送给（'gswyhq@126.com', 'zhou_li@gow.cn'）,
+        to_email_list: 收件人邮箱，如果不指定to_email_list参数，则发送给（'gswewf@126.com', 'zhou_li@gow.cn'）,
                 如果to_email_list参数是一个列表，则将该邮件发送给列表中的所有用户
         subject: 邮件标题；
         contents: 邮件正文内容；
@@ -35,7 +35,7 @@ def send_email(to_email_list=None, subject=None, contents=None, attachments=None
         """
 
     if not to_email_list:
-        to_email_list = ['gswyhq@126.com', 'zhou_li@gow.cn']
+        to_email_list = ['gswewf@126.com', 'zhou_li@gow.cn']
 
     if PY3:
         user = 'ai_public@gow.cn'
@@ -66,8 +66,8 @@ def send_email(to_email_list=None, subject=None, contents=None, attachments=None
 
 
 def main():
-    send_email(to_email_list='gswyhq@126.com', subject='测试邮件', contents='无',
-               attachments=['/home/gswyhq/ambbr-ai/ambbr/test/use_yagmail_send_email.py'], cc='zhou_li@gow.cn')
+    send_email(to_email_list='gswewf@126.com', subject='测试邮件', contents='无',
+               attachments=['/home/gswewf/ambbr-ai/ambbr/test/use_yagmail_send_email.py'], cc='zhou_li@gow.cn')
 
 
 if __name__ == "__main__":

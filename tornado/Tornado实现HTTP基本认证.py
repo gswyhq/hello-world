@@ -74,8 +74,8 @@ if __name__ == '__main__':
     
 # 浏览器登录：http://192.168.3.145:8800/http
 # 或者用户名密码登录：
-# gswyhq@gswyhq-PC:~/ner_es$ curl http://192.168.3.145:8800/http --u hello:world
-# gswyhq@gswyhq-PC:~/ner_es$ curl http://192.168.3.145:8800/http -u hello:world
+# gswewf@gswewf-PC:~/ner_es$ curl http://192.168.3.145:8800/http --u hello:world
+# gswewf@gswewf-PC:~/ner_es$ curl http://192.168.3.145:8800/http -u hello:world
 #
 # import requests
 # r = requests.get('http://192.168.3.145:8800/http', auth=('hello', 'world'))

@@ -14,9 +14,9 @@ Name=Navicat for Mysql 客户端
 
 Comment=The Smarter Way to manage dadabase
 
-Exec=/bin/sh "/home/gswyhq/navicat112_mysql/start_navicat"
+Exec=/bin/sh "/home/gswewf/navicat112_mysql/start_navicat"
 
-Icon=/home/gswyhq/navicat112_mysql/navicat.png
+Icon=/home/gswewf/navicat112_mysql/navicat.png
 
 Categories=Application;Database;MySQL;navicat
 

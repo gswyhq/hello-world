@@ -119,7 +119,7 @@ def change_excel_file(excel_file):
     wb.save(excel_file)
 
 def main():
-    excel_file = '/home/gswyhq/input/auto_test_set.xlsx'
+    excel_file = '/home/gswewf/input/auto_test_set.xlsx'
     read_excel(excel_file=excel_file)
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 # 进入mysql命令行：
-gswyhq@gswyhq-pc:~$ mysql -u root -p
+gswewf@gswewf-pc:~$ mysql -u root -p
 Enter password:
 或者：
 zy@ubuntu:~$ mysql -h localhost -uroot -p

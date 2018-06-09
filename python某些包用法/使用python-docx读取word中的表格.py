@@ -11,7 +11,7 @@
 # Word里面的文本不只是包含了字符串，还有字号、字体、颜色等等属性，都包含在style中。一个Run对象就是style相同的一段文本，新建一个Run就有新的style。
 
 import docx
-docx_file = '/home/gswyhq/Downloads/数据字典(zy)2018-03-01.docx'
+docx_file = '/home/gswewf/Downloads/数据字典(zy)2018-03-01.docx'
 doc = docx.Document(docx_file)
 
 # 遍历每个表格

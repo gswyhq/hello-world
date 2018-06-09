@@ -7,9 +7,9 @@
  
 /usr/share/fonts/，即系统的字体文件，local是自己新建的文件夹；
 复制好后，在local中运行：
-root@gswyhq-pc:/usr/share/fonts/local# mkfontscale
-root@gswyhq-pc:/usr/share/fonts/local# mkfontdir
-root@gswyhq-pc:/usr/share/fonts/local# ls -l
+root@gswewf-pc:/usr/share/fonts/local# mkfontscale
+root@gswewf-pc:/usr/share/fonts/local# mkfontdir
+root@gswewf-pc:/usr/share/fonts/local# ls -l
 总用量 14976
 -rw-r--r-- 1 root root      716 7月   4 23:26 fonts.dir
 -rw-r--r-- 1 root root      716 7月   4 23:26 fonts.scale

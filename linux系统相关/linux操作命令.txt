@@ -5,10 +5,10 @@ rm -rf 360热点 #删除文件夹“360热点”及其内部的所有文件夹�
 tar -xf 360热点.tar ##将压缩文件“360热点.tar”解压到同目录下的“360热点”文件夹中，其目录结构不变
 tar -zxvf japan.tar.gz -C /tmp/ 解压到指定目录 /tmp/
 
-gswyhq@gswyhq-pc:~/服务器上的文件$ tar -czvf /home/gswyhq/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswyhq/服务器上的文件/360热点.tar.gz’
+gswewf@gswewf-pc:~/服务器上的文件$ tar -czvf /home/gswewf/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswewf/服务器上的文件/360热点.tar.gz’
 
 
-gswyhq@gswyhq-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
+gswewf@gswewf-pc:~/gow69/shell$ tar -xzvf 360热点.tar.gz #将当前目录下面的压缩包“360热点.tar.gz"解压到当前目录中。
 
 sudo chmod a+r bs4/ #改变文件夹的权限
 
@@ -45,16 +45,16 @@ stat 中的参数意义如下：
     
 mongodb 安装
 下载源文件：https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz?_ga=1.249661326.982219555.1458790832
-gswyhq@gswyhq-pc:~/下载$ sudo tar -zxvf mongodb-linux-x86_64-3.2.4.tgz -C /usr/local/
+gswewf@gswewf-pc:~/下载$ sudo tar -zxvf mongodb-linux-x86_64-3.2.4.tgz -C /usr/local/
 将 /usr/local/中的mongodb-linux-x86_64-3.2.4改名为：mongodb
-gswyhq@gswyhq-pc:~/下载$ sudo mkdir /data
-gswyhq@gswyhq-pc:~/下载$ sudo mkdir /data/db #MongoDB 将数据存储在/data/db 目录中
-gswyhq@gswyhq-pc:~/下载$ echo $PATH
+gswewf@gswewf-pc:~/下载$ sudo mkdir /data
+gswewf@gswewf-pc:~/下载$ sudo mkdir /data/db #MongoDB 将数据存储在/data/db 目录中
+gswewf@gswewf-pc:~/下载$ echo $PATH
 /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-gswyhq@gswyhq-pc:~/下载$ export PATH=$PATH:/usr/local/mongodb/bin  #添加到环境变量
-gswyhq@gswyhq-pc:~/下载$ echo $PATH
+gswewf@gswewf-pc:~/下载$ export PATH=$PATH:/usr/local/mongodb/bin  #添加到环境变量
+gswewf@gswewf-pc:~/下载$ echo $PATH
 /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/mongodb/bin
-gswyhq@gswyhq-pc:~/下载$ 
+gswewf@gswewf-pc:~/下载$ 
 还需要解决：mongodb必须有读写和目，录创建权限
 
 http://api.mongodb.org/python/current/installation.html
@@ -72,43 +72,43 @@ sudo tar -zxvf opencc-1.0.3.tar.gz -C /usr/local/
 出现错误：  Doxygen is needed to build the documentation.  Please install it correctly
 ftp://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz，下载doxygen
 
-gswyhq@gswyhq-pc:~/下载$ sudo tar -zxvf doxygen-1.8.11.linux.bin.tar.gz -C /usr/local/
-gswyhq@gswyhq-pc:~/下载$ cd /usr/local/doxygen-1.8.11/
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ ./configure
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ sudo make install
+gswewf@gswewf-pc:~/下载$ sudo tar -zxvf doxygen-1.8.11.linux.bin.tar.gz -C /usr/local/
+gswewf@gswewf-pc:~/下载$ cd /usr/local/doxygen-1.8.11/
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ ./configure
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ sudo make install
 /usr/bin/install: 无法获取'bin/doxytag' 的文件状态(stat): 没有那个文件或目录
 Makefile:13: recipe for target 'install' failed
 make: *** [install] Error 1
-gswyhq@gswyhq-pc:/usr/local$ sudo git clone https://github.com/doxygen/doxygen.git
-gswyhq@gswyhq-pc:/usr/local$ cd doxygen
+gswewf@gswewf-pc:/usr/local$ sudo git clone https://github.com/doxygen/doxygen.git
+gswewf@gswewf-pc:/usr/local$ cd doxygen
 
-gswyhq@gswyhq-pc:/usr/local/doxygen$ sudo mkdir build
-gswyhq@gswyhq-pc:/usr/local/doxygen$ cd build
-gswyhq@gswyhq-pc:/usr/local/doxygen/build$ cmake -G "Unix Makefiles" ..
+gswewf@gswewf-pc:/usr/local/doxygen$ sudo mkdir build
+gswewf@gswewf-pc:/usr/local/doxygen$ cd build
+gswewf@gswewf-pc:/usr/local/doxygen/build$ cmake -G "Unix Makefiles" ..
 - Found PythonInterp: /usr/bin/python (found version "2.7.11") 
 CMake Error at /usr/share/cmake-3.4/Modules/FindPackageHandleStandardArgs.cmake:148 (message):
   Could NOT find FLEX (missing: FLEX_EXECUTABLE)
 
 于是：sudo apt-get install flex
 Could NOT find BISON (missing: BISON_EXECUTABLE)
-于是：gswyhq@gswyhq-pc:/usr/local$ sudo apt-get install bison
+于是：gswewf@gswewf-pc:/usr/local$ sudo apt-get install bison
 
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cd build/
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11/build$ cmake -G "Unix Makefiles" ..
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ cd build/
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11/build$ cmake -G "Unix Makefiles" ..
 再运行：
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_wizard=YES
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -L
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ make
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_wizard=YES
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ cmake -L
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ make
 
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_doc=YES
-gswyhq@gswyhq-pc:/usr/local/doxygen-1.8.11$ make docs
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ cmake -Dbuild_doc=YES
+gswewf@gswewf-pc:/usr/local/doxygen-1.8.11$ make docs
 
 epstopdf: not found
 
 不管这个。
-gswyhq@gswyhq-pc:/usr/local$ cd opencc-1.0.3/
-gswyhq@gswyhq-pc:/usr/local/opencc-1.0.3$ sudo make
-gswyhq@gswyhq-pc:/usr/local/opencc-1.0.3$ sudo make install
+gswewf@gswewf-pc:/usr/local$ cd opencc-1.0.3/
+gswewf@gswewf-pc:/usr/local/opencc-1.0.3$ sudo make
+gswewf@gswewf-pc:/usr/local/opencc-1.0.3$ sudo make install
 
 安装opencc成功。
 
@@ -125,7 +125,7 @@ http://dev.mysql.com/downloads/file/?id=461343
 sudo pip3 install PyMySQL
 
 进入mysql数据库控制台，
-root@gswyhq-pc:~# mysql -uroot -p
+root@gswewf-pc:~# mysql -uroot -p
 Enter password: 
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 5
@@ -139,7 +139,7 @@ owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql> set password=password('gswyhq');
+mysql> set password=password('gswewf');
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
 mysql> 
@@ -154,7 +154,7 @@ sudo apt autoremove #卸载安装过程中的辅助包
 http://spark.apache.org/downloads.html
 下载spark-1.6.1.tgz
 解压到/usr/local/
-root@gswyhq-pc:/usr/local/spark-1.6.0/build# ./mvn -pl :spark-streaming_2.10 clean install
+root@gswewf-pc:/usr/local/spark-1.6.0/build# ./mvn -pl :spark-streaming_2.10 clean install
 
 Using `mvn` from path: /usr/local/spark-1.6.0/build/apache-maven-3.3.3/bin/mvn
 Warning: JAVA_HOME environment variable is not set.
@@ -168,10 +168,10 @@ OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was 
 [ERROR] 
 [ERROR] For more information about the errors and possible solutions, please read the following articles:
 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MavenExecutionException
-root@gswyhq-pc:/usr/local/spark-1.6.0/build# echo $?
+root@gswewf-pc:/usr/local/spark-1.6.0/build# echo $?
 1
 
-gswyhq@gswyhq-pc:~$ export PATH=$PATH:/usr/bin/java
+gswewf@gswewf-pc:~$ export PATH=$PATH:/usr/bin/java
 
 [INFO] Scanning for projects...
 [ERROR] [ERROR] Could not find the selected project in the reactor: :spark-streaming_2.10 @ 
@@ -182,11 +182,11 @@ gswyhq@gswyhq-pc:~$ export PATH=$PATH:/usr/bin/java
 [ERROR] 
 [ERROR] For more information about the errors and possible solutions, please read the following articles:
 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MavenExecutionException
-root@gswyhq-pc:/usr/local/spark-1.6.0/build# 
+root@gswewf-pc:/usr/local/spark-1.6.0/build# 
 
 于
 http://mvnrepository.com/artifact/org.apache.spark/spark-streaming_2.10/1.6.0
-下载/home/gswyhq/下载/spark-streaming_2.10-1.6.0.jar
+下载/home/gswewf/下载/spark-streaming_2.10-1.6.0.jar
 
 
  sudo pip3 install polyglot
@@ -232,8 +232,8 @@ http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/liblinear.cgi?+http://www.csie.ntu.edu
 在/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python，打开命令行终端：运行“make”
 cd /usr/local/lib/python3.5/dist-packages/liblinear-2.1
 再运行“make”
-切换到gswyhq用户，运行：
-gswyhq@gswyhq-pc:~$ export PATH=$PATH:/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
+切换到gswewf用户，运行：
+gswewf@gswewf-pc:~$ export PATH=$PATH:/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
 
 export PYTHON3PATH=$PYTHON3PATH:/usr/local/lib/python3.5/dist-packages/liblinear-2.1/python
 上面设置路径方法还是不行；最终，在sys.path随便一个路径下，如：'/usr/local/lib/python3.5/dist-packages'
@@ -277,19 +277,19 @@ cd ltp
 make
 更多说明见：http://ltp.readthedocs.org/zh_CN/latest/install.html#linux-mac-osx-cygwin
 sudo pip3 install pyltp，安装pyltp
-下载模型文件：http://pan.baidu.com/share/link?shareid=1988562907&uk=2738088569#path=%252Fltp-models%252F3.3.1
+下载模型文件：http://pan.baidu.com/share/link?shareid=19188562907&uk=27380188569#path=%252Fltp-models%252F3.3.1
 
 
 pynlpir 初始化失败的解决方法：
 https://github.com/NLPIR-team/NLPIR/blob/master/License/license%20for%20a%20month/NLPIR-ICTCLAS%E5%88%86%E8%AF%8D%E7%B3%BB%E7%BB%9F%E6%8E%88%E6%9D%83/NLPIR.user
 下载NLPIR.user,
-gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/
+gswewf@gswewf-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/
 cli.py       Data/        __init__.py  lib/         nlpir.py     pos_map.py   __pycache__/ 
-gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/
+gswewf@gswewf-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/
 
-gswyhq@gswyhq-pc:~/下载$ sudo mv /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user.backup
-[sudo] gswyhq 的密码：
-gswyhq@gswyhq-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user
+gswewf@gswewf-pc:~/下载$ sudo mv /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user.backup
+[sudo] gswewf 的密码：
+gswewf@gswewf-pc:~/下载$ sudo cp NLPIR.user /usr/local/lib/python3.5/dist-packages/pynlpir/Data/NLPIR.user
 
 
 sudo pip3 install sklearn
@@ -352,61 +352,61 @@ Binary file a.log matches
 
 　　sudo apt-get install libcurl4-gnutls-dev libexpat1-dev gettext libz-dev git-core  
 　　
-　　ssh-keygen -C 'gswyhq@126.com' -t rsa
+　　ssh-keygen -C 'gswewf@126.com' -t rsa
 　　#生成密钥
 　　#http://www.cnblogs.com/jackge/archive/2013/08/17/3264801.html
 　　
 　　scp yhq@172.19.1.239:/home/pkg.tgz .
 　　#复制文件到当前目录
 　　
-gswyhq@gswyhq-pc:~$ mkdir git-project
-gswyhq@gswyhq-pc:~$ cd git-project/
-gswyhq@gswyhq-pc:~/git-project$ git init #本地初始化，并在当前文件夹生成一个.git文件夹
-初始化空的 Git 仓库于 /home/gswyhq/git-project/.git/
-gswyhq@gswyhq-pc:~/git-project$ ls
+gswewf@gswewf-pc:~$ mkdir git-project
+gswewf@gswewf-pc:~$ cd git-project/
+gswewf@gswewf-pc:~/git-project$ git init #本地初始化，并在当前文件夹生成一个.git文件夹
+初始化空的 Git 仓库于 /home/gswewf/git-project/.git/
+gswewf@gswewf-pc:~/git-project$ ls
 pkg.tgz
-gswyhq@gswyhq-pc:~/git-project$ touch pkg.tgz #linux的touch命令不常用，一般在使用make的时候可能会用到，用来修改文件时间戳，或者新建一个不存在的文件。
-gswyhq@gswyhq-pc:~/git-project$ git add pkg.tgz #添加文件到暂存区
-gswyhq@gswyhq-pc:~/git-project$ echo $?
+gswewf@gswewf-pc:~/git-project$ touch pkg.tgz #linux的touch命令不常用，一般在使用make的时候可能会用到，用来修改文件时间戳，或者新建一个不存在的文件。
+gswewf@gswewf-pc:~/git-project$ git add pkg.tgz #添加文件到暂存区
+gswewf@gswewf-pc:~/git-project$ echo $?
 0
-gswyhq@gswyhq-pc:~/git-project$ 
+gswewf@gswewf-pc:~/git-project$ 
 
 
 
-root@gswyhq-pc:/home/gswyhq/git-project# scp -r yhq@114.119.10.194:/mnt/sdb/shell2/ /home/gswyhq/git-project/
+root@gswewf-pc:/home/gswewf/git-project# scp -r yhq@114.119.10.194:/mnt/sdb/shell2/ /home/gswewf/git-project/
 
-#复制服务器114.119.10.194上的/mnt/sdb/shell2/ 文件到本地文件夹/home/gswyhq/git-project/中。
+#复制服务器114.119.10.194上的/mnt/sdb/shell2/ 文件到本地文件夹/home/gswewf/git-project/中。
 
-gswyhq@gswyhq-pc:~/git-project$ git config --global user.email "gswyhq@126.com"
-gswyhq@gswyhq-pc:~/git-project$ git config --global user.name 'gswyhq'
+gswewf@gswewf-pc:~/git-project$ git config --global user.email "gswewf@126.com"
+gswewf@gswewf-pc:~/git-project$ git config --global user.name 'gswewf'
 
-gswyhq@gswyhq-pc:~/git-project$ git clone git@172.19.1.100:gow.ai #将远程服务器上（git@172.19.1.100:gow.ai）克隆一个版本库到本地
+gswewf@gswewf-pc:~/git-project$ git clone git@172.19.1.100:gow.ai #将远程服务器上（git@172.19.1.100:gow.ai）克隆一个版本库到本地
 正克隆到 'gow.ai'...
-Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':  #输入密码
+Enter passphrase for key '/home/gswewf/.ssh/id_rsa':  #输入密码
 warning: 您似乎克隆了一个空仓库。
 检查连接... 完成。
-gswyhq@gswyhq-pc:~/git-project$ echo $?
+gswewf@gswewf-pc:~/git-project$ echo $?
 0
-gswyhq@gswyhq-pc:~/git-project$ ls
+gswewf@gswewf-pc:~/git-project$ ls
 gow.ai  pkg.tgz
-gswyhq@gswyhq-pc:~/git-project$ mv pkg.tgz gow.ai/ #移动文件到刚才克隆的版本库
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ git init
-重新初始化现存的 Git 仓库于 /home/gswyhq/git-project/gow.ai/.git/
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ git add pkg.tgz #添加文件到暂存区
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+gswewf@gswewf-pc:~/git-project$ mv pkg.tgz gow.ai/ #移动文件到刚才克隆的版本库
+gswewf@gswewf-pc:~/git-project/gow.ai$ git init
+重新初始化现存的 Git 仓库于 /home/gswewf/git-project/gow.ai/.git/
+gswewf@gswewf-pc:~/git-project/gow.ai$ git add pkg.tgz #添加文件到暂存区
+gswewf@gswewf-pc:~/git-project/gow.ai$ echo $?
 0
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ git commit -m '172.19.1.239服务器上pkg.tgz文件第一次提交'
+gswewf@gswewf-pc:~/git-project/gow.ai$ git commit -m '172.19.1.239服务器上pkg.tgz文件第一次提交'
 [master（根提交） 52a6575] 172.19.1.239服务器上pkg.tgz文件第一次提交
  1 file changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 pkg.tgz
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+gswewf@gswewf-pc:~/git-project/gow.ai$ echo $?
 0
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ git remote add gow_git git@172.19.1.100:gow.ai #增加一个远程服务器端
+gswewf@gswewf-pc:~/git-project/gow.ai$ git remote add gow_git git@172.19.1.100:gow.ai #增加一个远程服务器端
 #上面的命令会增加URL地址为'git@172.19.1.100:gow.ai'，名称为gow_git的远程服务器库，以后提交代码的时候只需要使用 gow_git别名即可
 
 #git push (远程仓库名) (分支名) 将本地分支推送到服务器上去。
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ git push gow_git master # 将本地分支推送到服务器上去。
-Enter passphrase for key '/home/gswyhq/.ssh/id_rsa': 
+gswewf@gswewf-pc:~/git-project/gow.ai$ git push gow_git master # 将本地分支推送到服务器上去。
+Enter passphrase for key '/home/gswewf/.ssh/id_rsa': 
 对象计数中: 3, 完成.
 Delta compression using up to 4 threads.
 压缩对象中: 100% (2/2), 完成.
@@ -414,9 +414,9 @@ Delta compression using up to 4 threads.
 Total 3 (delta 0), reused 0 (delta 0)
 To git@172.19.1.100:gow.ai
  * [new branch]      master -> master
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ echo $?
+gswewf@gswewf-pc:~/git-project/gow.ai$ echo $?
 0
-gswyhq@gswyhq-pc:~/git-project/gow.ai$ 
+gswewf@gswewf-pc:~/git-project/gow.ai$ 
 
 
 
@@ -426,7 +426,7 @@ nltk 运行失败：
   _tagger.pickle' not found.  Please use the NLTK Downloader to
   obtain the resource:  >>> nltk.download()
   Searched in:
-    - '/home/gswyhq/nltk_data'
+    - '/home/gswewf/nltk_data'
     - '/usr/share/nltk_data'
     - '/usr/local/share/nltk_data'
     - '/usr/lib/nltk_data'
@@ -451,21 +451,21 @@ http://xiazai.xmindchina.cn/trail/xmind-7-linux-amd64.rar
 dpkg -i /usr/local/xmind-7-linux-amd64.deb
 
 目录下，所有文件字符串替换：
-sed -i "s/logger.debug/logger.info/g" `grep logger.debug -rl /home/gswyhq/svn/WhiteII/WhiteII`
-将/home/gswyhq/svn/WhiteII/WhiteII目录及其子目录中所有文件中的logger.debug替换为：logger.info
+sed -i "s/logger.debug/logger.info/g" `grep logger.debug -rl /home/gswewf/svn/WhiteII/WhiteII`
+将/home/gswewf/svn/WhiteII/WhiteII目录及其子目录中所有文件中的logger.debug替换为：logger.info
 
 在ubuntu中如果解压zip包出现中文乱码，可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip或者 unar -e GB18030 xxx.zip 即可！
 
-gswyhq@gswyhq-pc:~$ curl localhost:9200
+gswewf@gswewf-pc:~$ curl localhost:9200
 bash: curl: 未找到命令
 通过下面的安装即可：
 sudo apt-get install curl
 
-gswyhq@gswyhq-PC:~/yhb$ curl http://localhost:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
+gswewf@gswewf-PC:~/yhb$ curl http://localhost:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
 
 上句等同于（curl的post,json文件）：
-gswyhq@gswyhq-PC:~/yhb$ echo '{"question": "a卡在哪里能用", "uid": "123456"}' > updateqa.json
-gswyhq@gswyhq-PC:~/yhb$ curl http://localhost:8000/ -d @updateqa.json
+gswewf@gswewf-PC:~/yhb$ echo '{"question": "a卡在哪里能用", "uid": "123456"}' > updateqa.json
+gswewf@gswewf-PC:~/yhb$ curl http://localhost:8000/ -d @updateqa.json
 
 Linux下查看文件和文件夹大小
 df命令可以显示目前所有文件系统的可用空间及使用情形
@@ -482,14 +482,14 @@ df -h
     如果当前目录下文件和文件夹很多，使用不带参数du的命令，可以循环列出所有文件和文件夹所使用的空间。这对查看究竟是那个地方过大是不利的，
     所以得指定深入目录的层数，参数：--max-depth=，这是个极为有用的参数！如下，注意使用“*”，可以得到文件的使用空间大小.
     
-# 查看/home/gswyhq/xiaoxiao/下文件大小
-gswyhq@gswyhq-pc:~/xiaoxiao$ du -h --max-depth=1 /home/gswyhq/xiaoxiao/*
+# 查看/home/gswewf/xiaoxiao/下文件大小
+gswewf@gswewf-pc:~/xiaoxiao$ du -h --max-depth=1 /home/gswewf/xiaoxiao/*
 
 # 查看当前目录下的文件及文件夹的大小：
 web1@10-13-101-154:~$ du -sh *
 
 # 查看文件的md5值：
-gswyhq@gswyhq-pc:~/qa_jar$ md5sum jar/sim.jar
+gswewf@gswewf-pc:~/qa_jar$ md5sum jar/sim.jar
 0810a0fbeda9bb7a5e8954e569910d2a  jar/sim.jar
 
 
@@ -524,37 +524,37 @@ wget -b http://www.minjieren.com/wordpress-3.1-zh_CN.zip
 protoc 命令安装：
 
 在https://github.com/google/protobuf/releases/，下载protobuf-python-3.0.0.tar.gz，并解压复制到：/usr/local/protobuf-3.0.0
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# ./configure 
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# make
+root@gswewf-pc:/usr/local/protobuf-3.0.0# ./configure 
+root@gswewf-pc:/usr/local/protobuf-3.0.0# make
 # 出现下面的错误
 CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/bash /usr/local/protobuf-3.0.0/missing aclocal-1.14 -I m4
 /usr/local/protobuf-3.0.0/missing:行81: aclocal-1.14: 未找到命令
 # 删除文件，重新用命令行解压
-root@gswyhq-pc:/usr/local# rm -r protobuf-3.0.0
-root@gswyhq-pc:/usr/local# tar -xzvf /home/gswyhq/下载/protobuf-python-3.0.0.tar.gz
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# make 
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# make check
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# make install
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# protoc --version  
+root@gswewf-pc:/usr/local# rm -r protobuf-3.0.0
+root@gswewf-pc:/usr/local# tar -xzvf /home/gswewf/下载/protobuf-python-3.0.0.tar.gz
+root@gswewf-pc:/usr/local/protobuf-3.0.0# make 
+root@gswewf-pc:/usr/local/protobuf-3.0.0# make check
+root@gswewf-pc:/usr/local/protobuf-3.0.0# make install
+root@gswewf-pc:/usr/local/protobuf-3.0.0# protoc --version  
 protoc: error while loading shared libraries: libprotobuf.so.10: cannot open shared object file: No such file or directory
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# 
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
+root@gswewf-pc:/usr/local/protobuf-3.0.0# 
+root@gswewf-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
+root@gswewf-pc:/usr/local/protobuf-3.0.0# vim ~/.profile 
 打开配置文件“~/.profile ”，在该文件开头中添加
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 然后保存退出，接下来执行
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# source ~/.profile  
-root@gswyhq-pc:/usr/local/protobuf-3.0.0# protoc --version  
+root@gswewf-pc:/usr/local/protobuf-3.0.0# source ~/.profile  
+root@gswewf-pc:/usr/local/protobuf-3.0.0# protoc --version  
 libprotoc 3.0.0
 
 # 更改文件的权限，将当前目录下的skill_server.sh更改成有可执行权限
-gswyhq@gswyhq-pc:~/wangda$ chmod 777 ./skill_server.sh
+gswewf@gswewf-pc:~/wangda$ chmod 777 ./skill_server.sh
 
 # 递归比较两个文件目录的不同
-diff -urNa ./xiaoxiao /home/gswyhq/git_work/WhiteII > diff0909.txt
+diff -urNa ./xiaoxiao /home/gswewf/git_work/WhiteII > diff0909.txt
 
 # 搭建FTP服务
-gswyhq@gswyhq-pc:~$ sudo apt-get install vsftpd
+gswewf@gswewf-pc:~$ sudo apt-get install vsftpd
 
 # 更改配置文件
 sudo vim /etc/vsftpd.conf
@@ -569,24 +569,24 @@ sudo vim /etc/vsftpd.conf
     #设置固定目录，在结尾添加。如果不添加这一行，各用户对应自己的目录，当然这个文件夹自己建
     local_root=/home/ftp
 # 添加用户，设置密码（123456）
-gswyhq@gswyhq-pc:~$ sudo useradd -d /home/ftp -M ftpuser
-gswyhq@gswyhq-pc:~$ sudo passwd ftpuser
+gswewf@gswewf-pc:~$ sudo useradd -d /home/ftp -M ftpuser
+gswewf@gswewf-pc:~$ sudo passwd ftpuser
 输入新的 UNIX 密码：
 重新输入新的 UNIX 密码：
 passwd：已成功更新密码
-gswyhq@gswyhq-pc:~$ 
+gswewf@gswewf-pc:~$ 
 
 # 新建文件夹，调整权限
 sudo chmod a-w /home/ftp
 sudo mkdir /home/ftp/data
 
-root@gswyhq-pc:~# vim /etc/pam.d/vsftpd
+root@gswewf-pc:~# vim /etc/pam.d/vsftpd
     #auth    required pam_shells.so
 
 # 重启ftp服务
-gswyhq@gswyhq-pc:~$ sudo service vsftpd restart
+gswewf@gswewf-pc:~$ sudo service vsftpd restart
 
-# gswyhq@gswyhq-pc:~$ sudo service vsftpd stop
+# gswewf@gswewf-pc:~$ sudo service vsftpd stop
 
 #关于用户访问文件夹限制
 由chroot_local_user、chroot_list_enable、chroot_list_file这三个控制（在/etc/vsftpd.conf中），转别人的一段话：
@@ -640,12 +640,12 @@ telnet localhost 11111
 
 下载密钥文件
 更改权限：
-gswyhq@gswyhq-pc:~$ chmod 600 gswyhq.pem 
+gswewf@gswewf-pc:~$ chmod 600 gswewf.pem 
 
 登陆跳板机
-ssh gswyhq@172.26.1.9 -i gswyhq.pem
+ssh gswewf@172.26.1.9 -i gswewf.pem
 
-        您的用户名： gswyhq
+        您的用户名： gswewf
         您的权限： 普通用户
         您的web登录密码： yN1GNDt_CSoUqzKg
         您的ssh密钥文件密码： 0M2tW6QEQhANAI4x
@@ -720,9 +720,9 @@ sudo apt-get install meld
  chown [-R] 账号名称:用户组名称 文件或目录
  
 安装adb命令：
-gswyhq@gswyhq-pc:~$ sudo apt-get install android-tools-adb
+gswewf@gswewf-pc:~$ sudo apt-get install android-tools-adb
 安装apk程序
-adb install -r /home/gswyhq/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
+adb install -r /home/gswewf/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
 显示adb日志
 adb shell logcat
 
@@ -751,18 +751,18 @@ source filename 或 . filename
 # source /etc/profile
 
 
-gswyhq@gswyhq-pc:~$ sudo apt-get update
+gswewf@gswewf-pc:~$ sudo apt-get update
 正在读取软件包列表... 完成
 E: 无法获得锁 /var/lib/apt/lists/lock - open (11: 资源暂时不可用)
 E: 无法对目录 /var/lib/apt/lists/ 加锁
-gswyhq@gswyhq-pc:~$ sudo rm /var/lib/apt/lists/lock
-gswyhq@gswyhq-pc:~$ sudo apt-get update
+gswewf@gswewf-pc:~$ sudo rm /var/lib/apt/lists/lock
+gswewf@gswewf-pc:~$ sudo apt-get update
 
 python 中对某行代码运行时间进行计时：
 https://github.com/lilydjwg/winterpy/blob/master/pylib/myutils.py#L184-L201
 
 安装adb程序
-adb install -r /home/gswyhq/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
+adb install -r /home/gswewf/.cxoffice/Deepin-QQ/dosdevices/y:/ambbr-ai/需求文档/app-debug.apk 
 查看日志
 adb shell logcat
 
@@ -788,9 +788,9 @@ set nu              //在左侧显示文本的行号
 
 linux读写md格式文件：
 1.安装retext
-gswyhq@gswyhq-pc:~/tensorflow-zh$ sudo apt-get install retext
+gswewf@gswewf-pc:~/tensorflow-zh$ sudo apt-get install retext
 2.打开对应的md格式文件，如：TOC.md
-gswyhq@gswyhq-pc:~/tensorflow-zh$ retext TOC.md
+gswewf@gswewf-pc:~/tensorflow-zh$ retext TOC.md
 
 切换到root用户：
 sudo su
@@ -840,12 +840,12 @@ nohup bash /gow/semantic/xiaoxiaoxiao/WhiteII/manager_wrap.sh &
 exit 0
 
 deepin系统右键 -> 新建文档 -> 新建python文件
-需要设置一个python的模板文件，放在“/home/gswyhq/模板”目录下即可。
+需要设置一个python的模板文件，放在“/home/gswewf/模板”目录下即可。
 
 将本机的8000端口开放给外部可以访问：
-gswyhq@gswyhq-pc:~$ sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
-[sudo] gswyhq 的密码：
-gswyhq@gswyhq-pc:~$ sudo iptables-save
+gswewf@gswewf-pc:~$ sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+[sudo] gswewf 的密码：
+gswewf@gswewf-pc:~$ sudo iptables-save
 
 持久化iptables
 上文那样做只是暂时保存了开放端口的信息，如果服务器重启，保存的信息就掉了，所以我们需要持久化一下端口信息，这里我们使用 iptables-persistent
@@ -854,12 +854,12 @@ apt-get install iptables-persistent
 持久化信息
 service iptables-persistent save
 但还是报错：
-gswyhq@gswyhq-pc:~$ sudo service iptables-persistent save
+gswewf@gswewf-pc:~$ sudo service iptables-persistent save
 iptables-persistent: unrecognized service
 
 在ubuntu中由于不存在 /etc/init.d/iptales文件，所以无法使用service等命令来启动iptables，需要用modprobe命令。
 启动iptables
-gswyhq@gswyhq-pc:~$ sudo modprobe ip_tables
+gswewf@gswewf-pc:~$ sudo modprobe ip_tables
 关闭iptables（关闭命令要比启动复杂）
 iptables -F
 iptables -X

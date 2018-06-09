@@ -3,15 +3,15 @@
 实现步骤:
 
 安装gollum 和 github-markdown
-gswyhq@gswyhq-PC:~$ sudo apt-get install ruby
-gswyhq@gswyhq-PC:~$ sudo apt-get install rubygems
-gswyhq@gswyhq-PC:~$ sudo apt-get  install   ruby-dev
-gswyhq@gswyhq-PC:~$ sudo gem install gollum
-gswyhq@gswyhq-PC:~$ sudo gem install github-markdown
+gswewf@gswewf-PC:~$ sudo apt-get install ruby
+gswewf@gswewf-PC:~$ sudo apt-get install rubygems
+gswewf@gswewf-PC:~$ sudo apt-get  install   ruby-dev
+gswewf@gswewf-PC:~$ sudo gem install gollum
+gswewf@gswewf-PC:~$ sudo gem install github-markdown
 
 选择一个目录克隆wiki
 在gitlab网站wiki/Git Access页面内找项目连接地址(打开wiki页面点击右侧的`  Clone repository`即可获取对应的地址)
-如：http://192.168.3.101/gswyhq/data-system-framework/wikis/git_access
+如：http://192.168.3.101/gswewf/data-system-framework/wikis/git_access
 git clone git @git.xxxxxxx.org:xxxx/name.wiki.git
 
 进入目录
@@ -23,7 +23,7 @@ git reset --hard 哈希值
 最后将修改push到服务器上就ok了.从此以后可以和代码一样在本地写wiki后再推到服务器了
 
 在项目git的目录（含有.git目录）执行
-gswyhq@gswyhq-PC:~/data-system-framework.wiki$ gollum --css --allow-uploads --mathjax --h1-title
+gswewf@gswewf-PC:~/data-system-framework.wiki$ gollum --css --allow-uploads --mathjax --h1-title
 以上使用了一些参数，分别是使用自定义 custom.css 文件（在git初始化目录），增加上传功能，支持 LaTeX 公式，markdown的一级标题为全文标题。
 
 在浏览器中访问以下地址来创建wiki内容：

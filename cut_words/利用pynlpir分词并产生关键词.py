@@ -8,7 +8,7 @@ import pynlpir
 def read_stop_words():
     #读取停用词
     #tf = open("stop_words.txt", "r")
-    tf=open('/home/gswyhq/问答问题/问答系统/stop_words.txt')
+    tf=open('/home/gswewf/问答问题/问答系统/stop_words.txt')
     lines = tf.readlines()
     tf.close()
     stop_words = [line[:-1] for line in lines]

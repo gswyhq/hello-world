@@ -1,17 +1,17 @@
 
 # 一、动态添加同义词插件
-gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/bells/elasticsearch-analysis-dynamic-synonym.git
-gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-dynamic-synonym
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ git log
+gswewf@gswewf-pc:~/github_projects$ git clone https://github.com/bells/elasticsearch-analysis-dynamic-synonym.git
+gswewf@gswewf-pc:~/github_projects$ cd elasticsearch-analysis-dynamic-synonym
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ git log
 commit ec71478cdea1e0d056101cef5219b3e512ae4eac
 Author: watsonzhu(朱斌华) <watsonzhu@tencent.com>
 Date:   2017-05-17 10:25:26 +0800
 ...
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ mvn package
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ cd target/releases/
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ ls
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ mvn package
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ cd target/releases/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ ls
 elasticsearch-analysis-dynamic-synonym-5.2.0--.zip
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ unzip elasticsearch-analysis-dynamic-synonym-5.2.0--.zip -d  elasticsearch-analysis-dynamic-synonym-5.2.0
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ unzip elasticsearch-analysis-dynamic-synonym-5.2.0--.zip -d  elasticsearch-analysis-dynamic-synonym-5.2.0
 
 若出现以下错误，则是对应的Java开发环境没有安装：
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.3.2:compile (default-compile) on project elasticsearch-analysis-dynamic-synonym: Compilation failure
@@ -23,7 +23,7 @@ gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target
 [ERROR] installation by setting the JAVA_HOME environment variable.
 [ERROR]
 
-gswyhq@gswyhq-PC:~$ java -version
+gswewf@gswewf-PC:~$ java -version
 Picked up _JAVA_OPTIONS:   -Dawt.useSystemAAFontSettings=gasp
 openjdk version "1.8.0_141"
 OpenJDK Runtime Environment (build 1.8.0_141-8u141-b15-3-b15)
@@ -32,40 +32,40 @@ OpenJDK 64-Bit Server VM (build 25.141-b15, mixed mode)
 已经安装了Java运行时，但是为了开发Java应用程序，您需要JDK，因此您必须安装OpenJDK devel软件包
 
 openjdk-8-jre包仅包含Java运行时环境。
-gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jre
+gswewf@gswewf-PC:~$ sudo apt-get install openjdk-8-jre
 
 如果你想开发Java程序，那么请安装openjdk-8-jdk包。
-gswyhq@gswyhq-PC:~$ sudo apt-get install openjdk-8-jdk
+gswewf@gswewf-PC:~$ sudo apt-get install openjdk-8-jdk
 
 卸载所有openjdk安装，这是非常危险的，包括PyCharm Professional等都会卸载；
 sudo apt-get remove openjdk*
 
 # 二、分词插件‘pinyin’
-gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
-gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-pinyin
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ git checkout v5.2.0
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn clean
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn compile
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn package
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin$ cd target/releases/
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ ls
+gswewf@gswewf-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-pinyin.git
+gswewf@gswewf-pc:~/github_projects$ cd elasticsearch-analysis-pinyin
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ git checkout v5.2.0
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn clean
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn compile
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ mvn package
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin$ cd target/releases/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ ls
 elasticsearch-analysis-pinyin-5.2.0.zip
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ unzip elasticsearch-analysis-pinyin-5.2.0.zip -d elasticsearch-analysis-pinyin-5.2.0
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-pinyin/target/releases$ unzip elasticsearch-analysis-pinyin-5.2.0.zip -d elasticsearch-analysis-pinyin-5.2.0
 
 # 三、中文分词插件‘ik’
-gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
-gswyhq@gswyhq-pc:~/github_projects$ cd elasticsearch-analysis-ik
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ git checkout v5.2.0
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn clean
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn compile
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ mvn package
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik$ cd target/releases/
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ ls
+gswewf@gswewf-pc:~/github_projects$ git clone https://github.com/medcl/elasticsearch-analysis-ik.git
+gswewf@gswewf-pc:~/github_projects$ cd elasticsearch-analysis-ik
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ git checkout v5.2.0
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn clean
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn compile
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ mvn package
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik$ cd target/releases/
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ ls
 elasticsearch-analysis-ik-5.2.0.zip
-gswyhq@gswyhq-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ unzip elasticsearch-analysis-ik-5.2.0.zip -d elasticsearch-analysis-ik-5.2.0
+gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-ik/target/releases$ unzip elasticsearch-analysis-ik-5.2.0.zip -d elasticsearch-analysis-ik-5.2.0
 
 # 四、elasticsearch的docker镜像
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker pull elasticsearch:5.2.0
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker pull elasticsearch:5.2.0
 5.2.0: Pulling from library/elasticsearch
 5040bd298390: Pulling fs layer
 fce5728aad85: Pulling fs layer
@@ -85,7 +85,7 @@ Digest: sha256:ab1c7595f92e6b7b56a9a7525982f5ac9106f0c8e5e59358ab3bbaabcf4ed48e
 Status: Downloaded newer image for elasticsearch:5.2.0
 
 # 五、编写同义词文件
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim my_synonyms.txt
 # Example:
 ipod, i - pod, i pod
 foozball, foosball
@@ -97,31 +97,31 @@ aa, bb
 电话, 手机
 
 # 六、启动一个容器，并加载同义词文件
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/my_synonyms.txt:/usr/share/elasticsearch/config/my_synonyms.txt -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/my_synonyms.txt:/usr/share/elasticsearch/config/my_synonyms.txt -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
 14183ba403af6160761cffcc2d845f27218911f6c1fbc862337a1543e159ac62
 # 上面这个挂载单个文件时，宿主机有改动，容器内却不会有改动，故改成挂载目录：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/synonyms:/usr/share/elasticsearch/config/synonyms -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker run -d --name elasticsearch5.2.0_9200 -p 9200:9200 -p 9300:9300 -v $PWD/synonyms:/usr/share/elasticsearch/config/synonyms -v "$PWD/esdata":/usr/share/elasticsearch/data -v /etc/localtime:/etc/localtime elasticsearch:5.2.0
 14183ba403af6160761cffcc2d845f27218911f6c1fbc862337a1543e159ac62
 
 # 以上启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
 # 但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
 # 这个时候需要进入容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
 
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker exec -it elasticsearch5.2.0_9200 /bin/bash
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker exec -it elasticsearch5.2.0_9200 /bin/bash
 root@6fe69600d809:/usr/share/elasticsearch# cd config/
 root@6fe69600d809:/usr/share/elasticsearch/config# echo "http.cors.enabled: true" >> elasticsearch.yml
 root@6fe69600d809:/usr/share/elasticsearch/config# echo 'http.cors.allow-origin: "*"' >> elasticsearch.yml
 
 # 七、添加对应的分词，动态更新同义词插件，重启容器
-gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
-gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
-gswyhq@gswyhq-pc:~/github_projects$ docker cp elasticsearch-analysis-dynamic-synonym/target/releases/elasticsearch-analysis-dynamic-synonym-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+gswewf@gswewf-pc:~/github_projects$ docker cp elasticsearch-analysis-pinyin/target/releases/elasticsearch-analysis-pinyin-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+gswewf@gswewf-pc:~/github_projects$ docker cp elasticsearch-analysis-ik/target/releases/elasticsearch-analysis-ik-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
+gswewf@gswewf-pc:~/github_projects$ docker cp elasticsearch-analysis-dynamic-synonym/target/releases/elasticsearch-analysis-dynamic-synonym-5.2.0 elasticsearch5.2.0_9200:/usr/share/elasticsearch/plugins/
 
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ docker restart elasticsearch5.2.0_9200
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker restart elasticsearch5.2.0_9200
 
 # 八、开始使用
 1、编写一个空的同义词文件
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim my_synonyms.txt
 
 dyn_body = {
     "settings": {
@@ -166,9 +166,9 @@ es = Elasticsearch(host='localhost', port='9200')
 es.indices.create(index='test2', ignore=400, body=dyn_body)
 
 # 向索引`test2`下的类型`solution`添加2条记录
-gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ curl -XPUT localhost:9200/test2/solution/1 -d '{"title": "番茄"}'
-{"_index":"test2","_type":"solution","_id":"1","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}gswyhq@gs
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/test2/solution/2 -d '{"title": "土豆"}'
+gswewf@gswewf-pc:~/hello-world/elasticsearch$ curl -XPUT localhost:9200/test2/solution/1 -d '{"title": "番茄"}'
+{"_index":"test2","_type":"solution","_id":"1","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}gswewf@gs
+gswewf@gswewf-pc:~/docker/elasticsearch$ curl -XPUT localhost:9200/test2/solution/2 -d '{"title": "土豆"}'
 {"_index":"test2","_type":"solution","_id":"2","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}
 
 # 搜索番茄能找到结果，搜索西红柿找不到结果；搜索土豆能找到结果，但是搜索马铃薯找不到结果：
@@ -217,7 +217,7 @@ http://localhost:9200/_analyze?analyzer=ik_max_word&pretty=true&text=西红柿
   }
 }
 对同义词文件进行修改：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ vim my_synonyms.txt
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim my_synonyms.txt
 # Example:
 ipod, i - pod, i pod
 foozball, foosball

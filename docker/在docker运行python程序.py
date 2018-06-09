@@ -6,7 +6,7 @@
 4、运行docker-compose up启动服务
 
 # 第一步：编写py程序
-gswyhq@gswyhq-pc:~/docker/test_web$ vim app.py 
+gswewf@gswewf-pc:~/docker/test_web$ vim app.py 
 
 from flask import Flask
 from redis import Redis
@@ -23,12 +23,12 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
 
 # 第二步：定义这个Python应用容器的依赖文件requirements.txt
-gswyhq@gswyhq-pc:~/docker/test_web$ vim requirements.txt 
+gswewf@gswewf-pc:~/docker/test_web$ vim requirements.txt 
 flask
 redis
 
 # 第三步：编写Dockerfile文件，即创建python应用的docker镜像
-gswyhq@gswyhq-pc:~/docker/test_web$ vim Dockerfile
+gswewf@gswewf-pc:~/docker/test_web$ vim Dockerfile
 FROM python:3.5
 ADD . /code
 WORKDIR /code
@@ -37,7 +37,7 @@ RUN pip3 install -r requirements.txt
 # 上述，指定镜像是python:3.5，并复制当前目录到容器的/code目录；然后下载需要的扩展（申明在requirements.txt）。
 
 # 第四步：使用 docker-compose.yml定义容器应用的服务配置
-gswyhq@gswyhq-pc:~/docker/test_web$ vim docker-compose.yml 
+gswewf@gswewf-pc:~/docker/test_web$ vim docker-compose.yml 
 web:
   build: .
   command: python3 app.py
@@ -63,11 +63,11 @@ redis：直接使用Docker Hub上的官方镜像来提供所需的Redis服务支
 
 
 # 显示当前的目录文件结构
-gswyhq@gswyhq-pc:~/docker/test_web$ ls
+gswewf@gswewf-pc:~/docker/test_web$ ls
 app.py  docker-compose.yml  Dockerfile  requirements.txt
 
 # 第五步：执行compose启动命令 ，启动命令如下
-gswyhq@gswyhq-pc:~/docker/test_web$ docker-compose up
+gswewf@gswewf-pc:~/docker/test_web$ docker-compose up
 
 # 通过compose启动成功后，会最先开始构建Redis容器，紧随其后则构建Python容器，并生成应用的镜像；
 # 然后，Docker Compose会并行地启动全部容器，应用容器会通过compose与被依赖容器进行通信，实现该应用的部署。
@@ -81,11 +81,11 @@ Couldn’t connect to Docker daemon at http+unix://var/run/docker.sock - is it r
 
 解决方法如下：
 1、设置 DOCKER_HOST 环境变量
-gswyhq@gswyhq-pc:~$ vim .bashrc
+gswewf@gswewf-pc:~$ vim .bashrc
 添加：export DOCKER_HOST=tcp://localhost:4243
 
 2、使更改配置生效
-gswyhq@gswyhq-pc:~$ source ~/.bashrc
+gswewf@gswewf-pc:~$ source ~/.bashrc
 
 3、重启电脑
 
@@ -99,17 +99,17 @@ $ sudo service docker restart
 $ netstat -ant | grep 4243
 
 7、继续启动服务
-gswyhq@gswyhq-pc:~/docker/test_web$ docker-compose up
+gswewf@gswewf-pc:~/docker/test_web$ docker-compose up
 
 # 有时会报下面的错误：
-gswyhq@gswyhq-pc:~$ docker ps
+gswewf@gswewf-pc:~$ docker ps
 Cannot connect to the Docker daemon at tcp://localhost:4243. Is the docker daemon running?
 这时需要把当前用户加入到docker用户组中
-gswyhq@gswyhq-pc:~$ sudo usermod -a -G docker $USER
+gswewf@gswewf-pc:~$ sudo usermod -a -G docker $USER
 # 查看docker服务是否开启：
-gswyhq@gswyhq-pc:~$ netstat -pan | grep 4243
+gswewf@gswewf-pc:~$ netstat -pan | grep 4243
 (Not all processes could be identified, non-owned process info
  will not be shown, you would have to be root to see it all.)
 # 将docker设置为开机启动
-gswyhq@gswyhq-pc:~$ sudo systemctl enable docker
+gswewf@gswewf-pc:~$ sudo systemctl enable docker
 

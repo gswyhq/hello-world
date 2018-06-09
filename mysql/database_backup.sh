@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/gswyhq/yhb/mysql_connect
+cd /home/gswewf/yhb/mysql_connect
 
 #备份地址
 backupdir=`pwd`/data
@@ -29,6 +29,6 @@ table_name=question
 #删除1天之前的备份文件
 find $backupdir -name $table_name"*.sql.gz" -type f -mtime +1 -exec rm -rf {} \; > /dev/null 2>&1
 
-# mysql@gswyhq-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
+# mysql@gswewf-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
 # mysqldump: [Warning] Using a password on the command line interface can be insecure.
-# mysql@gswyhq-pc:~$ /usr/bin/mysqldump --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
+# mysql@gswewf-pc:~$ /usr/bin/mysqldump --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql

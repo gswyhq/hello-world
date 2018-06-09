@@ -11,7 +11,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 # 下载mnist数据集
 # mnist = input_data.read_data_sets('/tmp/', one_hot=True)
-mnist = input_data.read_data_sets('/home/gswyhq/MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets('/home/gswewf/MNIST_data', one_hot=True)
 # 数字(label)只能是0-9，神经网络使用10个出口节点就可以编码表示0-9；
 #  1 -> [0,1.0,0,0,0,0,0,0,0]   one_hot表示只有一个出口节点是hot
 #  2 -> [0,0.1,0,0,0,0,0,0,0]

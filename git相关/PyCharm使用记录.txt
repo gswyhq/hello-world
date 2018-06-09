@@ -21,11 +21,11 @@ VCS -> GIT -> Show History
 http://www.sdbeta.com/xiazai/2015/1103/46398.html
 解压下载的文件，获取到resources_cn.jar文件；
 解压到当前目录
-gswyhq@gswyhq-pc:~$ unrar e pycharm5hhb.rar
+gswewf@gswewf-pc:~$ unrar e pycharm5hhb.rar
 备份之前的：
-gswyhq@gswyhq-pc:/usr/lib/pycharm-community/lib$ mv resources_en.jar resources_en.jar.bak 
+gswewf@gswewf-pc:/usr/lib/pycharm-community/lib$ mv resources_en.jar resources_en.jar.bak 
 用汉化包，替换原语言包：
-sudo mv /home/gswyhq/resources_cn.jar /usr/lib/pycharm-community/lib/resources_en.jar
+sudo mv /home/gswewf/resources_cn.jar /usr/lib/pycharm-community/lib/resources_en.jar
 重启pycharm即可。
 以上测试通过的版本是：PyCharm Community Edition 2016.1.4
 
@@ -52,7 +52,7 @@ File-> Settings -> Tools -> Python Integrated Tools -> Default test runner ,将`
 将来自“http://blog.sina.com.cn/s/blog_1415b40850102wujm.html”的验证码，粘贴进入：
 点击‘OK’报错：
 This license CNEKJPQZEX has been cancelled
-gswyhq@gswyhq-pc:~$ sudo vim /etc/hosts
+gswewf@gswewf-pc:~$ sudo vim /etc/hosts
 文件下添加`0.0.0.0 account.jetbrains.com`
 重新粘贴验证码即可；
 
@@ -66,9 +66,9 @@ step2:
 并且修改两个以 vmoptions为结尾的启动文件如图所示:
 
 并且在两个文件后追加 "-javaagent:/usr/lib/pycharm-professional/bin/JetbrainsCrack-2.6.10-release-enc.jar"
-gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo mv /home/gswyhq/Downloads/JetbrainsCrack-2.6.10-release-enc.jar .
-gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm.vmoptions
-gswyhq@gswyhq-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm64.vmoptions
+gswewf@gswewf-PC:/usr/lib/pycharm-professional/bin$ sudo mv /home/gswewf/Downloads/JetbrainsCrack-2.6.10-release-enc.jar .
+gswewf@gswewf-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm.vmoptions
+gswewf@gswewf-PC:/usr/lib/pycharm-professional/bin$ sudo vim /usr/lib/pycharm-professional/bin/pycharm64.vmoptions
 
 step3:
 重启idea

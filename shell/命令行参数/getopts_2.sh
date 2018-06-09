@@ -5,8 +5,8 @@ filename=""
 output=""
 
 # 获取使用帮助：
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -h
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -help
+#gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -h
+#gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -help
 
 function usage() {
         echo "使用方法:"
@@ -29,7 +29,7 @@ do
                         ;;
 
                 # 输入一个文件，并检测文件是否存在
-                # gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -f asdfwef.pdf
+                # gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -f asdfwef.pdf
                 f)
                         filename=$OPTARG
                         if [ ! -f $filename ]
@@ -40,7 +40,7 @@ do
                         ;;
 
                 # 输出文件，并检测输出文件的路径是否存在
-                # gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -o ./afwf/sdf
+                # gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -o ./afwf/sdf
                 o)
                         output=$OPTARG
                         # dirname命令可以取给定路径的目录部
@@ -52,8 +52,8 @@ do
                         ;;
 
                 # 提供帮助选项
-                # gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -h
-                # gswyhq@gswyhq-PC:~/yhb/es_search$ ./getopts_2.sh -help
+                # gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -h
+                # gswewf@gswewf-PC:~/yhb/es_search$ ./getopts_2.sh -help
                 h)
                         usage
                         exit

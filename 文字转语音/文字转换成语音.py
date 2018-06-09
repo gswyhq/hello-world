@@ -2,12 +2,12 @@
 # 名称:        模块1
 # 目的:
 # 参考:
-# 作者:      gswyhq
+# 作者:      gswewf
 #
 # 日期:      2017-08-13
 # 版本:      Python 3.3.5
 # 系统:      deepin15.3
-# Email:     gswyhq@126.com
+# Email:     gswewf@126.com
 #-------------------------------------------------------------------------------
 """
 文字转换成语音, 原理，将每个汉字转换成对应的拼音，再通过拼音调用对应的音频文件，拼接成最后的音频文件；
@@ -24,10 +24,10 @@ silent = AudioSegment.silent(duration=500)
 # 单字音频文件的来源：
 # 从Ekho Voice Data的下载页面(https://sourceforge.net/projects/e-guidedog/files/Ekho%20Voice%20Data/0.2/)获取它们。
 # 下载音频文件解压；
-# gswyhq@gswyhq-pc:~$ tar xJvf pinyin-huang-44100-wav-v2.tar.xz
-PINYIN_VOICE_PATH = '/home/gswyhq/ekho-7.5.1/ekho-data/pinyin'
+# gswewf@gswewf-pc:~$ tar xJvf pinyin-huang-44100-wav-v2.tar.xz
+PINYIN_VOICE_PATH = '/home/gswewf/ekho-7.5.1/ekho-data/pinyin'
 
-EXPORT_PATH = '/home/gswyhq/data/新文件夹'
+EXPORT_PATH = '/home/gswewf/data/新文件夹'
 
 def load_voice_dict():
     voice_file_list = [f for f in os.listdir(PINYIN_VOICE_PATH) if f.endswith('.wav')]
@@ -78,10 +78,10 @@ def main():
     txt_to_voice(text)
 
 def test():
-    path = '/home/gswyhq/下载/御天神帝_qisuu.com/御天神帝'
+    path = '/home/gswewf/下载/御天神帝_qisuu.com/御天神帝'
     fts = os.listdir(path)
     fts.sort()
-    export_path = '/home/gswyhq/下载/御天神帝_qisuu.com/mp3'
+    export_path = '/home/gswewf/下载/御天神帝_qisuu.com/mp3'
 
     for ft  in fts:
         with open(os.path.join(path, ft))as f:

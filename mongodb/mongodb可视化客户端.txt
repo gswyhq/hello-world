@@ -5,15 +5,15 @@ docker pull tianon/robomongo
 从官网下载.tar.gz压缩包进行解压，
 
 wget https://download.robomongo.org/1.1.1/linux/robo3t-1.1.1-linux-x86_64-c93c6b0.tar.gz
-gswyhq@gswyhq-PC:~$ sudo tar zxvf /home/gswyhq/Downloads/robo3t-1.1.1-linux-x86_64-c93c6b0.tar.gz -C /usr/local
-gswyhq@gswyhq-PC:~$ cd /usr/local/
-gswyhq@gswyhq-PC:/usr/local$ sudo chown -R gswyhq:gswyhq robo3t-1.1.1-linux-x86_64-c93c6b0
-gswyhq@gswyhq-PC:/usr/local$ cd robo3t-1.1.1-linux-x86_64-c93c6b0/
+gswewf@gswewf-PC:~$ sudo tar zxvf /home/gswewf/Downloads/robo3t-1.1.1-linux-x86_64-c93c6b0.tar.gz -C /usr/local
+gswewf@gswewf-PC:~$ cd /usr/local/
+gswewf@gswewf-PC:/usr/local$ sudo chown -R gswewf:gswewf robo3t-1.1.1-linux-x86_64-c93c6b0
+gswewf@gswewf-PC:/usr/local$ cd robo3t-1.1.1-linux-x86_64-c93c6b0/
 然后直接运行bin目录下的robo3t文件即可启动界面。
-gswyhq@gswyhq-PC:/usr/local/robo3t-1.1.1-linux-x86_64-c93c6b0$ ./bin/robo3t
+gswewf@gswewf-PC:/usr/local/robo3t-1.1.1-linux-x86_64-c93c6b0$ ./bin/robo3t
 
 创建桌面快捷启动：
-gswyhq@gswyhq-PC:~/Desktop$ vim robo3t.desktop
+gswewf@gswewf-PC:~/Desktop$ vim robo3t.desktop
 [Desktop Entry]
 
 Encoding=UTF-8
@@ -36,6 +36,6 @@ Terminal=0
 
 ---------------------------
 　　我们需要赋予快捷方式运行权限：
-gswyhq@gswyhq-PC:~/Desktop$ chmod +x robo3t.desktop　　
+gswewf@gswewf-PC:~/Desktop$ chmod +x robo3t.desktop　　
 为了方便后续查找快捷方式，我们将该快捷方式复制到ubuntu应用快捷文件存放路径，方便下次搜索并运行robo3t.
 sudo cp robo3t.desktop /usr/share/applications

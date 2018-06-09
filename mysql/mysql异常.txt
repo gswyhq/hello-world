@@ -18,9 +18,9 @@ mysql> repair table question;
 
 kill掉‘/usr/sbin/mysqld’对应的进程，mysql会自动重启；
 切换到mysql用户：
-切换用户：gswyhq@gswyhq-pc:~$ sudo su - mysql
-停止服务：mysql@gswyhq-pc:~$ /etc/init.d/mysql stop
-启动服务：mysql@gswyhq-pc:~$ /etc/init.d/mysql start
+切换用户：gswewf@gswewf-pc:~$ sudo su - mysql
+停止服务：mysql@gswewf-pc:~$ /etc/init.d/mysql stop
+启动服务：mysql@gswewf-pc:~$ /etc/init.d/mysql start
 
 启动服务时失败，报数据记录点不一致的错：
 [ERROR] [FATAL] InnoDB: Tablespace id is 168 in the data dictionary but in file ./yhb/question.ibd it is 209!
@@ -42,7 +42,7 @@ bind-address            = 127.0.0.1
 改为：
 bind-address            = 0.0.0.0
 重启mysql服务：
-gswyhq@gswyhq-pc:~$ sudo /etc/init.d/mysql restart
+gswewf@gswewf-pc:~$ sudo /etc/init.d/mysql restart
 
 第二步：
 允许用户‘root’从ip为192.168.1.51的主机连接到mysql服务器的‘yhb’数据库，并使用‘123456’作为密码：

@@ -209,9 +209,9 @@ def search(index_file='index.csv',query_image='',dataset_path=''):
         cv2.waitKey(0)
 
 if __name__=='__main__':
-    outputfile='/home/gswyhq/VQA/index.csv'
-    dataset_path='/home/gswyhq/gow69/data/dataset'
-    query_image='/home/gswyhq/gow69/data/queries/108100.png'
+    outputfile='/home/gswewf/VQA/index.csv'
+    dataset_path='/home/gswewf/gow69/data/dataset'
+    query_image='/home/gswewf/gow69/data/queries/108100.png'
     #index (outputfile,dataset_path)
     search(outputfile,query_image,dataset_path)
 

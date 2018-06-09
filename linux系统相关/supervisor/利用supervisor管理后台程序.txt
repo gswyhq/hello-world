@@ -52,24 +52,24 @@ supervisorctl update    根据最新的配置文件，启动新配置或有改�
 
 实例：
 第一步：编写conf文件，如tornado.conf
-gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo vim tornado.conf
+gswewf@gswewf-pc:/etc/supervisor/conf.d$ sudo vim tornado.conf
 
 [group:tornadoes]
 programs=tornado-8000
 
 [program:tornado-8000]
 # command=/home/web1/venv_demo/bin/python /home/web1/demo/main.py 
-command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
+command=/usr/bin/python3 /home/gswewf/yhb/tornado_server.py
 # directory=/home/web1/demo/
-directory=/home/gswyhq/yhb/
+directory=/home/gswewf/yhb/
 # user=web1
-user=gswyhq
+user=gswewf
 startretries=10               ; 启动失败时的最多重试次数
 autostart=true                    ; 程序是否随supervisor启动而启动                
 autorestart=true                  ;程序停止时，是否自动重启 
 redirect_stderr=true          ; 重定向stderr到stdout
-stdout_logfile=/home/gswyhq/yhb/log/tornado.log
-stderr_logfile=/home/gswyhq/yhb/log/tornado.log
+stdout_logfile=/home/gswewf/yhb/log/tornado.log
+stderr_logfile=/home/gswewf/yhb/log/tornado.log
 loglevel=info
 
 
@@ -107,43 +107,43 @@ loglevel=info
 
 
 第二步：启动
-gswyhq@gswyhq-pc:~$ sudo supervisorctl start tornado-8000
+gswewf@gswewf-pc:~$ sudo supervisorctl start tornado-8000
 unix:///var/run/supervisor.sock refused connection
 这样启动会报错；改用下面的
-gswyhq@gswyhq-pc:~$ sudo supervisord -c /etc/supervisor/supervisord.conf
+gswewf@gswewf-pc:~$ sudo supervisord -c /etc/supervisor/supervisord.conf
 Unlinking stale socket /var/run/supervisor.sock
-gswyhq@gswyhq-pc:~$ sudo supervisorctl -c /etc/supervisor/supervisord.conf
+gswewf@gswewf-pc:~$ sudo supervisorctl -c /etc/supervisor/supervisord.conf
 unix:///var/run/supervisor.sock no such file
 supervisor> exit
 
 或者通过下面方法启动：
-gswyhq@gswyhq-pc:~/yhb$ sudo supervisorctl start tornadoes:tornado-8000
+gswewf@gswewf-pc:~/yhb$ sudo supervisorctl start tornadoes:tornado-8000
 
 或者通过下面方法启动（关闭supervisord后，上面两种方法启动都无效）：
-gswyhq@gswyhq-pc:~$ sudo /etc/init.d/supervisor start
+gswewf@gswewf-pc:~$ sudo /etc/init.d/supervisor start
 
 
 第三步：关闭
-gswyhq@gswyhq-pc:~$ sudo supervisorctl stop tornado-8000
+gswewf@gswewf-pc:~$ sudo supervisorctl stop tornado-8000
 tornado-8000: ERROR (no such process)
 会报错，改用下面的：
-gswyhq@gswyhq-pc:~$ sudo supervisorctl stop all
+gswewf@gswewf-pc:~$ sudo supervisorctl stop all
 tornadoes:tornado-8000: stopped
 
 或者：
-gswyhq@gswyhq-pc:~$ sudo supervisorctl stop tornadoes:tornado-8000
+gswewf@gswewf-pc:~$ sudo supervisorctl stop tornadoes:tornado-8000
 tornadoes:tornado-8000: stopped
 
-gswyhq@gswyhq-pc:~$ sudo supervisorctl stop all
+gswewf@gswewf-pc:~$ sudo supervisorctl stop all
 tornadoes:tornado-8000: stopped
 
 # sudo supervisorctl stop all 仅仅是结束了所有的tornadoes；并不能结束supervisord的进程
-gswyhq@gswyhq-pc:~$ ps -aux|grep supervi
+gswewf@gswewf-pc:~$ ps -aux|grep supervi
 root     16781  0.0  0.1  61128 20580 ?        Ss   16:15   0:00 /usr/bin/python /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
-gswyhq   17321  0.0  0.0  14520   996 pts/2    S+   16:32   0:00 grep supervi
+gswewf   17321  0.0  0.0  14520   996 pts/2    S+   16:32   0:00 grep supervi
 
 # 若需要结束supervisord的进程，只能是关闭supervisord
-gswyhq@gswyhq-pc:~$ sudo supervisorctl shutdown
+gswewf@gswewf-pc:~$ sudo supervisorctl shutdown
 Shut down
 
 # 查看supervisor状况：
@@ -167,9 +167,9 @@ Restarted supervisord
 FATAL      Exited too quickly (process log may have details)
 
 可能是配置有问题，command写得有问题 
-command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
+command=/usr/bin/python3 /home/gswewf/yhb/tornado_server.py
 
-可能是/home/gswyhq/yhb/tornado_server.py没加执行环境 
+可能是/home/gswewf/yhb/tornado_server.py没加执行环境 
 第一行加上#!/usr/bin/python3 
 
 报‘Exited too quickly (process log may have details)’错误，也有可能是启动程序过慢造成不停地重启失败的，
@@ -178,7 +178,7 @@ command=/usr/bin/python3 /home/gswyhq/yhb/tornado_server.py
 也有可能是程序已经在其他地方被人为启动了，导致端口占用，报错：
 elasticsearch-head               BACKOFF   Exited too quickly (process log may have details)
 这个时候关掉人为占用，重启对应守护进程即可，如：
-gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo supervisorctl restart elasticsearch-head
+gswewf@gswewf-pc:/etc/supervisor/conf.d$ sudo supervisorctl restart elasticsearch-head
 
 
 另外命令不能把终端输出信息屏蔽掉
@@ -192,7 +192,7 @@ command=/bin/bash /usr/local/elasticsearch-5.3.0/bin/elasticsearch   # 正确写
 单独在shell运行elasticsearch正常，但用supervisord运行elasticsearch报错：
 max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]
 需要更改默认的配置，如：
-gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo vim elasticsearch.conf 
+gswewf@gswewf-pc:/etc/supervisor/conf.d$ sudo vim elasticsearch.conf 
 [supervisord]
 minfds=65536
 minprocs=32768  
@@ -208,12 +208,12 @@ command=/usr/local/elasticsearch-5.3.0/bin/elasticsearch
 # Web 管理后台运行的 IP 和端口，如果开放到公网，需要注意安全性
 port=127.0.0.1:9001
 # 登录管理后台的用户名
-username=gswyhq
+username=gswewf
 # 登录管理后台的密码
 password=123456
 
 配置好后，重新加载
-gswyhq@gswyhq-pc:/etc/supervisor/conf.d$ sudo /etc/init.d/supervisor reload
+gswewf@gswewf-pc:/etc/supervisor/conf.d$ sudo /etc/init.d/supervisor reload
 浏览器打开：http://127.0.0.1:9001/ ，输入用户名密码，即可看见程序运行情；
 
 若允许非本地连接需更改：

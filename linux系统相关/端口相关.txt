@@ -15,7 +15,7 @@
 
 # 查看某个端口是否开放：
 sudo apt-get install lsof
-gswyhq@gswyhq-pc:~$ lsof -i:8005
+gswewf@gswewf-pc:~$ lsof -i:8005
 
 
 

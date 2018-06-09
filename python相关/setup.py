@@ -22,9 +22,9 @@ if sys.argv[-1] == 'tag':
 setup(
     name='semantics_match',  # pip list,查询到的名字
     version=version,
-    author='gswyhq',
-    author_email='gswyhqyang@web1.co',
-    url='http://192.168.3.101/gswyhq/semantics_match',
+    author='gswewf',
+    author_email='gswewfyang@web1.co',
+    url='http://192.168.3.101/gswewf/semantics_match',
     description='语义匹配，先用bm25初步过滤，再结合wmd匹配的分数，给出最终的结果',
     long_description=open('README.md').read(),
 
@@ -62,8 +62,8 @@ setup(
                     'text_pretreatment',
                       ],
     dependency_links=[
-        'git+http://192.168.3.101/gswyhq/semantics_match.git/#egg=semantics-match-0.0.4',
-        'git+http://192.168.3.101/gswyhq/text_pretreatment.git/#egg=text-pretreatment-0.0.2',
+        'git+http://192.168.3.101/gswewf/semantics_match.git/#egg=semantics-match-0.0.4',
+        'git+http://192.168.3.101/gswewf/text_pretreatment.git/#egg=text-pretreatment-0.0.2',
     ],
     test_suite='tests',  # 运行“python3 setup.py test” 即可测试当前目录下的tests目录中的单元测试文件
 )

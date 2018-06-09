@@ -1,6 +1,6 @@
 
 若是通过docker运行redis实例，则需要进入对应的实例环境
-gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+gswewf@gswewf-PC:~$ docker exec -it redis6379 /bin/bash
 root@2ef3dea30784:/data# ls
 dump.rdb
 root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379
@@ -9,7 +9,7 @@ OK
 127.0.0.1:6379[7]> info
 
 # 连接redis:
-gswyhq@gswyhq-pc:~$ redis-cli 
+gswewf@gswewf-pc:~$ redis-cli 
 # 获取某个key的值
 127.0.0.1:6379> get foo
 "10"
@@ -28,22 +28,22 @@ OK
 127.0.0.1:6379[9]> get guest901:images
 "{\"fid_lists\": [\"\\u7528\\u6237\\u672c\\u4eba\\u7684\\u8138\"], \"\\u7528\\u6237\\u672c\\u4eba\\u7684\\u8138\": {\"name\": \"\\u6240\\u53d1\\u751f\\u7684\", \"relationship\": \"\\u670b\\u53cb\"}}"
 127.0.0.1:6379[9]> exit
-gswyhq@gswyhq-pc:~$
+gswewf@gswewf-pc:~$
 
 # 连接ip=127.0.0.1,port=6379,db=9:
-gswyhq@gswyhq-pc:~$ redis-cli -h 127.0.0.1 -p 6379 -n 9
+gswewf@gswewf-pc:~$ redis-cli -h 127.0.0.1 -p 6379 -n 9
 127.0.0.1:6379[9]> dbsize
 (integer) 2
 
 # 通过127.0.0.1能连接上，但通过本机ip却连接不上：
 Could not connect to Redis at 192.168.1.104:6379: Connection refused
 # 第一步，更改配置
-gswyhq@gswyhq-pc:~$ sudo vim /etc/redis/redis.conf
+gswewf@gswewf-pc:~$ sudo vim /etc/redis/redis.conf
 将`bind 127.0.0.1`改为：`bind 0.0.0.0`即可
 # 第二步，重启服务
-gswyhq@gswyhq-pc:~$ sudo systemctl restart redis-server
+gswewf@gswewf-pc:~$ sudo systemctl restart redis-server
 # 第三步，重新连接成功：
-gswyhq@gswyhq-pc:~$ redis-cli -h 192.168.1.104 -p 6379 -n 9
+gswewf@gswewf-pc:~$ redis-cli -h 192.168.1.104 -p 6379 -n 9
 192.168.1.104:6379[9]> exit
 
 
@@ -158,7 +158,7 @@ hmset myset22 k2 v2 k3 v3 k4 v4
 set myk32 v3
 # redis-cli中只支持dos格式的换行符 \r\n ，如果你在Linux下、Mac下或者Windows下创建的文件，最好都转个码。没有转码的文件,执行会失败。
 下面是转码指令, 只需要在命令后加入要转码的文件即可：
-gswyhq@gswyhq-PC:~/docker/redis/data$ sudo unix2dos d1.txt
+gswewf@gswewf-PC:~/docker/redis/data$ sudo unix2dos d1.txt
 root@2ef3dea30784:/data# head d1.txt| redis-cli -p 6379 -h 172.17.0.3 -n 0 --pipe
 All data transferred. Waiting for the last reply...
 Last reply received from server.

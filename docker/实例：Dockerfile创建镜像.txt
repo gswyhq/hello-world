@@ -1,8 +1,8 @@
 
 实践，编写Dockerfile文件及python应用
-gswyhq@gswyhq-pc:~/test_docker$ ls
+gswewf@gswewf-pc:~/test_docker$ ls
 Dockerfile  hello.py
-gswyhq@gswyhq-pc:~/test_docker$ vim Dockerfile
+gswewf@gswewf-pc:~/test_docker$ vim Dockerfile
   1 FROM ubuntu:0701
   2
   3 # 设置环境变量
@@ -24,7 +24,7 @@ gswyhq@gswyhq-pc:~/test_docker$ vim Dockerfile
  19 CMD ["-qa"]
  20
 
- gswyhq@gswyhq-pc:~/test_docker$ vim hello.py
+ gswewf@gswewf-pc:~/test_docker$ vim hello.py
   1 #!/usr/bin/python3
   2 # coding: utf-8
   3 import os
@@ -51,17 +51,17 @@ gswyhq@gswyhq-pc:~/test_docker$ vim Dockerfile
  24 if __name__ == '__main__':
  25     main()
 
-gswyhq@gswyhq-pc:~/test_docker$ docker build -t test_dockt_py0716 .
+gswewf@gswewf-pc:~/test_docker$ docker build -t test_dockt_py0716 .
 
-gswyhq@gswyhq-pc:~/test_docker$ docker run test_dockt_py0716
+gswewf@gswewf-pc:~/test_docker$ docker run test_dockt_py0716
 
 # 覆盖Dockerfile文件中cmd参数(默认是`-qa`), 修改环境变量MYSQL_HOST（默认值是`localhost`）为196.168.3.51
-gswyhq@gswyhq-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716 -no-qa
+gswewf@gswewf-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716 -no-qa
 命令行启动参数: {'qa': False}
 你好
 环境变量`MYSQL_HOST`的值： 196.168.3.51
 环境变量`MYSQL_PORT`的数据类型： <class 'str'>
-gswyhq@gswyhq-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716
+gswewf@gswewf-pc:~/test_docker$ docker run --env MYSQL_HOST='196.168.3.51' test_dockt_py0716
 命令行启动参数: {'qa': True}
 你好
 环境变量`MYSQL_HOST`的值： 196.168.3.51

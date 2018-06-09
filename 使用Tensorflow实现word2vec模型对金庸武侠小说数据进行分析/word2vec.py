@@ -36,12 +36,12 @@ def maybe_download(filename, expected_bytes):
 
 STRING_PUNCTUATION = '—“×}~:%#】－＋!"％]?&|$\'｝：{*》、＠-？/～,>[，…<(.）；【‘=`\\”^／＃｜+。)！’＆＝@_｀;｛￥《（023456789'
 
-def jieba_jinyong(path='/home/gswyhq/jinyong/金庸作品集世纪新修版【TXT】/*.txt'):
+def jieba_jinyong(path='/home/gswewf/jinyong/金庸作品集世纪新修版【TXT】/*.txt'):
     """读取金庸小说集，并用结巴分词，分词后的结果，写入文件"""
     import glob
     import jieba
-    out_file = '/home/gswyhq/github_projects/word2vec/jieba_jinyong.txt'
-    with open('/home/gswyhq/input/stopwords.dat', encoding='utf8')as f:
+    out_file = '/home/gswewf/github_projects/word2vec/jieba_jinyong.txt'
+    with open('/home/gswewf/input/stopwords.dat', encoding='utf8')as f:
         stopwords = [t.strip() for t in f.readlines() if t]
 
     stopwords += [t for t in STRING_PUNCTUATION]

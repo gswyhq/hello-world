@@ -9,7 +9,7 @@ import tensorflow as tf
 
 # -------------------------------数据预处理---------------------------#
 
-poetry_file = '/home/gswyhq/data/全唐诗(43030首).txt'  # 下载地址：https://pan.baidu.com/s/1o7QlUhO
+poetry_file = '/home/gswewf/data/全唐诗(43030首).txt'  # 下载地址：https://pan.baidu.com/s/1o7QlUhO
 
 # 诗集
 poetrys = []

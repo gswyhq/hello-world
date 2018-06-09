@@ -232,7 +232,7 @@ def worker_no_with(lock, f):
     
 if __name__ == "__main__":
     lock = multiprocessing.Lock()
-    f = "/home/gswyhq/gow69/多进程测试file.txt"
+    f = "/home/gswewf/gow69/多进程测试file.txt"
     w = multiprocessing.Process(target = worker_with, args=(lock, f))
     nw = multiprocessing.Process(target = worker_no_with, args=(lock, f))
     w.start()

@@ -1,7 +1,7 @@
 一、添加同义词文件
 
 elasticsearch的安装目录下添加同义词文件：
-gswyhq@gswyhq-pc:/usr/local/elasticsearch-5.3.0$ vim config/test_synonyms.txt 
+gswewf@gswewf-pc:/usr/local/elasticsearch-5.3.0$ vim config/test_synonyms.txt 
 内容为： 
     #Example:
     ipod, i-pod, i pod
@@ -75,7 +75,7 @@ es = Elasticsearch(host='localhost', port='9200')
 es.indices.create(index='test3', ignore=400, body=ik_body)
 
 三、添加数据
-gswyhq@gswyhq-pc:~$ curl -XPUT localhost:9200/test3/solution/1 -d '{"title": "番茄"}'
+gswewf@gswewf-pc:~$ curl -XPUT localhost:9200/test3/solution/1 -d '{"title": "番茄"}'
 
 四、搜索西红柿
 {

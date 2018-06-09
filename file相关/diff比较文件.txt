@@ -1,6 +1,6 @@
 
 # 比较两个目录下的文件不同，仅仅输出文件名：
-gswyhq@gswyhq-pc:~$ diff -urNaq zby zby2
+gswewf@gswewf-pc:~$ diff -urNaq zby zby2
 
 -a 把所有文件看出文本心事，并对它们进行逐行比较，即使它们看起来不是文件文件
 -b 忽略空格

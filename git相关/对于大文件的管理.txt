@@ -2,7 +2,7 @@
 git对于大文件的管理：
 
 1.安装
-于‘https://git-lfs.github.com/’下载，/home/gswyhq/Downloads/git-lfs-linux-amd64-2.3.4.tar.gz
+于‘https://git-lfs.github.com/’下载，/home/gswewf/Downloads/git-lfs-linux-amd64-2.3.4.tar.gz
 
 或者：
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash

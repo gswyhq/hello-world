@@ -1,11 +1,11 @@
 
 # 本地端口转发异常：
-ubuntu@ip-172-31-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
+ubuntu@ip-172-33-14-6:~$ ssh -fCNL "*:18007:localhost:7770" localhost
 localhost: Warning: Permanently added 'localhost' (ECDSA) to the list of known hosts.
 localhost: Permission denied (publickey).
 # 解决方法，生成密钥，添加到authorized_keys文件中：
-ubuntu@ip-172-31-14-6:~$ ssh-keygen -C 'web1172.31.14.6@web1.co' -t rsa
-ubuntu@ip-172-31-14-6:~/.ssh$ cat id_rsa.pub >> authorized_keys 
+ubuntu@ip-172-33-14-6:~$ ssh-keygen -C 'web1172.31.14.6@web1.co' -t rsa
+ubuntu@ip-172-33-14-6:~/.ssh$ cat id_rsa.pub >> authorized_keys 
 
 
 # 有时候报错如下：
@@ -16,38 +16,38 @@ FileNotFoundError: [Errno 2] No such file or directory: '/usr/lib/jvm'
 root@b06e71597f91:/# apt-get update
 root@b06e71597f91:/# apt-get install openjdk-8-jdk
 
-gswyhq@gswyhq-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
+gswewf@gswewf-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
 报错：
 Benchmarking 127.0.0.1 (be patient)
 socket: Too many open files (24)
 解决方法：
 1、查看当前要以打开的文件个数
-gswyhq@gswyhq-PC:~$ ulimit -a
+gswewf@gswewf-PC:~$ ulimit -a
 open files                      (-n) 1024
 2、调整可以打开的文件数
-gswyhq@gswyhq-PC:~$ ulimit -n 65535
+gswewf@gswewf-PC:~$ ulimit -n 65535
 3、重新执行刚才的命令
-gswyhq@gswyhq-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
+gswewf@gswewf-PC:~$ ab -c 2000 -n 2000 "http://127.0.0.1:8000/test"
 
-gswyhq@gswyhq-PC:~$ ab -c 2000 -n 20000 -k "http://127.0.0.1:8000/test"
+gswewf@gswewf-PC:~$ ab -c 2000 -n 20000 -k "http://127.0.0.1:8000/test"
 报错：
 apr_pollset_poll: The timeout specified has expired (70007)
 Total of 18724 requests completed
 解决方法：
 修改‘/etc/sysctl.conf’文件添加如下两行（若已经存在，则可以尝试继续增大）：
-gswyhq@gswyhq-PC:~$ sudo vim /etc/sysctl.conf
+gswewf@gswewf-PC:~$ sudo vim /etc/sysctl.conf
 net.nf_conntrack_max = 655360
 net.netfilter.nf_conntrack_tcp_timeout_established = 12000
 
 # 不重起服务器，让新配置生效
-gswyhq@gswyhq-PC:~$ sudo sysctl -p /etc/sysctl.conf
+gswewf@gswewf-PC:~$ sudo sysctl -p /etc/sysctl.conf
 
 
 安装unix2dos和dos2unix
-gswyhq@gswyhq-PC:~$ sudo apt-get install tofrodos
+gswewf@gswewf-PC:~$ sudo apt-get install tofrodos
 运行这两行
-gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/todos /usr/bin/unix2dos
-gswyhq@gswyhq-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
+gswewf@gswewf-PC:~$ sudo ln -s /usr/bin/todos /usr/bin/unix2dos
+gswewf@gswewf-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
 
 当远程登录主机时出现Pseudo-terminal will not be allocated because stdin is not a terminal. 错误。
 原因：用脚本调用或者程序调用ssh登陆远程的时候出现的这个情况。

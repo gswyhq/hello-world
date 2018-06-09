@@ -1,12 +1,12 @@
 
 在当前目录及子目录中，查找文件名包含‘shell’的txt文件
-gswyhq@gswyhq-pc:~/hello-world$ find . -name "*shell*.txt"
+gswewf@gswewf-pc:~/hello-world$ find . -name "*shell*.txt"
 
 # 在当前目录下查找所有的`__pycache__`目录，并删除
-gswyhq@gswyhq-PC:~$ find . -type d -name "__pycache__" | xargs rm -r
+gswewf@gswewf-PC:~$ find . -type d -name "__pycache__" | xargs rm -r
 
 将当前目录下文件名符合"20170*.txt"输出到当前目录下的test.tmp文件中
-gswyhq@gswyhq-pc:~$ find -name "20170*.txt" -exec 'cat' {} \; > test.tmp
+gswewf@gswewf-pc:~$ find -name "20170*.txt" -exec 'cat' {} \; > test.tmp
 
 find是我们很常用的一个Linux命令，若有进一步的操作，这个时候exec的作用就显现出来了。
 exec解释：
@@ -15,17 +15,17 @@ exec解释：
 exec选项后面跟随着所要执行的命令或脚本，然后是一对儿{ }，一个空格和一个\，最后是一个分号。
 
 查找当前目录及子目录下的zip格式文件，以下两条命令的效果是一样的：
-gswyhq@gswyhq-pc:~$ find . -name "*.zip"
-gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec ls {} \;
+gswewf@gswewf-pc:~$ find . -name "*.zip"
+gswewf@gswewf-pc:~$ find . -name "*.zip" -exec ls {} \;
 
 复制查找的所有结果到当前目录下的test子目录中：
-gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec cp {} test/ \;
+gswewf@gswewf-pc:~$ find . -name "*.zip" -exec cp {} test/ \;
 
 查找当前目录及子目录下的zip文件，并解压到当前目录的test子目录中（unar的-o 参数是用于解压到指定目录中）：
-gswyhq@gswyhq-pc:~$ find . -name "*.zip" -exec unar {} -o test/ \;
+gswewf@gswewf-pc:~$ find . -name "*.zip" -exec unar {} -o test/ \;
 
 查找当前目录及子目录中的mp3格式的文件，并移动到父目录下的mp3目录中：
-gswyhq@gswyhq-pc:~$ find . -name "*.mp3" -exec mv {} ../mp3/ \;
+gswewf@gswewf-pc:~$ find . -name "*.mp3" -exec mv {} ../mp3/ \;
 
 更多示例见：http://www.cnblogs.com/wanqieddy/archive/2011/06/09/2076785.html
 

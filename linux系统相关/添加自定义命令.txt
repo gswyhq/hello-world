@@ -28,16 +28,16 @@ if [ -f ~/.bash_aliases ]; then
 fi
 就是说可以另外新建一个文件用于专门存放自己的alias信息,默认情况下这个文件并不存在
 
-gswyhq@gswyhq-pc:~$ vim .bash_aliases
-alias baidu='python3 /home/gswyhq/hello-world/linux系统相关/baidu.py'
-alias cmd_help='python3 /home/gswyhq/hello-world/linux系统相关/cmd_help.py'
+gswewf@gswewf-pc:~$ vim .bash_aliases
+alias baidu='python3 /home/gswewf/hello-world/linux系统相关/baidu.py'
+alias cmd_help='python3 /home/gswewf/hello-world/linux系统相关/cmd_help.py'
 
 # 让添加的别名设置立即生效：
-gswyhq@gswyhq-pc:~$ source .bashrc 
+gswewf@gswewf-pc:~$ source .bashrc 
 
 # 试用自定义的命令
-gswyhq@gswyhq-pc:~$ baidu 你好
-gswyhq@gswyhq-pc:~$ cmd_help unzip
+gswewf@gswewf-pc:~$ baidu 你好
+gswewf@gswewf-pc:~$ cmd_help unzip
 
 有时候退出，重新登录服务器，之前的设置并没有生效；说明没有~/.bash_profile文件，或者文件中没有执行.bashrc文件。
 (.bash_profile文件是用户登陆终端的时候会自动执行的文件，一般此文件中会调用.bashrc)

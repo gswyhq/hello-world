@@ -1,40 +1,40 @@
 
 su 命令就是切换用户的工具
 
-gswyhq@gswyhq-pc:~$ su 
+gswewf@gswewf-pc:~$ su 
 密码：
 su：鉴定故障
 需要root用户权限
-gswyhq@gswyhq-pc:~$ sudo su
+gswewf@gswewf-pc:~$ sudo su
 
-gswyhq@gswyhq-pc:~$ sudo su
-[sudo] gswyhq 的密码：
-root@gswyhq-pc:/home/gswyhq# pwd
-/home/gswyhq
-root@gswyhq-pc:/home/gswyhq# exit
+gswewf@gswewf-pc:~$ sudo su
+[sudo] gswewf 的密码：
+root@gswewf-pc:/home/gswewf# pwd
+/home/gswewf
+root@gswewf-pc:/home/gswewf# exit
 exit
-gswyhq@gswyhq-pc:~$ sudo su -
-root@gswyhq-pc:~# pwd
+gswewf@gswewf-pc:~$ sudo su -
+root@gswewf-pc:~# pwd
 /root
 
 su命令和su -命令最大的本质区别就是：前者只是切换了root身份，但Shell环境仍然是普通用户的Shell；而后者连用户和Shell环境一起切换成root身份了。只有切换了Shell环境才不会出现PATH环境变量错误。su切换成root用户以后，pwd一下，发现工作目录仍然是普通用户的工作目录；而用su -命令切换以后，工作目录变成root的工作目录了。
 
 
-gswyhq@gswyhq-pc:~$ sudo su - mysql
-[sudo] gswyhq 的密码：
+gswewf@gswewf-pc:~$ sudo su - mysql
+[sudo] gswewf 的密码：
 没有目录，将以 HOME=/ 登录
 
 新建目录：
 sudo mkdir /home/mysql
 更改权限：
-gswyhq@gswyhq-pc:/home$ ls -l
+gswewf@gswewf-pc:/home$ ls -l
 总用量 8
-drwxr-xr-x 48 gswyhq gswyhq 4096 5月   5 11:36 gswyhq
+drwxr-xr-x 48 gswewf gswewf 4096 5月   5 11:36 gswewf
 drwxr-xr-x  2 root   root   4096 5月   5 11:36 mysql
-gswyhq@gswyhq-pc:/home$ sudo chown mysql:mysql mysql
-gswyhq@gswyhq-pc:/home$ ls -l
+gswewf@gswewf-pc:/home$ sudo chown mysql:mysql mysql
+gswewf@gswewf-pc:/home$ ls -l
 总用量 8
-drwxr-xr-x 48 gswyhq gswyhq 4096 5月   5 11:36 gswyhq
+drwxr-xr-x 48 gswewf gswewf 4096 5月   5 11:36 gswewf
 drwxr-xr-x  2 mysql  mysql  4096 5月   5 11:36 mysql
 
 编辑‘/etc/passwd’文件，将mysql用户的家目录由/nonexistent 改为：/home/mysql
@@ -42,16 +42,16 @@ mysql:x:115:123:MySQL Server,,,:/nonexistent:/bin/false
 改为：
 mysql:x:115:123:MySQL Server,,,:/home/mysql:/bin/false
 
-gswyhq@gswyhq-pc:~$ sudo su - mysql
-gswyhq@gswyhq-pc:~$ echo $?
+gswewf@gswewf-pc:~$ sudo su - mysql
+gswewf@gswewf-pc:~$ echo $?
 1
-gswyhq@gswyhq-pc:~$ sudo less /var/log/auth.log 
-May  5 11:42:04 gswyhq-pc su[12568]: pam_unix(su:session): session opened for user mysql by (uid=0)
-May  5 11:42:04 gswyhq-pc su[12568]: pam_systemd(su:session): Cannot create session: Already running in a session
-May  5 11:42:04 gswyhq-pc su[12568]: pam_unix(su:session): session closed for user mysql
-May  5 11:42:04 gswyhq-pc sudo: pam_unix(sudo:session): session closed for user root
-May  5 11:42:45 gswyhq-pc sudo:   gswyhq : TTY=pts/5 ; PWD=/home/gswyhq ; USER=root ; COMMAND=/usr/bin/less /var/log/auth.log
-May  5 11:42:45 gswyhq-pc sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+gswewf@gswewf-pc:~$ sudo less /var/log/auth.log 
+May  5 11:42:04 gswewf-pc su[12568]: pam_unix(su:session): session opened for user mysql by (uid=0)
+May  5 11:42:04 gswewf-pc su[12568]: pam_systemd(su:session): Cannot create session: Already running in a session
+May  5 11:42:04 gswewf-pc su[12568]: pam_unix(su:session): session closed for user mysql
+May  5 11:42:04 gswewf-pc sudo: pam_unix(sudo:session): session closed for user root
+May  5 11:42:45 gswewf-pc sudo:   gswewf : TTY=pts/5 ; PWD=/home/gswewf ; USER=root ; COMMAND=/usr/bin/less /var/log/auth.log
+May  5 11:42:45 gswewf-pc sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
 
 编辑‘/etc/passwd’文件，将mysql用户的shell由/bin/false 改为：/bin/bash
 mysql:x:115:123:MySQL Server,,,:/home/mysql:/bin/bash

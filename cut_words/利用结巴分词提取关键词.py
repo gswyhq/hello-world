@@ -22,8 +22,8 @@ class ExtractKeywords(TFIDF):
             self.postokenizer = postokenizer
 
 def main():
-    kg_file = '/home/gswyhq/yhb/input/jykl/kg_zhongjixian.txt'
-    synonyms_file = '/home/gswyhq/yhb/input/jykl/synonyms_zhongjixian.txt'
+    kg_file = '/home/gswewf/yhb/input/jykl/kg_zhongjixian.txt'
+    synonyms_file = '/home/gswewf/yhb/input/jykl/synonyms_zhongjixian.txt'
     from text_pretreatment import TextPretreatment
     text_pre = TextPretreatment(synonyms_file=synonyms_file, kg_file=kg_file, stop_word_file='')
 

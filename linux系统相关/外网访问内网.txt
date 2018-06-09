@@ -8,6 +8,6 @@ nohup autossh -NR 7772:192.168.3.103:22 ubuntu@54.222.11.43 > /dev/null 2>&1 &
 ubuntu@54.222.11.43:~$ ssh -fCNL *:18002:localhost:7772 localhost
 
 第三步：外网访问内网
-gswyhq@gswyhq-PC:~$ ssh -p 18002 zy@54.222.11.43
+gswewf@gswewf-PC:~$ ssh -p 18002 zy@54.222.11.43
 
 

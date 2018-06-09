@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-# gswyhq@gswyhq-PC:~$ sudo pip3 install pyorient
+# gswewf@gswewf-PC:~$ sudo pip3 install pyorient
 import pyorient
 # 1、创建客户端实例意味着创建连接。
 client = pyorient.OrientDB("localhost", 2424)
-session_id = client.connect("root", "gswyhq")
+session_id = client.connect("root", "gswewf")
 
 # 2、创建名为DB_Demo的数据库。
 db_name = 'abcde'

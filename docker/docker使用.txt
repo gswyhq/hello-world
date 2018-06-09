@@ -1,7 +1,7 @@
 
 # 可以通过参数`--detach=false`，那么容器将会运行在后台模式。
 
-gswyhq@gswyhq-pc:~$ sudo docker run \
+gswewf@gswewf-pc:~$ sudo docker run \
 >     --detach \
 >     --publish=17474:7474 --publish=17687:7687 \
 >     --volume=$HOME/neo4j/data:/data \
@@ -15,29 +15,29 @@ Status: Downloaded newer image for neo4j:3.2
 2432a632b19f921c4f92f1e73a0c197ee4228b997fa3804bdd5dc545c9b32345
 
 # docker即在后台运行了，查看正在运行的容器：
-gswyhq@gswyhq-pc:~$ sudo docker ps
+gswewf@gswewf-pc:~$ sudo docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                        NAMES
 2432a632b19f        neo4j:3.2           "/docker-entrypoin..."   7 minutes ago       Up 7 minutes        7473/tcp, 0.0.0.0:17474->7474/tcp, 0.0.0.0:17687->7687/tcp   inspiring_stonebraker
 
 # 查看所有的容器，包括已经停止的。
-gswyhq@gswyhq-pc:~$ sudo docker ps -a
+gswewf@gswewf-pc:~$ sudo docker ps -a
 
 # 可以通过`--name`参数为启动的容器命名：
-gswyhq@gswyhq-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
+gswewf@gswewf-pc:~$ sudo docker run   --detach  --name=neo4j17474 --publish=17474:7474 --publish=17687:7687    --volume=$HOME/neo4j/data:/data  --volume=$HOME/neo4j/logs:/logs  --volume=$HOME/neo4j/conf:/conf  neo4j:3.2
 87551d79de66f14b74009128cfc79163b94d23b4ace6f2fb53bff2fa21a84b4c
-gswyhq@gswyhq-pc:~$ sudo docker ps
+gswewf@gswewf-pc:~$ sudo docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                      NAMES
 87551d79de66        neo4j:3.2           "/docker-entrypoin..."   14 seconds ago      Up 12 seconds       0.0.0.0:7474->7474/tcp, 7473/tcp, 0.0.0.0:7687->7687/tcp   neo4j17474
 
 
 删除容器id为`a70d3901c981`的容器：
-gswyhq@gswyhq-pc:~$ sudo docker rm a70d3901c981
+gswewf@gswewf-pc:~$ sudo docker rm a70d3901c981
 
 # 删除容器名为`peaceful_haibt`的容器：
-gswyhq@gswyhq-pc:~$ sudo docker rm peaceful_haibt
+gswewf@gswewf-pc:~$ sudo docker rm peaceful_haibt
 
 # 删除所有容器
-gswyhq@gswyhq-pc:~$ sudo docker rm $(sudo docker ps -a -q)
+gswewf@gswewf-pc:~$ sudo docker rm $(sudo docker ps -a -q)
 
 # 删除单个容器
 docker rm <容器名orID>
@@ -56,7 +56,7 @@ FATA[0000] Error response from daemon: No command specified
 具体的command需要在导出容器的时候通过docker ps查看到。
 
 # 查询容器id为`d42fe5599730`的详细信息,也可以查询到command：
-gswyhq@gswyhq-pc:~$ sudo docker inspect d42fe5599730
+gswewf@gswewf-pc:~$ sudo docker inspect d42fe5599730
 
 # 重命名容器：
 zy@ubuntu:~/nwd$ sudo docker ps
@@ -73,12 +73,12 @@ zy@ubuntu:~$ sudo docker exec -it bf1bbe3e0fbf /bin/bash
 bash-4.3# 
 
 # 查看容器的标准输出：
-gswyhq@gswyhq-pc:~$ docker logs -f ubuntu-yhb 
+gswewf@gswewf-pc:~$ docker logs -f ubuntu-yhb 
 
 # 查看容器的进程：
-gswyhq@gswyhq-pc:~$ docker top ubuntu-yhb 
+gswewf@gswewf-pc:~$ docker top ubuntu-yhb 
 
 # 查看容器的配置：
-gswyhq@gswyhq-pc:~$ docker inspect ubuntu-yhb
+gswewf@gswewf-pc:~$ docker inspect ubuntu-yhb
 
 

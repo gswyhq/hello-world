@@ -13,7 +13,7 @@ def expot_data(cid, data):
     :return: 
     """
     title = data[0]
-    host, http_port, bolt_port, user, password = 'localhost', 7474, 7687, 'neo4j', 'gswyhq'
+    host, http_port, bolt_port, user, password = 'localhost', 7474, 7687, 'neo4j', 'gswewf'
     graph = Graph(host=host, http_port=http_port, bolt_port=bolt_port, user=user, password=password)
     # title = ["_id", "_labels", "tagline", "title", "released", "name", "born", "_start", "_end", "_type", "roles"]
     _start_index = title.index('_start')
@@ -91,7 +91,7 @@ def main():
                  ['', '', '', '', '', '', '', '23', '0', 'PRODUCED', '']
                  ]
 
-    # data = read_data('/home/gswyhq/docker/neo4j/linshi/data/jykl_all2.csv')
+    # data = read_data('/home/gswewf/docker/neo4j/linshi/data/jykl_all2.csv')
     expot_data('Jiaoyinkanglian', data)
 
 if __name__ == '__main__':

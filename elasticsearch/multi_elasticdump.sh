@@ -6,9 +6,9 @@ pid_name='unknown'
 
 
 # 获取使用帮助：
-#gswyhq@gswyhq-PC:~/yhb/es_search$ ./elasticdump.sh -h
+#gswewf@gswewf-PC:~/yhb/es_search$ ./elasticdump.sh -h
 
-# gswyhq@gswyhq-PC:~/yhb/es_search$ ./elasticdump.sh -i 192.168.3.105:9200 -o 192.168.3.145:9200 -p xinxin
+# gswewf@gswewf-PC:~/yhb/es_search$ ./elasticdump.sh -i 192.168.3.105:9200 -o 192.168.3.145:9200 -p xinxin
 
 function usage() {
         echo "使用方法:"
@@ -98,12 +98,12 @@ rm -rf ${data_dir}
 echo "${input_host_port} 上的索引前缀 ${pid_name} 成功迁移到 ${output_host_port}"
 
 # 哪些别名指向索引`dingding_faq`：
-#curl -XGET '42.93.171.45:8861/dingding_faq/_alias/*?pretty'
+#curl -XGET '42.93.171.44:8861/dingding_faq/_alias/*?pretty'
 
-# gswyhq@gswyhq-PC:~/yhb$ docker run --rm -ti -v $PWD/data:/data taskrabbit/elasticsearch-dump:v3.3.14 /bin/multielasticdump --input="http://192.168.3.105:9200/all_baoxian*" --output=/data/alias.json --type=alias
+# gswewf@gswewf-PC:~/yhb$ docker run --rm -ti -v $PWD/data:/data taskrabbit/elasticsearch-dump:v3.3.14 /bin/multielasticdump --input="http://192.168.3.105:9200/all_baoxian*" --output=/data/alias.json --type=alias
 # elasticdump --input=./alias.json --output=http://es.com:9200 --type=alias
 
 # curl -XGET 42.93.187.77:18200/jrtz_kg_entity_synonyms_alias/_count?
 # curl -XGET -u elastic:web12008 '192.168.3.105:9200/_cat/indices/all_baoxian*'
 
-# 42.93.171.45:8861
+# 42.93.171.44:8861

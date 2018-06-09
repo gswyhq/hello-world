@@ -95,3 +95,6 @@ match p=(n:Didian)-[*..2]-(n1)  where n.name='深圳'
 and any(r IN relationships(p) WHERE type(r)= '营销服务部')
 return  length(p), n.name, n1.name
 
+# 查`深圳市`直接相连的Ssc, 若没有，则查隔一个点的Ssc
+match p=(n3)<-[r:`地址`]-(n1:Zhongdeanlian:Ssc)-->(n2) where n2.name='深圳市'return p UNION match p=(n3)<-[r:`地址`]-(n1:Zhongdeanlian:Ssc)-[*..2]-(n2) where n2.name='深圳市' and not (:Zhongdeanlian:Ssc)-->(n2) return p
+

@@ -13,9 +13,9 @@ $ sudo apt-get install sshfs     【基于 Debian/Ubuntu 的系统】
 $ sudo mkdir /mnt/tecmint     【基于 Debian/Ubuntu 的系统】
 
 192.168.3.145机器上操作：
-gswyhq@gswyhq-PC:~$ cd /
-gswyhq@gswyhq-PC:/$ sudo mkdir remote_131_data
-gswyhq@gswyhq-PC:/$ sudo chown -R gswyhq:gswyhq remote_131_data
+gswewf@gswewf-PC:~$ cd /
+gswewf@gswewf-PC:/$ sudo mkdir remote_131_data
+gswewf@gswewf-PC:/$ sudo chown -R gswewf:gswewf remote_131_data
 
 步骤 3：使用 SSHFS 挂载远程的文件系统
 当你已经创建你的挂载点目录之后，现在使用 root 用户运行下面的命令行，在 /mnt/tecmint 目录下挂载远程的文件系统。视你的情况挂载目录可以是任何目录。
@@ -26,19 +26,19 @@ gswyhq@gswyhq-PC:/$ sudo chown -R gswyhq:gswyhq remote_131_data
 /data/yanghq/sharedata/145
 
 192.168.3.145机器上操作：
-gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
+gswewf@gswewf-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
 fusermount: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf
 
 # 出现allow_other参数不正常的解决方法
 错误信息如下：
-gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
+gswewf@gswewf-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other
 fusermount: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf
 解决方法，安装提示，在/etc/fuse.conf中取消‘user_allow_other’行的注释，或添加user_allow_other
-gswyhq@gswyhq-PC:/remote_131_data$ sudo vim /etc/fuse.conf
+gswewf@gswewf-PC:/remote_131_data$ sudo vim /etc/fuse.conf
 添加如下信息，并保存：
 user_allow_other
 继续运行挂载：
-gswyhq@gswyhq-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
+gswewf@gswewf-PC:/remote_131_data$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
 
 # 其中，allow_other参数代表该设置对其他用户也生效。也必须先把ssh自动登录配置好了，让root用户能够使用root身份登录远程主机。
 
@@ -63,7 +63,7 @@ ffmpeg-php-0.6.0                json-1.2.1.tgz                       my_next_art
 步骤 5：使用 df -h 命令检查挂载点
 如果你运行 df -h命令，你将会看到远程文件系统的挂载点。
 
-gswyhq@gswyhq-PC:/remote_131_data$ df -h
+gswewf@gswewf-PC:/remote_131_data$ df -h
 文件系统                                         容量  已用  可用 已用% 挂载点
 udev                                             7.8G     0  7.8G    0% /dev
 tmpfs                                            1.6G  2.0M  1.6G    1% /run
@@ -111,7 +111,7 @@ $ sudo mount -a   【基于 Debian/Ubuntu 的系统】
 # umount /mnt/tecmint
 目前为止就这样了，如果你在挂载远程文件系统的时候遇到任何问题或者需要任何帮助，请通过评论联系我们，如果你感觉这篇文章非常有用，请分享给你的朋友们。
 
-gswyhq@gswyhq-PC:/remote_131_data$ sudo mount -a
+gswewf@gswewf-PC:/remote_131_data$ sudo mount -a
 fuse: mountpoint is not empty
 fuse: if you are sure this is safe, use the 'nonempty' mount option
 
@@ -120,29 +120,29 @@ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_
 
 
 卸载挂载时出现异常：
-gswyhq@gswyhq-PC:/remote_131_data$ sudo umount /remote_131_data
+gswewf@gswewf-PC:/remote_131_data$ sudo umount /remote_131_data
 umount: /remote_131_data: target is busy
         (In some cases useful info about processes that
          use the device is found by lsof(8) or fuser(1).)
 # 显示设备或资源忙，强制卸载也不行；主要是因为有进程占用了。这时，可以使用fuser命令来查看：
 # fuser能识别出正在对某个文件或端口访问的进程
 # -v: 含义是:verbose output,详细的输出信息
-gswyhq@gswyhq-PC:/remote_131_data$ fuser -vm /remote_131_data
+gswewf@gswewf-PC:/remote_131_data$ fuser -vm /remote_131_data
                      用户     进程号 权限   命令
 /remote_131_data:    root     kernel mount /remote_131_data
-                     gswyhq     1620 ..c.. bash
+                     gswewf     1620 ..c.. bash
 # 即可知道是pid=1620 的dataserver占用了该目录
 # 停止对应服务，即可umount成功
-gswyhq@gswyhq-PC:~$ Kill -9 1620
+gswewf@gswewf-PC:~$ Kill -9 1620
 # 或者使用用 -k参数即可
 # 说明: -k：含义: kill processes accessing the named file
-gswyhq@gswyhq-PC:/remote_131_data$ fuser -k /remote_131_data
+gswewf@gswewf-PC:/remote_131_data$ fuser -k /remote_131_data
 # 重新卸载：
-gswyhq@gswyhq-PC:~$ sudo umount /remote_131_data
+gswewf@gswewf-PC:~$ sudo umount /remote_131_data
 
 
 挂载异常：
-gswyhq@gswyhq-PC:~$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
+gswewf@gswewf-PC:~$ sshfs yanghq@192.168.3.131:/data/yanghq/sharedata/145 /remote_131_data -o allow_other,nonempty
 fuse: bad mount point `/remote_131_data': Transport endpoint is not connected
 有时候是因为已经被挂载了，才会出险此错误；卸载挂载，再重新挂载即可
 

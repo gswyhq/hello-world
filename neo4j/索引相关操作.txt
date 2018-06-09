@@ -222,16 +222,16 @@ autoUpdate  true/false  如果这个索引应该跟踪图形更新
 
 
 如查询relationship的自动索引：
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 
 查询索引使用的关系的属性列表：
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/relationship/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 
 查询索引使用的节点的属性列表：
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/properties -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 
 如查询节点的自动索引
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/index/auto/node/status -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 
 运行curl报错：
 {
@@ -245,9 +245,9 @@ gswyhq@gswyhq-PC:~/hello-world/neo4j$ curl -i http://localhost:47474/db/data/ind
 
 第一步：获取编译的登录用户名及密码；
 import base64
-base64.b64encode(b"neo4j:gswyhq")
+base64.b64encode(b"neo4j:gswewf")
 Out[14]: b'bmVvNGo6Z3N3eWhx'
 
 第二步：通过获取的密钥`bmVvNGo6Z3N3eWhx`进行认证访问， 如下，获取所有节点的labels
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 

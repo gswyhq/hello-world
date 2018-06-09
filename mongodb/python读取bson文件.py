@@ -14,11 +14,11 @@
 # 修改：
 # 　　json也要大动大移，bson就不需要。
 
-# gswyhq@gswyhq-PC:~$ sudo pip3 install bson
+# gswewf@gswewf-PC:~$ sudo pip3 install bson
 
 import bson
 
-with open('/home/gswyhq/docker/mongo/data/mongodb_192_168_3_130/page/保险条款.bson', 'rb')as f:
+with open('/home/gswewf/docker/mongo/data/mongodb_192_168_3_130/page/保险条款.bson', 'rb')as f:
     b_data = f.read()
 
 data = bson.loads(b_data)

@@ -7,7 +7,7 @@
 
 2、120G+训练好的word2vec模型（中文词向量）
 https://weibo.com/p/23041816d74e01f0102x77v?luicode=20000061&lfid=4098518198740187&featurecode=newtitle
-MODEL_FILE = '/home/gswyhq/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
+MODEL_FILE = '/home/gswewf/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
 下载链接：链接: https://pan.baidu.com/s/1o7MWrnc 密码:wzqv
 
 3、训练好的模型

@@ -3,24 +3,24 @@
 # ADD 将静态文件添加到容器目录 /usr/share/elasticsearch/data
 # VOLUME 的作用与 -v 等效，用来创建 docker managed volume，mount point 为 /usr/share/elasticsearch/data，因为这个目录就是 ADD 添加的目录，所以会将已有数据拷贝到 volume 中。
 
-gswyhq@gswyhq-PC:~/docker/elasticsearch/xinxin_all_baoxian$ vim Dockerfile
+gswewf@gswewf-PC:~/docker/elasticsearch/xinxin_all_baoxian$ vim Dockerfile
 FROM busybox:latest
 ADD data /usr/share/elasticsearch/data
 VOLUME /usr/share/elasticsearch/data
 
 第二步：build 新镜像 xinxin_es_data：
-gswyhq@gswyhq-PC:~/docker/elasticsearch/xinxin_all_baoxian$ docker build -t xinxin_es_data .
+gswewf@gswewf-PC:~/docker/elasticsearch/xinxin_all_baoxian$ docker build -t xinxin_es_data .
 
 第三步：用新镜像创建 data-packed volume container：
 
-gswyhq@gswyhq-PC:~/docker/elasticsearch/xinxin_all_baoxian$ docker create --name xinxin_es_data_2 xinxin_es_data
+gswewf@gswewf-PC:~/docker/elasticsearch/xinxin_all_baoxian$ docker create --name xinxin_es_data_2 xinxin_es_data
 # 注意这里执行的是 docker create 命令，这是因为 volume container 的作用只是提供数据，它本身不需要处于运行状态。
 
 因为在 Dockerfile 中已经使用了 VOLUME 指令，这里就不需要指定 volume 的 mount point 了。启动 httpd 容器并使用 data-packed volume container：
 容器能够正确读取 volume 中的数据。data-packed volume container 是自包含的，不依赖 host 提供数据，具有很强的移植性，非常适合 只使用 静态数据的场景，比如应用的配置信息、web server 的静态文件等。
 
 第四步：启动一个容器，挂载数据卷
-gswyhq@gswyhq-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run -it -d --name=xinxin_9200 --volumes-from xinxin_es_data_2 -p 9200:9200 -p 9300:9300 xinxin_all_baoxian_es:20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run -it -d --name=xinxin_9200 --volumes-from xinxin_es_data_2 -p 9200:9200 -p 9300:9300 xinxin_all_baoxian_es:20180504
 bd2341556eb3996efb1f67a072594238c07d20c0cbdb1b580d5007eab1b7bf25
 
 

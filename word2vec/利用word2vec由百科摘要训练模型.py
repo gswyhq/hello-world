@@ -32,12 +32,12 @@ class MySentences(object):
 def main():
 
     lei='互动百科'
-    path='/home/gswyhq/百科/{}/分割文件/三段'.format(lei)
+    path='/home/gswewf/百科/{}/分割文件/三段'.format(lei)
     key='abstract'
     line = MySentences(path,key)
 
     #加载现有的模型
-    model = gensim.models.Word2Vec.load('/home/gswyhq/百科/百度百科_维基百科.model')
+    model = gensim.models.Word2Vec.load('/home/gswewf/百科/百度百科_维基百科.model')
     #进一步训练模型
     model.train(line)
 
@@ -51,7 +51,7 @@ def main():
     # trim unneeded model memory = use(much) less RAM
     #model.init_sims(replace=True)
     #默认格式的word2vec model
-    model.save('/home/gswyhq/百科/百度百科_维基百科_{}.model'.format(lei))
+    model.save('/home/gswewf/百科/百度百科_维基百科_{}.model'.format(lei))
 
     #一个原始c版本word2vec的vector格式的模型
     #model.save_word2vec_format(outp2, binary=False)
@@ -147,11 +147,11 @@ for j in range(10):
     text=''
     for line in datasn:
         text+=line[1]+'\n'
-    with open('/home/gswyhq/服务器上的文件/百科/三段/百度百科摘要被分词后并分割的文件/百度百科摘要{}'.format(j),'w+',encoding='utf-8')as f:
+    with open('/home/gswewf/服务器上的文件/百科/三段/百度百科摘要被分词后并分割的文件/百度百科摘要{}'.format(j),'w+',encoding='utf-8')as f:
         print(text,file=f)
 
 >>> import gensim
->>> new_model = gensim.models.Word2Vec.load('/home/gswyhq/gow69/baidutext.model')
+>>> new_model = gensim.models.Word2Vec.load('/home/gswewf/gow69/baidutext.model')
 >>> new_model['家禽']
 array([ 0.88960493,  0.14945506, -0.73302388, -2.30815172,  2.05703282,
         0.43654519, -0.9240911 , -1.02483976, -0.79898733, -0.33145291,
@@ -183,7 +183,7 @@ array([ 0.88960493,  0.14945506, -0.73302388, -2.30815172,  2.05703282,
 [('番茄', 0.8706957697868347), ('豆角', 0.8482689261436462), ('豆芽', 0.8462470173835754), ('南瓜', 0.8442108035087585), ('葱头', 0.8412971496582031), ('黄瓜', 0.8305303454399109), ('青椒', 0.8298680782318115), ('蕃茄', 0.8288747072219849), ('炒蛋', 0.8274224400520325), ('洋葱', 0.8247127532958984)]
 >>>
 >>> import gensim
->>> new_model = gensim.models.Word2Vec.load('/home/gswyhq/gow69/baidutext2.model')
+>>> new_model = gensim.models.Word2Vec.load('/home/gswewf/gow69/baidutext2.model')
 >>> new_model['家禽']
 array([  5.51216081e-02,  -4.58016127e-01,  -5.42117774e-01,
          8.97823423e-02,  -1.25151420e+00,   2.29572564e-01,
@@ -231,7 +231,7 @@ array([  5.51216081e-02,  -4.58016127e-01,  -5.42117774e-01,
          8.29504430e-01,   7.74918318e-01,  -5.57394743e-01,
         -1.08179130e-01,   8.86960745e-01,  -2.78985143e-01,
         -4.66506213e-01,   1.25811553e+00,   5.75722873e-01,
-         5.41218162e-01,  -4.39393938e-01,  -4.20438856e-01,
+         5.41218162e-01,  -4.39393938e-01,  -4.204318856e-01,
          6.99457109e-01,  -1.91870902e-03,  -1.69534028e-01,
          5.20021737e-01,   4.36077267e-01,   3.75892490e-01,
         -9.81403232e-01,   1.72307655e-01,  -7.85605788e-01,

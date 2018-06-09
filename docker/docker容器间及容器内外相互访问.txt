@@ -1,6 +1,6 @@
 
 启动一个容器，什么-p -P --expose都不指定。 就用busybox吧，很小。起了以后就是一个bash等在那儿。
-gswyhq@gswyhq-pc:~$ sudo docker run -it busybox
+gswewf@gswewf-pc:~$ sudo docker run -it busybox
 Unable to find image 'busybox:latest' locally
 latest: Pulling from library/busybox
 27144aa8f1b9: Pull complete 
@@ -14,19 +14,19 @@ Status: Downloaded newer image for busybox:latest
 并在容器里执行一个netcat侦听端口7777。 一旦得到连接就发送date命令的结果给对方。
 
 # 当然，也可以通过容器号，查询容器的iP：
-gswyhq@gswyhq-pc:~$ sudo docker inspect 5709caedb0b8 |grep IPA
+gswewf@gswewf-pc:~$ sudo docker inspect 5709caedb0b8 |grep IPA
             "SecondaryIPAddresses": null,
             "IPAddress": "172.17.0.3",
                     "IPAMConfig": null,
                     "IPAddress": "172.17.0.3",
 # 在别的容器里，连接`5709caedb0b8`容器的7777端口：
-gswyhq@gswyhq-pc:~$ docker run busybox nc 172.17.0.3 7777
+gswewf@gswewf-pc:~$ docker run busybox nc 172.17.0.3 7777
 Sat Jun 24 07:49:32 UTC 2017
 
 # 在容器内若要访问宿主机，通过‘127.0.0.1’、‘localhost’肯定是不行的，这个时候，他们指的容器自身；
 # 可以通过宿主机的ip进行访问：
 # 在容器外获取宿主机的ip
-gswyhq@gswyhq-pc:~/docker/redis$ ifconfig 
+gswewf@gswewf-pc:~/docker/redis$ ifconfig 
 wlp9s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.104  netmask 255.255.255.0  broadcast 192.168.1.255
         inet6 fe80::7081:a93d:5a44:8c3e  prefixlen 64  scopeid 0x20<link>
@@ -34,12 +34,12 @@ wlp9s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         RX packets 683182  bytes 879923683 (839.1 MiB)
 # 并且宿主机允许其他的机器通过ip访问
 # 如防火墙允许：
-gswyhq@gswyhq-pc:~/yhb$ sudo ufw allow from 172.17.0.0/12
-[sudo] gswyhq 的密码：
+gswewf@gswewf-pc:~/yhb$ sudo ufw allow from 172.17.0.0/12
+[sudo] gswewf 的密码：
 WARN: Rule changed after normalization
 Rule added
 # 重启ufw使新规则生效
-gswyhq@gswyhq-pc:~/yhb$ sudo ufw reload
+gswewf@gswewf-pc:~/yhb$ sudo ufw reload
 
 # 数据库层面的允许，如mysql数据库允许其他的机器访问：
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.17.%' IDENTIFIED BY '123456' WITH GRANT OPTION;
@@ -56,19 +56,19 @@ b'10'
 # 宿主机访问容器：
 1、通过宿主机的ip不能访问，但通过容器的ip却能访问：
 # 通过宿主机ip不能访问：
-gswyhq@gswyhq-pc:~/yhb$ curl http://192.168.1.104:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
+gswewf@gswewf-pc:~/yhb$ curl http://192.168.1.104:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
 curl: (7) Failed to connect to 192.168.1.104 port 8000: 拒绝连接
 # 在宿主机上，通过容器的ip却能访问
-gswyhq@gswyhq-pc:~/yhb$ curl http://172.17.0.2:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
+gswewf@gswewf-pc:~/yhb$ curl http://172.17.0.2:8000/ -d '{"question": "a卡在哪里能用", "uid": "123456"}'
 这需要在利用镜像生成容器时，指定`-p`参数，将容器内的端口映射到容器外，如：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswyhq/yhb:/yhb -p 8000:8000 -w /yhb ubuntu:0701 /bin/bash
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswewf/yhb:/yhb -p 8000:8000 -w /yhb ubuntu:0701 /bin/bash
 也可以映射主机的IP地址(缺失主机的ip地址时，默认是`0.0.0.0`，可以远程访问)的指定端口到虚拟机的指定端口：
 # 只能本地访问(通过`127.0.0.1`、`localhost`能访问，但通过主机ip`192.168.1.104`却不能访问)：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswyhq/yhb:/yhb -p 127.0.0.1:8000:8000 -w /yhb ubuntu:0701 /bin/bash
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswewf/yhb:/yhb -p 127.0.0.1:8000:8000 -w /yhb ubuntu:0701 /bin/bash
 # 只能通过主机ip访问（通过`127.0.0.1`、`localhost`不能访问）：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswyhq/yhb:/yhb -p 192.168.1.104:8000:8000 -w /yhb ubuntu:0701 /bin/bash
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswewf/yhb:/yhb -p 192.168.1.104:8000:8000 -w /yhb ubuntu:0701 /bin/bash
 
 # 查看某个容器的映射端口：
-gswyhq@gswyhq-pc:~/yhb$ docker port ubuntu-yhb
+gswewf@gswewf-pc:~/yhb$ docker port ubuntu-yhb
 
 

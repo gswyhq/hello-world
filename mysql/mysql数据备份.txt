@@ -1,29 +1,29 @@
 
 备份数据命令
-mysql@gswyhq-pc:~$ /usr/bin/mysqldump python_tstamps  > python_tstamps.sql
-报错：mysqldump: Got error: 1045: Access denied for user 'gswyhq'@'localhost' (using password: NO) when trying to connect
+mysql@gswewf-pc:~$ /usr/bin/mysqldump python_tstamps  > python_tstamps.sql
+报错：mysqldump: Got error: 1045: Access denied for user 'gswewf'@'localhost' (using password: NO) when trying to connect
 需要用，用户名密码
 
-mysql@gswyhq-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
+mysql@gswewf-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
 mysqldump: [Warning] Using a password on the command line interface can be insecure.
 提示警告不安全
 
 编辑.cnf文件，添加user和password
-gswyhq@gswyhq-pc:~$ vim /etc/mysql/conf.d/mysqldump.cnf
+gswewf@gswewf-pc:~$ vim /etc/mysql/conf.d/mysqldump.cnf
 在“[mysqldump]”选项下添加：                                                                                                                                                                                          user=root
 password=123456
 
 
 示例：
-# mysql@gswyhq-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
+# mysql@gswewf-pc:~$ /usr/bin/mysqldump  -uroot -p123456 --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
 # mysqldump: [Warning] Using a password on the command line interface can be insecure.
-# mysql@gswyhq-pc:~$ /usr/bin/mysqldump --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
+# mysql@gswewf-pc:~$ /usr/bin/mysqldump --host=localhost --databases yhb --tables python_tstamps > python_tstamps.sql
 
 # 复制mysql数据库：
 第一步：新建一个空的数据库`product1`：
 mysql> CREATE DATABASE `product1` DEFAULT CHARACTER SET UTF8 COLLATE UTF8_GENERAL_CI;
 第二步：复制数据库（将数据库`yhb`复制到`product1`）：
-gswyhq@gswyhq-pc:~$ mysqldump yhb -hlocalhost -uroot -p123456 --add-drop-table | mysql -hlocalhost product1 -uroot -p123456
+gswewf@gswewf-pc:~$ mysqldump yhb -hlocalhost -uroot -p123456 --add-drop-table | mysql -hlocalhost product1 -uroot -p123456
 
 1 导出所有库
 
@@ -68,8 +68,8 @@ mysqldump -uroot -p123456 --all-databases > all.sql
 
 写好备份程序后，添加到定时任务：
 进入crontab 编辑状态
-gswyhq@gswyhq-pc:~$ crontab -e  
-no crontab for gswyhq - using an empty one
+gswewf@gswewf-pc:~$ crontab -e  
+no crontab for gswewf - using an empty one
 
 Select an editor.  To change later, run 'select-editor'.
   1. /bin/nano        <---- easiest
@@ -80,8 +80,8 @@ Choose 1-3 [1]: 2
 crontab: installing new crontab
 
 添加一行（每隔一个小时备份一次）
-0 * * * * gswyhq /home/gswyhq/database_backup.sh
+0 * * * * gswewf /home/gswewf/database_backup.sh
 
 重启crontab服务：
-gswyhq@gswyhq-pc:~$ sudo service cron restart
+gswewf@gswewf-pc:~$ sudo service cron restart
  

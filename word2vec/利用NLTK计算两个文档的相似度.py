@@ -2,12 +2,12 @@
 # 名称:利用NLTK计算两个文档的相似度
 # 目的:
 # 参考:http://www.52nlp.cn/%e5%a6%82%e4%bd%95%e8%ae%a1%e7%ae%97%e4%b8%a4%e4%b8%aa%e6%96%87%e6%a1%a3%e7%9a%84%e7%9b%b8%e4%bc%bc%e5%ba%a6%e4%b8%89
-# 作者:      gswyhq
+# 作者:      gswewf
 #
 # 日期:      2016-01-14
 # 版本:      Python 3.3.5
 # 系统:      win32
-# Email:     gswyhq@126.com
+# Email:     gswewf@126.com
 #-------------------------------------------------------------------------------
 import nltk
 

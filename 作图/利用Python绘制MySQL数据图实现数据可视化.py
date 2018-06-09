@@ -2,8 +2,8 @@
 # coding: utf-8
 
 # 第一步：下载数据、解压、导入mysql
-# gswyhq@gswyhq-pc:~$ wget http://downloads.mysql.com/docs/world.sql.zip
-# gswyhq@gswyhq-pc:~$ unzip world.sql.zip
+# gswewf@gswewf-pc:~$ wget http://downloads.mysql.com/docs/world.sql.zip
+# gswewf@gswewf-pc:~$ unzip world.sql.zip
 # Navicat for MySQL: 选择一个数据表；右键 -> Execute SQL File -> 选择刚解压的数据即可
 
 # 或者：
@@ -32,13 +32,13 @@ df = df.sort(['LifeExpectancy'], ascending=[1])
 import plotly.plotly as py
 from plotly.graph_objs import Scatter, Layout, XAxis, YAxis, Data, Figure, Marker, Line
 # 设置登陆信息及api秘钥
-py.sign_in(username="gswyhq", api_key='VRsmiPYfSNqJ3rEWk6JX')
+py.sign_in(username="gswewf", api_key='VRsmiPYfSNqJ3rEWk6JX')
 # 此处的用户名是在网站“https://plot.ly/”注册后的用户名；api_key并不是注册时候的登陆密码，
 # 而是在页面“https://plot.ly/settings/api”点击生成秘钥按钮“Regenerate Key”后，生成的秘钥；
 # 生成秘钥后，可以在本地文件中记录秘钥：
-# gswyhq@gswyhq-pc:~$ vim .plotly/.credentials
+# gswewf@gswewf-pc:~$ vim .plotly/.credentials
 
-# 生成的可视化图像，并不是在本地；而是在页面： https://plot.ly/~gswyhq/0
+# 生成的可视化图像，并不是在本地；而是在页面： https://plot.ly/~gswewf/0
 
 
 country_names = df['Name']

@@ -9,7 +9,7 @@ $ swapon -s
 
 $ free -m
 
-ubuntu@ip-172-31-13-170:~$ df -h
+ubuntu@ip-172-33-13-170:~$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
 udev             30G     0   30G   0% /dev
 tmpfs           6.0G  8.7M  6.0G   1% /run
@@ -26,29 +26,29 @@ tmpfs           6.0G     0  6.0G   0% /run/user/1000
 手动方式
 建立交换文件
 # 用root账号，使用 fallocate 命令来创建一个所需大小的交换文件（M = Mebibytes, G = Gibibytes）。例如，创建一个32 GB的交换文件：
-ubuntu@ip-172-31-13-170:~$ sudo fallocate -l 32G /swapfile
+ubuntu@ip-172-33-13-170:~$ sudo fallocate -l 32G /swapfile
 
 # 为交换文件设置权限：（交换文件全局可读是一个巨大的本地漏洞）
-ubuntu@ip-172-31-13-170:~$ sudo chmod 600 /swapfile
+ubuntu@ip-172-33-13-170:~$ sudo chmod 600 /swapfile
 
 # 创建好交换文件后，将其格式化：
-ubuntu@ip-172-31-13-170:~$ sudo mkswap /swapfile
+ubuntu@ip-172-33-13-170:~$ sudo mkswap /swapfile
 Setting up swapspace version 1, size = 32 GiB (34359734272 bytes)
 no label, UUID=e6e9061b-ad5c-4955-8257-d17d4069dcf3
 
 # 启用交换文件：
-ubuntu@ip-172-31-13-170:~$ sudo swapon /swapfile
+ubuntu@ip-172-33-13-170:~$ sudo swapon /swapfile
 
 # 最后，编辑 /etc/fstab， 在其中添加如下的一行：
-ubuntu@ip-172-31-13-170:~$ sudo vim /etc/fstab
+ubuntu@ip-172-33-13-170:~$ sudo vim /etc/fstab
 /swapfile none swap defaults 0 0
 
 # 检查交换空间的状态
-ubuntu@ip-172-31-13-170:~$ free -h
+ubuntu@ip-172-33-13-170:~$ free -h
               total        used        free      shared  buff/cache   available
 Mem:            59G        665M         58G        8.6M        444M         58G
 Swap:           31G          0B         31G
-ubuntu@ip-172-31-13-170:~$ df -h
+ubuntu@ip-172-33-13-170:~$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
 udev             30G     0   30G   0% /dev
 tmpfs           6.0G  8.7M  6.0G   1% /run

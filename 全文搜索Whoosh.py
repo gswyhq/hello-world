@@ -15,7 +15,7 @@ Quick Start
 from whoosh.index import create_in
 from whoosh.fields import *
 schema = Schema(title = TEXT(stored = True),path = ID(stored=True),content=TEXT)
-ix = create_in("/home/gswyhq/百科/indexer",schema)#（这里的“indexer”实际上是一个目录，因此按照这个步骤来会出错，你得先创建目录，译者注）
+ix = create_in("/home/gswewf/百科/indexer",schema)#（这里的“indexer”实际上是一个目录，因此按照这个步骤来会出错，你得先创建目录，译者注）
 writer = ix.writer()
 writer.add_document(title=u"First document",path=u"/a",
                     content = u"this is the first document we've add!")

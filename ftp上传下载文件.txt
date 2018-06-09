@@ -45,7 +45,7 @@ ftp> dir
 ftp服务器上的文件下载：
 于在某个服务器，如106.75.141.189
 # 第一步：启动ftp服务
-gow@gzcloud:~/gswyhq$ ftp 
+gow@gzcloud:~/gswewf$ ftp 
 # 第二步：连接ftp服务器（如：106.75.153.117）
 ftp> open 106.75.153.117
 Connected to 106.75.153.117.

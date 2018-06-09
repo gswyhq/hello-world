@@ -1,30 +1,30 @@
 
 ab是apache自带的一个很好用的压力测试工具，当安装完apache的时候，就可以在bin下面找到ab
 apache2的安装（apache2在apache的基础上有大的改动）：
-gswyhq@gswyhq-pc:~$ sudo apt-get install apache2
+gswewf@gswewf-pc:~$ sudo apt-get install apache2
 
 # 需要注意的是，apache跟nginx同时使用是冲突的，都会使用80端口；
 这个时候可以更改一下apache的监听端口：
-gswyhq@gswyhq-pc:~$ sudo vim /etc/apache2/ports.conf 
+gswewf@gswewf-pc:~$ sudo vim /etc/apache2/ports.conf 
 `Listen 80`  改为 `Listen 8080`
 
 # 查看apache服务的状态：
-gswyhq@gswyhq-pc:~$ /usr/sbin/apachectl status
+gswewf@gswewf-pc:~$ /usr/sbin/apachectl status
 或者：
-gswyhq@gswyhq-PC:~$ sudo systemctl status apache2
+gswewf@gswewf-PC:~$ sudo systemctl status apache2
 
 # 停止apache服务
-gswyhq@gswyhq-pc:~$ sudo /usr/sbin/apache2ctl stop
+gswewf@gswewf-pc:~$ sudo /usr/sbin/apache2ctl stop
 或者：
-gswyhq@gswyhq-PC:~$ sudo systemctl stop apache2
+gswewf@gswewf-PC:~$ sudo systemctl stop apache2
 
 # 启动apache服务
-gswyhq@gswyhq-PC:~$ sudo systemctl start apache2
+gswewf@gswewf-PC:~$ sudo systemctl start apache2
 
 # 重新启动nginx:
-gswyhq@gswyhq-pc:~$ sudo /etc/init.d/nginx restart
+gswewf@gswewf-pc:~$ sudo /etc/init.d/nginx restart
 
-gswyhq@gswyhq-pc:~$ whereis ab
+gswewf@gswewf-pc:~$ whereis ab
 ab: /usr/bin/ab /usr/share/man/man1/ab.1.gz
 
 # 键入命令： 
@@ -35,16 +35,16 @@ ab -t 60 -c 100 http://192.168.0.10/
 在60秒内发请求，一次100个请求。 
 
 # 带参数的请求：
-gswyhq@gswyhq-pc:~$ ab -c 5 -n 10 -p test.txt http://192.168.3.51:8000/ 
+gswewf@gswewf-pc:~$ ab -c 5 -n 10 -p test.txt http://192.168.3.51:8000/ 
 # 参数文本的内容如下：
-gswyhq@gswyhq-pc:~$ head test.txt 
+gswewf@gswewf-pc:~$ head test.txt 
 {"question": "a卡在哪里能用", "uid": "1234567"}
 
 等同于：curl http://192.168.3.51:8000/ -d '{"question": "a卡在哪里能用", "uid": "1234567"}'
 
 
 结果解释：
-gswyhq@gswyhq-pc:~$ ab -c 10 -n 20 -p test.txt http://192.168.3.51:8000/
+gswewf@gswewf-pc:~$ ab -c 10 -n 20 -p test.txt http://192.168.3.51:8000/
 This is ApacheBench, Version 2.3 <$Revision: 1757674 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/

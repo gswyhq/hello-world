@@ -1,6 +1,6 @@
 
 # pull镜像：
-gswyhq@gswyhq-PC:~/nlp_layer$ docker pull orientdb:2.2.31
+gswewf@gswewf-PC:~/nlp_layer$ docker pull orientdb:2.2.31
 
 如何使用这个图像
 当OrientDB启动时，要求输入root密码。 root用户能够管理OrientDB服务器：创建新的数据库，管理用户和角色。可以使用环境属性将根密码传递给容器：
@@ -14,7 +14,7 @@ Studio是OrientDB管理的Web界面，与OrientDB发行版捆绑在一起。（h
 要登录，请从数据库列表中选择一个数据库，并使用任何数据库用户。 默认情况下（用户名/密码）reader / reader可以从数据库中读取记录，writer / writer可以读取，创建，更新和删除记录，而admin / admin具有所有权限。
 
 进入终端：
-gswyhq@gswyhq-PC:~/hello-world$: docker exec -it orientdb /orientdb/bin/console.sh
+gswewf@gswewf-PC:~/hello-world$: docker exec -it orientdb /orientdb/bin/console.sh
 # 连接服务器实例
 orientdb> connect remote:192.168.3.250 root
 Enter password:

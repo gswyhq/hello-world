@@ -70,7 +70,7 @@ class proxy_ip():
         '''
         #time.strftime("%Y%m%d")，返回：'20150912'
         #time.asctime()[:11]，返回：'Sat Sep 12 
-        file_name="/home/gswyhq/gow69/{}抓取到的代理服务器ip.txt".format(time.strftime("%Y%m%d"))
+        file_name="/home/gswewf/gow69/{}抓取到的代理服务器ip.txt".format(time.strftime("%Y%m%d"))
 
         with open(file_name.split('.')[0]+'.json','a+',encoding='utf-8')as f:
             f.write( json.dumps(num_ip,ensure_ascii=0))

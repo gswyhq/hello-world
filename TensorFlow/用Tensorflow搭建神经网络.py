@@ -115,7 +115,7 @@ if IS_TENSORBOARD:
     writer = tf.summary.FileWriter("logs/", sess.graph)
 
     # 运行完上面代码后，打开 终端，进入你存放的文件夹地址上一层，运行命令 tensorboard --logdir='logs/' 后会返回一个地址，
-    # gswyhq@gswyhq-pc:~/hello-world/TensorFlow$ tensorboard --logdir='logs/'
+    # gswewf@gswewf-pc:~/hello-world/TensorFlow$ tensorboard --logdir='logs/'
     # 然后用浏览器打开这个地址，点击 graph 标签栏下就可以看到流程图了
 
 sess.run(init)

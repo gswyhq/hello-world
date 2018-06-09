@@ -131,7 +131,7 @@ In[32]: print (xmltodict.unparse(mydict, pretty=True))
 <?xml version="1.0" encoding="utf-8"?>
 <text color="red" stroke="2">This is a test</text>
 
-In[137]: with open('/home/gswyhq/gow69/data/美团网城市列表.xml', "rb") as f:
+In[137]: with open('/home/gswewf/gow69/data/美团网城市列表.xml', "rb") as f:
     d = xmltodict.parse(f, xml_attribs=True)
 In[138]: d.keys()
 Out[136]: odict_keys(['response'])
@@ -164,7 +164,7 @@ OrderedDict([('servers',
 ...     return True
 >>>
 from gzip import GzipFile
->>> xmltodict.parse(GzipFile('/home/gswyhq/gow69/data/zhwiki-20160407-stub-articles1.xml.gz'),
+>>> xmltodict.parse(GzipFile('/home/gswewf/gow69/data/zhwiki-20160407-stub-articles1.xml.gz'),
 ...     item_depth=2, item_callback=handle_artist)
 
 

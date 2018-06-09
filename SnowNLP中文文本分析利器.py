@@ -2,12 +2,12 @@
 # 名称: SnowNLP: 中文文本分析利器
 # 目的:转换成拼音，繁体转简体，提取文本关键词（Textrank算法），提取文本摘要（Textrank算法）
 # 参考:http://site.douban.com/146782/widget/notes/15468638/note/320813055/
-# 作者:      gswyhq
+# 作者:      gswewf
 #
 # 日期:      2016-01-19
 # 版本:      Python 3.3.5
 # 系统:      win32
-# Email:     gswyhq@126.com
+# Email:     gswewf@126.com
 #-------------------------------------------------------------------------------
 '''
 通过pip安装后

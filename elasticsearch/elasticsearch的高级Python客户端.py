@@ -17,7 +17,7 @@
 # ＃Elasticsearch 2.x
 # elasticsearch-DSL>=2.0.0，<3.0.0
 
-# gswyhq@gswyhq-PC:~$ curl http://192.168.3.105:9200/
+# gswewf@gswewf-PC:~$ curl http://192.168.3.105:9200/
 # {
 #   "name" : "CGpcm3o",
 #   "cluster_name" : "elasticsearch",
@@ -32,7 +32,7 @@
 #   "tagline" : "You Know, for Search"
 # }
 # Elasticsearch版本是5.6.4，故：
-# gswyhq@gswyhq-PC:~$ sudo pip3 install elasticsearch-dsl==5.4.0
+# gswewf@gswewf-PC:~$ sudo pip3 install elasticsearch-dsl==5.4.0
 
 # 正常的一个查询示例：
 def abc_test1():
@@ -117,10 +117,10 @@ class Article(DocType):
     class Meta:
         # 定义索引名, 类型名
         index = 'blog'
-        doc_type = 'gswyhq'  # 若无类型名设置，则采用类名“Article”的小写为类型名
+        doc_type = 'gswewf'  # 若无类型名设置，则采用类名“Article”的小写为类型名
 
     def save(self, ** kwargs):
-        # kwargs['using'] = 'gswyhq_alias'
+        # kwargs['using'] = 'gswewf_alias'
         self.lines = len(self.body.split())  # 在当前记录上继续添加字段名：lines, 字段值为2
         return super(Article, self).save(** kwargs)
 

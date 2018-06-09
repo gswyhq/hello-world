@@ -47,11 +47,11 @@ vim /etc/gitlab/gitlab.rb
 
 
 设置为开发组：
-http://192.168.3.101/gswyhq/qa_jar/settings/members
+http://192.168.3.101/gswewf/qa_jar/settings/members
 
 
 取消保护：
-http://192.168.3.101/gswyhq/qa_jar/protected_branches
+http://192.168.3.101/gswewf/qa_jar/protected_branches
 
 # 添加成员：
 点击项目进入项目主页，点击右侧的小三角，选择`Members`，添加成员；

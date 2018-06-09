@@ -1,15 +1,15 @@
 
 # 第一步，拉取镜像
-gswyhq@gswyhq-PC:~/docker/redis/data$ docker pull microsoft/mssql-server-linux
+gswewf@gswewf-PC:~/docker/redis/data$ docker pull microsoft/mssql-server-linux
 
 # 第二步，运行实例
-gswyhq@gswyhq-PC:~/docker/redis/data$ docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux:latest
+gswewf@gswewf-PC:~/docker/redis/data$ docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux:latest
 329fe1c7772a8714ea403d0f8cea54728a8fddaa075b7a5bb2a9063faee97063
 
 其中ACCEPT_EULA=Y的意思是同意许可协议，必选；MSSQL_SA_PASSWORD为密码(这里设置的密码是：`yourStrong(!)Password`)，要求是最少8位的强密码，要有大写字母，小写字母，数字以及特殊符号
 
 # 第三步，命令行连接
-gswyhq@gswyhq-PC:~$ docker exec -it 329fe1c7772a /bin/bash
+gswewf@gswewf-PC:~$ docker exec -it 329fe1c7772a /bin/bash
 root@329fe1c7772a:/# cd /opt/mssql-tools/
 root@329fe1c7772a:/opt/mssql-tools# ./bin/sqlcmd -S localhost -U SA -P 'yourStrong(!)Password'
 1>

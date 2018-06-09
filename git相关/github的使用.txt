@@ -8,19 +8,19 @@
 
 给项目重命名：
 1、修改项目名字及URL
-进入项目目录，如http://192.168.3.101/gswyhq/templates/edit
+进入项目目录，如http://192.168.3.101/gswewf/templates/edit
 修改：Project name
 
 Rename repository
     Project name
     Path
 2、更新本地git地址：
-gswyhq@gswyhq-PC:~/templates$ git remote -v
-origin	git@192.168.3.101:gswyhq/templates.git (fetch)
-origin	git@192.168.3.101:gswyhq/templates.git (push)
-gswyhq@gswyhq-PC:~/templates$ git remote set-url origin git@192.168.3.101:gswyhq/ModelData.git
-gswyhq@gswyhq-PC:~/templates$ git remote -v
-origin	git@192.168.3.101:gswyhq/ModelData.git (fetch)
-origin	git@192.168.3.101:gswyhq/ModelData.git (push)
+gswewf@gswewf-PC:~/templates$ git remote -v
+origin	git@192.168.3.101:gswewf/templates.git (fetch)
+origin	git@192.168.3.101:gswewf/templates.git (push)
+gswewf@gswewf-PC:~/templates$ git remote set-url origin git@192.168.3.101:gswewf/ModelData.git
+gswewf@gswewf-PC:~/templates$ git remote -v
+origin	git@192.168.3.101:gswewf/ModelData.git (fetch)
+origin	git@192.168.3.101:gswewf/ModelData.git (push)
 
 

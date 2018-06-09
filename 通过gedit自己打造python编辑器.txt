@@ -21,21 +21,21 @@ https://sourceforge.net/projects/eric-ide/files/eric6/stable/6.1.3/
 https://riverbankcomputing.com/software/qscintilla/download/
 
 tar zxvf QScintilla-gpl-2.9.1.tar.gz
-gswyhq@gswyhq-pc:~/下载$ cd QScintilla-gpl-2.9.1/
+gswewf@gswewf-pc:~/下载$ cd QScintilla-gpl-2.9.1/
 cd Qt4Qt5
     qmake qscintilla.pro
     make
     make install
-cd /home/gswyhq/下 载/QScintilla-gpl-2.9.1/Python/
-gswyhq@gswyhq-pc:~/下载/QScintilla-gpl-2.9.1/Python$ python3 configure.py
+cd /home/gswewf/下 载/QScintilla-gpl-2.9.1/Python/
+gswewf@gswewf-pc:~/下载/QScintilla-gpl-2.9.1/Python$ python3 configure.py
 Error: Unable to import PyQt4.QtCore. Make sure PyQt4 is installed.
 
 将configure.py中90行的“pyqt5_is_default = False”改为：“pyqt5_is_default = True",再：
 python3 configure.py
     make
     make install
-cd /home/gswyhq/下载/eric6-6.1.3/
-gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
+cd /home/gswewf/下载/eric6-6.1.3/
+gswewf@gswewf-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
 Checking dependencies
 Python Version: 3.5.1
 Found PyQt5
@@ -52,12 +52,12 @@ Found QtWebKitWidgets
 Found QtWidgets
 
 sudo apt-get install PyQt5.QtSvg
-gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
+gswewf@gswewf-pc:~/下载/eric6-6.1.3$ sudo python3 install.py
 安装成功
 
-gswyhq@gswyhq-pc:~/下载$ tar zxvf eric6-i18n-zh_CN-6.1.3.tar.gz 
-gswyhq@gswyhq-pc:~/下载$ cd eric6-6.1.3/
-gswyhq@gswyhq-pc:~/下载/eric6-6.1.3$ sudo python3 install-i18n.py 
+gswewf@gswewf-pc:~/下载$ tar zxvf eric6-i18n-zh_CN-6.1.3.tar.gz 
+gswewf@gswewf-pc:~/下载$ cd eric6-6.1.3/
+gswewf@gswewf-pc:~/下载/eric6-6.1.3$ sudo python3 install-i18n.py 
 
 
 

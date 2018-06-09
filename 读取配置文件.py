@@ -61,7 +61,7 @@ class Db_Connector:
 
 
 if __name__ == "__main__":
-    f = Db_Connector("/home/gswyhq/music/test.conf")
+    f = Db_Connector("/home/gswewf/music/test.conf")
 
 '''
 class Config:

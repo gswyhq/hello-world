@@ -2,7 +2,7 @@
 neo4j-shell已被弃用，并被cyphell-shell替代。
 
 # 启动一个neo4j容器
-gswyhq@gswyhq-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  --name=movie7475 --publish=7475:7474 --publish=7688:7687    --volume=$PWD/data:/data  neo4j
+gswewf@gswewf-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  --name=movie7475 --publish=7475:7474 --publish=7688:7687    --volume=$PWD/data:/data  neo4j
 
 # 浏览器打开：http://localhost:7475/browser/
 # 输入`:play movie graph`，点击右箭头，导入数据
@@ -14,7 +14,7 @@ gswyhq@gswyhq-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  
 		警告：每次运行时，将数据添加到当前数据库中！
 
 # 进入容器：
-gswyhq@gswyhq-pc:~/docker/neo4j/movie$ docker exec -it movie7475 /bin/bash
+gswewf@gswewf-pc:~/docker/neo4j/movie$ docker exec -it movie7475 /bin/bash
 # 进入neo4j目录：
 bash-4.3# cd /var/lib/neo4j/bin/
 bash-4.3# pwd
@@ -22,14 +22,14 @@ bash-4.3# pwd
 bash-4.3# ./cypher-shell --help
 
 # 连接neo4j服务及用户名密码：
-bash-4.3# ./bin/cypher-shell -a bolt://localhost:8687 -u neo4j -p gswyhq
+bash-4.3# ./bin/cypher-shell -a bolt://localhost:8687 -u neo4j -p gswewf
 Connection refused (连接失败，主要是因为在docker容器中开启的neo4j服务，对应服务主机名并不是localhost)
-bash-4.3# ./bin/cypher-shell -a bolt://172.17.0.1:8687 -u neo4j -p gswyhq
+bash-4.3# ./bin/cypher-shell -a bolt://172.17.0.1:8687 -u neo4j -p gswewf
 Connected to Neo4j 3.2.1 at bolt://172.17.0.1:8687 as user neo4j.
 Type :help for a list of available commands or :exit to exit the shell.
 Note that Cypher queries must end with a semicolon.
 
-bash-4.3# ./cypher-shell -a bolt://localhost:7687 -u neo4j -p gswyhq
+bash-4.3# ./cypher-shell -a bolt://localhost:7687 -u neo4j -p gswewf
 	以用户neo4j连接到Neo4j 3.2.1在bolt：// localhost：7687。
 	键入`:help`可用命令的列表，或`:exit`退出shell。
 	请注意，Cypher查询必须以分号结尾。
@@ -51,11 +51,11 @@ Bye!
 # 退出docker容器
 bash-4.3# exit
 exit
-gswyhq@gswyhq-pc:~/docker/neo4j/movie$
+gswewf@gswewf-pc:~/docker/neo4j/movie$
 
 
 启动对应的neo4j服务后，进入neo4j安装目录，连接上对应的数据路径：
-gswyhq@gswyhq-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j-shell -path /home/gswyhq/docker/neo4j/movie_graph/data
+gswewf@gswewf-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j-shell -path /home/gswewf/docker/neo4j/movie_graph/data
 
 neo4j-shell已被弃用，并被cyphell-shell替代。
 

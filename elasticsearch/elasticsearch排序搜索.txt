@@ -64,7 +64,7 @@ missing变量指定了(specifies)缺失某个字段的文档应该如何处理(t
 
 【注意】如果嵌套的内部对象不匹配nested_filter那么就会用缺失值
 
-gswyhq@gswyhq-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_*/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
+gswewf@gswewf-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_*/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
 {
     "aggs" : {
         "intent" : {
@@ -111,7 +111,7 @@ SELECT avg(num) FROM twitter group by newtype
 也就是按newtype 字段进行group by,然后对num求平均值。在我们实际的业务系统中，这种统计需求也是最多的。
 
 
-gswyhq@gswyhq-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_templates_question_alias/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
+gswewf@gswewf-PC:~/yhb$ curl -X GET "localhost:9200/all_baoxian_templates_question_alias/_search" -u elastic:web12008 -H 'Content-Type: application/json' -d'
 {
     "aggs" : {
         "intent" : {

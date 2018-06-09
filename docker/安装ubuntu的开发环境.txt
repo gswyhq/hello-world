@@ -1,79 +1,79 @@
 
 1、拉取ubuntu镜像
-gswyhq@gswyhq-pc:~$ sudo docker pull ubuntu
+gswewf@gswewf-pc:~$ sudo docker pull ubuntu
 2、运行ubuntu镜像，生成一个容器
-gswyhq@gswyhq-pc:~$ docker run -i -t ubuntu /bin/bash
+gswewf@gswewf-pc:~$ docker run -i -t ubuntu /bin/bash
 3、在容器内更新软件源
 root@50d8508bb70c:/# sudo apt-get update
 4、安装程序
 root@50d8508bb70c:/# apt-get install python3-pip
 5、退出容器，并将容器保存为新的ubuntu镜像
 root@50d8508bb70c:/# exit
-gswyhq@gswyhq-pc:~$ docker commit -m "说明等等" 50d8508bb70c ubuntu:0627
+gswewf@gswewf-pc:~$ docker commit -m "说明等等" 50d8508bb70c ubuntu:0627
     或者注明一些信息，如：
-    ubuntu@ip-172-31-13-157:~$ docker commit -m "安装pyltp, mammoth" ebe08d2d402b ubuntu:1031
+    ubuntu@ip-172-33-13-157:~$ docker commit -m "安装pyltp, mammoth" ebe08d2d402b ubuntu:1031
     sha256:b37a6b4f8f4cfc6029abef5bed483d62d8941144d814422120cec3f4745d2fa7
     查看刚刚保存的镜像详情（包括commit message）：
-    ubuntu@ip-172-31-13-157:~$ docker inspect b37a6b4f8f4c
+    ubuntu@ip-172-33-13-157:~$ docker inspect b37a6b4f8f4c
 
 提交变更，并且把容器保存成Tag为0627的新的ubuntu镜像.(注意，这里提交只是提交到本地仓库，类似Git)
 6、查看刚刚保存的镜像
-gswyhq@gswyhq-pc:~$ docker images 
+gswewf@gswewf-pc:~$ docker images 
 REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
 ubuntu              0627                02390dd538bb        About a minute ago   442 MB
 7、将镜像保存为文件
-gswyhq@gswyhq-pc:~$ sudo docker save 02390dd538bb > ubuntu0627-save.tar
+gswewf@gswewf-pc:~$ sudo docker save 02390dd538bb > ubuntu0627-save.tar
 
 或者将容器保存为镜像文件：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker export b06e71597f91（容器地） > ubuntu0915-export.tar
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ docker export b06e71597f91（容器地） > ubuntu0915-export.tar
 # 从镜像文件中加载镜像
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker import ubuntu0915-export.tar ubuntu:0915
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ docker import ubuntu0915-export.tar ubuntu:0915
 # 低版本需要如下：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
 
 8、从文件中加载镜像：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ sudo docker load < ubuntu0627-save.tar
+gswewf@gswewf-pc:~/docker/ubuntu$ sudo docker load < ubuntu0627-save.tar
 9、添加tag
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker tag 02390dd538bb ubuntu:0627
+gswewf@gswewf-pc:~/docker/ubuntu$ docker tag 02390dd538bb ubuntu:0627
 10、运行导入的镜像生成一个容器
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -i -t ubuntu:0627 /bin/bash
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -i -t ubuntu:0627 /bin/bash
 11、安装一些安装包，并退出：
 root@06c9a3a2bcee:~# pip3 install jieba==0.36.2
 root@06c9a3a2bcee:~# exit
 12、运行容器
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker start 06c9a3a2bcee
+gswewf@gswewf-pc:~/docker/ubuntu$ docker start 06c9a3a2bcee
 13、进入容器
 方法1：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker attach 06c9a3a2bcee
+gswewf@gswewf-pc:~/docker/ubuntu$ docker attach 06c9a3a2bcee
 #通过`方法1`进入docker容器ssh界面，只要这个连接终止，或者使用了exit命令，容器就会退出后台运行，
 #若使用方法2，则退出时不会终止后台运行
 方法2：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/sh
+gswewf@gswewf-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/sh
 # 
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/bash
+gswewf@gswewf-pc:~/docker/ubuntu$ docker exec -it 06c9a3a2bcee /bin/bash
 root@06c9a3a2bcee:/# 
 # 用`/bin/sh`登录后不会显示用户及主机名；用`/bin/bash`会显示用户及主机名
 14、查看刚才安装的包：
 root@06c9a3a2bcee:/# pip3 list
 jieba (0.36.2)
 15、利用`ubuntu`镜像里头安装的python运行py脚本或sh脚本
-gswyhq@gswyhq-pc:~/docker/ubuntu$ ls
+gswewf@gswewf-pc:~/docker/ubuntu$ ls
 abc.py  simple.py  start.sh  ubuntu0629-save.tar  ubuntu0630-save.tar
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -t -i -v /home/gswyhq/docker/ubuntu:/ubuntu -w /ubuntu ubuntu:0629 python3 abc.py
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -t -i -v /home/gswewf/docker/ubuntu:/ubuntu -w /ubuntu ubuntu:0629 python3 abc.py
 abcd
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -v /home/gswyhq/docker/ubuntu:/ubuntu ubuntu /bin/bash /ubuntu/start.sh
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -v /home/gswewf/docker/ubuntu:/ubuntu ubuntu /bin/bash /ubuntu/start.sh
 16、向容器内复制文件：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl
+gswewf@gswewf-pc:~/docker/ubuntu$ docker cp tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl 06c9a3a2bcee:/tensorflow-1.2.0-cp35-cp35m-macosx_10_11_x86_64.whl
 17、将容器内的文件复制到当前目录：
-gswyhq@gswyhq-pc:~/hello-world/docker$ docker cp b874b4c27fe0:/ubuntu/abc.py .
+gswewf@gswewf-pc:~/hello-world/docker$ docker cp b874b4c27fe0:/ubuntu/abc.py .
 18、需要解决中文乱码问题，包括安装zh_CN.UTF-8 字符集，和将
 export LC_ALL=zh_CN.utf8
 export LANG=zh_CN.UTF-8
 添加到`~.bashrc`文件中，再commit保存为镜像；
 19、容器内外文件同步
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker run -t -i -v /home/gswyhq/docker/ubuntu:/ubuntu -w /ubuntu ubuntu:0629 /bin/bash
-像上面这样启动一个容器时，在容器内部，改动`/ubuntu`目录下的文件，会导致本机`/home/gswyhq/docker/ubuntu`目录下的文件改动；
-同理，在容器外面改动`/home/gswyhq/docker/ubuntu`目录中的文件，即等价于更改容器内部`/ubuntu`下的文件；
+gswewf@gswewf-pc:~/docker/ubuntu$ docker run -t -i -v /home/gswewf/docker/ubuntu:/ubuntu -w /ubuntu ubuntu:0629 /bin/bash
+像上面这样启动一个容器时，在容器内部，改动`/ubuntu`目录下的文件，会导致本机`/home/gswewf/docker/ubuntu`目录下的文件改动；
+同理，在容器外面改动`/home/gswewf/docker/ubuntu`目录中的文件，即等价于更改容器内部`/ubuntu`下的文件；
 
 # 常用命令安装：
 vim：root@fa81d021df0d:/ubuntu# apt-get install vim

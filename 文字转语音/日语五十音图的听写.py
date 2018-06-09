@@ -6,8 +6,8 @@ from pydub.silence import split_on_silence
 import random
 import os
 
-file = '/home/gswyhq/data/五十音.mp3'
-EXPORT_PATH = '/home/gswyhq/data/五十音图'
+file = '/home/gswewf/data/五十音.mp3'
+EXPORT_PATH = '/home/gswewf/data/五十音图'
 time_start = "00:16"
 time_end = "01:35"
 

@@ -4,7 +4,7 @@
 import re
 import json
 
-cidian_file = '/home/gswyhq/data/词典/现代汉语词典第六版电子书.txt'
+cidian_file = '/home/gswewf/data/词典/现代汉语词典第六版电子书.txt'
 
 def parse_version_6(cidian_file):
     cidian_dict = {}
@@ -19,7 +19,7 @@ def parse_version_6(cidian_file):
                 print(line)
             line = f.readline()
 
-    with open('/home/gswyhq/data/词典/现代汉语词典第六版电子书.json', 'w', encoding='utf8')as f:
+    with open('/home/gswewf/data/词典/现代汉语词典第六版电子书.json', 'w', encoding='utf8')as f:
         json.dump(cidian_dict, f, ensure_ascii=False)
 
 def main():

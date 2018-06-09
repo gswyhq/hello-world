@@ -14,7 +14,7 @@ EVAL脚本第一个参数是eval代表Lua程序的运行环境上下文；第二
 Lua函数redis.call()和redis.pcall()
 两个函数基本一样，唯一不同的是如果Redis命令调用出错的话，redis.call()将返回具体的错误信息，redis.pcall()将返回Lua table的包装错误。
 
-gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+gswewf@gswewf-PC:~$ docker exec -it redis6379 /bin/bash
 root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0
 192.168.3.250:6379> get "123456:description"
 "\"template\""

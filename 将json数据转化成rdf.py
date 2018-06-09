@@ -11,13 +11,13 @@ logging.basicConfig(level=logging.DEBUG,
                 filename=os.path.join(path,'{}{}日志.log'.format(sys.argv[0],time.strftime("%Y%m%d%H%M"))),
                 filemode='w+')
 
-json_file='/home/gswyhq/百度人物关系图谱/数据/音乐人物_演艺人物_演员_导演_歌手_明星.json'
-#'/home/gswyhq/百科/百度百科title_info_tag_poly/title_info.json'
-#'/home/gswyhq/百科/RDF/百度百科义项.rdf'
-out_file='/home/gswyhq/百度人物关系图谱/数据/音乐人物_演艺人物_演员_导演_歌手_明星.rdf'
+json_file='/home/gswewf/百度人物关系图谱/数据/音乐人物_演艺人物_演员_导演_歌手_明星.json'
+#'/home/gswewf/百科/百度百科title_info_tag_poly/title_info.json'
+#'/home/gswewf/百科/RDF/百度百科义项.rdf'
+out_file='/home/gswewf/百度人物关系图谱/数据/音乐人物_演艺人物_演员_导演_歌手_明星.rdf'
 
 def load_data():
-    path='/home/gswyhq/百科/百度百科title_info_tag_poly/json'
+    path='/home/gswewf/百科/百度百科title_info_tag_poly/json'
     for file in os.listdir(path):
         with open(os.path.join(path,file),encoding='utf8')as f:
             data=json.load(f)
@@ -43,9 +43,9 @@ def property():
 
 def open_tag():
     #词条标签
-    with open('/home/gswyhq/百科/百度百科title_info_tag_poly/title_tag.json','r',encoding='utf8')as f:
+    with open('/home/gswewf/百科/百度百科title_info_tag_poly/title_tag.json','r',encoding='utf8')as f:
         data=json.load(f)
-    with open('/home/gswyhq/百科/RDF/百度百科词条标签.rdf','w',encoding='utf8')as f:
+    with open('/home/gswewf/百科/RDF/百度百科词条标签.rdf','w',encoding='utf8')as f:
         for key,vlaue in data.items():
             if not key.split('_')[0]:
                 continue
@@ -56,9 +56,9 @@ def open_tag():
 
 def poly():
     #义项
-    with open('/home/gswyhq/百科/百度百科title_info_tag_poly/title_poly.json','r',encoding='utf8')as f:
+    with open('/home/gswewf/百科/百度百科title_info_tag_poly/title_poly.json','r',encoding='utf8')as f:
         data=json.load(f)
-    with open('/home/gswyhq/百科/RDF/百度百科义项.rdf','w',encoding='utf8')as f:
+    with open('/home/gswewf/百科/RDF/百度百科义项.rdf','w',encoding='utf8')as f:
         for key,vlaue in data.items():
             if not key.split('_')[0]:
                 continue
@@ -69,14 +69,14 @@ def poly():
 
 
 def main():
-    path='/home/gswyhq/百度人物关系图谱/数据'
+    path='/home/gswewf/百度人物关系图谱/数据'
     files=[os.path.join(path,f) for f in os.listdir(path) if f.startswith('2016')and f.endswith('.json')]
     data={}
     for fi in files:
         with open(fi,encoding='utf8')as f:
             data.update(json.load(f))
             
-    with open('/home/gswyhq/百度人物关系图谱/数据/爬取的人物知识图谱.json','w',encoding='utf8')as f:
+    with open('/home/gswewf/百度人物关系图谱/数据/爬取的人物知识图谱.json','w',encoding='utf8')as f:
         json.dump(data,f,ensure_ascii=0)
 if __name__ == "__main__":
     start=time.time()

@@ -61,7 +61,7 @@ def makeMyOpener(Referer="",proxy_ip=[]):
     opener.addheaders = header
     return opener
 
-#urllib.request.urlretrieve(url,'/home/gswyhq/sougouxibao/下载.scel')
+#urllib.request.urlretrieve(url,'/home/gswewf/sougouxibao/下载.scel')
 '''
 path=sys.path[0]
 

@@ -251,7 +251,7 @@ def test1():
 
 
 def test3():
-    RELATIONSHIPS_FILE = '/home/gswyhq/x/data/initiative/relationships.json'
+    RELATIONSHIPS_FILE = '/home/gswewf/x/data/initiative/relationships.json'
     tree = TrieTree(input_tries=RELATIONSHIPS_FILE)
     # tree = TrieTree(input_tries=['友人','好友','爸爸','朋友', "我妈"])
     # pprint(json.loads(json.dumps(tree.tree,ensure_ascii=0)))

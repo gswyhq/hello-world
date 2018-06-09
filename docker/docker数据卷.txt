@@ -55,15 +55,15 @@ $ sudo docker run --rm -it -v ~/.bash_history:/.bash_history ubuntu /bin/bash
 
 
 # 列出所有数据卷：
-gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume ls
+gswewf@gswewf-pc:~/hello-world/elasticsearch$ docker volume ls
 
 # 列出未使用的卷：
-gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume ls --filter dangling=true 
+gswewf@gswewf-pc:~/hello-world/elasticsearch$ docker volume ls --filter dangling=true 
 
 # 删除数据卷：
 docker volumes rm <volume name> 
 
 # 查看某个数据卷的配置：
-gswyhq@gswyhq-pc:~/hello-world/elasticsearch$ docker volume inspect a163382b96f3424d05f2ca11099abf472de0bd6729e70a6194cb3b69a726854a
+gswewf@gswewf-pc:~/hello-world/elasticsearch$ docker volume inspect a163382b96f3424d05f2ca11099abf472de0bd6729e70a6194cb3b69a726854a
 
 

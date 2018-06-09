@@ -61,7 +61,7 @@ curl -XPUT localhost:9200/my_index -d '{ "settings": { "number_of_shards": 1 }}'
 ES curl bulk 导入数据
 
 比如我们现在有这样一个文件，data.json：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ head data.json
+gswewf@gswewf-pc:~/docker/elasticsearch$ head data.json
 { "index": { "_id": 1 }}
 { "title": "The quick brown fox" }
 { "index": { "_id": 2 }}
@@ -76,7 +76,7 @@ gswyhq@gswyhq-pc:~/docker/elasticsearch$ head data.json
 它的第一行定义了_index，_type，_id等信息；第二行定义了字段的信息。
 
 然后执行命令：
-gswyhq@gswyhq-pc:~/docker/elasticsearch$ curl -XPOST localhost:9200/my_index/my_type/_bulk --data-binary @data.json
+gswewf@gswewf-pc:~/docker/elasticsearch$ curl -XPOST localhost:9200/my_index/my_type/_bulk --data-binary @data.json
 
 注意到以上在创建索引时，我们设置了number_of_shards为1,这里创建了一个只有一个主分片(Primary shard)的索引。
 

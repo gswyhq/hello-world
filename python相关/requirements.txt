@@ -5,7 +5,7 @@ scikit-learn==0.18.1
 gensim==2.0.0
 pyemd==0.4.3
 
--e git+http://192.168.3.101/gswyhq/text_pretreatment.git/#egg=text-pretreatment-0.0.2
+-e git+http://192.168.3.101/gswewf/text_pretreatment.git/#egg=text-pretreatment-0.0.2
 -e .
 
-git+http://192.168.3.101/gswyhq/dialogue_management.git@0.0.2
+git+http://192.168.3.101/gswewf/dialogue_management.git@0.0.2

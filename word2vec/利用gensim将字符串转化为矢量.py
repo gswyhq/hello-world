@@ -2,12 +2,12 @@
 # 名称:利用gensim将字符串转化为矢量
 # 目的:
 #
-# 作者:      gswyhq
+# 作者:      gswewf
 #
 # 日期:      2016-01-01
 # 版本:      Python 3.3.5
 # 系统:      win32
-# Email:     gswyhq@126.com
+# Email:     gswewf@126.com
 #-------------------------------------------------------------------------------
 from gensim import corpora, models, similarities
 

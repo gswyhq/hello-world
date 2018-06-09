@@ -3,7 +3,7 @@
 
 
 # 命令行获取zip使用示例：
-# gswyhq@gswyhq-pc:~$ ./cmd_help.py zip
+# gswewf@gswewf-pc:~$ ./cmd_help.py zip
 
 import time
 import sys

@@ -5,23 +5,23 @@ redis 数据库
 sudo apt-get install redis-server
 
 # 通过上方式安装redis服务的停止与启动方法：
-gswyhq@gswyhq-pc:~$ sudo systemctl stop redis-server
-gswyhq@gswyhq-pc:~$ sudo systemctl start redis-server
+gswewf@gswewf-pc:~$ sudo systemctl stop redis-server
+gswewf@gswewf-pc:~$ sudo systemctl start redis-server
 
 # 设置与取消开机启动：
-gswyhq@gswyhq-pc:~$ sudo systemctl enable redis-server
-gswyhq@gswyhq-pc:~$ sudo systemctl disable redis-server
+gswewf@gswewf-pc:~$ sudo systemctl enable redis-server
+gswewf@gswewf-pc:~$ sudo systemctl disable redis-server
 
 安装python包：
 sudo pip install redis
 
 也可以通过安装包安装：
-    1、下载 gswyhq@gswyhq-pc:~$ wget http://download.redis.io/releases/redis-3.2.9.tar.gz
-    2、解压 gswyhq@gswyhq-pc:~$ tar xzf redis-3.2.9.tar.gz
-    3、移动到安装路径 gswyhq@gswyhq-pc:~$ sudo mv redis-3.2.9 /usr/local/redis-3.2.9
-    4、安装 gswyhq@gswyhq-pc:/usr/local/redis-3.2.9$ make
-    5、启动 gswyhq@gswyhq-pc:/usr/local/redis-3.2.9$ src/redis-server
-    5、客户端操作 gswyhq@gswyhq-pc:/usr/local/redis-3.2.9$ src/redis-cli 
+    1、下载 gswewf@gswewf-pc:~$ wget http://download.redis.io/releases/redis-3.2.9.tar.gz
+    2、解压 gswewf@gswewf-pc:~$ tar xzf redis-3.2.9.tar.gz
+    3、移动到安装路径 gswewf@gswewf-pc:~$ sudo mv redis-3.2.9 /usr/local/redis-3.2.9
+    4、安装 gswewf@gswewf-pc:/usr/local/redis-3.2.9$ make
+    5、启动 gswewf@gswewf-pc:/usr/local/redis-3.2.9$ src/redis-server
+    5、客户端操作 gswewf@gswewf-pc:/usr/local/redis-3.2.9$ src/redis-cli 
                   127.0.0.1:6379> set foo bar
                   OK
                   127.0.0.1:6379> get foo
@@ -30,7 +30,7 @@ sudo pip install redis
 
 
 apt-get安装后的启动服务器：
-gswyhq@gswyhq-pc:/usr/bin$ ./redis-server 
+gswewf@gswewf-pc:/usr/bin$ ./redis-server 
 (#加上`&`号使redis以后台程序方式运行
 ./redis-server &)
 或 
@@ -39,11 +39,11 @@ $redis-server /etc/redis/redis.conf
 
 二、集群搭建
 
-gswyhq@gswyhq-pc:~$ mkdir redis_cluster
-gswyhq@gswyhq-pc:~/redis_cluster$ mkdir 7000 7001 7002 7003 7004 7005
-root@gswyhq-pc:/home/gswyhq/redis_cluster/7000# cp /etc/redis/redis.conf .
-root@gswyhq-pc:/home/gswyhq/redis_cluster/7000# chown gswyhq:gswyhq redis.conf 
-gswyhq@gswyhq-pc:~/redis_cluster/7000$ vim redis.conf 
+gswewf@gswewf-pc:~$ mkdir redis_cluster
+gswewf@gswewf-pc:~/redis_cluster$ mkdir 7000 7001 7002 7003 7004 7005
+root@gswewf-pc:/home/gswewf/redis_cluster/7000# cp /etc/redis/redis.conf .
+root@gswewf-pc:/home/gswewf/redis_cluster/7000# chown gswewf:gswewf redis.conf 
+gswewf@gswewf-pc:~/redis_cluster/7000$ vim redis.conf 
 修改下面的8行
 46:pidfile /var/run/redis/redis-server.pid
 50:port 6379
@@ -54,45 +54,45 @@ gswyhq@gswyhq-pc:~/redis_cluster/7000$ vim redis.conf
 651:# cluster-node-timeout 15000
 509:appendonly no
 改成：
-46:pidfile /home/gswyhq/redis_cluster/7000/redis-server.pid
+46:pidfile /home/gswewf/redis_cluster/7000/redis-server.pid
 50 port 7000
-108:logfile /home/gswyhq/redis_cluster/7000/redis-server.log
-192:dir /home/gswyhq/redis_cluster/7000
+108:logfile /home/gswewf/redis_cluster/7000/redis-server.log
+192:dir /home/gswewf/redis_cluster/7000
 637:cluster-enabled yes
-645:cluster-config-file /home/gswyhq/redis_cluster/7000/nodes.conf
+645:cluster-config-file /home/gswewf/redis_cluster/7000/nodes.conf
 651:cluster-node-timeout 15000
 509:appendonly yes
 
 其他的，类似，最后启动
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7000/redis.conf 
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7001/redis.conf 
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7002/redis.conf 
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7003/redis.conf 
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7004/redis.conf 
-gswyhq@gswyhq-pc:~$ redis-server /home/gswyhq/redis_cluster/7005/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7000/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7001/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7002/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7003/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7004/redis.conf 
+gswewf@gswewf-pc:~$ redis-server /home/gswewf/redis_cluster/7005/redis.conf 
 
 结果：
-gswyhq@gswyhq-pc:~$ ps -aux|grep redis
+gswewf@gswewf-pc:~$ ps -aux|grep redis
 redis      629  0.0  0.0  44388  8044 ?        Ssl  08:44   0:03 /usr/bin/redis-server 127.0.0.1:6379
-gswyhq    4846  0.0  0.0  40296  3856 ?        Ssl  10:33   0:00 redis-server 127.0.0.1:7000 [cluster]
-gswyhq    4892  0.0  0.0  40296  3920 ?        Ssl  10:35   0:00 redis-server 127.0.0.1:7001 [cluster]
-gswyhq    4935  0.0  0.0  40296  3840 ?        Ssl  10:38   0:00 redis-server 127.0.0.1:7002 [cluster]
-gswyhq    5137  0.0  0.0  40296  3876 ?        Ssl  10:52   0:00 redis-server 127.0.0.1:7003 [cluster]
-gswyhq    5166  0.0  0.0  40296  3820 ?        Ssl  10:54   0:00 redis-server 127.0.0.1:7004 [cluster]
-gswyhq    5351  0.0  0.0  40296  3920 ?        Ssl  10:59   0:00 redis-server 127.0.0.1:7005 [cluster]
-gswyhq    5436  0.0  0.0  14424  2156 pts/7    S+   11:03   0:00 grep redis
+gswewf    4846  0.0  0.0  40296  3856 ?        Ssl  10:33   0:00 redis-server 127.0.0.1:7000 [cluster]
+gswewf    4892  0.0  0.0  40296  3920 ?        Ssl  10:35   0:00 redis-server 127.0.0.1:7001 [cluster]
+gswewf    4935  0.0  0.0  40296  3840 ?        Ssl  10:38   0:00 redis-server 127.0.0.1:7002 [cluster]
+gswewf    5137  0.0  0.0  40296  3876 ?        Ssl  10:52   0:00 redis-server 127.0.0.1:7003 [cluster]
+gswewf    5166  0.0  0.0  40296  3820 ?        Ssl  10:54   0:00 redis-server 127.0.0.1:7004 [cluster]
+gswewf    5351  0.0  0.0  40296  3920 ?        Ssl  10:59   0:00 redis-server 127.0.0.1:7005 [cluster]
+gswewf    5436  0.0  0.0  14424  2156 pts/7    S+   11:03   0:00 grep redis
 
 已经有了六个正在运行中的 Redis 实例， 接下来我们需要使用这些实例来创建集群。通过使用 Redis 集群命令行工具 redis-trib ， 
 编写节点配置文件的工作可以非常容易地完成： redis-trib 位于 Redis 源码的 src 文件夹中， 它是一个 Ruby 程序， 
 这个程序通过向实例发送特殊命令来完成创建新集群， 检查集群， 或者对集群进行重新分片（reshared）等工作。
 这里通过create命令来创建集群，指定replicas=1，即每一个主实例有一个从实例。
 src下面的ruby脚本，建立集群： --replicas 1的意思是每个master有1个slave。
-gswyhq@gswyhq-pc:~/redis_cluster$ cp /usr/share/doc/redis-tools/examples/redis-trib.rb .
-gswyhq@gswyhq-pc:~/redis_cluster$ ls
+gswewf@gswewf-pc:~/redis_cluster$ cp /usr/share/doc/redis-tools/examples/redis-trib.rb .
+gswewf@gswewf-pc:~/redis_cluster$ ls
 7000  7001  7002  7003  7004  7005  redis-trib.rb
 
 # 注意连接集群模式的redis实例时需要加上参数-c，表示连接的是集群模式的实例
-gswyhq@gswyhq-pc:~/redis_cluster$ redis-cli -c -p 7000
+gswewf@gswewf-pc:~/redis_cluster$ redis-cli -c -p 7000
 127.0.0.1:7000> CLUSTER MEET 172.0.0.1 7001
 OK
 127.0.0.1:7000> CLUSTER MEET 172.0.0.1 7002
@@ -118,18 +118,18 @@ cluster_stats_messages_received:0
 127.0.0.1:7000> CLUSTER NODES
 5f273413dffe418b482a68c06eb4d43a2de46c5e :7000 myself,master - 0 0 0 connected
 127.0.0.1:7000> exit
-gswyhq@gswyhq-pc:~/redis_cluster$ ./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+gswewf@gswewf-pc:~/redis_cluster$ ./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
 /usr/lib/ruby/2.3.0/rubygems/core_ext/kernel_require.rb:55:in `require': cannot load such file -- redis (LoadError)
  from /usr/lib/ruby/2.3.0/rubygems/core_ext/kernel_require.rb:55:in `require'
  from ./redis-trib.rb:25:in `<main>'
 报错，说明Ruby的redis接口没有安装，可以通过sudo gem install redis 进行安装
 另外还需安装依赖
-gswyhq@gswyhq-pc:~$ sudo apt-get install ruby gem
-gswyhq@gswyhq-pc:~$ sudo apt-get install libssl-dev
-gswyhq@gswyhq-pc:~$ sudo gem install redis
+gswewf@gswewf-pc:~$ sudo apt-get install ruby gem
+gswewf@gswewf-pc:~$ sudo apt-get install libssl-dev
+gswewf@gswewf-pc:~$ sudo gem install redis
 
 再运行：
-gswyhq@gswyhq-pc:~/redis_cluster$ ./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+gswewf@gswewf-pc:~/redis_cluster$ ./redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
 可能会询问是否保存集群设置
 Can I set the above configuration? (type 'yes' to accept): 
 回答yes
@@ -140,7 +140,7 @@ Can I set the above configuration? (type 'yes' to accept):
 [OK] All 16384 slots covered.
 
 查看集群目前状况：
-gswyhq@gswyhq-pc:~/redis_cluster$ redis-cli -c -p 7000
+gswewf@gswewf-pc:~/redis_cluster$ redis-cli -c -p 7000
 127.0.0.1:7000> CLUSTER INFO
 cluster_state:ok
 cluster_slots_assigned:16384
@@ -156,21 +156,21 @@ cluster_stats_messages_received:340
 127.0.0.1:7000> 
 
 # 这次安装配置好后，以后启动不需要再仅仅对应的配置，仅仅需要启动对应的端口即可，可以写个启动脚本：
-gswyhq@gswyhq-pc:~/redis_cluster$ vim start.sh 
+gswewf@gswewf-pc:~/redis_cluster$ vim start.sh 
 #!/bin/bash
 
 if [ `ps -aux|grep redis-server |grep cluster | wc -l ` -le 0 ] ; then
-    redis-server /home/gswyhq/redis_cluster/7000/redis.conf 
-    redis-server /home/gswyhq/redis_cluster/7001/redis.conf 
-    redis-server /home/gswyhq/redis_cluster/7002/redis.conf 
-    redis-server /home/gswyhq/redis_cluster/7003/redis.conf 
-    redis-server /home/gswyhq/redis_cluster/7004/redis.conf 
-    redis-server /home/gswyhq/redis_cluster/7005/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7000/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7001/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7002/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7003/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7004/redis.conf 
+    redis-server /home/gswewf/redis_cluster/7005/redis.conf 
 fi
     echo `date`, 'redis集群, 启动'
 
 # 还可以写个停止服务的脚本：
-gswyhq@gswyhq-pc:~/redis_cluster$ vim kill.sh 
+gswewf@gswewf-pc:~/redis_cluster$ vim kill.sh 
 #!/bin/bash
 
 for i in `ps uax|grep redis-server |grep cluster | awk '{print $2}'` ; do
@@ -181,25 +181,25 @@ echo "redis集群关闭"
 
 redis图形化界面安装：
 方法一：
-gswyhq@gswyhq-pc:~/github_projects$ git clone --recursive https://github.com/uglide/RedisDesktopManager.git -b 0.9 rdm && cd ./rdm
+gswewf@gswewf-pc:~/github_projects$ git clone --recursive https://github.com/uglide/RedisDesktopManager.git -b 0.9 rdm && cd ./rdm
 # --recursive：递归下载；-b：克隆指定分支；rdm && cd ./rdm ：将项目克隆到当前目录下的‘rdm’目录中（若不存在，则新建），并克隆完成后，切好到该目录中
-gswyhq@gswyhq-pc:~/github_projects/rdm$ cd src/
-gswyhq@gswyhq-pc:~/github_projects/rdm/src$ ./configure 
+gswewf@gswewf-pc:~/github_projects/rdm$ cd src/
+gswewf@gswewf-pc:~/github_projects/rdm/src$ ./configure 
 Your operational system is not supported!
 系统不支持，安装失败
 
 方法二：
-gswyhq@gswyhq-pc:~$ sudo apt-get install mono-complete
-gswyhq@gswyhq-pc:~/github_projects$ git clone https://github.com/ServiceStackApps/RedisReact.git
-gswyhq@gswyhq-pc:~/github_projects/RedisReact/dist$ ls
+gswewf@gswewf-pc:~$ sudo apt-get install mono-complete
+gswewf@gswewf-pc:~/github_projects$ git clone https://github.com/ServiceStackApps/RedisReact.git
+gswewf@gswewf-pc:~/github_projects/RedisReact/dist$ ls
 appsettings.txt  RedisReact.AppMac.app.zip  RedisReact.AppMac.mono.app.zip  RedisReact-console.exe  RedisReact-console.zip  RedisReact-winforms.exe
-gswyhq@gswyhq-pc:~/github_projects/RedisReact/dist$ mono RedisReact-console.exe 
+gswewf@gswewf-pc:~/github_projects/RedisReact/dist$ mono RedisReact-console.exe 
 在默认浏览器中打开了一个http服务（http://127.0.0.1:2337/#/），默认连接的redis(127.0.0.1:6379 db=0),
 可以在github_projects/RedisReact/dist/appsettings.txt，更改默认配置；
 
 当然也可以仅仅下载一个exe文件也是可以运行的：
-gswyhq@gswyhq-pc:~$ wget https://raw.githubusercontent.com/ServiceStackApps/RedisReact/master/dist/RedisReact-console.exe
-gswyhq@gswyhq-pc:~$ mono RedisReact-console.exe 
+gswewf@gswewf-pc:~$ wget https://raw.githubusercontent.com/ServiceStackApps/RedisReact/master/dist/RedisReact-console.exe
+gswewf@gswewf-pc:~$ mono RedisReact-console.exe 
 ServiceStack SelfHost listening at http://127.0.0.1:2337/
 已在现有的浏览器会话中创建新的窗口。
 

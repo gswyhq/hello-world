@@ -5,18 +5,18 @@ Neo4j HA主要提供以下两个功能：
 水平方向扩展以读为主架构 读操作负载均衡。
 Neo4j HA模式总有单个master，零个或多个slave。
 
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ wget https://raw.githubusercontent.com/neo4j/docker-neo4j/1f73186d4ace2935f180daa9a1bf39e3b411a848/test/ha-cluster-compose.yml
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ wget https://raw.githubusercontent.com/neo4j/docker-neo4j/1f73186d4ace2935f180daa9a1bf39e3b411a848/test/ha-cluster-compose.yml
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
 ERROR:
         Can't find a suitable configuration file in this directory or any
         parent. Are you in the right directory?
 
         Supported filenames: docker-compose.yml, docker-compose.yaml
 
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ ls
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ ls
 ha-cluster-compose.yml
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ mv ha-cluster-compose.yml docker-compose.yml
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ mv ha-cluster-compose.yml docker-compose.yml
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ docker-compose -p neo4j-ha-cluster up --build -d
 Creating network "neo4jhacluster_lan" with the default driver
 Creating read-placeholder ...
 Creating neo4jhacluster_slave1_1 ...
@@ -24,9 +24,9 @@ Creating core-placeholder ...
 Creating neo4jhacluster_slave1_1
 Creating read-placeholder
 Creating read-placeholder ... done
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ echo $?
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ echo $?
 0
-gswyhq@gswyhq-PC:~/docker/neo4j-ha-cluster$ docker ps |grep neo4j
+gswewf@gswewf-PC:~/docker/neo4j-ha-cluster$ docker ps |grep neo4j
 fb03bbbe5de8        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 16 seconds       7473-7474/tcp, 7687/tcp                                      read-placeholder
 509b7515a564        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 17 seconds       7473-7474/tcp, 7687/tcp                                      core-placeholder
 234b739f3e53        neo4j:3.1-enterprise   "/docker-entrypoin..."   19 seconds ago      Up 17 seconds       7473-7474/tcp, 7687/tcp                                      neo4jhacluster_slave1_1

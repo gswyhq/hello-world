@@ -11,12 +11,12 @@ import json,time
 import queue,random
 import threading
 
-# gswyhq@gswyhq-PC:~/Downloads$ wget http://chromedriver.storage.googleapis.com/2.9/chromedriver_linux64.zip
-# gswyhq@gswyhq-PC:~/Downloads$ unzip chromedriver_linux64.zip
+# gswewf@gswewf-PC:~/Downloads$ wget http://chromedriver.storage.googleapis.com/2.9/chromedriver_linux64.zip
+# gswewf@gswewf-PC:~/Downloads$ unzip chromedriver_linux64.zip
 # Archive:  chromedriver_linux64.zip
 #   inflating: chromedriver
-# gswyhq@gswyhq-PC:~/Downloads$ chmod +x chromedriver
-# gswyhq@gswyhq-PC:~/Downloads$ sudo mv -f chromedriver /usr/local/share/chromedriver
+# gswewf@gswewf-PC:~/Downloads$ chmod +x chromedriver
+# gswewf@gswewf-PC:~/Downloads$ sudo mv -f chromedriver /usr/local/share/chromedriver
 
 class proxy_ip():
     """从http://www.proxy360.cn/default.aspx上爬取代理IP地址及其端口号
@@ -32,7 +32,7 @@ class proxy_ip():
     def get_proxy_ip(self):
         """获取代理ip"""
         #从json文件加载数据
-        file_name="/home/gswyhq/gow69/{}抓取到的代理服务器ip.json".format(time.strftime("%Y%m%d"))
+        file_name="/home/gswewf/gow69/{}抓取到的代理服务器ip.json".format(time.strftime("%Y%m%d"))
         ip_list=[]
         try:
             with open(file_name,'r',encoding='utf-8')as f:
@@ -69,7 +69,7 @@ class proxy_ip():
 
         browser.maximize_window()  #将浏览器最大化显示
         #browser.get(url)
-        #pickle.dump( browser.get_cookies() , open("/home/gswyhq/gow69/cookies.pkl","wb"))
+        #pickle.dump( browser.get_cookies() , open("/home/gswewf/gow69/cookies.pkl","wb"))
 
         # 获得cookie信息
         #[{'value': 'C1C98FDDADCF5DB889347C877C317B3A:FG=1', 'name': 'BAIDUID',
@@ -101,7 +101,7 @@ class proxy_ip():
 
     def witer_ip(self,num_ip):
         """将代理ip写入json文件"""
-        file_name="/home/gswyhq/gow69/{}模拟浏览器登陆测试通过的代理服务器ip.json".format(time.strftime("%Y%m%d"))
+        file_name="/home/gswewf/gow69/{}模拟浏览器登陆测试通过的代理服务器ip.json".format(time.strftime("%Y%m%d"))
         with open(file_name,'w+',encoding='utf-8')as f:
             f.write( json.dumps(num_ip,ensure_ascii=0))
 

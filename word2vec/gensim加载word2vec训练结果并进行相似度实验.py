@@ -7,7 +7,7 @@ import gensim
 from gensim.models import word2vec
 from collections import OrderedDict
 
-MODEL_FILE = '/home/gswyhq/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
+MODEL_FILE = '/home/gswewf/data/model/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
 # 模型来源：  https://weibo.com/p/23041816d74e01f0102x77v?luicode=20000061&lfid=4098518198740187&featurecode=newtitle
 
 def load_model(model_file=MODEL_FILE):
@@ -128,7 +128,7 @@ w2v_model['男孩'].shape
 
 def main():
     ds = {word: w2v_model[word] for word in w2v_model.index2word}
-    pkl_file = '/home/gswyhq/yhb/model/news_12g_baidubaike_20g_novel_90g_embedding_64.pkl'
+    pkl_file = '/home/gswewf/yhb/model/news_12g_baidubaike_20g_novel_90g_embedding_64.pkl'
     with open(pkl_file, "wb")as f:
         # Latin1是ISO-8859-1的别名
         pickle.dump(ds, f)

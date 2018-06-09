@@ -43,8 +43,8 @@ $ git push origin --force --all
 $ git push origin --force --tags
 
 step 6.修改保护
-如下报错：remote: GitLab: You are not allowed to force push code to a protected branch on this project.。原来是gitlab默认给master分支加了保护，不允许强制覆盖。于是去gitlab下点击project->Branches->project settings，打开页面：http://192.168.3.101/gswyhq/项目名称_demo/protected_branches ; 将下方受保护的master 中的Allowed to push 由‘Masters’改为‘No one’，再点击‘Unprotect’,即可把master的保护去掉就可以了。修改完，强制push之后，建议把master的保护再加回来，毕竟强推不是件好事。
-改回方法：同样在页面http://192.168.3.101/gswyhq/项目名称_demo/protected_branches；Branch，选择master; Allowed to merge,选择Masters;Allowed to push,选择Masters.即可改回受保护。
+如下报错：remote: GitLab: You are not allowed to force push code to a protected branch on this project.。原来是gitlab默认给master分支加了保护，不允许强制覆盖。于是去gitlab下点击project->Branches->project settings，打开页面：http://192.168.3.101/gswewf/项目名称_demo/protected_branches ; 将下方受保护的master 中的Allowed to push 由‘Masters’改为‘No one’，再点击‘Unprotect’,即可把master的保护去掉就可以了。修改完，强制push之后，建议把master的保护再加回来，毕竟强推不是件好事。
+改回方法：同样在页面http://192.168.3.101/gswewf/项目名称_demo/protected_branches；Branch，选择master; Allowed to merge,选择Masters;Allowed to push,选择Masters.即可改回受保护。
 
 当你已经把项目工程的大小缩减到满意的地步，还要注意一点，在gitlab（不是github）上，就算强制push到远程仓库里，容量只会叠加不会更替，所以只能先把gitlab上的工程删掉，重建工程，再push上去。
 
@@ -56,15 +56,15 @@ setting
 
 # 删除所有提交历史记录，成为一个干净的新仓库
 第一步：新建一个空白分支
-gswyhq@gswyhq-pc:~/hello-world$ git checkout --orphan latest_branch
+gswewf@gswewf-pc:~/hello-world$ git checkout --orphan latest_branch
 切换到一个新分支 'latest_branch'
 第二步：向空白分支添加文件
-gswyhq@gswyhq-pc:~/hello-world$ git add .
+gswewf@gswewf-pc:~/hello-world$ git add .
 第三步：提交
-gswyhq@gswyhq-pc:~/hello-world$ git commit -m "记录信息"
+gswewf@gswewf-pc:~/hello-world$ git commit -m "记录信息"
 第四步：强制删除旧分支
-gswyhq@gswyhq-pc:~/hello-world$ git branch -D master
+gswewf@gswewf-pc:~/hello-world$ git branch -D master
 第五步：将当前分值重命名为master分支
-gswyhq@gswyhq-pc:~/hello-world$ git branch -m master
+gswewf@gswewf-pc:~/hello-world$ git branch -m master
 第六步：将本地强制推送到远程
-gswyhq@gswyhq-pc:~/hello-world$ git push -f origin master
+gswewf@gswewf-pc:~/hello-world$ git push -f origin master

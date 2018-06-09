@@ -1,7 +1,7 @@
 
 自定义程序包的安装，可以通过setup.py文件来实现
 在项目目录的外头添加setup.py文件：
-gswyhq@gswyhq-PC:~/semantics_match$ tree
+gswewf@gswewf-PC:~/semantics_match$ tree
 .
 ├── flask_server.py
 ├── log
@@ -58,7 +58,7 @@ gswyhq@gswyhq-PC:~/semantics_match$ tree
 11 directories, 40 files
 
 # 在执行python setup.py install 命令时出现以下错误提示：
-gswyhq@gswyhq-PC:~/semantics_match$ python3 setup.py install
+gswewf@gswewf-PC:~/semantics_match$ python3 setup.py install
 running install
 error: can't create or remove files in install directory
 
@@ -76,10 +76,10 @@ python setup.py install --record files.txt
 第二步，删除安装文件即可
 cat files.txt | xargs rm -rf
 或者,通过pip uninstall删除，如删除包`semantics_match`：
-gswyhq@gswyhq-PC:~/semantics_match$ sudo pip3 uninstall semantics_match
+gswewf@gswewf-PC:~/semantics_match$ sudo pip3 uninstall semantics_match
 
 # 直接从git上面安装某个项目：
-sudo pip3 install git+http://192.168.3.101/gswyhq/templates_match.git
+sudo pip3 install git+http://192.168.3.101/gswewf/templates_match.git
 
 当然也可以通过某一次提交的版本（commit hash）, 分支名（branch name）, tag进行安装：
 
@@ -94,7 +94,7 @@ $ pip install git+git://github.com/aladagemre/django-notification.git@cool-featu
 $ pip install https://github.com/aladagemre/django-notification/archive/cool-feature-branch.tar.gz
 
 # 安装某个tag:
-gswyhq@gswyhq-PC:~$ sudo pip3 install git+http://192.168.3.101/gswyhq/text_pretreatment.git@0.0.2
+gswewf@gswewf-PC:~$ sudo pip3 install git+http://192.168.3.101/gswewf/text_pretreatment.git@0.0.2
 $ pip install git+git://github.com/aladagemre/django-notification.git@v2.1.0
 
 # 通过tag的源代码进行安装：
@@ -109,9 +109,9 @@ pip3 freeze > requirements.txt
 pip install -r requirements.txt
 
 # freeze是导出本机所有的Python包，若仅仅导出某个项目的依赖包，可以使用`pipreqs`; 使用之前需先进行安装：
-gswyhq@gswyhq-PC:~/nlp_layer$ sudo pip3 install pipreqs
-gswyhq@gswyhq-PC:~/nlp_layer$ pipreqs /home/gswyhq/nlp_layer  # 导出某个项目的依赖包
-INFO: Successfully saved requirements file in /home/gswyhq/nlp_layer/requirements.txt
+gswewf@gswewf-PC:~/nlp_layer$ sudo pip3 install pipreqs
+gswewf@gswewf-PC:~/nlp_layer$ pipreqs /home/gswewf/nlp_layer  # 导出某个项目的依赖包
+INFO: Successfully saved requirements file in /home/gswewf/nlp_layer/requirements.txt
 
 在requirements.txt文件中指定 branch names、 commit hash 或者 a tag name:
 -e git://git.myproject.org/MyProject.git@master#egg=MyProject

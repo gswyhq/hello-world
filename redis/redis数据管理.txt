@@ -17,7 +17,7 @@ root@2ef3dea30784:/data# redis-cli -h 192.168.3.105 -p 6379 -n 0 keys "484495395
 3. lua脚本中执行删除
 keys * 命令在数据量很大的情况下，直接在redis cli中执行会严重影响服务器性能，更好的方式是在lua脚本中执行
 eval方式执行redis lua
-gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+gswewf@gswewf-PC:~$ docker exec -it redis6379 /bin/bash
 # lua方式通配符查找
 root@2ef3dea30784:/data# redis-cli -h 192.168.3.250 -p 6379 -n 0 eval "return redis.call('keys', '123456:*')" 0
 1) "123456:description"

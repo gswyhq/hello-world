@@ -9,24 +9,24 @@ http://www.eguidedog.net/doc/doc_install_ekho.php
 
 https://github.com/hgneng/ekho
 # 安装ekho:
-gswyhq@gswyhq-pc:~$ sudo apt-get install libsndfile1-dev libpulse-dev libncurses5-dev libmp3lame-dev libespeak-dev
-gswyhq@gswyhq-pc:~$ tar xJvf ekho-7.5.1.tar.xz
-gswyhq@gswyhq-pc:~/ekho-7.5.1$ ./configure
-gswyhq@gswyhq-pc:~/ekho-7.5.1$ make
-gswyhq@gswyhq-pc:~/ekho-7.5.1$ sudo make install
-gswyhq@gswyhq-pc:~/ekho-7.5.1$ ekho "python 123 hello"
+gswewf@gswewf-pc:~$ sudo apt-get install libsndfile1-dev libpulse-dev libncurses5-dev libmp3lame-dev libespeak-dev
+gswewf@gswewf-pc:~$ tar xJvf ekho-7.5.1.tar.xz
+gswewf@gswewf-pc:~/ekho-7.5.1$ ./configure
+gswewf@gswewf-pc:~/ekho-7.5.1$ make
+gswewf@gswewf-pc:~/ekho-7.5.1$ sudo make install
+gswewf@gswewf-pc:~/ekho-7.5.1$ ekho "python 123 hello"
 
 # 下载音频文件解压；
-gswyhq@gswyhq-pc:~$ tar xJvf pinyin-huang-44100-wav-v2.tar.xz
-gswyhq@gswyhq-pc:~$ ls
+gswewf@gswewf-pc:~$ tar xJvf pinyin-huang-44100-wav-v2.tar.xz
+gswewf@gswewf-pc:~$ ls
 COPYING-pinyin-huang  ekho-7.5.1  ekho-7.5.1.tar.xz  pinyin-huang-44100-wav-v2  pinyin-huang-44100-wav-v2.tar.xz
 
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1/COPYING-pinyin-huang .
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1/pinyin-huang-44100-wav-v2 pinyin
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.voice pinyin.voice.bak
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.index pinyin.index.bak
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswewf/ekho-7.5.1/COPYING-pinyin-huang .
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswewf/ekho-7.5.1/pinyin-huang-44100-wav-v2 pinyin
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.voice pinyin.voice.bak
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv pinyin.index pinyin.index.bak
 
-gswyhq@gswyhq-pc:~/ekho-7.5.1_data$ tar xjvf pinyin-yali-44100-v9.tar.bz2
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1_data/pinyin-yali pinyin
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswyhq/ekho-7.5.1_data/COPYING-pinyin-yali .
-gswyhq@gswyhq-pc:~/ekho-7.5.1/ekho-data$ ekho "大千世界，界域三千" -o abcd.mp3
+gswewf@gswewf-pc:~/ekho-7.5.1_data$ tar xjvf pinyin-yali-44100-v9.tar.bz2
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswewf/ekho-7.5.1_data/pinyin-yali pinyin
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ mv /home/gswewf/ekho-7.5.1_data/COPYING-pinyin-yali .
+gswewf@gswewf-pc:~/ekho-7.5.1/ekho-data$ ekho "大千世界，界域三千" -o abcd.mp3

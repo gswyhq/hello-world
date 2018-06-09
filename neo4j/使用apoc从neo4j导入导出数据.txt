@@ -26,37 +26,37 @@ apoc.export.file.enabled=true
 
 docker中使用示例：
 
-CALL apoc.export.csv.query("MATCH (a:Shiyi)RETURN a.name AS name", "/home/gswyhq/docker/neo4j/result.csv", {})
+CALL apoc.export.csv.query("MATCH (a:Shiyi)RETURN a.name AS name", "/home/gswewf/docker/neo4j/result.csv", {})
 
 ERROR Neo.ClientError.Procedure.ProcedureNotFound
 There is no procedure with the name `apoc.export.csv.query` registered for this database instance. Please ensure you've spelled the procedure name correctly and that the procedure is properly deployed.
 
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ mkdir plugins
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ pushd plugins
+gswewf@gswewf-PC:~/docker/neo4j/linshi$ mkdir plugins
+gswewf@gswewf-PC:~/docker/neo4j/linshi$ pushd plugins
 ~/docker/neo4j/linshi/plugins ~/docker/neo4j/linshi
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi/plugins$ popd
+gswewf@gswewf-PC:~/docker/neo4j/linshi/plugins$ wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.2.3.5/apoc-3.2.3.5-all.jar
+gswewf@gswewf-PC:~/docker/neo4j/linshi/plugins$ popd
 ~/docker/neo4j/linshi
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* neo4j:3.2.5
+gswewf@gswewf-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* neo4j:3.2.5
 
-运行：CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswyhq/docker/neo4j/result.csv", {})
+运行：CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswewf/docker/neo4j/result.csv", {})
 
 ERROR
 Neo.ClientError.Procedure.ProcedureCallFailed
 Failed to invoke procedure `apoc.export.csv.query`: Caused by: java.lang.RuntimeException: Export to files not enabled, please set apoc.export.file.enabled=true in your neo4j.conf
 
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true neo4j
+gswewf@gswewf-PC:~/docker/neo4j/linshi$ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true neo4j
 
-运行： CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswyhq/docker/neo4j/result.csv", {})
+运行： CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/home/gswewf/docker/neo4j/result.csv", {})
 
 ERROR
 Neo.ClientError.Procedure.ProcedureCallFailed
-Failed to invoke procedure `apoc.export.csv.query`: Caused by: java.io.FileNotFoundException: /home/gswyhq/docker/neo4j/result.csv (No such file or directory)
+Failed to invoke procedure `apoc.export.csv.query`: Caused by: java.io.FileNotFoundException: /home/gswewf/docker/neo4j/result.csv (No such file or directory)
 
 原因是export的路径在neo4j的docker容器中不存在，修改路径名，重试：
 运行： CALL apoc.export.csv.query("MATCH (a:Movie)RETURN a.title AS title, a.year as year", "/var/lib/neo4j/result.csv", {})
 
-gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker exec -it modest_lumiere /bin/bash
+gswewf@gswewf-PC:~/docker/neo4j/linshi$ docker exec -it modest_lumiere /bin/bash
 bash-4.3# ls
 LICENSE.txt   LICENSES.txt  NOTICE.txt    README.txt    UPGRADE.txt   bin           certificates  conf          data          import        lib           logs          plugins       run
 bash-4.3# pwd
@@ -119,7 +119,7 @@ CALL apoc.export.csv.query("MATCH (a:Person) RETURN a.name AS name", "/home/xyzu
 导出数据：
 CALL apoc.export.cypher.all("/var/lib/neo4j/guoxinzhengquan_all.cypher",{})
 导出文件："/var/lib/neo4j/guoxinzhengquan_all.cypher"
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ docker exec -it guoxinzhengquan_47474 /bin/bash
+gswewf@gswewf-PC:~/hello-world/neo4j$ docker exec -it guoxinzhengquan_47474 /bin/bash
 bash-4.4# pwd
 /var/lib/neo4j
 bash-4.4# ls
@@ -129,7 +129,7 @@ NOTICE.txt                  bin                         data                    
 bash-4.4#
 
 导入数据：
-gswyhq@gswyhq-PC:~/hello-world/neo4j$ docker exec -it multiple_projects_7474 /bin/bash
+gswewf@gswewf-PC:~/hello-world/neo4j$ docker exec -it multiple_projects_7474 /bin/bash
 # 更改neo4j配置，使之运行通过shell端操作
 bash-4.4# vi conf/neo4j.conf
 # Enable a remote shell server which Neo4j Shell clients can log in to.
@@ -140,10 +140,10 @@ dbms.shell.host=127.0.0.1
 dbms.shell.port=1337
 
 或者在启动neo4j容器时，设置对应-e参数：
-gswyhq@gswyhq-PC:~/docker/neo4j/multiple_projects$ docker run --detach --name=multiple_projects_7474  -e NEO4J_AUTH=neo4j/gswyhq -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=127.0.0.1 -e NEO4J_dbms_shell_port=1337 neo4j:3.2.5
+gswewf@gswewf-PC:~/docker/neo4j/multiple_projects$ docker run --detach --name=multiple_projects_7474  -e NEO4J_AUTH=neo4j/gswewf -p 7474:7474 -v $PWD/plugins:/plugins -v $PWD/data:/data -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=127.0.0.1 -e NEO4J_dbms_shell_port=1337 neo4j:3.2.5
 a4f825189aec36369c38a97e6de83441e7dc8415013e283a87b0eb378334c07b
-gswyhq@gswyhq-PC:~/docker/neo4j/guoxinzhengquan$ docker cp guoxinzhengquan_all.cypher multiple_projects_7474:/var/lib/neo4j/
-gswyhq@gswyhq-PC:~/docker/neo4j/multiple_projects$ docker exec -it multiple_projects_7474 /bin/bash
+gswewf@gswewf-PC:~/docker/neo4j/guoxinzhengquan$ docker cp guoxinzhengquan_all.cypher multiple_projects_7474:/var/lib/neo4j/
+gswewf@gswewf-PC:~/docker/neo4j/multiple_projects$ docker exec -it multiple_projects_7474 /bin/bash
 bash-4.4# pwd
 /var/lib/neo4j
 bash-4.4# ./bin/neo4j-shell -host 127.0.0.1 -port 1337 -file /var/lib/neo4j/guoxinzhengquan_all.cypher

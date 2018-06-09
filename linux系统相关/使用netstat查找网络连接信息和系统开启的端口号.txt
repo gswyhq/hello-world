@@ -65,5 +65,5 @@ $ watch -d -n0 "netstat -atnp | grep ESTA"
 $ sudo netstat -aple | grep ntp
 
 # 查看端口占用：
-方法一：ubuntu@ip-172-31-7-184:~$ sudo netstat -plant |grep 18090
+方法一：ubuntu@ip-172-33-7-184:~$ sudo netstat -plant |grep 18090
 方法二：～$ lsof -i:端口号，用于查看某一端口的占用情况，比如查看22号端口使用情况，lsof -i:22

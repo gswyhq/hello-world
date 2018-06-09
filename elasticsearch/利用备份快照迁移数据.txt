@@ -7,14 +7,14 @@ zy@ubuntu:~/docker/elasticsearch$ curl -XPUT 192.168.3.105:9200/_snapshot/my_bac
 }'
 
 第二步：拷贝192.168.3.105快照仓库到本地（192.168.3.145）：
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ sudo scp -r zy@192.168.3.105:/home/zy/docker/elasticsearch/esdata/data_bak/* data_bak/
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ sudo scp -r zy@192.168.3.105:/home/zy/docker/elasticsearch/esdata/data_bak/* data_bak/
 # 修改所属用户
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ sudo chown -R systemd-resolve:systemd-timesync data_bak
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ sudo chown -R systemd-resolve:systemd-timesync data_bak
 
 # 第三步：从备份中恢复数据
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -XPOST 192.168.3.145:9200/_snapshot/my_backup/all_baoxian_bak/_restore -u elastic:web12008
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ curl -XPOST 192.168.3.145:9200/_snapshot/my_backup/all_baoxian_bak/_restore -u elastic:web12008
 
 # 删除备份快照，及本地快照数据等
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -XDELETE 192.168.3.105:9200/_snapshot/my_backup/all_baoxian_bak
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ curl -XDELETE 192.168.3.145:9200/_snapshot/my_backup/all_baoxian_bak -u elastic:web12008
-gswyhq@gswyhq-PC:~/docker/elasticsearch/esdata$ sudo rm -rf data_bak/*
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ curl -XDELETE 192.168.3.105:9200/_snapshot/my_backup/all_baoxian_bak
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ curl -XDELETE 192.168.3.145:9200/_snapshot/my_backup/all_baoxian_bak -u elastic:web12008
+gswewf@gswewf-PC:~/docker/elasticsearch/esdata$ sudo rm -rf data_bak/*

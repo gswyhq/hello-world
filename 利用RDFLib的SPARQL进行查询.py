@@ -68,7 +68,7 @@ def main():
     #序列化图表到文件,内置格式有：'xml', 'n3', 'turtle', 'nt', 'pretty-xml', 'trix', 'trig' and 'nquads'
     #g.serialize("graph.rdf",format('nt'))
     g1 = rdflib.Graph()
-    #g1.parse("/home/gswyhq/appliances/graph.rdf", format="nt")#根据自己的上下文解析新增三元组
+    #g1.parse("/home/gswewf/appliances/graph.rdf", format="nt")#根据自己的上下文解析新增三元组
     g1.load('graph.rdf',format='nt') #load：加载完，送给parse操作，同parse
     x1 = g1.query(q)
     print ('*'*8,list(x1))

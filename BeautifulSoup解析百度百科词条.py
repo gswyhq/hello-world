@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 
 
-def read_html(f='/media/gswyhq/000724FA000F917A/Baike/part-r-00001',split=0):
+def read_html(f='/media/gswewf/000724FA000F917A/Baike/part-r-00001',split=0):
     """读取文件，并分割,或者解析"""
     txt=''
     textall=''
@@ -21,13 +21,13 @@ def read_html(f='/media/gswyhq/000724FA000F917A/Baike/part-r-00001',split=0):
                 count+=1
                 if count%1000==0:
                     print("已解析文件数：",count)
-                    write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/纯文本", os.path.split(f)[-1]),textall)
-                    write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/包括链接等", os.path.split(f)[-1]),text_hrefall)
+                    write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/纯文本", os.path.split(f)[-1]),textall)
+                    write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/包括链接等", os.path.split(f)[-1]),text_hrefall)
                     textall=''
                     text_hrefall=''
                 if txt:
                     if split:
-                        write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/split_file",file),txt)
+                        write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/split_file",file),txt)
                     else:
                         try:
                             text,text_href=parser_html(txt)
@@ -38,7 +38,7 @@ def read_html(f='/media/gswyhq/000724FA000F917A/Baike/part-r-00001',split=0):
                             #write_txt(os.path.join(r"E:\Baike\包括链接等",file),text_href)
                         except  Exception as e :
                             print("解析出错：",file,e)
-                            write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/split_file",file),txt)
+                            write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/split_file",file),txt)
                 #file=os.path.join("E:\Baike\split_file",m.group(1))
                 file=m.group(1)
                 txt=''
@@ -46,24 +46,24 @@ def read_html(f='/media/gswyhq/000724FA000F917A/Baike/part-r-00001',split=0):
             line=fi.readline()
 
         if split:
-            write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/split_file",file),txt)
+            write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/split_file",file),txt)
         else:
             try:
                 text,text_href=parser_html(txt)
                 split_line='\n'+"*"*10+file+"*"*10+'\n'#分割线
                 textall+=split_line+text
                 text_hrefall+=split_line+text_href
-                write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/纯文本", os.path.split(f)[-1]),textall)
-                write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/包括链接等", os.path.split(f)[-1]),text_hrefall)
+                write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/纯文本", os.path.split(f)[-1]),textall)
+                write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/包括链接等", os.path.split(f)[-1]),text_hrefall)
                 #write_txt(os.path.join(r"E:\Baike\纯文本",file),text)
                 #write_txt(os.path.join(r"E:\Baike\包括链接等",file),text_href)
             except  Exception as e :
                 print("解析出错：",file,e)
-                write_txt(os.path.join(r"/media/gswyhq/000724FA000F917A/Baike/split_file",file),txt)
+                write_txt(os.path.join(r"/media/gswewf/000724FA000F917A/Baike/split_file",file),txt)
             
         
 
-def get_html(path=r"/media/gswyhq/000724FA000F917A/Baike/Baike"):
+def get_html(path=r"/media/gswewf/000724FA000F917A/Baike/Baike"):
     """根据路径，提取路径下所有文件内的HTML内容。"""
     for root, dirs, fs in os.walk(path):
         files=[]
@@ -143,13 +143,13 @@ if __name__ == '__main__':
     start=time.time()
     #files=get_html()[:5]
 
-    files=['/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00039',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00040',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00041',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00042',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00043',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00062',
- '/media/gswyhq/000724FA000F917A/Baike/Baike/part-r-00063']
+    files=['/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00039',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00040',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00041',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00042',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00043',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00062',
+ '/media/gswewf/000724FA000F917A/Baike/Baike/part-r-00063']
 
 
 

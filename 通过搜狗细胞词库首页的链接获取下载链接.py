@@ -61,7 +61,7 @@ def makeMyOpener(Referer="",proxy_ip=[]):
     opener.addheaders = header
     return opener
 
-#urllib.request.urlretrieve(url,'/home/gswyhq/sougouxibao/下载.scel')
+#urllib.request.urlretrieve(url,'/home/gswewf/sougouxibao/下载.scel')
 '''
 path=sys.path[0]
 
@@ -185,7 +185,7 @@ def get_proxy_ip():
     return ip_list
 
 def start_pool(url,ip_list):
-    with open('/home/gswyhq/sougouxibao/首页链接_下载页链接.json')as f:
+    with open('/home/gswewf/sougouxibao/首页链接_下载页链接.json')as f:
         pass_links=json.load(f)
 
     pass_links=[k for k,v in pass_links]
@@ -215,12 +215,12 @@ if __name__ == "__main__":
     logging.warning('完成，用时：{}'.format(time.time()-start))
 
 '''
-with open('/home/gswyhq/sougouxibao/201604081710日志.log')as f:
+with open('/home/gswewf/sougouxibao/201604081710日志.log')as f:
     url_link=f.readlines()
 
 links=list(set([tuple(url.strip().split('######')) for url in url_link if '######' in url]))
 
-with open('/home/gswyhq/sougouxibao/201604081716日志.log')as f:
+with open('/home/gswewf/sougouxibao/201604081716日志.log')as f:
     url_link2=f.readlines()
 
 links2=list(set([tuple(url.strip().split('######')) for url in url_link2 if '######' in url]))

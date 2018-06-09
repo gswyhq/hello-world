@@ -13,8 +13,8 @@ sudo gpasswd -a ${USER} docker
 sudo service docker restart
 第四步：然后退出并重新登录就生效
 切换当前会话到新 group 或者重启 X 会话
-gswyhq@gswyhq-pc:/var/run$ newgrp - docker
-gswyhq@gswyhq-pc:~$ docker ps
+gswewf@gswewf-pc:/var/run$ newgrp - docker
+gswewf@gswewf-pc:~$ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 
 注意，最后一步是必须的，否则因为 groups 命令获取到的是缓存的组信息，刚添加的组信息未能生效，所以 docker images 执行时同样有错。
@@ -30,10 +30,10 @@ systemctl restart docker # 重启dokcer
 systemctl enable docker # 开机自动启动docker
 
 # 监测容器：
-gswyhq@gswyhq-pc:~$ sudo pip3 install ctop
+gswewf@gswewf-pc:~$ sudo pip3 install ctop
 
 在一下旧的版本中导入时可能出错：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker export ca4b1acbe79b > ubuntu0717-export.tar
+gswewf@gswewf-pc:~/docker/ubuntu$ docker export ca4b1acbe79b > ubuntu0717-export.tar
 ubuntu@10-13-158-31:~/docker/ubuntu$ sudo docker import ubuntu0717-export.tar ubuntu:0717
 Downloading from http://ubuntu0717-export.tar
 FATA[0001] Get http://ubuntu0717-export.tar: dial tcp: lookup ubuntu0717-export.tar: no such host 
@@ -42,11 +42,11 @@ ubuntu@10-13-158-31:~/docker/ubuntu$ cat ubuntu0717-export.tar | sudo docker imp
 16a079ae5a08c141a3e710a987259a3cd633f206de226430a46d9ef4e4ddf023
 
 # 重启之前的一个容器报错：
-gswyhq@gswyhq-pc:~/docker/neo4j/nwd$ sudo docker start nwd27474
+gswewf@gswewf-pc:~/docker/neo4j/nwd$ sudo docker start nwd27474
 Error response from daemon: driver failed programming external connectivity on endpoint nwd27474 (aecc9f558db95cf92ebd496f382ab1608c62e422e8022ebf288ae0b350068557):  (iptables failed: iptables --wait -t filter -A DOCKER ! -i docker0 -o docker0 -p tcp -d 172.17.0.4 --dport 7687 -j ACCEPT: iptables: No chain/target/match by that name.
  (exit status 1))
 # 解决方法，重启docker服务即可
-gswyhq@gswyhq-pc:~$ sudo systemctl restart docker
+gswewf@gswewf-pc:~$ sudo systemctl restart docker
 
 # 修改docker容器时间：
 确认宿主机时间对否；在宿主机时间正确情况下可以：
@@ -57,9 +57,9 @@ $ docker cp /etc/localtime [containerId]:/etc/localtime
 # 若宿主机时区不对，可以：
 sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-ubuntu@ip-172-31-14-6:~$ docker cp /etc/localtime shanglishi18010:/etc/localtime
+ubuntu@ip-172-33-14-6:~$ docker cp /etc/localtime shanglishi18010:/etc/localtime
 FATA[0000] Error: Path not specified
-ubuntu@ip-172-31-14-6:~$ docker -v
+ubuntu@ip-172-33-14-6:~$ docker -v
 Docker version 1.6.2, build 7c8fca2
 版本1.6.2不允许从主机复制到容器，您需要升级到至少1.8的支持。
 
@@ -67,7 +67,7 @@ Docker version 1.6.2, build 7c8fca2
 Error response from daemon: Get https://registry-1.docker.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 可在 https://www.daocloud.io 注册账号 使用Docker 加速器；
 
-swyhq@gswyhq-pc:~/hello-world/docker$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io
+swyhq@gswewf-pc:~/hello-world/docker$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io
 Error: Unsupported OS, please set registry-mirror manually.
 
 修改Docker配置文件/etc/default/docker如下：
@@ -85,14 +85,14 @@ http://7d466737.m.daocloud.io Copy
 
 # 有时候拉取镜像时识别，可能对应的tag不是`latest`，
 可以在类似`https://hub.docker.com/r/mobz/elasticsearch-head/tags/`查看tags是多少：
-gswyhq@gswyhq-pc:~$ docker pull mobz/elasticsearch-head
+gswewf@gswewf-pc:~$ docker pull mobz/elasticsearch-head
 Using default tag: latest
 Error response from daemon: manifest for mobz/elasticsearch-head:latest not found
-gswyhq@gswyhq-pc:~$ docker pull mobz/elasticsearch-head:5-alpine
+gswewf@gswewf-pc:~$ docker pull mobz/elasticsearch-head:5-alpine
 
 
 # 导入镜像出错：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo docker import - ubuntu:0915
 FATA[0037] Error response from daemon: ApplyLayer exit status 1 stdout:  stderr: write /usr/lib/gcc/x86_64-linux-gnu/5/lto1: read-only file system
 
 请确保Docker容器中有足够的可用磁盘空间，通常是/var/lib/docker/graph。
@@ -103,22 +103,22 @@ OPTIONS="-g /data/docker -H unix:///var/run/docker.sock -H 0.0.0.0:4243 --selinu
 
 
 # 删除容器异常：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker rm -v b06e71597f91
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ docker rm -v b06e71597f91
 Error response from daemon: Cannot destroy container b06e71597f91: Driver devicemapper failed to remove root filesystem b06e71597f91207bfc4968ef0c258a6accfcf4eee1e057d9d590eeb1a7e11cb4: Error running DeleteDevice dm_task_run failed
 FATA[0000] Error: failed to remove one or more containers 
 # 添加-f参数强制删除
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ docker rm -f b06e71597f91
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ docker rm -f b06e71597f91
 b06e71597f91
 
 使用docker运行容器时出错，
 Error response from daemon: Error running DeviceCreate (createSnapDevice) dm_task_run failed
 
 方法1：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker stop
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo thin_check /var/lib/docker/devicemapper/devicemapper/metadata
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ sudo service docker stop
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ sudo thin_check /var/lib/docker/devicemapper/devicemapper/metadata
 若 thin_check 没安装，则通过下面的方法安装：
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo apt-get install thin-provisioning-tools
-ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker start
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ sudo apt-get install thin-provisioning-tools
+ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ sudo service docker start
 
 方法2：
 # systemctl stop docker.service 
@@ -127,12 +127,12 @@ ubuntu@ip-172-31-8-214:/data/docker/ubuntu$ sudo service docker start
 上述方法均无效后，直接卸载重装。
 
 # 删除容器出错：
-ubuntu@ip-172-31-11-15:~/zhongan_neo4j$ docker rm -v zhongan_neo4j_18000 
+ubuntu@ip-172-33-11-15:~/zhongan_neo4j$ docker rm -v zhongan_neo4j_18000 
 Error response from daemon: Driver aufs failed to remove root filesystem aa7595e846a9754f8c0bdd084b0e91429a58ce87f24f2646970421e049dea061: rename /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20 /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20-removing: device or resource busy
 # 解决方法，使用 umount -l 解除占用即可：
-ubuntu@ip-172-31-11-15:~/zhongan_neo4j$ sudo umount -l /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20
+ubuntu@ip-172-33-11-15:~/zhongan_neo4j$ sudo umount -l /var/lib/docker/aufs/mnt/f788ac88a12ffd733b2d03f494d32c8059dc8632812d5e4acc91d6a8c0b74b20
 
-gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
+gswewf@gswewf-pc:~$ sudo apt-get install docker.io
 正在读取软件包列表... 完成
 正在分析软件包的依赖关系树
 正在读取状态信息... 完成
@@ -141,14 +141,21 @@ E: 无法按照 glob ‘docker.io’ 找到任何软件包
 E: 无法按照正则表达式 docker.io 找到任何软件包
 
 更改配置软件源：
-gswyhq@gswyhq-pc:~$ sudo vim /etc/apt/sources.list
+gswewf@gswewf-pc:~$ sudo vim /etc/apt/sources.list
 deb [by-hash=force] http://mirrors.aliyun.com/deepin unstable main contrib non-free
 # deb [by-hash=force] http://packages.deepin.com/deepin unstable main contrib non-free
 # deb-src http://packages.deepin.com/deepin unstable main contrib non-free
 
-gswyhq@gswyhq-pc:~$ sudo apt-get update
-gswyhq@gswyhq-pc:~$ sudo apt-get install docker.io
+gswewf@gswewf-pc:~$ sudo apt-get update
+gswewf@gswewf-pc:~$ sudo apt-get install docker.io
 
 # 容器内不能输入中文，中文乱码等：
-gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+gswewf@gswewf-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+
+远程执行docker命令：
+ssh ubuntu@42.93.171.44 docker exec -it multiple_projects_neo4j_18855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
+报错：docker the input device is not a TTY
+解决方法很简单，只需要去掉上面的命令中的-it 即可．
+ssh ubuntu@42.93.171.44 docker exec multiple_projects_neo4j_18855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
+
 

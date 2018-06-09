@@ -7,8 +7,8 @@ from py2neo import Graph, Node, Relationship
 
 
 def authenticateAndConnect():
-    # py2neo.authenticate('localhost:47474', 'neo4j', 'gswyhq')
-    return Graph(host='localhost', user='neo4j', password='gswyhq', http_port=7474, bolt_port=7687)
+    # py2neo.authenticate('localhost:47474', 'neo4j', 'gswewf')
+    return Graph(host='localhost', user='neo4j', password='gswewf', http_port=7474, bolt_port=7687)
 
 
 def actorsDictionary():

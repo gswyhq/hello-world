@@ -137,8 +137,8 @@ Out[29]: ['ni', 'hao']
 In [30]: lazy_pinyin('你好☆',errors='replace')
 Out[30]: ['ni', 'hao', '2606']
 
-In [31]: lazy_pinyin('你好☆',errors=lambda x:'gswyhq')
-Out[31]: ['ni', 'hao', 'gswyhq']
+In [31]: lazy_pinyin('你好☆',errors=lambda x:'gswewf')
+Out[31]: ['ni', 'hao', 'gswewf']
 
 In [32]: lazy_pinyin('你好abcこんにちは')
 Out[32]: ['ni', 'hao', 'abcこんにちは']

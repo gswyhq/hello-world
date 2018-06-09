@@ -47,7 +47,7 @@ for i in range(6, 80):                  # 设置单元格下列宽样式
     sheet.write(0,i,Line_data,style)
     sheet.col(i).width = 0x0d00 + i*50
 
-path_py = "/home/gswyhq/jian1.bmp"         #读取插入图片以.py运行时路径，images和.py在同一目录下
+path_py = "/home/gswewf/jian1.bmp"         #读取插入图片以.py运行时路径，images和.py在同一目录下
 
 sheet.insert_bitmap(path_py, 2, 9)         #插入一个图片
 

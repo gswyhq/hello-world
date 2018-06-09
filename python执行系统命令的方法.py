@@ -188,7 +188,7 @@ p.communicate会一直等到进程退出，并将标准输出和标准错误输�
 再看一个communicate的例子。
 
 p=subprocess.Popen('ls',shell=True,stdout=subprocess.PIPE)
-stdoutput,erroutput=p.communicate('/home/gswyhq')
+stdoutput,erroutput=p.communicate('/home/gswewf')
 
 print(stdoutput)
 print(erroutput)
@@ -228,7 +228,7 @@ subprocess还可以连接起来多个命令来执行。
 在shell中我们知道，想要连接多个命令可以使用管道。
 
 在subprocess中，可以使用上一个命令执行的输出结果作为下一次执行的输入。例子如下：
-p1=subprocess.Popen('cat /home/gswyhq/gow69/参数传递.py',shell=True,stdout=subprocess.PIPE)
+p1=subprocess.Popen('cat /home/gswewf/gow69/参数传递.py',shell=True,stdout=subprocess.PIPE)
 p2=subprocess.Popen('tail -2',shell=True,stdin=p1.stdout,stdout=subprocess.PIPE)
 
 print(p2.stdout)

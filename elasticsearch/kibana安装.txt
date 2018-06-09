@@ -4,16 +4,16 @@
 
 https://artifacts.elastic.co/downloads/kibana/kibana-5.3.0-linux-x86_64.tar.gz
 解压到当前目录下：
-gswyhq@gswyhq-pc:~/Downloads$ tar zxvf kibana-5.3.0-linux-x86_64.tar.gz 
+gswewf@gswewf-pc:~/Downloads$ tar zxvf kibana-5.3.0-linux-x86_64.tar.gz 
 移动到安装目录：
-gswyhq@gswyhq-pc:/usr/local$ sudo mv /home/gswyhq/Downloads/kibana-5.3.0-linux-x86_64 kibana-5.3.0
+gswewf@gswewf-pc:/usr/local$ sudo mv /home/gswewf/Downloads/kibana-5.3.0-linux-x86_64 kibana-5.3.0
 
 2 编辑器中打开config/kibana.yml，设置elasticsearch.url
-gswyhq@gswyhq-pc:/usr/local/kibana-5.3.0$ vim config/kibana.yml 
+gswewf@gswewf-pc:/usr/local/kibana-5.3.0$ vim config/kibana.yml 
 取消“#elasticsearch.url: "http://localhost:9200" ”的注释
 
 3 运行：
-gswyhq@gswyhq-pc:/usr/local/kibana-5.3.0$ ./bin/kibana
+gswewf@gswewf-pc:/usr/local/kibana-5.3.0$ ./bin/kibana
 
 4 浏览器打开： http://localhost:5601
 

@@ -1,9 +1,9 @@
 
 增加一条数据：
-gswyhq@gswyhq-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"answer": "保险公司完成保险收费、保单打印的保险成交过程。", "timestamp": "2017-12-26T13:59:37.416041", "question": "出单", "description": "保险常见名词解释"}'
+gswewf@gswewf-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"answer": "保险公司完成保险收费、保单打印的保险成交过程。", "timestamp": "2017-12-26T13:59:37.416041", "question": "出单", "description": "保险常见名词解释"}'
 
 通过制定的id进行删除：
-删除id为AWCWwRuPPcvSZereEA8y的数据：gswyhq@gswyhq-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'
+删除id为AWCWwRuPPcvSZereEA8y的数据：gswewf@gswewf-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'
 
 针对索引`dingding`的`title`字段进行查询：
 curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: application/json' -d'
@@ -17,7 +17,7 @@ curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: applicatio
 '
 
 # 查询索引‘all_baoxian_kg_entity_synonyms_alias’，任意_type，id为22 的记录：
-gswyhq@gswyhq-PC:~/dialogue_management_system$ curl -XGET 192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_all/22 -u elastic:web12008
+gswewf@gswewf-PC:~/dialogue_management_system$ curl -XGET 192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_all/22 -u elastic:web12008
 {"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":1,"found":true,"_source":{"timestamp":"2018-04-17T19:07:25.518866","实体标准词":"恶性肿瘤","实体类型":"Jibing","实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","肝癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","乳腺癌","食道癌","肾癌","白血病"]}}
 
 
@@ -69,7 +69,7 @@ curl -XPOST -u elastic:web12008 'localhost:9200/all_baoxian_kg_entity_synonyms_a
 
 或者，仅仅提交修改的字段：
 修改索引`all_baoxian_kg_entity_synonyms_alias`，类型‘all_baoxian’, id为22，`实体同义词`字段的数据：
-gswyhq@gswyhq-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baoxian_kg_entity_synonyms_alias/all_baoxian/22/_update' -d ' {
+gswewf@gswewf-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baoxian_kg_entity_synonyms_alias/all_baoxian/22/_update' -d ' {
 "doc":{
     "实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","食道癌","肾癌","白血病"]
     }
@@ -81,14 +81,14 @@ gswyhq@gswyhq-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baox
 
 或者更新某个指定字段（若字段不存在则添加）：
 示例1， 添加`myfield`字段：
-gswyhq@gswyhq-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
+gswewf@gswewf-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
     "script": "ctx[\"_source\"][\"myfield\"]=\"测试\"",
     "lang": "python",
     "params": {}
 }'
 
 示例2，更新`可选实体`字段：
-gswyhq@gswyhq-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
+gswewf@gswewf-PC:~$ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty=true' -d '{
     "script": "ctx[\"_source\"][\"可选实体\"]=[\"Baoxianchanpin\", \"Jibing\"]",
     "lang": "python",
     "params": {}
@@ -119,7 +119,7 @@ curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
 }'
 
 # 查询多个id的记录：
-gswyhq@gswyhq-PC:~/dialogue_management_system/wiki$ curl -XGET 'localhost:9200/xinxin_templates_question_alias/_mget?pretty' -H 'Content-Type: application/json' -d'
+gswewf@gswewf-PC:~/dialogue_management_system/wiki$ curl -XGET 'localhost:9200/xinxin_templates_question_alias/_mget?pretty' -H 'Content-Type: application/json' -d'
 {
     "ids" : ["1", "2"]
 }

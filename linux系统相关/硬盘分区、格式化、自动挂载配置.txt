@@ -29,13 +29,13 @@
 
 
 示例：
-ubuntu@ip-172-31-14-6:~$ sudo fdisk -lu
+ubuntu@ip-172-33-14-6:~$ sudo fdisk -lu
 
 Disk /dev/xvda: 21.5 GB, 21474836480 bytes
-ubuntu@ip-172-31-14-6:~$ sudo mkfs -t ext4 /dev/xvdb
-ubuntu@ip-172-31-14-6:~$ sudo mkdir /data
-ubuntu@ip-172-31-14-6:~$ sudo mount -t ext4 /dev/xvdb /data
-ubuntu@ip-172-31-14-6:~$ df -h
+ubuntu@ip-172-33-14-6:~$ sudo mkfs -t ext4 /dev/xvdb
+ubuntu@ip-172-33-14-6:~$ sudo mkdir /data
+ubuntu@ip-172-33-14-6:~$ sudo mount -t ext4 /dev/xvdb /data
+ubuntu@ip-172-33-14-6:~$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/xvda1       20G  840M   18G   5% /
 none            4.0K     0  4.0K   0% /sys/fs/cgroup

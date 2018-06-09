@@ -17,8 +17,8 @@ tag的使用
 	$ git fetch origin tag release1.1.3.170225
 
 	同步远程某个tag到本地：
-	gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git fetch origin tag release1.1.3.170225
-	Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':
+	gswewf@gswewf-pc:~/new-ambbr-ai/ambbr$ git fetch origin tag release1.1.3.170225
+	Enter passphrase for key '/home/gswewf/.ssh/id_rsa':
 	remote: Counting objects: 6, done.
 	remote: Compressing objects: 100% (6/6), done.
 	remote: Total 6 (delta 5), reused 0 (delta 0)
@@ -36,22 +36,22 @@ tag的使用
 	 * [新标签]          release1.1.2.170225 -> release1.1.2.170225
 
 4）同步远程所有tag到本地
-	gswyhq@gswyhq-pc:~/yhb$ git fetch --tags
+	gswewf@gswewf-pc:~/yhb$ git fetch --tags
 
 5）查看tag
 	查看本地的tag
-	gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git tag
+	gswewf@gswewf-pc:~/new-ambbr-ai/ambbr$ git tag
 	beta0.1.161121
 	beta0.1.161123
 
     查看本地tag的详细信息：
-    gswyhq@gswyhq-pc:~/yhb$ git tag -n
+    gswewf@gswewf-pc:~/yhb$ git tag -n
     alpha0.0.1.170413 问句与模板匹配算法切换到词向量前的较稳定版本
     alpha0.0.1.170420 服务器上20170420运行的版本
 
 	查看远程的tag
-	gswyhq@gswyhq-pc:~/new-ambbr-ai/ambbr$ git ls-remote --tags origin
-	Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':
+	gswewf@gswewf-pc:~/new-ambbr-ai/ambbr$ git ls-remote --tags origin
+	Enter passphrase for key '/home/gswewf/.ssh/id_rsa':
 	08b236d71c6c0610725cc353244584b6fa2552a4	refs/tags/beta0.1.161121
 	4a598200e26aa44430fbfa01ebcd4c80d9af4560	refs/tags/beta0.1.161121^{}
 	d676f05c4c4d22fbbded524fb1ca732e550eea01	refs/tags/beta0.1.161123
@@ -78,8 +78,8 @@ tag的使用
 	git push origin :<branchName>
 
 	一次删除多个远程tag:
-	gswyhq@gswyhq-pc:~$ git push origin -d alpha0.0.1.170324 alpha0.0.1.170328
-	Enter passphrase for key '/home/gswyhq/.ssh/id_rsa':
+	gswewf@gswewf-pc:~$ git push origin -d alpha0.0.1.170324 alpha0.0.1.170328
+	Enter passphrase for key '/home/gswewf/.ssh/id_rsa':
 	To 192.168.3.101:web1/chat_bot_demo.git
 	 - [deleted]         alpha0.0.1.170324
 	 - [deleted]         alpha0.0.1.170328
@@ -88,14 +88,14 @@ tag的使用
 	git tag -d <tagname>
 
 	一次删除多个本地tag:
-	gswyhq@gswyhq-pc:~$ git tag
+	gswewf@gswewf-pc:~$ git tag
 	alpha0.0.1.170322
 	alpha0.0.1.170323
 	alpha0.0.1.170324
 	alpha0.0.1.170328
 	alpha0.0.1.170413
 	alpha0.0.1.170420
-	gswyhq@gswyhq-pc:~$ git tag -d alpha0.0.1.170322 alpha0.0.1.170323 alpha0.0.1.170324 alpha0.0.1.170328
+	gswewf@gswewf-pc:~$ git tag -d alpha0.0.1.170322 alpha0.0.1.170323 alpha0.0.1.170324 alpha0.0.1.170328
 	已删除标签 'alpha0.0.1.170322'（曾为 c1e9b91）
 	已删除标签 'alpha0.0.1.170323'（曾为 c079797）
 	已删除标签 'alpha0.0.1.170324'（曾为 4bd6022）
@@ -107,9 +107,9 @@ tag的使用
 
 # 更新tag的提交信息：
 # 创建一个tag，并写上标注信息
-gswyhq@gswyhq-PC:~/yhb$ git tag -a zhongan_neo4j_20171120 -m "20171120稳定版本，无上传文档功能"
+gswewf@gswewf-PC:~/yhb$ git tag -a zhongan_neo4j_20171120 -m "20171120稳定版本，无上传文档功能"
 # 发现标注信息不怎么好，更新一些标注信息
-gswyhq@gswyhq-PC:~/yhb$ git tag zhongan_neo4j_20171120 zhongan_neo4j_20171120 -f -m "众安航延险图谱展示，20171120稳定版本，无上传文档功能"
+gswewf@gswewf-PC:~/yhb$ git tag zhongan_neo4j_20171120 zhongan_neo4j_20171120 -f -m "众安航延险图谱展示，20171120稳定版本，无上传文档功能"
 已更新标签 'zhongan_neo4j_20171120'（曾为 08178c6）
 
 # 重命名tag名（先建一个tag的别名，再删除旧的tag名）

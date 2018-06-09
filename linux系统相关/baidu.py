@@ -3,8 +3,8 @@
 
 
 # 命令行打开百度搜索使用示例：
-# gswyhq@gswyhq-pc:~$ ./baidu.py
-# gswyhq@gswyhq-pc:~$ ./baidu.py 怎么上网 python
+# gswewf@gswewf-pc:~$ ./baidu.py
+# gswewf@gswewf-pc:~$ ./baidu.py 怎么上网 python
 
 import time
 import sys

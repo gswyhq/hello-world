@@ -107,8 +107,8 @@ print(uniqueGraphNames)
 
 RDFLib = Namespace('http://rdflib.net/')
 
-RDFLib.gswyhq
-#rdflib.term.URIRef('http://rdflib.net/gswyhq')
+RDFLib.gswewf
+#rdflib.term.URIRef('http://rdflib.net/gswewf')
 
 RDFLib['中文']
 #rdflib.term.URIRef('http://rdflib.net/中文')
@@ -196,7 +196,7 @@ print([rt for rt in g.transitiveClosure(reverseList,RDF.nil)])
 '''
 import rdflib
 g=rdflib.Graph()
-g.parse('/home/gswyhq/百科/RDF/百度百科义项.rdf')
+g.parse('/home/gswewf/百科/RDF/百度百科义项.rdf')
 
 qres = g.query(
     """SELECT DISTINCT ?aname ?bname

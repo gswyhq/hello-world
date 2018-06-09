@@ -16,10 +16,10 @@ zh_en_url = 'https://translate.google.cn/#zh-CN/en/'
 en_zh_url = 'https://translate.google.cn/#en/zh-CN/'
 
 # 命令行翻译使用示例：
-# gswyhq@gswyhq-pc:~$ vim .bash_aliases
-# alias fanyi='python3 /home/gswyhq/hello-world/linux系统相关/fanyi.py'
-# gswyhq@gswyhq-pc:~$ fanyi python
-# gswyhq@gswyhq-pc:~$ fanyi 你好 中国
+# gswewf@gswewf-pc:~$ vim .bash_aliases
+# alias fanyi='python3 /home/gswewf/hello-world/linux系统相关/fanyi.py'
+# gswewf@gswewf-pc:~$ fanyi python
+# gswewf@gswewf-pc:~$ fanyi 你好 中国
 
 def get_text(url='https://translate.google.cn/#en/zh-CN/get%0Aset'):
     from selenium import webdriver

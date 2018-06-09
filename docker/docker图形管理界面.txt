@@ -2,8 +2,8 @@
 轻量级图形页面管理之Portainer
 [root@ ganbing /]# docker pull portainer/portainer
 
-gswyhq@gswyhq-PC:~/docker/docker_web$ mkdir portainer_data
-gswyhq@gswyhq-PC:~/docker/docker_web$ docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+gswewf@gswewf-PC:~/docker/docker_web$ mkdir portainer_data
+gswewf@gswewf-PC:~/docker/docker_web$ docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 9b1713e90cc19412093996bc01ce7c4600c4a69ede61d238638e683fa8150b3f
 
 浏览器打开 http://192.168.3.145:9200 重新设置密码；即可管理本地及远程的docker容器；

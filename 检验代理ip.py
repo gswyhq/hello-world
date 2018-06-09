@@ -13,7 +13,7 @@ class sim_ProxyCheck():
     def checkProxy(self):
         cookies = urllib.request.HTTPCookieProcessor()
         #从json文件加载数据
-        with open("/home/gswyhq/gow69/{}抓取到的代理服务器ip.json".format(time.strftime("%Y%m%d")),'r',encoding='utf-8')as f:
+        with open("/home/gswewf/gow69/{}抓取到的代理服务器ip.json".format(time.strftime("%Y%m%d")),'r',encoding='utf-8')as f:
             txt_ip=json.loads(f.read())
         print(txt_ip)
         proxyHandler = urllib.request.ProxyHandler({"http" : r'http://%s:%s' %('218.249.3.133','8080')})

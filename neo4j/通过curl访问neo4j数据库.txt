@@ -1,6 +1,6 @@
 
 如下访问会报错：
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels?user=neo4j&password=gswyhq"
+gswewf@gswewf-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels?user=neo4j&password=gswewf"
 {
   "errors" : [ {
     "code" : "Neo.ClientError.Security.Unauthorized",
@@ -11,11 +11,11 @@ gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels?user=n
 
 第一步：获取编译的登录用户名及密码；
 import base64
-base64.b64encode(b"neo4j:gswyhq")
+base64.b64encode(b"neo4j:gswewf")
 Out[14]: b'bmVvNGo6Z3N3eWhx'
 
 第二步：通过获取的密钥`bmVvNGo6Z3N3eWhx`进行认证访问， 如下，获取所有节点的labels
-gswyhq@gswyhq-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
+gswewf@gswewf-PC:~/yhb$ curl -XGET "http://localhost:47474/db/data/labels" -H "Authorization: Basic bmVvNGo6Z3N3eWhx"
 [ "Fenzhijigou", "JIBINGZHONGLEI", "ZHONGDAJIBING", "BAOLIULEIXING", "BAOXIANJIN", "QINGKUANG", "Didian", "Huikang", "Yiyuan", "BAOXIANMINGCHENG", "GUANXI", "TIME", "XIANGGUANTIAOKUAN", "JIBING", "STRING", "JIANEJIAOQING", "QINGZHENGJIBING", "QINGJING", "Zunxianghuikang" ]
 
 或者：
@@ -46,13 +46,13 @@ Out[18]:
 执行单个cpyher语句事务的http请求
 
 查询neo4j节点总数的例子
-curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "match (n) return count(n)" } ]}'
+curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswewf -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "match (n) return count(n)" } ]}'
 
 执行多个cpyher语句事务的http请求
 我们在同一个http请求中也可以发送多个cpyher语句，响应的结果体中会包含每个cpyher语句结果。
 一个例子如下：
 
-curl -XPOST http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json" -d '{
+curl -XPOST http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswewf -H "Content-Type: application/json" -d '{
   "statements" : [ {
     "statement" : "match (n) RETURN id(n) limit 1"
   }, {
@@ -65,7 +65,7 @@ curl -XPOST http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyh
   } ]
 }'
 
-curl -XPOST http://192.168.3.145:7478/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json" -d '{
+curl -XPOST http://192.168.3.145:7478/db/data/transaction/commit -u neo4j:gswewf -H "Content-Type: application/json" -d '{
   "statements" : [ {
     "statement" : "match (n) RETURN id(n) limit 1"
   }, {

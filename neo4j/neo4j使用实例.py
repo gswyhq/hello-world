@@ -238,12 +238,12 @@ def test():
 
 更多详细说明：
 克隆到本地
-gswyhq@gswyhq-pc:~$ git clone https://github.com/nigelsmall/py2neo.git
-gswyhq@gswyhq-pc:~/py2neo$ cd book/
+gswewf@gswewf-pc:~$ git clone https://github.com/nigelsmall/py2neo.git
+gswewf@gswewf-pc:~/py2neo$ cd book/
 生成html说明文档
-gswyhq@gswyhq-pc:~/py2neo/book$ make html
-gswyhq@gswyhq-pc:~/py2neo/book$ cd _build/html/
-gswyhq@gswyhq-pc:~/py2neo/book/_build/html$ ls
+gswewf@gswewf-pc:~/py2neo/book$ make html
+gswewf@gswewf-pc:~/py2neo/book$ cd _build/html/
+gswewf@gswewf-pc:~/py2neo/book/_build/html$ ls
 database.html  genindex.html  _modules     objects.inv  py-modindex.html  searchindex.js  _static
 ext            index.html     neokit.html  ogm.html     search.html       _sources        types.html
 

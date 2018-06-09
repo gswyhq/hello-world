@@ -1,7 +1,7 @@
 
 
 # 容器内不能输入中文，挂载含有中文字符的文件到docker，出现中文乱码问题：
-gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo /bin/bash
+gswewf@gswewf-PC:~/docker/mongo$ docker exec -it some-mongo /bin/bash
 root@2802d82a4733:/# echo $LANG
 
 # 查看docker容器编码格式：执行locale命令；可以看到当前编码格式为POSIX，而这种编码格式不支持中文
@@ -73,11 +73,11 @@ LANGUAGE=
 LC_CTYPE="zh_CN.UTF-8"
 LC_NUMERIC="zh_CN.UTF-8"
 # 退出，提交保存为一个新的镜像：
-gswyhq@gswyhq-pc:~/docker/ubuntu$ docker commit db835fa8e5de ubuntu:0629-2
+gswewf@gswewf-pc:~/docker/ubuntu$ docker commit db835fa8e5de ubuntu:0629-2
 
 # 不能输入中文
 解决方法：登录容器时设定一下LANG 环境变量 docker exec -it CONTAINER env LANG=C.UTF-8 bash
 然后就可以输入中文了
-gswyhq@gswyhq-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+gswewf@gswewf-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
 root@2802d82a4733:/# asf访问法
 

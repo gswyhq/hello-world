@@ -76,8 +76,8 @@ def read_btxt2(infile,outfile):
     print('总共成语数：',len(dict_data.keys()))     
     
 def main():
-    infile='/home/gswyhq/idiom/成语/成语.json'
-    outfile='/home/gswyhq/idiom/idiom.json'
+    infile='/home/gswewf/idiom/成语/成语.json'
+    outfile='/home/gswewf/idiom/idiom.json'
     read_btxt2(infile,outfile)
 
 if __name__ == "__main__":

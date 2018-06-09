@@ -47,7 +47,7 @@ idf(t) = 1 + log ( numDocs / (docFreq + 1))
 
 
 除了指定分片和副本的分配，我们还可以对一个索引指定每个节点上的最大分片数量。例如我们希望yhb索引在每个节点上只有一个分片，我们可以运行如下命令：
-gswyhq@gswyhq-pc:~/yhb$ curl -XPUT "http://localhost:9200/yhb/_settings" -d '{ "index.routing.allocation.total_shards_per_node" : 1 }'
+gswewf@gswewf-pc:~/yhb$ curl -XPUT "http://localhost:9200/yhb/_settings" -d '{ "index.routing.allocation.total_shards_per_node" : 1 }'
 可以通过“http://localhost:9100/”-> "yhb"->"信息"->"索引信息",查看"total_shards_per_node"，即节点下的分片数
 
 浏览器输入查询：
@@ -111,16 +111,16 @@ http://lucene.apache.org/core/4_0_0/core/org/apache/lucene/search/similarities/T
 而“avgFieldLength”，指节点某一分片下，所有记录“fieldLength值”的平均值；
 
 查询id号为‘29723’对应的‘question’字段，分词的结果及每个词的term_freq值；
-gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'localhost:9200/yhb/log_qa/29723/_termvectors?fields=question&pretty'
+gswewf@gswewf-pc:~/yhb$ curl -XGET 'localhost:9200/yhb/log_qa/29723/_termvectors?fields=question&pretty'
 
 在页面“http://localhost:9100/”搜索时，"yhb/log_qa/_search"改为“yhb/log_qa/_search?explain”也可以查看详细的分数信息, 即可查看分数详情
 
 指定节点查询：
-gswyhq@gswyhq-pc:~/yhb$ curl -XGET 'http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=1&preference=_only_nodes:ubQ7NbI2QOKn_dePpe7W8A'
+gswewf@gswewf-pc:~/yhb$ curl -XGET 'http://localhost:9200/_search?q=question:a卡在哪里能用&pretty&explain&size=1&preference=_only_nodes:ubQ7NbI2QOKn_dePpe7W8A'
 查询时加上preference=_only_nodes:node1id,node2id 就可以指定在node1和node2中搜索
 
 # 更多说明：http://blog.csdn.net/dm_vincent/article/details/42201721
-http://blog.csdn.net/qq_19598855/article/details/50581945
+http://blog.csdn.net/qq_195918855/article/details/50581945
 http://www.cnblogs.com/richaaaard/p/5254988.html
 http://blog.csdn.net/dm_vincent/article/details/42113401
 

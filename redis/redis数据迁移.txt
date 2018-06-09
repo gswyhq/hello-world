@@ -24,7 +24,7 @@ save 60 10000                    #当有10000条Keys数据被改变时，60秒�
 利用持久化迁移数据(需要重启服务)
 
 # 若是通过docker运行redis实例，则需要进入对应的实例环境
-gswyhq@gswyhq-PC:~$ docker exec -it redis6379 /bin/bash
+gswewf@gswewf-PC:~$ docker exec -it redis6379 /bin/bash
 root@2ef3dea30784:/data# ls
 dump.rdb
 root@2ef3dea30784:/data# redis-cli -h 127.0.0.1 -p 6379
