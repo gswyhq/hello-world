@@ -1,0 +1,70 @@
+
+gswewf@gswewf-PC:~$ array_name=($start_date_key $snapshot_name 123456)
+gswewf@gswewf-PC:~$ echo array_name
+array_name
+gswewf@gswewf-PC:~$ echo $array_name
+2018-06-07
+gswewf@gswewf-PC:~$ echo $array_name[1]
+2018-06-07[1]
+gswewf@gswewf-PC:~$ echo ${array_name[1]}
+20180611122057
+gswewf@gswewf-PC:~$ echo ${array_name[2]}
+123456
+
+# 直接通过 数组名[下标] 就可以对其进行引用赋值，如果下标不存在，自动添加新一个数组元素
+gswewf@gswewf-PC:~$ array_name[3]=abcd
+gswewf@gswewf-PC:~$ echo ${array_name[3]}
+abcd
+# 用${数组名[下标]} 下标是从0开始  下标是：*或者@ 得到整个数组内容
+gswewf@gswewf-PC:~$ echo ${array_name[*]}
+2018-06-07 20180611122057 123456 abcd
+
+# 数组元素的删除：
+# 直接通过：unset 数组[下标] 可以清除相应的元素，不带下标，清除整个数据。
+gswewf@gswewf-PC:~$ unset array_name[1]
+gswewf@gswewf-PC:~$ echo ${array_name[*]}
+2018-06-07 123456 abcd
+
+# 数组长度：
+# 用${#数组名[@或*]} 可以得到数组长度
+gswewf@gswewf-PC:~$ echo ${#array_name[*]}
+3
+
+# 分片：
+[chengmo@centos5 ~]$ a=(1 2 3 4 5)
+[chengmo@centos5 ~]$ echo ${a[@]:0:3}
+1 2 3
+[chengmo@centos5 ~]$ echo ${a[@]:1:4}
+2 3 4 5
+
+[chengmo@centos5 ~]$ c=(${a[@]:1:4})
+[chengmo@centos5 ~]$ echo ${#c[@]}
+4
+[chengmo@centos5 ~]$ echo ${c[*]} 
+2 3 4 5
+
+直接通过 ${数组名[@或*]:起始位置:长度} 切片原先数组，返回是字符串，中间用“空格”分开，因此如果加上”()”，将得到切片数组，上面例子：c 就是一个新数据。
+
+# 替换：
+[chengmo@centos5 ~]$ a=(1 2 3 4 5)    
+[chengmo@centos5 ~]$ echo ${a[@]/3/100}
+1 2 100 4 5
+[chengmo@centos5 ~]$ echo ${a[@]}
+1 2 3 4 5
+[chengmo@centos5 ~]$ a=(${a[@]/3/100}) 
+[chengmo@centos5 ~]$ echo ${a[@]}     
+1 2 100 4 5
+
+调用方法是：${数组名[@或*]/查找字符/替换字符} 该操作不会改变原先数组内容，如果需要修改，可以看上面例子，重新定义数据。
+
+
+# 数组拼接成字符串：
+arr=(v1 v2 v3 vn)
+str=''
+for i in ${arr[@]};
+    do str="${str}_${i}";
+done
+echo $str
+
+
+

@@ -274,3 +274,21 @@ POST /test_index/_search
 }
 
 P.S .:如果任何姓氏将包含空格，则可能需要在该字段上使用“index”：“not_analyze”。
+
+# 查询某个字段的所有不重复的值
+curl -XPOST http://192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_search -d '{
+  "aggs": {
+    "my_terms": {
+      "terms": {
+        "field": "实体类型.keyword",
+        "size": 10000
+      }
+    }
+  },
+  "size": 0
+}
+'
+# “size”：10000最多可获得10000个唯一值。 缺省值是10。
+# “size”：0默认情况下，“hits”包含10个文档。 我们不需要它们。
+# 默认情况下，桶按doc_count的顺序排序。
+返回结果：{"took":15,"timed_out":false,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0},"hits":{"total":1374,"max_score":0.0,"hits":[]},"aggregations":{"my_terms":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"Yiyuan","doc_count":608},{"key":"Didian","doc_count":172},{"key":"Fenzhijigou","doc_count":172},{"key":"Jibing","doc_count":167},{"key":"Qingjing","doc_count":98},{"key":"Shiyi","doc_count":49},{"key":"Baozhangxiangmu","doc_count":39},{"key":"Time","doc_count":31},{"key":"Wenjian","doc_count":11},{"key":"Baoxianchanpin","doc_count":6},{"key":"Jiaofeifangshi","doc_count":5},{"key":"Baoxianzhonglei","doc_count":4},{"key":"Jine","doc_count":4},{"key":"Jibingzhonglei","doc_count":3},{"key":"Yiyuandengji","doc_count":2},{"key":"Baodanjiekuan","doc_count":1},{"key":"Hetonghuifu","doc_count":1},{"key":"Mianpeie","doc_count":1}]}}}

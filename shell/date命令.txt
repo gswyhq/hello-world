@@ -1,0 +1,60 @@
+
+# 字符串-> 日期
+gswewf@gswewf-PC:~/graph_qa$ date -d "2013-02-03 -i -2 day" +"%Y-%m-%d %T"
+2013-02-01 17:00:00
+
+gswewf@gswewf-PC:~$ date_key=`date +%Y-%m-%d`
+gswewf@gswewf-PC:~$ echo $date_key
+2018-06-11
+gswewf@gswewf-PC:~$ last_snapshot_name=`date +%Y%m%d --date="-7 day"`
+gswewf@gswewf-PC:~$ echo $last_snapshot_name
+20180604
+gswewf@gswewf-PC:~$ snapshot_name=`date +%Y%m%d%H%M%S`
+gswewf@gswewf-PC:~$ echo $snapshot_name
+20180611122057
+
+
+日期循环：
+第一种
+# 这里的例子以周为循环
+!/bin/bash
+
+begin_date="20160907"
+end_date="20170226"
+
+while [ "$begin_date" -le "$end_date" ];
+do
+    year=${begin_date:0:4}
+    week_of_year=$(date -d "$begin_date" +%W)
+    echo $year, $week_of_year
+    begin_date=$(date -d "${begin_date}+7days" +%Y%m%d)
+done
+
+第二种
+# 这里的例子每天作为循环，并展示当天的前一天
+#!/bin/bash
+
+startDate=20160201
+endDate=20160328
+startSec=`date -d "$startDate" "+%s"`
+endSec=`date -d "$endDate" "+%s"`
+for((i=$startSec;i<=$endSec;i+=86400))
+do
+    current_day=`date -d "@$i" "+%Y%m%d"`
+    one_day_ago=`date -d "$current_day yesterday" +%Y%m%d`
+    echo "current_day:${current_day}, yesterday:${one_day_ago}"
+done
+
+start_date_key="2018-06-07"
+end_date_key="2018-06-10"
+#date -d "2013-02-03 -i -2 day" +"%Y-%m-%d %T"
+
+startSec=`date -d "$start_date_key" "+%s"`
+endSec=`date -d "$end_date_key" "+%s"`
+for((i=$startSec;i<=$endSec;i+=86400))
+do
+    current_day=`date -d "@$i" "+%Y-%m-%d"`
+    echo $current_day
+done
+
+

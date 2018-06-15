@@ -33,3 +33,23 @@ CASE
 WHEN n.age IS NULL THEN -1
 ELSE n.age - 10 END AS age_10_years_ago
 
+Cypher中的表达式可以是：
+
+十进制（整数或双精度）文字：13，-40000，3.14，6.022E23。
+一个十六进制整数文字（以0x开头）：0x13zf，0xFC3A9，-0x66eff。
+八进制整数文字（从0开始）：01372,02127，-05671。
+字符串文字：'你好'，'世界'。
+一个布尔文字：true，false，TRUE，FALSE。
+一个变量：n，x，rel，myFancyVariable，`一个带有奇怪东西的名字[]！`。
+属性：n.prop，x.prop，rel.thisProperty，myFancyVariable.`（奇怪的属性名称）`。
+动态属性：n [“prop”]，rel [n.city + n.zip]，map [coll [0]]。
+参数：$param，$0
+表达式列表：['a'，'b']，[1，2，3]，['a'，2，n.property，$param]，[]。
+函数调用：length（p），nodes（p）。
+一个聚合函数：avg（x.prop），count（*）。
+路径模式：(a)-->()<--(b)。
+运营商应用程序：1 + 2和3 <4。
+谓词表达式是一个返回true或false的表达式：a.prop ='Hello'，length（p）> 10，exists（a.name）。
+正则表达式：a.name =〜'Tob。*'
+区分大小写的字符串匹配表达式：a.surname STARTS WITH'Sven'，a.surname ENDS WITH'son'或a.surname CONTAINS'son'
+CASE表达式。

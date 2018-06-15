@@ -9,6 +9,9 @@ refresh和flush的理解
 
 　　　　因此fresh实现的是从内存到文件系统缓存的过程。
 
+    使用示例：
+    curl -XPOST http://192.168.3.145:9200/zdal_faq_alias/_refresh
+
 　　2、flush
 
 　　　　flush是用于translog的。

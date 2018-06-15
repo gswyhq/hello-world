@@ -66,7 +66,7 @@ curl -XPUT 'localhost:9200/baike/_settings?pretty' -H 'Content-Type: application
 '
 
 # 查询某个索引的所有文档数：
-curl -XGET 152.180.187.77:18200/zhonghanrenshou_cypher_show_three_tuple_alias/_count?
+curl -XGET 152.180.187.77:18200/zhrs_cypher_show_three_tuple_alias/_count?
 
 # 索引状态：
 localhost:9200/my_index/_stats

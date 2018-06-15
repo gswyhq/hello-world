@@ -22,3 +22,16 @@ gswewf@gswewf-PC:~/yhb$ find log/ -name "io*"|xargs grep -E "传入参数|返回
 
 # 使用 -l 选项可以只显示文件名：
 gswewf@gswewf-PC:~/output$ grep -l "http" *.json
+
+# 查询06.10、06.11、06.12三天的日志：
+remote_cmd="grep -e '2018-06-10' -e '2018-06-11' -e '2018-06-12' /home/ubuntu/bnrs/log/io.log* | grep '返回数据' > /home/ubuntu/bnrs/log/bnrs_dump_bak.log"
+# 或者：
+remote_cmd="grep -E '2018-06-10|2018-06-11|2018-06-12' /home/ubuntu/bnrs/log/io.log* | grep '返回数据' > /home/ubuntu/bnrs/log/bnrs_dump_bak.log"
+
+# 查询6月10日除10、11、12点之外的日志：
+remote_cmd="grep '2018-06-10' /home/ubuntu/bnrs/log/io.log*| grep -v '2018-06-09 10:' | grep -v '2018-06-09 11:' | grep -v '2018-06-09 12:' | grep '返回数据' > /home/ubuntu/bnrs/log/bnrs_dump_bak.log"
+# 或者：
+remote_cmd="grep '2018-06-10' /home/ubuntu/bnrs/log/io.log*| grep -v -e '2018-06-09 10:' -e '2018-06-09 11:' -e '2018-06-09 12:' | grep '返回数据' > /home/ubuntu/bnrs/log/bnrs_dump_bak.log"
+# 或者：
+remote_cmd="grep '2018-06-10' /home/ubuntu/bnrs/log/io.log*| grep -vE '2018-06-09 10:|2018-06-09 11:|2018-06-09 12:' | grep '返回数据' > /home/ubuntu/bnrs/log/bnrs_dump_bak.log"
+

@@ -1,0 +1,17 @@
+
+AND:且
+OR:或
+XOR:异或
+NOT:非
+
+a           b    a AND b    a OR b    a XOR b    NOT a
+false    false    false    false    false    true
+false    null    false    null    null    true
+false    true    false    true    true    true
+true    false    false    true    true    false
+true    null    null    true    null    false
+true    true    true    true    false    false
+null    false    false    null    null    null
+null    null    null    null    null    null
+null    true    null    true    null    null
+                

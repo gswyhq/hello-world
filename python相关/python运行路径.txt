@@ -1,0 +1,4 @@
+
+某个文件是工程中的文件，将工程的根目录设置为工程路径进行运行单个文件：
+
+gswewf@gswewf-PC:~$ PYTHONPATH=`pwd` python3 es_search/update_intent.py

@@ -1,0 +1,67 @@
+
+字符串是shell编程中最常用最有用的数据类型（除了数字和字符串，也没啥其它类型好用了），字符串可以用单引号，也可以用双引号，也可以不用引号。建议使用双引号
+
+（1）单引号——原样输出
+str='this is a string'
+单引号字符串的限制：单引号字符串中的变量是无效的；单引号字符串中不能出现单引号（对单引号使用转义符后也不行）。
+
+（2）双引号
+your_name="liaihyy"
+str="Hello, I know your are \"$your_name\"! \n"
+双引号的优点：双引号里可以有变量，可以出现转义字符
+
+（3）字符串拼接
+your_name="liaihyy"
+greeting="hello, "$your_name" !"
+greeting_1="hello, ${your_name} !"
+echo $greeting $greeting_1
+
+（4）字符串长度
+${#变量名}
+string="abcd"
+echo ${#string} #输出 4
+
+（5）获取字符串的子串
+${变量名：起始索引：子串长度}
+string="runoob is a great site"
+echo ${string:1:4} # 输出 unoo
+
+（6）查找子串
+查找字符 "i 或 s" 的位置：
+string="runoob is a great company"
+echo `expr index "$string" is`  # 输出 8
+注意： 以上脚本中 "`" 是反引号，而不是单引号 "'"，不要看错了哦。
+
+
+file=/dir1/dir2/dir3/my.file.txt
+我們可以用 ${ } 分別替換獲得不同的值：
+${file#*/}：拿掉第一條 / 及其左邊的字串：dir1/dir2/dir3/my.file.txt
+${file##*/}：拿掉最後一條 / 及其左邊的字串：my.file.txt
+${file#*.}：拿掉第一個 . 及其左邊的字串：file.txt
+${file##*.}：拿掉最後一個 . 及其左邊的字串：txt
+
+${file%/*}：拿掉最後條 / 及其右邊的字串：/dir1/dir2/dir3
+${file%%/*}：拿掉第一條 / 及其右邊的字串：(空值)
+${file%.*}：拿掉最後一個 . 及其右邊的字串：/dir1/dir2/dir3/my.file
+${file%%.*}：拿掉第一個 . 及其右邊的字串：/dir1/dir2/dir3/my
+
+测试结果如下：
+
+gswewf@gswewf-PC:~$ file=/dir1/dir2/dir3/my.file.txt
+gswewf@gswewf-PC:~$ echo ${file#*/}
+dir1/dir2/dir3/my.file.txt
+gswewf@gswewf-PC:~$ echo ${file##*/}
+my.file.txt
+gswewf@gswewf-PC:~$ echo ${file#*.}
+file.txt
+gswewf@gswewf-PC:~$ echo ${file##*.}
+txt
+gswewf@gswewf-PC:~$ echo ${file%/*}
+/dir1/dir2/dir3
+gswewf@gswewf-PC:~$ echo ${file%%/*}
+
+gswewf@gswewf-PC:~$ echo ${file%.*}
+/dir1/dir2/dir3/my.file
+gswewf@gswewf-PC:~$ echo ${file%%.*}
+/dir1/dir2/dir3/my
+
