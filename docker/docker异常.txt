@@ -153,9 +153,9 @@ gswewf@gswewf-pc:~$ sudo apt-get install docker.io
 gswewf@gswewf-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
 
 远程执行docker命令：
-ssh ubuntu@42.93.171.44 docker exec -it multiple_projects_neo4j_118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
+ssh ubuntu@42.93.171.44 docker exec -it multiple_projects_neo4j_1111118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
 报错：docker the input device is not a TTY
 解决方法很简单，只需要去掉上面的命令中的-it 即可．
-ssh ubuntu@42.93.171.44 docker exec multiple_projects_neo4j_118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
+ssh ubuntu@42.93.171.44 docker exec multiple_projects_neo4j_1111118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
 
 

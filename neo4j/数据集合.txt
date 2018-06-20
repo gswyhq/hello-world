@@ -1,4 +1,13 @@
 
+聚合函数
+cypher支持count,sum,avg,min,max
+match (: Person) return count(*)
+聚合的时候null会被跳过 count 语法 支持 count( distinct role )
+
+收集聚合结果
+MATCH (m:Movie)<-[:ACTED_IN]-(a:Person)
+RETURN m.title AS movie, collect(a.name) AS cast, count(*) AS actors
+
 # 假设图谱中标签为Jibingzhonglei，有不同的几个；每一个对应关系`包含疾病`超过25个时，下表达式，查询到n的结果，可能只有一个；
 MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) RETURN n LIMIT 25
 

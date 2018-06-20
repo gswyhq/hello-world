@@ -277,7 +277,7 @@ cd ltp
 make
 更多说明见：http://ltp.readthedocs.org/zh_CN/latest/install.html#linux-mac-osx-cygwin
 sudo pip3 install pyltp，安装pyltp
-下载模型文件：http://pan.baidu.com/share/link?shareid=191188562907&uk=273801188569#path=%252Fltp-models%252F3.3.1
+下载模型文件：http://pan.baidu.com/share/link?shareid=1911111188562907&uk=2738011111188569#path=%252Fltp-models%252F3.3.1
 
 
 pynlpir 初始化失败的解决方法：

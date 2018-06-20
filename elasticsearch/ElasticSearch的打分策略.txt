@@ -120,7 +120,7 @@ gswewf@gswewf-pc:~/yhb$ curl -XGET 'http://localhost:9200/_search?q=question:a�
 查询时加上preference=_only_nodes:node1id,node2id 就可以指定在node1和node2中搜索
 
 # 更多说明：http://blog.csdn.net/dm_vincent/article/details/42201721
-http://blog.csdn.net/qq_1959118855/article/details/50581945
+http://blog.csdn.net/qq_19591111118855/article/details/50581945
 http://www.cnblogs.com/richaaaard/p/5254988.html
 http://blog.csdn.net/dm_vincent/article/details/42113401
 

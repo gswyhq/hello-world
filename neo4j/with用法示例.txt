@@ -1,6 +1,5 @@
 
 with语句给cypher提供了强大的pipeline能力，可以一个或者query的输出，或者下一个query的输入 和return语句非常类似，唯一不同的是，with的每一个结果，必须使用别名标识。
-
 通过这个功能，我们可以轻而易举的做到在查询结果里面在继续嵌套查询。
 
 MATCH (person:Person)-[:ACTED_IN]->(m:Movie)
