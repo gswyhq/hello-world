@@ -188,6 +188,8 @@ curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json'
 '
 注意：仅仅是复制数据，并不复制源索引的设置（包括分词、映射、分片等）；
 
+curl -X GET "localhost:9200/zdal_faq_alias/_settings,_mapping,_alias"
+
 # 仅仅复制某些查询结果到另一个索引：
 curl -XPOST 'localhost:9200/_reindex?pretty' -H 'Content-Type: application/json' -d'
 {

@@ -112,6 +112,13 @@ curl -XPOST 'localhost:9200/bnkhb_intent_20180516_094436/intent/0/_update?pretty
     "script" : "ctx._source.remove(\"tag\")"
 }'
 
+# 添加一个新字段`new_field`并赋值：
+curl -X POST "localhost:9200/test/type1/1/_update" -H 'Content-Type: application/json' -d'
+{
+    "script" : "ctx._source.new_field = \"value_of_new_field\""
+}
+'
+
  更新索引–脚本方式
 
 curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
@@ -170,6 +177,26 @@ curl -XPOST 'localhost:9200/test/type1/1/_update?pretty' -d'
         }
     }
 }'
+
+# 根据查询的结果进行删除：
+curl -XPOST 'localhost:9200/zdal_kg_entity_synonyms_alias/_delete_by_query' -d '
+{
+  "query": {
+    "terms": {
+      "实体标准词.keyword": [
+        "禅城",
+        "富阳",
+        "嘉定",
+        "峻岭",
+        "松江",
+        "桐乡",
+        "长安"
+      ]
+    }
+  },
+  "size": 5000
+}'
+
 
 一次查询多个不同的索引数据
 多GET API允许基于索引，类型（可选）和id（可能路由）获取多个文档。该响应包括具有所有提取的文档的docs数组，每个元素在结构上类似于由get API提供的文档。这里是一个例子：
