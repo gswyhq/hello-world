@@ -10,14 +10,14 @@
 # 所有数据都已经过注释，0 表示消极反馈，1 表示积极反馈。亚马逊的数据与下图相似。
 
 
-with open("/home/gswyhq/data/情感分析数据集/sentiment labelled sentences/amazon_cells_labelled.txt") as f1:
+with open("/home/gswewf/data/情感分析数据集/sentiment labelled sentences/amazon_cells_labelled.txt") as f1:
     lines = f1.readlines()
 
-with open("/home/gswyhq/data/情感分析数据集/sentiment labelled sentences/imdb_labelled.txt") as f1:
+with open("/home/gswewf/data/情感分析数据集/sentiment labelled sentences/imdb_labelled.txt") as f1:
     temp = f1.readlines()
     lines=lines+temp
 
-with open("/home/gswyhq/data/情感分析数据集/sentiment labelled sentences/yelp_labelled.txt") as f1:
+with open("/home/gswewf/data/情感分析数据集/sentiment labelled sentences/yelp_labelled.txt") as f1:
     temp = f1.readlines()
     lines=lines+temp
 # 数据存储于不同的文本文件中。我们打开每个文件并阅读所有的文本行，文本行还包括每个文本的标签。然后我们将其存储在一个名为「lines」的列表中。

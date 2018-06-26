@@ -41,3 +41,58 @@ if __name__ == "__main__":
 
 则可以通过“http://localhost:8000/test/index.html”，访问到“./communication/index.html”文件；
 
+
+
+方法2：
+静态页面的访问：
+#!/usr/lib/python3
+# coding = utf-8
+
+import tornado
+import tornado.ioloop
+import tornado.web
+from tornado.httpserver import HTTPServer
+
+from logger.logger import logger
+
+PORT = LISTEN_PORT
+# executor = concurrent.futures.ThreadPoolExecutor(2)
+
+import os
+from tornado.web import StaticFileHandler
+
+class IndexHandler(tornado.web.RequestHandler):
+    def get(self, *args, **kwargs):
+        # self.render("index.html")
+        with open(os.path.join(self.get_template_path(), 'index.html'))as f:
+            html_content = f.read()
+        self.finish(html_content)
+
+# @profile
+def make_app():
+    return tornado.web.Application([
+        (r'/pid/index.html(.*)', IndexHandler),  # 测试界面; http://192.168.3.145:8000/pid/index.html?pid=zdal
+        (r'/pid/js/(.*)', StaticFileHandler, {'path': 'communication/js'}),
+        (r'/pid/css/(.*)', StaticFileHandler, {'path': 'communication/css'}),
+        (r'/pid/img/(.*)', StaticFileHandler, {'path': 'communication/img'}),
+        (r'/pid/fonts/(.*)', StaticFileHandler, {'path': 'communication/fonts'}),
+
+        ],
+        static_path= 'communication',
+        template_path='communication',
+        static_url_prefix= '/test/',
+        # debug=True
+    )
+
+def main():
+    application = make_app()
+    myserver = HTTPServer(application)
+    application.listen(PORT)
+    logger.info('server is running....!!')
+    print('server is running....!!')
+    tornado.ioloop.IOLoop.current().start()
+
+
+if __name__ == "__main__":
+    main()
+

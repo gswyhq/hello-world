@@ -4,7 +4,15 @@
 ubuntu@ip-172-33-14-6:~$ sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 docker cp /usr/share/zoneinfo/Asia ubuntu1220:/usr/share/zoneinfo/Asia
 
-方法2：若改时区后还不对，则可以：
+# /usr/share/zoneinfo/Asia/Shanghai 实际上是指向/usr/share/zoneinfo/PRC
+gswewf@gswewf-PC:/usr/share/zoneinfo/Asia$ ls -al|grep Shanghai
+lrwxrwxrwx  1 root root    6 8月  15  2017 Shanghai -> ../PRC
+
+方法2：在/etc/profile中简单设置一下
+
+export TZ='CST-8'，即时生效一下就全部搞定。
+
+方法3：若改时区后还不对，则可以：
 ubuntu@ip-172-33-14-6:~$ date
 Fri Aug 11 09:59:49 UTC 2017
 # 更改时区：
