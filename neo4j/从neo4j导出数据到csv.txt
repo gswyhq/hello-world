@@ -9,6 +9,15 @@ _id	_labels	name	Name	_start	_end	_type	since
 				0	1	KNOWS	1768
 				2	3	免赔条款	1768
 
+Match (n)-[r:`下一步`]->(c)
+with collect(n) as colN, collect(c) as colC, collect(r) as colR
+CALL apoc.export.csv.data(colN+colC,colR, '/tmp/exportData.csv',{format:'plain'}) YIELD nodes, relationships
+RETURN nodes, relationships
+
+bash-4.4# head -n 3 /tmp/exportData.csv
+"_id","_labels","parser_dict","status","answer","pattern","name","recommend_question","min_max_val","non_pattern","_start","_end","_type"
+"5569",":TuijianState:Zhongdeanlian","{""儿子"": ""孩子"", ""爸"": ""父亲"", ""妈"": ""母亲"", ""我爸"": ""父亲"", ""我妈"": ""母亲"", ""我爸爸"": ""父亲"", ""我爹"": ""父亲"", ""我妈妈"": ""母亲"", ""小孩"": ""孩子"", ""老公"": ""配偶"", ""爸爸"": ""父亲"", ""我"": ""自己"", ""老婆"": ""配偶"", ""妈妈"": ""母亲"", ""女儿"": ""孩子""}","baoxiantijian","小联为您做保险体检啦~ 您可随时输入“退出”终止体检
+（1/3）您想为哪位家人购买产品？","(?P<baoxiantijian>(父亲|母亲|自己|配偶|孩子|爸爸|妈妈|老婆|老公|儿子|女儿|爸|妈|我|我爹)+)","保险体检","[""父亲"",""母亲"",""自己"",""配偶"",""孩子""]","","",,,
 
 USING PERIODIC COMMIT 10
 LOAD CSV FROM "file:///test.csv" AS line

@@ -61,4 +61,14 @@ root@14afcbc79eae:/taibao_poc# supervisord
 解决方法，创建日志目录：
 root@14afcbc79eae:/var/log# mkdir supervisor
 
+# 启动时报错：
+Error: 'ascii' codec can't decode byte 0xe5 in position 214: ordinal not in range(128)
+问题原因，Python程序中会报这个错误；
+比如，open的编码未有指明是encoding='utf8';
+解决方法：
+root@8b79b4483485:~# vim .bashrc
+末尾添加两行：
+export LC_ALL=zh_CN.utf8
+export LANG=zh_CN.UTF-8
+root@8b79b4483485:~# source .bashrc
 

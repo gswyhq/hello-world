@@ -1,0 +1,392 @@
+
+6.1 注释
+以 .. 开头的是内部注释，不会显示在结果文件中，必须以其开头，前面不可有空格.
+
+6.2 标题
+如:
+
+標題
+========================
+小標題
+------------------------
+6.3 段落
+中间空一行即可.
+
+6.4 字体格式
+**粗體**
+
+*斜體*
+
+``保持原样输出``
+6.5 文字解释标记
+通过 `` 来实现更多功能的标记.
+
+连结:
+
+`something`_
+
+.. _something: www.example.com
+锚标记:
+
+_`something`
+创建锚标记后，其他地方如果引用这个锚标记，则可以在文档内交叉引用。
+
+通过 :sub: 和 :sup: 来支持下标与上标:
+
+:sub:`下标内容`
+
+`上标内容`:sup:
+6.6 超链接
+第一种，直接写一个网址
+第二种，为文字指定一个超链接(需要的时候可以使用转义字符，用于转义空格):
+`APEC蓝`_
+
+.. _APEC蓝: www.example.com
+第三种，内嵌超链接
+`APEC蓝<www.example.com>`_
+第四种，无名超链接:
+Python is `one of the best scripting language`__ in the world.
+
+.. __: www.example.com
+第五种，文件内部标题自动作为连结地址，可以建立文件内部连结:
+`第一章`_
+第六种，间接超链接:
+`APEC奇闻`_
+
+.. _APEC奇闻: APEC蓝_
+第七种，无内容超链接:
+.. _回首页:
+6.7 图片
+图片支持属性定义:
+
+.. image:: 图片地址 :align: left
+在文字中间插入图片:
+
+这个在\ |a|\ 中插入图片
+
+.. |a| image:: url
+其中 |a| 这种形式叫别名.
+
+6.8 别名
+可以定义别名的元素有文本、链接、图像等:
+
+.. |别名| replace:: 字符串 （可以是独立链接）
+
+.. _链接: 目标地址
+
+.. |别名| replace:: 链接_
+
+.. |当前时间| date:: %H:%M
+
+.. |图片名称| image:: 图片路径
+   :width: 宽度
+   :height: 高度
+   :target: 目标链接
+6.9 表格
+复杂点得表格:
+
++------------+------------+-----------+
+| Header 1   | Header 2   | Header 3  |
++============+============+===========+
+| body row 1 | column 2   | column 3  |
++------------+------------+-----------+
+| body row 2 | Cells may span columns.|
++------------+------------+-----------+
+| body row 3 | Cells may  | - Cells   |
++------------+ span rows. | - contain |
+| body row 4 |            | - blocks. |
++------------+------------+-----------+
+简单点得表格:
+
+=====  =====  ======
+   Inputs     Output
+------------  ------
+  A      B    A or B
+=====  =====  ======
+False  False  False
+True   False  True
+False  True   True
+True   True   True
+=====  =====  ======
+6.10 注解与引用
+这是一个注解[1]_，这又是一个注解[2]_
+
+.. [1] 第一个注解
+.. [2] 第二个注解
+引用和注解的不同之处，就是使用具体引用文字代替数字:
+
+这是一个引用[APEC蓝]_，非常蓝，格外蓝
+
+.. [APEC蓝]  具有中国特色的蓝色天空，类似麒麟，可遇不可求
+6.11 块引用
+以 :: 开始，后面接一个空行，则属于块引用，其内容原样输出:
+
+This is a normal text paragraph. The next paragraph is a code sample::
+
+   It is not processed in any way, except
+   that the indentation is removed.
+
+   It can span multiple lines.
+
+This is a normal text paragraph again.
+6.12 特殊内置注释
+.. contents:: 索引
+   :depth: 3  标题搜索深度
+
+.. image :: (路径)/image.png
+    :target: http://ubuntu.org.cn
+
+.. figures :: 形状/figures.png
+
+
+.. sidebar:: 侧边栏标题
+   :subtitle: 子标题
+
+     These lines are sidebar content interpreted
+     as body elements.
+
+.. rubric:: 醒目提示（内容）
+
+.. topic:: 话题
+
+
+.. tip:: tip内容
+
+.. note:: note内容
+
+.. warning:: warning内容
+
+.. important::
+
+.. attention::
+
+.. danger::
+
+.. error::
+
+.. caution::
+6.13 不显示空格
+有些地方由于标记的需要，需要留空格，但最终结果又不应该显示此空格，则可以用转义字符:
+
+H\ :sub:`2`\ O
+6.14 读取其他rST文件
+.. header:: 源文件路径，读取到文件头部
+.. include:: 源文件路径，按顺序读取
+.. footer:: 源文件路径，读取到文件尾部
+
+.. header:: dir/header.rst
+.. include:: dir/1.rst
+.. include:: dir/2.rst
+.. include:: dir/3.rst
+.. footer:: footer.rst
+6.15 嵌入代码
+如:
+
+.. code-block:: python
+   print "Hello"
+又如:
+
+.. code-block:: console
+
+    echo "Hello"
+还有:
+
+.. code-block:: bash
+    $ pip install redis-py
+
+
+
+###################################################################################################################################################
+来源： https://blog.csdn.net/weishantc/article/details/46729103
+
+sphinx的一些常见标记语法。注意标记段一般要与前一段落用空行格开，标记段结束要与下一段落用空行格开，部分标记内的参数要与内容用空行格开(如果未加空行，make时一般也会警告)。
+
+段落
+
+段落(ref)是reST文档中最基本的块。段落是由一个或多个空白行分离的简单的文本块。在Python中，缩进在reST中是具有重要意义，所以同一段落的所有行必须左对齐而且是同一级缩进。
+
+标题
+
+上面，我们把每个章节单放在一个独立的rst文件中了，比如chapter1.rst。章节标题即一级标题，一级标题只要在标题名字下面加====就行了，=号的个数要超过标题的长度，否则会告警。几类标题的符号依次如下，使用的方式与一级标题一样：
+
+一级标题： = 
+二级标题： - 
+三级标题： + 
+四级标题： ^
+如下面使用例子：
+
+python语言基础语法
+=====================
+
+内置数据类型
+----------------------
+和大多数动态语言一样，python中的变量是动态变量
+numbers(数字)
++++++++++++++++
+
+数字的使用跟数学表达式一样:
+
+string(字符串)
+++++++++++++++++++++
+python通过单引号、双引号或三重引号引起来的表示字符串。
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+行内标记
+
+标准的行内标记相当简单：使用
+
+单星号：
+
+ *text* 强调 (斜体)
+1
+双星号：
+
+**text** 重点强调 (粗体)
+1
+反引号：
+
+``text`` 表示引用示例
+1
+如果星号或反引号出​​现在文本会对行内标记分隔符引起混淆，他们必须用一个反斜杠进行转义。
+
+注意行内标记一些限制:
+
+不能嵌套，
+文本不能以空格开始或者结束： * text* 是不正确的，
+必须由空格从周围的文本中分离出来。可以通过使用转义的空格来规避这个限制
+代码片断
+
+在sphinx中引用代码非常简单，如果是python代码，直接段落后面加 ::，并留一空行，被引用的代码，还要以tab或等量的空格进行缩进，如下面例子:
+
+python使用如下语法定义list，list的元素类型可以不一样::
+
+    >>> a = ['spam', 'eggs', 100, 1234]
+    >>> a
+    ['spam', 'eggs', 100, 1234]
+1
+2
+3
+4
+5
+如果要插入其他的代码，需要显式指明代码类型，如下面例子，说明使用的代码是scheme。添加linenos后，代码每行会显示行号,emphasize-lines配置要高亮的行。
+
+.. code-block:: scheme
+    :linenos:
+    :emphasize-lines: 2
+
+    (define (linear-combination a b x y)
+        (+ (* a x) (* b y)))
+1
+2
+3
+4
+5
+6
+代码包含
+
+上述是直接是直接把代码片断写在rst文件中的做法。但是我们经常要引用到外部的源代码文件，而不想把源文件中的代码拷来拷去，这时候就可以用到sphinx的代码包含功能，例子如下：
+
+.. literalinclude:: ../code/threading_1.py
+   :language: python
+   :linenos:
+   :lines: 1,3,5-10,20-
+1
+2
+3
+4
+显示代码方面的更详细的资料，可以查看 http://www.pythondoc.com/sphinx/markup/code.html
+
+图片
+
+sphinx显示图片功能，比较弱，无法设置图片居中等样式，只能设置图片宽度，例子如下：
+
+.. image:: ../images/1.2.png
+    :width: 800    
+1
+2
+标注
+
+sphinx有类似tip功能。例子如下：
+
+.. note:: 
+
+    python的字符串是不可修改的。如修改一个字符，应使用replace，或使用左边字串+新字符+右边字串拼接而成
+1
+2
+3
+效果如下：
+
+这里写图片描述
+
+此外，还支持脚注，可以参考文末的入门文档。
+
+外部链接
+
+你使用以下方式来实现内嵌的网页链接。
+
+`Link text <http://example.com/>`_ 
+1
+如果链接文本是Web地址，你一点都不需要特殊标记，解析器可以识别在普通的文本的链接和邮件地址。
+
+你也可以把链接和目标定义(ref)分开，像这样:
+
+This is a paragraph that contains `a link`_.
+
+.. _a link: http://example.com/
+1
+2
+3
+列表
+
+使用*号表示一组列表，#.表示有序列表，例子如下:
+
+* This is a bulleted list.
+* It has two items, the second
+  item uses two lines.
+
+1. This is a numbered list.
+2. It has two items too.
+
+#. This is a numbered list.
+#. It has two items too.
+1
+2
+3
+4
+5
+6
+7
+8
+9
+数学公式
+
+在sphinx中可以使用latex语法的公式。插入公式，需要在sphinx-quickstart时，把包含math选项打开。使用的例子如下，sphinx会把产生的公式变成图片，并包含到网页中：
+
+.. math::
+    \int_a^{b}f=\left[f(a+\dfrac{dx}{2})+f(a+dx+\dfrac{dx}{2})+(f(a+2dx+\dfrac{dx}{2})+\cdots \right]dx
+1
+2
+效果如下：
+
+这里写图片描述
+
+sphinx其他使用文档
+
+官方文档: http://sphinx-doc.org/contents.html
+
+中文入门：http://www.pythondoc.com/sphinx/rest.html#id15
+
+中文文档 http://zh-sphinx-doc.readthedocs.org/en/latest/contents.html
+

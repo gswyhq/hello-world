@@ -1,0 +1,167 @@
+
+Alpine Linux 中的 apk 命令讲解
+2018年05月23日 13:48:12
+阅读数：452
+Alpine Linux是一个面向安全应用的轻量级Linux发行版。它采用了musl libc和busybox以减小系统的体积和运行时资源消耗，同时还提供了自己的包管理工具apk。
+官方帮助文档
+
+alpine 提供了非常好用的apk软件包管理工具，通过apk –help命令查看完整的包管理命令。
+
+/ # apk
+apk-tools 2.8.2, compiled for x86_64.
+
+usage: apk COMMAND [-h|--help] [-p|--root DIR] [-X|--repository REPO] [-q|--quiet] [-v|--verbose] [-i|--interactive] [-V|--version] [-f|--force] [--force-binary-stdout] [--force-broken-world] [--force-non-repository] [--force-old-apk]
+           [--force-overwrite] [--force-refresh] [-U|--update-cache] [--progress] [--progress-fd FD] [--no-progress] [--purge] [--allow-untrusted] [--wait TIME] [--keys-dir KEYSDIR] [--repositories-file REPOFILE] [--no-network]
+           [--no-cache] [--cache-dir CACHEDIR] [--arch ARCH] [--print-arch] [ARGS]...
+
+The following commands are available:
+  add       Add PACKAGEs to 'world' and install (or upgrade) them, while ensuring that all dependencies are met
+  del       Remove PACKAGEs from 'world' and uninstall them
+  fix       Repair package or upgrade it without modifying main dependencies
+  update    Update repository indexes from all remote repositories
+  info      Give detailed information about PACKAGEs or repositories
+  search    Search package by PATTERNs or by indexed dependencies
+  upgrade   Upgrade currently installed packages to match repositories
+  cache     Download missing PACKAGEs to cache and/or delete unneeded files from cache
+  version   Compare package versions (in installed database vs. available) or do tests on literal version strings
+  index     Create repository index file from FILEs
+  fetch     Download PACKAGEs from global repositories to a local directory
+  audit     Audit the directories for changes
+  verify    Verify package integrity and signature
+  dot       Generate graphviz graphs
+  policy    Show repository policy for packages
+  stats     Show statistics about repositories and installations
+  manifest  Show checksums of package contents
+
+Global options:
+  -h, --help              Show generic help or applet specific help
+  -p, --root DIR          Install packages to DIR
+  -X, --repository REPO   Use packages from REPO
+  -q, --quiet             Print less information
+  -v, --verbose           Print more information (can be doubled)
+  -i, --interactive       Ask confirmation for certain operations
+  -V, --version           Print program version and exit
+  -f, --force             Enable selected --force-* (deprecated)
+  --force-binary-stdout   Continue even if binary data is to be output
+  --force-broken-world    Continue even if 'world' cannot be satisfied
+  --force-non-repository  Continue even if packages may be lost on reboot
+  --force-old-apk         Continue even if packages use unsupported features
+  --force-overwrite       Overwrite files in other packages
+  --force-refresh         Do not use cached files (local or from proxy)
+  -U, --update-cache      Update the repository cache
+  --progress              Show a progress bar
+  --progress-fd FD        Write progress to fd
+  --no-progress           Disable progress bar even for TTYs
+  --purge                 Delete also modified configuration files (pkg removal) and uninstalled packages from cache (cache clean)
+  --allow-untrusted       Install packages with untrusted signature or no signature
+  --wait TIME             Wait for TIME seconds to get an exclusive repository lock before failing
+  --keys-dir KEYSDIR      Override directory of trusted keys
+  --repositories-file REPOFILE Override repositories file
+  --no-network            Do not use network (cache is still used)
+  --no-cache              Do not use any local cache path
+  --cache-dir CACHEDIR    Override cache directory
+  --arch ARCH             Use architecture with --root
+  --print-arch            Print default arch and exit
+
+This apk has coffee making abilities.
+使用示例
+
+下面列举常用命令：
+
+apk update
+
+update：从远程镜像源中更新本地镜像源索引。
+
+update命令会从各个镜像源列表下载APKINDEX.tar.gz并存储到本地缓存，一般在/var/cache/apk/(Alpine在该目录下)、/var/lib/apk/ 、/etc/apk/cache/下。
+
+apk add
+
+add：安装PACKAGES并自动解决依赖关系。
+
+add命令从仓库中安装最新软件包，并自动安装必须的依赖包，也可以从第三方仓库添加软件包。
+
+$ apk add openssh openntp vim
+$ apk add --no-cache mysql-client
+$ apk add docker --update-cache --repository http://mirrors.ustc.edu.cn/alpine/v3.4/main/ --allow-untrusted
+
+安装指定版本软件包
+apk add asterisk=1.6.0.21-r0
+apk add 'asterisk<1.6.1'
+apk add 'asterisk>1.6.1
+
+Alpine构建可以使用--virtual参数指定构建过程需要安装的包，这样构建的镜像体积会小很多。
+举个例子：
+RUN apk add build-base
+RUN apk del build-base
+上面这种方式看似是删除了build-base这个包，但并不会减少镜像体积，原因很简单，安装过程被记录保存下来了。
+
+使用下面的方式：
+RUN apk add --virtual BUILD build-base && \
+    apk del BUILD
+build-base这个包不会被记录下来，可以减少150MB的体积呐~
+这种用法在 Dockerfile 中很常见，将多个包的集合命名为一个名称，方便了后续卸载。
+
+4.2更新国内源
+# Alpine的源文件为：
+/etc/apk/repositories，
+# 默认的源地址为：http://dl-cdn.alpinelinux.org/
+
+#可以编辑源文件 /etc/apk/repositories，
+#采用国内阿里云的源，文件内容为：
+https://mirrors.aliyun.com/alpine/v3.6/main/
+https://mirrors.aliyun.com/alpine/v3.6/community/
+
+# 如果采用中国科技大学的源，文件内容为：
+https://mirrors.ustc.edu.cn/alpine/v3.6/main/
+https://mirrors.ustc.edu.cn/alpine/v3.6/community/
+
+
+安装指定版本软件包
+
+$ apk add asterisk=1.6.0.21-r0
+$ apk add 'asterisk<1.6.1'
+$ apk add 'asterisk>1.6.1
+
+--no-cache参数不缓存文件，有助于减少最终体积。
+
+apk del
+
+del：卸载并删除PACKAGES
+
+apk del openssh openntp vim
+1
+apk upgrade
+
+upgrade：升级当前已安装的软件包。
+
+upgrade命令升级系统已安装的所有软件包（一般包括内核），当然也可指定仅升级部分软件包（通过-u或–upgrade选择指定）。
+
+$ apk update #更新最新本地镜像源
+$ apk upgrade #升级软件
+$ apk add --upgrade busybox #指定升级部分软件包
+1
+2
+3
+apk search
+
+search：搜索软件包。
+
+search命令搜索可用软件包，-v 参数输出描述内容，支出通配符，-d 或 –description 参数指定通过软件包描述查询。
+
+$ apk search #查找所有可用软件包
+$ apk search -v #查找所有可用软件包及其描述内容
+$ apk search -v 'acf*' #通过软件包名称查找软件包
+$ apk search -v -d 'docker' #通过描述文件查找特定的软件包
+1
+2
+3
+4
+apk info
+
+info：列出PACKAGES或镜像源的详细信息。
+
+info命令用于显示软件包的信息。
+
+$ apk info #列出所有已安装的软件包
+$ apk info -a zlib #显示完整的软件包信息
+$ apk info --who-owns /sbin/lbu #显示指定文件属于的包

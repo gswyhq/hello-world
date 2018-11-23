@@ -1,0 +1,10 @@
+# 最近新建的文件在最后：
+gswyhq@gswyhq-PC:~/test$ ls -ltr
+
+# 最近新建的文件在最前：
+gswyhq@gswyhq-PC:~/test$ ls -lt
+
+gswyhq@gswyhq-PC:~/test$ ls -al |sort +5 # 对第六列进行排序，增序排序
+gswyhq@gswyhq-PC:~/test$ ls -al |sort +5 +6 +7
+gswyhq@gswyhq-PC:~/test$ ls -al |sort -r +5 +6 +7  # 逆序排列
+

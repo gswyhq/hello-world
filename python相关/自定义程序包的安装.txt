@@ -112,6 +112,8 @@ pip install -r requirements.txt
 gswewf@gswewf-PC:~/nlp_layer$ sudo pip3 install pipreqs
 gswewf@gswewf-PC:~/nlp_layer$ pipreqs /home/gswewf/nlp_layer  # 导出某个项目的依赖包
 INFO: Successfully saved requirements file in /home/gswewf/nlp_layer/requirements.txt
+# 若在项目目录中已存在requirements.txt，可以使用--force，覆盖该文件：
+$ pipreqs /home/gswewf/nlp_layer --force
 
 在requirements.txt文件中指定 branch names、 commit hash 或者 a tag name:
 -e git://git.myproject.org/MyProject.git@master#egg=MyProject

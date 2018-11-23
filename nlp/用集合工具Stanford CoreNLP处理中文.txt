@@ -1,0 +1,66 @@
+第一步：下载docker镜像
+gswyhq@gswyhq-PC:~/yhb$ docker pull frnkenstien/corenlp
+Using default tag: latest
+latest: Pulling from frnkenstien/corenlp
+709515475419: Already exists
+38a1c0aaa6fd: Already exists
+cd134db5e982: Already exists
+45118f5757b7: Pull complete
+47699c5e72cd: Pull complete
+c33627a00818: Pull complete
+Digest: sha256:94b21717165db276fb73a22194569aa957d6cc2a24d79d0f212d39cc887e9d5d
+Status: Downloaded newer image for frnkenstien/corenlp:latest
+
+第二步：下载模型
+下载中文模型（version 3.9.1）： http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-02-27-models.jar
+gswyhq@gswyhq-PC:~/stanford_corenlp$ ls
+readme.txt  stanford-chinese-corenlp-2018-02-27-models.jar
+
+第三步：启动容器
+gswyhq@gswyhq-PC:~/stanford_corenlp$ docker run -p 9000:9000 --name coreNLP --rm -i -t -v $PWD/stanford-chinese-corenlp-2018-02-27-models.jar:/stanford-corenlp-full-2018-02-27/tanford-chinese-corenlp-3.9.1-models.jar frnkenstien/corenlp
+
+第四步：安装Python包
+gswyhq@gswyhq-PC:~$ sudo pip3 install  stanfordcorenlp -i http://pypi.mirrors.ustc.edu.cn/simple/ --trusted-host pypi.mirrors.ustc.edu.cn
+
+第五步：开始使用
+# 也可以在浏览器打开使用
+In [1]: from stanfordcorenlp import StanfordCoreNLP
+In [4]: sentence = '清华大学位于北京。'
+   ...:
+   ...: with StanfordCoreNLP('http://192.168.3.145', port=9000, lang='zh') as nlp:
+   ...:     print(nlp.word_tokenize(sentence))
+   ...:     print(nlp.pos_tag(sentence))
+   ...:     print(nlp.ner(sentence))
+   ...:     print(nlp.parse(sentence))
+   ...:     print(nlp.dependency_parse(sentence))
+   ...:
+
+       with StanfordCoreNLP('http://192.168.3.145', port=9000, lang='zh') as nlp:
+   ...:     output = nlp.annotate(sentence, properties={"annotators":"tokenize,ssplit,pos,lemma,ner,depparse,natlog,openie",
+   ...:                                 "outputFormat": "json",
+   ...:                                  "openie.triple.strict":"true",
+   ...:                                  "openie.max_entailments_per_clause":"1"})
+   ...:                                  
+
+In [7]: output
+Out[7]: '{"sentences":[{"index":0,"basicDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":2,"dependentGloss":"。"},{"dep":"amod","governor":2,"governorGloss":"。","dependent":1,"dependentGloss":"清华大学位于北京"}],"enhancedDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":2,"dependentGloss":"。"},{"dep":"amod","governor":2,"governorGloss":"。","dependent":1,"dependentGloss":"清华大学位于北京"}],"enhancedPlusPlusDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":2,"dependentGloss":"。"},{"dep":"amod","governor":2,"governorGloss":"。","dependent":1,"dependentGloss":"清华大学位于北京"}],"openie":[],"tokens":[{"index":1,"word":"清华大学位于北京","originalText":"清华大学位于北京","lemma":"清华大学位于北京","characterOffsetBegin":0,"characterOffsetEnd":8,"pos":"JJ","before":"","after":""},{"index":2,"word":"。","originalText":"。","lemma":"。","characterOffsetBegin":8,"characterOffsetEnd":9,"pos":"NN","before":"","after":""}]}]}'
+
+In [16]: with StanfordCoreNLP('http://192.168.3.145', port=9000, lang='zh') as nlp:
+    ...:     output = nlp.annotate("Barack Obama was born in Hawaii.", properties={"annotators":"tokenize,ssplit,pos,lemma,ner,depparse,natlog,openie",
+    ...:                                 "outputFormat": "json",
+    ...:                                  "openie.triple.strict":"true",
+    ...:                                  "openie.max_entailments_per_clause":"1"})
+    ...:                                  
+
+In [17]: output
+Out[17]: '{"sentences":[{"index":0,"basicDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":4,"dependentGloss":"born"},{"dep":"compound","governor":2,"governorGloss":"Obama","dependent":1,"dependentGloss":"Barack"},{"dep":"nsubjpass","governor":4,"governorGloss":"born","dependent":2,"dependentGloss":"Obama"},{"dep":"auxpass","governor":4,"governorGloss":"born","dependent":3,"dependentGloss":"was"},{"dep":"case","governor":6,"governorGloss":"Hawaii","dependent":5,"dependentGloss":"in"},{"dep":"nmod","governor":4,"governorGloss":"born","dependent":6,"dependentGloss":"Hawaii"},{"dep":"punct","governor":4,"governorGloss":"born","dependent":7,"dependentGloss":"."}],"enhancedDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":4,"dependentGloss":"born"},{"dep":"compound","governor":2,"governorGloss":"Obama","dependent":1,"dependentGloss":"Barack"},{"dep":"nsubjpass","governor":4,"governorGloss":"born","dependent":2,"dependentGloss":"Obama"},{"dep":"auxpass","governor":4,"governorGloss":"born","dependent":3,"dependentGloss":"was"},{"dep":"case","governor":6,"governorGloss":"Hawaii","dependent":5,"dependentGloss":"in"},{"dep":"nmod:in","governor":4,"governorGloss":"born","dependent":6,"dependentGloss":"Hawaii"},{"dep":"punct","governor":4,"governorGloss":"born","dependent":7,"dependentGloss":"."}],"enhancedPlusPlusDependencies":[{"dep":"ROOT","governor":0,"governorGloss":"ROOT","dependent":4,"dependentGloss":"born"},{"dep":"compound","governor":2,"governorGloss":"Obama","dependent":1,"dependentGloss":"Barack"},{"dep":"nsubjpass","governor":4,"governorGloss":"born","dependent":2,"dependentGloss":"Obama"},{"dep":"auxpass","governor":4,"governorGloss":"born","dependent":3,"dependentGloss":"was"},{"dep":"case","governor":6,"governorGloss":"Hawaii","dependent":5,"dependentGloss":"in"},{"dep":"nmod:in","governor":4,"governorGloss":"born","dependent":6,"dependentGloss":"Hawaii"},{"dep":"punct","governor":4,"governorGloss":"born","dependent":7,"dependentGloss":"."}],"openie":[{"subject":"Barack Obama","subjectSpan":[0,2],"relation":"was","relationSpan":[2,3],"object":"born","objectSpan":[3,4]},{"subject":"Barack Obama","subjectSpan":[0,2],"relation":"was born in","relationSpan":[2,5],"object":"Hawaii","objectSpan":[5,6]}],"entitymentions":[{"docTokenBegin":0,"docTokenEnd":2,"tokenBegin":0,"tokenEnd":2,"text":"Barack Obama","characterOffsetBegin":0,"characterOffsetEnd":12,"ner":"PERSON"},{"docTokenBegin":5,"docTokenEnd":6,"tokenBegin":5,"tokenEnd":6,"text":"Hawaii","characterOffsetBegin":25,"characterOffsetEnd":31,"ner":"STATE_OR_PROVINCE"}],"tokens":[{"index":1,"word":"Barack","originalText":"Barack","lemma":"Barack","characterOffsetBegin":0,"characterOffsetEnd":6,"pos":"NNP","ner":"PERSON","before":"","after":" "},{"index":2,"word":"Obama","originalText":"Obama","lemma":"Obama","characterOffsetBegin":7,"characterOffsetEnd":12,"pos":"NNP","ner":"PERSON","before":" ","after":" "},{"index":3,"word":"was","originalText":"was","lemma":"be","characterOffsetBegin":13,"characterOffsetEnd":16,"pos":"VBD","ner":"O","before":" ","after":" "},{"index":4,"word":"born","originalText":"born","lemma":"bear","characterOffsetBegin":17,"characterOffsetEnd":21,"pos":"VBN","ner":"O","before":" ","after":" "},{"index":5,"word":"in","originalText":"in","lemma":"in","characterOffsetBegin":22,"characterOffsetEnd":24,"pos":"IN","ner":"O","before":" ","after":" "},{"index":6,"word":"Hawaii","originalText":"Hawaii","lemma":"Hawaii","characterOffsetBegin":25,"characterOffsetEnd":31,"pos":"NNP","ner":"STATE_OR_PROVINCE","before":" ","after":""},{"index":7,"word":".","originalText":".","lemma":".","characterOffsetBegin":31,"characterOffsetEnd":32,"pos":".","ner":"O","before":"","after":""}]}]}'
+
+
+也可以安装包：
+gswyhq@gswyhq-PC:~/stanford_corenlp$ sudo pip3 install stanford-corenlp
+import corenlp
+
+https://blog.csdn.net/thriving_fcl/article/details/76595253?locationNum=10&fps=1
+CoreNLP官方也有提供封装好的Python接口：https://github.com/stanfordnlp/python-stanford-corenlp
+其他模型下载地址： https://stanfordnlp.github.io/CoreNLP/download.html
+https://github.com/stanfordnlp/CoreNLP

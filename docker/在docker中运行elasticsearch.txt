@@ -116,18 +116,5 @@ elasticsearch-analysis-pinyin-5.5.1.jar  nlp-lang-1.7.jar  plugin-descriptor.pro
 
 # 重启elasticsearch容器，至此分词工具就安装好了；
 
-# 安装elasticsearch插件：
-docker pull mobz/elasticsearch-head:5-alpine
-gswewf@gswewf-pc:~/docker/elasticsearch-head$ docker run -d --name elasticsearch-head9100 -p 9100:9100 mobz/elasticsearch-head:5-alpine
-浏览器打开‘http://localhost:9100/’即可。
-
-有时候启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
-但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
-这个时候需要进入`elasticsearch`容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
-gswewf@gswewf-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
-gswewf@gswewf-pc:~/docker/elasticsearch$ vim elasticsearch.yml 
-# config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
-http.cors.enabled: true
-http.cors.allow-origin: "*"
 
 

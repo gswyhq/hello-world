@@ -1,0 +1,20 @@
+1、原代码使用正常，改成 Server来使用的时候，遇到了这个错误：
+TypeError: Cannot interpret feed_dict key as Tensor: Tensor Tensor("Placeholder_4:0", shape=(50, 3), dtype=float32) is not an element of this graph.
+错误原因：
+改完成 server之后，load model是在实例化我的调用mask rcnn的类的时候进行的，然而inference是在接收到request的时候才进行，显然不在一个进程里。而那个写成subscriber的版本，他们是在同一个进程里的，subscribe的图片不断的写入一个类成员变量里，这里利用了python多线程中互斥锁确保不会同时读写这个变量，然后就可以让model对当前的图片进行inference了:
+# Right after loading or constructing your model, save the TensorFlow graph:
+graph = tf.get_default_graph()
+# In the other thread (or perhaps in an asynchronous event handler), do:
+global graph
+with graph.as_default():
+    (... do inference here ...)
+
+...
+        self._model.load_weights(model_path, by_name=True)
+        self.graph = tf.get_default_graph()
+...
+        # Run detection
+        with self.graph.as_default():
+            results = self._model.detect([np_image], verbose=0)
+...
+

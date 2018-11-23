@@ -1,0 +1,26 @@
+
+节点类型且查询
+实现类似match (a:test1 & :test2)
+MATCH (a:test1:test2) return a limit 25
+
+节点类型的或查询
+match (a:test1)
+with a.id as id
+return id
+union //union两侧数据名称、格式都得相同，需要两侧零时变量名称相同，或是用with转换名字
+match (b:test2)
+with b.id as id
+return id
+PS1：union要求两侧数据名称、类型相同，所以需要用with修改临时变量名称，或者在定义临时变量名称时，就使名称相同
+PS2：union是会合并相同数据的集合，union all是不合并相同数据的集合
+
+关系的type的或查询
+
+方法一：“|”或运算符
+# 查找关系是`保障项目`或`保险金额`的路径（返回值限定是一个时，出来的关系并不能优先保证是`保障项目`）；
+match(n)-[r:`保障项目`|:`保险金额`]->(n2) where n.name='保险产品' return n,r,n2 limit 1
+
+# 若需要优先保证是`保障项目`, 则需要通过如下语句（对查询结果进行排序）：
+MATCH (a)-[r:`保障项目`|:`保险金额`]->(b)
+return a,b,type(r) ORDER BY
+CASE type(r) WHEN "保障项目" THEN 0 ELSE 1 END ASC limit 1

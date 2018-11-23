@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>表单提交示例 - 基本表单提交</title>
+</head>
+<body>
+<form action="/server_url" method="post" onsubmit="return beforeSubmit()">
+    ID：<input id="username" type="text" name="username" />
+    Password：<input id="password" type="password" name="password" />
+    <input type="submit" value="Submit" />
+</form>
+<script type="text/javascript">
+    function beforeSubmit() {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        if (username.length < 6 || password.length < 6) {
+            alert('格式不正确！');
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+</body>
+</html>
+<!--注意from表单中的onsubmit属性一定要有return，否则是没有效果的。onsubmit属性是可选的，如果需要js对表单做一些简单的验证，那么可以使用这种方式来做，js如果验证不通过则返回false，那么表单是不会提交的。-->

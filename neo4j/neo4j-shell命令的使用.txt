@@ -1,0 +1,4 @@
+
+导出数据：
+bash-4.4# ./bin/neo4j-shell -c dump > export_data.cypher 
+

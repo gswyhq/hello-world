@@ -1,0 +1,195 @@
+# 从字符串中解析出时间：
+date("2018-04-05")
+
+# 返回没有时区的时间：
+localtime("12:45:30.25")
+
+# 返回指定时区的时间：
+time("12:45:30.25+01:00")
+
+# 返回没有指定时区的日期时间：
+localdatetime("2018-04-05T12:34:00")
+
+# 返回指定时区的日期时间：
+return datetime("2018-04-05T12:34:00[Europe/Berlin]")
+return datetime("2018-04-05T12:34:00[Asia/Shanghai]")
+
+# 将UNIX纪元时间转换为正常的日期：
+datetime({epochMillis: 3360000})
+
+time.strftime('%Y-%m-%d %H:%M:%S')
+Out[12]: '2018-09-13 10:21:59'
+time.time()
+Out[13]: 1536805326.9604545
+return datetime({epochMillis: 1536805326960})
+"2018-09-13T02:22:06.960000000Z"
+
+# 使用命名组件的映射来调用所有的时间函数
+date({year: {year}, month: {month}, day: {day}})
+return date({year:2018, month:9, day: 23})
+"2018-09-23"
+
+# 可以通过组合其他类型来创建时间类型。此示例从日期和时间创建日期时间。
+datetime({date: {date}, time: {time}}) 
+return datetime({date: date("2018-9-23"), time: time("12:45:30.25+08:00")})
+"2018-09-23T12:45:30.250000000+08:00"
+
+# 可以通过从更复杂的类型中进行选择以及覆盖单个组件来创建时间类型。此示例通过从日期时间中进行选择以及覆盖日期组件来创建日期。
+date({date: {datetime}, day: 5})
+return date({date: datetime("2018-09-23T12:34:00[Asia/Shanghai]"), day: 5})
+"2018-09-05"
+
+# 提取时间年月日：
+WITH date("2018-04-05") AS d
+RETURN d.year, d.month, d.day, d.week, d.dayOfWeek
+╒════════╤═════════╤═══════╤════════╤═════════════╕
+│"d.year"│"d.month"│"d.day"│"d.week"│"d.dayOfWeek"│
+╞════════╪═════════╪═══════╪════════╪═════════════╡
+│2018    │4        │5      │14      │4            │
+└────────┴─────────┴───────┴────────┴─────────────┘
+
+# 返回1年，2个月，10天，12小时，45分钟和30.25秒的持续时间。
+duration("P1Y2M10DT12H45M30.25S")
+return datetime("2018-09-23T12:34:00[Asia/Shanghai]") + duration("P1Y2M10DT12H45M30.25S")
+╒══════════════════════════════════════════════════════════════════════╕
+│"datetime("2018-09-23T12:34:00[Asia/Shanghai]") + duration("P1Y2M10DT1│
+│2H45M30.25S")"                                                        │
+╞══════════════════════════════════════════════════════════════════════╡
+│"2019-12-04T01:19:30.250000000[Asia/Shanghai]"                        │
+└──────────────────────────────────────────────────────────────────────┘
+
+# 计算两个时间间的时间差：
+duration.between($date1,$date2)
+return duration.between(date('2018-09-23'), date('2018-09-24'))
+╒══════════════════════════════════════════════════════════╕
+│"duration.between(date('2018-09-23'), date('2018-09-24'))"│
+╞══════════════════════════════════════════════════════════╡
+│"P0M1DT0S"                                                │
+└──────────────────────────────────────────────────────────┘
+
+return duration.between(date('2018-09-23'), date('2018-09-14'))
+╒══════════════════════════════════════════════════════════╕
+│"duration.between(date('2018-09-23'), date('2018-09-14'))"│
+╞══════════════════════════════════════════════════════════╡
+│"P0M-9DT0S"                                               │
+└──────────────────────────────────────────────────────────┘
+
+WITH duration("P1Y2M10DT12H45M") AS d RETURN d.years, d.months, d.days, d.hours, d.minutes
+╒═════════╤══════════╤════════╤═════════╤═══════════╕
+│"d.years"│"d.months"│"d.days"│"d.hours"│"d.minutes"│
+╞═════════╪══════════╪════════╪═════════╪═══════════╡
+│1        │14        │10      │12       │765        │
+└─────────┴──────────┴────────┴─────────┴───────────┘
+
+with duration.between(date('2018-09-23'), date('2018-09-14')) as d return d.years, d.months, d.days, d.hours, d.minutes
+╒═════════╤══════════╤════════╤═════════╤═══════════╕
+│"d.years"│"d.months"│"d.days"│"d.hours"│"d.minutes"│
+╞═════════╪══════════╪════════╪═════════╪═══════════╡
+│0        │0         │-9      │0        │0          │
+└─────────┴──────────┴────────┴─────────┴───────────┘
+
+# 时间相加减：
+return date("2015-01-01") + duration("P1Y1M1D")
+╒══════════════════════════════════════════╕
+│"date("2015-01-01") + duration("P1Y1M1D")"│
+╞══════════════════════════════════════════╡
+│"2016-02-02"                              │
+└──────────────────────────────────────────┘
+
+return date("2015-01-01") - duration("P1Y1M1D")
+╒══════════════════════════════════════════╕
+│"date("2015-01-01") - duration("P1Y1M1D")"│
+╞══════════════════════════════════════════╡
+│"2013-11-30"                              │
+└──────────────────────────────────────────┘
+
+# 时间乘以一个数字
+duration("PT30S") * 10
+
+return date("2015-01-01") + duration("P1Y1M1D")*2
+╒════════════════════════════════════════════╕
+│"date("2015-01-01") + duration("P1Y1M1D")*2"│
+╞════════════════════════════════════════════╡
+│"2017-03-03"                                │
+└────────────────────────────────────────────┘
+
+# 通过系统的timestamp()函数来获取当前的时间: 
+return timestamp()
+╒═════════════╕
+│"timestamp()"│
+╞═════════════╡
+│1541677979164│
+└─────────────┘
+返回当前的毫秒的时间戳。
+
+但是1528183330725这种整数毫秒的形式可能不太直观，我们还是希望看到类似：yyyy-MM-dd HH:mm:ss，如2018-06-05 15:22:10这类形式日期，并以字符串的形式存储于节点的属性中。 
+因此，我们可以使用APOC的函数apoc.date.format来完成这个转换操作。 
+
+日期格式转换函数：apoc.date.format
+call apoc.help('apoc.date.format')
+╒══════════╤══════════════════╤══════════════════════════════════════════════════════════════════════╤══════════════════════════════════════════════════════════════════════╤═══════╤════════╕
+│"type"    │"name"            │"text"                                                                │"signature"                                                           │"roles"│"writes"│
+╞══════════╪══════════════════╪══════════════════════════════════════════════════════════════════════╪══════════════════════════════════════════════════════════════════════╪═══════╪════════╡
+│"function"│"apoc.date.format"│"apoc.date.format(12345,('ms|s|m|h|d'),('yyyy-MM-dd HH:mm:ss zzz'),('T│"apoc.date.format(time :: INTEGER?, unit = ms :: STRING?, format = yyy│null   │null    │
+│          │                  │Z')) get string representation of time value optionally using the spec│y-MM-dd HH:mm:ss :: STRING?, timezone =  :: STRING?) :: (STRING?)"    │       │        │
+│          │                  │ified unit (default ms) using specified format (default ISO) and speci│                                                                      │       │        │
+│          │                  │fied time zone (default current TZ)"                                  │                                                                      │       │        │
+└──────────┴──────────────────┴──────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────┴───────┴────────┘
+
+* time: INTEGER 第1个参数是整型; 
+* unit: STRING 第2个参数是字符串，取值有ms|s|m|h|d，表示：毫秒|秒|分|时|日，是第1个参数的单位，默认值是ms，即毫秒; 
+* format: STRING 第3个参数表示转换输出的格式，如yyyy-MM-dd HH:mm:ss zzz（精确到秒，zzz表示返回时区）; 
+* timezone: STRING 第4个参数表示时区，默认是当前Neo4j数据库配置的时区，可以在neo4j.conf中进行dbms.db.timezone配置，默认时区是UTC；
+
+分析完这个函数，我们就可以编写以下的转换操作：
+return apoc.date.format(timestamp(),'ms','yyyy-MM-dd HH:mm:ss','CTT') as createTime
+╒═════════════════════╕
+│"createTime"         │
+╞═════════════════════╡
+│"2018-11-08 19:56:05"│
+└─────────────────────┘
+
+这里的CTT表示的时区是Asia/Shanghai
+注意：如果yyyy-MM-dd HH:mm:ss中的HH变为小写，即yyyy-MM-dd hh:mm:ss，那么得到的小时会是12小时的表示形式，即上面的createTime变为2018-06-05 04:03:19
+那么在实际创建带createTime日期信息节点的时候cypher语句为：
+
+CREATE (testNode:TestNode {pro:"test",createTime: apoc.date.format(timestamp(),'ms','yyyy-MM-dd HH:mm:ss','CTT')})
+return testNode
+
+建议的写法为如下所示：可以在后续其他语句共同使用这个createTime变量，生成一次即可
+
+WITH apoc.date.format(timestamp(),'ms','yyyy-MM-dd HH:mm:ss','CTT') as createTime
+CREATE (testNode:TestNode {pro:"test",createTime:createTime})
+return testNode
+
+timezone时区：
+EST - -05:00 
+HST - -10:00 
+MST - -07:00 
+ACT - Australia/Darwin 
+AET - Australia/Sydney 
+AGT - America/Argentina/Buenos_Aires 
+ART - Africa/Cairo 
+AST - America/Anchorage 
+BET - America/Sao_Paulo 
+BST - Asia/Dhaka 
+CAT - Africa/Harare 
+CNT - America/St_Johns 
+CST - America/Chicago 
+CTT - Asia/Shanghai 
+EAT - Africa/Addis_Ababa 
+ECT - Europe/Paris 
+IET - America/Indiana/Indianapolis 
+IST - Asia/Kolkata 
+JST - Asia/Tokyo 
+MIT - Pacific/Apia 
+NET - Asia/Yerevan 
+NST - Pacific/Auckland 
+PLT - Asia/Karachi 
+PNT - America/Phoenix 
+PRT - America/Puerto_Rico 
+PST - America/Los_Angeles 
+SST - Pacific/Guadalcanal 
+VST - Asia/Ho_Chi_Minh
+
+

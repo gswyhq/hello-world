@@ -1,0 +1,183 @@
+
+当通过程序向图形化数据库中写入大量数据的时候，你会希望它能够高效的处理。
+
+低效的方式
+
+下面这些方式不是十分有效：
+- 将值直接写入到语句中，而不是通过参数的方式
+- 每一个更新都通过一个Transaction发送一个请求
+- 通过一个Transaction发送大量的单个请求
+- 生成一个巨大复杂的语句（几百行），然后通过一个Transaction进行提交
+- 在一个Transaction中，发送一个巨大的请求，会导致OOM错误
+
+正确的方式
+
+你需要构造尽可能小的请求，并且语句格式固定（这样可以利用缓存），然后通过参数方式进行使用。
+
+每一个请求可以只修改一个属性，或者修改整个子图（上百个节点），但是它的语句结构必须是一致的，否则就不能使用缓存。
+
+
+# 一次提交多个请求：
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "CREATE (n {props}) RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "My Node测试"
+      }
+    }
+  } ]
+}'
+
+# 创建节点并写入属性
+# Merge节点并写入属性(MERGE ON CREATE: 若merge部分有结果，则不执行create部分；MERGE ON MATCH: 若merge有结果，则执行match部分；）
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "UNWIND {batch} as row  CREATE (n:Label) SET n.name = row.name, n.age = row.age, n.id=row.id",
+    "parameters" : {"batch": [{"id":"alice@example.com", "name":"Alice","age":32},{"id":"bob@example.com","name":"Bob","age":42}]}
+  }, {
+    "statement" : "UNWIND {batch} as row  MERGE (n:Label {id:row.id})  ON CREATE SET n.name = row.properties.name, n.age = row.properties.age",
+    "parameters" : {"batch": [{"id":"alice@example.com","properties":{"name":"Alice2","age":132}},{"id":"bob@example.com","properties":{"name":"Bob2","age":142}}]}
+  } ]
+}'
+
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "UNWIND {batch} as row  CREATE (n:Label) SET n.name = row.name, n.age = row.age, n.id=row.id",
+    "parameters" : {"batch": [{"id":"alice@example.com", "name":"Alice","age":32},{"id":"bob@example.com","name":"Bob","age":42}]}
+  }, {
+    "statement" : "UNWIND {batch} as row  MERGE (n:Label {id:row.id})  ON MATCH SET n.name = row.properties.name, n.age = row.properties.age",
+    "parameters" : {"batch": [{"id":"alice@example.com","properties":{"name":"Alice2","age":132}},{"id":"bob@example.com","properties":{"name":"Bob2","age":142}}]}
+  } ]
+}'
+
+# 寻找节点，创建／Merge关系，并写入属性
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "UNWIND {batch} as row MATCH (from:Label {id:row.from}) MATCH (to:Label {id:row.to}) CREATE (from)-[rel:KNOWS]->(to) SET rel.since = row.properties.since",
+    "parameters" : {"batch": [{"from":"alice@example.com","to":"bob@example.com","properties":{"since":2012}},{"from":"alice@example.com","to":"charlie@example.com","properties":{"since":2016}}]}
+  } ]
+}'
+
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "UNWIND {batch} as row MATCH (from:Label {id:row.from}) MATCH (to:Label {id:row.to}) MERGE (from)-[rel:KNOWS]->(to) ON CREATE SET rel.since = row.properties.since",
+    "parameters" : {"batch": [{"from":"alice@example.com","to":"bob@example.com","properties":{"since":2012}},{"from":"alice@example.com","to":"charlie@example.com","properties":{"since":2016}}]}
+  } ]
+}'
+
+# 通过id或者id列表找节点
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "UNWIND {batch} as row MATCH (from) WHERE id(from) = row.from MATCH (to) WHERE id(to) IN row.to CREATE (from)-[rel:FOO]->(to) SET rel.created = row.created",
+    "parameters" : {"batch": [{"from":123,"to":[44,12,128],"created":"2016-01-13"}, {"from":34,"to":[23,35,2983],"created":"2016-01-15"}]}
+  } ]
+}'
+
+# 通过id更新已有的节点
+# 你可以传入一个Map，其中的key是节点id或者关系id。这样以来，通过id查找会变得更高效。
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "WITH {batch} as data, [k in keys({batch}) | toInt(k)] as ids MATCH (n) WHERE id(n) IN ids SET n.count = data[toString(id(n))]",
+    "parameters" : { "batch" : {"1":334,"2":222,"3":3840}}
+  } ]
+}'
+
+# 通过id更新已有的关系
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "WITH {batch} as data, [k in keys({batch}) | toInt(k)] as ids MATCH ()-[rel]->() WHERE id(rel) IN ids SET rel.foo = data[toString(id(rel))] ",
+    "parameters" : { "batch" : {"1":334,"2":222,"3":3840}}
+  } ]
+}'
+
+
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "UNWIND { batch } as row CREATE (n:Label {name:row.name, age:row.age}) return n",
+    "parameters" : {
+      "batch" : [
+          {"name":"Alice",
+           "age":32
+           },
+          {"name":"Bob",
+           "age":42
+           }
+      ]
+    }
+  } ]
+}'
+
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "UNWIND { batch } as row CREATE (n:Label ) SET n.name = row.name, n.age = row.age ",
+    "parameters" : {
+      "batch" : [
+          {"name":"Alice",
+           "age":32
+           },
+          {"name":"Bob",
+           "age":42
+           }
+      ]
+    }
+  } ]
+}'
+
+# Merge节点并写入属性
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "UNWIND {batch} as row MERGE (n:Label {id:row.id}) SET n.name = row.properties.name, n.age = row.properties.age ",
+    "parameters" : {
+      "batch" : [{"id":"alice@example.com","properties":{"name":"Alice","age":32}},{"id":"bob@example.com","properties":{"name":"Bob","age":42}}]
+    }
+  } ]
+}'
+
+# 寻找节点，创建关系，并写入属性
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "UNWIND {batch} as row MATCH (from:Label {from:row.from}) MATCH (to:Label {to:row.to}) CREATE (from)-[rel:KNOWS]->(to) SET rel.since = row.properties.since ",
+    "parameters" : {
+      "batch" : [{"from":"alice@example.com","to":"bob@example.com","properties":{"since":2012}},{"from":"alice@example.com","to":"charlie@example.com","properties":{"since":2016}}]
+    }
+  } ]
+}'
+
+# 寻找节点，Merge关系，并写入属性
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "UNWIND {batch} as row MATCH (from:Label {from:row.from}) MATCH (to:Label {to:row.to}) MERGE (from)-[rel:KNOWS]->(to) SET rel.since = row.properties.since ",
+    "parameters" : {
+      "batch" : [{"from":"alice@example.com","to":"bob@example.com","properties":{"since":2012}},{"from":"alice@example.com","to":"charlie@example.com","properties":{"since":2016}}]
+    }
+  } ]
+}'
+
+
+

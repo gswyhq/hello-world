@@ -1,0 +1,59 @@
+shell脚本的并发
+
+Default模式下，shell命令是阻塞执行的，可以通过其后添加&让这条命令异步执行，如：
+
+sleep 10 &
+
+执行这条命令后，并不会阻塞10秒，而是立即返回。
+
+如果将这种方法用在while循环中，则可以实现多进程并行处理。例如一下test1.sh文件为：
+
+#!/bin/bash
+while read line
+do
+{
+  command 1
+} &
+done
+
+command 2
+
+这样的话command 1就可以并行执行了,其实质是将每条command 1命令作为后台进程在执行，这样主进程就不用等待前面的命令执行完毕之后才开始执行接下来的命令。通过执行ls -l | test1.sh可以看到并发的进程数量。
+
+但是这样带来一个问题: 如果在while循环外面的command 2需要用到循环内部执行得到的结果，那么像test1.sh的这种写法就不work了。我们可以对其做简单修改，达到上述目的，如test2.sh：
+
+#!/bin/bash
+while read line
+do
+{
+  command 1
+} &
+done
+wait
+
+command 2
+
+上面的代码是将所有的command 1在后台并行执行，等到循环里面的命令都结束之后才执行接下来的command 2。
+
+shell脚本的并发控制 
+有时为了避免并发进程数过多，导致机器卡死，需要限制并发的数量。以下代码实现了该功能：
+
+#!/bin/bash
+
+while read line
+do
+{
+  joblist=($(jobs -p))
+  while (( ${#joblist[*]} >= 20 ))
+  do
+  {
+      sleep 1
+      joblist=($(jobs -p))
+  }
+  done
+  sleep 10 &
+}
+done
+
+以上方法通过控制后台任务数来控制并发进程数目在20个以内。
+

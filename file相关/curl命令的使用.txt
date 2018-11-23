@@ -1,0 +1,8 @@
+
+上传文件：
+curl -XPOST http://192.168.3.145:8000/fileupload -H "Content-Type:multipart/form-data" -F "pid=yhb" -F "sign=qfwi22r1afwef" -F "xianzhong=重疾险" -F "knowledge=条款" -F "filename=@/home/gswyhq/Downloads/实施方案.pdf;type=application/pdf"
+
+注意："-F"与"-d"有一点不同，"-d"可以使用“-d 'a=1&b=2'”将两个字段放一起；而"-F"不行，一个"-F"只能包含一个key/value对，如："-F a=1 -F b=2"。
+
+下载文件：
+curl -o 本地文件名.jar http://192.168.3.101/weiangluo/pdf2text/raw/df609c76f5cb0a3605b597e2a3fed7f60355e809/pdf2text/pdf2text-0.1.jar

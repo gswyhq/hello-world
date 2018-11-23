@@ -1,0 +1,26 @@
+
+基础镜像包含alpine、centos、ubuntu三种。特意整理一下不同系统的修改方法。
+
+Alpine
+
+RUN apk --no-cache add tzdata  && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone 
+--no-cache参数不缓存文件，有助于减少最终体积。
+
+Ubuntu
+
+RUN echo "Asia/Shanghai" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata
+
+# ubuntu16.04默认没有安装tzdata; 另外必须修改 /etc/localtime 软链接的指向才行：
+RUN apt-get install -y tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+CentOS
+
+RUN echo "Asia/shanghai" > /etc/timezone;
+当然也可以将时区作为构建镜像的参数处理，这样可以带来更大的灵活性。
+
+链接：https://www.jianshu.com/p/004ddf941aac
+來源：简书

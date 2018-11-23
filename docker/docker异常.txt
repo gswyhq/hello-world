@@ -158,4 +158,65 @@ ssh ubuntu@42.93.171.44 docker exec -it multiple_projects_neo4j_1111118855 /var/
 解决方法很简单，只需要去掉上面的命令中的-it 即可．
 ssh ubuntu@42.93.171.44 docker exec multiple_projects_neo4j_1111118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher
 
+关于Sending build context to Docker daemon 数据很大的问题
+以往进行docker build的时候都是在新建的文件夹下面进行，这次为了图方便，就直接放在开发根目录下进行build，这样子问题就来了。于是就有了下面的文件大小发送量：
+Sending build context to Docker daemon 4.309 GB
+第一反应就是是不是当前目录都给发送过去了。查了下，果然是的，发现在Docker client会发送Dockerfile同级目录下的所有文件到Dockerdaemon。
+解决的方式就是之前第一句话说的，在一个新的文件夹中进行build这样子问题就不存在了，当然这样子会比较简洁，但是有时候脑袋就是这么直，我就是想要在根目录进行呢。这个时候该怎么办呢？—— .dockerignore 。
+没错了，在Dockerfile同级目录下添加一个 .dockerignore 文件。
+在 .dockerignore 中添加需要忽略的文件或者文件夹即可。于是在添加之后：
+Sending build context to Docker daemon 679.9 kB
+看到这个数据量整个人都舒服了。
 
+问题说明
+docker的python容器中执行print(‘测试’)，常见的错误提示，在宿主机不会出现
+UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-127: ordinal not in range(128)
+或者有时候，用 "docker run my_ubuntu /project/start.sh", 启动一个Python服务启动不了，
+但用"docker run my_ubuntu /bin/bash" 启动容器后，再执行"/project/start.sh"却可以正常运行；输出对应的日志，也是因为编码不正常所致。
+问题分析
+原因是因为locale 的设置导致 shell 的stdin/stdout/stderr 的默认编码为ascii，当用ascii编码去解释python3默认unicode编码的时候，自然会有问题
+解决方法：
+locale -a查看容器所有语言环境
+root@1d0ff322167f:/project# locale -a
+C
+C.UTF-8
+POSIX
+zh_CN
+zh_CN.gb2312
+zh_CN.utf8
+zh_HK.utf8
+zh_SG.utf8
+zh_TW.utf8
+只需要把容器编码设置为可以支持中文的编码即可
+# docker run 方式
+docker run -e LANG=zh_CN.utf8  m_container:latest my-python3
+# docker-compose 方式
+ environment:
+      - LANG=zh_CN.utf8
+
+
+# 如何避免Docker容器启动脚本运行后自动退出
+（1）容器中运行多个守护进程时，前面的进程要用后台方式运行（或添加 &），否则后面的服务无法启动
+（2）容器中最后一个守护进程一定要用前台方式运行，否则start.sh退出，容器退出，所有的服务就白启动了
+
+有时候避免自动退出可以使用交互模式；比如最后执行的命令是‘/bin/bash’或者‘/usr/bin/python3’
+docker run -it ***
+或者在“docker-compose.yml”文件中设置： tty: true
+
+# 使用supervisord遇到的问题：
+通过docker run -d 方式启动容器报“Unlinking stale socket /tmp/supervisor.sock”错误，而通过docker run -it 启动后手动执行  /usr/bin/supervisord -c /etc/supervisor.conf则没问题
+解决：
+将Dockerfile中的CMD  ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"] 修改成ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"] 重新生成镜像，用该镜像启动容器docker run -d即可，问题解决。
+
+有时候出现错误：
+”Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.26/images/json: dial unix /var/run/docker.sock: connect: permission denied“
+问题原因：
+docker进程使用Unix Socket而不是TCP端口。而默认情况下，Unix socket属于root用户，需要root权限才能访问。
+解决方法1
+使用sudo获取管理员权限，运行docker命令
+解决方法2
+docker守护进程启动的时候，会默认赋予名字为docker的用户组读写Unix socket的权限，因此只要创建docker用户组，并将当前用户加入到docker用户组中，那么当前用户就有权限访问Unix socket了，进而也就可以执行docker相关命令
+sudo groupadd docker     #添加docker用户组
+sudo gpasswd -a $USER docker     #将登陆用户加入到docker用户组中
+newgrp docker     #更新用户组
+docker ps    #测试docker命令是否可以使用sudo正常使用

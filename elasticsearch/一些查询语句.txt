@@ -301,3 +301,112 @@ GET /index/type/_search
       }
    }
 }
+
+# 空值查询
+curl -X POST "localhost:9200/my_index/posts/_bulk" -H 'Content-Type: application/json' -d'
+{ "index": { "_id": "1"              }}
+{ "tags" : ["search"]                }
+{ "index": { "_id": "2"              }}
+{ "tags" : ["search", "open_source"] }
+{ "index": { "_id": "3"              }}
+{ "other_field" : "some data"        }
+{ "index": { "_id": "4"              }}
+{ "tags" : null                      }
+{ "index": { "_id": "5"              }}
+{ "tags" : ["search", null]          }
+{ "index": { "_id": "6"              }}
+{ "tags" : ""          }
+{ "index": { "_id": "7"              }}
+{ "tags" : []          }
+'
+
+# 非空字段， is not null
+curl -X GET "localhost:9200/my_index/posts/_search" -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "exists" : { "field" : "tags" }
+            }
+        }
+    }
+}
+'
+# 查询结果有4个，_id为：1,2,5,6；这个结果包括tags字段为空字符串的；
+
+# 若希望查询结果中不包括，tags字段为空字符串的；则需要通过下面的方法实现：
+curl -X GET "localhost:9200/my_index/posts/_search" -H 'Content-Type: application/json' -d'
+{
+     "query": {"bool": {"must": [{
+                                     "constant_score": {
+                                         "filter": {
+                                             "exists": {
+                                                 "field": "tags"
+                                             }
+                                         }
+                                     }
+                                 }
+                                 ],
+                        "must_not": [
+                            {
+                              "term": {
+                                "tags.keyword": ""
+                              }
+                            }
+                        ],
+                        "should": []}},
+     "size": 10,
+     "sort": []
+}'
+
+# 多字段搜索：
+curl -XPOST "http://192.168.3.105:9200/all_baoxian_intent_20180723_160904/_search" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "multi_match": {
+      "query": "Baoxianchanpin",
+      "fields": [
+        "必选实体.keyword",
+        "可选实体.keyword"
+      ]
+    }
+  }
+}'
+
+# 先根据分数排序，再根据字段长度排序
+{
+  "size": 20,
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "script": "doc['query_question.keyword'].value.length()",
+        "type": "number",
+        "order": "desc"
+      }
+    }
+  ],
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "intent.keyword": {
+              "boost": 0.001,
+              "term": "限制_投保_地点"
+            }
+          }
+        },
+        {
+          "match": {
+            "query_question": "是否所有地区的客户均可投保？"
+          }
+        }
+      ]
+    }
+  }
+}

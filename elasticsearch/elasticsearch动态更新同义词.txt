@@ -8,6 +8,9 @@ Author: watsonzhu(朱斌华) <watsonzhu@tencent.com>
 Date:   2017-05-17 10:25:26 +0800
 ...
 gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ mvn package
+# 若有报错： /home/gswyhq/github_projects/elasticsearch-analysis-dynamic-synonym/src/main/java/com/bellszhu/elasticsearch/plugin/DynamicSynonymPlugin.java:[40,4] 错误: 方法不会覆盖或实现超类型的方法
+# 解决方法，删除报错行的：@Overrride注解
+
 gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym$ cd target/releases/
 gswewf@gswewf-pc:~/github_projects/elasticsearch-analysis-dynamic-synonym/target/releases$ ls
 elasticsearch-analysis-dynamic-synonym-5.2.0--.zip

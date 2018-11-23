@@ -1,0 +1,53 @@
+
+# 设置多个属性
+MATCH  (n2:Number{name:"260万笔"}) where id(n2)=6134 set n2.name='600万' set n2.Name="600万"set n2.alias='600万' return n2
+
+# 或者通过map,设置多个属性
+match (p { name: 'Peter' })
+SET p += { hungry: TRUE , position: 'Entrepreneur' } return p
+
+# 从map添加属性
+MATCH (peter:Number { name: '600万' }) SET peter += { hungry: TRUE , position: 'Entrepreneur' } return peter
+
+# 在节点上加标签：    MATCH (n { name: 'Stefan' }) SET n :German RETURN n
+MATCH (n { name: 'Emil' }) SET n :Swedish:Bossman RETURN n
+
+# set的属性值可以拷贝原有的属性值，或者使用原有的属性值进行运算：
+match (n{name:'xys'})-[r:read]->(m{name:'books'})   set r.num=r.num+1
+
+# FOREACH:
+为所有节点设置mark属性：
+MATCH p =(begin)-[*]->(END ) WHERE begin.name='A' AND END .name='D' FOREACH (n IN nodes(p)| SET n.marked = TRUE )
+
+# 通过参数重设某个属性：
+参数：
+{
+  "surname" : "Taylor"
+}
+请求：
+MATCH (n { name: 'Andres' })
+SET n.surname = $surname
+RETURN n.name, n.surname
+
+# 通过参数设置所有的属性：
+参数：
+{
+  "props" : {
+    "name" : "Andres",
+    "position" : "Developer"
+  }
+}
+请求：
+MATCH (n { name: 'Andres' })
+SET n = $props
+RETURN n.name, n.position, n.age, n.hungry
+
+# 重设节点标签（Set a labels on a node）：
+MATCH (n { name: 'Stefan' })
+SET n:German
+RETURN n.name, labels(n) AS labels
+
+# 重设节点标签（Set multiple labels on a node）：
+MATCH (n { name: 'Emil' })
+SET n:Swedish:Bossman
+RETURN n.name, labels(n) AS labels

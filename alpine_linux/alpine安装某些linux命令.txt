@@ -1,0 +1,6 @@
+
+1, ssh
+apk update
+apk add openssh
+
+

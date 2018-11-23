@@ -1,0 +1,19 @@
+# nohup的使用：
+alpine镜像带有busybox，这是许多命令的替代品，包括nohup。
+第一步，安装coreutils包：
+/usr/src # apk --update add coreutils
+# 查看使用帮助：
+/usr/src # coreutils --help
+Usage: coreutils --coreutils-prog=PROGRAM_NAME [PARAMETERS]... 
+Execute the PROGRAM_NAME built-in program with the given PARAMETERS.
+
+      --help     display this help and exit
+      --version  output version information and exit
+
+Built-in programs:
+ [ b2sum base32 base64 basename cat chcon chgrp chmod chown chroot cksum comm cp csplit cut date dd df dir dircolors dirname du echo env expand expr factor false fmt fold ginstall groups head hostid id join link ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nohup nproc numfmt od paste pathchk pinky pr printenv printf ptx pwd readlink realpath rm rmdir runcon seq sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf sleep sort split stat stdbuf stty sum sync tac tail tee test timeout touch tr true truncate tsort tty uname unexpand uniq unlink users vdir wc who whoami yes
+
+
+第二步，使用 nohup:
+/usr/src/app # coreutils --coreutils-prog=nohup python3 start.py --port 6666 > /dev/null &
+

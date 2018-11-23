@@ -1,0 +1,21 @@
+
+# 命令行打开excel
+目标：通过命令‘excel chat.xls’来打开excel文件`chat.xls`
+~$ excel chat.xls  
+步骤1：查找到excel程序位置
+打开一个excel文件，找到对应的程序位置：
+gswyhq@gswyhq-PC:~/Desktop$ ps -aux|grep wps
+gswyhq    8871  0.5  1.5 1254120 248204 ?      Sl   10:56   0:14 /opt/kingsoft/wps-office/office6/et /home/gswyhq/Downloads/state_transition_graph (1).csv
+
+步骤2：编辑.bash_aliases 文件设置编码
+gswyhq@gswyhq-PC:~$ vim .bash_aliases
+# 添加一行： 
+alias excel='/opt/kingsoft/wps-office/office6/et'
+# 使设置生效：
+# source ~/.bash_aliases
+
+步骤3：开始使用
+gswyhq@gswyhq-PC:~/Downloads$ excel 保单查询标注cypher.csv
+
+同理可以设置word:
+alias word='/opt/kingsoft/wps-office/office6/wps'

@@ -1,0 +1,59 @@
+如何在Ubuntu 16.04上安装配置邮件发送服务器
+gswyhq@gswyhq-PC:~$ docker pull ubuntu:16.04
+
+gswyhq@gswyhq-PC:~$ docker run --rm -d -it --name=ubuntu_email ubuntu:16.04 /bin/bash
+2a2b65c8cbc2ed6137a0db7cbd5b5e4a52427269d4f79d3487a8ca6fe8af5a55
+gswyhq@gswyhq-PC:~$ docker exec -it ubuntu_email /bin/bash
+# 更新软件包：
+root@2a2b65c8cbc2:/# apt-get update
+
+# 然后安装Mailutils(Postfix在该包中):
+root@2a2b65c8cbc2:/# apt-get install mailutils
+# 若是deepin系统则是安装： apt-get install postfix
+
+
+# 安装中首先会出现问题请你确认，选择Y
+
+Do you want to continue?[Y/n]
+
+以下配置页面共5个选项，我们选择默认选项Internet Site：
+  1. No configuration  2. Internet Site  3. Internet with smarthost  4. Satellite system  5. Local only
+General type of mail configuration: 2
+
+# 下面的配置页面是输入系统邮件名字：
+Thus, if a mail address on the local host is foo@example.org, the correct value for this option would be example.org.
+
+System mail name: 145.com
+
+
+安装完毕。
+步骤二：配置Postfix
+
+Postfix需要在配置中监听loopbackinterface，打开主Postfix配置文件：
+
+sudo vi /etc/postfix/main.cf
+将inet_interfaces = all更为inet_interfaces = loopback-only，保存退出。
+
+重启Postfix：
+
+sudo service postfix restart
+
+
+步骤三 测试发送邮件：
+root@2a2b65c8cbc2:/# echo "ceshiyoujianzhengwen" | mail -s "test" gswyhq@126.com
+
+发送正文为中文的邮件(标题为中文会发送不成功)：
+gswyhq@gswyhq-PC:~$ echo "邮件正文" | mail -s "test" --encoding=utf-8 gswyhq@126.com
+
+打开邮箱，会发现收到一份邮件：
+标题：test 
+
+发件人：root@2a2b65c8cbc2 root <>
+(由 <root@2a2b65c8cbc2> 代发) 
+
+时   间：2018年7月25日(星期三) 上午9:49 
+收件人： 
+gswyhq <gswyhq@126.com>
+
+来源： https://www.jianshu.com/p/78e2e1914ec1
+

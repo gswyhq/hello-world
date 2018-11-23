@@ -118,3 +118,8 @@ git tag -d old_tag_name
 
 # 更新tag名及提交的信息：
 git tag zhongan_hangyangxian_neo4j_20171124 zhongan_hangyangxian_neo4j -f -m "众安航延险知识图谱展示，支持6个特定Word文档条款上传后进行对应的问答, 20171124版本"
+
+# 重命名tag；rename a tag old to new:
+git tag new old
+git tag -d old
+

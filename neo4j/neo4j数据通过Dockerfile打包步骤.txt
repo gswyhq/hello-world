@@ -1,0 +1,32 @@
+
+1、启动一个空容器
+gswyhq@gswyhq-PC:~/github_projects/docker-neo4j-publish/3.4.5/community$ docker run --rm -e TZ='CST-8' -e NEO4J_AUTH=neo4j/gswyhq -p 1337:1337 -p 7474:7474 -p 7687:7687 --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=0.0.0.0 -e NEO4J_dbms_shell_port=1337 -e NEO4J_dbms_active__database=graph.db  neo4j:3.4.5
+
+2、迁移数据到该容器中：
+导出数据：
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/xinxin_20180810_all.cypher",{})
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ scp zy105:/home/zy/docker/neo4j/xinxin_zhongjixian/data/xinxin_20180810_all.cypher .
+gswyhq@gswyhq-PC:~/docker/neo4j/linshi$ docker cp xinxin_20180810_all.cypher 022e47309736:/var/lib/neo4j/data/
+bash-4.4# ./bin/neo4j-shell --file data/xinxin_20180810_all.cypher
+
+3、将改容器中的数据复制出来到一个文件夹中；
+gswyhq@gswyhq-PC:~/github_projects/docker-neo4j-publish/3.4.5/community$ docker cp 022e47309736:/data xinxin_neo4j_data_20180810
+
+4、编写Dockerfile_xinxin_20180810文件：
+
+主要是在（https://github.com/neo4j/docker-neo4j-publish/blob/master/3.4.5/community/Dockerfile）基础上添加：
+COPY ./plugins /plugins
+COPY neo4j-community-3.4.5-unix.tar.gz neo4j-community-3.4.5-unix.tar.gz
+#    && curl --fail --silent --show-error --location --remote-name ${NEO4J_URI}
+
+# VOLUME /data
+COPY ./xinxin_20180803_data /data
+
+
+5、构建镜像：
+gswyhq@gswyhq-PC:~/github_projects/docker-neo4j-publish/3.4.5/community$ docker build -t xinxin_neo4j_data:20180810 -f Dockerfile_xinxin_20180810 .
+
+6、用刚才构建的镜像启动一个容器：
+docker run --rm -e TZ='CST-8' -e NEO4J_AUTH=neo4j/gswyhq -p 1337:1337 -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=0.0.0.0 -e NEO4J_dbms_shell_port=1337 -e NEO4J_dbms_active__database=graph.db  xinxin_neo4j_data:20180810
+
+

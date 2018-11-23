@@ -51,3 +51,13 @@
             proxy_read_timeout 300;
         }
     }
+
+# /etc/init.d # nginx 
+nginx: [emerg] open() "/run/nginx/nginx.pid" failed (2: No such file or directory)
+可能是`/run/nginx`目录不存在，创建一个空目录即可：
+mkdir /run/nginx
+
+nginx代理多个服务，但若有服务未开启，可能会导致：
+用户访问请求慢,TTFB时间长的问题;网页响应慢，waiting（TTFB）时间过长
+
+

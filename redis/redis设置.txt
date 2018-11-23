@@ -1,0 +1,14 @@
+# 设置密码：
+打开redis.conf文件，搜索requirepass关键字
+关注标记的那一行，#requirepass foobared。设置密码的方法就是去掉注释的#，把foobared替换成自己的密码即可，例如将密码设置为123456： 
+requirepass 123456
+修改完成后重启redis，再次通过redis客户端redis-cli登录
+加了-a参数之后即可正常连接并操作redis。
+redis-cli -a 123456
+
+docker启动redis并设置密码
+设置密码只需要加上–requirepass
+docker run -d --name myredis -p 6379:6379 redis --requirepass "mypassword"
+
+
+

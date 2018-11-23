@@ -1,0 +1,60 @@
+
+
+返回一个节点：match (n {name:"B"}) return n;
+返回一个关系：match (n {name:"A"})-[r:KNOWS]->(c) return r;
+返回一个属性：match (n {name:"A"}) return n.name;
+返回所有节点：match p=(a {name:"A"})-[r]->(b) return *;
+列别名： match (a {name:"A"}) return a.age as thisisage;
+表达式： match (a {name:"A"}) return a.age >30 ,"literal",(a)-->();
+唯一结果：match (a {name:"A"})-->(b) return distinct b;
+
+ORDER BY:
+
+通过属性排序所有节点：match (n) return n order by n.name;
+多个属性排序：match (n) return n order n.name,n.age;
+指定排序方式：match (n) return n order by n.name desc;
+NULL值的排序：match (n) return n.length,n order by n.length;
+
+LIMIT:
+
+match (n) return n order by n.name limit 3;
+
+SKIP:
+match (n) return n order by n.name skip 3;
+match (n) return n order by n.name skip 1 limit 3;
+
+WITH:
+
+过滤聚合函数的结果：
+MATCH (david { name: "David" })--(otherPerson)-->()  WITH otherPerson, count(*) AS foaf
+WHERE foaf > 1  RETURN otherPerson;
+collect前排序结果：MATCH (n)  WITH n   ORDER BY n.name DESC LIMIT 3  RETURN collect(n.name;
+limit搜索路径的分支：
+MATCH (n { name: "Anders" })--(m)  WITH m
+ORDER BY m.name DESC LIMIT 1  MATCH (m)--(o)  RETURN o.name;
+
+UNWIND:
+将一个集合展开为一个序列：unwind[1,2,3] as x return x;
+创建一个去重的集合：with [1,1,2,3] as coll unwind coll x with distinct x return collect(x) as set;
+
+UNION & UNION ALL:
+
+不删除重复：match (n:Actor) return n.name as name union all match(n:Movie) return b.title as name;
+删除重复：match (n:Actor) return n.name as name union match(n:Movie) return b.title as name;
+
+# extract：从一个节点或关系集合中返回单个属性或值的集合。
+MATCH  p=(n2:Number{name:"260万笔"}) return [x IN nodes(p) WHERE x.name <> '123456' | x.alias]
+
+# 将满足条件的节点的属性值求和
+MATCH  p=(n2:Number)--(n3)--(n4)  RETURN reduce(s = '', n IN nodes(p) | s + n.name) AS reduction
+
+MATCH p=(a)-->(b)-->(c)
+WHERE a.name='Alice' AND b.name='Bob' AND c.name='Daniel'
+RETURN reduce(totalAge = 0, n IN nodes(p)| totalAge + n.age) AS reduction
+
+# 查询结果排序
+# 优先返回关系是`保障项目`,其次按节点b的name属性值的长度降序排列：
+MATCH (a)-[r:`保障项目`|:`保险金额`]->(b) where a.name='保险产品'
+return a,b,type(r) ORDER BY
+CASE type(r) WHEN "保障项目" THEN 0 ELSE 1 END ASC, size(b.name) DESC
+limit 10

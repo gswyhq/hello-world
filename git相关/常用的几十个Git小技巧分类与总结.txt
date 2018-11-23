@@ -17,6 +17,16 @@ git help everyday
 git help -g
 获取Git Bash的自动补全
 curl http://git.io/vfhol > ~/.git-completion.bash && echo '[ -f ~/.git-completion.bash ] && . ~/.git-completion.bash' >> ~/.bashrc
+
+实际上大多数git发行版本，安装git时，git自动补全的脚本（git completion script） 被安装到 /etc/bash_completion.d/ (or /usr/share/bash-completion/completions/git) ；
+这个时候不需要到 github下载git自动补全脚本. 仅仅需要添加到 .bashrc中即可:
+source /etc/bash_completion.d/git
+# or
+source /usr/share/bash-completion/completions/git
+在某些Ubuntu版本中, 默认情况下git autocomplete 可能会被破坏掉了，这时可以通过下面的命令安装修复:
+sudo apt-get install git-core bash-completion
+
+
 设置自动更正
 git config --global help.autocorrect 1
 Remote:远端仓库配置

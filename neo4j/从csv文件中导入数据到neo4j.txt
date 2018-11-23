@@ -33,6 +33,42 @@ gswewf@gswewf-PC:~/yhb$ docker exec -it linshi7474 /bin/bash
 "Neo4j-import"已被弃用，改为：“neo4j-admin import”
 bash-4.3# ./bin/neo4j-admin import --mode=csv --nodes=/var/lib/neo4j/linshi/movies.csv --nodes=/var/lib/neo4j/linshi/actors.csv --relationships="/var/lib/neo4j/linshi/roles.csv" --database=movies.db
 
+
+根据某个查询语句导出：
+Match (n)-[r:`下一步`]->(c)
+with collect(n) + collect(c) as colC, collect(r) as colR UNWIND colC AS n2 with distinct n2, colR with collect(n2) as colN, colR
+CALL apoc.export.csv.data(colN,colR, '/var/lib/neo4j/import/export_nodes_rels.csv',{format:'plain'}) YIELD nodes, relationships
+RETURN nodes, relationships
+
+文件内容如下：
+bash-4.4# head -n 5 /var/lib/neo4j/import/export_nodes_rels.csv
+"_id","_labels","parser_dict","status","answer","pattern","name","recommend_question","min_max_val","non_pattern","_start","_end","_type","lvxingxiantuijian","age"
+"5633",":TuijianState:Zhongdeanlian","{""儿子"": ""孩子"", ""爸"": ""父亲"", ""妈"": ""母亲"", ""我爸"": ""父亲"", ""我妈"": ""母亲"", ""我爸爸"": ""父亲"", ""我爹"": ""父亲"", ""我妈妈"": ""母亲"", ""小孩"": ""孩子"", ""老公"": ""配偶"", ""爸爸"": ""父亲"", ""我"": ""自己"", ""老婆"": ""配偶"", ""妈妈"": ""母亲"", ""女儿"": ""孩子""}","baoxiantijian","小联为您做保险体检啦~ 您可随时输入“退出”终止体检
+（1/3）您想为哪位家人购买产品？","(?P<baoxiantijian>(父亲|母亲|自己|配偶|孩子|爸爸|妈妈|老婆|老公|儿子|女儿|爸|妈|我|我爹)+)","保险体检","[""父亲"",""母亲"",""自己"",""配偶"",""孩子""]","","",,,,,
+"5634",":TuijianState:Zhongdeanlian","","age","了解到您为【自己】购买产品
+（2/3）您【自己】的年龄是多少？","(?P<age>([一二两三四五六七八九十0-9])+([周岁天月个])*)","询问被投保人年龄","[""例如:1岁""]","[0,150]","([万亿元块])+",,,,,
+bash-4.4# tail -n 5 /var/lib/neo4j/import/export_nodes_rels.csv
+,,,,,,,,,,"5643","5644","下一步","东南亚、日韩、港澳台",""
+,,,,,,,,,,"5644","5645","下一步","","[18,150]"
+,,,,,,,,,,"5645","5646","下一步","",""
+,,,,,,,,,,"5646","5647","下一步","",""
+,,,,,,,,,,"5647","5648","下一步","",""
+
+
+节点及关系同时导入：
+LOAD CSV WITH HEADERS FROM "file:///export_nodes_rels.csv" AS line
+FOREACH (n IN (CASE WHEN line._id IS NOT NULL THEN [1] ELSE[] END) |
+    CREATE (p:TuijianState:Zhongdeanlian { id:toint(line._id),  parser_dict:line.parser_dict, status:line.status, answer:line.answer, pattern:line.pattern, name:line.name, recommend_question:line.recommend_question, min_max_val:line.min_max_val, non_pattern:line.non_pattern
+})
+)
+FOREACH (n IN (CASE WHEN line._id is null THEN [1] ELSE[] END) |
+    MERGE (user { id: toint(line._start)})
+    MERGE (brand {id: toint(line._end)})
+    MERGE (user)-[:`下一步2`{lvxingxiantuijian:line.lvxingxiantuijian, age:line.age}]->(brand)
+)
+
+# 将导出的数据导入neo4j:
+
 更多示例见： https://neo4j.com/docs/operations-manual/current/tutorial/import-tool/
 
 gswewf@gswewf-PC:~/docker/neo4j/linshi$ head /home/gswewf/docker/neo4j/linshi/person.csv
@@ -373,6 +409,21 @@ WITH HEADERS表明csv文件的第一行是属性名。
 LOAD CSV WITH HEADERS FROM "file:///PersonRel_Format.csv" AS line
 match (from:person{id:line.from_id}),(to:person{id:line.to_id})
 merge (from)-[r:rel{property1:line.property1,property2:line.property2}]->(to)
+
+其他一些示例：
+LOAD CSV WITH HEADERS FROM "file:///test_dataset/edges.csv" AS line
+WITH line WHERE line.relation ='RELATED_TO'
+MATCH (person1:Person {pid:line.node1})
+MATCH (person2:Person {pid:line.node2})
+CREATE (person1)-[:RELATED_TO {type:line.type}]->(person2)
+
+USING PERIODIC COMMIT
+LOAD CSV FROM "file:///file-name.csv" AS line
+WITH line
+SKIP 2000000 LIMIT 1000000
+MATCH (a:Person {name: line[0]}),(b:Person {name:line[1]})
+CREATE (a)-[:FOLLOWS {period: line[2]}]->(b)
+
 
 
 目前主要有以下几种数据插入方式：

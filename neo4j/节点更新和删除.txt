@@ -1,0 +1,60 @@
+节点更新和删除
+
+例1:更新和添加一个属性
+
+  //1.创建一个节点，只有一个属性name='张三'
+  CREATE ({name:'张三'})
+  
+  //2.给创建的"张三"节点，添加一个属性age=20，修改name属性值为"李四"
+  MATCH (n {name:'张三'}) 
+  SET n.name='李四'
+  SET n.age=20 
+  RETURN n
+例2: 修改节点信息,覆盖节点属性
+
+  //该语句会直接删除掉name属性，新增age属性
+  MATCH (n {name:'张三'}) 
+  SET n={age:20}
+例3:修改节点信息,新增节点属性
+
+  //该语句不会删除掉name属性，而是在节点中新增age属性
+  MATCH (n {name:'张三'}) SET n += {age:20} RETURN n
+例4:删除节点属性
+
+  MATCH (n{name:'张三'}) remove n.age RETURN n
+例5:为节点添加新标签
+
+  //添加一个标签
+  MATCH (n{name:'张三'}) SET n:Person RETURN n
+  //添加多个标签
+  MATCH (n{name:'张三'}) SET n:Person:Student RETURN n
+例6:删除节点标签
+
+  MATCH (n{name:'张三'}) REMOVE n:Person RETURN n
+例7:为已经存在的两个节点添加关系
+
+
+  MATCH (a:Person {name: "张三"}),
+        (b:Person {name: "李四"})
+  MERGE (a)-[r:FRIENDS]->(b)
+例8:匹配一个节点，更新属性如果属性不存在则创建该属性
+
+MERGE (n:Person {name: "张三"})
+  ON CREATE SET n.created = timestamp()
+  ON MATCH SET
+    n.counter = coalesce(n.counter, 0) + 1,
+    n.accessTime = timestamp()
+例9:匹配一个节点为他创建一个新的关系
+
+  //如果没有"王五"节点则创建一个新的
+  MATCH (a:Person {name: "张三"})
+    MERGE
+    (a)-[r:KNOWS]->(b:Person {name: "王五"})
+例10:删除一个节和关系
+
+  MATCH (a)-[r:KNOWS]->(b) DELETE r,b
+例11:级联删除
+
+  //删除"王五"节点之后，将与王五节点建立关系也删除掉
+  MATCH (n{name: "王五"}) DETACH DELETE n
+

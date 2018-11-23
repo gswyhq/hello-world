@@ -81,4 +81,6 @@ gswewf@gswewf-pc:~$ docker top ubuntu-yhb
 # 查看容器的配置：
 gswewf@gswewf-pc:~$ docker inspect ubuntu-yhb
 
+# 拉取指定镜像：
+docker pull 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp@sha256:9dd2acf3e3f0e1763ec0d91c6cdcb260162e62e460a151d47b647b4150da2ed1
 

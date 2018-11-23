@@ -37,15 +37,16 @@ RETURN count(*)
 如果你的更新操作是相互独立的话（创建节点，更新属性或者更新独立的子图），那么你可以添加parallel:true来充分利用cpu。
 
 比方说，你想计算多个物品的评分，并通过批处理的方式来更新属性，你应该按下面这样操作
-call apoc.periodic.iterate('
-MATCH (n:User)-[r1:LIKES]->(thing)<-[r2:RATED]-(m:User) WHERE id(n)<id(m) RETURN thing, avg( r1.rating + r2.rating ) as score
-','
-WITH {thing} as t SET t.score = {score}
-', {batchSize:10000, parallel:true})
+call apoc.periodic.iterate('MATCH (n:User)-[r1:LIKES]->(thing)<-[r2:RATED]-(m:User) WHERE id(n)<id(m) RETURN thing, avg( r1.rating + r2.rating ) as score',
+                           'WITH {thing} as t SET t.score = {score}', 
+                           {batchSize:10000, parallel:true}
+                          )
 
 其他：
-call apoc.periodic.iterate("match (r:Label {`domain key` : 'unit-B2'})-[:isPredecessorOf*0..]->(n:`T-Base`) return distinct n as map","
-create (copy:`T-Base`) set copy = map, copy.`domain key` = map.`domain key` + '-copy'  with map, copy create (copy)-[:isCopyOf]->(map)",{batchSize:10000,iterateList:true})
+call apoc.periodic.iterate("match (r:Label {`domain key` : 'unit-B2'})-[:isPredecessorOf*0..]->(n:`T-Base`) return distinct n as map",
+                           "create (copy:`T-Base`) set copy = map, copy.`domain key` = map.`domain key` + '-copy'  with map, copy create (copy)-[:isCopyOf]->(map)",
+                           {batchSize:10000,iterateList:true}
+                          )
 
 # 动态创建或者操作Map，并赋给属性
 尽管Cypher为列表提供了相当遍历的操作，如range, collect, unwind, reduce, extract, filter, size等，但Map在有的时候也是需要进行创建和更改的。
@@ -160,3 +161,22 @@ CALL apoc.load.json(url) YIELD value
 UNWIND value.items AS item
 RETURN item.title, item.owner, item.creation_date, keys(item)
 
+复杂用法：
+Match (n)-[r:`下一步`]->(c)
+with collect(n) as colN, collect(c) as colC, collect(r) as colR
+CALL apoc.export.cypher.data(colN+colC,colR, '/tmp/exportData.cypher',{format:'plain'}) YIELD nodes, relationships
+RETURN nodes, relationships
+
+time ./cypher-shell -u yourUsername -p yourPassword  "Match (n:Person)-[r:LIKES_COMMENT]->(c:Comment)
+with collect(n) as colN, collect(c) as colC, collect(r) as colR
+CALL apoc.export.cypher.data(colN+colC,colR, 'yourPath/exportData.cypher',{format:'plain'}) YIELD nodes, relationships
+RETURN nodes, relationships"
+
+mkdir plugins
+pushd plugins
+wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.4.0.1/apoc-3.4.0.1-all.jar
+popd
+docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -p 7687:7687 neo4j:3.4.0
+
+下载zip文件（https://codeload.github.com/neo4j-contrib/neo4j-apoc-procedures/zip/3.4.0.1），解压；
+浏览器打开‘./neo4j-apoc-procedures-3.4.0.1/docs/index.html'即可查看apoc的使用帮助；

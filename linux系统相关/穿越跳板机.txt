@@ -1,0 +1,25 @@
+穿越跳板机 desktop -> gateway -> server
+从desktop访问server，必须先登录到gateway，即:
+[user@desktop ~]$ ssh gateway
+[user@gateway ~]$ ssh server
+
+穿越跳板机方法：
+STEP1. 在desktop上生成RSA公钥私钥
+STEP2. 在desktop的.ssh目录下生成config文件，文件内容如下：
+Host shortServer
+    ProxyCommand ssh user@gateway nc server %p 2>/dev/nul
+
+其中，gateway为跳板机ip，server为目标服务器ip，shortServer自定义一个缩写的服务器名称。
+
+例如：gateway地址x.y.g.w，目标服务器，例如172.31.56.123。
+
+Host 123
+    ProxyCommand ssh user@x.y.g.w nc 172.31.56.123 %p 2>/dev/nul
+
+连接方法： 
+
+[user@desktop ~]$ ssh 123
+此时SCP也能直接用了
+
+[user@desktop ~]$ scp ToCopy.txt 123:
+

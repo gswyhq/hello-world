@@ -1,0 +1,11 @@
+
+//返回任意关系为`产品结果`或`保单号`的所有节点关系
+MATCH p=(n)-[:`产品价格`|:`保单号`]->(m) RETURN p
+
+// 在最短路径中，查询关系中有下限的：
+match p=shortestPath((m:Baoxianchanpin{name:'百万信天游'})-[r*1..9]->(n))
+where n<>m and any(x in r where type(x)='下限') return p;
+
+//按关系的属性：只经过那些属性f小于4的关系
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in r where x.f<4) return p;

@@ -1,5 +1,17 @@
 
+ab是apachebench命令的缩写。
+
+ab的原理：ab命令会创建多个并发访问线程，模拟多个访问者同时对某一URL地址进行访问。它的测试目标是基于URL的，因此，它既可以用来测试apache的负载压力，也可以测试nginx、lighthttp、tomcat、IIS等其它Web服务器的压力。
+
+ab命令对发出负载的计算机要求很低，它既不会占用很高CPU，也不会占用很多内存。但却会给目标服务器造成巨大的负载，其原理类似CC攻击。自己测试使用也需要注意，否则一次上太多的负载。可能造成目标服务器资源耗完，严重时甚至导致死机。
+
 ab是apache自带的一个很好用的压力测试工具，当安装完apache的时候，就可以在bin下面找到ab
+
+也可以通过docker使用：
+docker pull devth/alpine-bench
+docker run -e 'POST={"msg_type": "text", "ref": "", "question": "解释一下保险", "source": "h5", "pid": "t6.site.web1.ai_1", "uid": "05b213342c2141d99c14ec1632f1e118", "ip": "172.31.7.184", "media": {}}'-it --rm -t devth/alpine-bench -t 60 -c 30 http://192.168.3.164:8000/ 
+
+
 apache2的安装（apache2在apache的基础上有大的改动）：
 gswewf@gswewf-pc:~$ sudo apt-get install apache2
 
@@ -102,5 +114,4 @@ Percentage of the requests served within a certain time (ms)
 其中 50％ 的用户响应时间小于 369 毫秒 
 80 ％ 的用户响应时间小于 453 毫秒 
 最大的响应时间小于 487 毫秒 
-
 

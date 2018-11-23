@@ -1,0 +1,11 @@
+
+# 第一步：拉取镜像：
+docker pull harryhan1989/mindoc
+
+# 第二步：开启MySQL服务，新建一个名为“mindoc”的MySQL数据库：
+
+# 第三步：启动一个mindoc容器：
+gswyhq@gswyhq-PC:~/docker/mindoc$ docker run -p 8181:8181 --name mindoc -e DB_ADAPTER=mysql -e MYSQL_PORT_3306_TCP_ADDR=192.168.3.145 -e MYSQL_PORT_3306_TCP_PORT=3306 -e MYSQL_INSTANCE_NAME=mindoc -e MYSQL_USERNAME=root -e MYSQL_PASSWORD=123456 -e httpport=8181 -d harryhan1989/mindoc:latest
+3850d2750d556f59e5d393e9e40093493a01e9ffe01e0755c6d4264a9dacce0f
+
+

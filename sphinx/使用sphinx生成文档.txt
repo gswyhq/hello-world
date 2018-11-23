@@ -1,0 +1,165 @@
+
+2.1 安装工具
+$ sudo pip install sphinx sphinx-autobuild
+2.2 新建文档项目
+$ mkdir docs
+$ cd docs
+$ sphinx-quickstart
+
+# 在 docs下运行 sphinx-quickstart
+# 之后会提示让对项目进行一些设置，以生成项目的配置文件
+> Root path for the documentation [.]: doc  # 在当前目录下新建doc文件夹存放sphinx相关信息
+> Separate source and build directories (y/n) [n]:   # 默认，直接回车
+> Name prefix for templates and static dir [_]:
+> Project name: python123   # 输入项目名称
+> Author name(s): 123   # 作者
+> Project language [en]: zh_CN
+> autodoc: automatically insert docstrings from modules (y/n) [n]: y  # 这个很重要，输入y
+> viewcode: include links to the source code of documented Python objects (y/n) [n]: y  # 很重要，输入y，表示将源码也放到文档中，你看很多python的模块的文档，其实都是包含代码的。
+
+# 配置conf.py 
+在conf.py文件中加入如下代码， 导入自己的项目路径
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('./../../code'))
+
+# 生成rst文件 
+注意:-o 后面跟的是保存rst文件的路径， 你的index.rst在哪个目录，那你就指定哪个目录。然后在后面的是你的项目(代码)路径
+root@a4850076c1e3:/ner_es/docs# mkdir source
+root@a4850076c1e3:/ner_es/docs# sphinx-apidoc -o ./source ../code
+
+# 最后执行make html,生成html文件
+
+2.3 生成特定格式文档
+$ make html
+$ make latexpdf
+$ make epub
+
+4 本地使用RTD主题
+
+$ sudo pip install sphinx_rtd_theme
+更新conf.py:
+
+import sphinx_rtd_theme
+# 将 html_theme = “alabaster”改成如下，再加上html_theme_path：
+
+html_theme = "sphinx_rtd_theme"
+
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# 最后我们再执行一次：make html 
+
+# 编译成功，进入docs目录，点击bulid目录，进入html目录，查看index.html，就可以看见文档html了。
+
+5 Sphinx生成pdf的中文支持问题
+
+目前看来几个文档，如果不想认真地去学一遍Tex的话，还真没有很好地解决方法，暂时可以修改config.py:
+
+language = "zh_CN"
+
+latex_elements = {
+# The paper size ('letterpaper' or 'a4paper').
+'papersize': 'a4paper',
+
+# The font size ('10pt', '11pt' or '12pt').
+#'pointsize': '12pt',
+
+'classoptions': ',english',
+'inputenc': '',
+'utf8extra': '',
+
+# Additional stuff for the LaTeX preamble.
+'preamble': '''
+\usepackage{xeCJK}
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+\setCJKmainfont[BoldFont=SimHei, ItalicFont=STKaiti]{SimSun}
+\setCJKmonofont[Scale=0.9]{Consolas}
+\setCJKfamilyfont{song}[BoldFont=SimSun]{SimSun}
+\setCJKfamilyfont{sf}[BoldFont=SimSun]{SimSun}
+'''
+}
+生成pdf:
+
+$ make latex
+$ cd _build/latex/
+$ xelatex *.tex
+
+root@a4850076c1e3:/ner_es# mkdir docs
+root@a4850076c1e3:/ner_es# cd docs/
+root@a4850076c1e3:/ner_es/docs# sphinx-quickstart 
+Welcome to the Sphinx 1.7.6 quickstart utility.
+
+Please enter values for the following settings (just press Enter to
+accept a default value, if one is given in brackets).
+
+Selected root path: .
+
+You have two options for placing the build directory for Sphinx output.
+Either, you use a directory "_build" within the root path, or you separate
+"source" and "build" directories within the root path.
+> Separate source and build directories (y/n) [n]: 
+
+Inside the root directory, two more directories will be created; "_templates"
+for custom HTML templates and "_static" for custom stylesheets and other static
+files. You can enter another prefix (such as ".") to replace the underscore.
+> Name prefix for templates and static dir [_]: 
+
+The project name will occur in several places in the built documentation.
+> Project name: ner
+> Author name(s): gswyhq
+> Project release []: 
+
+If the documents are to be written in a language other than English,
+you can select a language here by its language code. Sphinx will then
+translate text that it generates into that language.
+
+For a list of supported codes, see
+http://sphinx-doc.org/config.html#confval-language.
+> Project language [en]: zh_CN
+
+The file name suffix for source files. Commonly, this is either ".txt"
+or ".rst".  Only files with this suffix are considered documents.
+> Source file suffix [.rst]: 
+
+One document is special in that it is considered the top node of the
+"contents tree", that is, it is the root of the hierarchical structure
+of the documents. Normally, this is "index", but if your "index"
+document is a custom template, you can also set this to another filename.
+> Name of your master document (without suffix) [index]: 
+
+Sphinx can also add configuration for epub output:
+> Do you want to use the epub builder (y/n) [n]: 
+Indicate which of the following Sphinx extensions should be enabled:
+> autodoc: automatically insert docstrings from modules (y/n) [n]: y
+> doctest: automatically test code snippets in doctest blocks (y/n) [n]: 
+> intersphinx: link between Sphinx documentation of different projects (y/n) [n]: 
+> todo: write "todo" entries that can be shown or hidden on build (y/n) [n]: 
+> coverage: checks for documentation coverage (y/n) [n]: 
+> imgmath: include math, rendered as PNG or SVG images (y/n) [n]: 
+> mathjax: include math, rendered in the browser by MathJax (y/n) [n]: 
+> ifconfig: conditional inclusion of content based on config values (y/n) [n]: 
+> viewcode: include links to the source code of documented Python objects (y/n) [n]: y
+> githubpages: create .nojekyll file to publish the document on GitHub pages (y/n) [n]: 
+
+A Makefile and a Windows command file can be generated for you so that you
+only have to run e.g. `make html' instead of invoking sphinx-build
+directly.
+> Create Makefile? (y/n) [y]: 
+> Create Windows command file? (y/n) [y]: 
+
+Creating file ./conf.py.
+Creating file ./index.rst.
+Creating file ./Makefile.
+Creating file ./make.bat.
+
+Finished: An initial directory structure has been created.
+
+You should now populate your master file ./index.rst and create other documentation
+source files. Use the Makefile to build the docs, like so:
+   make builder
+where "builder" is one of the supported builders, e.g. html, latex or linkcheck.
+
+root@a4850076c1e3:/ner_es/docs# 
+
+

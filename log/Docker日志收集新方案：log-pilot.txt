@@ -1,0 +1,64 @@
+
+docker pull registry.cn-hangzhou.aliyuncs.com/acs-sample/log-pilot
+
+docker run --rm -it \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /:/host \
+    --privileged \
+    -e FLUENTD_OUTPUT=elasticsearch \
+    -e ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST} \
+    -e ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT} \
+    registry.cn-hangzhou.aliyuncs.com/acs-sample/log-pilot
+
+
+FLUENTD_OUTPUT=elasticsearch：把日志发送到 ElasticSearch。
+ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}：ElasticSearch 的域名。
+ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}：ElasticSearch 的端口号。
+
+privileged：使用该参数，container内的root拥有真正的root权限。
+否则，container内的root只是外部的一个普通用户权限。
+
+
+在阿里云容器服务里使用 log-pilot
+
+容器服务专门为 log-pilot 做了优化，最适合 log-pilot 运行。
+
+要在容器服务里运行 log-pilot，您仅需要使用下面的编排文件创建一个新应用。有关如何创建应用，参见 创建应用。
+
+pilot:
+  image: registry.cn-hangzhou.aliyuncs.com/acs-sample/log-pilot:0.9.5-filebeat
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /:/host
+  privileged: true
+  environment:
+    FLUENTD_OUTPUT: elasticsearch #按照您的需要替换 
+    ELASTICSEARCH_HOST: ${elasticsearch} #按照您的需要替换
+    ELASTICSEARCH_PORT: 9200
+  labels:
+    aliyun.global: true
+接下来，您就可以在要收集日志的应用上使用 aliyun.logs.xxx 标签了。
+
+label 说明
+
+启动 tomcat 时，声明了下面两个 label 来告诉 log-pilot 这个容器的日志位置。
+
+--label aliyun.logs.catalina=stdout 
+--label aliyun.logs.access=/usr/local/tomcat/logs/localhost_access_log.*.txt
+您还可以在应用容器上添加更多的标签。
+
+在本方案的 elasticsearch 场景下，环境变量中的 $name 表示 Index，本例中 $name即是 catalina 和 access 。
+
+aliyun.logs.$name = $path
+变量 name 是日志名称，只能包含 0~9、a~z、A~Z 和连字符（-）。
+变量 path 是要收集的日志路径，必须具体到文件，不能只写目录。文件名部分可以使用通配符，例如，/var/log/he.log 和 /var/log/*.log 都是正确的值，但 /var/log 不行，不能只写到目录。stdout 是一个特殊值，表示标准输出。
+aliyun.logs.$name.format：日志格式，目前支持以下格式。
+none：无格式纯文本。
+json：json 格式，每行一个完整的 json 字符串。
+csv：csv 格式。
+aliyun.logs.$name.tags：上报日志时，额外增加的字段，格式为 k1=v1,k2=v2，每个 key-value 之间使用逗号分隔，例如 aliyun.logs.access.tags="name=hello,stage=test"，上报到存储的日志里就会出现 name 字段和 stage 字段。
+如果使用 ElasticSearch 作为日志存储，target 这个 tag 具有特殊含义，表示 ElasticSearch 里对应的 index。
+
+
+参考资料： https://helpcdn.aliyun.com/document_detail/50441.html
+

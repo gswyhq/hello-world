@@ -561,7 +561,7 @@ RETURN p2
 
 查询两个节点间最短路径对应的所有实体关系列表：
 MATCH p=(n0)-[*]->(n9)
-where  n0.name = "尊享惠康" and n9.name="恶性肿瘤"
+where  n0.name = "保险产品" and n9.name="恶性肿瘤"
 WITH extract(rel in relationships(p) | [STARTNODE(rel).name, type(rel), endnode(rel).name]) as relationshipLabels
 RETURN distinct relationshipLabels
 

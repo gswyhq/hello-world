@@ -45,3 +45,22 @@ git fetch只会将本地库所关联的远程库的commit id更新至最新
 git pull会将本地库更新至远程库的最新状态
 从结果上来看，git pull = git fetch + git merge
 
+git fetch还可以实现断点续传的功能：
+git clone获取比较大的源码时，常常clone一半的时候报错：
+error: RPC failed; curl 56 GnuTLS recv error (-54): Error in the pull function.
+fatal: The remote end hung up unexpectedly
+fatal: 过早的文件结束符（EOF）
+fatal: index-pack 失败
+
+可以使用 git fetch 解决:
+     mkdir common
+     cd common
+     git init
+     git remote add origin http://android.git.kernel.org/common.git
+     git fetch http://android.git.kernel.org/common.git
+     传完后,
+     git branch -a
+     git checkout remotes/....
+
+如果中间断掉了, 可以直接进入common目录, 继续git fetch就可以续传了.
+

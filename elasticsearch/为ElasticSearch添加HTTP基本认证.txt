@@ -2,7 +2,13 @@
 ES的HTTP连接没有提供任何的权限控制措施，一旦部署在公共网络就容易有数据泄露的风险，尤其是加上类似elasticsearch-head这样友好的前端界面，简直让你的数据瞬间裸奔在黑客的眼皮底下。
 X-Pack是一个Elastic Stack扩展，将安全性，警报，监控，报告，机器学习和图形功能捆绑到一个易于安装的软件包中。 要访问此功能，您必须在Elasticsearch中安装X-Pack。
 
-在Elasticsearch中安装X-Pack
+在es 6.3版本之前是需要自己额外安装X-Pack的；
+在es 6.3版本开始，开放 X-Pack的代码；默认是安装了X-Pack的；
+
+docker pull docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+
+在Elasticsearch中安装X-Pack（6.3之前的版本）
 安装Elasticsearch之后，您可以选择获取并安装X-Pack。
 
 您必须运行与您正在运行的Elasticsearch版本相匹配的X-Pack版本。有关产品兼容性的更多信息，请参阅弹性支持列表(https://www.elastic.co/support/matrix#matrix_compatibility)。

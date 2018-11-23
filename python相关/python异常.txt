@@ -1,0 +1,6 @@
+1、运行python程序时报错：
+提示“SyntaxError: Non-ASCII character '\xe8' in file”
+解决方法：
+在文件头部加上：
+# -*- coding: utf-8 -*-
+

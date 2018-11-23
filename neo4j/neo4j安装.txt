@@ -1,5 +1,12 @@
 
+windows系统安装：
+下载EXE文件：https://neo4j.com/artifact.php?name=neo4j-community_windows-x64_3_2_5.exe 双击安装；
+
+
+Linux系统安装：
 https://neo4j.com/download/，下载：Download Community Edition
+
+https://neo4j.com/artifact.php?name=neo4j-community-3.4.5-unix.tar.gz
 
 /home/gswewf/下载/neo4j-community-3.0.4-unix.tar.gz
 

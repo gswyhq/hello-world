@@ -1,0 +1,33 @@
+将"我们是中国人"以UTF-8编码转换成byte数组（byte数组其实就相当于二进制序列了，此过程即编码），再以GBK编码和byte数组创建新的字符串（此过程即以GBK编码去解码byte数组，得到字符串），就产生乱码了。
+因为编码采用的UTF-8和解码采用的GBK不是同一种编码，所以最后结果乱码了。
+之后再对乱码使用GBK编码，还原到解码前的byte数组，再使用和最初编码时使用的一致的编码UTF-8进行解码，就可得到最初的“我们是中国人”。
+这种多余的转换有时候还是很有用的，比如ftp协议只支持ISO-8859-1编码，这个时候如果要传中文，只能先换成ISO-8859-1的乱码，ftp完成后，再转回UTF-8就又可以得到正常的中文了。
+
+反过来，先将字符串以GBK编码再以UTF-8解码，再以UTF-8编码，再以GBK解码。就会出现乱码或解码错误：
+
+'你好'.encode('utf-8').decode('gbk').encode('gbk').decode('utf8')
+Out[11]: '你好'
+'你好'.encode('gbk').decode('utf-8').encode('utf-8').decode('gbk')
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/IPython/core/interactiveshell.py", line 2910, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-12-17cf93ed116c>", line 1, in <module>
+    '你好'.encode('gbk').decode('utf-8').encode('utf-8').decode('gbk')
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc4 in position 0: invalid continuation byte
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/IPython/core/interactiveshell.py", line 2856, in run_ast_nodes
+    if self.run_code(code, result):
+  File "/usr/local/lib/python3.5/dist-packages/IPython/core/interactiveshell.py", line 2927, in run_code
+    self.showtraceback(running_compiled_code=True)
+TypeError: showtraceback() got an unexpected keyword argument 'running_compiled_code'
+
+
+UTF-8采用了一种可变长的编码方式，即将常用的字符编码成较短的序列，而不常用的字符用较长的序列表示，这样让编码占用更少存储空间的同时也保证了对庞大字符集的支持。
+正式由于UTF-8采用的这种特别的变长编码方式，这一点和其他的编码很不一样。比如GBK固定用两个字节来表示汉字，一个字节来表示英文和其他符号。
+使用GBK进行编码，“我们是中国人”6个汉字占12个字节，而是用UTF-8进行编码则占了18个字节，其中每个汉字占3个字节（由于是常用汉字，只占3个字节，有的稀有汉字会占四个字节。）
+UTF-8编码的读取方式也比较不同，需要先读取第一个字节，然后根据这个字节的值才能判断这个字节之后还有几个字节共同参与一个字符的表示。
+
+由于UTF-8的特殊编码方式，所以有些序列是不可能出现在UTF-8编码中的；
+所以当我们将由GBK编码的12个字节试图用UTF-8解码时会出现错误，由于GBK编码出了不可能出现在UTF-8编码中出现的序列，所以当我们试图用UTF-8去解码时，经常会遇到这种不可能序列，对于这种不可能序列，就会出现解码错误；
+

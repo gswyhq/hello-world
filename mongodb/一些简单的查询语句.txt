@@ -1,0 +1,6 @@
+
+# 查询字段status的值为1， entities字段的长度大于40：
+db.getCollection('sentence').find(
+{'status':1, $where: "(this.entities.length > 40)"}
+).limit(2);
+

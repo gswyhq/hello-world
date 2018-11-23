@@ -1,0 +1,41 @@
+
+第一步， 编写备份数据脚本
+ubuntu@ip-172-33-13-170:~/docker/neo4j/multiple_projects_p1$ vim backup_neo4j_18014_data.sh
+```shell
+#!/bin/bash
+
+# 导出数据到文件
+snapshot_name=`date +%Y%m%d`
+cypher_file="\"/var/lib/neo4j/data/all_data_backup_${snapshot_name}.cypher\""
+echo "导出数据到cypher文件：${cypher_file}"
+neo4j_export_cypher="CALL apoc.export.cypher.all(${cypher_file},{}); "
+docker exec multipleprojectsp1_neo4j_18014_1 /var/lib/neo4j/bin/cypher-shell -u neo4j -p gswyhq  "${neo4j_export_cypher}"
+
+sleep 5
+
+# 删除七天前的备份文件
+last_snapshot_name=`date +%Y%m%d --date="-7 day"`
+last_cypher_file="/var/lib/neo4j/data/all_data_backup_${last_snapshot_name}.cypher"
+echo "删除旧的备份文件：${last_cypher_file}"
+docker exec multipleprojectsp1_neo4j_18014_1 /bin/bash -c "rm ${last_cypher_file}"
+
+```
+
+第二步，修改文件及数据库权限
+ubuntu@ip-172-33-13-170:~/docker/neo4j/multiple_projects_p1$ chmod 755 backup_neo4j_18014_data.sh
+
+修改`neo4j.conf`，并重启neo4j:
+apoc.export.file.enabled=true
+apoc.import.file.enabled=true
+
+
+第三步，设置定时任务
+# ”crontab -l" 查看crontab 中所有部署的内容
+#zy@ubuntu:~$ crontab -l
+#no crontab for zy
+
+# ”crontab -e" 进入crontab 编辑状态
+#zy@ubuntu:~$ crontab -e
+
+# 每晚02:35 执行脚本：/home/ubuntu/docker/neo4j/multiple_projects_p1/backup_neo4j_18014_data.sh， 备份neo4j数据
+35 2 * * * /bin/bash /home/ubuntu/docker/neo4j/multiple_projects_p1/backup_neo4j_18014_data.sh > /home/ubuntu/docker/neo4j/multiple_projects_p1/crontab.log

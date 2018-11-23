@@ -1,0 +1,20 @@
+
+# 输出查询结果的第三列：
+curl 192.168.3.105:9200/_cat/indices/*kg*_alias|awk '{print $3}'
+
+# 1、打印文件的第一列(域)
+awk '{print $1}' filename
+
+2、打印文件的前两列(域)
+awk '{print $1,$2}' filename
+
+3、打印完第一列，然后打印第二列
+awk '{print $1 $2}' filename
+
+4、打印最后一列：
+gswyhq@gswyhq-PC:~/yhb$ ls -al|awk '{print $NF}'
+
+# 查找某个程序的进程，再批量kill掉：
+gswyhq@gswyhq-PC:~/yhb$ ps -aux|grep draw|awk '{print $2}'|xargs kill
+
+

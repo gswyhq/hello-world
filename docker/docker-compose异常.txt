@@ -1,0 +1,9 @@
+
+通过｀docker-compose.yml｀启动一个容器，能启动，但会自动退出：
+解决方法：
+使用tty参数（推荐使用）
+修改docker-compose.yml，增加一个配置tty:true，如下：
+master:
+  image: java:8u111-jdk
+  tty: true
+

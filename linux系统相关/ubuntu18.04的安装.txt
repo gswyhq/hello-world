@@ -1,0 +1,8 @@
+
+第一步下载Ubuntu Desktop 镜像文件： http://mirror.lzu.edu.cn/ubuntu-releases/18.04.1/ubuntu-18.04.1-desktop-amd64.iso
+
+第二步：制作成启动u盘
+
+第三步：进入BIOS设置U盘启动(相应的bios设置可参考： http://www.udashi.com/jc/2.html )；再u盘安装
+
+

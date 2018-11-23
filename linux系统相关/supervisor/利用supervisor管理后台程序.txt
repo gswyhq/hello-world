@@ -27,6 +27,9 @@ ubuntu@10-13-70-173:~/qbzz$ sudo supervisorctl update
 # 重新启动配置中的所有程序（对现有运行的程序会重启一次）
 supervisorctl reload  
 
+# supervisord 添加配置 而 不重启所有进程：
+一般不是严格的环境下的时候，我们在添加了supervisord 新的配置之后，会使用 supervisorctl reload进行配置更新，但是这样一来，所有过去的进程也会重新load一次。
+经过发现，我们可以使用supervisorctl reread，然后supervisorctl update，这样就会在不打扰过去配置的基础上新增我们的需求。
 
 停止进程 (app=你配置中写的程序名称)：
 # supervisorctl stop app

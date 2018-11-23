@@ -1,0 +1,22 @@
+
+# 使用pageRank计算得分对节点影响力进行排序
+MATCH (n:人)
+WITH collect(n) as nodes
+CALL apoc.algo.pageRank(nodes) YIELD node,score
+RETURN node.name,score
+ORDER BY score DESC
+
+# 对指定关系类型的节点运行pageRank计算
+MATCH (n:人)
+WITH collect(n) as nodes
+CALL apoc.algo.pageRankWithConfig(nodes,{types:'手机号|通联'}) YIELD node,score
+RETURN node.name,score
+ORDER BY score DESC
+
+# 对指定关系类型的节点运行pageRank计算
+MATCH (n:人)
+WITH collect(n) as nodes
+CALL apoc.algo.pageRankWithConfig(nodes,{iterations:1000,types:'通联'}) YIELD node,score
+RETURN node.name,score
+ORDER BY score DESC
+

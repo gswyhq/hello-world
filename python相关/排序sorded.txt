@@ -1,0 +1,94 @@
+
+在 Python 中，非 ASCII 文本的标准排序方式是使用 locale.strxfrm函数，根据 locale 模块的文档（https://docs.python.org/3/library/locale.html?highlight=strxfrm#locale.strxfrm），这 个函数会“把字符串转换成适合所在区域进行比较的形式”。
+
+locale.strcoll, locale.strxfrm 使用的不是完整的Unicode排序算法，而是使用ISO 14651 。
+ISO 14651 是关于 UCS 字符串排序的.
+
+ts = ['税延型养老年金保险A款', '税延型养老年金保险B1款', '税延型养老年金保险B2款', '全民无忧', '保险产品', '康爱保', '百万信天游', '税延型养老年金保险C款']
+sorted(ts, reverse=False)
+Out[38]: 
+['全民无忧',
+ '保险产品',
+ '康爱保',
+ '百万信天游',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款']
+sorted(ts, key=locale.strxfrm, reverse=False)
+Out[39]: 
+['全民无忧',
+ '保险产品',
+ '康爱保',
+ '百万信天游',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款']
+
+# 按中文拼音排序：
+locale.setlocale(locale.LC_COLLATE, 'zh_CN.UTF8')
+sorted(ts, key = locale.strxfrm)
+Out[49]: 
+['百万信天游',
+ '康爱保',
+ '全民无忧',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款',
+ '保险产品']
+
+# locale本身不是线程安全的（若改成了按拼音排序，则后续所有的排序都改成了按拼音排序，却无法再改回来），可以使用contextmanager解决。
+
+from contextlib import contextmanager
+import locale
+@contextmanager
+def changedlocale(newone):
+    old_locale = locale.getlocale(locale.LC_COLLATE)
+    try:
+        locale.setlocale(locale.LC_COLLATE, newone)
+        yield locale.strxfrm
+    finally:
+        locale.setlocale(locale.LC_COLLATE, old_locale)
+def sort_strings(strings, locale_=None):
+    if locale_ is None:
+        return sorted(strings)
+    with changedlocale(locale_) as strxfrm:
+        return sorted(strings, key=strxfrm)
+    
+sort_strings(ts, locale_='zh_CN.UTF8')
+Out[9]: 
+['百万信天游',
+ '康爱保',
+ '全民无忧',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款',
+ '保险产品']
+sort_strings(ts)
+Out[10]: 
+['全民无忧',
+ '保险产品',
+ '康爱保',
+ '百万信天游',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款']
+sorted(ts, reverse=False)
+Out[11]: 
+['全民无忧',
+ '保险产品',
+ '康爱保',
+ '百万信天游',
+ '税延型养老年金保险A款',
+ '税延型养老年金保险B1款',
+ '税延型养老年金保险B2款',
+ '税延型养老年金保险C款']
+
+
+有的服务器不能locale不能设置成功,需要安装语言包:
+sudo apt-get install language-pack-zh*
+

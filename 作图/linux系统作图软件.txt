@@ -1,0 +1,8 @@
+第一步，下载桌面版软件：
+wget https://github.com/jgraph/drawio-desktop/releases/download/v8.8.0/draw.io-amd64-8.8.0.deb
+
+第二步，安装：
+gswyhq@gswyhq-PC:~$ sudo dpkg -i draw.io-amd64-8.8.0.deb
+
+第三步，启动，设置语言（默认英文），使用
+

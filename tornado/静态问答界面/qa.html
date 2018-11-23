@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <meta name="keywords" content="'"/>
+    <meta name="description" content=""/>
+    <meta name="robots" content="all">
+    <meta name="Language" content="zh-CN"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<style>
+    body{
+        min-width: 1024px;
+    }
+    .container{
+        padding: 20px;
+        font-size: 16px;
+    }
+    .my_input{
+        display: inline-block;
+        width: 400px;
+        height: 32px;
+        line-height: 1.5;
+        padding: 4px 7px;
+        font-size: 14px;
+        border: 1px solid #dcdee2;
+        border-radius: 4px;
+        color: #515a6e;
+        background-color: #fff;
+        background-image: none;
+        position: relative;
+        cursor: text;
+        transition: border .2s ease-in-out,background .2s ease-in-out,box-shadow .2s ease-in-out;
+    }
+    .my_input:hover{
+        border-color: #57a3f3;
+    }
+    .my_input:focus{
+        border-color: #57a3f3;
+        outline: 0;
+        box-shadow: 0 0 0 2px rgba(45,140,240,.2);
+    }
+    .send_btn{
+        display: inline-block;
+        outline: 0;
+        border: none;
+        color: #fff;    
+        background-color: #2d8cf0;
+        border-color: #2d8cf0;
+        padding: 6px 15px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 400;
+        text-align: center;
+        line-height: 1.5;
+        min-width: 80px;
+        margin-left: 20px;
+    }
+    .send_btn:hover{
+        background-color: #57a3f3;
+        border-color: #57a3f3;
+    }
+    #json_box{
+        margin:  30px 0;
+        padding: 20px;
+        border: 1px solid #dcdee2;
+        width: 820px;
+        min-height: 700px;
+    }
+</style>
+<body>
+  <div class="container">
+      <input type="text" class="my_input">
+      <button class="send_btn" onclick="sendQuestion()">send</button>   
+      <pre  id="json_box">
+            
+  </div>
+  </div>  
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+<script>
+    $(function () {
+        console.log("load_success...")
+    })
+
+    function sendQuestion() {
+        var questionText = $(".my_input").val();
+        $.ajax({
+            type: "post",
+            url: "http://192.168.3.145:8000/api",
+
+            contentType: "application/json",
+
+            dataType: "json",
+            async: true, //异步
+            data: JSON.stringify({"question" : questionText }),
+            success: function (res) {
+                try{
+                    res = JSON.stringify(res, null, 4);
+                }catch(err){}
+                console.log(res)
+                $("#json_box").html(res)
+            },
+            error: function () {
+                console.log('fail...');
+            }
+        });
+         
+    }
+
+</script>

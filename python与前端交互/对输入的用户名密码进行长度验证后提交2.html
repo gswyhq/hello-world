@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>表单提交示例 - 基本表单提交2</title>
+</head>
+<body>
+<form id="form_login" action="/server_url" method="post">
+    ID：<input id="username" type="text" name="username" />
+    Password：<input id="password" type="password" name="password" />
+</form>
+<button id="btn-submit" onclick="beforeSubmit()">Submit</button>
+<script type="text/javascript">
+    var loginForm = document.getElementById('form_login');
+    function beforeSubmit() {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        if (username.length < 6 || password.length < 6) {
+            alert('格式不正确！');
+        } else {
+            loginForm.submit();
+        }
+    }
+</script>
+</body>
+</html>
+<!--上面稍微做了一点点修改，form元素增加了id，去掉了onsubmit，还有一个type为submit的input按钮也去掉了，取而代之的是在from的外面增加了一个普通按钮。
+
+这个按钮点击会触发一段js，在这个js中可以做数据校验，如果验证通过，则通过js提交表单，form表单增加id的作用就是为了js获取表单元素变的方便。-->

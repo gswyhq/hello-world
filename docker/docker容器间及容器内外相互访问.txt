@@ -71,4 +71,8 @@ gswewf@gswewf-pc:~/docker/ubuntu$ docker run -it --name=ubuntu-yhb -v /home/gswe
 # 查看某个容器的映射端口：
 gswewf@gswewf-pc:~/yhb$ docker port ubuntu-yhb
 
+# 容器内部查看容器的id:
+/chat_bot # hostname 
+4d9c42808f46
+
 

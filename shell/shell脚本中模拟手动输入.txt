@@ -1,0 +1,27 @@
+
+1、方法1：
+利用重定向
+    重定向的方法应该是最简单的
+例：
+以下的test.sh是要求我们从stdin中分别输入no,name然后将输入的no,name打印出来
+[root@localhost test]# cat test.sh
+#! /bin/bash
+read -p "enter number:" no
+read -p "enter name:" name
+echo you have entered $no, $name
+
+以下是作为输入的文件内容：
+[root@localhost test]# cat input.data 
+1
+lufubo
+
+然后我们利用重定向来完成交互的自动化：
+[root@localhost test]# ./test.sh < input.data 
+you have entered 1, lufubo
+
+2、方法2：
+利用管道完成交互的自动化
+[root@localhost test]# echo -e "1\nlufbo\n" | ./test.sh 
+you have entered 1, lufbo
+
+

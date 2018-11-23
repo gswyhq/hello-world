@@ -44,3 +44,10 @@ sudo docker attach  cfc99817d125
 向镜像内传递文件：
 gow@gzcloud:~/gswewf$ sudo docker run -it -v /home/gow/gswewf/elasticsearch-analysis-ik-5.1.1:/usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-5.1.1 ambbr-es:2017-02-14  /bin/bash
 
+docker容器中查看容器linux版本:
+有时候需要登陆容器搞点事情，这时候需要看容器系统的版本，那么一条命令就能完成。 
+正确的姿势： 
+cat /etc/issue
+错误的姿势: 
+cat /proc/version 或 uname -a ，这样查到的是宿主机的系统。
+

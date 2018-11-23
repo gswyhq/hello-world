@@ -65,3 +65,16 @@ range 查询同样可以应用在日期字段上：
 
 字符串范围在过滤 低基数（low cardinality） 字段（即只有少量唯一词项）时可以正常工作，但是唯一词项越多，字符串范围的计算会越慢。
 
+查询某个索引下的所有类型_type:
+curl -XPOST "192.168.3.105:9200/index_name/_search" -H 'Content-Type: application/json' -d '{
+  "aggs": {
+    "types": {
+      "terms": {
+        "field": "_type",
+        "size": 10000
+      }
+    }
+  },
+  "size": 0
+}'
+

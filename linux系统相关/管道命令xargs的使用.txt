@@ -1,0 +1,35 @@
+
+xargs：将前命令的执行结果作为参数传递给后一条命令。
+
+-t 表示先打印命令，然后再执行。
+-i 参数直接用 {}就能代替管道之前的标准输出的内容；
+$ ls | xargs -t -i mv {} {}.bak
+
+-I 参数 需要事先指定替换字符
+$ ls -al |awk '{print $9}'|xargs -I x echo "测试"---x
+测试---终端复用器tmux.txt
+测试---重定向输出.py
+
+-a file 从文件中读入作为sdtin
+$ cat 1.txt 
+aaa  bbb ccc ddd
+a    b
+$ xargs -a 1.txt echo
+aaa bbb ccc ddd a b
+
+-e flag ，注意有的时候可能会是-E，flag必须是一个以空格分隔的标志，当xargs分析到含有flag这个标志的时候就停止。
+
+$ xargs -E 'ddd'  -a 1.txt echo
+aaa bbb ccc
+
+$ cat 1.txt |xargs -E 'ddd' echo
+aaa bbb ccc
+
+-n num 后面加次数，表示命令在执行的时候一次用的argument的个数，默认是用所有的。
+
+$ cat 1.txt |xargs -n 2 echo
+aaa bbb
+ccc ddd
+a b
+
+

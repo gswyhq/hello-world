@@ -148,6 +148,21 @@ bash-4.4# pwd
 /var/lib/neo4j
 bash-4.4# ./bin/neo4j-shell -host 127.0.0.1 -port 1337 -file /var/lib/neo4j/guoxinzhengquan_all.cypher
 
+# 导入数据也可以(但这种方法导出的数据仅仅是节点，对应的关系并不能导入)：
+call apoc.cypher.runFile("/var/lib/neo4j/guoxinzhengquan_all.cypher")
 
 
+# 导出部分数据： 
+call apoc.export.cypher.query("MATCH (n:Baodanxinxi) OPTIONAL MATCH (n)-[r]-(n2) RETURN n,r,n2","/var/lib/neo4j/data/zdal_baodanxinxi.cypher",{})
 
+# 导入：
+bash-4.4# ./bin/neo4j-shell -file data/zdal_baodanxinxi.cypher
+
+# 导出数据到文件
+call apoc.export.cypher.all('/var/lib/neo4j/data/all_baoxian_20181114_1423.plain.cypher', {format:'plain'})
+
+# 从文件中导入数据到neo4j(此方法写的速度非常慢，2万个节点约需要30min)
+call apoc.cypher.runFile('/var/lib/neo4j/data/all_baoxian_20181114_1423.plain.cypher')
+# 或者
+time ./cypher-shell -u neo4j -p gswyhq
+"call apoc.cypher.runFile('/var/lib/neo4j/data/all_baoxian_20181114_1423.plain.cypher')"

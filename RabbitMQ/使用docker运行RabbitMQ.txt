@@ -1,0 +1,8 @@
+
+
+docker run -d --hostname my-rabbit --name some-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3.7.8-management
+在浏览器中访问 http://localhost:15672 ,如果能够使用 guest:guest 验证信息登录 RabbitMQ 的控制面板,说明它已经在你的开发环境中运行起来了。
+
+或者通过项目的命令来设置默认用户名/密码：
+docker run -d --hostname my-rabbit --name some-rabbit -p 15672:15672 -p 5672:5672 -e RABBITMQ_DEFAULT_USER=user -e RABBITMQ_DEFAULT_PASS=password rabbitmq:3.7.8-management
+

@@ -20,3 +20,13 @@ UNWIND somenames AS names
 WITH names AS candidate
 WHERE candidate STARTS WITH 'Jo'
 RETURN candidate
+
+
+Match (n)-[r:`下一步`]->(c)
+with collect(n) + collect(c) as colC, collect(r) as colR UNWIND colC AS n with distinct n, colR return n, colR
+
+
+Match (n)-[r:`下一步`]->(c)
+with collect(n) + collect(c) as colC, collect(r) as colR UNWIND colC AS n2 with distinct n2, colR with collect(n2) as colN, colR
+CALL apoc.export.csv.data(colN,colR, '/var/lib/neo4j/import/export_nodes_rels.csv',{format:'plain'}) YIELD nodes, relationships
+RETURN nodes, relationships

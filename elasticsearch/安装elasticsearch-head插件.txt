@@ -1,0 +1,91 @@
+
+# 安装elasticsearch插件：
+docker pull mobz/elasticsearch-head:5-alpine
+gswewf@gswewf-pc:~/docker/elasticsearch-head$ docker run -d --name elasticsearch-head9100 -p 9100:9100 mobz/elasticsearch-head:5-alpine
+浏览器打开‘http://localhost:9100/’即可。
+
+有时候启动了一个elasticsearch实例，浏览器打开http://localhost:9200/，获取数据正常；
+但elasticsearch-head插件却不能连接上`http://localhost:9200/`，
+这个时候需要进入`elasticsearch`容器内，修改`/usr/share/elasticsearch/config/elasticsearch.yml`，再重启容器
+gswewf@gswewf-pc:~/docker/elasticsearch$ docker cp elasticsearch9200:/usr/share/elasticsearch/config/elasticsearch.yml .
+gswewf@gswewf-pc:~/docker/elasticsearch$ vim elasticsearch.yml
+# config/elasticsearch.yml文件末尾 增加新的参数，这样head插件可以访问es
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# 若需要开启登录认证，则需要在`elasticsearch.yml`文件添加：
+http.cors.allow-headers: "Authorization"
+
+然后在每次使用head插件的时候，按照如下的格式输入：
+http://localhost:9100/?auth_user=elastic&auth_password=changeme
+
+其中elastic是默认账号，changeme是初始密码，均可以在x-pack插件中进行修改。
+
+POST _xpack/security/user/_password
+POST _xpack/security/user/<username>/_password
+
+路径参数
+<username>
+（字符串）要更改其密码的用户。 如果未指定此参数，则会更改当前用户的密码。
+请求参数
+password
+（字符串）新密码值。
+
+每个用户都可以更改自己的密码。 具有manage_security权限的用户可以更改其他用户的密码。
+
+示例：修改用户 `elastic123`的密码为：new-password
+curl -X POST "localhost:9200/_xpack/security/user/elastic123/_password" -H 'Content-Type: application/json' -d'
+{
+  "password": "new-password"
+}
+'
+
+# 有时候拉取镜像时识别，可能对应的tag不是`latest`，
+可以在类似`https://hub.docker.com/r/mobz/elasticsearch-head/tags/`查看tags是多少：
+gswewf@gswewf-pc:~$ docker pull mobz/elasticsearch-head
+Using default tag: latest
+Error response from daemon: manifest for mobz/elasticsearch-head:latest not found
+gswewf@gswewf-pc:~$ docker pull mobz/elasticsearch-head:5-alpine
+
+# Elasticsearch 6.x head 请求头设置
+head 连接Elasticsearch6是 【数据浏览模块不能显示数据了】
+看一下网络流可知报406 错误
+{
+  "error" : "Content-Type header [application/x-www-form-urlencoded] is not supported",
+  "status" : 406
+}
+解决方法：
+gswyhq@gswyhq-PC:~/github_projects$ git clone https://github.com/mobz/elasticsearch-head.git
+gswyhq@gswyhq-PC:~/github_projects$ cd elasticsearch-head
+编辑vendor.js
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch-head$ vim _site/vendor.js
+共有两处
+
+ 1. 6886行
+/contentType: "application/x-www-form-urlencoded
+改成
+contentType: "application/json;charset=UTF-8"
+ 2. 7574行
+ var inspectData = s.contentType === "application/x-www-form-urlencoded" &&
+改成
+ var inspectData = s.contentType === "application/json;charset=UTF-8" &&
+
+Gruntfile.js 96行，插入一行` hostname: '*'`
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch-head$ vim Gruntfile.js
+
+ 90         connect: {
+ 91             server: {
+ 92                 options: {
+ 93                     port: 9100,
+ 94                     base: '.',
+ 95                     keepalive: true,
+ 96                     hostname: '*'
+ 97                 }
+ 98             }
+ 99         }
+
+
+# 打包成镜像：
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch-head$ docker build -t elasticsearch-head:5-alpine-20180713 -f Dockerfile-alpine .
+
+zy@ubuntu:~/docker/elasticsearch-head$ docker run -d --name elasticsearch-head_9100 --restart=always -p 9100:9100 elasticsearch-head:5-alpine-20180713

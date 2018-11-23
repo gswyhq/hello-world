@@ -1,0 +1,18 @@
+
+UNION语句使用使用示例
+1.使用UNION结果去重，求并集
+
+  MATCH (a)-[:KNOWS]->(b)
+  RETURN b.name
+  UNION
+  MATCH (a)-[:LOVES]->(b)
+  RETURN b.name
+
+2.使用UNION ALL结果不去重, 求和集
+
+  MATCH (a)-[:KNOWS]->(b)
+  RETURN b.name
+  UNION ALL
+  MATCH (a)-[:LOVES]->(b)
+  RETURN b.name
+

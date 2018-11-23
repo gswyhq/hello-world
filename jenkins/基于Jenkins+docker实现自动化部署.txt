@@ -1,0 +1,36 @@
+
+docker pull jenkins
+
+docker run -p 8080:8080 -p 50000:50000 jenkins
+
+启动容器后，会生成一个随机密码；也可以在容器中的`/var/jenkins_home/secrets/initialAdminPassword`文件找到对应的随机密码;
+
+浏览器打开：locahost:8080,输入密码；
+可以，安装建议的插件（Install suggested plugins）:安装Jenkins社区认为最有用的插件。
+也可以，选择要安装的插件(Select plugins to install):选择并安装最适合您需求的插件。
+若安装失败，可以重试，或者跳过；
+之后设置用户名及密码；
+
+新建一个项目：
+源码管理
+ None   
+ Git    
+    Repositories    
+    Repository URL  
+http://192.168.3.101/gswyhq/deployment.git
+Help for feature: Repository URL
+Failed to connect to repository : Command "git ls-remote -h http://192.168.3.101/gswyhq/deployment.git HEAD" returned status code 128:
+stdout: 
+stderr: remote: HTTP Basic: Access denied
+fatal: Authentication failed for 'http://192.168.3.101/gswyhq/deployment.git/'
+
+则需要在jenkins容器内生成git密钥
+jenkins@a3f4d3de62b2:/$ ssh-keygen 
+
+生成密钥之后，需要将 ~/.ssh/id_rsa.pub 文件内的内容添加到gitlab,如：http://192.168.3.101/profile/keys
+并重启jenkins容器；
+并且地址不能写成是：http://192.168.3.101/gswyhq/deployment.git
+而应该是：git@192.168.3.101:gswyhq/deployment.git
+
+# https://www.cnblogs.com/bigben0123/p/7886092.html
+

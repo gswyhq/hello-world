@@ -1,0 +1,8 @@
+Arch Linux 没有携带 sudo，需要通过  pacman -S sudo  安装。
+[root@4891fe85fdb8 ~]# pacman -Sy sudo
+
+[root@4891fe85fdb8 ~]# pacman -Sy grub
+
+# 安装git:
+[root@4891fe85fdb8 ~]# pacman -Sy git
+

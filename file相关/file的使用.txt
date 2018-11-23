@@ -1,0 +1,5 @@
+
+# 查看文件的编码及类型：
+file -i BALANCE.txt
+BALANCE.txt: text/plain; charset=us-ascii
+

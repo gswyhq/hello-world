@@ -1,0 +1,13 @@
+
+# 导出数据到文件：
+index_end=`date +%Y%m%d_%H%M%S`
+cypher_data_file_name=${pid}_${index_end}.cypher
+dump_cypher='CALL apoc.export.cypher.all(\"/var/lib/neo4j/data/'${cypher_data_file_name}'\",{})'
+
+curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "'"${dump_cypher}"'" } ]}'
+
+id=1111  
+name="ct"  
+curl http://192.1.13.100:8888/dataservice/knowledge/createKP  -H "Accept: application/json"  -H "Content-Type: application/json"  -d '{"kpId":"'"$id"'","kpName":"'"$name"'","description":"desc","path":"0-1-","sort":1,"version":1,"parentKPId":  
+1}'    
+

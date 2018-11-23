@@ -54,5 +54,80 @@ MATCH (n:Baoxianchanpin)-[r:`保险种类`]->(n2), (n)-[r2:`保障项目`]->(n3)
 查询在深圳没有分支机构，但在广东有分支机构：
 match (n)-[r1:`隶属于`]->(n1)-[r2:`分支机构`]->(n2) where n.name='深圳' and n1.name='广东省' and not (n)-[r2:`分支机构`]->(n2) return n2
 
+方法8：
+查询与某个点关联的所有点，并去重：
+MATCH p=(n:TuijianState {name: "保险体检"})-[*0..10]->() UNWIND nodes(p) as ns return DISTINCT ns
+
 # 断言某个属性是否存在：
 MATCH (n:Jibingzhonglei)-[r:`包含疾病`]->(n2) where not n.alias is null return n
+
+# 多级查找：
+# 查找跟 name:保险体检 关联的 status=who，之后所有的点
+MATCH p=(n:TuijianState:Zhongdeanlian {name: "保险体检"})-[*0..10]->(n2)
+UNWIND nodes(p) as ns1 with ns1 where ns1.status="who"
+with ns1 match p=(ns1:TuijianState:Zhongdeanlian)-[*0..10]->(n2)
+UNWIND nodes(p) as ns
+return DISTINCT ns order by ns.id
+
+# 查询所有的属性键：
+MATCH (n:Zhongxinyinhang)where n.name='薪金煲' WITH keys(n) as k UNWIND k as x RETURN DISTINCT x
+
+MATCH (n:Zhongxinyinhang)where n.name='薪金煲' return keys(n), properties(n)
+
+match (n)
+WITH distinct keys(n) as properties
+UNWIND properties as property
+return distinct property
+
+MATCH (n:Zhongxinyinhang)where n.name='薪金煲'
+WITH collect(n) AS persons
+RETURN persons
+
+call apoc.meta.data() yield label, property
+with ['Zhongxinyinhang', 'Youbangxianggang'] as labels, property, label where label in labels
+return property, label
+
+# 统计求和：
+RETURN bus, apoc.coll.sum([rel in bus | rel.fare]) as totalFare
+或：
+RETURN bus, reduce(total = 0, rel in bus | total + rel.fare) as totalFare
+
+过滤标签：MATCH (n)  WHERE n:Swedish  RETURN n;
+过滤属性：MATCH (n)  WHERE n.age < 30  RETURN n;
+MATCH (n)  WHERE exists (n.belt)  RETURN n;
+正则：MATCH (n)  WHERE n.name =~ 'Tob.*'  RETURN n;
+MATCH (tobias { name: 'Tobias' }),(others)  WHERE others.name IN ['Andres', 'Peter'] AND (tobias)<--(others)   RETURN others
+使用not：MATCH (persons),(peter { name: 'Peter' })  WHERE NOT (persons)-->(peter)  RETURN persons
+使用属性：MATCH (n)  WHERE (n)-[:KNOWS]-({ name:'Tobias' })  RETURN n
+关系类型：MATCH (n)-[r]->()  WHERE n.name='Andres' AND type(r)=~ 'K.*'  RETURN r
+使用IN：MATCH (a)  WHERE a.name IN ["Peter", "Tobias"]  RETURN a
+MATCH (n)  WHERE n.belt = 'white'  RETURN n
+MATCH (n)  WHERE n.belt = 'white' OR n.belt IS NULL RETURN n  ORDER BY n.name
+过滤NULL：MATCH (person)  WHERE person.name = 'Peter' AND person.belt IS NULL RETURN person
+
+正则匹配查找：
+match(n:Name) 
+    where n.key =~ '^[0-9]{1,10}CHINA$' 
+return count(n)
+
+# 查询标签开头为Abc的所有标签：
+CALL db.labels() YIELD label with label where label starts with 'Abc' return label
+结果： 
+╒════════════════════════╕
+│"label"                 │
+╞════════════════════════╡
+│"Abc1535103448461383382"│
+├────────────────────────┤
+│"Abc153511749678647311" │
+└────────────────────────┘
+
+LOAD CSV WITH HEADERS FROM 'file:///file.csv' AS line
+WITH line
+
+MERGE (a:Item {name: line.Col1})
+
+FOREACH (x IN SPLIT(line.Col2, ';') |
+  MERGE (s:Item {name: x})
+  MERGE (s)-[:rel]->(a));
+
+

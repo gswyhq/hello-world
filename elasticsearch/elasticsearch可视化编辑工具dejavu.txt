@@ -1,0 +1,13 @@
+
+1、启动一个可视化工具对应的容器：
+docker run --restart=always -p 1358:1358 -d appbaseio/dejavu:2.0.5
+
+2、浏览器打开`http://192.168.3.132:1358/live/`
+
+3、输入：http://192.168.3.105:9200 及随便一个索引， 如：test , 再点击 `START BROWSING`，进入查询及编辑界面；
+若索引不存在，则会一直连接不上，但会跳转到查询及编辑界面；这个时候可以点击“Disconnect”，重新在`Heather`项填入存在的索引（不能是别名）,再点击`Connect`进行连接。
+
+4、点击`Viewing` 处的下拉列表，切换到`Editing`即可进行对应的编辑。
+
+5、点击`Search Preview`即可进入到查询编辑界面；
+在`Search`框里输入被查询字段，但效果不怎么样。

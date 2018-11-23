@@ -2,7 +2,7 @@
 # coding:utf8
 
 import os
-import logging
+import logging, threading
 import traceback
 import logging.handlers
 
@@ -18,13 +18,13 @@ class Logger(object):
 
         outer = logging.StreamHandler()
         outer.setLevel(logging.DEBUG)
-        outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(message)s'))
+        outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(threadName)s-%(message)s'))
         self.log.addHandler(outer)
 
-        file_outer = logging.handlers.RotatingFileHandler("log/ambbr.log", mode='a', maxBytes=1024 * 1024 * 100,
+        file_outer = logging.handlers.RotatingFileHandler("log/yhb.log", mode='a', maxBytes=1024 * 1024 * 100,
                                                           backupCount=10000, encoding="utf-8")
         file_outer.setLevel(logging.DEBUG)
-        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(message)s'))
+        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(threadName)s-%(message)s'))
         self.log.addHandler(file_outer)
 
         #io log
@@ -33,7 +33,7 @@ class Logger(object):
         file_outer = logging.handlers.RotatingFileHandler("log/io.log", mode='a', maxBytes=1024 * 1024 * 100,
                                                           backupCount=10000, encoding="utf-8")
         file_outer.setLevel(logging.INFO)
-        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(message)s'))
+        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(threadName)s-%(message)s'))
         self.iolog.addHandler(file_outer)
 
         # error log
@@ -42,12 +42,21 @@ class Logger(object):
         file_outer = logging.handlers.RotatingFileHandler("log/error.log", mode='a', maxBytes=1024 * 1024 * 100,
                                                           backupCount=10000, encoding="utf-8")
         file_outer.setLevel(logging.ERROR)
-        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(message)s'))
+        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(threadName)s-%(message)s'))
         self.errlog.addHandler(file_outer)
+
+        # 图灵接口的日志
+        self.tulingiolog = logging.getLogger("semtulingIo")
+        self.tulingiolog.setLevel(logging.INFO)
+        file_outer = logging.handlers.RotatingFileHandler("log/tuling.log", mode='a', maxBytes=1024 * 1024 * 100,
+                                                          backupCount=10000, encoding="utf-8")
+        file_outer.setLevel(logging.INFO)
+        file_outer.setFormatter(logging.Formatter('%(asctime)s-%(levelname)s-%(threadName)s-%(message)s'))
+        self.tulingiolog.addHandler(file_outer)
 
     # Formats the message as needed and calls the correct logging method
     # to actually handle it
-    def _raw_log(self, logfn, message, exc_info, no_uid=False):
+    def _raw_log(self, logfn, message, exc_info, no_uid=True):
         cname = ''
         loc = ''
         fn = ''
@@ -67,21 +76,28 @@ class Logger(object):
         else:
             logfn(u"{}{}{}{}: {}".format(self.uid, loc, cname, fn, message), exc_info=exc_info)
 
-    def info(self, message, exc_info=False, no_uid=False):
+    def info(self, message, exc_info=False, no_uid=True):
         """
         Log a info-level message. If exc_info is True, if an exception
         was caught, show the exception information (message and stack trace).
         """
         self._raw_log(self.iolog.info, message, exc_info, no_uid=no_uid)
 
-    def debug(self, message, exc_info=False, no_uid=False):
+    def tulinginfo(self, message, exc_info=False, no_uid=True):
+        """
+        Log a info-level message. If exc_info is True, if an exception
+        was caught, show the exception information (message and stack trace).
+        """
+        self._raw_log(self.tulingiolog.info, message, exc_info, no_uid=no_uid)
+
+    def debug(self, message, exc_info=False, no_uid=True):
         """
         Log a debug-level message. If exc_info is True, if an exception
         was caught, show the exception information (message and stack trace).
         """
         self._raw_log(self.log.debug, message, exc_info, no_uid=no_uid)
 
-    def warning(self, message, exc_info=False, no_uid=False):
+    def warning(self, message, exc_info=False, no_uid=True):
         """
         Log a warning-level message. If exc_info is True, if an exception
         was caught, show the exception information (message and stack trace).
@@ -105,8 +121,9 @@ class Logger(object):
         self._raw_log(self.iolog.exception, message, exc_info)
 
     def set_uid(self, uid):
-        self.uid = uid
-
+        # self.uid = uid
+        # 将用户id设置为线程名
+        threading.current_thread().setName(uid)
 
 logger = Logger()
 

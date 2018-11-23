@@ -1,0 +1,4 @@
+
+在节点和关系之间复制属性：
+# 会将pn所有的属性及属性值复制到了at上
+MATCH (at { name: 'Andres' }),(pn { name: 'Peter' }) SET at = pn RETURN at, pn;

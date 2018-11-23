@@ -44,4 +44,11 @@ MATCH (p:Jibing)RETURN p, p.name AS name, upper(p.name), coalesce(p.nickname,"�
 │{"name":"亚尔兹默氏病"}     │"亚尔兹默氏病"     │"亚尔兹默氏病"       │"没有查到，默认值"│{"name":"亚尔兹默氏病","label":"Jibing"}     │
 └──────────────────────┴─────────────┴───────────────┴──────────┴───────────────────────────────────────┘
 
+求交集：
+WITH [1,2,3] as a, [3,4,5] as b
+RETURN REDUCE(res=[], x IN a | CASE  WHEN x IN b THEN res+x ELSE res END) as bbbb
+
+合并多个结果：
+Union 和 Union all
+Union：把多段Match的return结果 上线组合成一个结果集，会自动去掉重复行； Union all：作用同union，但不去重；
 

@@ -1,0 +1,42 @@
+0x03 OpenRC init系统
+
+在类Unix系统上，OpenRC是一个基于依赖的init。由于0.25 OpenRC包含openrc-init，它可以替换/ sbin/init，但init程序的默认提供程序是SysVinit for OpenRC。与Linux一样，OpenRC也可用于多个BSD系统。
+OpenRC是TrueOS，Gentoo，Alpine Linux，Parabola GNU / Linux-libre，Artix Linux和其他类似unix 系统的默认初始化系统，而其他一些像Devuan则提供它作为选项
+
+3.1 openrc的安装
+apk add --no-cache openrc
+
+3.2 rc-update - 不同运行级增加或者删除服务
+
+rc-update add nginx 增加一个服务
+rc-update del nginx 删除一个服务
+
+3.3 rc-status - 运行级的状态管理
+
+rc-status  查看默认运行级别的状态
+rc-status -a 查看所有运行级别的状态
+
+3.4 rc-service - 管理服务的状态
+
+rc-service nginx start 启动一个服务
+rc-service nginx stop  停止一个服务
+rc-service nginx restart  重启一个服务
+
+3.5 openrc - 管理不同的运行级
+
+Alpine Linux可用的运行级
+
+default
+sysinit
+boot
+single
+reboot
+shutdown
+
+3.5 关机重启指令 - 在容器中试了好像没反应
+
+reboot 重启系统，类似于shutdown -r now。
+halt 关机，类似于shutdown -h now。
+poweroff 关机
+
+

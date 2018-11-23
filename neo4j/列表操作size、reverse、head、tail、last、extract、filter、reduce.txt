@@ -1,0 +1,35 @@
+# 列表中元素的个数:
+size($list)
+
+# 计算字符串的长度：
+RETURN SIZE("你好，中国！")
+╒════════════════╕
+│"SIZE("你好，中国！")"│
+╞════════════════╡
+│6               │
+└────────────────┘
+
+# 反转列表中元素的顺序：
+reverse($list)
+
+head($list), last($list), tail($list)
+head() :返回第一个元素, 
+last() :返回列表中最后一个元素. 
+tail() :返回列表中除第一个元素之外所有元素组成的列表，对于空列表或仅有单个元素的列表，会返回一个空列表；
+
+# 对列表元素进行过滤
+[x IN list WHERE x.prop <> $value | x.prop]
+
+# 原始列表中每个元素属性值的列表
+extract(x IN list | x.prop)
+
+# 筛选限定条件为True的结果：
+filter(x IN list WHERE x.prop <> $value)
+
+# 将满足条件的节点的属性值求和:
+reduce(s = "", x IN list | s + x.prop)
+MATCH p=(a)-->(b)-->(c)
+WHERE a.name='Alice' AND b.name='Bob' AND c.name='Daniel'
+RETURN reduce(totalAge = 0, n IN nodes(p)| totalAge + n.age) AS reduction
+
+

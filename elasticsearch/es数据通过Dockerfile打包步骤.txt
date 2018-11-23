@@ -1,0 +1,25 @@
+
+1、启动一个空容器
+docker run --rm -p 9200:9200 -p 9300:9300 -v /etc/localtime:/etc/localtime elasticsearch:5.6.4
+
+2、迁移数据到该容器中：
+gswyhq@gswyhq-PC:~/yhb/es_search$ ./multi_elasticdump.sh -i 192.168.3.105:9200 -o 192.168.3.145:9200 -p all_baoxian
+
+3、将改容器中的数据复制出来到一个文件夹中；
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/alpine$ docker cp 81e0631035d8:/usr/share/elasticsearch/data xinxin_es_data_20180810
+
+4、编写Dockerfile_xinxin_20180810文件：
+
+主要是在（https://github.com/docker-library/elasticsearch/blob/master/5/Dockerfile）基础上添加：
+COPY plugins_5.6.10 /usr/share/elasticsearch/plugins
+
+# VOLUME /usr/share/elasticsearch/data
+COPY ./xinxin_es_data_20180810 /usr/share/elasticsearch/data
+
+5、构建镜像：
+docker build -t xinxin_elasticsearch_data:20180810 -f Dockerfile_xinxin_20180810 .
+
+6、用刚才构建的镜像启动一个容器：
+docker run -p 19200:9200 -p 19300:9300 xinxin_elasticsearch_data:20180810
+
+

@@ -48,6 +48,15 @@ Out[18]:
 查询neo4j节点总数的例子
 curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswewf -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "match (n) return count(n)" } ]}'
 
+或者查询所有节点数，关系数、属性总量：
+curl -XGET 192.168.3.164:7474/db/manage/server/jmx/domain/org.neo4j/instance%3Dkernel%230%2Cname%3DPrimitive%20count -u neo4j:gswyhq
+
+或者用neo4j，browser:
+执行“:sysinfo”命令
+
+MATCH (n:Information_extraction_qa) OPTIONAL MATCH(n)-[r]-(n2) return  count(distinct n) as 实体总数, count(distinct r) as 关系总数, count(distinct properties(n)) as 属性总数
+
+
 执行多个cpyher语句事务的http请求
 我们在同一个http请求中也可以发送多个cpyher语句，响应的结果体中会包含每个cpyher语句结果。
 一个例子如下：
@@ -76,5 +85,10 @@ curl -XPOST http://192.168.3.145:7478/db/data/transaction/commit -u neo4j:gswewf
     }
   } ]
 }'
+
+# 导出数据到文件：
+curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" :"CALL apoc.export.cypher.all(\"/var/lib/neo4j/data/all_baoxian_20181025_200514.cypher\",{})" } ]}'
+
+# curl -XGET 192.168.3.105:47474/db/data/labels -u neo4j:gswyhq
 
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels

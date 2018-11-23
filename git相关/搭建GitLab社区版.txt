@@ -11,6 +11,9 @@ sudo docker run --detach \
     --volume /srv/gitlab/logs:/var/log/gitlab \
     --volume /srv/gitlab/data:/var/opt/gitlab \
     gitlab/gitlab-ce:latest
+
+# 启动时间有点长约2~5分钟；浏览器打开http://localhost:80
+
 参考资料：https://docs.gitlab.com/omnibus/docker/
 
 方法二：

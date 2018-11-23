@@ -11,6 +11,9 @@ MERGE ON CREATE
 MERGE (p:Person {name:"Charlie Sheen"})
 ON CREATE SET p.age=10 return p
 
+# MERGE SET
+MERGE (n:Label {id:28012}) SET n.name = 'Alices', n.age = 154 return n
+若有id为28012，则更改其属性name、age；若没有id为28012的节点则创建该节点，并更改其属性name、age；
 
 Merge子句
 
@@ -38,12 +41,14 @@ RETURN keanu.name, keanu.created
 MERGE (person:Person)
 ON MATCH SET person.found = TRUE , person.lastAccessed = timestamp()
 RETURN person.name, person.found, person.lastAccessed
-4，在merge子句中同时指定on create 和 on match子句
 
+4，在merge子句中同时指定on create 和 on match子句
+# 如果找到就设置属性，没找到创建节点并设置属性：
 MERGE (keanu:Person { name: 'Keanu Reeves' })
 ON CREATE SET keanu.created = timestamp()
 ON MATCH SET keanu.lastSeen = timestamp()
 RETURN keanu.name, keanu.created, keanu.lastSeen
+
 5，merge子句用于match或create一个关系
 
 MATCH (charlie:Person { name: 'Charlie Sheen' }),(wallStreet:Movie { title: 'Wall Street' })
@@ -54,6 +59,10 @@ RETURN charlie.name, type(r), wallStreet.title
 MATCH (oliver:Person { name: 'Oliver Stone' }),(reiner:Person { name: 'Rob Reiner' })
 MERGE (oliver)-[:DIRECTED]->(movie:Movie)<-[:ACTED_IN]-(reiner)
 RETURN movie
+
+# merge关系，如果找到关系就设置属性，如果没找到就创建关系并设置属性：
+match (n{name:'xys'}),(m{name:'books'})  merge (n)-[r:read]->(m) on create set r.num=1 on match set r.num=r.num+1
+
 7，merge子句用于子查询
 
 复制代码
@@ -69,3 +78,45 @@ MATCH (person:Person)
 MERGE (city:City { name: person.bornIn })
 MERGE (person)-[r:BORN_IN]->(city)
 RETURN person.name, person.bornIn, city;
+
+merge (n:Baoxianchanpin:Abc1535103448461383382) merge (m:Shiyi:Abc1535103448461383382) MERGE   (n)-[:`专业术语`]->(m) RETURN n,m
+
+Some example data:
+
+CREATE 
+  (t1:Type {name:"t1"}),
+  (t2:Type {name:"t2"}),
+  (t3:Type {name:"t3"}),
+  (t1)-[:REL]->(t2)
+The query:
+
+MATCH (t1:Type)
+OPTIONAL MATCH (t1)-[r]->(t2:Type)
+RETURN
+  t1, t2,
+  CASE r
+    WHEN NULL THEN "other thing"
+    ELSE "something"
+  END AS info
+
+CALL db.labels() YIELD label with label where label starts with 'Abc' WITH COLLECT(label) AS its FOREACH (value IN its |  merge (n:Baoxianchanpin ) set n.sign=value )
+
+CALL db.labels() YIELD label with label where label starts with 'Abc' WITH COLLECT(label) AS its FOREACH (value IN its |  MERGE (n:Baoxianchanpin {sign:value}) MERGE(m:Shiyi {sign: value}) MERGE  (n)-[:`专业术语`]->(m)  )
+
+a b 都不存在，创建节点并建立关系
+a b 都存在，只建立关系
+a 存在 b 不存在，创建b节点并建立关系
+a 不存在 b 存在，创建a节点并建立关系
+MERGE (a:TEST1{_id:'3'})
+WITH (a)
+MERGE (b:TEST2{_id:'4'}) 
+WITH a,b
+WHERE a._id='3' AND b._id ='4' MERGE (a)-[r:CONTACT]->(b)
+
+或：
+MERGE (a:TEST1{_id:'3'})
+WITH (a)
+MERGE (b:TEST2{_id:'4'}) 
+WITH a,b MERGE (a)-[r:CONTACT]->(b)
+
+

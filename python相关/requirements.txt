@@ -9,3 +9,9 @@ pyemd==0.4.3
 -e .
 
 git+http://192.168.3.101/gswewf/dialogue_management.git@0.0.2
+
+# 导出某个项目的依赖包
+# gswewf@gswewf-PC:~/nlp_layer$ sudo pip3 install pipreqs
+# gswewf@gswewf-PC:~/nlp_layer$ pipreqs /home/gswewf/nlp_layer  # 导出某个项目的依赖包
+# INFO: Successfully saved requirements file in /home/gswewf/nlp_layer/requirements.txt
+

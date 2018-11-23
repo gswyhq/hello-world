@@ -19,6 +19,9 @@ ubuntu@10-13-109-255:~$ sudo tar --strip-components=1 -xvzf docker-17.05.0-ce.tg
 把当前用户加入到docker用户组中
 gswewf@gswewf-pc:~$ sudo usermod -a -G docker $USER
 
+# 将当前用户从docker用户组删除：
+zy@ubuntu:~$ sudo gpasswd -d $USER docker
+
 添加配置文件
 gswewf@gswewf-pc:~$ sudo vim /etc/default/docker
 在配置文件中添加或修改

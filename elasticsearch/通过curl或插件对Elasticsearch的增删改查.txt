@@ -20,7 +20,11 @@ curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: applicatio
 gswewf@gswewf-PC:~/dialogue_management_system$ curl -XGET 192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_all/22 -u elastic:web12008
 {"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":1,"found":true,"_source":{"timestamp":"2018-04-17T19:07:25.518866","实体标准词":"恶性肿瘤","实体类型":"Jibing","实体同义词":["恶性肿瘤","严重性肿瘤","癌症","恶性黑色素瘤","已发生转移的皮肤癌","血癌","骨癌","淋巴癌","肠癌","肝癌","胃癌","盆腔癌","子宫癌","宫颈癌","肺癌","纵隔癌","脑癌","神经癌","乳腺癌","食道癌","肾癌","白血病"]}}
 
-
+# 按某个字段值进行查找：
+import urllib.parse
+urllib.parse.quote('模板id')
+Out[3]: '%E6%A8%A1%E6%9D%BFid'
+curl http://42.93.37.139:18200/all_baoxian_templates_question_alias/_search?q=%E6%A8%A1%E6%9D%BFid:7
 
 查看集群状态
 curl 'localhost:9200/_cat/health?v'
@@ -76,6 +80,19 @@ gswewf@gswewf-PC:~$ curl -XPOST -u elastic:web12008 '192.168.3.105:9200/all_baox
 }'
 
 返回结果：{"_index":"all_baoxian_kg_entity_synonyms_20180417_190725","_type":"all_baoxian","_id":"22","_version":9,"result":"updated","_shards":{"total":2,"successful":1,"failed":0}}
+
+# 根据某个查询结果进行更新：
+curl -XPOST http://192.168.3.164:9200/t6.site.web1.ai_1_faq_alias/_update_by_query -H 'Content-Type: application/json' -d '{
+  "query": {
+    "term": {
+      "ukey": "welcome"
+    }
+  },
+  "script": {
+    "inline": "ctx._source.answer = \"仅说一句，欢迎光临!!!\";ctx._source.timestamp=\"2018-09-18T10:43:27.661986\""
+  }
+}'
+
 
 数据的更新，还可以通过_update端点，编写内嵌脚本（inline script）来实现。
 

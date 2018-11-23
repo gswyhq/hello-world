@@ -1,0 +1,65 @@
+
+1、保存模型
+
+# 首先定义saver类
+saver = tf.train.Saver(max_to_keep=4)
+
+# 定义会话
+with tf.Session() as sess:
+
+    sess.run(tf.global_variables_initializer())
+    print "------------------------------------------------------"
+
+    for epoch in range(300):
+        if epoch % 10 == 0:
+            print "------------------------------------------------------"
+            # 保存模型
+            saver.save(sess, "model/my-model", global_step=epoch)
+            print "save the model"
+
+        # 训练
+        sess.run(train_step)
+    print "------------------------------------------------------"
+注意点：
+
+创建saver时，可以指定需要存储的tensor，如果没有指定，则全部保存。
+
+创建saver时，可以指定保存的模型个数，利用max_to_keep=4，则最终会保存4个模型（下图中我保存了160、170、180、190step共4个模型）。
+
+saver.save()函数里面可以设定global_step，说明是哪一步保存的模型。
+
+程序结束后，会生成四个文件：存储网络结构.meta、存储训练好的参数.data和.index、记录最新的模型checkpoint。
+
+如：
+
+这里写图片描述
+
+2、加载模型
+
+def load_model():
+    with tf.Session() as sess:
+        saver = tf.train.import_meta_graph('model/my-model-290.meta')
+        saver.restore(sess, tf.train.latest_checkpoint("model/"))
+注意点：
+
+首先import_meta_graph，这里填的名字meta文件的名字。然后restore时，是检查checkpoint，所以只填到checkpoint所在的路径下即可，不需要填checkpoint，不然会报错“ValueError: Can’t load save_path when it is None.”。
+
+后面根据具体例子，介绍如何利用加载后的模型得到训练的结果，并进行预测。
+
+
+知识点
+
+1、.meta文件：一个协议缓冲，保存tensorflow中完整的graph、variables、operation、collection。
+
+2、checkpoint文件：一个二进制文件，包含了weights, biases, gradients和其他variables的值。但是0.11版本后的都修改了，用.data和.index保存值，用checkpoint记录最新的记录。
+
+3、在进行保存时，因为meta中保存的模型的graph，这个是一样的，只需保存一次就可以，所以可以设置saver.save(sess, 'my-model', write_meta_graph=False)即可。
+
+4、如果想设置每多长时间保存一次，可以设置saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)，这个是每2个小时保存一次。
+
+5、如果不想保存所有变量，可以在创建saver实例时，指定保存的变量，可以以list或者dict的类型保存。如：
+
+w1 = tf.Variable(tf.random_normal(shape=[2]), name='w1')
+w2 = tf.Variable(tf.random_normal(shape=[5]), name='w2')
+saver = tf.train.Saver([w1,w2])
+

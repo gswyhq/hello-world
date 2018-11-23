@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>addrow.html</title>
+      <script type="text/javascript">
+    
+        var num = 1;
+        
+        function addRow() {
+            var tb = document.getElementById("mytableid");
+            var row = tb.insertRow();
+            var cell = row.insertCell();
+            cell.innerText = "第" + num + "行";
+            num++;
+            cell = row.insertCell();
+            cell.innerHTML = "<input type='text' value = '新一行'>";
+            
+        }
+        
+        function delRow() {
+            var rowIndex = document.getElementById("delTextId").value;
+            var tb = document.getElementById("mytableid");
+            tb.deleteRow(rowIndex-1);
+        }
+    </script>
+    
+  </head>
+  
+  <body>
+    <table id="mytableid">
+        <!-- <tr><td>第一行</td><td>输入</td></tr> -->
+    </table>
+    
+    <input type="button" value="新增一行" onclick="addRow()" />
+    <br>
+    <input type="text" id="delTextId" />
+    <input type="button" value="删除选择行" onclick="delRow()" />
+  </body>
+</html>

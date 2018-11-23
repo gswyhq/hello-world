@@ -16,6 +16,17 @@ ES_INDEX = 'intent'  # 必须是小写
 ES_USER = 'elastic'
 ES_PASSWORD = 'web12008'
 
+r = requests.post("http://localhost:9200/_bulk", headers={"Content-Type": 'application/json'}, data='''
+{ "delete": { "_index": "website", "_type": "blog", "_id": "123" }} 
+{ "create": { "_index": "website", "_type": "blog", "_id": "123" }}
+{ "title":    "My first blog post" }
+{ "index":  { "_index": "website", "_type": "blog" }}
+{ "title":    "My second blog post" }
+{ "update": { "_index": "website", "_type": "blog", "_id": "123", "_retry_on_conflict" : 3} }
+{ "doc" : {"title" : "My updated blog post, 中文字符串也可以"} }
+'''.encode('utf-8'))
+
+
 intent_entity_dict = {'是否承保某个疾病': [['Jibing'],[]],
 '保障项目的责任免除详情': [[],['Baozhangxiangmu']],
  '询问合同变更': [[],[]],

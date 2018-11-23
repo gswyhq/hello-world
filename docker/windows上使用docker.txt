@@ -1,4 +1,24 @@
 ﻿
+对于Windows用户来说，使用docker toolbox来安装docker是最简单的方式
+Windows10安装参考： https://www.cnblogs.com/linjj/p/5606687.html
+
+windows10家庭版：但是在windows系统中Docker目前仅有win10专业版和企业版的安装包，win7/win8/win10家庭版需要通过docker toolbox来安装。
+docker toolbot下载地址(Docker的有CE和EE版，CE为社区版)：http://mirrors.aliyun.com/docker-toolbox/windows/docker-toolbox/DockerToolbox-18.03.0-ce.exe
+
+Windows7安装参考：https://blog.csdn.net/qq2712193/article/details/54576313
+下载及安装说明： https://docs.docker.com/toolbox/toolbox_install_windows/
+
+运行报错：
+错误1：“未找到应用程序”，是因为对应的git路径错误；右击对应的快捷键，->"属性"，修改对应的路径即可。
+
+错误2：“doesn't have vt-x/amd-v enabled”
+这时当使用VirtualBox启动虚拟机时提醒“虚拟电脑控制台 - 错误”，说明你电脑虚拟化技术处于被禁用状态。 
+这时就要启动BIOS的虚拟化设置 | 开启CPU虚拟化支持。 
+重启电脑后按F2或F10进入BIOS界面（不同主板型号进入BIOS所需按键不同）。 
+进入BIOS界面：Configuratio > Intel Virtualization Technology > Enabled。 
+注：主板不一样其BISO中显示关键词也不一样的，主要是找到Virtual或Virtualization将其设置为Enabled。
+F10保存BIOS设置并重启电脑。再次点击运行Docker，就发现OK了
+
 机器必须具有运行Windows 7或更高版本的64位操作系统;
     可以安装Docker Toolbox，它使用Oracle Virtual Box而不是Hyper-V。
     Docker Toolbox的下载地址：
@@ -191,7 +211,11 @@ default   *        virtualbox   Running   tcp://192.168.99.100:2376           v1
 test01    -        virtualbox   Running   tcp://192.168.99.101:2376           v17.06.0-ce
 
 
-
+设置国内镜像源：
+docker-machine ssh default
+sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=http://f2d6cb40.m.daocloud.io |g" /var/lib/boot2docker/profile
+exit
+docker-machine restart default
 
 
 

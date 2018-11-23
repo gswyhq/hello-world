@@ -113,11 +113,17 @@ MATCH p=(n)-[*1..9]-(n2) where id(n)=79 FOREACH (n IN nodes(p) | SET n:Abcd ) re
         MATCH p=()-[r:`答案列表`]->() RETURN ID(r)  # 获取`答案列表`这个属性的id；
         
         MATCH (x:Shuxing)-[r]-() RETURN endNode(r)  # 查询所有的叶子节点
+
         MATCH (a) WHERE ANY (x IN a.alias WHERE x = "价格") RETURN a  # 在列表中查询，若有一个满足及查询成功
         
         MATCH (a) WHERE a.name='Eskil' RETURN a.array, filter(x IN a.array WHERE length(x)= 3)  # 在搜索结果的基础上继续过滤；
        
         match (n) where not (n)-->() return distinct n  # 查找所有的叶子节点
+
+        # 查询所有的叶子节点，或者分叉节点
+        MATCH p=(n2:TuijianState:Zhongdeanlian) where (NOT (n2)-->() or length((n2)-->())>=2  )  RETURN n2
+
+        MATCH p=(n:TuijianState:Zhongdeanlian {name: "旅行险推荐"})-[*0..10]->(n2) where n2.status='age' AND (NOT (n2)-->() or length((n2)-->())>=2  )  RETURN n2
 
         MATCH (person:Person{name: "张三"}) SET person.ths = CASE person.salary WHEN 'Teacher' THEN 50000 WHEN 'Assistant' THEN 40000 WHEN 85 THEN 'abc' ELSE 'asd' END RETURN person # 选择性赋值
 
@@ -678,6 +684,12 @@ MATCH (emp:Employee)
 RETURN emp.empid,emp.name,emp.salary,emp.deptno
 ORDER BY emp.name DESC
 
+# 多重排序，多级排序：
+# 先按照搜索结果的路径长度排序，再按照搜索路径的关系id排序：
+MATCH p=shortestPath((n:TuijianState:Zhongdeanlian {name: "旅行险推荐"})-[*0..10]->(n2))
+where n2.status="start" or n.status="start"  unwind relationships(p) as rels with DISTINCT rels as rels2, length(p) as ls
+return endnode(rels2) as ns, rels2, ls  order by ls, id(rels2)
+
 # 合并查询结果：
 UNION子句，它结合并返回来自两个组结果共同行到单个组结果。 它不会从两个节点返回重复的行。
 结果列有限制，并从两个结果集的列名称应该是相同的（Neo4j的“AS”子句用于给一些别名。），列的数据类型应该是相同的。
@@ -854,6 +866,12 @@ WITH person, count(*) AS appearances, collect(m.title) AS movies
 WHERE appearances > 1
 RETURN person.name, appearances, movies
 
+# 计算结点的出入度并根据出入度为结点设置类型
+MATCH (p:LinkedinID)
+WITH p, size ((p) -[]-> ()) AS outDegree, size ((p) <-[]- ()) AS inDegree
+WHERE inDegree > 5 AND outDegree > 5
+RETURN p limit 1
+//（设置类型：SET p:Label1）
 
 可以在查询的开始，使用 CYPHER 关键词跟着Neo4j 版本指定需要的 Neo4j 版本：
 cypher 3.2 MATCH (n1)-[r]->(n:Qingjing)return n

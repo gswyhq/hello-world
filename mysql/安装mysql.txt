@@ -131,7 +131,12 @@ tar -zxvf  /home/rain/download/navicat8_mysql_en.tar.gz
 OK，这样就完啦
 连接上数据库后里面的中文数据是乱码,把Ubuntu的字符集修改为zh_CN.utf8就行了,修改方法:
 1.查看系统支持的字符集: locale -a  
-2,修改字符集: export LANG=zh_CN.utf8  
+2,修改字符集: export LANG=zh_CN.utf8
+具体方法：
+打开navicat窗口界面一般会乱码。关闭navicat，然后双击安装目录下的start_navicat 文件默认用文本编辑器gedit打开，
+gswyhq@gswyhq-PC:~/Desktop$ vim /home/gswyhq/navicat112_mysql_cs_x64/start_navicat
+在文本开头大概第8行找到配置项 export LANG="en_US.UTF-8",此编码只识别UTF-8中的英文编码，把他改成export LANG="zh_CN.UTF-8"，可识别中文。保存，关闭即可。
+
 破解方案：
 第一次执行start_navicat时，会在用户主目录下生成一个名为.navicat的隐藏文件夹。
 cd /home/rain/.navicat/  
@@ -139,6 +144,10 @@ cd /home/rain/.navicat/
 rm system.reg
 把此文件删除后，下次启动navicat 会重新生成此文件，30天试用期会按新的时间开始计算。
 也可以直接删除.navicat 目录
+
+也可以设置个定时任务，”crontab -e" 进入crontab 编辑状态;
+# 每天09:00 删除/home/gswyhq/.navicat64文件夹
+0 9 * * * rm -r /home/gswyhq/.navicat64
 
 增删改字段：
 选择表，右键-> 表设计-> '添加字段'、'插入字段'等等；
@@ -230,3 +239,4 @@ Current database: *** NONE ***
 最后发现是字体的问题；
 打开一个表，选择上方的“工具（tools）”--> "选项（options）" --> "外观（Appearance）"--> "字体（Font）";
 将四个字体都设置为中文字体："WenQuanYi Micro Hei" 或“Droid Sans Fallback”
+

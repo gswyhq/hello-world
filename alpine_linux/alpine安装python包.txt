@@ -1,0 +1,17 @@
+
+1、安装numpy:
+RUN apk --update add --no-cache --virtual .build-deps \
+        g++ \
+        --repository http://mirrors.ustc.edu.cn/alpine/v3.8/main/ --allow-untrusted \
+    && \
+    pip install numpy==1.15.1 && \
+    -i http://pypi.douban.com/simple \
+     --trusted-host=pypi.douban.com \
+    && apk del -f .build-deps
+
+2、安装scipy:
+   也是需要先安装g++
+
+3、安装tensorflow
+需要通过Dockerfile文件安装
+https://raw.githubusercontent.com/better/alpine-tensorflow/master/Dockerfile    

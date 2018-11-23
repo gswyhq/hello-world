@@ -56,3 +56,11 @@ gswewf@gswewf-PC:~$ sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
 ssh -t -t user@10.242.1.1
 或者
 ssh user@10.242.1.1 -tt
+
+# 使用sudo时报错：
+sudo: no tty present and no askpass program specified
+原因：由于帐号并没有开启免密码或设置root密码导致的
+解决方案1（设置免密）：
+假设当前帐号为gswyhq;切换到root下，添加免密码： 
+[root@4891fe85fdb8 ~]# echo "gswyhq ALL = NOPASSWD: ALL" >> /etc/sudoers 
+

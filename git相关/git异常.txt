@@ -1,0 +1,48 @@
+
+具体报错
+fatal: The remote end hung up unexpectedly
+error: RPC failed; curl 18 transfer closed with outstanding read data remaining
+
+解决方法
+git config --global http.postBuffer 524288000
+
+需要注意的是http.postBuffer 后，单位是b，524288000B也就500M左右
+
+# root@5420f754d9e6:/chat_bot# git diff HEAD conf/system_conf.py
+WARNING: terminal is not fully functional
+这是因为 TERM 变量的值 git 无法识别。
+在Windows中可以使用如下的方式设置
+SETX TERM cygwin
+在Linux中可以使用如下的方式设置：
+root@5420f754d9e6:/chat_bot# export TERM=xterm
+
+有时候删除远程的分支或者tag会报错：
+error: dst refspec tianfeng_20180910 matches more than one.
+错误原因：当远程仓库同时存在相同名称的 branch 和 tag 时，不指明绝对路径的前提下，操作这个名称的 branch 和 tag 都会出现这个问题。
+解决方案：
+指明操作对象的绝对路径就能准确操作了
+对象	路径
+branch	refs/heads/branch_name
+tag	refs/tags/tag_name
+举个删除的例子：
+//删除 dev_test 分支
+git push origin :refs/heads/dev_test
+//删除 dev_test 标签
+git push origin :refs/tags/dev_test
+
+# git diff; git branch等命令时，不能已颜色来区分；而是显示如下格式：
+* [[32mmaster[[m
+[[1mdiff --git a/README.md b/README.md[[m
+[[1mdiff --git a/README.md b/README.md[[m
+[[1mindex 808c44b..4111fe9 100644[[m
+[[1m--- a/README.md[[m
+[[1m+++ b/README.md[[m
+解决方案：安装第三方工具colordiff增加颜色：
+Alpine Linux: apk add colordiff
+
+# 解决github上传ssh-key后仍须输入密码的问题
+git clone https://github.com/Name/project.git
+这样便会在你git push时候要求输入用户名和密码 
+解决的方法是使用ssh方式克隆仓库:
+git clone git@github.com:Name/project.git
+

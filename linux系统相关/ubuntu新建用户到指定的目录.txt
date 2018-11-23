@@ -1,0 +1,123 @@
+ubuntu 新建用户到指定的目录
+
+一、新建用户
+
+ubuntu新建用户有两个命令，adduser 和 useradd：
+
+1、其中adduser比较方便，直接使用命令：sudo adduser “用户名”，
+
+然后设置密码，一路回车就OK了，
+
+并且系统默认为新建的用户在/home目录下建立以用户名为名字的家目录，并且默认加入sudo用户组，自动设置shell，总之，很方便；
+
+
+
+2、useradd，使用不太方便，需要自己设置家目录，需要自己把用户加入sudo用户组，如果不加入sudo用户组的话，sudo命令不能用，还需要自己设置shell等等，但是有些时候，我们就是希望不要把家目录放到默认的/home/下，想放到别的硬盘下，这时候的useradd就显得很有用了，先看一下useradd可跟的参数，
+
+选项：  
+  -b, --base-dir BASE_DIR   新账户的主目录的基目录  
+  -c, --comment COMMENT         新账户的 GECOS 字段  
+  -d, --home-dir HOME_DIR       新账户的主目录  
+  -D, --defaults        显示或更改默认的 useradd 配置  
+  -e, --expiredate EXPIRE_DATE  新账户的过期日期  
+  -f, --inactive INACTIVE       新账户的密码不活动期  
+  -g, --gid GROUP       新账户主组的名称或 ID  
+  -G, --groups GROUPS   新账户的附加组列表  
+  -h, --help                    显示此帮助信息并推出  
+  -k, --skel SKEL_DIR   使用此目录作为骨架目录  
+  -K, --key KEY=VALUE           不使用 /etc/login.defs 中的默认值  
+  -l, --no-log-init 不要将此用户添加到最近登录和登录失败数据库  
+  -m, --create-home 创建用户的主目录  
+  -M, --no-create-home      不创建用户的主目录  
+  -N, --no-user-group   不创建同名的组  
+  -o, --non-unique      允许使用重复的 UID 创建用户  
+  -p, --password PASSWORD       加密后的新账户密码  
+  -r, --system                  创建一个系统账户  
+  -s, --shell SHELL     新账户的登录 shell  
+  -u, --uid UID         新账户的用户 ID  
+  -U, --user-group      创建与用户同名的组  
+  -Z, --selinux-user SEUSER     为 SELinux 用户映射使用指定 SEUSER  
+如果我们希望新建用户user0到/mnt/hdd2/目录下，并且指定用户使用的shell是/bin/bash，应该首先切换到root用户下，然后使用命令：
+# useradd  -d  /mnt/hdd2/user0   -m -s  /bin/bash  user0       //这样建立的用户并没有加入到sudo用户组；
+
+这样新建用户user0的家目录就会在/mnt/hdd2/user0，使用的shell是/bin/bash。然后再使用命令：
+
+# passwd user0；设置密码就可以了。
+
+
+
+二、用户组设置命令：
+
+1、如果在新建用户的时候没有指定shell，可以使用命令：
+
+# usermod -s /bin/bash  user0；其中user0是用户名，来为用户指定shell；
+
+
+
+2、可以使用命令将用户添加到sudo用户组：
+
+#usermod -aG sudo  user0；这儿的a参数代表追加 。或者命令 #  gpasswd  –a  user0  sudo；
+
+与之对应的把一个用户退出超级用户组，可以使用命令：# gpasswd –d  user0  sudo；
+查看用户所属的用户组命令：#groups fgl0
+查看用户所使用的shell，切换到所要查看的用户下，执行命令：#echo $SHELL
+linux的用户信息保存在/etc/passwd文件中，另外，/etc/shadow文件存放的是用户密码相关信息。
+
+/etc/passwd文件格式：
+用户名:密码:UID:GID:用户信息:HOME目录路径:用户shell
+其中UID为0则是用户root，1～499为系统用户，500以上为普通用户
+
+/etc/shadow保存用户密码信息，包括加密后的密码，密码过期时间，密码过期提示天数等。
+用户组信息保存在/etc/group文件中.
+格式如下：
+用户组名:组密码:GID:组内帐号（多个帐号用逗号分隔）
+
+用户登录后，/etc/passwd文件里的GID为用户的初始用户组。
+用户的初始用户组这一事实不会再/etc/group中体现。
+
+更改文件或者目录所属的用户或者用户组：chown [-R] 账号名称:用户组名称 文件或目录
+-R : 进行递归( recursive )的持续更改
+例如：chown root:root testfile // 使用 chown 一次性修改testfile文件的拥有者及组 
+3、删除ubuntu用户，如果要删除的用户当前已登陆，是删除不掉的，必须注销掉当前用户切换为另一个用户下，才能删除。切换到root下，使用命令：
+
+# userdel  user0；   或者#  userdel –r  user0；-r参数代表同时删除用户的工作目录；
+
+# zy@ubuntu:~$ sudo userdel -r yhq
+
+
+4、创建一个新组，在/etc/group文件里有所有组信息。以下命令可以创建新组：
+
+# groupadd -g "gid" "group name"
+
+
+
+
+
+三、补充知识：
+
+1、shell
+
+shell是一个命令解析器
+
+所谓shell是一个交互式的应用程序。
+
+shell执行外部命令的 时候，是通过fork/exec叉一个子进程，然后执行这个程序。
+
+2、sudo
+
+sudo 是一种程序，用于提升用户的权限，在linux中输入sudo就是调用sudo这个程序提升权限  
+
+sudo的意思是，以别人的权限叉起一个进程，并运行程序。
+
+3、cd
+
+cd是shell的内部命令。  
+
+也就是说，是直接由shell运行的，不叉子进程。 
+
+那么这儿说一个有趣的问题，为什么执行sudo cd  xx命令会报错：sudo: cd: command not found。这是因为如果不报错的话，就意味着你在当前的进程里完成了提升当前进程权限的操作。但是很显然的是：
+
+你在当前进程里当然不能提升进程的权限（其实也可以，不过得编程的时候写到代码里，然后再编译，而我们的 shell没有这个功能）否则岂不是太危险了？比如黑客.sh
+
+来源： https://blog.csdn.net/baidu_35679960/article/details/78752591
+

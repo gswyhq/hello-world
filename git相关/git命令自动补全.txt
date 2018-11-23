@@ -1,0 +1,39 @@
+
+ubuntu 系统 git 自动补全：
+root@5e5b7a877731:/# wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash ~/.git-completion.bash
+修改主目录下的 .bashrc 文件
+root@5e5b7a877731:/# vim ~/.bashrc
+在文件的最后一行，加上如下代码：
+source ~/.git-completion.bash
+root@5e5b7a877731:/# source ~/.bashrc
+或者：将如下行放到.bash_profile 文件中
+if [ -f ~/.git-completion.bash ]; then
+. ~/.git-completion.bash
+fi
+将其立即生效：
+source ~/.bash_profile
+
+实际上大多数git发行版本，安装git时，git自动补全的脚本（git completion script） 被安装到 /etc/bash_completion.d/ (or /usr/share/bash-completion/completions/git) ；
+这个时候不需要到 github下载git自动补全脚本. 仅仅需要添加到 .bashrc中即可:
+source /etc/bash_completion.d/git
+# or
+source /usr/share/bash-completion/completions/git
+在某些Ubuntu版本中, 默认情况下git autocomplete 可能会被破坏掉了，这时可以通过下面的命令安装修复:
+sudo apt-get install git-core bash-completion
+
+
+Alpine Linux系统的git自动补全：
+1、安装自动补全
+apk update
+apk add git git-bash-completion bash bash-completion
+2、将默认的shell由/bin/ash更改为/bin/bash
+需要将 root shell 更改为 bash，请输入：
+# vi /etc/passwd
+查找用户名和默认 shell，比如 /bin/ash：
+root:x:0:0:root:/root:/bin/ash
+然后用 /bin/bash 替换：
+root:x:0:0:root:/root:/bin/bash
+3、编辑~/.bashrc,添加：
+source /usr/share/bash-completion/completions/git
+
+

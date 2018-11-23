@@ -1,0 +1,79 @@
+
+du -sm * | sort -n //统计当前目录大小 并安大小 排序
+
+# 查看docker容器资源使用情况，并按cpu从大到小输出：
+# 按CPU的使用情况进行排序输出：
+ubuntu@ip-172-33-13-170:~$ docker stats --all --format "table {{.CPUPerc}}\t{{.MemUsage}}\t{{.Container}}" --no-stream |sort -r
+
+shell sort命令
+用法：sort [选项]... [文件]...
+串联排序所有指定文件并将结果写到标准输出。
+
+排序选项：
+
+-b, --ignore-leading-blanks 忽略前导的空白区域
+-d, --dictionary-order  只考虑空白区域和字母字符
+-f, --ignore-case   忽略字母大小写
+-g, --general-numeric-sort  按照常规数值排序
+-i, --ignore-nonprinting    只排序可打印字符
+-n, --numeric-sort  根据字符串数值比较
+-r, --reverse   逆序输出排序结果
+
+其他选项：
+
+-c, --check, --check=diagnose-first 检查输入是否已排序，若已有序则不进行操作
+-k, --key=位置1[,位置2] 在位置1 开始一个key，在位置2 终止(默认为行尾)
+-m, --merge 合并已排序的文件，不再进行排序
+-o, --output=文件   将结果写入到文件而非标准输出
+-t, --field-separator=分隔符    使用指定的分隔符代替非空格到空格的转换
+-u, --unique    配合-c，严格校验排序；不配合-c，则只输出一次排序结果
+
+ 
+
+例子1：-u 去重 ，默认安装ASCII码升序排列
+
+## 查看文件内容
+cat test_sort.txt
+ 
+## sort -u 去重
+cat test_sort.txt |sort -u
+
+
+ 
+
+例子2： -r ,降序排序
+## 查看文件内容
+cat test_sort.txt
+ 
+## sort 默认升序
+cat test_sort.txt |sort
+ 
+## sort -r 降序
+cat test_sort.txt |sort -r
+　　
+
+ 
+
+ 例子3： -g 、-n ，按照数值排序
+ 
+## sort 默认升序，但默认按照字符串比较，会出现2 大于10的情况
+cat test_sort.txt |sort
+ 
+## 按照常规数值排序
+cat test_sort.txt |sort -g
+ 
+## 按照字符串数值排序
+cat test_sort.txt |sort -n
+　　
+
+ 
+
+例子4：-t （设置分隔符）和-k （指定某列）
+## 查看文件内容
+cat test_sort.txt
+ 
+## sort -t -k
+cat test_sort.txt |sort -n -t "|" -k 3
+　　
+
+ 

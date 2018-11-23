@@ -1,0 +1,24 @@
+# 官方套件庫
+docker run --rm -t -i pritunl/archlinux:latest /bin/bash
+
+#  Docker Registry 中的 Arch Linux 映像檔只提供 x86_64 版本
+gswyhq@gswyhq-PC:~/github_projects$ docker run --rm -it base/archlinux /bin/bash
+[root@4891fe85fdb8 /]# useradd gswyhq
+
+# 给gswyhq用户设置密码：
+[root@4891fe85fdb8 /]# passwd gswyhq
+New password: 
+Retype new password: 
+passwd: password updated successfully
+
+# 创建主目录：
+[root@4891fe85fdb8 home]# mkdir /home/gswyhq
+
+# 改变主目录的用户及用户组：
+[root@4891fe85fdb8 home]# chown -R gswyhq:gswyhq /home/gswyhq
+
+# 指定用户进入容器： 
+gswyhq@gswyhq-PC:~/Downloads$ docker exec -it --user=gswyhq 4891fe85fdb8 /bin/bash
+
+
+

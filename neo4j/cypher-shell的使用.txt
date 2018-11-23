@@ -13,6 +13,9 @@ gswewf@gswewf-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  
 		等待查询完成
 		警告：每次运行时，将数据添加到当前数据库中！
 
+# 在容器外直接执行 cypher语句：
+gswyhq@gswyhq-PC:~$ docker exec -it linshi7474 /var/lib/neo4j/bin/cypher-shell -a bolt://192.168.3.145:7687 -u neo4j -p gswyhq "match (n) return n limit 2 ;"
+
 # 进入容器：
 gswewf@gswewf-pc:~/docker/neo4j/movie$ docker exec -it movie7475 /bin/bash
 # 进入neo4j目录：

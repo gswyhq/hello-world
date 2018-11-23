@@ -1,4 +1,26 @@
 
+例子1:创建节点并给节点分配一个属性
+CREATE (n {name:"张三"})
+
+例子2:批量创建节点并且分配属性
+UNWIND [{name:"李四"},{name:"张三"}] AS mynodes
+CREATE (n) SET n = mynodes
+
+例3:创建节点时分配属性和标签
+CREATE ( n:Person{name:"李四"} )
+
+例4:创建一个关系，给两个节点建立关系指定关系类型、方向和绑定一个变量。
+  CREATE ({name:"李四"})-[r:have]->({bookname:"设计模式"})
+
+例5:创建两个节点同时创建一个关系，给两个节点建立关系指定关系类型、方向和属性。
+  CREATE ({name:"李四"})-[:LOVES{since:"2017"}]->({name:"小花"})
+
+例6:给已经存在的两个节点创建一个关系。
+  MATCH (a:Person),(b:Person)
+  WHERE a.name = '张三' AND b.name = 李四'
+  CREATE (a)-[r:FRIEND]->(b)
+  RETURN r
+
 create (n:Baoxianchanpin{name:"百年康倍保"})-[r:`保险种类`]->(n2{name:'医疗险'})  RETURN n,n2
 # 新建两个节点及关系，若节点已经存在，则会另外新建一个与之前已存在的相独立的节点及关系
 
@@ -71,25 +93,31 @@ Merge子句的作用有两个：当模式（Pattern）存在时，匹配该模�
 MERGE (michael:Person { name: 'Michael Douglas' })
 RETURN michael;
 2，在merge子句中指定on create子句
-
 如果需要创建节点，那么执行on create子句，修改节点的属性；
+MERGE (n:Label {name:"Bob"})  ON CREATE SET n.name = "Bob2" SET n.age = 142 return n
+# 若merge部分查询到了结果，则on create部分并不执行； 只有当merge部分没有查询到结果时，on create部分才会执行；
 
-ERGE (keanu:Person { name: 'Keanu Reeves' })
+MERGE (keanu:Person { name: 'Keanu Reeves' })
 ON CREATE SET keanu.created = timestamp()
 RETURN keanu.name, keanu.created
 3，在merge子句中指定on match子句
 
 如果节点已经存在于数据库中，那么执行on match子句，修改节点的属性；
+# 若merge部分查询到了结果，则执行on match部分修改节点属性； 若merge部分没有查询到结果时，则执行merge部分，on match修改部分属性(若有跟merge冲突的属性，则该部分的不改变)；
+如： MERGE (n:Label {name:"Bob"})  ON MATCH SET n.name = "Bob2" SET n.age = 142 return n
+假设没有查询到结果： 则创建的点属性为： name属性是merge部分的；age属性是match部分的； {name: "Bob", age: 142}
 
 MERGE (person:Person)
 ON MATCH SET person.found = TRUE , person.lastAccessed = timestamp()
 RETURN person.name, person.found, person.lastAccessed
-4，在merge子句中同时指定on create 和 on match子句
 
+4，在merge子句中同时指定on create 和 on match子句
+# 若merge部分查询到了结果，则执行on match 部分；若没有查询到结果，则执行on create部分（若有跟merge冲突的属性，则该部分的更新为create部分）
 MERGE (keanu:Person { name: 'Keanu Reeves' })
 ON CREATE SET keanu.created = timestamp()
 ON MATCH SET keanu.lastSeen = timestamp()
 RETURN keanu.name, keanu.created, keanu.lastSeen
+
 5，merge子句用于match或create一个关系
 
 MATCH (charlie:Person { name: 'Charlie Sheen' }),(wallStreet:Movie { title: 'Wall Street' })

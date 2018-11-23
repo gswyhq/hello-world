@@ -72,3 +72,63 @@ tmpfs           6.0G     0  6.0G   0% /run/user/1000
 # rm -rf /swapfile
 最后从 /etc/fstab 中删除相关条目
 
+# swap的设置
+一般情况下不会用到swap的，一般物理内存使用在90%以上(默认是这个数，可以自行在/etc/sysctl.conf里设置vm.swappiness参数)才会用到swap，
+但有的时候，内存会被缓存占用，导致系统开始使用swap空间，此时就需要清理下swap了 
+这里先说下vm.swappiness参数，设置成vm.swappiness＝10：就是说当内存使用90%以上才会使用swap空间;
+
+# swap空间的清理：
+第一步：先执行sync命令
+~$ sudo sync
+
+# sync命令用于强制被改变的内容立刻写入磁盘，更新超块信息。
+# 在Linux/Unix系统中，在文件或数据处理过程中一般先放到内存缓冲区中，等到适当的时候再写入磁盘，以提高系统的运行效率。
+# sync命令则可用来强制将内存缓冲区中的数据立即写入磁盘中。用户通常不需执行sync命令，系统会自动执行update或bdflush操作，将缓冲区的数据写 入磁盘。
+# 只有在update或bdflush无法执行或用户需要非正常关机时，才需手动执行sync命令。
+
+第二步：(如果仅仅是清理swap的话，这一步可以不执行)
+~$ sudo -i
+# echo 3 > /proc/sys/vm/drop_caches
+
+# 此指令输入立即生效，意在释放所有缓存。 
+
+第三步：关闭swap,再开户swap
+# swapoff -a
+# swapon -a
+
+# 注意：关闭之前，最好需要有对应的空余内存空间
+
+zy@ubuntu:~/ner_es$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G         11G        1.8G        181M        2.2G        3.5G
+Swap:          1.0G        1.0G         12K
+zy@ubuntu:~/ner_es$ sudo swapoff -a
+zy@ubuntu:~/ner_es$ sudo swapon -a
+zy@ubuntu:~/ner_es$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G         12G        1.1G        181M        2.2G        2.7G
+Swap:          1.0G          0B        1.0G
+
+# 现在看swap的used的那一项为零了，说明已经清空；但Mem的free的那一项增加了。
+
+若需要对swap分区进行扩容，则另新建一个就可以了：
+扩容之前：
+gswyhq@gswyhq-PC:~$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G        9.7G        3.5G        366M        2.4G        5.3G
+Swap:          4.0G        2.6G        1.4G
+gswyhq@gswyhq-PC:~$ /sbin/swapon -s
+Filename                Type        Size    Used    Priority
+/swapfile                               file        4194300 2728544 -1
+
+扩容之后：
+gswyhq@gswyhq-PC:~$ sudo swapon -s
+Filename                Type        Size    Used    Priority
+/swapfile                               file        4194300 2727996 -1
+/home/gswyhq/swapfile                   file        20971516    0   -2
+
+gswyhq@gswyhq-PC:~$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            15G        9.7G        3.5G        370M        2.5G        5.3G
+Swap:           23G        2.6G         21G
+

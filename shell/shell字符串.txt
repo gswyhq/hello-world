@@ -65,3 +65,40 @@ gswewf@gswewf-PC:~$ echo ${file%.*}
 gswewf@gswewf-PC:~$ echo ${file%%.*}
 /dir1/dir2/dir3/my
 
+# 分割字符串：
+var='1,2,3,4,5'
+var=${var//,/ }    #这里是将var中的,替换为空格
+var=($var) # 用于将字符串$a分割到数组$var ${var[0]} ${var[1]} ... 分别存储分割后的数组第1 2 ... 项
+echo ${var[0]}
+
+如何读取最后一列：android-1152x1920
+1. echo $string| awk -F "," '{print $NF}'
+2. echo $string | awk '{split($0,array,",");print array[6]}'
+3. echo $string | cut -d "," -f6
+其中-d代表用什么进行分割，-f6代表要第6个结果
+另外还有一个常用的参数是-c,用法为 -cx-y 这个意思是取得第x至第y个字符串 
+echo “abcdefg” | cut -c3-6 输出为 def 
+
+
+如何读取 android-1152x1920 中的 1152x1920
+1. echo $string| awk -F "," '{print $NF}' | awk -F "-" '{print $NF}'
+2. echo $string | cut -d "," -f6 | cut -c 9-   
+获得android-1152x1920后，再取从第9个字符到最后的字符
+ 
+
+截取指定字符串
+echo | awk '{print substr("'${string}'",2,4)}' 
+ 
+// 从第2个字符开始获取4个字符   结果为：home 
+ 
+计算字符串长度 
+ 
+echo | awk '{print length("'${string}'")}' 
+ 
+// 结果为： 29 
+ 
+字符串大小写转换 
+echo | awk '{ print toupper("test"), tolower("TEST") }' 
+ 
+结果为: TEST  test
+

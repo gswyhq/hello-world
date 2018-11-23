@@ -1,0 +1,13 @@
+
+可以通过Java的pdfbox包来实现；
+
+第一步, 构建镜像：
+docker build -t pdfbox-app:2.0.12 -f Dockerfile_pdfbox  .
+
+第二步，使用构建的镜像提取文本：
+docker run -v $PWD:/mnt --rm -it pdfbox-app:2.0.12 ExtractText /mnt/information_extraction_qa_2018-11-22_140504_1542865819085117848.pdf
+
+有时候PDF文件能打开，但使用的时候，有时候会报“You do not have permission to extract text”的错误。
+PDF文档具有可应用于它们的某些安全权限以及与其关联的两个密码，用户密码和主密码。
+如果设置了“无法提取文本”权限位，则需要使用主密码解密文档以提取文本。
+解决方案：打开PDF文件，将该PDF文件打印到文件（PDF格式），再使用打印到文件后的文件重试即可。

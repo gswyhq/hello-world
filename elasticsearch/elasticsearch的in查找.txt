@@ -1,0 +1,89 @@
+
+1, 查询某个字段值是否在某个列表中： 
+{
+  "query": {
+    "terms": {
+      "实体标准词.keyword": [
+        "企业财产损失基本险"
+      ]
+    }
+  }
+}
+
+2, 查询某个字段值是否在某个字符串中：
+curl -XPUT 192.168.3.164:9200/test -d '{
+   "settings": {
+      "analysis": {
+         "analyzer": {
+            "substring": {
+               "type": "custom",
+               "tokenizer": "standard",
+               "filter": [
+                  "lowercase",
+                  "substring"           
+               ]
+            },
+            "exact": {
+               "type": "custom",
+               "tokenizer": "keyword",
+               "filter": [
+                  "lowercase"
+               ]
+            }
+         },
+         "filter": {
+            "substring": {
+              "type":"shingle",
+                "output_unigrams" : true
+
+            }
+         }
+      }
+   },
+   "mappings": {
+      "movie": {
+         "properties": {
+            "title": {
+               "type": "string",
+               "fields": {
+                  "raw": {
+                     "type": "string",
+                     "analyzer": "exact"
+                  }
+               }
+            }
+         }
+      }
+   }
+}'
+
+curl -XPUT 192.168.3.164:9200/test/movie/1 -d '{"title": "重大疾病"}'
+curl -XPUT 192.168.3.164:9200/test/movie/2 -d '{"title": "重大疾病保险金"}'
+curl -XPUT 192.168.3.164:9200/test/movie/3 -d '{"title": "轻症疾病保险金"}'
+curl -XPUT 192.168.3.164:9200/test/movie/4 -d '{"title": "Joe Dirt"}'
+curl -XPUT 192.168.3.164:9200/test/movie/5 -d '{"title": "Meet Joe Black"}'
+curl -XPUT 192.168.3.164:9200/test/movie/6 -d '{"title": "Tomorrow Never Dies"}'
+
+curl -XPOST 192.168.3.164:9200/test/_search -d '{
+        "query": {
+            "match": {
+               "title.raw" : {
+                   "analyzer": "substring",
+                   "query": "Joe Dirt tomorrow"
+               }
+            }
+        }
+    }'
+
+curl -XPOST 192.168.3.164:9200/test/_search -d '{
+        "query": {
+            "match": {
+               "title.raw" : {
+                   "analyzer": "substring",
+                   "query": "重大疾病如何理赔"
+               }
+            }
+        }
+    }'
+
+

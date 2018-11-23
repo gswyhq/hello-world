@@ -1,0 +1,36 @@
+
+方法1：本地构建上传镜像：
+
+# 提交自己本地的镜像：
+gswyhq@gswyhq-PC:~$ docker push neo4j-apoc:3.4.5
+The push refers to a repository [docker.io/library/neo4j-apoc]
+f477502af074: Preparing
+d4746dcd86b2: Preparing
+d881b77844a5: Preparing
+9cec8df7590e: Preparing
+278abe5dcf7f: Preparing
+4f999017f343: Waiting
+8bc7bbcd76b6: Waiting
+298c3bb2664f: Waiting
+73046094a9b8: Waiting
+denied: requested access to the resource is denied
+# 提交被拒绝，需要使用 docker tag改名字,再上传即可：
+gswyhq@gswyhq-PC:~$ docker tag neo4j:apoc_3.4.5 gswyhq/neo4j-apoc:3.4.5
+gswyhq@gswyhq-PC:~$ docker push gswyhq/neo4j-apoc:3.4.5
+
+需要注意的是`gswyhq`是本人的docker用户名。进入docker hub网站查看，发现多了一个公共的repository。
+网页打开：https://www.docker.com/gswyhq
+就可看见上传的镜像文件了。
+
+方法2：自动构建
+可以从存储在仓库中的构建上下文中自动构建镜像。构建上下文是 Dockerfile 和特定位置的任何文件。对于自动构建，构建上下文是包含 Dockerfile 的存储库。
+
+自动构建有几个优点：
+
+以这种方式构建的镜像完全符合期望
+可以访问 Docker Hub 仓库的任何人都可以使用 Dockerfile。
+代码变化后仓库会自动更新。
+GitHub 和 Bitbucket 上的公共和私人仓库都支持自动构建。
+具体详情可参考：https://blog.csdn.net/kikajack/article/details/79617311
+https://docs.docker.com/docker-hub/builds/
+

@@ -45,7 +45,7 @@ handlers = [
     (r"/user", UserHandler)
 ]
 
-template_path = os.path.join(os.path.dirname(__file__),"template")
+template_path = os.path.join(os.path.dirname(__file__),"template")  # 保障‘self.render('index.html')’有效果
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()

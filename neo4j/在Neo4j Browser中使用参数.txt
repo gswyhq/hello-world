@@ -19,6 +19,25 @@ MERGE (y)<-[:IN]-(e:Event { id: event.id })
 RETURN e.id AS x
 ORDER BY x
 
+
+# 定义一个变量：
+:param batch: [{from:123,to:[44,12,128],created:"2016-01-13"}, {from:34,to:[23,35,2983],created:"2016-01-15"}]
+
+# 使用变量：
+UNWIND {batch} as row
+MATCH (from) WHERE id(from) = toint(row.from)
+MATCH (to) WHERE id(to) IN [x IN row.to | toint(x)] // list of ids
+CREATE (from)-[rel:FOO]->(to)
+SET rel.created = row.created return from, to
+
+# 或者：
+UNWIND $batch as row
+MATCH (from) WHERE id(from) = toint(row.from)
+MATCH (to) WHERE id(to) IN [x IN row.to | toint(x)] // list of ids
+MERGE (from)-[rel:FOO]->(to)
+SET rel.created = row.created return from, to
+
+
 3，查看创建的图形
 
 参数是一个列表格式的数据，在参数events中，两个event的year属性都是2014，因此，MERGE子句只会创建一个Year节点；由于两个event的id属性不同，因此MERGE子句会创建两个Event节点，并创建Year节点和Event节点之间的关系

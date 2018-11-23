@@ -29,3 +29,13 @@ do
     ssh -t -p $port $user@$ip $remote_cmd
 done
 
+# 本地shell文件，远程执行（将 time.sh 脚本放到远程服务器192.168.3.103  上运行）：
+ssh zy@192.168.3.103 < time.sh
+
+
+Windows系统利用putty远程执行本地脚本：
+putty.exe -ssh -pw 123456 zy@192.168.3.103 -m "time.sh"
+
+Windows系统利用pscp复制远程文件到本地：
+pscp.exe -pw 123456 zy@192.168.3.103:/home/zy/remote_command/dump_bak.xls .
+

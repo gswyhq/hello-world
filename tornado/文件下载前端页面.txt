@@ -1,0 +1,19 @@
+
+点击页面对应的按钮，即可下载对应的文件：
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>下载数据</title>
+    </head>
+    <body>
+        <a href="./2022104965.zip"
+		 		download="2022104965.zip">点击下载2</a>
+        <a href="http://192.168.3.145:8000/test/2022104965.zip"
+		 		download="2022104965.zip">点击下载</a>
+    </body>
+</html>
+
+

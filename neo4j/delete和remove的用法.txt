@@ -1,0 +1,24 @@
+
+DELETE和REMOVE主要区别 : DELETE操作用于删除节点和relation。 REMOVE操作用于删除标签label和属性。
+
+Match (n:Person {id:'baba'}) remove n.age return n
+MATCH (s:Teacher)-[r:teach]->(d:Student) delete r,s,d //删除与该关系相关的老师和学生及label
+MATCH (n:Test) remove n:Test //删除label
+
+删除属性Name:
+方法1：
+MATCH p=(n:Number)where n.name='600万' set n.Name=null return n
+方法2：
+MATCH p=(n:Number)where n.name='600万' remove n.Name return n
+
+DELETE：
+删除节点和关系
+删除单个节点：MATCH (n:Useless) DELETE n;
+删除节点和连接它的关系：MATCH (n { name: 'Andres' })-[r]-() DELETE n, r
+删除所有节点和关系：MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r
+
+REMOVE：
+删除标签和属性
+删除属性：MATCH (andres { name: 'Andres' }) REMOVE andres.age RETURN andres;
+删除节点的标签：MATCH (n { name: 'Peter' }) REMOVE n:German RETURN n;
+删除多重标签：MATCH (n { name: 'Peter' }) REMOVE n:German:Swedish RETURN n

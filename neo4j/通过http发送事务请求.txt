@@ -1,0 +1,124 @@
+
+# 单条请求：
+
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  } ]
+}'
+
+# 或者：
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) set n.name=\"测试123\" RETURN id(n)"
+  } ]
+}
+'
+
+# 一次提交多个请求：
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [ {
+    "statement" : "CREATE (n) RETURN id(n)"
+  }, {
+    "statement" : "CREATE (n {props}) RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "My Node测试"
+      }
+    }
+  } ]
+}'
+
+# 以图表格式返回结果
+# 如果要了解查询返回的节点和关系的图形结构，可以指定“图形”结果数据格式。 例如，当您想要可视化图形结构时，这非常有用。 格式整理结果的所有列中的所有节点和关系，并且还展平节点和关系的集合，包括路径。
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '{
+  "statements" : [ {
+    "statement" : "CREATE ( bike:Bike { weight: 10 } ) CREATE ( frontWheel:Wheel { spokes: 3 } ) CREATE ( backWheel:Wheel { spokes: 32 } ) CREATE p1 = (bike)-[:HAS { position: 1 } ]->(frontWheel) CREATE p2 = (bike)-[:HAS { position: 2 } ]->(backWheel) RETURN bike, p1, p2",
+    "resultDataContents" : [ "row", "graph" ]
+  } ]
+}'
+
+# 开始一个事务：
+gswyhq@gswyhq-PC:~/yhb/neo4j$ curl -XPOST http://localhost:7474/db/data/transaction -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d'{
+  "statements" : [ {
+    "statement" : "CREATE (n {props}) RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "My Node"
+      }
+    }
+  } ]
+}
+'
+{"commit":"http://localhost:7474/db/data/transaction/47/commit",
+    "results":[{"columns":["n"],"data":[{"row":[{"name":"My Node"}],
+    "meta":[{"id":5612,"type":"node","deleted":false}]}]}],
+    "transaction":{"expires":"Tue, 17 Jul 2018 11:22:54 +0000"},"errors":[]}
+
+# 假设您有一个打开的事务，您可以发出许多请求，每个请求都执行其他语句，并通过重置事务超时来保持事务处于打开状态。
+gswyhq@gswyhq-PC:~/yhb/neo4j$ curl -XPOST http://localhost:7474/db/data/transaction/47 -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d'{
+  "statements" : [ {
+    "statement" : "CREATE (n {props}) RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "My Node2222"
+      }
+    }
+  } ]
+}
+'
+
+{"commit":"http://localhost:7474/db/data/transaction/47/commit",
+"results":[{"columns":["n"],"data":[{"row":[{"name":"My Node2222"}],
+"meta":[{"id":5613,"type":"node","deleted":false}]}]}],
+"transaction":{"expires":"Tue, 17 Jul 2018 11:23:08 +0000"},
+"errors":[]}
+
+# 重置打开事务的事务超时
+# 在一段时间不活动后，每个孤立的事务都会自动过期。 可以通过重置事务超时来防止这种情况。
+# 可以通过向执行空语句列表的服务器发送保持活动请求来重置超时。 此请求将重置事务超时，并将事务将到期的新时间作为响应的“事务”部分中的RFC1123格式化时间戳值返回。
+gswyhq@gswyhq-PC:~/yhb/neo4j$ curl -XPOST http://localhost:7474/db/data/transaction/47 -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d'{
+  "statements" : [ ]
+}'
+
+# 鉴于您有一个打开的事务，您可以发送提交请求。 （可选）您提交其他语句以及在提交事务之前将执行的请求。
+gswyhq@gswyhq-PC:~/yhb/neo4j$ curl -XPOST http://localhost:7474/db/data/transaction/47/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d'{
+  "statements" : [ {
+    "statement" : "CREATE (n {props}) RETURN n",
+    "parameters" : {
+      "props" : {
+        "name" : "My Node3333"
+      }
+    }
+  } ]
+}
+'
+{"results":[{"columns":["n"],"data":[{"row":[{"name":"My Node3333"}],"meta":[{"id":5614,"type":"node","deleted":false}]}]}],"errors":[]}
+# 至此，开始事务的所有操作才有效；在commit之前的所有操作，数据并未真正更新到neo4j中；
+
+# 回滚打开的事务
+# 鉴于您有一个打开的事务，您可以发送回滚请求。 服务器将回滚事务。 尝试在此事务中运行的任何其他语句将立即失败。
+# 当然，回滚操作必须在事务的有效期内，若超时了，则回滚失败; 另外回滚操作必须在commit之前才有效：
+curl -XDELETE http://localhost:7474/db/data/transaction/47 -H "application/json; charset=UTF-8" -u neo4j:gswyhq
+
+# 创建节点并写入属性
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '{
+  "statements": [
+    {
+      "statement": "UNWIND { events } AS event MERGE (y:Year { year:event.year }) MERGE (y)<-[:IN]-(e:Event { id:event.id }) RETURN e.id AS x ORDER BY x",
+      "parameters":{
+                   "events" : [ {
+                        "year" : 2014,
+                        "id" : 1
+                      }, {
+                        "year" : 2014,
+                        "id" : 2
+                      } ]
+                    }
+            }
+      ]
+}'
+

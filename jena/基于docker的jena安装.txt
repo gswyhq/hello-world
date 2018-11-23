@@ -1,0 +1,191 @@
+拉取jena,3.6.0版本：
+gswyhq@gswyhq-PC:~$ docker pull stain/jena-fuseki:3.6.0
+
+# 启动容器：
+docker run -p 3030:3030 -it stain/jena-fuseki:3.6.0
+
+docker run -p 8080:8080 -it stain/jena-fuseki:3.6.0 ./fuseki-server --port=8080
+
+docker run -p 3030:3030 -e ADMIN_PASSWORD=pw123 -it stain/jena-fuseki:3.6.0
+
+指定Java设置，例如分配给内存的内存量
+堆（默认值：1200 MiB），使用-e设置JVM_ARGS环境：
+
+docker run -p 3030:3030 -e JVM_ARGS=-Xmx2g -it stain/jena-fuseki
+
+
+数据持久性
+Fuseki的数据存储在容器内的Docker卷/ fuseki中。
+请注意，除非您使用docker restart或下面的机制之一，数据
+在每次运行jena-fuseki图像之间都会丢失。
+
+将数据存储在已命名的Docker卷容器fuseki-data中
+（推荐），首先创建它为：
+
+docker run --name fuseki-data -v /fuseki busybox
+然后使用--volumes-from启动fuseki。这可以让你稍后升级
+jena-fuseki码头图像而不会丢失数据。下面的命令也使用
+-d在后台启动容器。
+
+docker run -d --name fuseki -p 3030:3030 --volumes-from fuseki-data stain/jena-fuseki
+如果您想将fuseki数据存储在主机的指定位置（例如
+磁盘空间或速度要求），请使用-v指定它：
+
+docker run -d --name fuseki -p 3030:3030 -v /ssd/data/fuseki:/fuseki -it stain/jena-fuseki
+
+只能是单个容器访问 /fuseki 数据卷
+
+查看日志：
+docker logs fuseki
+
+停止：
+docker stop fuseki
+或者如果您使用-it启动容器，请按Ctrl-C。
+
+重新启动一个命名的容器（它会记住卷和端口配置）：
+docker restart fuseki
+
+升级 Fuseki：
+docker pull stain/jena-fuseki
+docker stop fuseki
+docker rm fuseki
+docker run -d --name fuseki -p 3030:3030 --volumes-from fuseki-data stain/jena-fuseki
+
+数据加载
+Fuseki允许通过Web界面和Web上传RDF数据集服务，但对于大型数据集，直接加载它们效率更高
+使用命令行。
+
+这个docker映像包含一个调用了这个脚本的shell脚本load.sh
+从docker数据卷 /staging 中加载数据
+
+要获得帮助，请尝试：
+
+docker run stain/jena-fuseki ./load.sh
+
+您很可能想要使用主机上的文件夹加载
+-v，然后转换为数据卷，然后可以使用常规fuseki。
+
+在加载数据之前，您必须停止Fuseki容器，或者
+将数据加载到Fuseki还不知道的全新数据集中。
+停止名字为fuseki的容器:
+docker stop fuseki
+
+下面的例子假设你想加载Fuseki数据集'chembl19'
+从Docker数据卷fuseki-data（参见上文）加载这两个文件
+/home/stain/ops/chembl19 中的： cco.ttl.gz 和 void.ttl.gz
+
+docker run --volumes-from fuseki-data -v /home/stain/ops/chembl19:/staging \
+   stain/jena-fuseki ./load.sh chembl19 cco.ttl.gz void.ttl.gz
+
+提示：您可能会发现从数据分段运行数据加载会有好处
+目录为了使用tab-completion等而不暴露路径。 ./load.sh将扩展* .ttl之类的模式 - 您可能需要
+在主机上使用单引号（例如'*.ttl'）以避免它们被扩展。
+
+如果你没有指定任何文件名到load.sh，在 /staging  下所有的文件名匹配这些GLOB模式将被加载：
+*.rdf *.rdf.gz *.ttl *.ttl.gz *.owl *.owl.gz *.nt *.nt.gz *.nquads *.nquads.gz
+load.sh 填充图谱。
+
+注意：如果您将数据加载到全新/保险丝卷中，则需要新的随机数
+管理员密码将在您启动Fuseki之前设置。
+您可以检查数据加载的输出，或稍后覆盖
+密码使用-e ADMIN_PASSWORD = pw123。
+
+重启fuseki
+如果您创建了一个全新的数据集，然后在Fuseki中转到管理数据集，
+单击添加新数据集，选中持久并提供数据库名称
+正如提供给load.sh一样。 chembl19。
+
+现在转到数据集，从下拉菜单中选择，并尝试信息和查询。
+
+提示：可以将新数据集加载到a的体积中
+运行Fuseki服务器，只要您不在Fuseki中“创建”它即可
+load.sh已完成。
+
+用tdbloader加载
+如果您有更高级的要求，比如加载多个数据集或命名图，那么可以
+直接与tdbloader一起使用
+一个TDB汇编程序文件。
+
+请注意，Fuseki TDB数据集是 /fuseki/databases/.
+
+您将需要在已安装的Docker卷上提供汇编程序文件
+数据：
+
+docker run --volumes-from fuseki-data -v /home/stain/data:/staging stain/jena-fuseki \
+  ./tdbloader --desc=/staging/tdb.ttl
+
+请记住在汇编器中使用Docker容器的数据卷路径
+文件，例如/staging/dataset.ttl而不是/home/stain/data/dataset.ttl。
+
+定制Fuseki配置
+如果您需要进一步修改Fuseki的配置，您可以使用相当于：
+docker run --volumes-from fuseki-data -it ubuntu bash
+and inspect /fuseki with the shell. Remember to restart fuseki afterwards:
+
+docker restart fuseki
+
+# dat, idn文件的导入：
+bash-4.3# ls -al data/tdb/
+total 222868
+drwxr-xr-x    2 root     root          4096 Jun 26 04:45 .
+drwxr-xr-x    4 root     root          4096 Jun 26 04:28 ..
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GOSP.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GOSP.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GPOS.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GPOS.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GSPO.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 GSPO.idn
+-rw-r--r--    1 root     root      16777216 Jun 26 03:45 OSP.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 OSP.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 OSPG.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 OSPG.idn
+-rw-r--r--    1 root     root      16777216 Jun 26 03:45 POS.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 POS.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 POSG.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 POSG.idn
+-rw-r--r--    1 root     root      16777216 Jun 26 03:45 SPO.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 SPO.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 SPOG.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 SPOG.idn
+-rw-r--r--    1 root     root             0 Jun 26 03:45 journal.jrnl
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 node2id.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 node2id.idn
+-rw-r--r--    1 root     root       1709945 Jun 26 03:45 nodes.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 prefix2id.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 prefix2id.idn
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 prefixIdx.dat
+-rw-r--r--    1 root     root       8388608 Jun 26 03:45 prefixIdx.idn
+-rw-r--r--    1 root     root             0 Jun 26 03:45 prefixes.dat
+-rw-r--r--    1 root     root          1411 Jun 26 03:45 stats.opt
+bash-4.3pwd
+/jena-fuseki
+bash-4.3# ./fuseki-server --port 3031 --loc=data/tdb /tdb
+
+gswyhq@gswyhq-PC:~/docker/jena-fuseki$ docker run --name fuseki-data -v /fuseki busybox
+
+gswyhq@gswyhq-PC:~/docker/jena-fuseki$ docker run --name jena_3030 -p 3030:3030 -e ADMIN_PASSWORD=123456 -it -d -v $PWD:/jena-fuseki/data --volumes-from fuseki-data stain/jena-fuseki:3.6.0 /jena-fuseki/fuseki-server --loc=data/tdb /tdb
+2864bb8debd3fe37b17337f52c05852181b36ede43493f0d5318b5f9df718d3a
+
+gswyhq@gswyhq-PC:~/docker/jena-fuseki$ docker run --name jena_3030 -p 3030:3030 -e ADMIN_PASSWORD=123456 -it -d -v $PWD:/jena-fuseki/data --volumes-from fuseki-data stain/jena-fuseki:3.6.0 /jena-fuseki/fuseki-server --loc=data/tdb_drug_new /tdb_drug_new
+2d738601e10dd54522d14fa00eefe64c3a8d792935357c2317dd079d0ca53b1e
+
+# 导出全部的三元组到json
+gswyhq@gswyhq-PC:~/docker/jena-fuseki$ docker cp jena_3030:/jena-fuseki/bin jena-fuseki_bin
+gswyhq@gswyhq-PC:~/docker/jena-fuseki$ cd jena-fuseki_bin/
+gswyhq@gswyhq-PC:~/docker/jena-fuseki/jena-fuseki_bin$ ./s-query --service http://localhost:3030/tdb_drug_new/query 'SELECT * {?s ?p ?o}' > tdb_drug_new.json
+
+
+# PUT a file
+s-put http://localhost:3030/ds/data default D.nt
+
+# GET a file
+s-get http://localhost:3030/ds/data default
+
+# PUT a file to a named graph
+s-put http://localhost:3030/ds/data http://example/graph D.nt
+
+# Query
+s-query --service http://localhost:3030/ds/query 'SELECT * {?s ?p ?o}'
+
+# Update
+s-update --service http://localhost:3030/ds/update --file=update.ru

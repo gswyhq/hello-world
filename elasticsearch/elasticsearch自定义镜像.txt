@@ -1,0 +1,27 @@
+
+1、拉取源码：
+gswyhq@gswyhq-PC:~/github_projects$ git clone https://github.com/docker-library/elasticsearch.git
+
+2、进入Dockerfile文件目录
+gswyhq@gswyhq-PC:~/github_projects$ cd elasticsearch/5
+
+3、下载ik、pinyin分词插件
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5$ mkdir plugins_5.6.10
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ wget https://github-production-release-asset-2e65be.s3.amazonaws.com/4405468/4ab5932c-8ecc-11e8-960e-bd4f6d046a01?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20180802%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20180802T030338Z&X-Amz-Expires=300&X-Amz-Signature=11b2bfdb0b4d3f0b0b2202222417a26edafefe72bac402f7356088600b6bcb3b&X-Amz-SignedHeaders=host&actor_id=12732479&response-content-disposition=attachment%3B%20filename%3Delasticsearch-analysis-pinyin-5.6.10.zip&response-content-type=application%2Foctet-stream
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ wget https://github-production-release-asset-2e65be.s3.amazonaws.com/2993595/cb9c780c-9101-11e8-9d14-4ced0f4726e3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20180802%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20180802T030310Z&X-Amz-Expires=300&X-Amz-Signature=847f41c0339e205d423811ed510f03de369820ab3a5e811f49e3e9959a3a7e81&X-Amz-SignedHeaders=host&actor_id=12732479&response-content-disposition=attachment%3B%20filename%3Delasticsearch-analysis-ik-5.6.10.zip&response-content-type=application%2Foctet-stream
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ unzip elasticsearch-analysis-ik-5.6.10.zip
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ mv elasticsearch elasticsearch-analysis-ik-5.6.10
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ unzip elasticsearch-analysis-pinyin-5.6.10.zip
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5/plugins_5.6.10$ mv elasticsearch elasticsearch-analysis-pinyin-5.6.10
+
+4、修改Dockerfile文件，添加一行：
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5$ vim Dockerfile
+添加一行： COPY plugins_5.6.10 /usr/share/elasticsearch/plugins
+
+5、构建镜像
+gswyhq@gswyhq-PC:~/github_projects/elasticsearch/5$ docker build -t elasticsearch:my_5.6.10 -f Dockerfile .
+
+
+
+
+

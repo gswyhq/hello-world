@@ -1,4 +1,35 @@
 
+
+# 查找分支节点，或终止节点；若当前是分支节点，就返回当前节点，否则返回后续的分支节点或终止节点；
+MATCH p=(n2:TuijianState:Zhongdeanlian) where n2.status='place' with n2 match (n2)-[*0..10]->(n3) where  (NOT (n3)-->() or length((n3)-->())>=2 or length((n2)-->())>=2 )return DISTINCT CASE WHEN length((n2)-->())>=2  THEN n2
+ ELSE n3
+END as ns limit 1
+
+MATCH (start:Node)-[:REL]->(a)-[:REL]->(b)
+WITH collect(distinct a) as aNodes, collect(distinct b) as bNodes
+CALL apoc.when(size(aNodes) <= size(bNodes), 'RETURN aNodes as resultNodes', 'RETURN bNodes as resultNodes', {aNodes:aNodes, bNodes:bNodes}) YIELD value
+RETURN value.resultNodes as resultNodes
+
+MATCH (me:User{id:{myId}})
+CALL apoc.case(
+[{selection} = 'friends', "RETURN [(me)-[:FRIENDS]-(friend) | friend] as selection",
+{selection} = 'coworkers', "RETURN [(me)-[:WORKS_AT*2]-(coworker) | coworker] as selection",
+{selection} = 'all', "RETURN apoc.coll.union([(me)-[:FRIENDS]-(friend) | friend], [(me)-[:WORKS_AT*2]-(coworker) | coworker]) as selection"],
+'RETURN [] as selection', {me:me}) YIELD value
+RETURN value.selection as selection
+
+CALL apoc.when（condition，ifQuery，elseQuery：''，params：{}）产生价值
+基于条件，使用给定参数执行只读ifQuery或elseQuery
+CALL apoc.do.when（condition，ifQuery，elseQuery：''，params：{}）产生价值
+基于条件，执行使用给定参数编写ifQuery或elseQuery
+CALL apoc.case（[condition，query，condition，query，...]，elseQuery：''，params：{}）yield value
+给定条件/只读查询对的列表，使用给定参数执行与第一个条件评估关联的查询为true（或者如果没有则为else，则执行else查询）
+CALL apoc.do.case（[condition，query，condition，query，...]，elseQuery：''，params：{}）yield value
+给定条件/写入查询对的列表，使用给定参数执行与第一个条件评估关联的查询为true（或者如果没有则为else，则执行else查询）
+
+# 更多示例： https://neo4j-contrib.github.io/neo4j-apoc-procedures/#graph_algorithms
+
+
 MATCH (s:page)
 WITH s
 OPTIONAL MATCH (s)<-[r:pagetag]-(tag)
@@ -70,6 +101,7 @@ RETURN n
 , coalesce(p, 'nobody')
 , coalesce(labels(p),'nothing')
 
+# coalesce：返回第一个not null值。match (a) where a.name='Alice' return coalesce(a.hairColor,a.eyes)
 
 Cypher提供FOREACH语句，用来遍历列表中的每一个元素并分别执行更新操作。于是，一个包含0个元素或者1个元素的列表则可以看成一个条件表达式。因为当0个元素的时候，就不会执行遍历，而当1个元素的时候，就只执行一次遍历。
 
@@ -98,3 +130,30 @@ return  length(p), n.name, n1.name
 # 查`深圳市`直接相连的Ssc, 若没有，则查隔一个点的Ssc
 match p=(n3)<-[r:`地址`]-(n1:Zhongdeanlian:Ssc)-->(n2) where n2.name='深圳市'return p UNION match p=(n3)<-[r:`地址`]-(n1:Zhongdeanlian:Ssc)-[*..2]-(n2) where n2.name='深圳市' and not (:Zhongdeanlian:Ssc)-->(n2) return p
 
+MATCH (person:Person{name: "John"})
+SET person.salary =
+CASE person.type
+WHEN 'Teacher' THEN 50000
+WHEN 'Assistant' THEN 40000
+WHEN 'Student' THEN 0
+ELSE NULL
+END
+RETURN person
+
+# 根据关系的不同，设置不同的限定条件进行查询：
+MATCH (n:All_baoxian {name: "保险产品"})-[r]->(n2)
+WHERE n2.name =
+CASE type(r)
+WHEN '保险金额' THEN "最低基本保额10万元,且须为1000元的整倍数。"
+WHEN '保障项目' THEN "被保险人轻症豁免保费"
+ELSE NULL
+END
+RETURN n,r,n2
+
+# 查询保险产品名中有`尊享`二字，或者保障项目中，有`境外意外身故`几字的产品：
+MATCH (s:Baoxianchanpin)
+WITH s
+OPTIONAL MATCH (s)-[r:`保障项目`]->(tag)
+WITH s,r,tag
+Where s.name contains '尊享' or tag.name contains '境外意外身故'
+return distinct s, tag

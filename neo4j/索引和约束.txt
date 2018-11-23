@@ -1,0 +1,24 @@
+
+例1:创建索引
+
+  //为"Person"标签的name属性创建索引
+  CREATE INDEX ON :Person(name)
+例2:删除索引
+
+  //删除"Person"标签的name属性的索引
+  DROP INDEX ON :Person(name)
+例3:匹配条件中使用索引
+
+MATCH (n:Person)
+  WHERE n.name = 'Andres'
+  RETURN n
+例4:创建节点属性唯一约束
+创建一个唯一约束保证图数据库中同一个标签内的节点的属性值不重复。
+注意：不可以为已经创建索引的属性创建唯一约束
+
+  CREATE CONSTRAINT ON (n:Person) ASSERT n.name IS UNIQUE
+例5:创建节点属性唯一约束
+
+  DROP CONSTRAINT ON (n:Person) ASSERT n.name IS UNIQUE
+
+

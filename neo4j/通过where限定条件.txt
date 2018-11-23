@@ -1,0 +1,11 @@
+
+# 如果不存在 p2属性 就只创建 只有 p1属性的 节点
+MERGE (c:C {p1: 123})
+WITH c WHERE c.p2 IS NULL
+RETURN c
+
+# 如果存在 p2属性 就创建 有 p1 、p2属性的 节点
+MERGE (c:C {p1: 123，p2:456})
+WITH c WHERE c.p2 IS NOT NULL
+RETURN c
+

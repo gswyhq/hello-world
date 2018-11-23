@@ -36,3 +36,27 @@ RETURN o.name
 代码块解释：（1）从”Anders”出发，找到关联（无向）的所有人的集合m；（2）对集合m按照name降序排列，取top-1；（3）返回与top-1关联（无向）的所有人的name。
 
 MATCH (n1)-[r]->(n:Qingjing) with labels(n1) as l, count(*) as count where count > 1  RETURN l, count
+
+CALL apoc.help("apoc") YIELD name, text
+WITH * WHERE text IS null
+RETURN name AS undocumented
+
+例17:WITH语句使用使用示例
+WITH语句是将第一部分匹配的输出作为下一部分匹配的输入。
+1.查找有十个以上朋友的张姓男子
+
+  MATCH (user)-[:FRIEND]-(friend)
+  WHERE user.name =~ '张.*'
+  WITH user, count(friend) AS friends
+  WHERE friends > 10
+  RETURN user
+2.WITH语句中使用ORDER BY、SKIP 和 LIMIT 语句示例。
+
+MATCH (user)-[:FRIEND]-(friend)
+WITH user, count(friend) AS friends
+ORDER BY friends DESC
+SKIP 1
+  LIMIT 3
+RETURN user
+
+

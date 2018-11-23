@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <!--<link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.css" />-->
+        <!--<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>-->
+        <!--<script type="text/javascript" src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>-->
+        <title></title>
+        <script>
+            var rows = 1;
+            function addrows() {
+                var trElement = document.createElement("tr");
+                var td1Element = document.createElement("td");
+                var td2Element = document.createElement("td");
+                var td3Element = document.createElement("td");
+                var td4Element = document.createElement("td");
+//                td1Element.innerHTML="<input type='checkbox' value='1' name='chk'>"+rows;
+                td1Element.innerHTML=rows;
+                td2Element.innerHTML="<input type='text' value='' required name='questions' class='form-control'>";
+                td3Element.innerHTML="<input type='text' value='' required name='intents' class='form-control'>";
+                td4Element.innerHTML="<input type='button' value='删除当前行' class='btn btn-danger' onclick='delrow(this)'>";
+
+                trElement.appendChild(td1Element);
+                trElement.appendChild(td2Element);
+                trElement.appendChild(td3Element);
+                trElement.appendChild(td4Element);
+
+                var tbody = document.getElementById("tb");
+                tbody.appendChild(trElement);
+                rows++;
+            }
+            function delrow(obj){
+                //获取按钮所在的行
+                btnTrElement = obj.parentNode.parentNode;
+                //alert(btnTrElement.nodeName);
+                //获取按钮所在的行的上一级也就是TBODY
+                tbodyElemement = btnTrElement.parentNode;
+                //通过tobody干掉tr
+                tbodyElemement.removeChild(btnTrElement);
+            }
+        </script>
+    </head>
+
+    <body>
+        <form id="upload-form" action="/train_intent" method="post" enctype="multipart/form-data" >
+            <table class="table table-responsive table-striped" id="table">
+
+                <thead>
+                    <th>序号</th>
+                    <th>问句</th>
+                    <th>意图</th>
+                    <th>操作</th>
+                </thead>
+                <tbody id="tb">
+                    <!--
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>-->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td align="center" colspan="4">
+                            <!--<button class="btn btn-success" onclick="qx()">全选</button>&nbsp;&nbsp;&nbsp;-->
+                            <!--<button class="btn btn-warning" onclick="fx()">反选</button>&nbsp;&nbsp;&nbsp;-->
+                            <!--<button class="btn btn-danger" onclick="qbx()">全不选</button>&nbsp;&nbsp;&nbsp;-->
+                            <input  class="btn btn-info" type="submit" value="训练">
+                            <button class="btn btn-primary" onclick="addrows()">添加标记意图</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+        <script>
+            function qx(){
+                //获取所有的checkbox
+                var checkbox = document.getElementsByName("chk");
+                //遍历所有的checkbox
+                for (var i=0;i<checkbox.length;i++) {
+                    checkbox[i].checked=true;
+                }
+            }
+            function fx(){
+                //获取所有的checkbox
+                var checkbox = document.getElementsByName("chk");
+                //遍历所有的checkbox
+                for (var i=0;i<checkbox.length;i++) {
+                    checkbox[i].checked=!checkbox[i].checked;
+                }
+            }
+            function qbx(){
+                //获取所有的checkbox
+                var checkbox = document.getElementsByName("chk");
+                //遍历所有的checkbox
+                for (var i=0;i<checkbox.length;i++) {
+                    checkbox[i].checked=false;
+                }
+            }
+        </script>
+    </body>
+
+</html>
+

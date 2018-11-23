@@ -23,4 +23,10 @@ gswewf@gswewf-PC:~/templates$ git remote -v
 origin	git@192.168.3.101:gswewf/ModelData.git (fetch)
 origin	git@192.168.3.101:gswewf/ModelData.git (push)
 
+Releases,上传、下载静态文件：
+1、提交对应的tag:
+git push origin tag v5.6.10
+
+2、在githup网站上设置：
+依次点击`releases`->`v5.6.10`->`Edit tag`->` Attach binaries by dropping them here or  selecting them.`->`Publish release`；
 
