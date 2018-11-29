@@ -72,3 +72,9 @@ export LC_ALL=zh_CN.utf8
 export LANG=zh_CN.UTF-8
 root@8b79b4483485:~# source .bashrc
 
+如果出现这种错误：
+ Starting supervisor: Error: Another program is already listening on a port that one of our HTTP servers is configured to use.  Shut this program down first before starting supervisord.
+解决方法：
+unlink /var/run/supervisor.sock
+unlink /tmp/supervisor.sock
+

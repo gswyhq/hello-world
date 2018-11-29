@@ -4,3 +4,13 @@
 在文件头部加上：
 # -*- coding: utf-8 -*-
 
+2、python3, print函数报错：
+>>> print(code)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+UnicodeEncodeError: 'ascii' codec can't encode character '\u5408' in position 0: ordinal not in range(128)
+
+解决方案：
+root@6c6656292234:~# export LANG=en_US.UTF-8
+root@6c6656292234:~# export PYTHONIOENCODING=UTF-8
+

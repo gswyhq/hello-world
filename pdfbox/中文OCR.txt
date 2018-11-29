@@ -1,0 +1,68 @@
+
+Tesseract的OCR引擎目前已作为开源项目发布在Google Project，其项目主页在这里查看https://github.com/tesseract-ocr，
+它支持中文OCR，并提供了一个命令行工具。python中对应的包是pytesseract. 通过这个工具我们可以识别图片上的文字。
+
+1、安装tesseract
+apt-get update && apt-get install -y tesseract-ocr
+
+2、下载中文训练数据集：
+wget -t 0 -c https://raw.githubusercontent.com/tesseract-ocr/tessdata/master/chi_sim.traineddata -o /usr/share/tesseract-ocr/4.00/tessdata/
+
+# 查看已安装字库：tesseract --list-langs
+# 文字识别： root@3edc811f24fc:~# tesseract 1111.jpg result -l chi_sim
+# root@3edc811f24fc:~# tesseract 1111.jpg result -l chi_sim+eng
+# 执行之后生成结果记录在名为`result.txt`文件里
+
+3、（可选）安装python对应的包：pytesseract
+
+pip3 install pytesseract
+
+
+怎么用？
+
+如果要识别中文需要下载对应的训练集：https://github.com/tesseract-ocr/tessdata
+，下载”chi_sim.traineddata”，然后copy到训练数据集的存放路径，如：下载, https://raw.githubusercontent.com/tesseract-ocr/tessdata/master/chi_sim.traineddata
+
+
+root@3edc811f24fc:~# tesseract 1111.jpg result -l chi_sim
+
+
+具体代码就几行:
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pytesseract
+from PIL import Image
+
+# open image
+image = Image.open('test.png')
+code = pytesseract.image_to_string(image, lang='chi_sim')
+print(code)
+
+
+
+FROM ubuntu:18.04
+
+WORKDIR /tmp
+
+RUN apt-get update && apt-get -y install tesseract-ocr
+
+RUN apt-get -y install wget
+
+RUN wget -t 0 -c https://raw.githubusercontent.com/tesseract-ocr/tessdata/master/chi_sim.traineddata -O /usr/share/tesseract-ocr/4.00/tessdata/chi_sim.traineddata
+
+CMD ["/bin/bash"]
+
+# root@6c6656292234:~# tesseract --version
+# tesseract 4.0.0-beta.1
+
+# root@3edc811f24fc:~# tesseract 1111.jpg result -l chi_sim
+
+#  `docker build --no-cache -t gswyhq/tesseract-ocr-chi-sim -f Dockerfile  . `
+
+# `docker run -v $PWD:/tmp --rm -it gswyhq/tesseract-ocr-chi-sim tesseract /tmp/1111.jpg /tmp/result -l chi_sim+eng`
+
+
+
+

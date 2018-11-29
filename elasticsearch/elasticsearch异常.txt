@@ -112,3 +112,21 @@ curl -XPUT http://127.0.0.1:9200/my_index/_settings -d '{ "index" : { "max_resul
 其中my_index为要修改的index名，500000为要调整的新的窗口数。将该窗口调整后，便可以解决无法获取到10000条后数据的问题。
 注意事项
 通过上述的方式解决了我们的问题，但也引入了另一个需要我们注意的问题，窗口值调大了后，虽然请求到分页的数据条数更多了，但它是用牺牲更多的服务器的内存、CPU资源来换取的。
+
+# 问题： _update更新es数据时，报错：
+version conflict, current version [14] is different than the one provided [13]
+# 分析： 主要原因是因为多线程间的并发引起的，es的后台都是多线程异步的，多个修改请求，是没有顺序的，例如后修改的先到。
+es内部的多线程异步并发是基于自己的verison版本号进行乐观锁控制的，在后修改的先到时，filed=test3，version =2,修改后到时，先修改filed=test2,veriosn=1,此时会比较veriosn，是否相等，如果不相等的话，就直接丢弃这条数据了。
+在检索(retrieve)和重建索引(reindex)中保持更小的窗口，如何减少冲突性变更发生的概率，不过这些无法被完全避免，像一个其他进程在update进行重建索引时修改了文档这种情况依旧可能发生。
+为了避免丢失数据，update API在检索(retrieve)阶段检索文档的当前_version，然后在重建索引(reindex)阶段通过index请求提交。如果其他进程在检索(retrieve)和重加索引(reindex)阶段修改了文档，_version将不能被匹配，然后更新失败。
+对于多用户的局部更新，文档被修改了并不要紧。例如，两个进程都要增加页面浏览量，增加的顺序我们并不关心——如果冲突发生，我们唯一要做的仅仅是重新尝试更新既可。
+# 解决方案： 这些可以通过retry_on_conflict参数设置重试次数来自动完成，这样update操作将会在发生错误前重试——这个值默认为0。
+POST /website/pageviews/1/_update?retry_on_conflict=5 <1>
+{
+   "script" : "ctx._source.views+=1",
+   "upsert": {
+       "views": 0
+   }
+}
+<1> 在错误发生前重试更新5次
+
