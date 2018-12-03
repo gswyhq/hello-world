@@ -14,6 +14,12 @@ import docx
 docx_file = '/home/gswewf/Downloads/数据字典(zy)2018-03-01.docx'
 doc = docx.Document(docx_file)
 
+# #输出每一段的内容
+for para in doc.paragraphs:
+    print('\n\n', '-'*20)
+    print(para.style.style_id
+          , para.text)
+
 # 遍历每个表格
 for table in doc.tables:
     # print(dir(table))

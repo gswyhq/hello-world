@@ -410,3 +410,37 @@ curl -XPOST "http://192.168.3.105:9200/all_baoxian_intent_20180723_160904/_searc
     }
   }
 }
+
+获取所有的index:
+方法1： curl 192.168.3.105:9200/_cat/indices/*
+方法2：
+curl -XGET "http://localhost:9200/_search" -d'
+{
+  "aggs": {
+    "indicesAgg": {
+      "terms": {
+        "field": "_index",
+        "size": 200
+      }
+    }
+  },
+  "size": 0
+}'
+
+获取所有的type:
+方法1：
+curl 192.168.3.105:9200/all_baoxian_faq_20180815_150702/_mapping
+
+方法2：
+curl -XGET "http://192.168.3.105:9200/all_baoxian_faq_20180815_150702/_search" -d'
+{
+  "aggs": {
+    "typesAgg": {
+      "terms": {
+        "field": "_type",
+        "size": 200
+      }
+    }
+  },
+  "size": 0
+}'

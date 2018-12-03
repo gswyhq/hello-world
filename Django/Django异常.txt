@@ -1,0 +1,8 @@
+
+docker启动时候，访问报错：
+Invalid HTTP_HOST header: 'triples_tuple_xia:8000'. The domain name provided is not valid according to RFC 1034/1035.
+
+解决方案：
+`docker-compose.yml`文件中的服务名，不能有下划线；将下划线改为中划线即可：triples_tuple_xia -> triples-tuple-xia
+
+

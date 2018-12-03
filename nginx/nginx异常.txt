@@ -60,4 +60,53 @@ mkdir /run/nginx
 nginx代理多个服务，但若有服务未开启，可能会导致：
 用户访问请求慢,TTFB时间长的问题;网页响应慢，waiting（TTFB）时间过长
 
+报错：
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>nginx/1.10.3 (Ubuntu)</center>
+</body>
+</html>
+
+一般这个错误，是nginx配置不合理造成的。
+
+可以通过在http中增加如下配置，进行改善：
+
+    fastcgi_connect_timeout 300; 
+    fastcgi_send_timeout 300; 
+    fastcgi_read_timeout 300; 
+    fastcgi_buffer_size 64k; 
+    fastcgi_buffers 4 64k; 
+    fastcgi_busy_buffers_size 128k; 
+
+    fastcgi_temp_file_write_size 128k; 
+
+并且修改连接时间（请求时间比较长，建议改此处）：
+
+    proxy_connect_timeout   18000;   #连接时间为半小时
+    proxy_send_timeout      18000;   
+    proxy_read_timeout      18000;    
+
+vim /etc/nginx/nginx.conf
+
+http {
+
+        ##
+        # Basic Settings
+        ##
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        fastcgi_connect_timeout 300s;
+        fastcgi_send_timeout 300s;
+        fastcgi_read_timeout 300s;
+        types_hash_max_size 2048;
+        # server_tokens off;
+
+        # server_names_hash_bucket_size 64;
+        # server_name_in_redirect off;
+...
 

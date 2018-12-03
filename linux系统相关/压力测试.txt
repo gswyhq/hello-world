@@ -81,6 +81,13 @@ HTML transferred:       10160 bytes  # 从服务器接收到的内容或文件�
 Requests per second:    21.47 [#/sec] (mean)  #吞吐量-平均每秒请求数；等于Complete requests/Time taken for tests=20/0.932=21.47
 Time per request:       465.765 [ms] (mean)  # 服务器收到请求，响应页面要花费的时间，即从用户角度看，完成一个请求所需要的时间（因用户数量不止一个，服务器完成10个请求，平均每个用户才接收到一个完整的返回，所以该值是下一项数值的10倍。）
 Time per request:       46.576 [ms] (mean, across all concurrent requests)  # 并发的每个请求平均消耗时间，即服务器完成一个请求的时间。
+
+        其实主要的区别在请求的时间上，第一个Time per request会计算每一个请求的请求和结束时间，注意区别在计算统计每一个请求。
+        举个例子：
+        我们并发请求3个，分别每个请求的时间为30ms、40ms 、50ms ，总共并发完成的时间为90ms,那么：
+        (第二个）Time per request ＝ 90ms /3 = 30ms
+        (第一个) Time per request = (30ms + 40ms + 50ms) /3 = 40ms
+
 Transfer rate:          17.09 [Kbytes/sec] received  # 平均每秒网络上的流量，可以帮助排除是否存在网络流量过大导致响应时间延长的问题；
                         3.90 kb/s sent
                         20.99 kb/s total
