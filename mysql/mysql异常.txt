@@ -106,3 +106,43 @@ mysql> quit
 Bye
 再试登录：
 # mysql -u root -h 192.168.194.142 -p
+
+
+# 使用客户端连接接数据库时，却是登陆失败：
+2059 - Authentication plugin 'caching_sha2_password' cannot be loaded: ......
+
+MySql 8.0.11 换了新的身份验证插件（caching_sha2_password）, 原来的身份验证插件为（mysql_native_password）。而客户端工具Navicat Premium12 中找不到新的身份验证插件（caching_sha2_password），对此，我们将mysql用户使用的  登录密码加密规则  还原成  mysql_native_password，即可登陆成功。
+
+具体操作:
+# 首先使用 MySql 数据库自带的命令行客户端工具登录数据库
+# 第一步：进入容器：
+gswyhq@gswyhq-PC:~/hello-world/mysql$ docker exec -it mysql3306 /bin/bash
+# 第二步：进入命令行客户端：
+root@34e59588c8a0:/# mysql -u root -p
+# 第三步：登录数据库
+mysql> use mysql 
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+
+# 第四步：从数据库的user表中查询 mysql 用户原来使用的身份验证插件
+mysql> select user,host,plugin,authentication_string from user;
++------------------+-----------+-----------------------+------------------------------------------------------------------------+
+| user             | host      | plugin                | authentication_string                                                  |
++------------------+-----------+-----------------------+------------------------------------------------------------------------+
+| root             | %         | caching_sha2_password | $A$005$Na6X@tv*rq
+                                                                           k
+l6IPClpO8UerH6X7H0orTs/IOLLCEalWczP5V474aB5 |
+| mysql.infoschema | localhost | caching_sha2_password | $A$005$THISISACOMBINATIONOFINVALIDSALTANDPASSWORDTHATMUSTNEVERBRBEUSED |
+| mysql.session    | localhost | caching_sha2_password | $A$005$THISISACOMBINATIONOFINVALIDSALTANDPASSWORDTHATMUSTNEVERBRBEUSED |
+| mysql.sys        | localhost | caching_sha2_password | $A$005$THISISACOMBINATIONOFINVALIDSALTANDPASSWORDTHATMUSTNEVERBRBEUSED |
+| root             | localhost | caching_sha2_password | $A$005$	IvXd;UQ>TC/):niKdYFh1Lc9fCOwhtIe6U.3UokIZYV0VC54vffCqIy6 |
++------------------+-----------+-----------------------+------------------------------------------------------------------------+
+5 rows in set (0.00 sec)
+
+# 第五步：将用户root使用的身份验证插件 替换为之前版本使用的 mysql_native_password ，修改成功后再次使用客户端工具 Navicat Premium12 ，如无其它意外 , 应该是可以正常连接登录了。
+mysql> alter user 'root'@'%' identified with mysql_native_password by '123456';
+Query OK, 0 rows affected (0.14 sec)
+
+

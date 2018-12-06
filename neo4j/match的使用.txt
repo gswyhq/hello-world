@@ -54,6 +54,8 @@ MATCH (n:Baoxianchanpin)-[r:`保险种类`]->(n2), (n)-[r2:`保障项目`]->(n3)
 查询在深圳没有分支机构，但在广东有分支机构：
 match (n)-[r1:`隶属于`]->(n1)-[r2:`分支机构`]->(n2) where n.name='深圳' and n1.name='广东省' and not (n)-[r2:`分支机构`]->(n2) return n2
 
+match (n: Pt7_site_web1_ai_104) where n.name='华为' and not (n:Pt7_site_web1_ai_104)-[:`公司地址`]->() return n
+
 方法8：
 查询与某个点关联的所有点，并去重：
 MATCH p=(n:TuijianState {name: "保险体检"})-[*0..10]->() UNWIND nodes(p) as ns return DISTINCT ns
