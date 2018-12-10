@@ -156,4 +156,13 @@ gswyhq@gswyhq-PC:~/Downloads/deployment$ git branch
 # 如果您想要通过创建分支来保留在此状态下所做的提交，您可以通过在检出命令添加新分支：
 git checkout -b <new-branch-name>
 
+# 下载单个目录：
+目的： 仅仅下载目录https://github.com/tesseract-ocr/langdata/tree/master/chi_sim，但不要下载其他目录文件；
+方法：
+1，首先需要安装SVN。Ubuntu下的SVN安装十分简单，sudo apt-get install subversion
+2，将”/tree/master/”替换成”/trunk/”，则新生成的新链接为：https://github.com/tesseract-ocr/langdata/trunk/chi_sim
+将网址中的“/tree/master/”换成 “/trunk/”
+如果不是master分支，则换为“/branches/{branchname}”就可以，如“/brances/develop"。
+3， 下载目录：
+svn co https://github.com/tesseract-ocr/langdata/trunk/chi_sim
 

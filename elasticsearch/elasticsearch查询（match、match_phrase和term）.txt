@@ -289,5 +289,41 @@ must_not: 文档必须不匹配条件
  'size': 20,
  'stored_fields': ['_source']}
 
+# 字典数据的查询：
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "entity_dict.保险产品.keyword": "Baoxianchanpin"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  },
+  "from": 0,
+  "size": 20,
+  "sort": [],
+  "aggs": {}
+}
+
+查询结果： 
+{'_shards': {'failed': 0, 'skipped': 0, 'successful': 1, 'total': 1},
+ 'hits': {'hits': [{'_id': 'AWeGt5vtoVE-QSpZ16D3',
+                    '_index': 't7_site_web1_ai_150_faq_20181207_110019',
+                    '_score': 0.2876821,
+                    '_source': {'answer': '理赔',
+                                'entity_dict': {'保险产品': 'Baoxianchanpin',
+                                                '恶性肿瘤': 'Jibing'},
+                                'query_question': '菁英领航身故保险金如何理赔',
+                                'question': '保险产品恶性肿瘤如何理赔'},
+                    '_type': '180'}],
+          'max_score': 0.2876821,
+          'total': 1},
+ 'timed_out': False,
+ 'took': 0}
 
 
