@@ -1,0 +1,15 @@
+
+# 按照对应的依赖：
+apt-get install libsm6
+apt-get install libxrender1
+apt-get install libxext-dev
+
+利用pip安装opencv-python
+在安装之前，如果你之前安装过旧版本的opencv，那么就先将其删除，再进行下面的安装过程。 
+在pip中可以方便快速的安装opencv-python和opencv-contrib-python，只需要输入两条指令即可：
+
+$ pip install opencv-python #安装opencv
+$ pip install opencv-contrib-python #安装opencv的contrib扩展包
+
+
+

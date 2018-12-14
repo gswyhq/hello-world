@@ -46,3 +46,10 @@ git clone https://github.com/Name/project.git
 解决的方法是使用ssh方式克隆仓库:
 git clone git@github.com:Name/project.git
 
+gswyhq@gswyhq-PC:~/github_projects/PDF_Table_Extraction$ git pull origin master
+来自 https://github.com/gswyhq/PDF_Table_Extraction
+ * branch            master     -> FETCH_HEAD
+fatal: 拒绝合并无关的历史
+解决方案：
+在pull 时候, 添加–allow-unrelated-histories参数 即可.
+$ git pull origin master --allow-unrelated-histories

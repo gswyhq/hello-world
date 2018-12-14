@@ -145,4 +145,10 @@ l6IPClpO8UerH6X7H0orTs/IOLLCEalWczP5V474aB5 |
 mysql> alter user 'root'@'%' identified with mysql_native_password by '123456';
 Query OK, 0 rows affected (0.14 sec)
 
+# mysql下普通用户备份数据库时无lock tables权限的解决方法
+mysql的root账户设置的只允许localhost登录mysql， 但是备份是在我自己的开发的电脑上，就造成了 普通用户使用mysqldump命令无法备份sql  会报错，
+Got error: 1449: The user specified as a definer ('root'@'%') does not exist when using LOCK TABLES.
+在mysqldump 命令后面加上--skip-lock-tables选项即可。即： 
+mysqldump -h 192.168.12.171 -uzntg -pzg_0413 --skip-lock-tables zhg Smarist > Smarist.sql
+mysqldump --opt --host=139.**.**.106 --default-character-set=utf8  -u HONGLINCHEN --password=1234 --skip-lock-tables gmfserver>"D:\mysqlbackup\backup_gmfserver_%YMD%.sql"
 
