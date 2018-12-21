@@ -28,4 +28,36 @@ SET rel.created = row.created return from, to
 # 在浏览器中打开neo4j自动的browser,节点的名字不显示出来：
 若节点不Node Labels，则即使有name属性，也不会显示name对应的值；只有给节点添加了Node Labels；才会显示出name;
 
+bash-4.4# ./bin/neo4j-shell -file data/all_baoxian_20181214_165628.cypher 
+ERROR (-v for expanded information):
+	Error occurred in server thread; nested exception is: 
+	java.lang.OutOfMemoryError: Java heap space
 
+解决方法1：
+bash-4.4# set HEAP_SIZE=2048m
+修改 neo4j.conf 中的配置 (docker 中默认为512m)
+dbms.memory.heap.initial_size=2048m
+dbms.memory.heap.max_size=4096m
+
+ubuntu@ip-172-33-11-15:~$ docker run --detach  --restart=always --name=zhongjixian_18704 \
+                --publish=7474:7474 --publish=7687:7687     \
+                --env NEO4J_AUTH=neo4j/gswyhq \
+                --env NEO4J_dbms_allow__format__migration=true \
+                -e TZ='CST-8' \
+                -e NEO4J_dbms_db_timezone="SYSTEM" \
+                -v $PWD/plugins:/plugins \
+                 --volume=$PWD/data:/data \
+                -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* \
+                -e NEO4J_apoc_export_file_enabled=true \
+                -e NEO4J_apoc_import_file_enabled=true  \
+                -e NEO4J_dbms_shell_enabled=true \
+                -e NEO4J_dbms_shell_host=0.0.0.0 \
+                -e NEO4J_dbms_shell_port=1337 \
+                -e NEO4J_dbms_memory_heap_initial__size=1024m \
+                -e NEO4J_dbms_memory_heap_max__size=2048m \
+                neo4j:3.4.5
+解决方法2：
+直接重启对应的neo4j服务，释放内存。
+
+neo4j 3.4 添加了一个  neo4j-admin memrec 命令，可以打印Neo4j堆和pagecache内存设置的建议:
+bash-4.4# ./bin/neo4j-admin memrec --database=graph.db

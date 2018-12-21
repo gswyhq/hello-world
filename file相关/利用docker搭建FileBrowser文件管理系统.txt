@@ -1,0 +1,42 @@
+# https://filebrowser.github.io/installation/#docker
+
+下载filebrowser镜像
+docker pull filebrowser/filebrowser
+
+创建filebrowser挂载所需要的目录
+
+mkdir filebrowser
+
+启动filebrowser
+
+vim config.json
+{
+  "port": 80,
+  "address": "",
+  "database": "/etc/database.db",
+  "scope": "/srv",
+  "allowCommands": true,
+  "allowEdit": true,
+  "allowNew": true,
+  "commands": []
+}
+
+docker run \
+    -v $PWD/filebrowser/sites/root:/srv \
+    -v $PWD/filebrowser/config.json:/config.json \
+    -v $PWD/filebrowser/database.db:/database.db \
+    -p 8080:80 \
+    filebrowser/filebrowser
+
+或者：
+docker run \
+    -v $PWD/filebrowser/sites/root:/srv \
+    -v $PWD/filebrowser/database.db:/database.db \
+    -p 80:80 \
+    filebrowser/filebrowser
+    --port 80
+    --database /database.db
+    --scope /srv
+    --other-flag other-value
+
+通过浏览器访问 `http:localhost:80/files`，默认账号及密码均是：admin
