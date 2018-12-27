@@ -102,3 +102,6 @@ echo | awk '{ print toupper("test"), tolower("TEST") }'
  
 结果为: TEST  test
 
+# 替换文件中的字符串,将文件default_excalibur.cfg中的所有`127.0.0.1`替换为`0.0.0.0`：
+sed -i s/127.0.0.1/0.0.0.0/g "default_excalibur.cfg"
+

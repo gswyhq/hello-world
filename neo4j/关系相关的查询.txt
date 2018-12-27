@@ -9,3 +9,13 @@ where n<>m and any(x in r where type(x)='下限') return p;
 //按关系的属性：只经过那些属性f小于4的关系
 match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
 where all(x in r where x.f<4) return p;
+
+删除2个NODE之间重复的relationship
+MATCH (a)-[r:has_test_rel]->(b)
+WITH a, b, TAIL (COLLECT (r)) as rr
+WHERE size(rr)>0
+FOREACH (r IN rr | DELETE r)
+
+# size()方法，可以获取到关系里面的个数。
+# 查找所有关系数为2的节点：
+match p=(n)-[t]->(m) where size((n)-->())=2 return n

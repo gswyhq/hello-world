@@ -318,7 +318,7 @@ must_not: 文档必须不匹配条件
                     '_source': {'answer': '理赔',
                                 'entity_dict': {'保险产品': 'Baoxianchanpin',
                                                 '恶性肿瘤': 'Jibing'},
-                                'query_question': '菁英领航身故保险金如何理赔',
+                                'query_question': '生物公司身故保险金如何理赔',
                                 'question': '保险产品恶性肿瘤如何理赔'},
                     '_type': '180'}],
           'max_score': 0.2876821,

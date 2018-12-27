@@ -59,4 +59,63 @@ SKIP 1
   LIMIT 3
 RETURN user
 
+# 查找到最短路径，再在最短路径上继续查询：
+CREATE
+  (offer: Offer),
+  (sch1: Schedule),
+  (sch2: Schedule),
+  (stop1: Stop {name: "stop1"}),
+  (stop2: Stop {name: "stop2"}),
+  (stop3: Stop {name: "stop3"}),
+  (stop4: Stop {name: "stop4"}),
+  (stop1)-[:SWITCH_TO]->(stop2),
+  (stop2)-[:CONNECTED_BY]->(stop3),
+  (stop3)-[:SWITCH_TO]->(stop4),
+  (stop2)-[:SCHEDULED_BY]->(sch1),
+  (stop3)-[:SCHEDULED_BY]->(sch2),
+  (sch1)-[:OFFERED_BY]->(offer),
+  (sch2)-[:OFFERED_BY]->(offer)
 
+MATCH
+  (from:Stop {name:'stop1'}), (to:Stop {name:'stop4'}),
+  path = allShortestPaths((from)-[r*]->(to))
+UNWIND nodes(path) AS stopNode
+OPTIONAL MATCH (stopNode)-[sb:SCHEDULED_BY]->(schedule:Schedule)-[ob:OFFERED_BY]-(offer:Offer)
+RETURN stopNode, sb, ob, schedule, offer
+
+# 根据节点连接的关系类型数量过滤（注意是数量是不是某种类型）
+MATCH (n:Item) -[r]- ()
+WITH DISTINCT n, type(r) AS relType
+WITH n, collect(relType) AS relTypes
+WHERE size(relTypes) > 10 RETURN n,relTypes LIMIT 25
+
+# 根据两个值，查询其对应的最短路径：
+MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) ) where n1.name =~ "条件1" and n2.name =~ "条件2"  return p
+上句会查找所有满足条件的节点，再返回节点之间的最短路径；
+有时候，并不是希望返回所有的最短路径，而是在最短路径中，筛选最短路径；
+profile match p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
+where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+with collect(p) as ps, min(length(p)) as len
+UNWIND ps as p1 with p1, len where length(p1)=len return p1
+
+# 对查询结果的路径长度进行筛选：
+profile match p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
+where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+with collect(p) as ps, length(p) as len
+UNWIND ps as p1 with p1, len where len=2 return p1
+
+# 按路径长度进行升序排列：
+PROFILE MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
+where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+return p,length(p)
+order by length(p)
+
+match (n:mechword{name:'生物工程'}),(m:mechword{name:'现代化'})
+with n,m
+match p=shortestPath((n)-[r*..]-(m))
+unwind nodes(p) as nn
+with p,min(length(nn.name))as a
+unwind nodes(p) as mm
+with mm
+where length(mm.name)=a
+return mm.name;

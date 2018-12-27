@@ -180,3 +180,8 @@ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -p 7687
 
 下载zip文件（https://codeload.github.com/neo4j-contrib/neo4j-apoc-procedures/zip/3.4.0.1），解压；
 浏览器打开‘./neo4j-apoc-procedures-3.4.0.1/docs/index.html'即可查看apoc的使用帮助；
+
+# 根据一个节点返回关于这个节点的所有信息
+MATCH (n:T7_site_web1_ai_150) WHERE id(n)=161478
+CALL apoc.path.subgraphAll(n, {}) YIELD nodes, relationships
+RETURN nodes, relationships;

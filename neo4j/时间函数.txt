@@ -18,6 +18,19 @@ docker run --restart=always --name=zhongjixian_18704 \
 
 # TZ，设置命令行，date对应的时间；
 
+实体与关系添加时间戳
+加时间戳的语句:
+match ... where ... with a,b create (a)-[:sometype{latesttouch:timestamp()}]->(b)
+用最近访问时间作为筛选条件的语句:
+match (a) where ... with a match (a)-[r]-() where timestamp()-r.latesttouch<=5*60*1000
+
+通过时间过滤
+match (n:人) where n.insert_time>'1516204700000' and n.insert_time<'1516204900000' return n;
+
+通过时间过滤（Neo4j-3.4.0版本可以识别string类型存储的时间start_time: 2018-04-01 00:00:00，也可以这样去过滤）
+match (n:人) where n.insert_time>'1516204700000' and n.insert_time<'1516204900000' return n;
+match (n:人) where n.insert_time>'2018-04-01 00:00:00' and n.insert_time<'2018-05-01 00:00:00' return n;
+
 # 从字符串中解析出时间：
 date("2018-04-05")
 # -e NEO4J_dbms_db_timezone="SYSTEM"； 设置日志系统等的时间；只能是选择`UTC`或`SYSTEM`。`dbms.db.timezone`, neo4j 3.4版本才开始添加的。

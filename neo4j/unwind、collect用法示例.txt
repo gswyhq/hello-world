@@ -30,3 +30,18 @@ Match (n)-[r:`下一步`]->(c)
 with collect(n) + collect(c) as colC, collect(r) as colR UNWIND colC AS n2 with distinct n2, colR with collect(n2) as colN, colR
 CALL apoc.export.csv.data(colN,colR, '/var/lib/neo4j/import/export_nodes_rels.csv',{format:'plain'}) YIELD nodes, relationships
 RETURN nodes, relationships
+
+# 笛卡尔积-展开两个列表其结果为笛卡尔积
+unwind [1,2,3,4] as x
+unwind ['a','b','c','d'] as y
+return x,y
+
+# 笛卡尔积-多个with子查询的结果会以笛卡尔积的方式形成最终查询的结果
+match (m:vertices) where m.id in [111,222,333]
+with m
+match (m:vertices) where m.id in [444,555,666]
+with m,n
+return m,n
+
+# 笛卡尔积-match中的多个变量也是以笛卡尔积形式返回
+match (m:vertices:{type:'a'}),(n:vertices{type:'b'}) return m, n;

@@ -24,3 +24,9 @@ match(n)-[r:`保障项目`|:`保险金额`]->(n2) where n.name='保险产品' re
 MATCH (a)-[r:`保障项目`|:`保险金额`]->(b)
 return a,b,type(r) ORDER BY
 CASE type(r) WHEN "保障项目" THEN 0 ELSE 1 END ASC limit 1
+
+# 多值模糊查询，使用explain查看相对于OR的优势
+match (n:Label) where n.attr =~ '.*a1.*|.*a2.*' return n
+
+# 查看语句的执行计划EXPlAIN 或者 PROFILE
+EXPlAIN MATCH (n:现实人员) RETURN count(n)

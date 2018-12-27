@@ -132,4 +132,20 @@ FOREACH (x IN SPLIT(line.Col2, ';') |
   MERGE (s:Item {name: x})
   MERGE (s)-[:rel]->(a));
 
+# 查不存在关系的两个独立节点
+match (n) , (m)
+where not n-[ * ]-(m)
+return n,m
+limit 10
 
+# 按结点的标签：只经过标签为“A”的结点
+match p=shortestPath((m:Person{name:'1'})-[r:A*..4]-(n:Person{name:'4'})) return p;
+
+# 按结点的属性：不经过name为’5’的结点
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in nodes(p) where x.name<>'5')
+return p;
+
+# 按关系的属性：只经过那些属性f小于4的关系
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in r where x.f<4) return p;
