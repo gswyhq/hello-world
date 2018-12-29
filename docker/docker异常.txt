@@ -149,8 +149,12 @@ deb [by-hash=force] http://mirrors.aliyun.com/deepin unstable main contrib non-f
 gswewf@gswewf-pc:~$ sudo apt-get update
 gswewf@gswewf-pc:~$ sudo apt-get install docker.io
 
-# 容器内不能输入中文，中文乱码等：
+# 容器内不能输入中文，中文乱码等(可以在启动容器时就设置好，或者在进入容器时设置环境变量LANG)：
+方法1：进入容器时，命令改为：
 gswewf@gswewf-PC:~/docker/mongo$ docker exec -it some-mongo env LANG=C.UTF-8 /bin/bash
+方法2:启动容器时： docker run --rm -it -e LANG=C.UTF-8 some-mongo /bin/bash
+
+注意：不能输入中文时，在容器内部设置`export LANG="C.UTF-8"`是无效果的，仍旧不能输入中文，需要退出容器，在用`方法1`进入容器
 
 远程执行docker命令：
 ssh ubuntu@42.93.171.44 docker exec -it multiple_projects_neo4j_1111118855 /var/lib/neo4j/bin/neo4j-shell -file /var/lib/neo4j/data/all.cypher

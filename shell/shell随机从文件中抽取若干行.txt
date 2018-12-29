@@ -1,0 +1,30 @@
+shell 随机从文件中抽取若干行
+
+# 从文件中随机取出5行：
+shuf -n5 main.txt
+
+  
+
+sort -R main.txt | head -5
+
+ 
+
+awk -vN=5 -vC="`wc -l file`" 'BEGIN{srand();while(n<N){i=int(rand()*C+1);if(!(i in a)){a[i]++;n++}}}NR in a' file
+
+ 
+
+while read line;do echo "$line $RANDOM";done < main.txt | sort -k2,2n| awk 'NR<=5{print $1}'
+
+ 
+
+shuf 命令的选项：
+
+-e, --echo                  ：将每个参数视为输入行
+ -i, --input-range=LO-HI    ：将LO 到HI 的每个数字视为输入行
+ -n, --head-count=行数       ： 最多输出指定的行数
+ -o, --output=文件           ：将结果输出到指定文件而非标准输出
+     --random-source=文件    ：从指定文件获得随机比特
+ -z, --zero-terminated      ：以0 结束行而非新行
+     --help                 ：显示此帮助信息并退出
+     --version              ：显示版本信息并退出
+

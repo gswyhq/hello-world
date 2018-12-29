@@ -18,3 +18,9 @@ with graph.as_default():
             results = self._model.detect([np_image], verbose=0)
 ...
 
+# 有时候docker镜像在某个机器上可以运行，但迁移到其他机器上却不能运行，如报错：
+illegal instruction (core dumped)
+这个时候，可能是依赖的tensorflow的版本太高，而对应的机器不支持；可以通过降低对应的tensorflow的版本来解决。
+pip3 uninstall tensorflow
+pip3 install tensorflow==1.5.0
+
