@@ -130,3 +130,23 @@ POST /website/pageviews/1/_update?retry_on_conflict=5 <1>
 }
 <1> 在错误发生前重试更新5次
 
+通过`_update_by_query`, `_delete_by_query`,更新es数据时，有时候也会报版本冲突的错误，这个时候指定的conflicts=proceed参数。
+当update_by_query执行的时候，也应用了ES内部的version以支持到版本控制 ，也就是说，我们在执行过程可能会出现版本冲突的问题。
+默认情况下，update_by_query在遇到版本冲突问题时，同样返回409错误码，如果需求场景是不介意版本冲突的，那么可以按照上文那样，通过指定conflicts=proceed，从而当出现版本冲突时，ES将会继续执行更新的操作。
+POST crm/_update_by_query?conflicts=proceed
+
+默认情况下，版本冲突会中止_reindex过程，但您可以通过"conflicts": "proceed"请求正文中的设置对它们进行设置：
+POST _reindex
+{
+  "conflicts": "proceed", 
+  "source": {
+    "index": "gaoyh"
+  },
+  "dest": {
+    "index": "index_test",
+    "op_type": "create"
+  }
+}
+加上"conflicts": "proceed"后响应结果中不会具体显示failures。
+但是，版本冲突时并未造成reindex过程中止。
+

@@ -1,0 +1,173 @@
+
+import itchat
+ 
+def get_friends():
+    friends = itchat.get_friends(update=True) #获取微信好友列表，如果设置update=True将从服务器刷新列表
+    for i in friends:
+        print(i)
+ 
+def main():
+    itchat.auto_login(hotReload=True) #登录，会下载二维码给手机扫描登录，hotReload设置为True表示以后自动登录
+    get_friends()
+    itchat.run()  #让itchat一直运行
+
+
+给文件传输助手发一条信息，只需要这样：
+
+import itchat
+
+itchat.auto_login()
+
+itchat.send('Hello, filehelper', toUserName='filehelper')
+
+给指定微信好友发送消息：
+itchat.send('这是哪里？', toUserName='@2137fd0d11c5a245850f284138d324afed4346015e52559b6788da3daaedc6cf')
+`2137fd0d11c5a245850f284138d324afed4346015e52559b6788da3daaedc6cf`是通过`itchat.get_friends(update=True)`获取到的UserName。
+
+如果你想要回复发给自己的文本消息，只需要这样：
+
+import itchat
+
+@itchat.msg_register(itchat.content.TEXT)
+def text_reply(msg):
+    return msg.text
+
+itchat.auto_login()
+itchat.run()
+
+特殊的字典使用方式
+通过打印itchat的用户以及注册消息的参数，可以发现这些值都是字典。
+
+但实际上itchat精心构造了相应的消息、用户、群聊、公众号类。
+
+其所有的键值都可以通过这一方式访问：
+
+@itchat.msg_register(TEXT)
+def _(msg):
+    # equals to print(msg['FromUserName'])
+    print(msg.fromUserName)
+属性名为键值首字母小写后的内容。
+
+author = itchat.search_friends(nickName='LittleCoder')[0]
+author.send('greeting, littlecoder!')
+各类型消息的注册
+通过如下代码，微信已经可以就日常的各种信息进行获取与回复。
+
+import itchat, time
+from itchat.content import *
+
+@itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
+def text_reply(msg):
+    msg.user.send('%s: %s' % (msg.type, msg.text))
+
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
+def download_files(msg):
+    msg.download(msg.fileName)
+    typeSymbol = {
+        PICTURE: 'img',
+        VIDEO: 'vid', }.get(msg.type, 'fil')
+    return '@%s@%s' % (typeSymbol, msg.fileName)
+
+@itchat.msg_register(FRIENDS)
+def add_friend(msg):
+    msg.user.verify()
+    msg.user.send('Nice to meet you!')
+
+@itchat.msg_register(TEXT, isGroupChat=True)
+def text_reply(msg):
+    if msg.isAt:
+        msg.user.send(u'@%s\u2005I received: %s' % (
+            msg.actualNickName, msg.text))
+
+itchat.auto_login(True)
+itchat.run(True)
+
+命令行二维码
+通过以下命令可以在登陆的时候使用命令行显示二维码：
+
+itchat.auto_login(enableCmdQR=True)
+部分系统可能字幅宽度有出入，可以通过将enableCmdQR赋值为特定的倍数进行调整：
+
+# 如部分的linux系统，块字符的宽度为一个字符（正常应为两字符），故赋值为2
+itchat.auto_login(enableCmdQR=2)
+默认控制台背景色为暗色（黑色），若背景色为浅色（白色），可以将enableCmdQR赋值为负值：
+
+itchat.auto_login(enableCmdQR=-1)
+退出程序后暂存登陆状态
+通过如下命令登陆，即使程序关闭，一定时间内重新开启也可以不用重新扫码。
+
+itchat.auto_login(hotReload=True)
+用户搜索
+使用search_friends方法可以搜索用户，有四种搜索方式：
+
+仅获取自己的用户信息
+获取特定UserName的用户信息
+获取备注、微信号、昵称中的任何一项等于name键值的用户
+获取备注、微信号、昵称分别等于相应键值的用户
+其中三、四项可以一同使用，下面是示例程序：
+
+# 获取自己的用户信息，返回自己的属性字典
+itchat.search_friends()
+# 获取特定UserName的用户信息
+itchat.search_friends(userName='@abcdefg1234567')
+# 获取任何一项等于name键值的用户
+itchat.search_friends(name='littlecodersh')
+# 获取分别对应相应键值的用户
+itchat.search_friends(wechatAccount='littlecodersh')
+# 三、四项功能可以一同使用
+itchat.search_friends(name='LittleCoder机器人', wechatAccount='littlecodersh')
+关于公众号、群聊的获取与搜索在文档中有更加详细的介绍。
+
+附件的下载与发送
+itchat的附件下载方法存储在msg的Text键中。
+
+发送的文件的文件名（图片给出的默认文件名）都存储在msg的FileName键中。
+
+下载方法接受一个可用的位置参数（包括文件名），并将文件相应的存储。
+
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
+def download_files(msg):
+    msg.download(msg.fileName)
+    itchat.send('@%s@%s' % (
+        'img' if msg['Type'] == 'Picture' else 'fil', msg['FileName']),
+        msg['FromUserName'])
+    return '%s received' % msg['Type']
+如果你不需要下载到本地，仅想要读取二进制串进行进一步处理可以不传入参数，方法将会返回图片的二进制串。
+
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
+def download_files(msg):
+    with open(msg.fileName, 'wb') as f:
+        f.write(msg.download())
+用户多开
+使用如下命令可以完成多开的操作：
+
+import itchat
+
+newInstance = itchat.new_instance()
+newInstance.auto_login(hotReload=True, statusStorageDir='newInstance.pkl')
+
+@newInstance.msg_register(itchat.content.TEXT)
+def reply(msg):
+    return msg.text
+
+newInstance.run()
+退出及登陆完成后调用特定方法
+登陆完成后的方法需要赋值在loginCallback中。
+
+而退出后的方法需要赋值在exitCallback中。
+
+import time
+
+import itchat
+
+def lc():
+    print('finish login')
+def ec():
+    print('exit')
+
+itchat.auto_login(loginCallback=lc, exitCallback=ec)
+time.sleep(3)
+itchat.logout()
+若不设置loginCallback的值，则将会自动删除二维码图片并清空命令行显示。
+
+
