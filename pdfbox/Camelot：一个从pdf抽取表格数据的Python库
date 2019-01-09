@@ -1,0 +1,43 @@
+
+https://github.com/socialcopsdev/camelot
+
+sudo apt-get install python3-tk
+install ghostscript
+
+root@76b962c6a144:~# wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs926/ghostscript-9.26.tar.gz -O ghostscript-9.26.tar.gz
+root@76b962c6a144:~# tar zxvf ghostscript-9.26.tgz
+root@76b962c6a144:~# cd ghostscript-9.26
+# ./configure --prefix=/usr
+root@76b962c6a144:~/ghostscript-9.26# make all
+bash: make: command not found
+root@76b962c6a144:~# apt-get install build-essential
+root@76b962c6a144:~/ghostscript-9.26# ./configure
+root@76b962c6a144:~/ghostscript-9.26# make all
+root@76b962c6a144:~/ghostscript-9.26# make install
+
+root@76b962c6a144:~/ghostscript-9.26# apt-get install python3-pip
+root@76b962c6a144:~/ghostscript-9.26# pip3 install camelot-py
+
+# install opencv
+root@76b962c6a144:~# pip3 install opencv-python
+root@76b962c6a144:~# pip3 install opencv-contrib-python
+root@76b962c6a144:~# apt-get install libsm6
+root@76b962c6a144:~# apt-get install libxrender1
+root@76b962c6a144:~# apt-get install libxext-dev
+
+>>> import camelot
+>>> tables = camelot.read_pdf('foo.pdf')
+>>> tables
+<TableList n=1>
+>>> tables.export('foo.csv', f='csv', compress=True) # json, excel, html
+>>> tables[0]
+<Table shape=(7, 7)>
+>>> tables[0].parsing_report
+{
+    'accuracy': 99.02,
+    'whitespace': 12.24,
+    'order': 1,
+    'page': 1
+}
+>>> tables[0].to_csv('foo.csv') # to_json, to_excel, to_html
+>>> tables[0].df # get a pandas DataFrame!

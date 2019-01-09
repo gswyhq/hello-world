@@ -1,0 +1,99 @@
+
+编译和安装
+通过pip下载(自带模型文件)
+pip install pkuseg
+之后通过import pkuseg来引用
+从github下载(需要下载模型文件，见预训练模型)
+将pkuseg文件放到目录下，通过import pkuseg使用
+模型需要下载或自己训练。
+
+正确率明显高于jieba,但效率却不如：
+In [3]: seg = pkuseg.pkuseg()
+loading model
+finish
+
+In [4]: %timeit seg.cut('我爱北京天安门') #进行分词
+1.12 ms ± 34.2 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+
+In [5]: %timeit jieba.cut('我爱北京天安门') #进行分词
+296 ns ± 1.2 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+
+########################################################################################################################
+
+使用方式
+# 代码示例
+# 代码示例1		使用默认模型及默认词典分词
+import pkuseg
+seg = pkuseg.pkuseg(user_dict='./pkuseg/dicts_data/safe_lexicon.txt')				#以默认配置加载模型
+text = seg.cut('我爱北京天安门')	#进行分词
+print(text)
+
+# 代码示例2		设置用户自定义词典
+import pkuseg
+lexicon = ['北京大学', '北京天安门']	#希望分词时用户词典中的词固定不分开
+seg = pkuseg.pkuseg(user_dict=lexicon)	#加载模型，给定用户词典
+text = seg.cut('我爱北京天安门')		#进行分词
+print(text)
+
+# 代码示例3
+import pkuseg
+seg = pkuseg.pkuseg(model_name='./pkuseg/models/ctb8', user_dict='./pkuseg/dicts_data/safe_lexicon.txt')
+#假设用户已经下载好了ctb8的模型并解压放在了'./pkuseg/models/ctb8'目录下，通过设置model_name加载该模型
+# user_dict： 是用户词典，utf-8编码，每行是一个词；
+text = seg.cut('我爱北京天安门')			#进行分词
+print(text)
+
+# 代码示例4
+import pkuseg
+pkuseg.test('./pkuseg/dicts_data/input.txt', './pkuseg/dicts_data/output.txt', nthread=20, user_dict=[])	#对input.txt的文件分词输出到output.txt中，使用默认模型和词典，开20个进程
+
+# # 代码示例5
+# import pkuseg
+# pkuseg.train('./pkuseg/train_data/icwb2-data/training/msr_training.utf8', './pkuseg/train_data/icwb2-data/gold/msr_test_gold.utf8', './models', nthread=20)
+# #训练文件为'msr_training.utf8'，测试文件为'msr_test_gold.utf8'，模型存到'./models'目录下，开20个进程训练模型
+
+# 参数说明
+pkuseg.pkuseg(model_name='./pkuseg/models/ctb8', user_dict=[])
+# model_name		模型路径。默认是'msra'表示我们预训练好的模型(仅对pip下载的用户)。用户可以填自己下载或训练的模型所在的路径如model_name='./models'。
+# user_dict		设置用户词典。默认为'safe_lexicon'表示我们提供的一个中文词典(仅pip)。用户可以传入一个包含若干自定义单词的迭代器。
+readFile, outputFile = './pkuseg/dicts_data/input.txt', './pkuseg/dicts_data/output.txt'
+
+pkuseg.test(readFile, outputFile, model_name='./pkuseg/models/ctb8', user_dict='./pkuseg/dicts_data/safe_lexicon.txt', nthread=10)
+# readFile		输入文件路径
+# outputFile		输出文件路径
+# model_name		同pkuseg.pkuseg
+# user_dict		同pkuseg.pkuseg
+# nthread			测试时开的进程数
+
+import pkuseg
+
+trainFile = './pkuseg/train_data/icwb2-data/training/as_training.utf8'
+testFile = './pkuseg/train_data/icwb2-data/gold/as_testing_gold.utf8'
+savedir = './pkuseg/icwb2_model'
+
+pkuseg.train(trainFile, testFile, savedir, nthread=10)
+
+# trainFile		训练文件路径# 每行是已经分好词的句子（空格隔开）；
+# testFile		测试文件路径# 每行是已经分好词的句子（空格隔开）；
+# savedir			训练模型的保存路径， 需事先新建好空目录；
+# nthread			训练时开的进程数
+
+# 预训练模型
+# 分词模式下，用户需要加载预训练好的模型。我们提供了三种在不同类型数据上训练得到的模型，根据具体需要，用户可以选择不同的预训练模型。以下是对预训练模型的说明：
+#
+# MSRA: 在MSRA（新闻语料）上训练的模型。新版本代码采用的是此模型。下载地址(https://pan.baidu.com/s/1twci0QVBeWXUg06dK47tiA)
+#
+# CTB8: 在CTB8（新闻文本及网络文本的混合型语料）上训练的模型。下载地址(https://pan.baidu.com/s/1DCjDOxB0HD2NmP9w1jm8MA)
+#
+# WEIBO: 在微博（网络文本语料）上训练的模型。下载地址(https://pan.baidu.com/s/1QHoK2ahpZnNmX6X7Y9iCgQ)
+# 解压到指定文件夹： unzip -d './models/weibo' weibo.zip
+
+# 其中，MSRA数据由第二届国际汉语分词评测比赛(http://sighan.cs.uchicago.edu/bakeoff2005/data/icwb2-data.zip)提供，
+#     CTB8数据(https://wakespace.lib.wfu.edu/bitstream/handle/10339/39379/LDC2013T21.tgz?sequence=1)由LDC提供，
+#     WEIBO数据由NLPCC分词比赛提供(https://pan.baidu.com/s/1kUI1OHL)。
+
+
+docker pull gswyhq/pkuseg-python
+
+
+
