@@ -12,13 +12,13 @@ string转换为datetime：
 
 时间的加减：
 >>> last = time1 - datetime.timedelta(hours = 24)
->>> next_dat = time1 + datetime.timedelta(hours = 24)
+>>> next_dat = time1 + datetime.timedelta(days=1, hours=23, minutes=59, seconds=59, microseconds=999999)
 >>> print last
 2014-01-07 11:59:58
 >>> next_dat
-datetime.datetime(2014, 1, 9, 11, 59, 58)
+datetime.datetime(2014, 1, 10, 11, 59, 57, 999999)
 >>> print next_dat
-2014-01-09 11:59:58
+2014-01-10 11:59:57.999999
 >>> str(last)
 '2014-01-07 11:59:58'
 
