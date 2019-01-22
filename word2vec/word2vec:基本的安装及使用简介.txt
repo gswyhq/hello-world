@@ -1,0 +1,126 @@
+
+word2vec:基本的安装及使用简介
+
+python版本的word2vec安装：
+    1.先安装cython：
+    sudo pip3 install Cython
+
+    2.安装 word2vec:
+    sudo pip3 install word2vec
+
+    使用python版本的word2vec训练词向量
+    1.先导入word2vec包
+
+    import word2vec
+    word2vec.word2vec('text8','text8.txt',size=100,binary=0,verbose=True)
+
+    训练得到的词向量为：
+
+    word2vec(train, output, size=100, window=5, sample='1e-3', hs=0,
+    negative=5, threads=12, iter_=5, min_count=5, alpha=0.025,
+    debug=2, binary=1, cbow=1, save_vocab=None, read_vocab=None,
+    verbose=False)
+    word2vec的常用参数介绍：
+    train：要训练的文件；
+    output：输出的词向量文件；
+    size：词向量维度大小；
+    window=5：训练的窗口，训练的窗口为5就是考虑一个词的前5个词和后5个词（实际代码中还有一个随机选窗口的过程，窗口大小<=5) ；
+    sample：采样的阈值，如果一个词语在训练样本中出现的频率越大，那么就会被采样；
+    hs：如果为1则会采用hierarchica·softmax技巧。如果设置为0，则negative sampling会被使用；
+    negative：如果>0,则会采用negativesamp·ing，用于设置多少个noise words；
+    min_count：可以对字典做截断. 词频少于min_count次数的单词会被丢弃掉, 默认值为5；
+    binary：表示输出的结果文件是否采用二进制存储，0表示不使用（即普通的文本存储，可以打开查看），1表示使用，即vectors.bin的存储类型；
+    cbow：是否使用cbow模型，0表示使用skip-gram模型，1表示使用cbow模型，默认情况下是skip-gram模型，cbow模型快一些，skip-gram模型效果好一些 ；
+    save_vocab：词汇表保存到文件；
+    read_vocab：词汇表从文件中读取，不从训练数据中读取。
+
+    2.下面介绍一些有关word2vec的使用
+
+    word2vec.word2vec('text8','text8.bin',size=100,verbose=True)
+
+    通过训练预料生成bin二进制模型，模型生成后下次执行可以不用再调用该语句，直接用下面的方法加载即可。
+    model = word2vec.load("text8.bin")
+
+    查看词向量的大小
+    model.vectors.shape
+
+    查看词向量内容
+    model.vectors
+
+    查看'dog'的词向量内容
+    model['dog'].shape
+    model['dog'][:10]
+
+    查找与词'socks'余弦相似度大的词
+    indexes, metrics = model.cosine('socks')
+    model.generate_response(indexes, metrics)
+
+    其他的使用可参考：
+    http://nbviewer.jupyter.org/github/danielfrg/word2vec/blob/master/examples/word2vec.ipynb
+
+####################################################################################################
+
+命令行运行的方法：
+    官方word2vec的github下载地址：https://github.com/svn2github/word2vec
+
+    环境，linux-ubuntu-14.04LST，安装好git， gcc版本4.8.4
+
+    linux下的安装方式：
+
+    % git clone https://github.com/svn2github/word2vec.git
+
+    % cd word2vec
+
+    % make
+
+    命令解析：
+    -train <file>
+    　　使用<file>中的文本数据来训练模型
+    -output <file>
+    　　使用<file>保存生成的单词向量/单词簇
+    -size <int>
+    　　设置单词向量的大小; 默认值为100
+    -window <int>
+    　　设置单词之间的最大跳过长度; default是5
+    -sample <float>
+    　　设置单词出现的阈值。在训练数据中出现频率较高的那些
+    　　将被随机下采样; 默认值为1e-3，有用范围为（
+    0,1e -5）-hs <int>
+    　　使用Hierarchical Softmax; 默认值为0（未使用）
+    -negative <int>
+    　　负数示例数; 默认值是5，
+
+    　　使用<int>线程（默认为12）
+    -iter <int>
+    　　运行更多训练迭代（默认
+    值为5）-min-count <int>
+    　　这将丢弃小于<int>次的单词; 默认值为5
+    -alpha <float>
+    　　设置起始学习率; 对于skip-gram，默认值为0.025，对于CBOW，
+    类型为<int>
+    　　输出单词类而不是单词向量; 默认的类数为0（向量写入）
+    -debug <int>
+    　　设置调试模式（默认= 2 =训练期间的更多信息）
+    -binary <int>
+    　　以二进制模式保存生成的向量; 默认值为0（关闭）
+    -save-vocab <file>
+    　　词汇表将保存到<file>
+
+    　　词汇表将从<file>中读取，而不是从训练数据中构造出来的
+    --cbow <int>
+    　　使用连续词袋模型; 默认值为1（对于skip-gram模型使用0）
+
+    之后准备训练预料就可以了，将分词后的文件（每行是一个句子对应的分词，用空格隔开即可），训练即可，
+
+    ./word2vec -train fudan_corpus_final -output fudan_100_skip.bin -cbow 0 -size 100 -windows 10 -negative 5 -hs 0 -binary 1 -sample 1e-4 -threads 20 -iter 15
+
+    对于生成 “fudan_100_skip.bin” 文件，可以用gensim 转换为txt明文形式：
+
+    from gensim.models import word2vec
+
+    model = word2vec.Word2Vec.load_word2vec_format('path/to/GoogleNews-vectors-negative300.bin', binary=True)
+    model.save_word2vec_format('path/to/GoogleNews-vectors-negative300.txt', binary=False)
+
+    资料来源： https://www.cnblogs.com/ooon/p/6413065.html
+
+

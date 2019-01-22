@@ -21,7 +21,8 @@ curl -XPUT 'http://localhost:9200/megacorp' -d '
                     "type": "text"
                 }, 
                 "age": {
-                    "type": "integer"
+                    "type": "integer",
+                    "coerce": false    # coerce：默认值是true，尝试将字符串转换为数值，如果字段类型是整数，那么将小数取整；
                 }, 
                 "about": {
                     "type": "text"

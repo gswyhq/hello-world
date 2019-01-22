@@ -1,0 +1,88 @@
+
+设置权限让人只能查询不可修改
+# 仅仅只有企业版才有此功能
+
+docker run --rm neo4j:3.2.0-enterprise
+
+# 查看当前用户列表：
+:server user list
+
+添加用户：
+:server user add
+
+或者：
+# 添加用户及设置密码：
+CALL dbms.security.createUser("gswyhq", '123456')
+
+CALL dbms.security.createUser(*username*, password, requirePasswordChange)
+
+Name	Type	Description
+username　String　用户名
+password　String　密码
+requirePasswordChange　Boolean　这是可选的，默认值为true。 如果是这样，（i）用户在第一次登录时将被迫更改密码，并且（ii）在用户更改密码之前，他们将被禁止执行任何其他操作。
+
+＃　修改当前用户的密码：
+CALL dbms.security.changePassword(*password*)
+参数:
+Name	Type	Description
+password    String  当前用户的新密码
+
+＃　删除一个用户：
+CALL dbms.security.deleteUser("username")
+
+# 给用户设置只读的权限[reader,editor,publisher,architect,admin]：
+CALL dbms.security.addRoleToUser('reader', 'gswyhq')
+
+Neo4j提供以下本机角色：
+reader
+对数据图的只读访问（所有节点，关系，属性）。
+
+editor
+对数据图的读/写访问权限。
+写访问仅限于创建和更改图的现有属性键，节点标签和关系类型。
+
+publisher
+对数据图的读/写访问权限。
+
+architect
+对数据图的读/写访问权限。
+设置/删除对索引的访问以及任何其他未来的架构构造。
+
+admin
+对数据图的读/写访问权限。
+设置/删除对索引的访问以及任何其他未来的架构构造。
+查看/终止查询。
+
+$ CREATE (le:Person {name:"Euler"}),
+ (db:Person {name:"Bernoulli"}),
+ (le)-[:KNOWS {since:1768}]->(db)
+ RETURN le, db
+
+$ MATCH (n:Person1) set n.name = 'user' RETURN n LIMIT 25
+
+$ MATCH (n:Person1) delete n
+
+以上操作都会保如下的错误：
+Error
+Neo.ClientError.Security.Forbidden
+Write operations are not allowed for user 'gswyhq' with roles [reader].
+
+# 如下成查询操作则是正常的：
+MATCH (n:Person1) RETURN n LIMIT 25
+
+一个管理员能够在系统中创建自定义角色。
+句法：
+CALL dbms.security.createRole(*roleName*)
+
+例外：
+当前用户不是管理员。
+角色名称已存在于系统中。
+角色名称为空。
+角色名称包含字母数字字符和“_”字符以外的字符。
+角色名匹配的本地角色之一：reader，publisher，architect，和admin。
+
+一个管理员能够从系统中删除自定义角色。本机的角色reader，publisher，architect，和admin（参见8.4.1节，“本地角色”）不能被删除。
+CALL dbms.security.deleteRole(*roleName*)
+
+# 更多角色管理见：https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/native-roles/
+https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/procedures/

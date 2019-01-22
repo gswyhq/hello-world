@@ -61,3 +61,17 @@ ubuntu@ip-172-33-11-15:~$ docker run --detach  --restart=always --name=zhongjixi
 
 neo4j 3.4 添加了一个  neo4j-admin memrec 命令，可以打印Neo4j堆和pagecache内存设置的建议:
 bash-4.4# ./bin/neo4j-admin memrec --database=graph.db
+当然也可以在客户端运行cypher:
+CALL dbms.listConfig("heap");
+╒═══════════════════════════════╤══════════════════════════════════════════════════════════════════════╤═══════╕
+│"name"                         │"description"                                                         │"value"│
+╞═══════════════════════════════╪══════════════════════════════════════════════════════════════════════╪═══════╡
+│"dbms.memory.heap.initial_size"│"Initial heap size. By default it is calculated based on available sys│"512M" │
+│                               │tem resources."                                                       │       │
+├───────────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────┤
+│"dbms.memory.heap.max_size"    │"Maximum heap size. By default it is calculated based on available sys│"512M" │
+│                               │tem resources."                                                       │       │
+└───────────────────────────────┴──────────────────────────────────────────────────────────────────────┴───────┘
+
+--env=NEO4J_dbms_memory_heap_initial__size=512m
+--env=NEO4J_dbms_memory_heap_max__size=2G

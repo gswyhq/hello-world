@@ -150,3 +150,38 @@ POST _reindex
 加上"conflicts": "proceed"后响应结果中不会具体显示failures。
 但是，版本冲突时并未造成reindex过程中止。
 
+异常情况： ES请求好卡，多数情况下是timeout; 查看es日志记录发现好多gc记录
+原因：5.0默认分配jvm空间大小为2g 5.0之前好像是1g；数据量过多，导致es内存不足。
+解决方法:-e ES_JAVA_OPTS="-Xms4g -Xmx4g" //设置初始内存 和最大内存
+docker run -d -p 9200:9200 --name="es" -e ES_JAVA_OPTS="-Xms4g -Xmx4g" elasticsearch:5.6
+docker run -d --name elasticsearch_18200 -p 18200:9200 -p 18300:9300 -e "xpack.security.enabled=false" -e "ELASTIC_CONTAINER=true" -e "JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk" -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms4096m -Xmx4096m" -v /etc/localtime:/etc/localtime -v /data/elasticsearch:/usr/share/elasticsearch/data  elasticsearch:6.6.0
+
+# 重新索引数据时报错：
+"reason":"failed to parse [id]","caused_by":{"type":"number_format_exception","reason":"For input string: \"rob_mother\""
+原因是因为id 字段的数据不干净，有int类型，也有字符串类型，故而导致报错；
+解决方案，先定义索引的mapping,再重新索引数据：
+第一步： 定义mappings
+curl -XPUT 'http://localhost:9200/test_ms_faq_20190117_173633' -d '
+{
+    "mappings": {
+        "1": {
+            "properties": {"issetting": {"type": "integer"}, "timestamp": {"type": "text"}, "chanpin_name": {"type": "text"}, "ukey": {"type": "text"}, "query_question": {"type": "text"},
+                           "id": {"type": "text"},
+                           "answer": {"type": "text"},
+                           "similar_question": {"type": "text"},
+                           "question": {"type": "text"}}
+        }
+    }
+}
+'
+第二步：重新索引数据：
+curl -XPUT 'http://localhost:9200/test_ms_faq_20190117_173633' -d '
+{
+  "source": {
+    "index": "old_faq_20190117_173633"
+  },
+  "dest": {
+    "index": "test_ms_faq_20190117_173633"
+  }
+}
+'
