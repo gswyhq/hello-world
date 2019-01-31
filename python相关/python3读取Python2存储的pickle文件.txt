@@ -1,0 +1,43 @@
+
+序列化工具，在python3中，用pickle 替代了Python2 中的cPickle；
+但这不仅仅是一个名称的改变，在应用时也会出现各种各样的问题。
+
+问题1： python3 读取python2序列化的文件出错：
+python3:
+import pickle
+with open('data.pkl', 'r')as f:
+    x, y = pickle.load(f)
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/IPython/core/interactiveshell.py", line 3267, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-9-d7ddd873bce8>", line 2, in <module>
+    x, y = pickle.load(f)
+TypeError: a bytes-like object is required, not 'str'
+
+解决方案：
+采用rb 方式读取：
+with open('data.pkl', 'rb')as f:
+    data = pickle.load(f)
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/IPython/core/interactiveshell.py", line 3267, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-23-3fb9377bcc1c>", line 2, in <module>
+    data = pickle.load(f)
+UnicodeDecodeError: 'ascii' codec can't decode byte 0xb9 in position 2: ordinal not in range(128)
+
+读取的时候出现`UnicodeDecodeError`错误，用下方法即可解决：
+with open('data.pkl', 'rb')as f:
+    data = pickle.load(f, encoding='iso-8859-1' )
+
+问题2： 在python3中序列化Python2不能识别，这时只要这样序列化：
+
+python3：
+with open(pwd,'wb') as f:
+    pickle.dump(x,f,protocol = 2)
+
+这样序列化后的x在Python2里面就能读取
+python2：
+with open(pwd,'rb') as f:
+    data = cPickle.load(f)

@@ -159,3 +159,13 @@ gswewf@gswewf-PC:~$ curl -XPUT 'localhost:9200/logstash-2018.01'
 DELETE /%3Clogs-%7Bnow-30d%2Fd%7D*%3E
 
 curl -XGET 'localhost:9200/xinxin_20180228*/_aliases?pretty'
+
+# 查看一个索引所有segment的memory占用情况： 
+ubuntu@ip-172-33-9-40:~$ curl -XGET "localhost:18200/_cat/segments/p1.site.web1.ai_91_faq_20181202_000133?v&h=shard,segment,size,size.memory"
+
+# 查看一个node上所有segment占用的memory总和:
+ubuntu@ip-172-33-9-40:~$ curl -XGET "localhost:18200/_cat/nodes?v&h=name,port,sm"
+name    port      sm
+I1zZLek 9300 111.1mb
+
+

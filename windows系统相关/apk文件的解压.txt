@@ -1,0 +1,12 @@
+
+apktool，功能：反编译出apk所需要的资源文件和布局设置文件等
+
+sudo apt-get install apktool
+
+使用如下的命令：
+apktool d ./xxx.apk（apk所在的路径）
+
+d表示decode，在当前目录下就会生成一个名为xxx的目录，里面就是反编译出来的各种资源文件，其中res表示资源文件，smali表示源代码，不过是字节码，不能直接查看。
+
+~$ apktool d ./wjs_sc2_9001_fxxz.apk 
+

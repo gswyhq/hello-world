@@ -13,6 +13,11 @@ C:\Users\Lenovo\Downloads>pscp zy@192.168.3.103:/home/zy/yhb/zhiy.pem zhiy.pem
 zy@192.168.3.103's password:
 zhiy.pem                | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
 
+  － Mac Os X
+默认是安装了scp客户端的，命令格式
+scp username@hostname:remotefile localdirectory
+例如：scp root@192.147.10.215:/home/usr/mm.log Desktop/
+
 本地脚本放到远程服务器运行：
 C:\Users\Lenovo\Desktop\6.5\测试>putty.exe -ssh zy@192.168.3.103 -m "dump_log.sh"
 

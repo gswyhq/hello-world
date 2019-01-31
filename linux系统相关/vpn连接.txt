@@ -1,0 +1,34 @@
+
+gswyhq@gswyhq-PC:~$ sudo apt-get install -y pptp-linux
+正在读取软件包列表... 完成
+正在分析软件包的依赖关系树       
+正在读取状态信息... 完成       
+pptp-linux 已经是最新版 (1.9.0+ds-2)。
+升级了 0 个软件包，新安装了 0 个软件包，要卸载 0 个软件包，有 165 个软件包未被升级。
+gswyhq@gswyhq-PC:~$ sudo pptpsetup --create pptpd --server 183.62.7.146 --username vdr0000785 --password citicpru@201901 --encrypt --start
+Using interface ppp0
+Connect: ppp0 <--> /dev/pts/1
+LCP: timeout sending Config-Requests
+Connection terminated.
+Modem hangup
+
+–create是创建的连接名称
+–server是vpn的ip地址
+–username是用户名
+–password是密码，也可以没这个参数，命令稍后会自动询问。这样可以保证账号安全
+–encrypt 是表示需要加密，不必指定加密方式，命令会读取配置文件中的加密方式
+–start是表示创建连接完后马上连接
+
+3.连接/断开vpn
+vpn建立好之后，可以通过 pon 和 poff 连接和断开vpn服务
+
+pon vpntest /连接名称为vpntest,vpn服务
+poff vpntest    /断开名称为vpntest,vpn服务
+
+--------------------- 
+
+snx_install.sh: 下载地址：　https://vpn.ulm.edu/CSHELL/snx_install.sh
+https://www.fc.up.pt/ci/servicos/acesso/vpn/software/CheckPointVPN_SNX_Linux_800007075.sh
+
+原文：https://blog.csdn.net/qq_20948497/article/details/53419280 
+

@@ -50,6 +50,17 @@ zy@ubuntu:~$ sudo docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 neo4j               latest              87ca73ed691a        2 weeks ago         173.2 MB
 
+# 镜像压缩保存到文件(直接将镜像保存到文件，保存的文件较大，可以采用压缩的方式保存)
+gswyhq@gswyhq-PC:~/wmd$ docker save d904464cf693 > wmd_stretch_20190124-save.tar
+gswyhq@gswyhq-PC:~/wmd$ du -h wmd_stretch_20190124-save.tar
+2.3G	wmd_stretch_20190124-save.tar
+gswyhq@gswyhq-PC:~/wmd$ docker save d904464cf693 |gzip > wmd_stretch_20190124-save.tgz
+gswyhq@gswyhq-PC:~/wmd$ du -h wmd_stretch_20190124-save.tgz 
+1014M	wmd_stretch_20190124-save.tgz
+
+# 压缩的镜像文件加载：
+docker load < wmd_stretch_20190124-save.tgz
+
 # 导出容器id 为`d42fe5599730`的容器到文件
 gswewf@gswewf-pc:~/neo4j$ sudo docker export d42fe5599730 > /home/gswewf/neo4j/neo4j17474.tar
 

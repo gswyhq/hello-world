@@ -1,0 +1,32 @@
+
+一，选中文本：
+按下键盘上的鼠标左键，再滑动鼠标选中内容；
+
+二，复制文本
+选中文本后，按“Ctrl + Insert”
+
+三，粘贴文本
+光标定好位置后，按“Shift + Insert”
+
+四，鼠标上下翻页：
+用两个手指头在键盘的鼠标上上下滑动即可；
+
+五，登录服务器：
+安装：putty
+
+登录服务器2（ssh的使用）：
+Mac Os X Lion是自带这个服务的，如果想启动这个服务，按照下面的步骤即可：
+1. command ＋ space打开spotlight（搜索）
+2. 输入system preference（打开系统偏好设置）
+3. 打开sharing（打开共享）
+4. 启用Remote Login（远程登录），勾选上远程登录则为启动。
+5. 打开终端，测试下面的命令，username是你当前的用户名，如果有空格就使用单引号。
+ssh username@localhost
+接下来要你输入的密码，密码就是你该用户的登陆密码。
+如果成功，表示你的sshd服务已经启动。
+
+六，与服务器互传文件：
+默认是安装了scp客户端的，命令格式
+scp username@hostname:remotefile localdirectory
+例如：scp root@192.147.10.215:/home/usr/mm.log Desktop/
+

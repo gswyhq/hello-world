@@ -11,3 +11,36 @@ sudo ssserver -d stop
 sudo less /var/log/shadowsocks.log
 
 
+https://unix.stackexchange.com/questions/450229/getting-checkpoint-vpn-ssl-network-extender-working-in-the-command-line
+install tun
+
+wget https://www.fc.up.pt/ci/servicos/acesso/vpn/software/CheckPointVPN_SNX_Linux_800007075.sh -O snx_install.sh
+sudo dpkg --add-architecture i386
+sudo apt-get update
+sudo apt-get install libstdc++5:i386 libx11-6:i386 libpam0g:i386
+apt-get install bzip2
+chmod a+rx snx_install.sh
+sudo ./snx_install.sh
+sudo ldd /usr/bin/snx
+vim ~/.snxrc
+
+server IP_address_of_your_VPN
+username YOUR_USER
+reauth yes
+
+$ snx
+Check Point's Linux SNX
+build 800007075
+Please enter your password:
+
+SNX - connected.
+
+Session parameters:
+===================
+Office Mode IP      : 10.x.x.x
+DNS Server          : 10.x.x.x
+Secondary DNS Server: 10.x.x.x
+DNS Suffix          : xxx.xx, xxx.xx
+Timeout             : 24 hours
+
+echo 'Password' | snx

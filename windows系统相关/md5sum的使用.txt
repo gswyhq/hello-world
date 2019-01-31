@@ -1,0 +1,12 @@
+
+方法１：　win10 使用系统自带windows powershell 计算MD5值：
+1. 打开windows powershell
+2. 选择需要计算MD5值的文件
+ Get-FileHash C:\Windows\file.txt -Algorithm MD5| Format-List
+
+方法２：
+下载md5sum.exe，可以到这里 http://www.pc-tools.net/win32/md5sums/
+拷贝到c:/windows/system32/下，或者将md5sum.exe所在路径设置到环境变量PATH中，就可以直接通过命令行调用了：
+c:/md5sum boot.ini
+返回的结果就是boot.ini的MD5值。
+

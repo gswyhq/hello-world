@@ -14,4 +14,13 @@ RUN apk --update add --no-cache --virtual .build-deps \
 
 3、安装tensorflow
 需要通过Dockerfile文件安装
-https://raw.githubusercontent.com/better/alpine-tensorflow/master/Dockerfile    
+https://raw.githubusercontent.com/better/alpine-tensorflow/master/Dockerfile   
+
+4、安装scipy
+apk add py3-scipy
+apk add gfortran
+pip3 install scipy==1.0.1 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+pip3 install scikit_learn==0.19.1 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+
+ 

@@ -920,3 +920,7 @@ git clone ssh://git@hostname:port/.../xxx.git
 举例如下：
 git clone ssh://git@10.137.20.113:2222/root/test.git
 
+克隆git子模块：
+git clone --recursive https://github.com/src-d/wmd-relax
+使用 --recursive 参数进行 git clone. 这个项目 使用 google/or-tools 作为子模块。
+

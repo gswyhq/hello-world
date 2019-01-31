@@ -64,3 +64,29 @@ sudo: no tty present and no askpass program specified
 假设当前帐号为gswyhq;切换到root下，添加免密码： 
 [root@4891fe85fdb8 ~]# echo "gswyhq ALL = NOPASSWD: ALL" >> /etc/sudoers 
 
+异常（add-apt-repository: command not found）：
+root@7c1c26b49037:~# sudo add-apt-repository ppa:webupd8team/java
+sudo: add-apt-repository: command not found
+解决方案：
+root@7c1c26b49037:~# apt-get install -y software-properties-common python-software-properties
+
+问题：
+gswyhq@gswyhq-PC:~/hello-world$ sudo apt-get update
+命中:1 http://packages.deepin.com/deepin panda InRelease
+获取:2 http://ppa.launchpad.net/webupd8team/java/ubuntu disco InRelease [15.4 kB]
+错误:2 http://ppa.launchpad.net/webupd8team/java/ubuntu disco InRelease
+  由于没有公钥，无法验证下列签名： NO_PUBKEY C2518248EEA14886
+正在读取软件包列表... 完成
+W: GPG 错误：http://ppa.launchpad.net/webupd8team/java/ubuntu disco InRelease: 由于没有公钥，无法验证下列签名： NO_PUBKEY C2518248EEA14886
+E: 仓库 “http://ppa.launchpad.net/webupd8team/java/ubuntu disco InRelease” 没有数字签名。
+N: 无法安全地用该源进行更新，所以默认禁用该源。
+N: 参见 apt-secure(8) 手册以了解仓库创建和用户配置方面的细节。
+
+解决方法：
+gswyhq@gswyhq-PC:~/hello-world$ sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C2518248EEA14886
+Executing: /tmp/apt-key-gpghome.yRSpsOFtat/gpg.1.sh --recv-keys --keyserver keyserver.ubuntu.com C2518248EEA14886
+gpg: key C2518248EEA14886: 14 signatures not checked due to missing keys
+gpg: 密钥 C2518248EEA14886：公钥“Launchpad VLC”已导入
+gpg: 合计被处理的数量：1
+gpg:           已导入：1
+gswyhq@gswyhq-PC:~/hello-world$ sudo apt-get update

@@ -43,3 +43,12 @@ grep -o '好' 文件名.txt | wc -l
 
 -o 指示grep显示所有匹配的地方，并且每一个匹配单独一行输出。这样只要统计输出的行数就可以知道这个字符出现的次数了。
 
+操作 grep "xxx" a.log
+结果 Binary file a.log matches
+原因：grep认为a.log是二进制文件
+解决方法：grep -a "xxx" a.log
+可以看看grep -a参数的功能
+[appadmin@test3 ~/tmp]$ grep --help |grep '/-a'
+-a, --text equivalent to --binary-files=text
+即，让二进制文件等价于文本文件
+

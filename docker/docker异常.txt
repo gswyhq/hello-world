@@ -67,7 +67,7 @@ Docker version 1.6.2, build 7c8fca2
 Error response from daemon: Get https://registry-1.docker.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 可在 https://www.daocloud.io 注册账号 使用Docker 加速器；
 
-swyhq@gswewf-pc:~/hello-world/docker$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io
+swabcd@gswewf-pc:~/hello-world/docker$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://7d466737.m.daocloud.io
 Error: Unsupported OS, please set registry-mirror manually.
 
 修改Docker配置文件/etc/default/docker如下：
@@ -224,3 +224,42 @@ sudo groupadd docker     #添加docker用户组
 sudo gpasswd -a $USER docker     #将登陆用户加入到docker用户组中
 newgrp docker     #更新用户组
 docker ps    #测试docker命令是否可以使用sudo正常使用
+
+异常：docker could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network
+原因： 无法进行网络分配了
+解决方法：
+// 所有的网络
+docker network ls 
+//  删除不用的，腾出多余的
+docker network rm <networkname>
+
+# docker打包好的镜像，在有些机器上运行出错：
+ Illegal instruction (core dumped)
+illegal instruction，即SIGILL， 是POSIX标准中提供的一类错误。 从名字上看，SIGILL是启动的某个进程中的某一句不能被CPU识别成正确的指令。 此类错误是由操作系统发送给进程的，在进程试图执行一些形式错误、未知或者特权指令时操作系统会使用SIGILL信号终止程序。果然如名字一样，非法指令。那么，在什么情况下会出现这种错误呢，一般来说，有两种可能，一是将数据错误地写进了代码段，导致将本不是指令的数据当成指令去执行；第二种可能是编译时指定的CPU架构与实际运行的机器不一致。这里主要讲讲第二种。
+由于CPU架构的演进，CPU指令集一直在不断地拓展，SSE、SSE2、SSE3、SSE42、AVX、AVX2等。不同的CPU能支持的指令集是不一样的，如果编译程序时指定了使用新的CPU架构进行编译，则该程序在老的CPU上运行时，其指令就不能被执行，从而引发Illegal instruction错误。查阅gcc资料，gcc是提供了一个march编译选项来指定所使用的CPU架构的。如果不清楚自己的CPU类型，可以使用gcc -c -Q -march=native --help=target | grep march来查看：
+gswabcd@gswabcd-PC:~$ gcc -c -Q -march=native --help=target | grep march
+  -march=                     		skylake
+如果在编译时指定了-march参数，gcc将不会再用兼容的指令去编译，而是根据指定的CPU架构，采用其特定的指令集如AVX去生成二进制代码。因此，当你确定所编译的程序只会在特定的环境中运行时，可以使用-march参数来指定CPU架构，这样编译器就可以根据你的CPU架构进行指令上的优化，而这个指定带来的结果就是，如果你将程序放在其他机器上运行，有可能得到Illegal instruction的运行错误。
+# https://www.cnblogs.com/yutongqing/p/6823385.html
+# https://www.v2ex.com/t/174625
+
+异常：
+abcd@ubuntu-GPU:~/baoxian$ docker-compose -f docker-compose.yml up -d
+Creating network "zybaoxian_mynet" with driver "bridge"
+ERROR: could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network
+abcd@ubuntu-GPU:~/baoxian$ vim docker-compose.yml
+分析：docker可能处于最大的创建网络。该命令docker network prune可用于删除至少一个容器未使用的所有网络。
+或者是因为openvpn问题； 可以通过service openvpn stop 解决这个问题。
+abcd@ubuntu-GPU:~/baoxian$ docker network prune
+WARNING! This will remove all networks not used by at least one container.
+Are you sure you want to continue? [y/N] y
+Deleted Networks:
+haiyinpoc_mynet
+tianfengimage_mynet
+
+在 Docker 中删除 image 时有时会遇到类似
+Error response from daemon: conflict: unable to delete 6ec9a5a0fc9f (cannot be forced) - image has dependent child images
+这样的错误，原因是有另外的 image FROM 了这个 image，可以使用下面的命令列出所有在指定 image 之后创建的 image 的父 image
+docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=xxxxxx)
+其中 xxxxxx 是报错 image 的 id，在文章开头的例子中就是 6ec9a5a0fc9f。从列表中查找到之后就可以核对并删除这些 image。
+
