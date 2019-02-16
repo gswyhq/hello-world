@@ -1,0 +1,122 @@
+
+使用matplotlib作图时，中文显示乱码
+可以通过下命令查看本机安装的字体：
+gswyhq@gswyhq-PC:~$ fc-list
+/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf: DejaVu Serif:style=Bold
+/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf: Noto Sans Thai:style=Regular
+/usr/share/fonts/deepin-font-install/STKaiti/STKAITI.TTF: STKaiti:style=Regular
+/usr/share/fonts/truetype/xmind/RobotoCondensed-BoldItalic.ttf: Roboto Condensed:style=Bold Italic
+/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf: DejaVu Sans Mono:style=Book
+...
+搜索本机安装的楷体：
+gswyhq@gswyhq-PC:~$ fc-list|grep Kai
+/usr/share/fonts/deepin-font-install/STKaiti/STKAITI.TTF: STKaiti:style=Regular
+/usr/share/fonts/truetype/noto/NotoSansKaithi-Regular.ttf: Noto Sans Kaithi:style=Regular
+
+# 查看中文字体(注意冒号前有空格)：
+gswyhq@gswyhq-PC:~$ fc-list  :lang=zh
+/usr/share/fonts/deepin-font-install/STKaiti/STKAITI.TTF: STKaiti:style=Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK JP,Noto Sans CJK JP Bold:style=Bold,Regular
+/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc: Noto Serif CJK SC:style=Bold
+/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc: Noto Serif CJK TC:style=Bold
+/usr/share/fonts/deepin-font-install/LiSu/SIMLI.TTF: LiSu:style=Regular
+
+但通过上面查到的有些中文字体显示还是乱码；
+主要原因是因为字体名不对, 可以通过下方法查看中文字体名；
+gswyhq@gswyhq-PC:~$ fc-list :lang=zh -f "%{family}\n"
+Noto Sans CJK TC,Noto Sans CJK TC Bold
+STSong
+Noto Sans Mono CJK JP,Noto Sans Mono CJK JP Bold
+Noto Sans Mono CJK KR,Noto Sans Mono CJK KR Bold
+Noto Serif CJK TC
+Microsoft YaHei
+Noto Serif CJK SC
+Noto Serif CJK TC
+...
+
+import matplotlib.pyplot as plt
+
+plt.xlabel("x轴", fontproperties="STKAITI") # 华文行楷 fontproperties后，填写字体名，不区分大小写；
+plt.ylabel("y轴", fontproperties="Microsoft YaHei") #  （微软雅黑）
+plt.title("标题", fontproperties="LiSu") #          （隶书）
+plt.show()
+
+    ax = plt.subplot(1, 3, i+1)
+    ax.set_xlabel('球的半径', fontproperties="STKAITI")
+    ax.set_ylabel('距原点距离', fontproperties="STKAITI")
+    ax.set_title('维度的长度 D=%d' % D, loc='left', fontproperties="STKAITI")
+    plt.show()
+
+# 图例显示中文的问题：
+# 方法一（全局设置）：
+from pylab import mpl
+mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体   
+mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
+
+# 方法二（局部设置）：
+z = np.linspace(0., 5., 1000)  # [0, 5] 之间1000个均匀分布的点；
+gauss = np.exp(-z**2)
+cauchy = 1/(1+z**2)
+# 洛仑兹线性分布更适合于那种比较扁、宽的曲线 高斯线性分布则适合较高、较窄的曲线 当然，如果是比较居中的情况，两者都可以。
+plt.figure(figsize=(15, 4))  # 创建一个新的画布或引用一个已有的画布 figsize：设置画布的尺寸，默认 [6.4, 4.8]，单位英寸
+plt.plot(z, gauss, label='高斯分布（正态分布）')
+plt.plot(z, cauchy, label='柯西分布')
+plt.legend(prop=matplotlib.font_manager.FontProperties(fname='/usr/share/fonts/deepin-font-install/STKaiti/STKAITI.TTF'))
+
+
+一些中文字体的英文名：
+宋体     SimSun
+黑体     SimHei
+微软雅黑     Microsoft YaHei
+微软正黑体     Microsoft JhengHei
+新宋体     NSimSun
+新细明体     PMingLiU
+细明体     MingLiU
+标楷体     DFKai-SB
+仿宋     FangSong
+楷体     KaiTi
+隶书：LiSu
+幼圆：YouYuan
+华文细黑：STXihei
+华文楷体：STKaiti
+华文宋体：STSong
+华文中宋：STZhongsong
+华文仿宋：STFangsong
+方正舒体：FZShuTi
+方正姚体：FZYaoti
+华文彩云：STCaiyun
+华文糊糊：STHupo
+华文隶书：STLiti
+华文行楷：STXingkai
+华文新魏：STXinwei
+
+from matplotlib.font_manager import FontManager
+import subprocess
+ 
+fm = FontManager()
+mat_fonts = set(f.name for f in fm.ttflist)
+print (mat_fonts)
+output = subprocess.check_output('fc-list :lang=zh -f "%{family}\n"', shell=True)
+print ('*' * 10, '系统可用的中文字体', '*' * 10)
+print (output)
+zh_fonts = set(f.split(',', 1)[0] for f in output.decode().split('\n'))
+available = mat_fonts & zh_fonts
+print ('*' * 10, '可用的字体', '*' * 10)
+for f in available:
+    print(f)
+
+{'Noto Sans Armenian', 'Noto Sans Malayalam UI', 'eufm10', 'Droid Serif', 'Noto Sans Ol Chiki', 'Noto Serif Armenian', 'Noto Sans Khmer UI', 'Adobe Song Std', 'STXingkai', 'Noto Serif', 'Noto Sans Inscriptional Parthian', 'Noto Sans Avestan', 'Noto Serif Ethiopic', 'Noto Sans Sinhala', 'STKaiti', 'wasy10', 'STIXGeneral', 'Adobe Fan Heiti Std', 'Noto Sans Thai UI', 'Noto Sans Georgian', 'DejaVu Serif', 'Noto Sans Carian', 'Noto Sans Egyptian Hieroglyphs', 'Noto Sans NKo', 'Noto Serif Lao', 'Noto Sans Bengali', 'Roboto', 'Noto Sans Arabic', 'DejaVu Sans Mono', 'Noto Serif Sinhala', 'Noto Sans Bamum', 'Noto Naskh Arabic UI', 'Noto Sans Imperial Aramaic', 'Noto Kufi Arabic', 'Roboto Slab', 'Noto Sans Oriya', 'Liberation Serif', 'Noto Sans Symbols2', 'Noto Sans Mono', 'Noto Sans Batak', 'Noto Sans Cherokee', 'Noto Sans Meetei Mayek', 'Noto Mono', 'Noto Sans Telugu', 'SimSun-ExtB', 'Noto Sans Old Persian', 'Noto Sans Tagbanwa', 'Symbol', 'Noto Sans New Tai Lue', 'msbm10', 'Noto Serif Telugu', 'Noto Sans Shavian', 'Noto Sans Buginese', 'stmary10', 'Noto Sans Gurmukhi', 'Noto Serif Georgian', 'Microsoft YaHei', 'Noto Sans Adlam', 'Noto Sans Kannada', 'Noto Sans Hanunoo', 'Noto Sans Yi', 'cmmi10', 'Noto Sans Arabic UI', 'cmex10', 'Noto Sans Tai Le', 'Noto Sans Devanagari', 'Wingdings 2', 'Noto Sans Lao', 'Noto Sans Anatolian Hieroglyphs', 'Bitstream Vera Sans Mono', 'Noto Sans', 'Noto Sans Lycian', 'Noto Sans Tamil', 'STIXSizeTwoSym', 'Noto Sans Glagolitic', 'Noto Serif Devanagari', 'Noto Sans Osmanya', 'Noto Sans Ethiopic', 'Noto Serif Gujarati', 'Noto Sans Tibetan', 'STIXSizeOneSym', 'Noto Sans Myanmar UI', 'Noto Sans Cuneiform', 'Noto Sans Gothic', 'Noto Sans Ogham', 'Noto Sans Thaana', 'STFangsong', 'STIXSizeFourSym', 'Noto Sans Balinese', 'Noto Serif Hebrew', 'Bitstream Vera Serif', 'Noto Sans Phags Pa', 'DejaVu Serif Display', 'Noto Naskh Arabic', 'Noto Serif Malayalam', 'Noto Sans Runic', 'YouYuan', 'Noto Sans Kayah Li', 'Noto Sans Javanese', 'Liberation Sans Narrow', 'Noto Sans Syriac Western', 'Noto Serif Kannada', 'Noto Sans Mandaic', 'Noto Sans Bengali UI', 'Noto Sans Malayalam', 'Noto Sans Kaithi', 'Noto Sans Phoenician', 'Wingdings 3', 'Symbola', 'DejaVu Sans', 'Wingdings', 'webdings', 'Liberation Mono', 'Noto Sans Kannada UI', 'Noto Serif Khmer', 'LiSu', 'cmr10', 'Noto Sans Rejang', 'Noto Sans Inscriptional Pahlavi', 'Poiret One', 'Noto Sans Tai Viet', 'esint10', 'STIXSizeFiveSym', 'Noto Sans Kharoshthi', 'Noto Sans Tamil UI', 'Noto Sans Buhid', 'Noto Serif Bengali', 'Noto Sans Display', 'cmss10', 'Noto Sans Tifinagh', 'cmsy10', 'Noto Sans Lepcha', 'Noto Sans Lisu', 'DejaVu Sans Display', 'Liberation Sans', 'Noto Sans Vai', 'STSong', 'Noto Serif Display', 'Noto Sans Syriac Eastern', 'Noto Sans Sundanese', 'Noto Sans Adlam Unjoined', 'Noto Sans Telugu UI', 'Noto Sans Myanmar', 'Indie Flower', 'Noto Sans Devanagari UI', 'Noto Sans Old Turkic', 'Roboto Condensed', 'Noto Sans Tai Tham', 'Noto Serif Myanmar', 'Noto Sans Coptic', 'Bitstream Vera Sans', 'Noto Sans Gujarati', 'Noto Sans Cham', 'Lohit Devanagari', 'Lobster', 'DejaVu Math TeX Gyre', 'Noto Sans Gujarati UI', 'MT Extra', 'cmtt10', 'Noto Sans Ugaritic', 'Noto Sans Tagalog', 'Noto Sans Chakma', 'Noto Sans Hebrew', 'Noto Serif Tamil', 'Noto Sans Samaritan', 'Raleway', 'cmb10', 'Noto Sans Old South Arabian', 'Open Sans', 'STIXSizeThreeSym', 'Noto Sans Linear B', 'Noto Sans Syloti Nagri', 'Noto Sans Syriac Estrangela', 'Noto Sans Cypriot', 'Arvo', 'Noto Sans Sinhala UI', 'Noto Sans Oriya UI', 'Noto Sans Gurmukhi UI', 'Noto Sans Osage', 'STIXNonUnicode', 'Noto Sans Symbols', 'Noto Sans Lao UI', 'Noto Serif Thai', 'Adobe Heiti Std', 'msam10', 'Noto Sans Lydian', 'Noto Sans Old Italic', 'Adobe Fangsong Std', 'Noto Sans Thai', 'Noto Nastaliq Urdu', 'Noto Sans Mongolian', 'rsfs10', 'Noto Sans Brahmi', 'Noto Sans Canadian Aboriginal', 'Noto Sans Deseret', 'Noto Sans Khmer', 'Noto Sans Saurashtra', 'Noto Sans Limbu'}
+********** 系统可用的中文字体 **********
+b'Noto Sans CJK TC,Noto Sans CJK TC Bold\nSTSong\nNoto Sans Mono CJK JP,Noto Sans Mono CJK JP Bold\nNoto Sans Mono CJK KR,Noto Sans Mono CJK KR Bold\nNoto Serif CJK TC\nMicrosoft YaHei\nNoto Serif CJK SC\nNoto Serif CJK TC\nNoto Serif CJK KR\nNoto Serif CJK JP\nNoto Serif CJK SC\nWenQuanYi Bitmap Song\nAdobe Heiti Std,Adobe Heiti Std R\nNoto Sans CJK SC,Noto Sans CJK SC Bold\nNoto Sans CJK SC,Noto Sans CJK SC Regular\nNoto Sans Mono CJK JP,Noto Sans Mono CJK JP Regular\nNoto Sans Mono CJK SC,Noto Sans Mono CJK SC Bold\nSTXingkai\nMicrosoft YaHei\nNoto Sans CJK TC,Noto Sans CJK TC Regular\nWenQuanYi Bitmap Song\nWenQuanYi Bitmap Song\nAdobe \xe7\xb9\x81\xe9\xbb\x91\xe9\xab\x94 Std B,Adobe Fan Heiti Std,Adobe Fan Heiti Std B\nNoto Sans Mono CJK KR,Noto Sans Mono CJK KR Regular\nNoto Serif CJK KR\nLiSu\nNoto Sans Mono CJK TC,Noto Sans Mono CJK TC Bold\nYouYuan\nNoto Serif CJK JP\nWenQuanYi Bitmap Song\nAdobe Fangsong Std,Adobe Fangsong Std R\nWenQuanYi Bitmap Song\nAdobe Song Std,Adobe Song Std L\nNoto Sans CJK JP,Noto Sans CJK JP Regular\nNoto Sans Mono CJK SC,Noto Sans Mono CJK SC Regular\nNoto Sans CJK KR,Noto Sans CJK KR Regular\nNoto Sans Mono CJK TC,Noto Sans Mono CJK TC Regular\nSTFangsong\nNoto Sans CJK JP,Noto Sans CJK JP Bold\nNoto Sans CJK KR,Noto Sans CJK KR Bold\nSTKaiti\n'
+********** 可用的字体 **********
+Microsoft YaHei
+STKaiti
+STSong
+Adobe Heiti Std
+Adobe Song Std
+Adobe Fangsong Std
+STXingkai
+STFangsong
+YouYuan
+LiSu
+
