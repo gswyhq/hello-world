@@ -1,0 +1,61 @@
+
+安装xmindparser
+这个项目已经打包到PyPI，可以通过pip安装。
+
+pip3 install xmindparser
+Xmind 转Python 数据类型
+xmindparser可以将xmind转成dict数据类型，比如下面这么一个xmind文件：
+
+xmind example
+
+转换代码的示例：
+
+from xmindparser import xmind_to_dict
+out = xmind_to_dict(xmind_file)
+例子中out的数据结构如下：
+
+[
+  {
+    "title": "Sheet 1",
+    "topic": {
+      "makers": [
+        "star-orange"
+      ],
+      "topics": [
+        {
+          "link": "http://test.com",
+          "topics": [
+            {
+              "topics": [...]
+              "title": "e"
+            },
+            ...
+      ],
+      "title": "test"
+    },
+    "structure": "org.xmind.ui.map.unbalanced"
+  },
+  {
+    "title": "Sheet 2",
+     ...
+  }
+]
+通过遍历sheet和topics就可以获取到xmind中每个节点的数据。
+
+Xmind 转 JSON
+转成Json非常简单，如果你还是使用Python编程，可以这样写：
+
+from xmindpraser import xmind_to_json
+out_file = xmind_to_json(xmind_file)
+或者你直接调用命令行工具：
+
+xmindparser your.xmind -json
+Xmind 转 XML
+转成XML是类似的，使用Python编程，这样写：
+
+from xmindpraser import xmind_to_xml
+out_file = xmind_to_xml(xmind_file)
+或者你直接调用命令行工具：
+
+xmindparser your.xmind -xml
+
