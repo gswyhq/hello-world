@@ -27,3 +27,18 @@ bb = pandas.ExcelWriter('out.xlsx')
 df[0].to_excel(bb)
 bb.close()
 
+
+import pandas as pd
+def convert_to_html(result,title):
+    d = {}
+    index = 0
+    for t in title:
+        d[] = result[index]
+        index +=1
+    df = pd.DataFrame(d)
+    #如数据过长，可能在表格中无法显示，加上pd.set_option语句可以避免这一情况
+    pd.set_option('max_colwidth',200)
+    df = df [title]
+    h =df.to_html(index=False)
+    return h
+
