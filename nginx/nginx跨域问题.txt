@@ -1,0 +1,29 @@
+跨域问题
+跨域问题经常会遇到,如下面的错误：
+
+Access to Font at 'http://xxx:8089/resource_static/console/hello.ttf' from origin 'http://xxx:8089' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://xxx:8080' is therefore not allowed access.
+
+server {
+        listen       8000;
+        server_name  localhost;
+        location /resource_static/ {
+            root   /usr/src/app/wmd_api_alpine/communication/;
+            index index.htm index.html
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+        }
+
+    }
+
+上面配置表示在浏览器输入 localhost:8089/resource_static/ 时会访问本机的/usr/src/app/wmd_api_alpine/communication/ 目录，
+展示的是文件：/usr/src/app/wmd_api_alpine/communication/resource_static/index.htm 
+或者文件：/usr/src/app/wmd_api_alpine/communication/resource_static/index.html
+
+在/usr/src/app/wmd_api_alpine/communication/resource_static/下新建一个文件test.json
+在浏览器中输入：
+localhost:8089/resource_static/test.json
+会展示文件`/usr/src/app/wmd_api_alpine/communication/resource_static/test.json`的内容。
+
+

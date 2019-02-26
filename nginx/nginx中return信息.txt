@@ -1,0 +1,61 @@
+
+在nginx 配置文件中，经常会发现有很对return的运用场景， 进行测试总结
+
+
+
+1： 返回错误码
+
+eg:  单独配置返回返回码场景
+
+nginx 配置如下：
+
+        location = /test {
+         return 403 ;
+        }
+
+通过返回的页面为： 403 Forbidden 正常的403错误返回码报错
+
+可以看出 对于单独返回返回码的场景， 可以进行过滤拦截场景使用）
+
+
+
+2： 通过return  返回 文本信息和 json
+
+        location ^~ /pic {
+          default_type text/html ;
+          return 200  'test test test ';
+        }
+
+进行 http://192.168.1.19:8080/pic/test 进行测试，页面返回编辑的内容： test test test 
+
+        location ^~ /pic {
+          default_type application/json ;
+          return 200  '{"name":"nanjing_wuxu","result":"success"}';
+        }
+
+http://192.168.1.19:8080/pic/test 进行测试，页面返回编辑的内容：{"name":"nanjing_wuxu","result":"success"}
+
+
+
+可以理解，可以通过return 为请求方之间返回编辑的文本等信息
+
+
+
+3： 看能否直接跳转功能
+
+        location ^~ /pic {
+          return http://192.168.1.19:8080/aa.jpg;
+        }
+
+进行http://192.168.1.19:8080/pic/test 进行测试，返回的是aa.jsp图片， 从日志中也可以进行查看，进行了跳转
+
+ [26/Jan/2018:17:05:33 +0800] "GET /pic/test HTTP/1.1" 302 153 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0"
+ [26/Jan/2018:17:05:33 +0800] "GET /aa.jpg HTTP/1.1" 200 879394 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0"
+
+# 重定向
+location ^~ /baidu/ {
+    rewrite ^ http://baidu.com;
+   # root /vagrant/pro;
+}
+
+

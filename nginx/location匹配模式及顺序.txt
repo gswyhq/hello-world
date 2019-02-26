@@ -1,0 +1,440 @@
+
+匹配模式及顺序
+location匹配顺序
+"="前缀指令匹配，如果匹配成功，则停止其他匹配
+普通字符串指令匹配，顺序是从长到短，匹配成功的location如果使用^~，则停止其他匹配（正则匹配）
+正则表达式指令匹配，按照配置文件里的顺序，成功就停止其他匹配
+如果第三步中有匹配成功，则使用该结果，否则使用第二步结果
+
+注意点
+匹配的顺序是先匹配普通字符串，然后再匹配正则表达式。
+另外普通字符串匹配顺序是根据配置中字符长度从长到短，也就是说使用普通字符串配置的location顺序是无关紧要的，反正最后nginx会根据配置的长短来进行匹配，但是需要注意的是正则表达式按照配置文件里的顺序测试。
+找到第一个比配的正则表达式将停止搜索。
+
+一般情况下，匹配成功了普通字符串location后还会进行正则表达式location匹配。
+有两种方法改变这种行为，其一就是使用“=”前缀，这时执行的是严格匹配，并且匹配成功后立即停止其他匹配，同时处理这个请求；
+另外一种就是使用“^~”前缀，如果把这个前缀用于一个常规字符串那么告诉nginx 如果路径匹配那么不测试正则表达式。
+
+匹配模式及顺序
+　　location = /uri 　　　=开头表示精确匹配，只有完全匹配上才能生效。
+
+　　location ^~ /uri 　　^~ 开头对URL路径进行前缀匹配，并且在正则之前。
+
+　　location ~ pattern 　~开头表示区分大小写的正则匹配。
+
+　　location ~* pattern 　~*开头表示不区分大小写的正则匹配。
+
+　　location /uri 　　　　不带任何修饰符，也表示前缀匹配，但是在正则匹配之后。
+
+　　location / 　　　　　通用匹配，任何未匹配到其它location的请求都会匹配到，相当于switch中的default。 
+
+ 
+
+实验案例
+测试"^~"和"~"，nginx配置如下。浏览器输入http://localhost/helloworld/test，返回601。如将#1注释，#2打开，浏览器输入http://localhost/helloworld/test，返回603。
+注：#1和#2不能同时打开，如同时打开，启动nginx会报nginx: [emerg] duplicate location "/helloworld"...，因为这两个都是普通字符串。
+
+    location ^~ /helloworld {      #1
+        return 601;
+    }
+
+    #location /helloworld {        #2
+    #    return 602;
+    #}
+
+    location ~ /helloworld {
+        return 603;
+    }
+
+测试普通字符串的长短（普通字符串的匹配与顺序无关，与长短有关）。
+浏览器输入http://localhost/helloworld/test/a.html，返回601。浏览器输入http://localhost/helloworld/a.html，返回602。
+
+    location /helloworld/test/ {        #1
+        return 601;
+    }
+
+    location /helloworld/ {                #2
+        return 602;
+    }
+
+测试正则表达式的顺序（正则匹配与顺序相关）。
+浏览器输入http://localhost/helloworld/test/a.html，返回602；将#2和#3调换顺序，浏览器输入http://localhost/helloworld/test/a.html，返回603
+
+    location /helloworld/test/ {        #1
+        return 601;
+    }
+
+    location ~ /helloworld {            #2
+        return 602;
+    }
+
+    location ~ /helloworld/test {        #3
+        return 603;
+    }
+
+
+1. locat 基本语法使用
+Location block 的基本语法形式是：
+
+location [=|~|~*|^~|@] pattern { ... }
+1
+[=|~|~*|^~|@] 被称作 location modifier ，这会定义 Nginx 如何去匹配其后的 pattern ，以及该 pattern 的最基本的属性（简单字符串或正则表达式）
+location modifier
+
+1.1 =
+Example:
+
+server {
+
+server_name website.com;
+
+location = /abcd {
+
+[…]
+
+}
+
+
+}
+
+匹配情况：
+
+http://website.com/abcd        # 正好完全匹配
+
+http://website.com/ABCD        # 如果运行 Nginx server 的系统本身对大小写不敏感，比如 Windows ，那么也匹配
+
+http://website.com/abcd?param1m2    # 忽略查询串参数（query string arguments），这里就是 /abcd 后面的 ?param1m2
+
+http://website.com/abcd/    # 不匹配，因为末尾存在反斜杠（trailing slash），Nginx 不认为这种情况是完全匹配
+
+http://website.com/abcde    # 不匹配，因为不是完全匹配
+
+
+2.1 (None)
+可以不写 location modifier ，Nginx 仍然能去匹配 pattern 。这种情况下，匹配那些以指定的 patern 开头的 URI，注意这里的 URI 只能是普通字符串，不能使用正则表达式。
+
+Example:
+
+server {
+
+server_name website.com;
+
+location /abcd {
+
+[…]
+
+}
+
+
+}
+
+匹配情况：
+
+http://website.com/abcd        # 正好完全匹配
+
+http://website.com/ABCD        # 如果运行 Nginx server 的系统本身对大小写不敏感，比如 Windows ，那么也匹配
+
+http://website.com/abcd?param1m2    # 忽略查询串参数（query string arguments），这里就是 /abcd 后面的 ?param1m2
+
+http://website.com/abcd/    # 末尾存在反斜杠（trailing slash）也属于匹配范围内
+
+http://website.com/abcde    # 仍然匹配，因为 URI 是以 pattern 开头的
+
+
+3.1 ~
+这个 location modifier 对大小写敏感，且 pattern 须是正则表达式
+
+Example:
+
+server {
+
+server_name website.com;
+
+location ~ ^/abcd$ {
+
+[…]
+
+
+
+}
+
+匹配情况：
+
+http://website.com/abcd        # 完全匹配
+
+http://website.com/ABCD        # 不匹配，~ 对大小写是敏感的
+
+http://website.com/abcd?param1m2    # 忽略查询串参数（query string arguments），这里就是 /abcd 后面的 ?param1m2
+
+http://website.com/abcd/    # 不匹配，因为末尾存在反斜杠（trailing slash），并不匹配正则表达式 ^/abcd$
+
+http://website.com/abcde    # 不匹配正则表达式 ^/abcd$
+
+
+注意：对于一些对大小写不敏感的系统，比如 Windows ，~ 和 ~* 都是不起作用的，这主要是操作系统的原因。
+
+4.1 ~*
+与 ~ 类似，但这个 location modifier 不区分大小写，pattern 须是正则表达式
+
+Example:
+
+server {
+
+server_name website.com;
+
+location ~* ^/abcd$ {
+
+[…]
+
+}
+
+
+}
+
+匹配情况：
+
+http://website.com/abcd        # 完全匹配
+
+http://website.com/ABCD        # 匹配，这就是它不区分大小写的特性
+
+http://website.com/abcd?param1m2    # 忽略查询串参数（query string arguments），这里就是 /abcd 后面的 ?param1m2
+
+http://website.com/abcd/    # 不匹配，因为末尾存在反斜杠（trailing slash），并不匹配正则表达式 ^/abcd$
+
+http://website.com/abcde    # 不匹配正则表达式 ^/abcd$
+
+
+5.1 ^~
+匹配情况类似 2. (None) 的情况，以指定匹配模式开头的 URI 被匹配，不同的是，一旦匹配成功，那么 Nginx 就停止去寻找其他的 Location 块进行匹配了（与 Location 匹配顺序有关）
+
+6.1 @
+用于定义一个 Location 块，且该块不能被外部 Client 所访问，只能被 Nginx 内部配置指令所访问，比如 try_files or error_page
+
+——- 搜索顺序以及生效优先级 ——-
+
+因为可以定义多个 Location 块，每个 Location 块可以有各自的 pattern 。因此就需要明白（不管是 Nginx 还是你），当 Nginx 收到一个请求时，它是如何去匹配 URI 并找到合适的 Location 的。
+
+要注意的是，写在配置文件中每个 Server 块中的 Location 块的次序是不重要的，Nginx 会按 location modifier 的优先级来依次用 URI 去匹配 pattern ，顺序如下：
+
+1. =
+
+2. (None)    如果 pattern 完全匹配 URI（不是只匹配 URI 的头部）
+
+3. ^~
+
+4. ~ 或 ~*
+
+5. (None)    pattern 匹配 URI 的头部
+
+
+7.1匹配案例
+location = / {
+
+# 精确匹配 / ，主机名后面不能带任何字符串
+
+[ configuration A ]
+
+}
+
+location / {
+
+# 因为所有的地址都以 / 开头，所以这条规则将匹配到所有请求
+
+# 但是正则和最长字符串会优先匹配
+
+[ configuration B ]
+
+}
+
+location /documents/ {
+
+# 匹配任何以 /documents/ 开头的地址，匹配符合以后，还要继续往下搜索
+
+# 只有后面的正则表达式没有匹配到时，这一条才会采用这一条
+
+[ configuration C ]
+
+}
+
+location ~ /documents/Abc {
+
+# 匹配任何以 /documents/ 开头的地址，匹配符合以后，还要继续往下搜索
+
+# 只有后面的正则表达式没有匹配到时，这一条才会采用这一条
+
+[ configuration CC ]
+
+}
+
+location ^~ /images/ {
+
+# 匹配任何以 /images/ 开头的地址，匹配符合以后，停止往下搜索正则，采用这一条。
+
+[ configuration D ]
+
+}
+
+location ~* .(gif|jpg|jpeg)$ {
+
+# 匹配所有以 gif,jpg或jpeg 结尾的请求
+
+# 然而，所有请求 /images/ 下的图片会被 config D 处理，因为 ^~ 到达不了这一条正则
+
+[ configuration E ]
+
+}
+
+location /images/ {
+
+# 字符匹配到 /images/，继续往下，会发现 ^~ 存在
+
+[ configuration F ]
+
+}
+
+location /images/abc {
+
+# 最长字符匹配到 /images/abc，继续往下，会发现 ^~ 存在
+
+# F与G的放置顺序是没有关系的
+
+[ configuration G ]
+
+}
+
+location ~ /images/abc/ {
+
+# 只有去掉 config D 才有效：先最长匹配 config G 开头的地址，继续往下搜索，匹配到这一条正则，采用
+
+[ configuration H ]
+1
+}
+
+location ~* /js/.*/.js
+
+顺序 no优先级：
+
+(location =) > (location 完整路径) > (location ^~ 路径) > (location ~,~* 正则顺序) > (location 部分起始路径) > (/)
+
+上面的匹配结果
+
+按照上面的location写法，以下的匹配示例成立：
+
+/ -> config A
+
+精确完全匹配，即使/index.html也匹配不了
+
+/downloads/download.html -> config B
+
+匹配B以后，往下没有任何匹配，采用B
+
+/images/1.gif -> configuration D
+
+匹配到F，往下匹配到D，停止往下
+
+/images/abc/def -> config D
+
+最长匹配到G，往下匹配D，停止往下
+
+你可以看到 任何以/images/开头的都会匹配到D并停止，FG写在这里是没有任何意义的，H是永远轮不到的，这里只是为了说明匹配顺序
+
+/documents/document.html -> config C
+
+匹配到C，往下没有任何匹配，采用C
+
+/documents/1.jpg -> configuration E
+
+匹配到C，往下正则匹配到E
+
+/documents/Abc.jpg -> config CC
+
+最长匹配到C，往下正则顺序匹配到CC，不会往下到E
+
+2.实际使用建议
+所以实际使用中，个人觉得至少有三个匹配规则定义，如下：
+
+直接匹配网站根，通过域名访问网站首页比较频繁，使用这个会加速处理，官网如是说。
+
+这里是直接转发给后端应用服务器了，也可以是一个静态首页
+
+2.1 第一个必选规则
+location = / {
+
+proxy_pass http://tomcat:8080/index
+1
+}
+
+2.2 第二个必选规则
+是处理静态文件请求，这是nginx作为http服务器的强项
+有两种配置模式，目录匹配或后缀匹配,任选其一或搭配使用
+
+location ^~ /static/ {
+
+root /webroot/static/;
+1
+}
+
+location ~* .(gif|jpg|jpeg|png|css|js|ico)$ {
+
+root /webroot/res/;
+1
+}
+
+2.3第三个规则就是通用规则，
+用来转发动态请求到后端应用服务器
+非静态文件请求就默认是动态请求，自己根据实际把握
+
+location / {
+
+proxy_pass http://tomcat:8080/
+1
+}
+
+# nginx重定向的IF条件判断
+在server和location两种情况下可以使用nginx的IF条件判断，条件可以为以下几种：
+正则表达式
+
+如：
+匹配判断
+~  为区分大小写匹配; !~为区分大小写不匹配
+ ~* 为不区分大小写匹配；!~为不区分大小写不匹配
+例如下面设定nginx在用户使用ie的使用重定向到/nginx-ie目录下：
+if ($http_user_agent ~ MSIE) {
+    rewrite ^(.*)$ /nginx-ie/$1 break;
+}
+文件和目录判断
+  -f和!-f判断是否存在文件
+ -d和!-d判断是否存在目录
+ -e和!-e判断是否存在文件或目录
+ -x和!-x判断文件是否可执行
+例如下面设定nginx在文件和目录不存在的时候重定向：
+if (!-e $request_filename) {
+    proxy_pass http://127.0.0.1/;
+}
+
+return
+返回http代码，例如设置nginx防盗链：
+location ~* \.(gif|jpg|png|swf|flv)$ {
+        valid_referers none blocked http://www.jefflei.com/ http://www.leizhenfang.com/;
+        if ($invalid_referer) {
+            return 404;
+        }
+}
+
+location = / {
+        if ($http_host ~ news\.c1gstudio.com$) {
+            rewrite ^.+ http://news.c1gstudio.com/forum-831-1.html last;
+            break;
+        }
+}
+
+301重定向方法
+
+进行了301重定向，把www .jefflei.com和jefflei.com合并，并把之前的域名也一并合并. 有两种实现方法,第一种方法是判断nginx核心变量host(老版本是http_host)：
+server {
+server_name www.jefflei.com jefflei.com ;
+if ($host != 'www.jefflei.com' ) {
+rewrite ^/(.*)$ http://www.jefflei.com/$1 permanent;
+}
+...
+}
