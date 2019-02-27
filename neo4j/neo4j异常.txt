@@ -75,3 +75,8 @@ CALL dbms.listConfig("heap");
 
 --env=NEO4J_dbms_memory_heap_initial__size=512m
 --env=NEO4J_dbms_memory_heap_max__size=2G
+
+# 同一个镜像在其他机器上运行正常，而在某台机器上运行报错：
+2019-02-27 04:21:51.565+0000 ERROR Failed to start Neo4j: Starting Neo4j failed: Component 'org.neo4j.server.database.LifecycleManagingDatabase@5733f295' was successfully initialized, but failed to start. Please see the attached cause exception "/data/databases/graph.db/neostore.relationshiptypestore.db (Too many open files in system)". 
+临时方案：可能是该机器人开的docker容器太多了，关闭一些不常用的docker容器就可以解决。
+
