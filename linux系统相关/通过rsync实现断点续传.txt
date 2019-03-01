@@ -1,0 +1,88 @@
+
+scp和rsync对比：scp节约资源，系统负荷小，但断点续传是个问题；rsync速度更快，断点续传方便，但系统负荷大，尤其是传输很多文件的时候，硬盘I/O非常高。
+
+ 
+
+scp
+
+scp [OPTION] SRC DEST
+
+常用参数：
+
+-r：递归拷贝目录
+
+-q：不显示进度
+
+-l：限制传输带宽，单位是kbits/s
+
+例如：
+
+scp -r -l 200 /home/user/exampledir user@192.168.XXX.XXX:/home/user/
+
+rsync
+
+rsync [OPTION] SRC DEST
+
+常用参数：
+
+--progress： 显示拷贝进度
+
+--partial：保留不完整文件，实现断点续传
+
+--partial-dir=DIR：指定不完整文件的存储目录，而不是默认存储到目的地目录。
+
+-P：包含--progress和--partial
+
+--rsh=ssh：使用ssh方式传输文件，注意：如果之前设置过ssh免密码登录，那么此时也就不需要密码了，非常方便
+
+-v：显示详细信息
+
+-a：归档模式。也就是以递归方式传输文件，并保持所有文件属性。
+
+-r：递归方式传输文件
+
+ 
+
+断点续传：
+
+所以，只要我们使用下面的命令传输数据，在断开重连后，再输入同样的命令就可以实现断点续传了：
+
+rsync -P --rsh=ssh yliu@192.168.200.2:/home/yliu/test.mp4 /root
+ 
+
+
+
+命令如下：
+
+rsync -P --rsh=ssh home.tar 192.168.0.34:/home/home.tar
+
+-P: 是包含了 “–partial –progress”， 部分传送和显示进度
+
+-rsh=ssh 表示使用ssh协议传送数据
+
+如果不想每次都使用 rsync -P rsh=ssh 之类的，可以写成alias scpr="rsync -P --rsh=ssh"
+
+那么下次就可以直接使用 scpr home.tar 192.168.0.34:/home/home.tar 来拷贝数据了。
+
+在传输过程中，目标文件会以.home.tar.xxxx文件也隐藏，可以用la -a来显示出来。如果scpr中断了，那么该文件会变成用户指定的目标文件"home.tar",下次传的时候又会改成.home.tar.xxxx文件。
+
+执行rsync过程中，我们肯定希望把这个job放入后台执行，而不因为secureCRT类似的窗口中断受影响，那么在执行了
+
+rsync -P --rsh=ssh home.tar 192.168.0.34:/home/home.tar， 再输出密码后，可以用ctrl+z 来中断，再使用bg命令让它在后台执行。
+
+
+后台执行：
+~$ rsync -P --rsh='ssh -p 8833' /data/abc.sql root@192.168.6.25:/mydata/
+为防止putty工具再次中断，把命令放入后台执行，如下
+
+ctrl+Z暂停执行
+
+jobs：查看当前运行的程序
+~$ jobs
+
+bg $1：设置程序后台执行
+~$ bg $1
+
+fg $1：设置程序前台执行
+~$ fg $1
+
