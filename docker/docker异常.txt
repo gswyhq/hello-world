@@ -263,3 +263,11 @@ Error response from daemon: conflict: unable to delete 6ec9a5a0fc9f (cannot be f
 docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=xxxxxx)
 其中 xxxxxx 是报错 image 的 id，在文章开头的例子中就是 6ec9a5a0fc9f。从列表中查找到之后就可以核对并删除这些 image。
 
+问题： 
+yhq@ubuntu-GPU:~/hqrs_poc$ docker-compose -f docker-compose.yml up -d
+Creating network "hqrs_poc_mynet" with driver "bridge"
+ERROR: could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network
+原因：网络不能超过30个；
+ docker network ls | wc -l 不能超过30 个
+可以通过 docker network rm esservice_mynet 来删除无用网络（这里是删除网络 esservice_mynet）
+

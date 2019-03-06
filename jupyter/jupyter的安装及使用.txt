@@ -1,0 +1,70 @@
+方法一：
+安装jupyter notebook
+首先使用
+
+pip3 install jupyter
+安装jupyter notebook。
+
+2、在ipynb所在的目录打开jupyter notebook
+3、 远程访问
+启动的时候加上ip和端口
+jupyter notebook --ip 0.0.0.0 --port 9999
+
+4、设置密码：
+检查是否存在配置文件jupyter_notebook_config.py，这个文件的默认位置时在你的主目录下Jupyter文件夹中：
+
+Windows: C:\Users\USERNAME\.jupyter\jupyter_notebook_config.py
+OS X: /Users/USERNAME/.jupyter/jupyter_notebook_config.py
+Linux: /home/USERNAME/.jupyter/jupyter_notebook_config.py
+
+如果Jupyter文件夹不存在，或者文件夹存在然而目录内没有配置文件，运行以下命令：
+$ jupyter notebook --generate-config
+
+这个命令会创建Jupyter文件夹
+gswyhq@gswyhq-PC:~/github_projects/deep-learning-with-python-notebooks$ jupyter notebook --generate-config
+Writing default config to: /home/gswyhq/.jupyter/jupyter_notebook_config.py
+gswyhq@gswyhq-PC:~/github_projects/deep-learning-with-python-notebooks$ jupyter notebook password
+Enter password: 
+Verify password: 
+[NotebookPasswordApp] Wrote hashed password to /home/gswyhq/.jupyter/jupyter_notebook_config.json
+gswyhq@gswyhq-PC:~/github_projects/deep-learning-with-python-notebooks$ jupyter notebook --ip 0.0.0.0 --port 9999 
+[I 08:59:50.519 NotebookApp] 启动notebooks 在本地路径: /home/gswyhq/github_projects/deep-learning-with-python-notebooks
+[I 08:59:50.519 NotebookApp] 本程序运行在: http://(gswyhq-PC or 127.0.0.1):9999/
+[I 08:59:50.519 NotebookApp] 使用control-c停止此服务器并关闭所有内核(两次跳过确认).
+
+
+
+
+方法二：
+安装：
+gswewf@gswewf-pc:~$ sudo pip3 install pyzmq
+gswewf@gswewf-pc:~$ sudo pip3 install jinja2
+gswewf@gswewf-pc:~$ sudo pip3 install jsonschema
+gswewf@gswewf-pc:~$ sudo pip3 install jupyter
+
+命令行打开：gswewf@gswewf-pc:~$ ipython notebook
+
+或浏览器打开：http://localhost:8888/tree
+
+或者：
+yhq@ubuntu-GPU:~$ docker run -it --rm -v $PWD/notebooks:/tf/notebooks -p 8888:8888 tensorflow/tensorflow:nightly-py3-jupyter
+
+    To access the notebook, open this file in a browser:
+        file:///root/.local/share/jupyter/runtime/nbserver-9-open.html
+    Or copy and paste one of these URLs:
+        http://(f10a7f5fd894 or 127.0.0.1):8888/?token=1e70329d9711e5dfd5c04250d6bf01eadb601904802423f3
+
+浏览器打开：
+http://192.168.3.132:8888/?token=1e70329d9711e5dfd5c04250d6bf01eadb601904802423f3
+
+或者通过守护进程启动：
+gswyhq@gswyhq-PC:~$ docker run -d --name=jupyter -p 8888:8888 tensorflow/tensorflow:nightly-py3-jupyter
+# 进入容器，设置密码：
+gswyhq@gswyhq-PC:~$ docker exec -it jupyter /bin/bash
+root@9bf94f991c8b:/tf# jupyter notebook password
+Enter password:
+Verify password:
+[NotebookPasswordApp] Wrote hashed password to /root/.jupyter/jupyter_notebook_config.json
+# 重启容器：
+gswyhq@gswyhq-PC:~$ docker restart jupyter
+

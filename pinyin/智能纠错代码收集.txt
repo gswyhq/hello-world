@@ -1,0 +1,19 @@
+1:"我想买哥苹果手机" "对京东新人度大打折扣" 原语句:我想买哥苹果手机 纠正句:我想买个苹果手机 原语句:对京东新人度大打折扣 纠正句:对京东信任度大打折扣
+https://github.com/taozhijiang/chinese_correct_wsd.git
+
+2:咳数->咳嗽 呕土->呕吐
+https://github.com/PengheLiu/Cn_Speck_Checker.git
+
+3：米月传->芈月传
+https://github.com/liuhuanyong/QueryCorrection.git
+
+4:呕涂 呕吐
+东方之朱 东方之珠
+沙拢 沙龙
+机七 机器
+领遇 领域
+分知 分枝
+https://github.com/beyondacm/Autochecker4Chinese.git
+
+
+

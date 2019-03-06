@@ -1,0 +1,20 @@
+
+1、安装jupyter notebook
+首先使用
+
+pip3 install jupyter
+安装jupyter notebook。
+
+2、在ipynb所在的目录打开jupyter notebook 
+只需要在ipynb文件所在目录终端输入：~/$ jupyter notebook
+
+3、在浏览器打开的jupyter即可打开并使用ipynb文件，
+
+File=》Download as =》Python（.py）即可把ipynb文件转化为py文件
+
+# 远程访问 
+启动的时候加上ip和端口 
+jupyter notebook --ip 0.0.0.0 --port 9999
+
+
+
