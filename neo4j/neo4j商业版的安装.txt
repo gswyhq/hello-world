@@ -1,0 +1,13 @@
+
+docker build -t neo4j_enterprise:3.5.2 -f Dockerfile .
+
+docker run --rm -p 7474:7474 -p 7687:7687 --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j_enterprise:3.5.2
+
+Dockerfile: https://github.com/neo4j/docker-neo4j-publish/blob/master/3.5.2/enterprise/Dockerfile
+
+-ARG NEO4J_URI=http://dist.neo4j.org/neo4j-enterprise-3.5.2-unix.tar.gz
+
+若上面的下载太慢可以使用下面的地址:
+
++ARG NEO4J_URI=https://neo4j.com/artifact.php?name=neo4j-enterprise-3.5.2-unix.tar.gz
+

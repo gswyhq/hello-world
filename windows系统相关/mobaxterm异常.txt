@@ -7,7 +7,7 @@ mobaxterm bash: git: command not found, mobaxterm安装好了之后在windows下
 
 Settings -> Configuration -> Terminal -> Use Windows PATH environment
 
-[xiaomeijuan.sara] ? git branch
+[xmj.sara] ? git branch
 /bin/busybox.exe less -R: /bin/busybox.exe: No such file or directory
 解决方法是安装Git插件
 在mobaxterm图形界面上点击packages，查找git进行安装。

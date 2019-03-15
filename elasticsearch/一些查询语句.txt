@@ -469,3 +469,30 @@ curl -X GET "localhost:9200/my_index/address/_search" -H 'Content-Type: applicat
   }
 }
 
+# 一次发送多个不同的查询请求：
+curl -XGET "192.168.3.105:9200/twitter/_msearch" -H 'Content-Type: application/json' -d'
+{"index":"hqrs_kg_entity_synonyms_20190308_011748"}
+{"query" : {"match_all" : {}}, "from" : 0, "size" : 1}
+{"index":"all_baoxian_faq_20180815_150702"}
+{"query" : {"match_all" : {}}, "size":1}
+{"index" : "all_baoxian_faq_20180815_150702", "_id": "AWU8aMI31TlmcUmAotLo"}
+{"query" : {"match_all" : {}}}
+'
+
+# 模糊查询：
+{"aggs": {},
+ "from": 0,
+ "query": {"bool": {"must": [],
+   "must_not": [],
+   "should": [{"fuzzy": {"实体标准词.keyword": {"fuzziness": "auto",
+       "value": "美好如意"}}},
+    {"fuzzy": {"实体同义词.keyword": {"fuzziness": "auto", "value": "美好如意"}}}]}},
+ "size": 10,
+ "sort": []}
+
+# 通过fuzziness， 设置编辑距离，如果设置Auto，那么会根据字符串的长度而改变
+# 比如，长度为:
+# 0..2，必须完全匹配
+# 3..5，可以有一个编辑距离的模糊度
+# >5，可以有两个编辑距离的模糊度
+

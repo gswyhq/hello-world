@@ -1,0 +1,10 @@
+
+root@1b0aa1cfbe93:/chat_bot$ pip3 install python-Levenshtein
+报错：
+  /usr/local/include/python3.5m/Python.h:11:20: fatal error: limits.h: No such file or directory
+   #include <limits.h>
+                      ^
+解决方案：
+apk add musl-dev
+
+
