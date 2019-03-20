@@ -377,4 +377,30 @@ print hashVal
 #Empty db
 client.flushdb()
 
+# 聚群的连接，方式一
+import redis
+        # 注释掉单机redis连接
+        # self.rc = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=False)
+
+        # 改为：
+        self.pool = redis.ConnectionPool(host=REDIS_HOST, port=int(REDIS_PORT), password=REDIS_PASSWORD,
+                                    db=int(REDIS_DB), decode_responses=False)
+        self.rc = redis.Redis(connection_pool=self.pool)
+
+# redis聚群的连接，方式二：
+pip3 install redis-py-cluster
+
+from rediscluster import StrictRedisCluster
+redis_nodes =  [{'host': '10.10.10.124','port':7000,'password':'ps1'},
+                    {'host': '10.10.10.124', 'port': 7001, 'password': 'ps1'},
+                    {'host': '10.10.10.124', 'port': 7002, 'password': 'ps1'},
+                    {'host': '10.10.10.125','port':7003, 'password': 'ps2'},
+                    {'host': '10.10.10.125', 'port': 7004, 'password': 'ps2'},
+                    {'host': '10.10.10.125', 'port': 7005, 'password': 'ps2'},
+                   ]
+    
+redisconn = StrictRedisCluster(startup_nodes=redis_nodes)
+如果没有密码，则去掉'password': 'ps2'这一部分即可
+{'host': '10.10.10.125', 'port': 7005},
+
 
