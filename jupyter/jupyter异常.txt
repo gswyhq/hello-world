@@ -1,0 +1,11 @@
+
+问题：
+    from jupyter_core.utils import ensure_dir_exists
+ImportError: cannot import name 'ensure_dir_exists'
+解决方法：
+gswyhq@gswyhq-pc:~$ sudo pip3 install -U jupyter_core jupyter_client
+
+问题：
+ImportError: No module named 'nbconvert.exporters.base'
+解决方法：
+gswyhq@gswyhq-pc:~$ sudo pip3 install -U nbconvert
