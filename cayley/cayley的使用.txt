@@ -1,0 +1,5 @@
+
+https://github.com/cayleygraph/cayley.git
+
+docker run -p 64210:64210 quay.io/cayleygraph/cayley --init -i /data/my_data.nq
+

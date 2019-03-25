@@ -53,3 +53,11 @@ fatal: 拒绝合并无关的历史
 解决方案：
 在pull 时候, 添加–allow-unrelated-histories参数 即可.
 $ git pull origin master --allow-unrelated-histories
+
+有时候push报错：
+gswyhq@gswyhq-PC:~/github_projects/kompose$ git push origin master 
+fatal: Out of memory, malloc failed (tried to allocate 524288000 bytes)
+fatal: The remote end hung up unexpectedly
+主要原因是本机内存不足，引起；
+解决方法：关闭不用的应用，释放对应的内容占用，再重新push即可。
+
