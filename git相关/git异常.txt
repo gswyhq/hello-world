@@ -61,3 +61,15 @@ fatal: The remote end hung up unexpectedly
 主要原因是本机内存不足，引起；
 解决方法：关闭不用的应用，释放对应的内容占用，再重新push即可。
 
+pip3 install git+https://... 时出现：
+fatal: 配置变量 'http.postbuffer' 的数字取值 '5242880000' 设置错误: out of range
+解决方案：
+查找哪里的git配置设置错误：
+gswyhq@gswyhq-pc:~$ git config http.postBuffer 
+524288000
+gswyhq@gswyhq-pc:~$ sudo git config http.postBuffer 
+5242880000
+这个时候，说明sudo用户的配置错误：
+解决方案：
+gswyhq@gswyhq-pc:~$ sudo git config --global  http.postBuffer 524288000
+
