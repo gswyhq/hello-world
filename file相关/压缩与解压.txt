@@ -219,6 +219,21 @@ tar –xZvf file.tar.Z   //解压tar.Z
 unrar e file.rar //解压rar
 unzip file.zip //解压zip
 
+bzip2
+　　bzip2是采用更好压缩算法的压缩程序，一般可以提供较之gzip更好的压缩效果。其具有与gzip相似的指令选项，压缩产生 .bz2 后缀的压缩文件。
+　　bzip2的常用指令选项如下：
+　　基础格式: bzip2 [Options] file1 file2 file3
+　　指令选项：(默认功能为压缩)
+　　-c　　　　　　　//将输出写至标准输出
+　　-d　　　　　　　//进行解压操作
+　　-v　　　　　　　//输出压缩/解压的文件名和压缩比等信息
+　　-k　　　　　　　//在压缩/解压过程中保留原文件
+　　-digit　　　　 //digit部分为数字(1-9)，代表压缩速度，digit越小，则压缩速度越快，但压缩效果越差，digit越大，则压缩速度越慢，压缩效果越好。默认为6.
+　　　　bzip2 exp1.txt exp2.txt　　　　   //分别将exp1.txt和exp2.txt压缩，且不保留原文件。
+　　　　bzip2 -dv exp1.bz2　　　　　　 //将exp1.bz2解压，并显示压缩比等信息。
+　　　　bzip2 -kd exp1.bz2 　　　　　　  //将exp1.bz2解压，并且原压缩文件exp1.bz2不会消失
+　　注：对应于 bzip2，可以使用 bunzip2 进行解压操作，效果类似bunzip2 -d xx，同时可以使用bzcat读取压缩文件的内容并显示在标准输出，功能类似于 bzip2 -c xx.
+
 总结
 1、*.tar 用 tar –xvf 解压
 2、*.gz 用 gzip -d或者gunzip 解压
