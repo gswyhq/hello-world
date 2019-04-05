@@ -271,3 +271,36 @@ ERROR: could not find an available, non-overlapping IPv4 address pool among the 
  docker network ls | wc -l 不能超过30 个
 可以通过 docker network rm esservice_mynet 来删除无用网络（这里是删除网络 esservice_mynet）
 
+# 宿主机的目录挂载到了docker容器内，在容器内修改了，在宿主机上无权限修改：
+zhang@ubuntu-GPU:~/bi-lstm-crf$ head nohup.out
+head: cannot open 'nohup.out' for reading: Permission denied
+zhang@ubuntu-GPU:~/bi-lstm-crf$ ls -al
+total 3468504
+drwxrwxr-x 12 zhang  zhang     2117632 Apr  3 09:04 .
+drwxr-xr-x 15 zhang  zhang        4096 Apr  1 09:07 ..
+-rw-r--r--  1 root root  302717562 Apr  2 21:26 2014_processed
+-rw-r--r--  1 root root  813491744 Apr  2 21:30 2014_processed.h5
+-rw-------  1 root root      26575 Apr  3 09:04 nohup.out
+解决方法：
+1、在宿主机挂载目录中新建一个临时文件。
+zhang@ubuntu-GPU:~/bi-lstm-crf$ vim abcd.txt
+2、进入容器，查看新建临时文件的用户及组；
+zhang@ubuntu-GPU:~/bi-lstm-crf$ docker exec -it my_bi_lstm_crf /bin/bash
+root@ca2a9588f057:/bi-lstm-crf$ ls -al
+total 3468508
+drwxrwxr-x 12 zhang  1009    2117632 Apr  3 01:16 .
+drwxr-xr-x  1 root root       4096 Apr  2 13:22 ..
+-rw-rw-r--  1 1009 1009          4 Apr  3 01:16 abcd.txt
+3、在容器内修改用户及组
+root@ca2a9588f057:/bi-lstm-crf$ chown -R 1009:1009 /bi-lstm-crf
+4、退出容器，查看宿主机上的用户及组：
+root@ca2a9588f057:/bi-lstm-crf$ exit
+zhang@ubuntu-GPU:~/bi-lstm-crf$ ls -al
+total 3468508
+drwxrwxr-x 12 zhang zhang    2117632 Apr  3 09:16 .
+drwxr-xr-x 15 zhang zhang       4096 Apr  1 09:07 ..
+-rw-r--r--  1 zhang zhang  302717562 Apr  2 21:26 2014_processed
+-rw-r--r--  1 zhang zhang  813491744 Apr  2 21:30 2014_processed.h5
+-rw-rw-r--  1 zhang zhang          4 Apr  3 09:16 abcd.txt
+-rw-------  1 zhang zhang      26575 Apr  3 09:04 nohup.out
+

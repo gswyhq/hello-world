@@ -1,5 +1,5 @@
 
-neo4j-shell已被弃用，并被cyphell-shell替代。
+neo4j-shell已被弃用，并被cypher-shell替代。
 
 # 启动一个neo4j容器
 gswewf@gswewf-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  --name=movie7475 --publish=7475:7474 --publish=7688:7687    --volume=$PWD/data:/data  neo4j
@@ -60,7 +60,7 @@ gswewf@gswewf-pc:~/docker/neo4j/movie$
 启动对应的neo4j服务后，进入neo4j安装目录，连接上对应的数据路径：
 gswewf@gswewf-pc:/usr/local/neo4j-community-3.1.1$ ./bin/neo4j-shell -path /home/gswewf/docker/neo4j/movie_graph/data
 
-neo4j-shell已被弃用，并被cyphell-shell替代。
+neo4j-shell已被弃用，并被cypher-shell替代。
 
 # 创建一个节点数据：
 neo4j-sh (?)$ CREATE (:Movie { title:"The Matrix",released:1997 }) ;

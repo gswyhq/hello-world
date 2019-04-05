@@ -1,0 +1,40 @@
+
+kompose
+kompose是一个可以在kubernetes运行docker-compose.yml的工具，也可以将docker-compose.yml转换为kubernetes的相应文件，非常便利。
+
+安装
+# Linux
+curl -L https://github.com/kubernetes/kompose/releases/download/v1.18.0/kompose-linux-amd64 -o kompose
+
+chmod +x kompose
+sudo mv ./kompose /usr/local/bin/kompose
+
+转换
+在要转换的docker-compose.yml文件夹目录下执行
+
+kompose convert
+大功告成
+
+如果不想转换，也可以直接运行
+
+kompose up
+
+或者制作一个docker镜像，供以后使用：
+docker build -t gswyhq/kompose -f Dockerfile .
+docker run -it --rm -v $PWD:/tmp gswyhq/kompose kompose convert -f /tmp/docker-compose.yaml
+
+运行完成后，会在本地生成下面三个文件：
+neo4j-claim0-persistentvolumeclaim.yaml  neo4j-deployment.yaml  neo4j-service.yaml
+
+可能需要修改添加下面内容等：
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: neo4j
+
+deployment.yaml,neo4j-service.yaml 也可以合并在一个文件，通过内容为‘---’的行进行合并。
+
+

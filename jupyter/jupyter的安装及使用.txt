@@ -8,7 +8,8 @@ pip3 install jupyter
 2、在ipynb所在的目录打开jupyter notebook
 3、 远程访问
 启动的时候加上ip和端口
-jupyter notebook --ip 0.0.0.0 --port 9999
+jupyter notebook --ip 0.0.0.0 --port 9999 
+或者：jupyter notebook --ip 0.0.0.0 --port 9999 --allow-root
 
 4、设置密码：
 检查是否存在配置文件jupyter_notebook_config.py，这个文件的默认位置时在你的主目录下Jupyter文件夹中：

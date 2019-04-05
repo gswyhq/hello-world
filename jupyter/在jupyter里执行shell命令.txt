@@ -1,0 +1,7 @@
+
+在jupyter里执行shell命令
+在 jupyter Code Cell中只能执行ls 、pwd 等简单命令。当需要执行tar 或者稍微负责命令时就报错了
+解决方案：
+只要在 shell 命令前加 ! 即可，如：
+!tar -zxvf sp.tgz
+
