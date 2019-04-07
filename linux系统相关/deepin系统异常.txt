@@ -1,0 +1,7 @@
+
+深度商店：
+Failed to load URL rcc://web/index.html with error ERR_FAILED (-2).
+解决方法：
+gswyhq@gswyhq-pc:~$ sudo apt-get install deepin-appstore deepin-appstore-data --reinstall
+
+
