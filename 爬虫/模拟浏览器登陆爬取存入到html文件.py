@@ -9,7 +9,10 @@ import re
 import os
 import time
 from urllib import parse
-
+# from multiprocessing import Pool
+from bs4 import BeautifulSoup
+from multiprocessing.dummy import Pool as ThreadPool
+from zhconv import convert
 
 with open('/home/gswyhq/下载/爬取的网址信息.json', 'r')as f:
     ts3 = json.load(f)
@@ -69,9 +72,28 @@ def save_html_to_file(title, url):
 # my_headers = ["Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36"]
 # print(getContent(url, my_headers))
 
-def main():
-    [save_html_to_file(title, url) for url, title in ts3]
+def html_to_txt(title):
+    """将下载的html文件转换为txt"""
+    html_file = os.path.join(PATH, "{}.html".format(title))
+    save_file = os.path.join(PATH, "txt/{}.txt".format(title))
+    with open(html_file)as f:
+        content = f.read()
+    soup = BeautifulSoup(content, "lxml")
+    with open(save_file, 'w', encoding='utf-8')as f:
+        for text in soup.find_all('div', id='content'):
+            for t in text.strings:
+                t = convert(t.strip(), 'zh-cn') # 繁体转简体
+                print(t, file=f)
 
+def save_html_to_file_job1(z):
+    # pool.map不能处理多参数；只能通过对有多个参数的方法进行封装
+    return save_html_to_file(z[0], z[1])
+
+def main():
+    # [save_html_to_file(title, url) for url, title in ts3]
+    # with ThreadPool() as pool:
+    #     pool.map(save_html_to_file_job1, [(title, url) for url, title in ts3])
+    [html_to_txt(title) for url, title in ts3]
 
 if __name__ == '__main__':
     main()
