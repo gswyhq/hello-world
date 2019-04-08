@@ -84,3 +84,5 @@ gswewf@gswewf-pc:~$ docker inspect ubuntu-yhb
 # 拉取指定镜像：
 docker pull 899150993273.dkr.ecr.cn-north-1.amazonaws.com.cn/nlp@sha256:9dd2acf3e3f0e1763ec0d91c6cdcb260162e62e460a151d47b647b4150da2ed1
 
+# 进入docker 使用root用户的方式
+$ docker run --rm -it --user root rhel7.4-base:0.2 /bin/bash
