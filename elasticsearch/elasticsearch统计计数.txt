@@ -1,0 +1,79 @@
+
+
+
+# 按某个字段进行统计文档数
+{
+  "query": {
+    "range": {
+      "create_time": {
+        "gte": "2018-07-05T14",
+        "lt": "2019-04-09T15:00:00"
+      }
+    }
+  },
+  "aggs": {
+    "my_terms": {
+      "terms": {
+        "field": "chanpin_name.keyword",
+        "size": 1000000
+      }
+    }
+  },
+  "size": 0
+}
+
+# 统计某个字段各自的文档数及总的文档数据：
+{
+  "query": {
+    "range": {
+      "create_time": {
+        "gte": "2018-07-05T14",
+        "lt": "2019-04-09T15:00:00"
+      }
+    }
+  },
+  "aggs": {
+    "my_terms": {
+      "terms": {
+        "field": "chanpin_name.keyword",
+        "size": 1000000
+      }
+    },
+    "sum_value": {
+      "sum": {
+        "field": "count"
+      }
+    }
+  },
+  "size": 0
+}
+
+查询某段时间内，每个产品的各自的记录数及count字段的求和
+{
+  "query": {
+    "range": {
+      "create_time": {
+        "gte": "2018-07-05T14",
+        "lt": "2019-04-09T19:00:00"
+      }
+    }
+  },
+  "aggs": {
+    "chanpin_count": {
+      "terms": {
+        "field": "chanpin_name.keyword",
+        "size": 1000000
+      },
+      "aggs": {
+        "chanpin_sum": {
+          "sum": {
+            "field": "count"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+
+

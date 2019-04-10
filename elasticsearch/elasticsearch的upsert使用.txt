@@ -1,0 +1,58 @@
+
+upsert: 
+如果指定的document不存在，就执行upsert中的初始化操作； 
+如果指定的document存在，就执行doc或者script指定的partial update操作 
+也就是说两种操作只能2选一
+
+POST /test_index/test_type/11/_update
+{
+   "script" : "ctx._source.num+=1",
+   "upsert": {
+       "num": 0,
+       "tags": []
+   }
+}
+
+在bulk中upsert操作，事实上，只需要加上如下参数就可以了
+
+"doc_as_upsert" : true 
+这样，使用python脚本时参数如下所示：
+
+t = {'_index': INDEX_NAME, '_type': doc_type, '_id': doc['id'], '_op_type': 'update',
+     'doc': doc['doc'],'doc_as_upsert' : True}
+注意此时使用doc应该是文档的全体哦！
+
+
+    datas = []
+    url = "http://{}:{}/_bulk".format(ES_HOST, ES_PORT)
+    _index = "{}_{}_alias".format(pid.lower(), ES_STATISTICAL_COUNT_INDEX)
+    _type = ES_STATISTICAL_COUNT_TYPE
+    now = datetime.now()
+    # now.strftime("%Y-%m-%d %H:%S:%M")
+    timestamp = now.isoformat()
+    _id = "{}{}".format(get_pinyin(current_chanpin_name), now.strftime("%Y%m%d%H"))
+    now_hour = now.replace(minute=0, second=0, microsecond=0)  # 最小统计单位为小时
+    create_time = now_hour.isoformat()
+
+    datas.append(
+        json.dumps({"update": {"_index": _index, "_type": _type, "_id": _id}}, ensure_ascii=False) + '\n')
+    datas.append(json.dumps({ "script" :
+                                  { "source": 'ctx._source.count += params.param1;ctx._source.chanpin_name = params.chanpin_name;ctx._source.timestamp=params.timestamp; ctx._source.create_time=params.create_time',
+                                    "lang" : "painless",
+                                    "params" : {"param1" : 1,
+                                                "chanpin_name": current_chanpin_name,
+                                                "timestamp": timestamp,
+                                                "create_time": create_time}},
+                              "upsert" : {"count" : 1,
+                                        "chanpin_name": current_chanpin_name,
+                                        "timestamp": timestamp,
+                                        "create_time": create_time}
+                              }, ensure_ascii=False) + '\n')
+
+    if datas:
+        datas_str = ''.join(datas)
+        r = requests.post(url, headers={"Content-Type": 'application/json'}, data=datas_str.encode('utf-8'))
+        print(r.json())
+        logger.info('更新`{}`产品咨询量的结果： {}'.format(url, r.json().get('errors', True) == False))
+
+

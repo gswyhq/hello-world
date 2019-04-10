@@ -1,0 +1,13 @@
+
+1,下载python包但本地文件
+gswyhq@gswyhq-PC:~/hello-world/centos$ pip3 download tensorflow==1.5.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com -d /home/gswyhq/Downloads/pack
+在`/home/gswyhq/Downloads/pack`目录下可以看到下载到本地的文件：
+gswyhq@gswyhq-PC:~/Downloads/pack$ ls
+absl-py-0.7.1.tar.gz               Markdown-3.1-py2.py3-none-any.whl                setuptools-41.0.0-py2.py3-none-any.whl             tensorflow_tensorboard-1.5.1-py3-none-any.whl
+bleach-1.5.0-py2.py3-none-any.whl  numpy-1.16.2-cp36-cp36m-manylinux1_x86_64.whl    six-1.12.0-py2.py3-none-any.whl                    Werkzeug-0.15.2-py2.py3-none-any.whl
+html5lib-0.9999999.tar.gz          protobuf-3.7.1-cp36-cp36m-manylinux1_x86_64.whl  tensorflow-1.5.0-cp36-cp36m-manylinux1_x86_64.whl  wheel-0.33.1-py2.py3-none-any.whl
+
+2, 指定本地路径进行安装：
+pip3 install --no-index --find-links="/home/gswyhq/Downloads/pack" tensorflow==1.5.0
+
+

@@ -1,0 +1,15 @@
+
+1,下载：
+[root@e4f8d3e4daa6 ~]# yum install --downloadonly --downloaddir=/tmp createrepo deltarpm python-deltarpm
+[root@e4f8d3e4daa6 ~]# yum install --downloadonly --downloaddir=/tmp vim
+
+2,通过本地的RPM文件安装：
+[root@e4f8d3e4daa6 ~]# rpm -ivh /tmp/deltarpm-3.6-3.el7.x86_64.rpm 
+[root@e4f8d3e4daa6 ~]# rpm -ivh /tmp/python-deltarpm-3.6-3.el7.x86_64.rpm 
+[root@e4f8d3e4daa6 ~]# rpm -ivh /tmp/createrepo-0.9.9-28.el7.noarch.rpm   
+# 搭建自己的yum仓库
+[root@e4f8d3e4daa6 ~]# createrepo -v /tmp
+[root@e4f8d3e4daa6 ~]# rpm --rebuilddb && yum install -y vim 
+[root@e4f8d3e4daa6 ~]# vim abcd.txt
+
+

@@ -1,0 +1,19 @@
+FROM centos:7.4.1708
+
+ENV LANG C.UTF-8
+
+RUN yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make
+
+RUN yum install -y wget && wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tar.xz
+
+# 解压编译，安装python3
+RUN tar -xvJf Python-3.6.8.tar.xz && cd Python-3.6.8 && ./configure prefix=/usr/local/python3 && make && make install
+
+RUN ln -s /usr/local/python3/bin/python3 /usr/bin/python3 && ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
+
+# 通过pip安装tensorflow
+RUN pip3 install tensorflow==1.5.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+CMD ["/bin/bash"]
+
+# docker build -t my_tensorflow -f Dockerfile .
