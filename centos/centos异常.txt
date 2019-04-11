@@ -1,0 +1,12 @@
+pip3 install python-Levenshtein==0.12.0
+报错：
+    Levenshtein/_levenshtein.c:99:20: fatal error: Python.h: No such file or directory
+     #include <Python.h>
+                        ^
+    compilation terminated.
+    error: command 'gcc' failed with exit status 1
+解决方案:
+yum install python36-devel
+python-dev的包在centos的yum中不叫python-dev，而是python-devel.
+ubuntu等系统该命令是：apt-get install python3-dev
+

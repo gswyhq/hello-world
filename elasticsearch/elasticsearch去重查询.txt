@@ -1,0 +1,50 @@
+
+# 去重查询，若id字段的值一样，则仅仅取一个；
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "terms": {
+            "question.keyword": [
+              "售后指引（纸质保单和发票、批改、退保）",
+              "定制家庭方案、疾病核保推荐、管理家庭保单请找我"
+            ]
+          }
+        }
+      ],
+      "must_not": [],
+      "must": []
+    }
+  },
+  "from": 0,
+  "size": 0,
+  "sort": [],
+  "aggs": {
+    "id_aggs": {
+      "terms": {
+        "field": "id.keyword",
+        "size": 200
+      },
+      "aggs": {
+        "id_top": {
+          "top_hits": {
+            "sort": [
+              {
+                "_score": {
+                  "order": "desc"
+                }
+              }
+            ],
+            "size": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+ret = r.json()
+buckets = ret.get('aggregations', {}).get('id_aggs', {}).get('buckets', [])
+hits = sum([bucket.get('id_top', {}).get('hits', {}).get('hits', []) for bucket in buckets], [])
+
