@@ -1,0 +1,52 @@
+
+Q：为什么使用正确的密码却无法登录，会一直闪退到登录界面？
+A：出现这个问题的原因有多，请自行判断：
+类型一：登录的配置文件出问题了，请在登录界面使用快捷键“Ctrl + Alt + F1”切换到TTY1，然后使用你的账号登录（密码请直接盲打后回车，密码不会回显），如何执行：
+rm ~/.Xauthority
+然后使用快捷键“Alt + F7”切换回登录界面后进行登录。
+
+类型二：/tmp权限错误，请在登录界面使用快捷键“Ctrl + Alt + F1”切换到TTY1，然后使用你的账号登录（密码请直接盲打后回车，密码不会回显），然后执行：
+引用: sudo chmod -R 777 /tmp && sudo chown root /tmp
+
+然后使用快捷键“Alt + F7”切换回登录界面后进行登录。
+
+类型三：/home分区可用空间不足，请进入Live CD模式转移文件或者使用命令行删除不需要的文件。
+
+
+类型四：一般系统默认为qwerty键盘布局，可能在更新系统时，选择了其他键盘布局，所以导致键位映射错位输入密码正确但提示错误。
+解决方法是：修改/etc/sysconfig/keyboard
+KEYTABLE="en"
+LAYOUT="us"
+
+--------------------- 
+
+原文：https://blog.csdn.net/qq_37010527/article/details/79758722 
+
+本人正是类型四，升级系统后，下次开机进入不了系统；
+
+原因排查及解决：
+1，电脑1 开机，停留在输入密码那里；
+2，另开启一台电脑2，并登陆电脑1;
+   ssh gswyhq@192.168.1.7
+   gswyhq@gswyhq-pc:~$ df -h
+   发现磁盘空间足够，排除类型三；
+   
+   cd /
+   gswyhq@gswyhq-pc:/$ ls -al
+   总用量 124
+   drwxrwxrwt  10 root   root    4096 4月  12 23:02 tmp
+   发现权限正常，排除类型二；
+
+查找，发现没有`/etc/sysconfig/keyboard`文件
+但通过gswyhq@gswyhq-pc:/etc$ sudo grep 'LAYOUT' -R .
+找到文件`/etc/default/keyboard`
+gswyhq@gswyhq-pc:/etc$ sudo vim default/keyboard 
+XKBVARIANT="chr"
+BACKSPACE="guess"
+改为：
+XKBVARIANT=""
+# BACKSPACE="guess"
+保存；
+
+3，再在电脑1，登录处输入密码，能正常登录。
+
