@@ -1,0 +1,15 @@
+将github.io博客clone到本地：
+如：http://fancyerii.github.io/2019/03/14/dl-book/　对应的github地址为：
+https://github.com/fancyerii/fancyerii.github.io
+
+git clone https://github.com/fancyerii/fancyerii.github.io
+
+root@531aa88b8fe9:/srv/gitbook# gitbook pdf ./ ./mybook.pdf
+
+参考资料：
+使用GitHub.io当作自己的博客网站 https://blog.csdn.net/tyyytcj/article/details/80880018
+gitbook 使用：　https://blog.csdn.net/lu_embedded/article/details/81100704
+生成PDF中文乱码：https://blog.csdn.net/marvellousbinary/article/details/80527189
+https://www.e-learn.cn/content/qita/655343
+
+

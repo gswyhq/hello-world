@@ -1,0 +1,24 @@
+
+Dockerfiler如何使用多个CMD命令
+
+两个办法，一个是CMD不用中括号框起来，将命令用"&&"符号链接：
+方法一：
+CMD /bin/bash -c 'nginx && /usr/bin/supervisord'
+
+# "-c"选项使shell解释器从一个字符串中而不是从一个文件中读取并执行shell命令。
+
+注意下面这样带有中括号的写法语法是无效的，等同于执行命令"nginx /usr/bin/supervisord":
+CMD ["nginx", "/usr/bin/supervisord"]
+
+方法二：
+另一个方法是不用CMD，用ENTRYPOINT命令，指定一个执行的shell脚本，然后在entrypoint.sh文件中写上要执行的命令：
+
+ENTRYPOINT ["./entrypoint.sh"]
+entrypoint.sh文件如下：
+```shell
+#!/bin/bash
+nginx
+/usr/bin/supervisord
+```
+
+
