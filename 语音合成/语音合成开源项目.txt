@@ -1,0 +1,4 @@
+
+https://github.com/r9y9/wavenet_vocoder
+https://github.com/soobinseo/Tacotron-pytorch.git
+
