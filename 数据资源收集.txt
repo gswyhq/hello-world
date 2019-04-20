@@ -1,0 +1,75 @@
+
+Name:LDC2013T21.tgz： https://wakespace.lib.wfu.edu/bitstream/handle/10339/39379/LDC2013T21.tgz?sequence=1
+
+toutiao_data.csv: 
+    今日头条中文新闻（文本）分类数据集 
+    每行为一条数据，以!分割的个字段，从前往后分别是 新闻ID，分类code（见下文），分类名称（见下文），新闻字符串（仅含标题），新闻关键词。
+    来源: https://github.com/mattzheng/LangueOne/toutiao_data.rar; https://github.com/fateleak/toutiao-text-classfication-dataset.git
+
+GoogleNews-vectors-negative300.bin.gz
+    https://github.com/3Top/word2vec-api
+    https://pan.baidu.com/s/1kTCQqft
+
+/home/gswyhq/data/kaggle_dogs-vs-cats
+猫狗分类数据集不包含在 Keras 中。它由 Kaggle 在 2013 年末公开并作为一项计算视觉竞赛的一部分,当时卷积神经网络还不是主流算法。
+# 你可以从 https://www.kaggle.com/c/dogs-vs-cats/data 下载原始数据集
+#  数据集 链接：https://pan.baidu.com/s/13hw4LK8ihR6-6-8mpjLKDA 密码：dmp4
+
+icwb2-data.rar
+    http://sighan.cs.uchicago.edu/bakeoff2005/data/icwb2-data.rar
+
+SogouC.reduced.zip
+    https://pan.baidu.com/s/1pLrORJt
+
+蛋白质功能预测：
+https://github.com/tbepler/protein-sequence-embedding-iclr2019
+- [SCOPe data](http://bergerlab-downloads.csail.mit.edu/bepler-protein-sequence-embeddings-from-structure-iclr2019/scope.tar.gz)
+- [Pfam data](http://bergerlab-downloads.csail.mit.edu/bepler-protein-sequence-embeddings-from-structure-iclr2019/pfam.tar.gz)
+- [Protein secondary structure data](http://bergerlab-downloads.csail.mit.edu/bepler-protein-sequence-embeddings-from-structure-iclr2019/secstr.tar.gz)
+- [Transmembrane data](http://bergerlab-downloads.csail.mit.edu/bepler-protein-sequence-embeddings-from-structure-iclr2019/transmembrane.tar.gz)
+- [CASP12 contact map data](http://bergerlab-downloads.csail.mit.edu/bepler-protein-sequence-embeddings-from-structure-iclr2019/casp12.tar.gz)
+
+词性标注@人民日报199801.txt
+https://pan.baidu.com/s/1gd6mslt
+
+中华古诗词数据库
+最全中华古诗词数据集，唐宋两朝近一万四千古诗人, 接近5.5万首唐诗加26万宋诗. 两宋时期1564位词人，21050首词。
+https://github.com/chinese-poetry/chinese-poetry
+
+汉语拆字字典
+https://github.com/kfcd/chaizi
+
+中华新华字典数据库。包括歇后语，成语，词语，汉字。
+https://github.com/pwxcoo/chinese-xinhua
+
+中文实体情感知识库
+刻画人们如何描述某个实体，包含新闻、旅游、餐饮，共计30万对。
+https://github.com/rainarch/SentiBridge
+
+# 《TensorFlow+Keras深度学习人工智能实践应用》随书示例
+https://pan.baidu.com/s/1c2rXnH2#list/path=%2FMP21710_example.zip
+MP21710_example.zip
+
+分词数据集 people-2014.7z：
+数据集: https://pan.baidu.com/s/1EtXdhPR0lGF8c7tT8epn6Q 验证码: yj9j
+
+http://183.61.19.162/zdoc/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA(%E7%AC%AC3%E7%89%88).pdf
+http://183.61.19.162/zdoc/算法导论(第3版).pdf
+
+七律百科知识图谱
+7lore.zip
+http://openkg.cn/dataset/7lore
+http://openkg1.oss-cn-beijing.aliyuncs.com/30ee798a-3199-4de4-9792-7746bc8891e0/7lore.zip
+7Lore_triple.csv
+
+语音合成：
+https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2
+http://cn-mirror.openslr.org/resources/47/primewords_md_2018_set1.tar.gz
+
+聊天语料：
+raw_chat_corpus.zip
+存在 https://pan.baidu.com/s/1szmNZQrwh9y994uO8DFL_A 提取码：f2ex 中。
+
+百度中文问答数据集：
+https://pan.baidu.com/s/1QUsKcFWZ7Tg1dk_AbldZ1A, 提取码：2dva
+WebQA.v1.0.7z
