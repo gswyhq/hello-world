@@ -1,3 +1,6 @@
+git config --global log.date iso8601
+git config --global core.quotepath false
+git config --global credential.helper store
 
 git config是用于进行一些配置设置，有三种不同的方式来指定这些配置适用的范围：
 1) git config   针对一个git仓库
