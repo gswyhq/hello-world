@@ -1,0 +1,106 @@
+
+使用
+$ docker pull [options] name[:tag|@digest]
+name 镜像名称后面可以跟上镜像标签或者镜像摘要
+
+选项
+名称	默认	描述
+--all-tags, a		下载仓库所有镜像
+--disable-content-trust	true	跳过镜像校验
+--platform		设置镜像所属平台, 如果有多个镜像服务.
+
+使用示例
+从docker hub拉取镜像
+拉取一个或多个镜像使用docker pull，如果没有指定镜像标签，docker默认使用:latest，下面的示例命令就会拉取最新的镜像文件，等同于：docker pull debian:latest
+$ docker pull debian
+
+docker镜像基本都是由多层组成（分层存储）
+每一层都可以被不同镜像共同使用
+可以通过docker images查看本地已存在的镜像文件
+
+docker使用内存寻址方式来存储镜像文件，镜像文件ID是通过SHA256摘要方式包含其配置和镜像层
+
+通过镜像摘要拉取镜像（不可变的身份标识）
+
+通过镜像名称或者加标签的方式拉取镜像文件，显然这是一种很方便的拉取镜像的方式。
+如果使用了标签拉取，当你再次使用docker pull的时候可以确保你能拉取到最新的镜像文件。
+例如：docker pull ubuntu:14.04便可以拉取最新的Ubuntu 14.04镜像。
+有时候你可能并不想获取最新的镜像文件，而是使用一个固定版本的镜像文件。
+docker提供了一种通过摘要digest拉取镜像的方式，这种方式你可以明确的指定镜像的版本号。
+这样你可以获得一个固定版本的镜像文件。并且确保你每次使用的时候都是同一个镜像文件。
+
+想要获取镜像的摘要，需要先pull下一个镜像文件，例如：
+$ docker pull ubuntu:14.04
+
+14.04: Pulling from library/ubuntu
+5a132a7e7af1: Pull complete
+fd2731e4c50c: Pull complete
+28a2f68d1120: Pull complete
+a3ed95caeb02: Pull complete
+Digest: sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+Status: Downloaded newer image for ubuntu:14.04
+
+docker已经帮我们打印出了该镜像的摘要：
+sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+
+当你push一个镜像到某个仓库的时候，docker也会打印出其摘要信息，这样在你push完成之后便可以得到该镜像的最新版本摘要信息。
+通过摘要方式拉取镜像：（只需要将摘要替换掉镜像标签tag即可）
+$ docker pull ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+
+sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2: Pulling from library/ubuntu
+5a132a7e7af1: Already exists
+fd2731e4c50c: Already exists
+28a2f68d1120: Already exists
+a3ed95caeb02: Already exists
+Digest: sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+Status: Downloaded newer image for ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+
+摘要拉取方式也可以在Dockerfile FROM 中使用，例如：
+FROM ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+MAINTAINER some maintainer <maintainer@example.com>
+
+需要注意的是通过github上的Dockerfile自动构建的镜像，通过digest拉取镜像时会出错：
+gswyhq@gswyhq-PC:~/github_projects/neural-painters$ docker pull gswyhq/neural-painters
+Using default tag: latest
+latest: Pulling from gswyhq/neural-painters
+e79bb959ec00: Already exists
+ddb44049fbce: Pull complete
+412e48298844: Pull complete
+5082f465a9e9: Pull complete
+3553769d983b: Pull complete
+d89008642f3c: Pull complete
+8da2e86c1eb2: Pull complete
+2cfc0edec068: Pull complete
+862a0739afbb: Pull complete
+12e96f4ba313: Pull complete
+e205a5d47291: Pull complete
+3902864b1447: Pull complete
+Digest: sha256:b0622dd0a36c6f9fbd29dac081c55f5870312bab4b97e36e0b2dab84a9326a54
+Status: Downloaded newer image for gswyhq/neural-painters:latest
+
+gswyhq@gswyhq-PC:~/github_projects/neural-painters$ docker pull gswyhq/neural-painters@sha256:b0622dd0a36c6f9fbd29dac081c55f5870312bab4b97e36e0b2dab84a9326a54
+Error response from daemon: manifest for gswyhq/neural-painters@sha256:b0622dd0a36c6f9fbd29dac081c55f5870312bab4b97e36e0b2dab84a9326a54 not found
+
+这个时候可以将自动构建的镜像重命名一下，再push到仓库；push到仓库时会新生成一个sha256;利用这个新生成的sha256即可以pull制定版本镜像
+
+gswyhq@gswyhq-PC:~/hello-world/docker$ docker tag gswyhq/neural-painters:latest gswyhq/neural-painters:v1
+gswyhq@gswyhq-PC:~/hello-world/docker$ docker push gswyhq/neural-painters:v1
+The push refers to a repository [docker.io/gswyhq/neural-painters]
+0ddcb6e460fd: Layer already exists
+fd1ca4731559: Layer already exists
+a893eabb85b0: Layer already exists
+923dadece94f: Layer already exists
+ea75b02d066b: Layer already exists
+2654f9d249a9: Layer already exists
+ef2e1cf1026f: Layer already exists
+2a47b8afe39e: Layer already exists
+a77380cbbe99: Layer already exists
+ea7fd61b017d: Layer already exists
+2c737b13665f: Layer already exists
+fbb641a8b943: Layer already exists
+v1: digest: sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd size: 2828
+
+gswyhq@gswyhq-PC:~/hello-world/docker$ docker pull gswyhq/neural-painters@sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
+sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd: Pulling from gswyhq/neural-painters
+Digest: sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
+Status: Image is up to date for gswyhq/neural-painters@sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
