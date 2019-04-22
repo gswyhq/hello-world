@@ -149,3 +149,6 @@ return p;
 # 按关系的属性：只经过那些属性f小于4的关系
 match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
 where all(x in r where x.f<4) return p;
+
+# 不包括那些产品
+MATCH (n1:PID:Baoxianchanpin) with collect(DISTINCT n1.name) as n1s MATCH (n2:Baoxianchanpin) where not 'PID' in labels(n2) and not n2.name in n1s return DISTINCT n2.name
