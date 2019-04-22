@@ -1,0 +1,142 @@
+
+资料来源：https://www.jiqizhixin.com/articles/2018-10-26-4
+https://neo4j.com/docs/graph-algorithms/current/
+
+neo4j的一个插件可以提供这样一个功能，让我们能够直接在其上实现相似度计算。
+
+环境安装：
+
+这里你只需要一个jar包，就可以将其搞定。
+
+下载链接：https://github.com/neo4j-contrib/neo4j-graph-algorithms/releases
+
+将下载的graph-algorithms-algo-3.5.0.1.jar包拷贝到$NEO4J_HOME/plugins目录中
+
+注意：要修改neo4j的配置将
+
+dbms.security.procedures.unrestricted=algo.*
+
+添加到neo4j.conf文件当中，一定要做，要不然后边的试验会失败
+
+重启neo4j数据库就可以了。
+
+第一个例子：
+
+打开你的neo4j数据库，输入 ：RETURN algo.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
+
+这个语句的意思就是调用neo4j提供的算法计算库中的函数，并且计算[3,8,7,5,2,9]和 [10,8,6,6,4,5]两组数据的余弦相似度，那么返回的结果是：
+
+
+那么这个值已经非常的接近1了。这就是这两个数字列表的余弦相似度值。
+
+此时你应该感觉到，使用Neo4j库中的插件来实现，非常的简单。
+
+那么下面，我们可以自己来根据公式进行推理一下。
+
+首先，我们创建一个图关系：
+
+具体Cypher如下：
+
+MERGE (french:Cuisine {name:'French'})MERGE (italian:Cuisine {name:'Italian'})MERGE (indian:Cuisine {name:'Indian'})MERGE (lebanese:Cuisine {name:'Lebanese'})MERGE (portuguese:Cuisine {name:'Portuguese'})MERGE (zhen:Person {name: "Zhen"})MERGE (praveena:Person {name: "Praveena"})MERGE (michael:Person {name: "Michael"})MERGE (arya:Person {name: "Arya"})MERGE (karin:Person {name: "Karin"})MERGE (praveena)-[:LIKES {score: 9}]->(indian)MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)MERGE (zhen)-[:LIKES {score: 10}]->(french)MERGE (zhen)-[:LIKES {score: 6}]->(indian)MERGE (michael)-[:LIKES {score: 8}]->(french)MERGE (michael)-[:LIKES {score: 7}]->(italian)MERGE (michael)-[:LIKES {score: 9}]->(indian)MERGE (arya)-[:LIKES {score: 10}]->(lebanese)MERGE (arya)-[:LIKES {score: 10}]->(italian)MERGE (arya)-[:LIKES {score: 7}]->(portuguese)MERGE (karin)-[:LIKES {score: 9}]->(lebanese)MERGE (karin)-[:LIKES {score: 7}]->(italian)
+
+neo4j插入结果：
+
+
+那么我们用这个数据再进行一次计算
+
+Cypher如下：
+
+MATCH (p:Person), (c:Cuisine) OPTIONAL MATCH (p)-[likes:LIKES]->(c) WITH {item:id(p), weights: collect(coalesce(likes.score, 0))} as userData WITH collect(userData) as data CALL algo.similarity.cosine.stream(data) YIELD item1, item2, count1, count2, similarity RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity ORDER BY similarity DESC
+
+相似度计算结果：
+
+
+以上，我们可以看到Arya和Karin的食物口味最相似，得分为0.889。最高分为1，因此它们非常接近最大相似度
+
+下边还有很多相似度为0的，原因是我数据库中原本有一些数据导致，那么现在我们要把这些数据过滤掉
+
+Cypher如下：
+
+MATCH (p:Person), (c:Cuisine)
+
+OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+
+WITH {item:id(p), weights: collect(coalesce(likes.score, 0))} as userData
+
+WITH collect(userData) as data
+
+CALL algo.similarity.cosine.stream(data, {similarityCutoff: 0.0})
+
+YIELD item1, item2, count1, count2, similarity
+
+RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity
+
+ORDER BY similarity DESC
+
+运行结果：
+
+
+我们可以看到那些没有相似性的用户已被过滤掉了。如果我们正在实现k-Nearest Neighbors类型查询，我们可能希望k为给定用户找到最相似的用户。我们可以通过传入topK参数来做到这一点。
+
+以下将返回用户流以及最相似的用户（即k=1）：
+
+Cypher如下：
+
+MATCH (p:Person), (c:Cuisine)
+
+OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+
+WITH {item:id(p), weights: collect(coalesce(likes.score, 0))} as userData
+
+WITH collect(userData) as data
+
+CALL algo.similarity.cosine.stream(data, {topK:1, similarityCutoff: 0.0})
+
+YIELD item1, item2, count1, count2, similarity
+
+RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity
+
+ORDER BY from
+
+执行结果：
+
+
+细心的同学会发现，以上的结果有一点问题，第一行的结果和第二行的结果其实是相同的。
+
+那么我们现在要做的是为每个用户找到最相似的用户，并存储这些用户之间的关系：
+
+Cypher如下
+
+MATCH (p:Person), (c:Cuisine)
+
+OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+
+WITH {item:id(p), weights: collect(coalesce(likes.score, 0))} as userData
+
+WITH collect(userData) as data
+
+CALL algo.similarity.cosine(data, {topK: 1, similarityCutoff: 0.1, write:true})
+
+YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+
+RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
+
+执行结果如下：
+
+
+
+
+然后，我们可以写一个查询，以找出与我们相似的其他人可能喜欢的美食类型。
+
+以下将找到与Praveena最相似的用户
+
+Cypher：
+
+MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
+
+(other)-[:LIKES]->(cuisine)
+
+WHERE not((p)-[:LIKES]->(cuisine))
+
+RETURN cuisine.name AS cuisine
+
