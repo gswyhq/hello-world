@@ -33,34 +33,7 @@ CREATE (:Category {categoryID: row.CategoryID, categoryName: row.CategoryName, d
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
 MERGE (order:Order {orderID: row.OrderID}) ON CREATE SET order.shipName =  row.ShipName;
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
+
 　　（2）创建索引
 　　对刚创建的节点建立索引，以便在下一步创建边关系的时候能快速检索到各点。
 
@@ -77,19 +50,7 @@ CREATE INDEX ON :Supplier(supplierID);
 CREATE INDEX ON :Customer(customerID);
 
 CREATE INDEX ON :Customer(customerName);
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
+
 　　（3）创建边关系
 　　首先创建products和employees的边关系。
 
@@ -111,24 +72,7 @@ LOAD CSV WITH HEADERS FROM "file:orders.csv" AS row
 MATCH (order:Order {orderID: row.OrderID})
 MATCH (customer:Customer {customerID: row.CustomerID})
 MERGE (customer)-[:PURCHASED]->(order);
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
+
 　　其次，创建products, suppliers, and categories的边关系.
 
 USING PERIODIC COMMIT
@@ -142,17 +86,7 @@ LOAD CSV WITH HEADERS FROM "file:products.csv" AS row
 MATCH (product:Product {productID: row.ProductID})
 MATCH (category:Category {categoryID: row.CategoryID})
 MERGE (product)-[:PART_OF]->(category);
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
+
 　　然后，创建employees之间的“REPORTS_TO”关系。
 
 USING PERIODIC COMMIT
@@ -160,11 +94,7 @@ LOAD CSV WITH HEADERS FROM "file:employees.csv" AS row
 MATCH (employee:Employee {employeeID: row.EmployeeID})
 MATCH (manager:Employee {employeeID: row.ReportsTo})
 MERGE (employee)-[:REPORTS_TO]->(manager);
-1
-2
-3
-4
-5
+
 　　最后，为优化查询速度，在orders上创建唯一性约束：
 
 CREATE CONSTRAINT ON (o:Order) ASSERT o.orderID IS UNIQUE;
@@ -172,3 +102,104 @@ CREATE CONSTRAINT ON (o:Order) ASSERT o.orderID IS UNIQUE;
 　　此外，也可以通过运行整个脚本一次性完成所上述工作：
 
 bin/neo4j-shell -path northwind.db -file import_csv.cypher.
+
+官方实例
+
+LOAD CSV FROM "http://data.neo4j.com/examples/person.csv" AS line
+fieldterminator '\t'
+MERGE (n:Person {id: toInt(line[0])})
+SET n.name = line[1]
+RETURN n
+(1)　导入前注意事项
+csv一定要用 UTF-8无BOM编码，否则入库时可能乱码
+默认使用,作为分隔符
+导入数据前，一定要校验数据，都是坑呀，总结出的经验
+建议使用绝对路径
+(2)　检查csv一共多少行
+(2.1)　windows下相对路径方式
+load csv from "file:/Test.csv" as line return count(*);
+
+(2.2)　windows下绝对路径方式
+load csv from "file:///C:/User/wdb/2017-04-06_test.csv" as line return count(*);
+
+(2.3)　linux下相对路径格式
+load csv from "file:/2017-04-06_test.csv" as line return count(*);
+
+(2.4)　linux下绝对路径格式
+load csv from "file:/home/wkq/databases/data/2017-04-06_test.csv" as line return count(*);
+
+(3)　校验数据
+(3.1)　 检查数据 不带标题
+注意：注意路径 使用UTF-8编码，否则可能导致乱码
+load csv from "file:///C:/User/wdb/Test.csv" as line with line return line limit 5;
+
+(3.2)　检查数据 带标题
+注意：注意路径 使用UTF-8编码，否则可能导致乱码
+load csv with headers from "file:///C:/User/wdb/Test.csv" as line with line return line limit 5;
+
+(4)　真正导入数据
+(4.1) 导入数据 csv文件带文件头
+load csv with headers from "file:///C:/User/wdb/Test.csv" as line with line create (:Person {name:line.name, number:toInt(line.number), tel:toInt(line.tel), sex:line.sex, class:line.classmate}) ;
+
+(4.2) 导入数据 csv文件不带文件头
+load csv from "file:///C:/User/wdb/Test.csv" as line with line create (:Person {name:line[0], number:toInt(line[1]), tel:toInt(line[2]), sex:line[3], class:line[4]}) ;
+
+注事事项
+数据量大了以后可以使用批量提交
+using periodic commit 10000 表示 每10000行进行一次事务提交
+
+(5)　性能测试
+neo4j-sh (?)$ using periodic commit 10000 load csv with headers from "file:/data/stale/data01/neo4j/node_uuid_10w.csv" as line with line create (:Test {uuid:line.uuid, name:line.name});
++-------------------+
+| No data returned. |
++-------------------+
+Nodes created: 100000
+Properties set: 200000
+Labels added: 100000
+3412 ms
+/data/stale/data01/neo4j/node_uuid_1kw.csv文件加上标题一共10000010条，有10000009条数据
+
+neo4j-sh (?)$ load csv from "file:/data/stale/data01/neo4j/node_uuid_1kw.csv" as line return count(*);
++----------+
+| count(*) |
++----------+
+| 10000010 |
++----------+
+1 row
+7434 ms
+neo4j-sh (?)$ using periodic commit 10000 load csv with headers from "file:/data/stale/data01/neo4j/node_uuid_1kw.csv" as line with line create (:Test {uuid:line.uuid, name:line.name});
++-------------------+
+| No data returned. |
++-------------------+
+Nodes created: 10000009
+Properties set: 20000018
+Labels added: 10000009
+151498 ms
+服务器32核，256G内存，10T机械硬盘
+导入时CPU利用率在150%左右，RES Memory 5G左右，VIRT Memory 70G左右
+
+(6)　可能遇到的问题
+(6.1)　Neo.DatabaseError.General.UnknownError
+Neo.DatabaseError.General.UnknownError: At /home/usdp/databases/data/news.csv:172393 - there's a field starting with a quote and whereas it ends that quote there seems to be characters in that field after that ending quote. That isn't supported. This is what I read: '最后一公里"'
+字符转义的问题，换一个分隔符或者把那条数据去掉
+
+在修改语句后 load csv from "file:/home/usdp/databases/data/news.csv" as line fieldterminator ';' return count(*);
+
+数据格式问题
+在生成数据或者处理数据这步没做好，没有好的办法，只能把有问题的数据处理掉
+
+(6.2)　Couldn’t load the external resource
+WARNING: Couldn't load the external resource at: file:/home/usdp/databases/data/news.csv
+路径输错了或者没有权限
+
+(6.3)　WARNING: Invalid input
+WARNING: Invalid input ')': expected whitespace, '.', node labels, '[', "=~", IN, STARTS, ENDS, CONTAINS, IS, '^', '*', '/', '%', '+', '-', '=', "<>", "!=", '<', '>', "<=", ">=", AND, XOR, OR, ',' or '}'
+cypther语句写的有问题
+
+(6.4)　WARNING: Variable n not defined
+cypther语句写的有问题，找不见变量n
+
+(6.5)　WARNING: Expected 0 to be a java.lang.String, but it was a java.lang.Long
+load csv时使用header就在cypther里用header的属性
+或者load csv时不使用header，然后用line[0], line[1]
+否则会出现上面的错误
