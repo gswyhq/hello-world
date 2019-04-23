@@ -25,7 +25,11 @@ dbms.security.procedures.unrestricted=algo.*
 打开你的neo4j数据库，输入 ：RETURN algo.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
 
 这个语句的意思就是调用neo4j提供的算法计算库中的函数，并且计算[3,8,7,5,2,9]和 [10,8,6,6,4,5]两组数据的余弦相似度，那么返回的结果是：
-
+╒══════════════════╕
+│"similarity"      │
+╞══════════════════╡
+│0.8638935626791597│
+└──────────────────┘
 
 那么这个值已经非常的接近1了。这就是这两个数字列表的余弦相似度值。
 
@@ -40,7 +44,7 @@ dbms.security.procedures.unrestricted=algo.*
 MERGE (french:Cuisine {name:'French'})MERGE (italian:Cuisine {name:'Italian'})MERGE (indian:Cuisine {name:'Indian'})MERGE (lebanese:Cuisine {name:'Lebanese'})MERGE (portuguese:Cuisine {name:'Portuguese'})MERGE (zhen:Person {name: "Zhen"})MERGE (praveena:Person {name: "Praveena"})MERGE (michael:Person {name: "Michael"})MERGE (arya:Person {name: "Arya"})MERGE (karin:Person {name: "Karin"})MERGE (praveena)-[:LIKES {score: 9}]->(indian)MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)MERGE (zhen)-[:LIKES {score: 10}]->(french)MERGE (zhen)-[:LIKES {score: 6}]->(indian)MERGE (michael)-[:LIKES {score: 8}]->(french)MERGE (michael)-[:LIKES {score: 7}]->(italian)MERGE (michael)-[:LIKES {score: 9}]->(indian)MERGE (arya)-[:LIKES {score: 10}]->(lebanese)MERGE (arya)-[:LIKES {score: 10}]->(italian)MERGE (arya)-[:LIKES {score: 7}]->(portuguese)MERGE (karin)-[:LIKES {score: 9}]->(lebanese)MERGE (karin)-[:LIKES {score: 7}]->(italian)
 
 neo4j插入结果：
-
+Added 10 labels, created 10 nodes, set 22 properties, created 12 relationships, completed after 259 ms.
 
 那么我们用这个数据再进行一次计算
 
@@ -49,7 +53,29 @@ Cypher如下：
 MATCH (p:Person), (c:Cuisine) OPTIONAL MATCH (p)-[likes:LIKES]->(c) WITH {item:id(p), weights: collect(coalesce(likes.score, 0))} as userData WITH collect(userData) as data CALL algo.similarity.cosine.stream(data) YIELD item1, item2, count1, count2, similarity RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity ORDER BY similarity DESC
 
 相似度计算结果：
-
+╒══════════╤══════════╤══════════════════╕
+│"from"    │"to"      │"similarity"      │
+╞══════════╪══════════╪══════════════════╡
+│"Arya"    │"Karin"   │0.8893006975229283│
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Michael" │0.8249630162429022│
+├──────────┼──────────┼──────────────────┤
+│"Praveena"│"Michael" │0.5100496780395022│
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Praveena"│0.4061183653774261│
+├──────────┼──────────┼──────────────────┤
+│"Michael" │"Arya"    │0.3184912471845722│
+├──────────┼──────────┼──────────────────┤
+│"Michael" │"Karin"   │0.3085485706658717│
+├──────────┼──────────┼──────────────────┤
+│"Praveena"│"Arya"    │0.2723483386163968│
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Arya"    │0.0               │
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Karin"   │0.0               │
+├──────────┼──────────┼──────────────────┤
+│"Praveena"│"Karin"   │0.0               │
+└──────────┴──────────┴──────────────────┘
 
 以上，我们可以看到Arya和Karin的食物口味最相似，得分为0.889。最高分为1，因此它们非常接近最大相似度
 
@@ -74,7 +100,23 @@ RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to,
 ORDER BY similarity DESC
 
 运行结果：
-
+╒══════════╤══════════╤══════════════════╕
+│"from"    │"to"      │"similarity"      │
+╞══════════╪══════════╪══════════════════╡
+│"Arya"    │"Karin"   │0.8893006975229283│
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Michael" │0.8249630162429022│
+├──────────┼──────────┼──────────────────┤
+│"Praveena"│"Michael" │0.5100496780395022│
+├──────────┼──────────┼──────────────────┤
+│"Zhen"    │"Praveena"│0.4061183653774261│
+├──────────┼──────────┼──────────────────┤
+│"Michael" │"Arya"    │0.3184912471845722│
+├──────────┼──────────┼──────────────────┤
+│"Michael" │"Karin"   │0.3085485706658717│
+├──────────┼──────────┼──────────────────┤
+│"Praveena"│"Arya"    │0.2723483386163968│
+└──────────┴──────────┴──────────────────┘
 
 我们可以看到那些没有相似性的用户已被过滤掉了。如果我们正在实现k-Nearest Neighbors类型查询，我们可能希望k为给定用户找到最相似的用户。我们可以通过传入topK参数来做到这一点。
 
@@ -99,7 +141,19 @@ RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to,
 ORDER BY from
 
 执行结果：
-
+╒══════════╤═════════╤══════════════════╕
+│"from"    │"to"     │"similarity"      │
+╞══════════╪═════════╪══════════════════╡
+│"Arya"    │"Karin"  │0.8893006975229283│
+├──────────┼─────────┼──────────────────┤
+│"Karin"   │"Arya"   │0.8893006975229283│
+├──────────┼─────────┼──────────────────┤
+│"Michael" │"Zhen"   │0.8249630162429022│
+├──────────┼─────────┼──────────────────┤
+│"Praveena"│"Michael"│0.5100496780395022│
+├──────────┼─────────┼──────────────────┤
+│"Zhen"    │"Michael"│0.8249630162429022│
+└──────────┴─────────┴──────────────────┘
 
 细心的同学会发现，以上的结果有一点问题，第一行的结果和第二行的结果其实是相同的。
 
@@ -122,7 +176,11 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 
 执行结果如下：
-
+╒═══════╤═════════════════╤═══════╤═══════════════════════╤═══════════════╤══════════════════╤══════════════════╤═════════════════╤══════════════════╕
+│"nodes"│"similarityPairs"│"write"│"writeRelationshipType"│"writeProperty"│"min"             │"max"             │"mean"           │"p95"             │
+╞═══════╪═════════════════╪═══════╪═══════════════════════╪═══════════════╪══════════════════╪══════════════════╪═════════════════╪══════════════════╡
+│5      │5                │true   │"SIMILAR"              │"score"        │0.5100479125976562│0.8892974853515625│0.787713623046875│0.8892974853515625│
+└───────┴─────────────────┴───────┴───────────────────────┴───────────────┴──────────────────┴──────────────────┴─────────────────┴──────────────────┘
 
 
 
@@ -139,4 +197,12 @@ MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
 WHERE not((p)-[:LIKES]->(cuisine))
 
 RETURN cuisine.name AS cuisine
+执行结果：
+╒═════════╕
+│"cuisine"│
+╞═════════╡
+│"French" │
+├─────────┤
+│"Italian"│
+└─────────┘
 
