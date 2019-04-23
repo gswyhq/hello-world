@@ -1,6 +1,15 @@
 
 neo4j-shell已被弃用，并被cypher-shell替代。
 
+旧的（3.2.5、3.4.5版本）数据导出导入：
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/all_data_20190423.cypher",{})
+bash-4.4# ./bin/neo4j-shell -file data/all_data_20190423.cypher
+
+新的（3.5.4版本）数据导出导入：
+CALL apoc.export.cypher.all("/var/lib/neo4j/data/all_data_20190423.cypher",{format:"plain"})
+bash-4.4# cat data/all_data_20190423.cypher |./bin/cypher-shell -u neo4j -p 123456 --format plain
+
+
 # 启动一个neo4j容器
 gswewf@gswewf-pc:~/docker/neo4j/movie$ sudo docker run  --restart=no  --detach  --name=movie7475 --publish=7475:7474 --publish=7688:7687    --volume=$PWD/data:/data  neo4j
 
