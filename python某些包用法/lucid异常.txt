@@ -3,7 +3,10 @@ In [1]: import lucid.modelzoo.vision_models as models
 
 In [2]: inception_v1 = models.InceptionV1() 
 
+inception_v1.load_graphdef()
+
 运行步骤2，一直卡着，运行不成功；或者有时候报错：URLError: <urlopen error [Errno 101] Network is unreachable>
 
-最后发现将pexpect==4.7.0 版本降为 pexpect==4.2.1，则无该问题发生。
+最后发现将pexpect==4.7.0 版本降为 pexpect==4.2.1，
+requests==2.21.0 版本降为 requests==2.18.4 则无该问题发生。
 
