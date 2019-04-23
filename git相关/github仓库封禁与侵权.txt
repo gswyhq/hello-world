@@ -1,0 +1,16 @@
+
+ takedown ？或者 report abuse
+
+
+GitHub 上的仓库由于收到了 DMCA Takedown 投诉被封禁，仓库处于不可访问状态。此时在 GitHub 上访问该仓库时，会显示一个公开消息，表明该仓库被封禁的原因。
+
+按照 GitHub DMCA 的规则，GitHub 在确认投诉有效后，会给该仓库的管理员发送一封邮件，提示该仓库需要在 24 小时内清理被投诉的内容，并回复 GitHub 才行——否则，该仓库会被封禁，禁止任何访问和数据导出。
+
+我们在收到该 Takedown 投诉后，会有 24 小时的时间来响应，但由于过年期间，仓库拥有者没有及时看到邮件，未能及时发现这么严重的通知。因此，在过了 24 小时后， Github 按照 DMCA 的规则，进行了仓库的封禁。
+
+举报github上的盗版内容：
+Contact GitHub 页面上有 Report abuse 和 Copyright claims (DCMA)两个相关选项。
+
+https://github.com/contact
+
+
