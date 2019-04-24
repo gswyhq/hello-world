@@ -38,7 +38,7 @@ segmentor.release()
 4.3 使用自定义词典
 lexicon.txt文件如下：
 
-尊享惠康
+保险产品
 安行万里
 亚硝酸盐
 
@@ -53,13 +53,13 @@ cws_model_path = os.path.join(LTP_DATA_DIR, 'cws.model')  # 分词模型路径�
 from pyltp import Segmentor
 segmentor = Segmentor()  # 初始化实例
 segmentor.load_with_lexicon(cws_model_path, '/home/gswyhq/Downloads/lexicon.txt') # 加载模型，第二个参数是您的外部词典文件路径
-words = segmentor.segment('亚硝酸盐是一种化学物质,尊享惠康与安行万里分别是什么保险产品？')
+words = segmentor.segment('亚硝酸盐是一种化学物质,保险产品与安行万里分别是什么保险产品？')
 print('\t'.join(words))
 segmentor.release()
 
 输出
 [INFO] 2018-08-16 19:18:03 loaded 2 lexicon entries
-亚硝酸盐	是	一	种	化学	物质	,	尊享惠康	与	安行万里	分别	是	什么	保险	产品	？
+亚硝酸盐	是	一	种	化学	物质	,	保险产品	与	安行万里	分别	是	什么	保险	产品	？
 
 4.4 词性标注
 import os
