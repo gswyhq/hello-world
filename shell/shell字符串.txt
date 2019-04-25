@@ -105,3 +105,9 @@ echo | awk '{ print toupper("test"), tolower("TEST") }'
 # 替换文件中的字符串,将文件default_excalibur.cfg中的所有`127.0.0.1`替换为`0.0.0.0`：
 sed -i s/127.0.0.1/0.0.0.0/g "default_excalibur.cfg"
 
+# 批量替换：
+sed -i "s/oldstring/newstring/g" filename
+
+sed -i "s/oldstring/newstring/g" `grep oldstring -rl path`
+
+

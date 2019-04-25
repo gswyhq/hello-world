@@ -198,6 +198,8 @@ docker run -e LANG=zh_CN.utf8  m_container:latest my-python3
  environment:
       - LANG=zh_CN.utf8
 
+# 另外也有可能是python的编码不对，通过设置环境参数`PYTHONIOENCODING`来解决：
+docker run --rm -it --name my_rhel2 -e LANG=C.UTF-8 -e PYTHONIOENCODING=UTF-8 rhel7.4-base:0.3 /bin/bash
 
 # 如何避免Docker容器启动脚本运行后自动退出
 （1）容器中运行多个守护进程时，前面的进程要用后台方式运行（或添加 &），否则后面的服务无法启动

@@ -82,3 +82,6 @@ curl: root@fa81d021df0d:/ubuntu# apt-get install curl
 git: root@fa81d021df0d:/ubuntu# apt-get install git
 ping: root@fa81d021df0d:/ubuntu# apt-get install iputils-ping
 
+启动一个32位的ubuntu:
+docker run --rm -it -e LANG=C.UTF-8 i386/ubuntu:16.04 /bin/bash
+

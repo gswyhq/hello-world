@@ -1,0 +1,41 @@
+
+极简DeBug工具PySnooper
+
+gswyhq@gswyhq-PC:~$ sudo pip3 install pysnooper
+
+使用示例：
+import pysnooper
+
+@pysnooper.snoop()
+def number_to_bits(number):
+    if number:
+        bits = []
+        while number:
+            number, remainder = divmod(number, 2)
+            bits.insert(0, remainder)
+        return bits
+    else:
+        return [0]
+
+number_to_bits(6)
+
+
+PySnooper 详细特征
+
+如果标准错误输出难以获得，或者太长了，那么可以将输出定位到本地文件：
+@pysnooper.snoop('/my/log/file.log')
+
+
+查看一些非本地变量的值：
+@pysnooper.snoop(variables=('foo.bar', 'self.whatever'))
+
+
+展示我们函数中调用函数的 snoop 行：
+默认调用深度为1
+@pysnooper.snoop(depth=2)
+
+
+将所有 snoop 行以某个前缀开始，更容易定位和找到：
+@pysnooper.snoop(prefix='ZZZ ')
+
+正式服务中，不建议使用，否则打印日志信息太多，非常影响性能。
