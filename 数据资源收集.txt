@@ -73,3 +73,8 @@ raw_chat_corpus.zip
 百度中文问答数据集：
 https://pan.baidu.com/s/1QUsKcFWZ7Tg1dk_AbldZ1A, 提取码：2dva
 WebQA.v1.0.7z
+
+mnist.npz:
+下载链接：https://pan.baidu.com/s/1jH6uFFC 密码: dw3d
+测试keras的代码时显示需要下载'https://s3.amazonaws.com/img-datasets/mnist.npz'，下载了多次都无法访问该地址，致使测试搁置。翻墙下载下来，需要的可以从这里下载解压后放在~/.keras/datases/里面，然后可以运行。
+
