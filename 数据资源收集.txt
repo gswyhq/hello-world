@@ -82,4 +82,7 @@ aclImdb.zip
 http://s3.amazonaws.com/text-datasets/aclImdb.zip
 原始 IMDB 电影评论数据集(不是使用 Keras 内置的已经预先分词的 IMDB 数据)
 
+2014 年英文维基百科的预计算嵌入
+这是一个 822 MB 的压缩文件,文件名是 glove.6B.zip,里面包含 400 000 个单词(或非单词的标记)的 100 维嵌入向量。
+http://nlp.stanford.edu/data/glove.6B.zip
 
