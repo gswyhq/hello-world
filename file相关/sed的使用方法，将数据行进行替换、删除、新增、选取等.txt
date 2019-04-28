@@ -100,6 +100,15 @@ sed命令行格式为：
      end
      bye
 
+
+1、在文件的首行插入指定内容：
+:~$ sed -i "1i#! /bin/sh -" a 
+执行后，在a文件的第一行插入#! /bin/sh -
+
+2、在文件的指定行（n）插入指定内容：
+:~$ sed -i "niecho "haha"" a 
+执行后，在a文件的第n行插入echo "haha"
+
 对文件批量重命名：
  for i in `ls`; do mv -f $i `echo $i | sed 's/test/mytest/g'`; done
 或者写个脚本，显得更加清晰：
