@@ -323,3 +323,9 @@ drwxr-xr-x 15 zhang zhang       4096 Apr  1 09:07 ..
 -rw-rw-r--  1 zhang zhang          4 Apr  3 09:16 abcd.txt
 -rw-------  1 zhang zhang      26575 Apr  3 09:04 nohup.out
 
+问题：
+docker容器内终端不能全屏
+解决docker终端宽度、高度显示不正确
+解决方案，设置COLUMNS和LINES环境变量：
+docker exec -it --env COLUMNS=`tput cols` --env LINES=`tput lines` your_container_name /bin/bash
+
