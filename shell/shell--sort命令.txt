@@ -74,6 +74,20 @@ cat test_sort.txt
  
 ## sort -t -k
 cat test_sort.txt |sort -n -t "|" -k 3
-　　
+
+按时间排序：　　
+# 按修改文件时间升序排列：
+ls -rtl
+
+# 按修改文件时间降序排列：
+ls -tl
+
+# 按文件大小排序：
+使用 
+
+ ll -S | grep '^[^d]'  
+
+// 格式化文件大小形式
+ ll -Sh | grep '^[^d]'  
 
  

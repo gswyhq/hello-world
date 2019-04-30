@@ -391,15 +391,15 @@ import redis
 pip3 install redis-py-cluster
 
 from rediscluster import StrictRedisCluster
-redis_nodes =  [{'host': '10.10.10.124','port':7000,'password':'ps1'},
-                    {'host': '10.10.10.124', 'port': 7001, 'password': 'ps1'},
-                    {'host': '10.10.10.124', 'port': 7002, 'password': 'ps1'},
-                    {'host': '10.10.10.125','port':7003, 'password': 'ps2'},
-                    {'host': '10.10.10.125', 'port': 7004, 'password': 'ps2'},
-                    {'host': '10.10.10.125', 'port': 7005, 'password': 'ps2'},
+redis_nodes =  [{'host': '10.10.10.124','port':7000},
+                    {'host': '10.10.10.124', 'port': 7001},
+                    {'host': '10.10.10.124', 'port': 7002},
+                    {'host': '10.10.10.125','port':7003},
+                    {'host': '10.10.10.125', 'port': 7004},
+                    {'host': '10.10.10.125', 'port': 7005},
                    ]
     
-redisconn = StrictRedisCluster(startup_nodes=redis_nodes)
+redisconn = StrictRedisCluster(startup_nodes=redis_nodes, password='ps1')
 如果没有密码，则去掉'password': 'ps2'这一部分即可
 {'host': '10.10.10.125', 'port': 7005},
 

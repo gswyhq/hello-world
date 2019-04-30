@@ -259,19 +259,36 @@ Deleted Networks:
 haiyinpoc_mynet
 tianfengimage_mynet
 
-在 Docker 中删除 image 时有时会遇到类似
-Error response from daemon: conflict: unable to delete 6ec9a5a0fc9f (cannot be forced) - image has dependent child images
-这样的错误，原因是有另外的 image FROM 了这个 image，可以使用下面的命令列出所有在指定 image 之后创建的 image 的父 image
-docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=xxxxxx)
-其中 xxxxxx 是报错 image 的 id，在文章开头的例子中就是 6ec9a5a0fc9f。从列表中查找到之后就可以核对并删除这些 image。
-
-问题： 
+问题：
 yhq@ubuntu-GPU:~/hqrs_poc$ docker-compose -f docker-compose.yml up -d
 Creating network "hqrs_poc_mynet" with driver "bridge"
 ERROR: could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network
 原因：网络不能超过30个；
  docker network ls | wc -l 不能超过30 个
 可以通过 docker network rm esservice_mynet 来删除无用网络（这里是删除网络 esservice_mynet）
+
+当然也可以采用另一种方式，将所有的项目加入到同一个自定义网络当中以节省自定义网络的数量
+每台机器上执行:
+docker network create xxx-network
+docker-compose 文件中写入如下内容
+
+version: '3'
+​
+services:
+  app:
+    build: ./app
+    networks:
+      - xxx-network
+networks:
+  xxx-network:
+    external: true
+
+
+在 Docker 中删除 image 时有时会遇到类似
+Error response from daemon: conflict: unable to delete 6ec9a5a0fc9f (cannot be forced) - image has dependent child images
+这样的错误，原因是有另外的 image FROM 了这个 image，可以使用下面的命令列出所有在指定 image 之后创建的 image 的父 image
+docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=xxxxxx)
+其中 xxxxxx 是报错 image 的 id，在文章开头的例子中就是 6ec9a5a0fc9f。从列表中查找到之后就可以核对并删除这些 image。
 
 # 宿主机的目录挂载到了docker容器内，在容器内修改了，在宿主机上无权限修改：
 zhang@ubuntu-GPU:~/bi-lstm-crf$ head nohup.out
