@@ -1,0 +1,16 @@
+
+解决谷歌浏览器无法从该网站添加应用、拓展程序和用户脚本
+Windows系统：
+1.在Google Chrome浏览器的桌面快捷方式上鼠标右键，选择属性(R)，进入如下界面
+2. 在目标(T)后添加参数   --enable-easy-off-store-extension-install （注意在添加参数之前，要有个空格，加两个空格），添加完之后点击确认
+3. 进入谷歌浏览器的 "拓展程序" 页面（即在谷歌浏览器地址栏输入：chrome://extensions/）
+4.  右上角有个开发者模式，点击启用就可以添加应用、拓展程序和用户脚本了
+
+deepin系统：
+找到google-chrome的启动程序：google-chrome.desktop
+做如下的修改：
+< Exec=/usr/bin/google-chrome-stable %U
+---
+> Exec=/usr/bin/google-chrome-stable --enable-easy-off-store-extension-install %U
+重启浏览器即可。
+
