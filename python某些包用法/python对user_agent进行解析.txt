@@ -1,0 +1,59 @@
+
+python 对user_agent进行 解析 判断客户端是什么操作系统
+
+安装工具库
+pip3 install pyyaml ua-parser user-agents
+
+from user_agents import parse
+
+ua_string = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36'
+user_agent = parse(ua_string) #解析成user_agent
+bw = user_agent.browser.family #判断是什么浏览器
+s = user_agent.os.family #判断是什么操作系统
+juge_pc = user_agent.is_pc #判断是不是桌面系统
+phone = user_agent.device.family
+
+print(bw,s,phone,juge_pc)
+
+>>> from user_agents import parse
+>>> ua_string = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B179 Safari/7534.48.3'
+>>> # 浏览器属性
+>>> user_agent = parse(ua_string)
+>>> user_agent.browser
+Browser(family=u'Mobile Safari', version=(5, 1), version_string='5.1')
+>>> user_agent.browser.family
+u'Mobile Safari'
+>>> user_agent.browser.version
+(5, 1)
+>>> user_agent.browser.version_string
+'5.1'
+>>> # 操作系统属性
+>>> user_agent.os
+OperatingSystem(family=u'iOS', version=(5, 1), version_string='5.1')
+>>> user_agent.os.family
+u'iOS'
+>>> user_agent.os.version
+(5, 1)
+>>> user_agent.os.version_string
+'5.1'
+>>> # 设备属性
+>>> user_agent.device
+Device(family=u'iPhone', brand=u'Apple', model=u'iPhone')
+>>> user_agent.device.family
+u'iPhone'
+>>> user_agent.device.brand
+u'Apple'
+>>> user_agent.device.model
+u'iPhone'
+>>>
+>>> str(user_agent)
+'iPhone / iOS 5.1 / Mobile Safari 5.1'
+
+
+它还提供了属性判断：
+
+is_mobile：判断是不是手机
+is_tablet：判断是不是平板
+is_pc：判断是不是桌面系统
+is_touch_capable：有没有触屏功能
+is_bot：是不是搜索引擎的爬虫
