@@ -157,3 +157,11 @@ OPTIONAL MATCH (s)-[r:`保障项目`]->(tag)
 WITH s,r,tag
 Where s.name contains '尊享' or tag.name contains '境外意外身故'
 return distinct s, tag
+
+# 根据查询结果的不同，返回不同的答案：
+MATCH (n3)<-[r1:`被保人年龄最大值`]-(n1:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin) -[r:`被保人年龄最小值`]->(n2) where n1.name="附加吉祥安康重疾" RETURN 
+CASE
+WHEN toFloat("7000")>=toFloat(n2.name) and toFloat("7000") <= toFloat(n3.name)  THEN '年龄符合投保要求!'
+ELSE '年龄不符合投保要求!' END  as answer
+
+

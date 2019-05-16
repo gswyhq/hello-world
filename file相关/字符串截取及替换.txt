@@ -20,3 +20,23 @@ ${string/substring/replacement}	使用$replacement, 来代替第一个匹配的$
 ${string//substring/replacement}	使用$replacement, 代替所有匹配的$substring
 ${string/#substring/replacement}	如果$string的前缀匹配$substring, 那么就用$replacement来代替匹配到的$substring
 
+gswyhq@gswyhq-PC:~/nlp_server$ echo $input_file
+xinxin_yyb_228_kg_entity_synonyms_20190513_160517.json
+
+# 截取倒数第五个字符串之前的：
+gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file::0-5}
+xinxin_yyb_228_kg_entity_synonyms_20190513_160517
+
+# 截取倒数的5个字符串：
+gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:0-5}
+.json
+
+# 从倒数第五个字符串开始，截取3个字符：
+gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:0-5:3}
+.js
+
+# 从第五个字符串开始，截取3个字符：
+gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:5:3}
+eng
+
+
