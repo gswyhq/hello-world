@@ -1,0 +1,29 @@
+
+运行有些需要调用chrome浏览器的包时，会报错；或者利用selenium来模拟浏览器进行爬取时遇到了这个问题：：
+selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home
+
+解决方案：
+这一错误是因为没有配置好chromedriver，怎么配置呢？（我用的是chrome）
+1.打开chrome 输入 “chrome://version/”来查看chrome版本 如图我的是68
+2.访问此网站  http://chromedriver.storage.googleapis.com/index.html   然后选择合适版本的driver 
+比如 Index of /2.41/
+点击notes.txt就可查看其对应的版本号，如下：
+----------ChromeDriver v2.41 (2018-07-27)----------
+Supports Chrome v67-69
+Resolved issue 2458: Chromedriver fails to start with whitelisted-ips option [[Pri-1]]
+...
+
+3.下载 chromedriver_linux64.zip 文件
+解压后的文件为：chromedriver
+
+4.将 chromedriver 文件移动到指定位置
+查看WebDriver的文档
+- executable_path - path to the executable. If the default is used it assumes the executable is in the $PATH
+得知需要将chromedriver 文件移动到$PATH 目录下；
+gswyhq@gswyhq-PC:~$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin
+gswyhq@gswyhq-PC:~$ sudo mv chromedriver /usr/local/bin/
+
+或者在调用的时候，指明绝对路径即可，如：
+browser = webdriver.Chrome(executable_path='/home/gswyhq/Downloads/chromedriver')
+

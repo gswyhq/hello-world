@@ -1,0 +1,27 @@
+关键：使用 pyecharts-snapshot插件
+第一步：安装phantomjs
+打开系统命令行，键入下列代码：
+sudo apt-get install -y npm
+gswyhq@gswyhq-PC:~$ sudo npm install -g phantomjs --unsafe-perm
+gswyhq@gswyhq-PC:~$ sudo npm install -g phantomjs-prebuilt --unsafe-perm
+ 
+第二步：安装了 Nodejs 环境
+sudo apt-get install nodejs
+ 
+第三步：安装 pyecharts-snapshot
+pip3 install pyecharts-snapshot
+第四步：重启计算机，render（path=“”）的输出路径和格式即可
+ 
+支持保存作各种格式
+对象.render(path='snapshot.html')
+对象.render(path='snapshot.png')
+对象.render(path='snapshot.pdf')
+
+举个栗子：
+bar = Bar("我的第一个图表", "这里是副标题")
+bar.add("服装", ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"], [5, 20, 36, 10, 75, 90])
+# bar.print_echarts_options()
+bar.render(path='snapshot.html')
+bar.render(path='snapshot.png')
+bar.render(path='snapshot.pdf')
+
