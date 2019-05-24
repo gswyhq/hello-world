@@ -1,0 +1,7 @@
+# pipreqs /home/gswyhq/openvc
+# sudo pip3 install -r requirements.txt -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+numpy==1.16.2
+opencv-contrib-python==4.1.0.25
+opencv-python==4.1.0.25
+Pillow==5.1.0
