@@ -174,3 +174,23 @@ MATCH  (n:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin{name:"保险�
 UNION MATCH  (n:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin{name:"保险产品"})-->(n1:Baozhangxiangmu{name:"重大疾病保险金"})-[r:`保障项目F`{name:"不保"}]->(n2:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing)
  with collect(DISTINCT n2.name) as n2name match (n3:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing) where n2name and not "恶性肿瘤" in n2name 
  RETURN  DISTINCT "保"
+
+# 统计计数,统计每个产品，各自有多少个保障项目
+MATCH (n:Admin_bussiness_site_web1_ai_19:Baoxianchanpin)-[]->(m:Baozhangxiangmu)
+WITH n, count(m) AS nrOfMovies
+RETURN n { .name, nrOfMovies }
+╒═════════════════════════════════╕
+│"n"                              │
+╞═════════════════════════════════╡
+│{"name":"金福连","nrOfMovies":5}    │
+├─────────────────────────────────┤
+│{"name":"金雪球","nrOfMovies":2}    │
+├─────────────────────────────────┤
+│{"name":"保险产品","nrOfMovies":7}   │
+├─────────────────────────────────┤
+│{"name":"住院津贴医疗险","nrOfMovies":2}│
+├─────────────────────────────────┤
+│{"name":"小雨伞A款","nrOfMovies":2}  │
+└─────────────────────────────────┘
+
+
