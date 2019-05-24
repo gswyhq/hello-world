@@ -81,7 +81,7 @@ Neo4j CQL MERGE命令语法与CQL CREATE命令类似。
 检索所有Profile节点详细信息并观察结果
 我们将使用CREATE命令执行这些操作
 
-可以在cypher语句前面加上`PROFILE`观看查询的细节问题：
+可以在cypher语句前面加上`PROFILE`观看查询的细节问题(耗时，性能分析)：
 PROFILE MATCH (n:Baoxianjin),(n2:Jibing) RETURN n LIMIT 25
 
 参考：https://www.w3cschool.cn/neo4j/neo4j_cql_merge.html

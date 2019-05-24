@@ -165,3 +165,12 @@ WHEN toFloat("7000")>=toFloat(n2.name) and toFloat("7000") <= toFloat(n3.name)  
 ELSE '年龄不符合投保要求!' END  as answer
 
 
+判断某个保险金保不保某个疾病的逻辑： 
+1， 若产品关系‘保障项目F’写的是保， 那查保的疾病，若有就保，若没有就不保； 
+2，若产品关系‘保障项目F’的写的不保，那查不保的疾病，若没有就是保，若有就是不保;
+MATCH  (n:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin{name:"保险产品"})-->(n1:Baozhangxiangmu{name:"重大疾病保险金"})-[r:`保障项目F`{name:"保"}]->(n2:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing)
+ with collect(DISTINCT n2.name) as n2name match (n3:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing) where n2name and  "恶性肿瘤" in n2name
+ RETURN  DISTINCT "保"  
+UNION MATCH  (n:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin{name:"保险产品"})-->(n1:Baozhangxiangmu{name:"重大疾病保险金"})-[r:`保障项目F`{name:"不保"}]->(n2:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing)
+ with collect(DISTINCT n2.name) as n2name match (n3:Admin_bussiness_site_web1_ai_19:Tongyong:Jibing) where n2name and not "恶性肿瘤" in n2name 
+ RETURN  DISTINCT "保"

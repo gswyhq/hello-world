@@ -25,6 +25,13 @@ extract(x IN list | x.prop)
 
 # 筛选限定条件为True的结果：
 filter(x IN list WHERE x.prop <> $value)
+语法:
+filter(variable In list WHERE predicate)
+predicate:断言表达式
+match(a)
+where a.name = "nick"
+return filter(str in keys(a) where length(str) > 3) 
+返回a节点的array属性中的字符串长度大于3 的元素列表
 
 # 将满足条件的节点的属性值求和:
 reduce(s = "", x IN list | s + x.prop)

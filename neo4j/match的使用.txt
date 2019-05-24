@@ -45,7 +45,7 @@ WHERE n.name =~ '.ail.'
 RETURN n
 # 并行查询，两个子句的返回值应该一致
 
-方法6：
+方法6 (多分支查询，多关系查询)：
 Cypher 查询中的多个模式使用逗号（，）作为分隔符分开。作为结果的节点必须匹配所有逗号隔开的模式，相当于一个 “ 并 ” （ AND ）语句。
 MATCH (n:Baoxianchanpin)-[r:`保险种类`]->(n2), (n)-[r2:`保障项目`]->(n3) where n.name='康倍保' RETURN n,n2, n3
 以上示例，只有n节点同时拥有r、r2两个关系时，才会查询出结果。
@@ -152,3 +152,8 @@ where all(x in r where x.f<4) return p;
 
 # 不包括那些产品
 MATCH (n1:PID:Baoxianchanpin) with collect(DISTINCT n1.name) as n1s MATCH (n2:Baoxianchanpin) where not 'PID' in labels(n2) and not n2.name in n1s return DISTINCT n2.name
+
+
+# 查询投保年龄是否符合要求，并给出对应的投保年龄（多关系，多分支查询，再在查询结果中进行筛选）；
+MATCH (n1:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin) -[r2:`被保人年龄`]->(n4) ,(n3)<-[r1:`被保人年龄最大值`]-(n1:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin) -[r:`被保人年龄最小值`]->(n2) where n1.name="保险产品" OPTIONAL  match (n1:Admin_bussiness_site_web1_ai_19:Tongyong:Baoxianchanpin) -[r:`被保人年龄`]->(n4)  RETURN CASE WHEN toFloat("4380")>=toFloat(n2.name) and toFloat("4380") <= toFloat(n3.name)  THEN '年龄符合投保要求!' + "\n" + n4.name ELSE '年龄不符合投保要求!' + "\n"  + n4.name END  as answer
+
