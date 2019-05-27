@@ -1,0 +1,49 @@
+
+不小心执行 rm -f，该如何恢复？
+
+恢复不小心删除文件的前提条件：
+1、恢复的是文件，未尝试过文件目录；
+2、文件在删除前被打开过（在删除时关闭了也无所谓）；
+
+原理：
+在Linux系统中，每个运行中的程序都有一个宿主进程彼此隔离，以/proc/进程号来体现（Linux本质上就是一个文件系统），比如：ls -l /proc/13067 查看进程PID为13067的进程信息；
+当程序运行时，操作系统会专门开辟一块内存区域，提供给当前进程使用，对于依赖的文件，操作系统会发放一个文件描述符，以便读写文件，
+当我们执行 rm -f 删除文件时，其实只是删除了文件的目录索引节点，对于文件系统不可见，但是对于打开它的进程依然可见，即仍然可以使用先前发放的文件描述符读写文件，
+正是利用这样的原理，所以我们可以使用I/O重定向的方式来恢复文件。
+
+操作：
+如果不小心误删了文件，不要着急，首先使用 lsof 查看打开该文件的进程，然后再使用 cat /proc/进程号/fd/文件描述符 查看恢复数据，最后使用I/O重定向的方式来恢复文件。
+
+实例：
+用wps打开excel文件 "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"； 再关闭。
+查询文件的MD5值：
+gswyhq@gswyhq-PC:~/Downloads$ md5sum "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+eb2662e43e915f32849eaa5e609d3c14  /home/gswyhq/Downloads/快捷教育导出 (1).xlsx
+
+删除文件：
+gswyhq@gswyhq-PC:~/Downloads$ rm "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+
+查询文件被打开过的进程号及文件描述符：
+gswyhq@gswyhq-PC:~/Downloads$ lsof |grep 快捷教育导出
+
+wpsoffice 11363 11369                 gswyhq   31w      REG                8,4    251781   18753550 /home/gswyhq/Downloads/快捷教育导出 (1).xlsx (deleted)
+wpsoffice 11363 11369                 gswyhq   32u      REG                8,4       165    6030337 /home/gswyhq/Downloads/.~快捷教育导出 (1).xlsx (deleted)
+wpsoffice 11363 11370                 gswyhq   31w      REG                8,4    251781   18753550 /home/gswyhq/Downloads/快捷教育导出 (1).xlsx (deleted)
+wpsoffice 11363 11370                 gswyhq   32u      REG                8,4       165    6030337 /home/gswyhq/Downloads/.~快捷教育导出 (1).xlsx (deleted)
+
+通过上面的查询结果可以看出，文件被进程号为11363的进程打开过，但文件描述符有两个31和32；（实际上32是对应的一个缓存；通过后面的文件大小可以看出，可恢复的文件描述符应该是31）
+但不妨先恢复文件描述符是32的：
+gswyhq@gswyhq-PC:/proc/11363/fd$ cat /proc/11363/fd/32 > "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+
+通过恢复文件的md5值得知，并不是原先删除的文件，用WPS打开文件，也提示文件错误
+gswyhq@gswyhq-PC:~/Downloads$ md5sum "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+6f227c7001781d0def083a81834f4b5d  /home/gswyhq/Downloads/快捷教育导出 (1).xlsx
+gswyhq@gswyhq-PC:~/Downloads$ rm "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+
+# 再尝试恢复文件描述符是31的：
+gswyhq@gswyhq-PC:/proc/11363/fd$ cat /proc/11363/fd/31 > "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+# 查询md5值，与删除前的一致，并通过wps打开文件来看，也是删除之前的文件内容。
+gswyhq@gswyhq-PC:~/Downloads$ md5sum "/home/gswyhq/Downloads/快捷教育导出 (1).xlsx"
+eb2662e43e915f32849eaa5e609d3c14  /home/gswyhq/Downloads/快捷教育导出 (1).xlsx
+
+来源：https://mp.weixin.qq.com/s/PVzEjTsCeGi-AsMNPPgBtw
