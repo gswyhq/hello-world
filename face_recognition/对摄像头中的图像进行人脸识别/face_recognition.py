@@ -21,6 +21,9 @@ cam = cv2.VideoCapture(0)
 minW = 0.1*cam.get(3)
 minH = 0.1*cam.get(4)
 
+# print(minW, minH)
+# 64, 48
+
 def change_cv2_draw(image,strs,local=(0, 0),sizes=20,colour=(255, 0, 0)):
     """
     将cv图片格式转化为PIL库的格式，用PIL的方法写入中文，然后在转化为CV的格式 ; 解决cv2.putText，中文乱码问题
@@ -36,7 +39,7 @@ def change_cv2_draw(image,strs,local=(0, 0),sizes=20,colour=(255, 0, 0)):
     draw = ImageDraw.Draw(pilimg)  # 图片上打印
 
     # 查看中文字体(注意冒号前有空格)：
-    # gswyhq @ gswyhq - PC: ~$ fc - list: lang = zh
+    # gswyhq@gswyhq-PC:~$ fc-list :lang=zh
 
     font = ImageFont.truetype("/usr/share/fonts/deepin-font-install/SimSun/SimSun.ttf",sizes, encoding="utf-8")
     draw.text(local, strs, colour, font=font)

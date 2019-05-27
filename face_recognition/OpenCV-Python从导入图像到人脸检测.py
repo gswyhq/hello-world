@@ -37,11 +37,11 @@ viewImage(cropped, "裁剪之后的图像")
 
 # 调整大小到20%后
 scale_percent = 20 # 原始大小的百分比
-width = int(img.shape[1] * scale_percent / 100)
-height = int(img.shape[1] * scale_percent / 100)
+width = int(image.shape[1] * scale_percent / 100)
+height = int(image.shape[1] * scale_percent / 100)
 dim = (width, height)
 
-resized = cv2.resize(img, dim , interpolation=cv2.INTER_AREA)
+resized = cv2.resize(image, dim , interpolation=cv2.INTER_AREA)
 viewImage(resized, "裁剪20%后")
 
 # 进行180度旋转
@@ -57,7 +57,7 @@ viewImage(rotated, "旋转180度后")
 
 # 灰度和阈值(黑白效果)
 gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-ret, threshold_image = cv2.threshold(im, 127, 255, 0)
+ret, threshold_image = cv2.threshold(image, 127, 255, 0)
 viewImage(gray_image, '灰度与阈值')
 viewImage(threshold_image, '黑白效果')
 
@@ -66,7 +66,7 @@ viewImage(threshold_image, '黑白效果')
 # 值设定为255。
 
 # 另一个例子；
-ret, threshold = cv2.threshold(im, 150, 200, 10)
+ret, threshold = cv2.threshold(image, 150, 200, 10)
 # 这将把所有阴影值小于150的像素点设定为10和所有大于150的像素点设定为200。
 
 
