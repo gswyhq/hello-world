@@ -98,3 +98,14 @@ http://nlp.stanford.edu/data/glove.6B.zip
 http://download.tensorflow.org/example_images/flower_photos.tgz
 5种花卉类型，接近4000张图像，分为训练集与测试集。
 
+atec_nlp_sim_train.csv
+相似度匹配语料
+数据来源： https://github.com/ziweipolaris/atec2018-nlp.git
+
+保险问答用户日志.xlsx
+
+zhrs_faq_8_updateqa_question_answer.json
+一些保险相关相似句
+
+意图识别数据_all.txt
+

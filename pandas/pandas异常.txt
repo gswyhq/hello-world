@@ -1,0 +1,13 @@
+
+异常：pd.read_excel,读取excel数据时，字符串自动转换为数字：
+解决方案1：设置converters
+如：
+df = pd.read_excel(yiyuan_excel_file, sheet_name="Sheet1", index_col=0, converters={'医院等级': str})
+
+解决方案2：设置dtype
+如：
+df = pd.read_excel(yiyuan_excel_file, sheet_name="Sheet1", index_col=0, dtype={'医院等级': np.str})
+
+但这两种方案，只能是针对excel数据中，本就是文本类型的数据；
+若原excel中是自定义的`0000`类型的数据， 如0001，读取出来的结果仍旧是: "1".
+
