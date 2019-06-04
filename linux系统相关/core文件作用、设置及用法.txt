@@ -1,0 +1,92 @@
+
+Core文件作用、设置及用法
+
+1.Core文件简介
+
+Core文件其实就是内存的映像，当程序崩溃时，存储内存的相应信息，主用用于对程序进行调试。当程序崩溃时便会产生core文件，其实准确的应该说是core dump 文件,
+默认生成位置与可执行程序位于同一目录下，文件名为core.***,其中***是某一数字。
+
+2.开启或关闭Core文件的生成
+
+关闭或阻止core文件生成：
+
+$ulimit -c 0
+
+打开core文件生成：
+
+$ulimit -c unlimited
+
+以上配置只对当前会话起作用，下次重新登陆后，还是得重新配置。要想配置永久生效，得在/etc/profile或者/etc/security/limits.conf文件中进行配置。
+
+首先以root权限登陆，然后打开/etc/security/limits.conf文件，进行配置：
+
+#vim /etc/security/limits.conf
+
+<domain>    <type>    <item>        <value>
+
+       *              soft          core         unlimited
+
+或者在/etc/profile中作如下配置：
+
+#vim /etc/profile
+
+ulimit -S -c unlimited >/dev/null 2>&1
+
+或者想配置只针对某一用户有效，则修改此用户的~/.bashrc或者~/.bash_profile文件：
+
+limit -c unlimited
+
+ulimit -c 0 是禁止产生core文件，而ulimit -c 1024则限制产生的core文件的大小不能超过1024kb
+
+
+ulimit 功能说明：控制shell程序的资源。
+
+语　　法：ulimit [-aHS][-c <core文件上限>][-d <数据节区大小>][-f <文件大小>][-m <内存大小>][-n <文件数目>][-p <缓冲区大小>][-s <堆叠大小>][-t <CPU时间>][-u <程序数目>][-v <虚拟内存大小>]
+
+补充说明：ulimit为shell内建指令，可用来控制shell执行程序的资源。
+
+参　　数：
+   -a 　显示目前资源限制的设定。
+   -c <core文件上限> 　设定core文件的最大值，单位为区块。
+   -d <数据节区大小> 　程序数据节区的最大值，单位为KB。
+   -f <文件大小> 　shell所能建立的最大文件，单位为区块。
+   -H 　设定资源的硬性限制，也就是管理员所设下的限制。
+   -m <内存大小> 　指定可使用内存的上限，单位为KB。
+   -n <文件数目> 　指定同一时间最多可开启的文件数。
+   -p <缓冲区大小> 　指定管道缓冲区的大小，单位512字节。
+   -s <堆叠大小> 　指定堆叠的上限，单位为KB。
+   -S 　设定资源的弹性限制。
+   -t <CPU时间> 　指定CPU使用时间的上限，单位为秒。
+   -u <程序数目> 　用户最多可开启的程序数目。
+   -v <虚拟内存大小> 　指定可使用的虚拟内存上限，单位为KB。
+
+------------------
+
+
+
+1,说明:
+ulimit用于shell启动进程所占用的资源.
+
+2,类别:
+shell内建命令
+
+3,语法格式:
+ulimit [-acdfHlmnpsStvw] [size]
+
+4,参数介绍:
+
+QUOTE:
+-H 设置硬件资源限制.
+-S 设置软件资源限制.
+-a 显示当前所有的资源限制.
+-c size:设置core文件的最大值.单位:blocks
+-d size:设置数据段的最大值.单位:kbytes
+-f size:设置创建文件的最大值.单位:blocks
+-l size:设置在内存中锁定进程的最大值.单位:kbytes
+-m size:设置可以使用的常驻内存的最大值.单位:kbytes
+-n size:设置内核可以同时打开的文件描述符的最大值.单位:n
+-p size:设置管道缓冲区的最大值.单位:kbytes
+-s size:设置堆栈的最大值.单位:kbytes
+-t size:设置CPU使用时间的最大上限.单位:seconds
+-v size:设置虚拟内存的最大值.单位:kbytes
+
