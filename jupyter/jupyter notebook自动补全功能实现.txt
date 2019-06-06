@@ -1,0 +1,60 @@
+jupyter notebook自动补全功能实现
+
+Jupyter notebook使用默认的自动补全是关掉的。要打开自动补全，需修改默认配置。
+
+ 
+
+命令行中输入：ipython profile create
+
+以上命令会在~/.ipython/profile_default/目录下生成ipython_config.py和ipython_kernel_config.py
+
+ 
+
+我们需要修改（ipython_config.py）的以下几行，将开启补全功能：
+
+复制代码
+## Activate greedy completion PENDING DEPRECTION. this is now mostly taken care
+#  of with Jedi.
+#
+#  This will enable completion on elements of lists, results of function calls,
+#  etc., but can be unsafe because the code is actually evaluated on TAB.
+c.Completer.greedy = True
+## Experimental: restrict time (in milliseconds) during which Jedi can compute
+#  types. Set to 0 to stop computing types. Non-zero value lower than 100ms may
+#  hurt performance by preventing jedi to build its cache.
+c.Completer.jedi_compute_type_timeout = 400
+## Experimental: Use Jedi to generate autocompletions. Off by default.
+c.Completer.use_jedi = True
+复制代码
+重启jupyter后生效。
+
+ 
+
+注：以上操作后，在编写代码是发现不是自动不全，是要按下tab键才可以补全，所以还是有些不便，还好有插件，通过Hinterland插件即可解决自动补全问题了，安装配置步骤：
+
+1、在命令行中激活代码补全环境（注：如果使用的是默认环境则不需要激活）
+
+2、安装nbextensions（以下不截图了，在cmd环境中运行即可，在安装过程中如有提示缺少的库安装即可）
+安装nbextensions
+~$: pip3 install --user jupyter_contrib_nbextensions -i https://pypi.mirrors.ustc.edu.cn/simple
+~$: jupyter contrib nbextension install --user
+
+安装nbextensions_configurator
+~$: pip3 install --user jupyter_nbextensions_configurator 
+~$: jupyter nbextensions_configurator enable --user
+
+3、重启jupyter，在弹出的主页面里，能看到增加了一个Nbextensions标签页，在这个页面里，勾选Hinterland即启用了代码自动补全。
+
+注：如果页面无Hinterland项，或者不全，命令行执行：
+
+jupyter contrib nbextension install --user --skip-running-check
+
+再次重启jupyter，Nbextensions标签页中数据将全部出现了
+
+
+
+ 
+
+ 在输入代码后，会自动补全了，不用再按tab键了，快很多了吧
+
+

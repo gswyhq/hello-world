@@ -66,3 +66,11 @@ docker image prune --force --all
 
 这个命令可以删除所有不使用的镜像并且不再请求确认。
 
+通过下面命令，查看docker磁盘占用情况：
+gswyhq@gswyhq-PC:~$ docker system df
+TYPE                TOTAL               ACTIVE              SIZE                RECLAIMABLE
+Images              556                 22                  128.8GB             122.3GB (94%)
+Containers          36                  2                   2.213GB             2.029GB (91%)
+Local Volumes       11                  7                   274.8MB             330.2kB (0%)
+
+
