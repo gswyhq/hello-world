@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # sudo apt-get install ffmpeg
-# sudo apt-get install pydub
+# sudo pip3 install pydub
 
 from pydub import AudioSegment
 

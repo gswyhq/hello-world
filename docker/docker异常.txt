@@ -283,6 +283,11 @@ networks:
   xxx-network:
     external: true
 
+删除网络时候，有时候报错：
+yhq@ubuntu-GPU:~$ docker network rm multiple_baoxian_projects_mynet
+Error response from daemon: network multiple_baoxian_projects_mynet id 2028ee973ab62e918a4f3c77aa5c2f3e8236d315092a97cbbbb5f13068811a44 has active endpoints
+此时可用docker inspect 2028ee973ab62e91(上述提示中的该网络的id)来检查该网络下活动的endpointsFailed。
+
 
 在 Docker 中删除 image 时有时会遇到类似
 Error response from daemon: conflict: unable to delete 6ec9a5a0fc9f (cannot be forced) - image has dependent child images
