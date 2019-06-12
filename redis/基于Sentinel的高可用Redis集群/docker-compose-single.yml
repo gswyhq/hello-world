@@ -1,0 +1,82 @@
+version: '2'
+services:
+  master:
+    image: redis:3.2.12
+    restart: always
+    volumes:
+      - ./redis.conf:/redis.conf
+    command: redis-server /redis.conf --port 7687 --requirepass "redisweb1123" --masterauth "redisweb1123"
+    network_mode: "host"
+
+  slave1:
+    image: redis:3.2.12
+    restart: always
+    command: redis-server /redis.conf --port 7688 --slaveof 192.168.3.164 7687 --requirepass "redisweb1123" --masterauth "redisweb1123"
+    volumes:
+      - ./redis.conf:/redis.conf
+#    links:
+#      - master:redis-master
+    network_mode: "host"
+
+  slave2:
+    image: redis:3.2.12
+    restart: always
+    command: redis-server /redis.conf --port 7689 --slaveof 192.168.3.164 7687 --requirepass "redisweb1123" --masterauth "redisweb1123"
+    volumes:
+      - ./redis.conf:/redis.conf
+#    links:
+#      - master:redis-master
+    network_mode: "host"
+
+
+  slave3:
+    image: redis:3.2.12
+    restart: always
+    command: redis-server /redis.conf --port 7690 --slaveof 192.168.3.164 7687 --requirepass "redisweb1123" --masterauth "redisweb1123"
+    volumes:
+      - ./redis.conf:/redis.conf
+#    links:
+#      - master:redis-master
+    network_mode: "host"
+
+  sentinel1:
+#    build: sentinel
+    restart: always
+    image: redis-sentinel:26379
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    ports:
+      - "26379:26379"
+#    links:
+#      - master:redis-master
+#      - slave
+#    network_mode: "host"
+
+  sentinel2:
+#    build: sentinel
+    restart: always
+    image: redis-sentinel:26379
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    ports:
+      - "26380:26379"
+#    links:
+#      - master:redis-master
+#      - slave
+#    network_mode: "host"
+
+  sentinel3:
+#    build: sentinel
+    restart: always
+    image: redis-sentinel:26379
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    ports:
+      - "26381:26379"
+#    links:
+#      - master:redis-master
+#      - slave
+#    network_mode: "host"
