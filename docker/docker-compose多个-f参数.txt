@@ -1,0 +1,14 @@
+
+docker-compose -f xxx -f xxxx :会将多个compose,yaml文件 合并到一起 当指定了多个文件时(包括没指定-f但同时存在docker-compose.yml和docker-compose.override.yml文件)，Compose会将多个文件合并成一个配置文件，合并的结果与指定文件的顺序有关。合并有两种操作，没有的添加，相同的覆盖。
+
+应用多个 compose 配置文件
+docker-compose 命令默认使用的配置文件是当前目录中的 docker-compose.yml 文件，当然我们可以通过 -f 选项指定一个其它名称的配置文件，比如：
+
+$ docker-compose -f docker-compose-dev.yml up
+更酷的是我们可以添加多个 -f 选项，docker-compose 会自动合并它们，当然也会根据先后顺序把一些重复的配置项覆盖掉。
+
+下面的命令会同时应用这两个配置文件：
+
+$ docker-compose -f docker-compose-base.yml -f docker-compose-dev.yml config
+config 命令不会执行真正的操作，而是显示 docker-compose 程序解析到的配置文件内容
+
