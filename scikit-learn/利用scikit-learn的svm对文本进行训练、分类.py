@@ -4,7 +4,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 import jieba
 from jieba import analyse
-import MySQLdb
+
+import MySQLdb # pip3 install mysqlclient
+
 import numpy as np
 from sklearn import metrics
 from sklearn.svm import SVC

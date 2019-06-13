@@ -1,0 +1,29 @@
+
+临时修改可以通过下面方法：
+sudo pip3 install -r requirements.txt -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+永久修改 pip 默认源
+默认修改为豆瓣源
+进入 ~/.pip
+$ cd ~/.pip
+
+如果没有则创建文件夹
+$ mkdir ~/.pip
+
+查看是否存在 pip.conf，没有就创建
+$ vim ~/.pip/pip.conf
+
+编辑 pip.conf 文件。这里使用豆瓣源，也可以使用阿里源。
+
+[Global]
+index-url=http://pypi.douban.com/simple
+
+[install]
+use-mirrors=true
+mirrors=http://pypi.douban.com/simple/
+trusted-host=pypi.douban.com
+
+ESC，输入:wq保存退出。
+然后再测试 pip install就可以发现已经是国内安装python包的速度了。
+
+

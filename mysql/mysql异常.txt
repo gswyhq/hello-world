@@ -152,3 +152,10 @@ Got error: 1449: The user specified as a definer ('root'@'%') does not exist wh
 mysqldump -h 192.168.12.171 -uzntg -pzg_0413 --skip-lock-tables zhg Smarist > Smarist.sql
 mysqldump --opt --host=139.**.**.106 --default-character-set=utf8  -u HONGLINCHEN --password=1234 --skip-lock-tables gmfserver>"D:\mysqlbackup\backup_gmfserver_%YMD%.sql"
 
+import MySQLdb 需要 pip3 install mysqlclient
+但安装mysqlclient报错：
+OSError: mysql_config not found
+解决方案：
+apt-get install libmysqlclient-dev
+pip3 install mysqlclient
+
