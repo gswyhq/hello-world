@@ -315,7 +315,7 @@ if __name__ == "__main__":
 ### 使用总结
 * 客户端
 
-客服端调用其他的服务的时候，需要在调用的时候，增加一个名为`zipkin_span`的装饰器，装饰器内的部分参数如下
+客户端调用其他的服务的时候，需要在调用的时候，增加一个名为`zipkin_span`的装饰器，装饰器内的部分参数如下
 ```shell
     service_name: 服务名,支持中文名
     span_name: 标签名，用来标志服务里面的某个操作，支持中文名
@@ -331,7 +331,7 @@ with zipkin_span(service_name='webapp', span_name='do_stuff'):
 ```
 除了增加一个装饰器外，还需要在请求服务的时候，对`headers`进行设置
 `headers = create_http_headers_for_new_span()`
-若不设置headers，则在zipkin服务中，可以查询到客服端服务，但是不会有客户端服务与其他服务的依赖关系。
+若不设置headers，则在zipkin服务中，可以查询到客户端服务，但是不会有客户端服务与其他服务的依赖关系。
 跳到一个新的服务时，通过create_http_headers_for_new_span生成新的span信息，包括trace_id，span_id，parent_span_id等，这是服务之间生成关联的条件之一。
 
 * 服务器端
