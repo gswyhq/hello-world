@@ -185,3 +185,48 @@ curl -XPUT 'http://localhost:9200/test_ms_faq_20190117_173633' -d '
   }
 }
 '
+
+通过fields返回指定字段出错：
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "question": "入职体检"
+          }
+        }
+      ]
+    }
+  },
+  "fields": [
+    "origin",
+    "query_question"
+  ]
+}
+"The field [fields] is no longer supported, please use [stored_fields] to retrieve stored fields or _source filtering if the field is not stored"
+解决方案：将fields换为_source:
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "question": "入职体检"
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "origin",
+    "query_question"
+  ]
+}
+
+
+
+
+
+
+

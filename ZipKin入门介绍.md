@@ -26,6 +26,25 @@ ZipKin几个概念
 
 * 数据存储在MySQL中
 ```shell
+docker run --rm --name zipkin \
+    -e MYSQL_HOST=192.168.3.132 \
+    -e MYSQL_PASS=123456 \
+    -e MYSQL_TCP_PORT=3303 \
+    -e MYSQL_USER=root \
+    -e STORAGE_TYPE=mysql \
+    -p 9411:9411 \
+    openzipkin/zipkin:2.14.0    
+
+ZIPKIN_VERSION=2.14.0
+# 此处的MySQL，需运行SQL(https://raw.githubusercontent.com/apache/incubator-zipkin/v$ZIPKIN_VERSION/zipkin-storage/mysql-v1/src/main/resources/mysql.sql)文件
+CREATE DATABASE zipkin ;
+USE zipkin;
+SOURCE /mysql/zipkin.sql ;
+    
+```
+
+或者：
+```shell
 my@192.168.3.133:~$ git clone https://github.com/openzipkin/docker-zipkin.git
 my@192.168.3.133:~$ cd docker-zipkin
 my@192.168.3.133:~/docker-zipkin$ docker-compose -f docker-compose.yml up -d
@@ -54,8 +73,20 @@ my@192.168.3.133: ~/docker-zipkin$ docker-compose -f docker-compose.yml -f docke
 ```
 
 # 使用
-主要是客户端，及服务端，都需要对ZipKin服务进行相应的交互，下面是个示例：
+主要是客户端，及服务端，都需要对ZipKin服务进行相应的交互，下面是个python3代码使用示例：
 启动3个服务，调用关系如下：client.py 分别调用 flask_server.py、 tornado_server.py
+
+requirements.txt
+```shell
+tornado==4.4.2
+requests==2.12.4
+py_zipkin==0.18.3
+Flask==1.0.3
+```
+
+安装python依赖包：
+
+`sudo pip3 install -r requirements.txt -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com`
 
 client.py  
 ```python
