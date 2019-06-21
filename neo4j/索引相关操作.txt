@@ -12,6 +12,11 @@ RETURN p
 # 删除索引：
 DROP INDEX ON :Person(name)
 
+# 删除所有索引：
+CALL apoc.schema.assert({},{},true) YIELD label, key RETURN *
+该过程主要用于确保DB具有在前2个映射中传递的索引和约束，但第三个参数确定是否删除任何其他索引和约束。在上面的查询中，前2个映射是空的，因此最终结果是所有索引和约束都被删除。
+
+
 自动添加索引，在neo4j 3.x需要使用apoc插件来实现；下面是apoc插件使用索引的方法（包括手动创建索引，自动创建索引）
 neo4j 2.x版本自动创建索引，需要修改配置文件（conf/neo4j.properties）：
 node_auto_indexing=true

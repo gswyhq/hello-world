@@ -83,8 +83,7 @@ CALL dbms.listConfig("heap");
 新装的linux默认只有1024，当作负载较大的服务器时，很容易遇到error: too many open files。因此，需要将其改大。
 使用 ulimit -n 65535 可即时修改，但重启后就无效了。（注ulimit -SHn 65535 等效 ulimit -n 65535，-S指soft，-H指hard)
 
-因创建索引引起的异常（neo4j: Version:	3.4.5
-Edition:	Community）：
+因创建索引引起的异常（neo4j: Version:	3.4.5;  Edition:	Community）：
 CREATE INDEX ON :Changjing(name)
 执行下面的语句，第一遍执行正常，第二遍执行就会报错：
 Neo.DatabaseError.General.UnknownError: org.neo4j.io.pagecache.CursorException: Read unreliable key, keySize=4069, keyValueSizeCap=4047, keyHasTombstone=false, offset=4121, pos=0 | GB+Tree[file:/var/lib/neo4j/data/databases/graph.db/schema/index/lucene_native-2.0/1/string-1.0/index-1, layout:StringLayout[version:0.1, identifier:24016946018123776], generation:4/6]
@@ -93,7 +92,6 @@ merge (m:Changjing { name:"在本合同保险期间内，且本合同有效的�
 
 而删除了索引，又恢复正常, 若字符长度没有这么长也是正常的：
 DROP INDEX ON :Changjing(name)
-
 
 空数据库，创建索引
 CREATE INDEX ON :Changjing(name)
