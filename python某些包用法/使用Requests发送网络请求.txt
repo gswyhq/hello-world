@@ -225,3 +225,8 @@ timeout 仅对连接过程有效，与响应体的下载无关。
 若请求超时，则抛出一个 Timeout 异常。
 若请求超过了设定的最大重定向次数，则会抛出一个 TooManyRedirects 异常。
 所有Requests显式抛出的异常都继承自 requests.exceptions.RequestException 。
+
+有时候requests，设置的了超时时间，如timeout=(300, 300),但到了60s的时候，还是显示timeout报错：
+这个时候，往往是由于服务器端的配置引起的，tornado服务往往没有这方面的限制，
+但服务端若配置了nginx代理，很有可能是nginx默认的超时时间引起的，nginx默认超时时间 60s
+这个时候，需要更改nginx 默认超时时间配置(具体方法可参考./nginx/nginx异常.txt)，并roload nginx配置即可。

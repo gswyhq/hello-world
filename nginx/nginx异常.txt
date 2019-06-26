@@ -69,44 +69,23 @@ nginx代理多个服务，但若有服务未开启，可能会导致：
 </body>
 </html>
 
-一般这个错误，是nginx配置不合理造成的。
+一般这个错误，是服务相应时间超过了nginx默认超时时间（60s），可通过下示例方法，增加对应的默认超时时间
+    server {
+        listen       8900;
+        server_name  localhost;
+        client_header_timeout 600s;
 
-可以通过在http中增加如下配置，进行改善：
-
-    fastcgi_connect_timeout 300; 
-    fastcgi_send_timeout 300; 
-    fastcgi_read_timeout 300; 
-    fastcgi_buffer_size 64k; 
-    fastcgi_buffers 4 64k; 
-    fastcgi_busy_buffers_size 128k; 
-
-    fastcgi_temp_file_write_size 128k; 
-
-并且修改连接时间（请求时间比较长，建议改此处）：
-
-    proxy_connect_timeout   18000;   #连接时间为半小时
-    proxy_send_timeout      18000;   
-    proxy_read_timeout      18000;    
-
-vim /etc/nginx/nginx.conf
-
-http {
-
-        ##
-        # Basic Settings
-        ##
-
-        sendfile on;
-        tcp_nopush on;
-        tcp_nodelay on;
-        keepalive_timeout 65;
-        fastcgi_connect_timeout 300s;
-        fastcgi_send_timeout 300s;
-        fastcgi_read_timeout 300s;
-        types_hash_max_size 2048;
-        # server_tokens off;
-
-        # server_names_hash_bucket_size 64;
-        # server_name_in_redirect off;
-...
-
+        location / {
+            proxy_pass_header Server;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For  $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            proxy_pass http://myapps;
+            client_max_body_size    50m;
+            client_body_timeout 600s;
+            proxy_connect_timeout 600s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+        }
+    }

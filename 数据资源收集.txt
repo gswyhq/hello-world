@@ -120,3 +120,62 @@ https://github.com/ChiCheng123/SRN
 SRN.pth
 https://pan.baidu.com/share/init?surl=ambmu1Bu6Oi7zTcEnigFyg 密码：6fba
 
+chinese_wwm_L-12_H-768_A-12.zip
+中文全词覆盖BERT模型
+https://github.com/ymcui/Chinese-BERT-wwm
+https://mp.weixin.qq.com/s/nlFXfgM5KKZXnPdwd97JYg
+
+task_data.tgz 任务数据
+ERNIE_stable.tgz 模型，包含预训练模型参数
+https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE
+
+ChnSentiCorp_htl_all.csv
+7000 多条酒店评论数据，5000 多条正向评论，2000 多条负向评论
+https://github.com/SophonPlus/ChineseNlpCorpus/raw/master/datasets/ChnSentiCorp_htl_all/ChnSentiCorp_htl_all.csv
+
+waimai_10k.csv
+某外卖平台收集的用户评价，正向 4000 条，负向 约 8000 条
+https://raw.githubusercontent.com/SophonPlus/ChineseNlpCorpus/master/datasets/waimai_10k/waimai_10k.csv
+
+online_shopping_10_cats.zip
+10 个类别，共 6 万多条评论数据，正、负向评论各约 3 万条， 包括书籍、平板、手机、水果、洗发水、热水器、蒙牛、衣服、计算机、酒店
+https://github.com/SophonPlus/ChineseNlpCorpus/raw/master/datasets/online_shopping_10_cats/online_shopping_10_cats.zip
+
+weibo_senti_100k.zip
+10 万多条，带情感标注 新浪微博，正负向评论约各 5 万条
+https://pan.baidu.com/s/1DoQbki3YwqkuwQUOj64R_g
+
+simplifyweibo_4_moods.zip
+36 万多条，带情感标注 新浪微博，包含 4 种情感，其中喜悦约 20 万条，愤怒、厌恶、低落各约 5 万条
+https://pan.baidu.com/s/16c93E5x373nsGozyWevITg
+
+dmsc
+movies.csv ratings.zip
+ 28 部电影，超 70 万 用户，超 200 万条 评分/评论 数据
+https://pan.baidu.com/s/1c0yn3TlkzHYTdEBz3T5arA#list/path=%2F
+
+yf_dianping
+ratings.zip links.csv restaurants.csv
+https://pan.baidu.com/s/1yMNvHLl6QYsGbjT7u51Nfg
+24 万家餐馆，54 万用户，440 万条评论/评分数据
+
+yf_amazon
+https://pan.baidu.com/s/1SbfpZb5cm-g2LmnYV_af8Q
+52 万件商品，1100 多个类目，142 万用户，720 万条评论/评分数据
+
+微博实体识别.
+https://github.com/hltcoe/golden-horse
+
+ez_douban
+5 万多部电影（3 万多有电影名称，2 万多没有电影名称），2.8 万 用户，280 万条评分数据
+https://pan.baidu.com/s/1DkN1LmdSMzm_jCBKhbPbig
+
+ACL2019-DuConv
+数据下载地址：
+http://ai.baidu.com/broad/download
+
+Knowledge Extraction
+知识抽取，标注的三元组数据
+https://github.com/chenwanyuan/knowledge_extraction/blob/master/data/corpu.tar.gz
+
+
