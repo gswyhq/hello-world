@@ -56,19 +56,23 @@ img = cv2.imread('/home/gswyhq/Downloads/IMG_20141005_130226.jpg', cv2.IMREAD_CO
 
 # 转换成灰度图像
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+print(gray.shape)
+predict_image = np.array(gray, 'uint8')
 # 人脸检测
 faces = faceCascade.detectMultiScale(
     gray,
     scaleFactor=1.2,
     minNeighbors=5,
-    minSize=(32, 32)
+    minSize=(420, 236)
 )
 result = []
 
+cv2.imwrite('/home/gswyhq/Downloads/检测.png', gray)
+print(len(faces))
 for (x, y, w, h) in faces:
     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    idnum, confidence = recognizer.predict(gray[y:y+h, x:x+w])
+    idnum, confidence = recognizer.predict(np.asarray(predict_image[y:y+h, x:x+w]))
+    print('idnum, confidence', idnum, confidence)
 
     if confidence < 100:
         idnum = names[idnum]
