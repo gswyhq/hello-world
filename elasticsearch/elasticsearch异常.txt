@@ -224,6 +224,17 @@ curl -XPUT 'http://localhost:9200/test_ms_faq_20190117_173633' -d '
   ]
 }
 
+get请求，返回指定字段，示例：
+r= requests.get("http://192.168.3.105:9200/1_kg_entity_synonyms_20190624_195034/doc/25?_source=实体同义词,实体标准词")
+r.json()
+Out[22]: 
+{'_index': '1_kg_entity_synonyms_20190624_195034',
+ '_type': 'doc',
+ '_id': '25',
+ '_version': 1,
+ 'found': True,
+ '_source': {'实体标准词': '金花股份',
+  '实体同义词': ['金花企业(集团)股份有限公司', '600080', 'jin hua gu fen', '金花股份']}}
 
 
 
