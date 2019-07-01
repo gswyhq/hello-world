@@ -178,4 +178,6 @@ Knowledge Extraction
 知识抽取，标注的三元组数据
 https://github.com/chenwanyuan/knowledge_extraction/blob/master/data/corpu.tar.gz
 
+MS-Celeb-1M 名人图片数据集
+https://hyper.ai/datasets/5543
 

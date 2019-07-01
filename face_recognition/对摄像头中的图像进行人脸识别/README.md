@@ -19,4 +19,8 @@ LBPHFaceRecognizer_create()为contrib中的函数。
 names中存储人的名字，若该人id为0则他的名字在第一位，id位1则排在第二位，以此类推。
 最终效果为一个绿框，框住人脸，左上角为红色的人名，左下角为黑色的概率。
 
+## 其他
+有时候，预测出来的结果都是一样的；除了程序上的问题外，可能是因为训练数据的问题；
+更换下训练数据即可，如采用数据：https://github.com/informramiz/opencv-face-recognition-python/tree/master/training-data
+
 [参考资料](https://www.cnblogs.com/xp12345/p/9818435.html)
