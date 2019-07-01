@@ -1,0 +1,8 @@
+
+CNN 手写中文识别
+https://github.com/taosir/cnn_handwritten_chinese_recognition.git
+
+三元组抽取
+https://github.com/bojone/kg-2019.git
+
+
