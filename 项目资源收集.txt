@@ -8,3 +8,10 @@ https://github.com/bojone/kg-2019.git
 利用opencv进行人脸识别：
 https://github.com/informramiz/opencv-face-recognition-python.git
 
+文本语义匹配：
+https://github.com/Lapis-Hong/atec-nlp
+https://github.com/ziweipolaris/atec2018-nlp
+https://gitee.com/jcjview/atec_nlp_sim.git
+https://github.com/yanqiangmiffy/sentence-similarity.git
+https://github.com/doudoucao/Sentence_Matching.git
+

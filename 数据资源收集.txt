@@ -181,3 +181,15 @@ https://github.com/chenwanyuan/knowledge_extraction/blob/master/data/corpu.tar.g
 MS-Celeb-1M 名人图片数据集
 https://hyper.ai/datasets/5543
 
+CCKS 2018 微众银行智能客服问句匹配大赛
+10w对左右的标注训练问句对数据集和1w对左右的验证问句对数据集。
+https://biendata.com/competition/CCKS2018_3/datadescribe/
+https://github.com/zoulala/CCKS_QA/blob/master/data/task3_train.txt
+
+# 旅行险日志：
+zdal_log
+
+语义匹配语料：
+new_esim
+LCQMC
+
