@@ -15,3 +15,6 @@ https://gitee.com/jcjview/atec_nlp_sim.git
 https://github.com/yanqiangmiffy/sentence-similarity.git
 https://github.com/doudoucao/Sentence_Matching.git
 
+人体姿态识别
+https://github.com/CMU-Perceptual-Computing-Lab/openpose
+
