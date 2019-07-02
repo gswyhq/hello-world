@@ -59,7 +59,7 @@ yhq@ubuntu-GPU:~$ docker run -it --rm -v $PWD/notebooks:/tf/notebooks -p 8888:88
 http://192.168.3.132:8888/?token=1e70329d9711e5dfd5c04250d6bf01eadb601904802423f3
 
 或者通过守护进程启动：
-gswyhq@gswyhq-PC:~$ docker run -d --name=jupyter -p 8888:8888 tensorflow/tensorflow:nightly-py3-jupyter
+gswyhq@gswyhq-PC:~$ docker run -d --name=jupyter -v $PWD/notebooks:/tf/notebooks -p 8888:8888 tensorflow/tensorflow:nightly-py3-jupyter
 # 进入容器，设置密码：
 gswyhq@gswyhq-PC:~$ docker exec -it jupyter /bin/bash
 root@9bf94f991c8b:/tf# jupyter notebook password

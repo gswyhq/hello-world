@@ -18,3 +18,17 @@ https://github.com/doudoucao/Sentence_Matching.git
 人体姿态识别
 https://github.com/CMU-Perceptual-Computing-Lab/openpose
 
+# 文本标注工具
+情感、句子类型、成分标注：https://github.com/xiaopangxia/Tagkit.git
+实体标注：https://github.com/shinima/aspp.git
+实体标注：https://github.com/GHY73/BiaoZhuTool.git
+
+# 文本聚类
+https://github.com/AimeeLee77/keyword_extraction.git
+https://github.com/zhangfazhan/text_clustering.git
+https://github.com/zqhZY/short_text_cnn_cluster.git
+
+# 短文本分类：
+https://github.com/AyinampudiNagaSai/Short-text-clustering-based-on-sentence-embedding-using-BiLSTM.git
+https://github.com/zqhZY/short_text_cnn_cluster.git
+
