@@ -192,4 +192,8 @@ zdal_log
 语义匹配语料：
 new_esim
 LCQMC
+sentencesim
+chinese_sts_corpus
+ChineseSTSCorpus = CCKS + LCQMC + sentencesim + chinese_sts_corpus
+
 

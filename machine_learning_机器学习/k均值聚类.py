@@ -80,8 +80,8 @@ def write_result(result_dict, save_file):
     print('聚类结果保存在：{}'.format(save_file))
 
 def main():
-    file_name = '/home/gswyhq/github_projects/text_clustering/data/test_data3.txt' # 每行为一个待聚类的句子；
-    save_file = '/home/gswyhq/Downloads/cluster_result.txt'  # 类别id, 该类别的句子
+    file_name = '/home/gswyhq/Downloads/创维/用户的问题.txt' # 每行为一个待聚类的句子；
+    save_file = '/home/gswyhq/Downloads/cluster_result2.txt'  # 类别id, 该类别的句子
     texts,ids = read_huan(file_name)
 
     result_dict = cluster(texts, ids, n_clusters=100)

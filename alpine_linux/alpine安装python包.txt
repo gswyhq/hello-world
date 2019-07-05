@@ -4,7 +4,7 @@ RUN apk --update add --no-cache --virtual .build-deps \
         g++ \
         --repository http://mirrors.ustc.edu.cn/alpine/v3.8/main/ --allow-untrusted \
     && \
-    pip install numpy==1.15.1 && \
+    pip install numpy==1.15.1 \
     -i http://pypi.douban.com/simple \
      --trusted-host=pypi.douban.com \
     && apk del -f .build-deps

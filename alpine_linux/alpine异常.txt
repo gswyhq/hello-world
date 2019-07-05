@@ -7,4 +7,9 @@ root@1b0aa1cfbe93:/chat_bot$ pip3 install python-Levenshtein
 解决方案：
 apk add musl-dev
 
+numpy安装成功，但报错：
+Original error was: Error loading shared library libcblas.so.3: No such file or directory 
+解决方法：
+可能是依赖关系问题，与其他依赖包分开，单独安装numpy
+
 

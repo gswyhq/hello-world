@@ -1,0 +1,44 @@
+横向合并
+
+table表格拆分合并（colspan、rowspan）
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>演示table标记2--单元格合并</title>
+        <style type="text/css">
+            td{
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <table border="1" cellspacing="0" width="50%" height="150">
+            <caption>横向合并单元格</caption>
+<!--colspan中必须指定要合并的列数目，是两列还是三列等等-->        
+            <tr> <th colspan="2">姓名和年龄</th> <th>电话</th> </tr>
+            <tr> <td>Jack</td> <td>24</td> <td>1351234567</td>  </tr>
+            <tr> <td>Tom</td> <td>22</td> <td>1351234567</td>  </tr>
+            <tr> <td>Rose</td> <td>22</td> <td>1351234567</td>  </tr>
+            <tr> <td>张三</td> <td>25</td> <td>1351234567</td>  </tr>
+        </table>
+        <br/>
+
+        <table border="1" cellspacing="0" width="50%" height="150">
+
+--------------------- 
+
+纵向合并
+<table border="1" cellspacing="0" width="50%" height="150">
+            <caption>纵向合并单元格</caption>
+            <tr><th>班级</t> <th>姓名</th><th>年龄</th> <th>电话</th> </tr>
+            <tr><td rowspan="2">601班</td> <td>Jack</td> <td>24</td> <td>1351234567</td>  </tr>
+            <tr> <td>Tom</td> <td>22</td> <td>1351234567</td>  </tr>
+<!--rowspan中必须指定要合并的列数目，是两行还是三行等等-->    
+            <tr><td  rowspan="3">602班</td> <td>Rose</td> <td>22</td> <td>1351234567</td>  </tr>
+            <tr> <td>张三</td> <td>25</td> <td>1351234567</td>  </tr>
+            <tr> <td>李四</td> <td>25</td> <td>1351234567</td>  </tr>
+        </table>
+
+
