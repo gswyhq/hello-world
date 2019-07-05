@@ -205,3 +205,5 @@ load csv时使用header就在cypther里用header的属性
 否则会出现上面的错误
 
 load csv 导入数据，并不能指定节点及关系的id;但导入数据可以热导入。
+参考资料：
+https://neo4j.com/docs/operations-manual/current/tools/import/file-header-format/#import-tool-header-format-header-files
