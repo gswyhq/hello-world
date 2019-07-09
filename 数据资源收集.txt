@@ -196,4 +196,8 @@ sentencesim
 chinese_sts_corpus
 ChineseSTSCorpus = CCKS + LCQMC + sentencesim + chinese_sts_corpus
 
+Iris Data Set(鸢尾属植物数据集)
+iris.data 
+http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
+
 

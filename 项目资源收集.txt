@@ -32,3 +32,9 @@ https://github.com/zqhZY/short_text_cnn_cluster.git
 https://github.com/AyinampudiNagaSai/Short-text-clustering-based-on-sentence-embedding-using-BiLSTM.git
 https://github.com/zqhZY/short_text_cnn_cluster.git
 
+python+flask搭建CNN在线识别手写中文
+https://github.com/taosir/cnn_handwritten_chinese_recognition
+
+CRNN+CTCLoss中文手写汉字识别        
+https://github.com/wangjinxile/ocr_TDR
+

@@ -150,6 +150,11 @@ gswewf@gswewf-pc:~/服务器上的文件$ tar -czvf /home/gswewf/服务器上的
 默认情况下，解压缩都不保留源文件，若需要保留源文件，需要用-c参数；
 -c或--stdout或--to-stdout：把解压后的文件输出到标准输出设备。 
 
+Linux压缩保留源文件的方法： 
+gzip –c filename > filename.gz 
+Linux解压缩保留源文件的方法： 
+gunzip –c filename.gz > filename 
+
 压缩保留源文件的方法： 
 gzip –c filename > filename.gz 
 解压缩保留源文件的方法： 
