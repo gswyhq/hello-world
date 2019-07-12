@@ -200,4 +200,12 @@ Iris Data Set(鸢尾属植物数据集)
 iris.data 
 http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
 
+腾讯超过800万个中文单词和短语提供200维矢量表示
+https://ai.tencent.com/ailab/nlp/data/Tencent_AILab_ChineseEmbedding.tar.gz
+
+cipslong.v1
+搜狗阅读理解比赛	大概80k的数据集
+
+dureader_raw
+阅读理解数据，百度dureader	100k的问答集
 

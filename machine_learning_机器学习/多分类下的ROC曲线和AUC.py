@@ -8,21 +8,17 @@
 #  得到一个[m， n]形状的矩阵P，每一行表示一个测试样本在各类别下概率值（按类别标签排序）。
 #  相应地，将每个测试样本的标签转换为类似二进制的形式，每个位置用来标记是否属于对应的类别（也按标签排序，这样才和前面对应），由此也可以获得一个[m， n]的标签矩阵L。
 
-#         方法1：每种类别下，都可以得到m个测试样本为该类别的概率（矩阵P中的列）。所以，根据概率矩阵P和标签矩阵L中对应的每一列，可以计算出各个阈值下的假正例率（FPR）和真正例率（TPR），从而绘制出一条ROC曲线。这样总共可以绘制出n条ROC曲线。最后对n条ROC曲线取平均，即可得到最终的ROC曲线。
+#  方法1：每种类别下，都可以得到m个测试样本为该类别的概率（矩阵P中的列）。
+# 所以，根据概率矩阵P和标签矩阵L中对应的每一列，可以计算出各个阈值下的假正例率（FPR）和真正例率（TPR），从而绘制出一条ROC曲线。这样总共可以绘制出n条ROC曲线。
+# 最后对n条ROC曲线取平均，即可得到最终的ROC曲线。
 #
-#         方法2：首先，对于一个测试样本：1）标签只由0和1组成，1
-# 的位置表明了它的类别（可对应二分类问题中的‘’正’’），0
-# 就表示其他类别（‘’负‘’）；2）要是分类器对该测试样本分类正确，则该样本标签中1对应的位置在概率矩阵P中的值是大于0对应的位置的概率值的。基于这两点，将标签矩阵L和概率矩阵P分别按行展开，转置后形成两列，这就得到了一个二分类的结果。所以，此方法经过计算后可以直接得到最终的ROC曲线。
+# 方法2：首先，对于一个测试样本：
+# 1）标签只由0和1组成，1的位置表明了它的类别（可对应二分类问题中的‘’正’’），0就表示其他类别（‘’负‘’）；
+# 2）要是分类器对该测试样本分类正确，则该样本标签中1对应的位置在概率矩阵P中的值是大于0对应的位置的概率值的。
+# 基于这两点，将标签矩阵L和概率矩阵P分别按行展开，转置后形成两列，这就得到了一个二分类的结果。所以，此方法经过计算后可以直接得到最终的ROC曲线。
 #
-#        上面的两个方法得到的ROC曲线是不同的，当然曲线下的面积AUC也是不一样的。 在python中，方法1和方法2分别对应sklearn.metrics.roc_auc_score函数中参数average值为
-# 'macro'
-# 和
-# 'micro'
-# 的情况。
-#
-#
-#
-#       下面以方法2为例，直接上代码，概率矩阵P和标签矩阵L分别对应代码中的y_score和y_one_hot：
+#  上面的两个方法得到的ROC曲线是不同的，当然曲线下的面积AUC也是不一样的。 在python中，方法1和方法2分别对应sklearn.metrics.roc_auc_score函数中参数average值为 'macro' 和 'micro' 的情况。
+# 下面以方法2为例，直接上代码，概率矩阵P和标签矩阵L分别对应代码中的y_score和y_one_hot：
 
 import numpy as np
 import pandas as pd
@@ -51,6 +47,20 @@ def main():
     y_score = model.predict_proba(x_test)
     # 1、调用函数计算micro类型的AUC
     print('调用函数auc：', metrics.roc_auc_score(y_one_hot, y_score, average='micro'))
+
+    y_test2, y_pred2 = y_test, np.array([np.argmax(t) for t in y_score])
+    
+    # 混淆矩阵
+    confusion_matrix(y_test2, y_pred2)
+    
+    # 3、经典-精确率、召回率、F1分数
+    precision_score(y_test2, y_pred2, average='micro')
+    recall_score(y_test2, y_pred2, average='micro')
+    f1_score(y_test2, y_pred2, average='micro')
+
+    # 4、模型报告
+    print(classification_report(y_test2, y_pred2, digits=4))
+
     # 2、手动计算micro类型的AUC
     # 首先将矩阵y_one_hot和y_score展开，然后计算假正例率FPR和真正例率TPR
     fpr, tpr, thresholds = metrics.roc_curve(y_one_hot.ravel(), y_score.ravel())
@@ -76,3 +86,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
