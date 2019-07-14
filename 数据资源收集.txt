@@ -215,3 +215,7 @@ dureader的文章title	20k类，大概可以生成 400K个不重复的句子对
 preprocessed
 百度知道数据；包括一些相似句等；
 
+nietzsche.txt
+#尼采的一些作品
+https://s3.amazonaws.com/text-datasets/nietzsche.txt
+
