@@ -219,3 +219,6 @@ nietzsche.txt
 #尼采的一些作品
 https://s3.amazonaws.com/text-datasets/nietzsche.txt
 
+cc.zh.300.vec
+wiki，200万，300维的词向量
+

@@ -24,3 +24,42 @@ illegal instruction (core dumped)
 pip3 uninstall tensorflow
 pip3 install tensorflow==1.5.0
 
+# 训练时报错： TypeError: Using a `tf.Tensor` as a Python `bool` isnot allowed. Use `if t is not None:` instead of `if t:` to test if a tensor isdefined, and use TensorFlow ops such as tf.cond to execute subgraphsconditioned on the value of a tensor.
+这里的原因是tensorflow的tensor不再是可以直接作为bool值来使用了，需要进行判断。
+
+如：if grad: 改为  if grad is not None:
+
+# 在GPU上运行报错：
+ImportError: libcuda.so.1: cannot open shared object file: No such file or directory
+
+解决方案：
+vi ./root/.bashrc
+添加：
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-10.0/compat"
+export CUDA_HOME=/usr/local/cuda
+执行：
+source ./root/.bashrc
+
+# 在GPU机器上docker容器中未能使用GPU
+2019-07-15 18:49:56.276452: E tensorflow/stream_executor/cuda/cuda_driver.cc:300] failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+2019-07-15 18:49:56.276526: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:155] no NVIDIA GPU device is present: /dev/nvidia0 does not exist
+将docker run 改成nvidia-docker run，这样才可以成功使用tensorflow
+或者：nvidia-docker-compose -f docker-compose.yml up -d
+
+# docker run报错：
+nvidia-docker run -it -d --rm tensorflow/tensorflow:1.13.1-gpu-py3
+5604b3af8eb62eda5936596d0cb4b1c7f29d69ae023c73ae57e686b57a7360b7
+docker: Error response from daemon: OCI runtime create failed: container_linux.go:348: starting container process caused "process_linux.go:402: container init caused \"process_linux.go:385: running prestart hook 1 caused \\\"error running hook: exit status 1, stdout: , stderr: exec command: [/usr/bin/nvidia-container-cli --load-kmods configure --ldconfig=@/sbin/ldconfig.real --device=all --compute --utility --require=cuda>=10.0 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=410,driver<411 --pid=25526 /data/docker_storage/docker/aufs/mnt/e411b26804cffbb97e5a5af91e7bc939866c423c4d47ada986f99219e6c62874]\\\\nnvidia-container-cli: requirement error: invalid expression\\\\n\\\"\"": unknown.
+
+可能是tensorflow版本与系统不兼容：
+nvidia-docker run -it -d --rm tensorflow/tensorflow:1.10.0-gpu-py3
+TensorFlow 1.13及更高版本的GPU版本（包括最新标签）需要支持CUDA 10的NVidia驱动程序。请参阅NVidia的支持映射表：https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver
+
+# ''tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor with shape[?]'' 错误分析
+这是tensorflow 一个经常性错误，错误的原因在于：显卡内存不够。
+解决方法就是降低显卡的使用内存，途径有以下几种措施:
+1 减少Batch 的大小
+2 分析错误的位置，在哪一层出现显卡不够，比如在全连接层出现的，则降低全连接层的维度，把2048改成1042啥的
+3 增加pool 层，降低整个网络的维度。
+4 修改输入图片的大小
+

@@ -1,0 +1,13 @@
+
+Keras中的CNN在训练了 50 个 epoch 之后，梯度丢失
+卷积层梯度是通过反向传播算法和链式法则计算的，这意味着我们是从最后一层开始，反向传递到较浅的层。但当最后一层的激活值接近零时，梯度到处都是零，所以不能反向传播，导致网络什么都学不到。
+在 Keras 中，卷积层默认是以 Glorot Uniform 分布进行初始化的：
+class Conv2D(_Conv):
+    def __init__(self, filters, kernel_size, strides=(1, 1), padding='valid', data_format=None, dilation_rate=(1, 1),
+                    activation=None, use_bias=True, kernel_initializer='glorot_uniform', bias_initializer='zeros',
+                    kernel_regularizer=None, bias_regularizer=None, activity_regularizer=None, kernel_constraint=None,
+                    bias_constraint=None, **kwargs):
+解决方案将初始化方法改成 Kaiming Uniform 分布，即将初始化改成 he_uniform。
+# https://mp.weixin.qq.com/s/qiVaM7-vP1_vnTX0oufAjw
+
+

@@ -1,0 +1,90 @@
+
+明明内存够用，但是还是提示内存错误：
+错误类型：CUDA_ERROE_OUT_OF_MEMORY
+E tensorflow/stream_executor/cuda/cuda_driver.cc:924] failed to alloc 17179869184 bytes on host: CUDA_ERROR_OUT_OF_MEMORY
+W ./tensorflow/core/common_runtime/gpu/pool_allocator.h:195] could not allocate pinned host memory of size: 17179869184
+
+
+yhq@gpu2-131:~$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:            62G         31G        6.4G        773M         24G         27G
+Swap:           63G         32M         63G
+yhq@gpu2-131:~$ 
+实际上报错是说GPU资源不够用
+nvidia-smi
+用上面的命令看下哪些GPU没有被使用，例如3号和5号没有被使用，则你可以用如下命令运行你的程序
+export CUDA_VISIBLE_DEVICES=3,5 python main.py
+
+yhq@gpu2-131:~$ nvidia-smi
+Tue Jul 16 10:09:13 2019       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 384.130                Driver Version: 384.130                   |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 108...  Off  | 00000000:05:00.0 Off |                  N/A |
+| 27%   48C    P8    18W / 250W |  10625MiB / 11171MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+|   1  GeForce GTX 108...  Off  | 00000000:06:00.0 Off |                  N/A |
+| 28%   49C    P8    19W / 250W |  10948MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+|   2  GeForce GTX 108...  Off  | 00000000:09:00.0 Off |                  N/A |
+| 24%   43C    P8    10W / 250W |  10627MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+|   3  GeForce GTX 108...  Off  | 00000000:0A:00.0 Off |                  N/A |
+| 23%   37C    P8    10W / 250W |  10627MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0     12707      C   /usr/bin/python3                           10615MiB |
+|    1      9554      C   /usr/bin/python3                           10653MiB |
+|    1     12707      C   /usr/bin/python3                             285MiB |
+|    2     12707      C   /usr/bin/python3                           10617MiB |
+|    3     12707      C   /usr/bin/python3                           10617MiB |
++-----------------------------------------------------------------------------+
+
+nvidia-smi
+显示所有GPU的当前信息状态
+显示的表格中：
+Fan：                     风扇转速（0%--100%），N/A表示没有风扇
+Temp：                 GPU温度（GPU温度过高会导致GPU频率下降）
+Perf：                    性能状态，从P0（最大性能）到P12（最小性能）
+Pwr：                     GPU功耗
+Persistence-M：   持续模式的状态（持续模式耗能大，但在新的GPU应用启动时花费时间更少）
+Bus-Id：               GPU总线，domain:bus:device.function
+Disp.A：                Display Active，表示GPU的显示是否初始化
+Memory-Usage：显存使用率
+Volatile GPU-Util：GPU使用率
+ECC：                   是否开启错误检查和纠正技术，0/DISABLED, 1/ENABLED
+Compute M.：     计算模式，0/DEFAULT,1/EXCLUSIVE_PROCESS,2/PROHIBITED
+
+上机器中，虽说主机的内存够用，但GPU内存被用光了，故而报错误：CUDA_ERROE_OUT_OF_MEMORY
+
+另外，有时候服务器GPU资源有空余但并不是完全满足需要，可以通过下面的方法来解决：
+服务器的GPU大小为M
+tensorflow只能申请N（N<M）
+也就是tensorflow不能申请到GPU的全部资源 然后就会报错
+
+解决方法：
+找到代码中Session
+在session定义前 增加
+config = tf.ConfigProto(allow_soft_placement=True)
+#最多占gpu资源的70%
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
+#开始不会给tensorflow全部gpu资源 而是按需增加
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
+这样就没问题了
+
+其实tensorflow 算是一个比较贪心的工具了
+就算用device_id指定gpu 也会占用别的GPU的显存资源 必须在执行程序前
+执行
+export CUDA_VISIBLE_DEVICES=n python main.py
+
+（n为可见的服务器编号）
+再去执行python 代码.py 才不会占用别的GPU资源
+
