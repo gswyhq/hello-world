@@ -222,3 +222,7 @@ https://s3.amazonaws.com/text-datasets/nietzsche.txt
 cc.zh.300.vec
 wiki，200万，300维的词向量
 
+WordVector_60dimensional
+60维维基百科词向量
+https://pan.baidu.com/s/1o8f1ELs
+
