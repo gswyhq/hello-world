@@ -234,4 +234,8 @@ https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zi
 neg.xls  pos.xls
 https://github.com/zhuanxuhit/nd101/tree/master/1.Intro_to_Deep_Learning/3.How_to_Do_Sentiment_Analysis/data
 
+CCKS2019关系抽取数据
+-  [origin data](https://pan.baidu.com/s/1EGPYAQp90usvpzROdNilPw) d6vp
+- [preprocessed data](https://pan.baidu.com/s/1lHD-IO7zI4EwyNfi_Fe1HQ) 4f93
+
 

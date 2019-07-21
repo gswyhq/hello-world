@@ -15,10 +15,11 @@ from keras_layer_normalization.layer_normalization import LayerNormalization
 from keras_multi_head.multi_head_attention import MultiHeadAttention
 from keras_position_wise_feed_forward.feed_forward import FeedForward
 from keras_bert.bert import gelu_tensorflow
-
-
 import re, os
 import codecs
+
+# https://github.com/bojone/bert_in_keras/
+# https://kexue.fm/archives/6736#%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB
 
 config_path = '/home/gswyhq/data/chinese_L-12_H-768_A-12/bert_config.json'
 checkpoint_path = '/home/gswyhq/data/chinese_L-12_H-768_A-12/bert_model.ckpt'

@@ -48,3 +48,7 @@ https://mp.weixin.qq.com/s/8GVqOYz4sC4X1U9U0Y96Pw
 “达观杯”文本智能处理挑战赛
 建立模型通过长文本数据正文(article)，预测文本对应的类别(class)   
 https://github.com/ShawnyXiao/2018-DC-DataGrand-TextIntelProcess/blob/master/res/TNT_000_-答辩PPT.pdf
+
+基于bert进行命名实体识别
+https://github.com/macanv/BERT-BiLSTM-CRF-NER
+
