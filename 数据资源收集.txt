@@ -226,3 +226,12 @@ WordVector_60dimensional
 60维维基百科词向量
 https://pan.baidu.com/s/1o8f1ELs
 
+官方的中文预训练权重
+chinese_L-12_H-768_A-12.zip
+https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zip
+
+情感语料：
+neg.xls  pos.xls
+https://github.com/zhuanxuhit/nd101/tree/master/1.Intro_to_Deep_Learning/3.How_to_Do_Sentiment_Analysis/data
+
+

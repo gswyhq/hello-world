@@ -1,0 +1,25 @@
+
+load一个bert微调后的模型时
+model = load_model('/home/gswyhq/hello-world/bert/model.h5')
+报错：
+ImportError: cannot import name 'TokenEmbedding'
+问题分析
+当我们自定义loss或者layer时，如果直接进行训练后模型文件加载，将会出现Value error 或layer 不存在等问题。
+解决方案：
+在Keras中，如果存在自定义layer或者loss，需要在load_model()中以字典形式指定layer或loss。如：
+
+from keras_bert.layers.embedding import TokenEmbedding
+from keras_pos_embd.pos_embd import PositionEmbedding
+from keras_layer_normalization.layer_normalization import LayerNormalization
+from keras_multi_head.multi_head_attention import MultiHeadAttention
+from keras_position_wise_feed_forward.feed_forward import FeedForward
+from keras_bert.bert import gelu_tensorflow
+
+model = load_model('/home/gswyhq/hello-world/bert/model.h5', custom_objects={'TokenEmbedding':TokenEmbedding,
+                                                                             'PositionEmbedding': PositionEmbedding,
+                                                                             'LayerNormalization': LayerNormalization,
+                                                                             'MultiHeadAttention': MultiHeadAttention,
+                                                                             'FeedForward': FeedForward,
+                                                                             'gelu_tensorflow': gelu_tensorflow})
+
+

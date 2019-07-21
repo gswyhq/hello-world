@@ -1,0 +1,31 @@
+
+shadowsocks安装使用
+
+http://www.jouypub.com/2019/087607e6c4fd4058af0d0a6e728245e8/
+
+安装步骤
+一、登录服务器，执行以下命令
+
+wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
+chmod +x shadowsocks-all.sh
+./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log
+
+二、启动脚本
+启动脚本后面的参数含义，从左至右依次为：启动，停止，重启，查看状态。
+
+Shadowsocks-Python 版：
+
+/etc/init.d/shadowsocks-python start | stop | restart | status
+
+三、卸载方法
+若已安装多个版本，则卸载时也需多次运行（每次卸载一种）
+
+./shadowsocks-all.sh uninstall
+
+客户端：
+https://github.com/shadowsocks/shadowsocks-qt5/releases/download/v3.0.1/Shadowsocks-Qt5-3.0.1-x86_64.AppImage
+chmod a+x Shadowsocks-Qt5-x86_64.AppImage
+./Shadowsocks-Qt5-x86_64.AppImage
+
+破解版谷歌访问助手的下载地址：
+https://github.com/haotian-wang/google-access-helper/releases/download/v2.3.0/google-access-helper-2.3.0.crx
