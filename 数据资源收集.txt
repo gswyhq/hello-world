@@ -232,7 +232,14 @@ https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zi
 
 情感语料：
 neg.xls  pos.xls
+https://www.cnblogs.com/sumuncle/p/6370686.html
+http://spaces.ac.cn/usr/uploads/2015/08/646864264.zip
 https://github.com/zhuanxuhit/nd101/tree/master/1.Intro_to_Deep_Learning/3.How_to_Do_Sentiment_Analysis/data
+
+评论数据
+sum.xls
+https://www.cnblogs.com/sumuncle/p/6370686.html
+http://spaces.ac.cn/usr/uploads/2015/09/829078856.zip
 
 CCKS2019关系抽取数据
 -  [origin data](https://pan.baidu.com/s/1EGPYAQp90usvpzROdNilPw) d6vp
