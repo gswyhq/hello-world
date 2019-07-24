@@ -1,0 +1,45 @@
+
+text.py
+
+```
+# -*- coding:utf-8 -*-
+import tornado.httpserver
+import tornado.ioloop
+import tornado.options
+import tornado.web
+# from dncrypte import *  #引入自己的方法
+from tornado.options import define, options
+define("port", default=8000, help="run on the given port", type=int)
+
+class IndexHandler(tornado.web.RequestHandler):
+    def get(self):
+        result = ""
+        Encrypted = ""
+        self.render('test.html', result='abcd')
+    def post(self):
+        encry=self.get_argument('Encrypted', 'Hello')
+        result = '7854'
+        self.render('test.html', result=result)
+
+if __name__ == "__main__":
+    tornado.options.parse_command_line()
+    app = tornado.web.Application(handlers=[(r"/", IndexHandler)])
+    http_server = tornado.httpserver.HTTPServer(app)
+    http_server.listen(options.port)
+    tornado.ioloop.IOLoop.instance().start()
+```
+
+test.html
+```
+<form action="http://myip:8888/?Encrypted=" method="post">
+    请输入加密串：<input type="text" name="word" id="word" value="" />
+    <input type="submit" value="提交" />
+    </br>
+    <table class="table table-bordered table-condensed table-responsive">
+        {{result}}
+    </table>
+    </br>
+</form>
+```
+
+

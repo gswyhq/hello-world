@@ -1,0 +1,133 @@
+
+我们想直接返回一个网页那么这个时候就需要用到模板了
+
+首先在工程目录下新建一个template文件夹。然后在Application中引用该文件夹的地址。template_path参数告诉Tornado在哪里寻找模板文件。下面的代码告诉Python在你Tornado应用文件同目录下的templates文件夹中寻找模板文件。
+
+app = tornado.web.Application(handlers=[(r"/", indexHandler),(r"/show",showHandler)],template_path=os.path.join(os.path.dirname(__file__),"template"),)
+然后在template文件下面新建一个index.html文件。内容如下：
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8http://127.0.0.1:8000/">
+    <title>tornada测试</title>
+</head>
+<body>
+<p>欢迎来到tornado</p>
+</body>
+</html>
+
+一旦我们告诉Tornado在哪里找到模板，我们可以使用RequestHandler类的render方法来告诉Tornado读入模板文件，插入其中的模版代码，并返回结果给浏览器
+
+修改indexHandler的get函数。改成return self.render(‘index.html’)
+
+class indexHandler(tornado.web.RequestHandler):
+    def get(self, *args, **kwargs):
+        return self.render('index.html')
+
+此时再在浏览器中输入http://127.0.0.1:8000/得到如下的输出
+
+
+再来看下如何从网页中传递数据到后端。我们首先需要在html中构造传递数据的页面。网页改成如下，在这里需要输入名字，年龄，城市，工作。填完后会自动跳转到/show的页面
+
+ 
+
+<body>
+
+<h1>填入下面的信息</h1>
+<form method="post" action="/show">
+<p>你的名字<br><input type="text" name="name"></p>
+<p>你的城市<br><input type="text" name="city"></p>
+<p>你的年龄<br><input type="text" name="age"></p>
+<p>你的工作<br><input type="text" name="job"></p>
+<input type="submit">
+</form>
+
+</body>
+
+输入http://127.0.0.1:8000/后的页面如下，点击提交查询后会显示输入的信息。传递参数的方法是post
+
+
+
+对应的增加showHandler的函数，定义post函数使用get_argument获取网页传递的参数，最后通过render函数跳转到/show的界面。并传递获取到的参数
+
+class showHandler(tornado.web.RequestHandler):
+    def post(self, *args, **kwargs):
+        name=self.get_argument('name')
+        age=self.get_argument('age')
+        city=self.get_argument('city')
+        job=self.get_argument('job')
+        self.render('show.html',name=name,age=age,city=city,job=job)
+
+下面再来看下show.html界面，传递的参数通过{{}}方式来引用
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>信息展示</title>
+</head>
+<body>
+<h1>你的信息</h1>
+<p>你的名字是{{name}}</p>
+<p>你的名城市在{{city}}</p>
+<p>你的年龄{{age}}</p>
+<p>你的工作是{{job}}</p>
+</body>
+</html>
+
+最终得到的界面如下
+
+
+接下来看下如果通过引用静态文件来渲染模板。在django章节中我们介绍给在django中引用bootstrap来渲染页面。在tornado中通过也可以引用。
+
+第一步：首先在项目中新建一个static文件夹，并将下载的bootstrap文件放在这个文件夹下面
+
+第二步：在Application添加静态文件的引用路径
+
+tornado.web.Application(handlers=[(r"/", indexHandler),(r"/show",showHandler)],template_path=os.path.join(os.path.dirname(__file__),"template"),                           static_path=os.path.join(os.path.dirname(__file__),"static"),)
+
+第三步：在show的head中引用bootstrap
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>信息展示</title>
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+ 
+
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+
+ 
+
+    <script src="/static/js/bootstrap.min.js"></script>
+
+ 
+
+    <script src="/static/js/bootstrap.js"></script>
+
+ 
+
+    <script src="/static/js/jquery-3.2.1.min.js"></script>
+
+</head>
+
+此时的页面显示如下
+
+
+
+在tornado工程中也可以看到获取bootstrap的打印
+
+[I 171208 10:18:56 web:2063] 200 GET /static/js/bootstrap.min.js (127.0.0.1) 2.66ms
+
+[I 171208 10:18:56 web:2063] 200 GET /static/js/bootstrap.js (127.0.0.1) 2.57ms
+
+[W 171208 10:18:56 web:2063] 200 GET /static/js/jquery-3.2.1.min.js (127.0.0.1) 51.24ms
+
+ 
+
+

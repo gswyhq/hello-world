@@ -1,0 +1,12 @@
+
+docker pull 1docker/opencc
+
+# 简体转繁体
+docker run --rm -it -v $PWD:/tmp 1docker/opencc opencc -c s2tw -i /tmp/README.md -o /tmp/output.txt
+
+-i: 输入文件
+-o: 输出文件
+
+# 繁体转简体
+docker run --rm -it -v $PWD:/tmp 1docker/opencc opencc -c tw2s -i /tmp/output.txt -o /tmp/output2.txt
+

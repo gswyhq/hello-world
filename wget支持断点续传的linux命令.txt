@@ -10,6 +10,8 @@ wget支持断点续传的linux命令
  
 -O name_name.tar.gz 
 把下载的文件命名为new_name.tar.gz 
+wget 下载到指定目录或指定文件
+wget -c -t 0 https://bintray.com/byvoid/opencc/download_file?file_path=opencc-1.0.4.tar.gz -O opencc-1.0.4.tar.gz
  
 http://www.cnscn.org/old_name.tar.gz 
 要下载的文件的网址 

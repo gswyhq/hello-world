@@ -52,3 +52,7 @@ https://github.com/ShawnyXiao/2018-DC-DataGrand-TextIntelProcess/blob/master/res
 基于bert进行命名实体识别
 https://github.com/macanv/BERT-BiLSTM-CRF-NER
 
+基于keras实现的esim模型用于语义匹配
+https://github.com/yuhsinliu1993/Quora_QuestionPairs_DL
+
+

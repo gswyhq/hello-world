@@ -8,7 +8,7 @@
 
 # 腾讯AI Lab嵌入词汇表中有停用词（例如“的”和“是”），数字和标点符号（例如“，”和“。”）
 
-from gensim.models.word2vec import KeyedVectors
+from gensim.models import KeyedVectors
 wv_from_text = KeyedVectors.load_word2vec_format(file, binary=False)
 
 def main():
