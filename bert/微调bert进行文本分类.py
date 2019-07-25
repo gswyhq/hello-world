@@ -17,6 +17,7 @@ from keras_position_wise_feed_forward.feed_forward import FeedForward
 from keras_bert.bert import gelu_tensorflow
 import re, os
 import codecs
+from keras.callbacks import ModelCheckpoint
 
 # https://github.com/bojone/bert_in_keras/
 # https://kexue.fm/archives/6736#%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB
@@ -72,8 +73,6 @@ for d in neg[0]:
 
 for d in pos[0]:
     data.append((d, 1))
-
-
 
 # 按照9:1的比例划分训练集和验证集
 random_order = list(range(len(data)))
@@ -179,14 +178,30 @@ train_D = data_generator(train_data)
 valid_D = data_generator(valid_data)
 
 start_time = time.time()
+
+
+checkpoint = ModelCheckpoint(filepath='model2.h5',monitor='val_acc',mode='auto' ,save_best_only='True')
+# filename：字符串，保存模型的路径
+# monitor：需要监视的值
+# verbose：信息展示模式，0或1; 如果你喜欢进度条,那就选1,如果喜欢清爽的就选0
+# save_best_only：当设置为True时，将只保存在验证集上性能最好的模型
+# mode：‘auto’，‘min’，‘max’之一，在save_best_only=True时决定性能最佳模型的评判准则，
+# 例如，当监测值为val_acc时，模式应为max，
+# 当检测值为val_loss时，模式应为min。在auto模式下，评价准则由被监测值的名字自动推断。
+# save_weights_only：若设置为True，则只保存模型权重，否则将保存整个模型（包括模型结构，配置信息等）
+# period：CheckPoint之间的间隔的epoch数
+
+callback_lists=[checkpoint]
+
 model.fit_generator(
     train_D.__iter__(),
     steps_per_epoch=len(train_D),
     epochs=1,
     validation_data=valid_D.__iter__(),
-    validation_steps=len(valid_D)
+    validation_steps=len(valid_D),
+    callbacks=callback_lists
 )
-model.save('model.h5')
+# model.save('model.h5') # 此方法保存最终的模型，但不一定是最优的模型；
 print('总耗时：{}'.format(time.time() - start_time))
 
 def predict(data, model_file='/home/gswyhq/hello-world/bert/model.h5'):
