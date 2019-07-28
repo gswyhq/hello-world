@@ -55,4 +55,6 @@ https://github.com/macanv/BERT-BiLSTM-CRF-NER
 基于keras实现的esim模型用于语义匹配
 https://github.com/yuhsinliu1993/Quora_QuestionPairs_DL
 
+基于n元笔画的中文词向量模型
+https://github.com/bamtercelboo/cw2vec
 
