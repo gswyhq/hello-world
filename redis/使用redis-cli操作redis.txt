@@ -30,6 +30,9 @@ OK
 127.0.0.1:6379[9]> exit
 gswewf@gswewf-pc:~$
 
+通过正则匹配，批量删除部分keys:
+root@f0f5322fb0cc:/data# redis-cli -n 2 keys "all_baoxian:*" |xargs redis-cli -n 2 del
+
 # 连接ip=127.0.0.1,port=6379,db=9:
 gswewf@gswewf-pc:~$ redis-cli -h 127.0.0.1 -p 6379 -n 9
 127.0.0.1:6379[9]> dbsize

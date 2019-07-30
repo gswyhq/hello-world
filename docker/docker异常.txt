@@ -333,4 +333,8 @@ docker容器内终端不能全屏,窗口最大化
 解决docker终端宽度、高度显示不正确
 解决方案，设置COLUMNS和LINES环境变量：
 docker exec -it --env COLUMNS=`tput cols` --env LINES=`tput lines` your_container_name /bin/bash
+也可以在容器内的 ~/.bashrc 文件末尾添加如下内容，这样就不需要每次进入容器都需要重新设置；
+# export COLUMNS=`tput cols`
+export COLUMNS=213
+export LINES=`tput lines`
 

@@ -1,0 +1,10 @@
+
+目前spacy还不支持中文模型
+
+sudo python3 -m spacy link jieba zh
+
+from spacy.lang.zh import Chinese
+
+nlp = Chinese()
+doc = nlp(u"蘋果公司正考量用一億元買下英國的新創公司")
+
