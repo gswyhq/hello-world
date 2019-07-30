@@ -252,3 +252,7 @@ zhwiki.zip
 /home/gswyhq/Downloads/zhwiki-latest-pages-articles.xml.bz2
 wiki中文数据的下载地址是：https://dumps.wikimedia.org/zhwiki/latest/zhwiki-latest-pages-articles.xml.bz2
 
+短文本语义匹配数据集
+QA_corpus
+https://github.com/terrifyzhao/text_matching/blob/master/input/train.csv
+
