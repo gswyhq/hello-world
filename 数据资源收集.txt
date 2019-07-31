@@ -256,3 +256,6 @@ wiki中文数据的下载地址是：https://dumps.wikimedia.org/zhwiki/latest/z
 QA_corpus
 https://github.com/terrifyzhao/text_matching/blob/master/input/train.csv
 
+医疗知识图谱NLP项目，实体规模4.4万，实体关系规模30万,实体类型包括：诊断检查项目,医疗科目，疾病，药品，食物，在售药品，疾病症状
+https://github.com/liuhuanyong/QASystemOnMedicalKG.git
+
