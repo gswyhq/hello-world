@@ -191,7 +191,7 @@ zdal_log
 
 语义匹配语料：
 new_esim
-LCQMC
+LCQMC: http://icrc.hitsz.edu.cn/info/1037/1146.htm
 sentencesim
 chinese_sts_corpus
 ChineseSTSCorpus = CCKS + LCQMC + sentencesim + chinese_sts_corpus
@@ -258,4 +258,13 @@ https://github.com/terrifyzhao/text_matching/blob/master/input/train.csv
 
 医疗知识图谱NLP项目，实体规模4.4万，实体关系规模30万,实体类型包括：诊断检查项目,医疗科目，疾病，药品，食物，在售药品，疾病症状
 https://github.com/liuhuanyong/QASystemOnMedicalKG.git
+
+glyph 文本分类数据：
+来源：https://github.com/zhangxiangxiao/glyph
+数据集	类	训练	测试
+大众点评网(Dianping)	2	2000000	500000
+JD全部(JD full)	5	3000000	250000
+JD二类(JD binary)	2	4000000	360000
+凤凰网(lfeng)	5	800000	50000
+中新网(Chinanews)	7	1,400,000	112000
 

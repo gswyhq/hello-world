@@ -168,6 +168,8 @@ xz -z 要压缩的文件
 xz解压文件方法或命令
 xz -d 要解压的文件
 同样使用 -k 参数来保留被解压缩的文件。
+解压到当前目录并保留原压缩文件,如：
+gswyhq@gswyhq-PC:~$ xz -dk full_test.csv.xz 
 
 创建或解压tar.xz文件的方法
 习惯了 tar czvf 或 tar xzvf 的人可能碰到 tar.xz也会想用单一命令搞定解压或压缩。其实不行 tar里面没有征对xz格式的参数比如 z是针对 gzip，j是针对 bzip2。
