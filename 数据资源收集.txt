@@ -268,3 +268,9 @@ JD二类(JD binary)	2	4000000	360000
 凤凰网(lfeng)	5	800000	50000
 中新网(Chinanews)	7	1,400,000	112000
 
+dataSets.zip
+中英文语义匹配数据集
+中文数据为atec2018数据
+https://drive.google.com/file/d/15FTuNdF5YswRMo3USL_lT_h1hI3ylrAc/view?usp=sharing
+
+

@@ -64,3 +64,9 @@ https://github.com/liuhuanyong/CrimeKgAssitant.git
 医疗知识图谱NLP项目，实体规模4.4万，实体关系规模30万
 https://github.com/liuhuanyong/QASystemOnMedicalKG.git
 
+英文语音识别
+https://github.com/BenShuai/kerasTfPoj.git
+
+文本匹配模型：
+https://github.com/calliwen/NLP_Sentence_Match.git
+
