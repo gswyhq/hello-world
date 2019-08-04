@@ -148,9 +148,9 @@ def main(IS_TRAIN=True):
     filter_list = word_filter(seg_list, pos)
     print('LDA模型结果: {}'.format(filter_list))
     # topic_extract(filter_list, 'LDA', pos)
-    doc_list = load_data()
-    keyword_num = 10
     if IS_TRAIN:
+        doc_list = load_data()
+        keyword_num = 10
         topic = TopicModel(doc_list, keyword_num, model='LDA', num_topics=4)
         with open(MODEL_PATH, 'wb')as f:
             pickle.dump(topic, f)
@@ -158,7 +158,8 @@ def main(IS_TRAIN=True):
         with open(MODEL_PATH, 'rb')as f:
             topic = pickle.load(f, encoding='iso-8859-1')
     topic.get_simword(filter_list)
+    print(topic.doc2bowvec(filter_list))
 
 
 if __name__ == '__main__':
-    main()
+    main(IS_TRAIN=False)
