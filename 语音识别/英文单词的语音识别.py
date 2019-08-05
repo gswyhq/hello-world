@@ -11,7 +11,7 @@ import random
 import numpy as np
 import pickle
 import wave
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Bidirectional, LSTM, Reshape
 from keras.models import Sequential
 import keras.losses
 import keras.optimizers
@@ -25,7 +25,7 @@ SPEECH_FILE_PATH = '/home/gswyhq/data/speech_commands_v0.01'
 TRAIN_TEST_SPLIT_FILE_PATH = '/home/gswyhq/data/speech_commands_v0.01/train_test_split.json'
 
 CLASS_TAGS = ['cat', 'eight', 'go', 'left', 'nine', 'on', 'right', 'six', 'three', 'up', 'yes', 'bed', 'dog', 'five', 'happy', 'no', 'one', 'seven', 'stop', 'tree', 'zero', 'bird', 'down', 'four', 'house', 'marvin', 'off', 'sheila', 'two', 'wow']
-CLASS_TAGS = CLASS_TAGS[:3]
+# CLASS_TAGS = CLASS_TAGS[:3]
 
 MAX_NUM_WAVS_PER_CLASS = 2**27 - 1  # ~134M
 
@@ -97,6 +97,10 @@ def get_wav_mfcc(wav_path):
     strData = f.readframes(nframes)#讀取音頻，字符串格式
     waveData = np.fromstring(strData,dtype=np.int16)#將字符串轉化爲int
     waveData = waveData*1.0/(max(abs(waveData)))#wave幅值歸一化
+    if np.isnan(waveData).any():
+        # /home/gswyhq/data/speech_commands_v0.01/bird/3e7124ba_nohash_0.wav
+        print("{} 文件有问题；".format(wav_path))
+        return None
     waveData = np.reshape(waveData,[nframes,nchannels]).T
     f.close()
 
@@ -132,6 +136,7 @@ def create_datasets(data, split_num=0.2):
         random.shuffle(files)
         for filename in files[:int(len(files) * split_num)]:
             waveData = get_wav_mfcc(filename)
+            if waveData is None:continue
             wavs.append(waveData)
             _class = filename.split('/')[-2]
             labels.append(CLASS_TAGS.index(_class))
@@ -160,6 +165,7 @@ def generator_datasets(data, tag, batch_size=1):
         labels = []  # labels 和 testlabels 這裏面存的值都是對應標籤的下標，下標對應的名字在 labsInd 和 testlabsInd 中
         for filename in files:
             waveData = get_wav_mfcc(filename)
+            if waveData is None:continue
             wavs.append(waveData)
             _class = filename.split('/')[-2]
             labels.append(CLASS_TAGS.index(_class))
@@ -179,8 +185,16 @@ def build_model():
     # 構建一個4層的模型
     model = Sequential()
     model.add(Dropout(0.2, input_shape=(16000,))) # 音頻爲16000幀的數據，這裏的維度就是16000，激活函數直接用常用的relu
+    # print("model.output_shape: {}".format(model.output_shape))
+    model.add(Dense(1024, activation='relu',
+                kernel_regularizer=regularizers.l2(0.005)  # 0.001, 过拟合; 0.01, 欠拟合
+                # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
+                # activity_regularizer=regularizers.l1(0.001)
+                    ))
+    model.add(Dropout(0.2))
+
     model.add(Dense(512, activation='relu',
-                kernel_regularizer=regularizers.l2(0.01)
+                kernel_regularizer=regularizers.l2(0.005)  # 0.001, 过拟合; 0.01, 欠拟合
                 # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
                 # activity_regularizer=regularizers.l1(0.001)
                     ))
@@ -195,19 +209,20 @@ def build_model():
     # 另外，正则化偏置参数可能会导致明显的欠拟合。
 
     model.add(Dropout(0.2))
-    model.add(Dense(256, activation='relu',
-                kernel_regularizer=regularizers.l2(0.01),
+    model.add(Dense(256, activation='relu', init='normal',
+                kernel_regularizer=regularizers.l2(0.0001)
+                # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
+                # activity_regularizer=regularizers.l1(0.001)
+                    ))
+
+    model.add(Dropout(0.2))
+    model.add(Dense(64, activation='tanh', init='normal',
+                # kernel_regularizer=regularizers.l2(0.001),
                 # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
                 # activity_regularizer=regularizers.l1(0.001)
                     ))
     model.add(Dropout(0.2))
-    model.add(Dense(64, activation='relu',
-                kernel_regularizer=regularizers.l2(0.001),
-                # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
-                # activity_regularizer=regularizers.l1(0.001)
-                    ))
-    model.add(Dropout(0.2))
-    model.add(Dense(len(CLASS_TAGS), activation='softmax'))
+    model.add(Dense(len(CLASS_TAGS), init='normal', activation='softmax'))
     # 二分类与多分类在前面的结构上都没有问题，就是需要改一下最后的全连接层，因为此时有5分类，所以需要Dense(5)，
     # 同时激活函数是softmax，如果是二分类就是dense(2)+sigmoid(激活函数)。
     # [編譯模型] 配置模型，損失函數採用交叉熵，優化採用Adadelta，將識別準確率作爲模型評估
@@ -315,7 +330,7 @@ def main():
     #
     # model = train(wavs, labels, valwavs, vallabels, testwavs, testlabels, batch_size=12, epochs=5, verbose=1)
 
-    history = generator_train(data, batch_size=124, epochs=5, verbose=1)
+    history = generator_train(data, batch_size=32, epochs=50, verbose=1)
 
 
 if __name__ == '__main__':
@@ -325,3 +340,11 @@ if __name__ == '__main__':
 # Epoch 00005: val_loss did not improve from 1.03783
 # Test loss: 2.796665355714285
 # Test accuracy: 0.6327724945135332
+
+# 410/412 [============================>.] - ETA: 1s - loss: 0.8723 - acc: 0.7428
+# 411/412 [============================>.] - ETA: 0s - loss: 0.8721 - acc: 0.7429
+# 412/412 [==============================] - 256s 621ms/step - loss: 0.8718 - acc: 0.7430 - val_loss: 1.2094 - val_acc: 0.5820
+# 
+# Epoch 00005: val_loss did not improve from 1.04681
+# Test loss: 1.2647096929143795
+# Test accuracy: 0.5635698610095099

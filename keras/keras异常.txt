@@ -23,3 +23,9 @@ model = load_model('/home/gswyhq/hello-world/bert/model.h5', custom_objects={'To
                                                                              'gelu_tensorflow': gelu_tensorflow})
 
 
+# 梯度消失与梯度爆炸、Loss为Nan的原因
+1.梯度爆炸。梯度变得非常大，使得学习过程难以继续。
+2.不当的损失函数。
+3.不当的输入。if np.isnan(data).any(): continue
+4.池化层中步长比卷积核的尺寸大。
+

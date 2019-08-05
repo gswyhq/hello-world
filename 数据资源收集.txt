@@ -279,3 +279,7 @@ https://pan.baidu.com/s/1Au85kI_oeDjode2hWumUvQ
 speech_commands_v0.02.tar.gz
 http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz
 
+
+multinli_1.0.zip
+https://www.nyu.edu/projects/bowman/multinli/multinli_1.0.zip
+
