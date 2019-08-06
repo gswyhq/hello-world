@@ -25,7 +25,7 @@ SPEECH_FILE_PATH = '/home/gswyhq/data/speech_commands_v0.01'
 TRAIN_TEST_SPLIT_FILE_PATH = '/home/gswyhq/data/speech_commands_v0.01/train_test_split.json'
 
 CLASS_TAGS = ['cat', 'eight', 'go', 'left', 'nine', 'on', 'right', 'six', 'three', 'up', 'yes', 'bed', 'dog', 'five', 'happy', 'no', 'one', 'seven', 'stop', 'tree', 'zero', 'bird', 'down', 'four', 'house', 'marvin', 'off', 'sheila', 'two', 'wow']
-# CLASS_TAGS = CLASS_TAGS[:3]
+# CLASS_TAGS = ['seven', 'stop']
 
 MAX_NUM_WAVS_PER_CLASS = 2**27 - 1  # ~134M
 
@@ -186,12 +186,12 @@ def build_model():
     model = Sequential()
     model.add(Dropout(0.2, input_shape=(16000,))) # 音頻爲16000幀的數據，這裏的維度就是16000，激活函數直接用常用的relu
     # print("model.output_shape: {}".format(model.output_shape))
-    model.add(Dense(1024, activation='relu',
-                kernel_regularizer=regularizers.l2(0.005)  # 0.001, 过拟合; 0.01, 欠拟合
-                # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
-                # activity_regularizer=regularizers.l1(0.001)
-                    ))
-    model.add(Dropout(0.2))
+    # model.add(Dense(1024, activation='relu',
+    #             kernel_regularizer=regularizers.l2(0.005)  # 0.001, 过拟合; 0.01, 欠拟合
+    #             # bias_regularizer=regularizers.l1_l2(l1=0.01, l2=0.01),
+    #             # activity_regularizer=regularizers.l1(0.001)
+    #                 ))
+    # model.add(Dropout(0.2))
 
     model.add(Dense(512, activation='relu',
                 kernel_regularizer=regularizers.l2(0.005)  # 0.001, 过拟合; 0.01, 欠拟合
@@ -260,16 +260,16 @@ def generator_train(data, batch_size=124, epochs=5, verbose=1):
     model = build_model()
     # 'training', 'validation', 'testing'
     history = model.fit_generator(generator_datasets(data, 'training', batch_size=batch_size),
-                                  steps_per_epoch=int(51088/batch_size),
+                                  steps_per_epoch=int(len(data['training'])/batch_size),
                                   # batch_size=batch_size,
                                   epochs=epochs,
                                   verbose=verbose,
                                   validation_data=generator_datasets(data, 'validation', batch_size=batch_size),
-                                  validation_steps = int(6798/batch_size),
+                                  validation_steps = int(len(data['validation'])/batch_size)+1,
                                   callbacks=[checkpoint])
 
     # 開始評估模型效果 # verbose=0爲不輸出日誌信息
-    score = model.evaluate_generator(generator_datasets(data, 'testing'), steps=6835, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=0)
+    score = model.evaluate_generator(generator_datasets(data, 'testing'), steps=len(data['testing'])+1, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1]) # 準確度
 
@@ -330,21 +330,18 @@ def main():
     #
     # model = train(wavs, labels, valwavs, vallabels, testwavs, testlabels, batch_size=12, epochs=5, verbose=1)
 
-    history = generator_train(data, batch_size=32, epochs=50, verbose=1)
+    history = generator_train(data, batch_size=124, epochs=5, verbose=1)
 
 
 if __name__ == '__main__':
     main()
 
-# 412/412 [==============================] - 477s 1s/step - loss: 1.1251e-04 - acc: 1.0000 - val_loss: 2.5347 - val_acc: 0.6341
-# Epoch 00005: val_loss did not improve from 1.03783
-# Test loss: 2.796665355714285
-# Test accuracy: 0.6327724945135332
-
-# 410/412 [============================>.] - ETA: 1s - loss: 0.8723 - acc: 0.7428
-# 411/412 [============================>.] - ETA: 0s - loss: 0.8721 - acc: 0.7429
-# 412/412 [==============================] - 256s 621ms/step - loss: 0.8718 - acc: 0.7430 - val_loss: 1.2094 - val_acc: 0.5820
-# 
-# Epoch 00005: val_loss did not improve from 1.04681
-# Test loss: 1.2647096929143795
-# Test accuracy: 0.5635698610095099
+# 26/30 [=========================>....] - ETA: 10s - loss: 0.9927 - acc: 0.7819
+# 27/30 [==========================>...] - ETA: 7s - loss: 0.9953 - acc: 0.7775
+# 28/30 [===========================>..] - ETA: 5s - loss: 0.9918 - acc: 0.7776
+# 29/30 [============================>.] - ETA: 2s - loss: 0.9885 - acc: 0.7775
+# 30/30 [==============================] - 79s 3s/step - loss: 0.9826 - acc: 0.7793 - val_loss: 0.7975 - val_acc: 0.8452
+#
+# Epoch 00005: val_loss improved from 1.03966 to 0.79747, saving model to /home/gswyhq/data/speech_commands_v0.01/model-ep005-loss0.983-val_loss0.797-acc0.7793.h5
+# Test loss: 0.7736149694778193
+# Test accuracy: 0.8588957055214724
