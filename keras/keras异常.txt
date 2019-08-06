@@ -29,3 +29,12 @@ model = load_model('/home/gswyhq/hello-world/bert/model.h5', custom_objects={'To
 3.不当的输入。if np.isnan(data).any(): continue
 4.池化层中步长比卷积核的尺寸大。
 
+在导入_obtain_input_shape时
+from keras.applications.imagenet_utils import _obtain_input_shape
+
+出现错误如下：
+ImportError: cannot import name '_obtain_input_shape'
+原因是在keras 2.2.2中，keras.applications.imagenet_utils模块不再有_obtain_input_shape方法。解决方法：
+将导入语句修改如下
+from keras_applications.imagenet_utils import _obtain_input_shape
+

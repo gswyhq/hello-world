@@ -283,3 +283,15 @@ http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz
 multinli_1.0.zip
 https://www.nyu.edu/projects/bowman/multinli/multinli_1.0.zip
 
+snli_1.0.zip
+https://nlp.stanford.edu/projects/snli/snli_1.0.zip
+/home/gswyhq/github_projects/DIIN-in-Keras/data/snli_1.0
+
+glove.840B.300d.zip
+http://nlp.stanford.edu/data/glove.840B.300d.zip
+/home/gswyhq/github_projects/DIIN-in-Keras/data/glove.840B.300d.txt
+
+图像数据集
+http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/data/animeface-character-dataset.zip
+https://www.crcv.ucf.edu/data/Selfie/Selfie-dataset.tar.gz
+
