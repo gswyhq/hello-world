@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        li{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <ul id="userList">
+        {% for key,val in users.items() %}
+            <li uid="{{key}}">{{val.name}} ({{val.count}})</li>
+        {% endfor %}
+    </ul>
+
+    <script src="https://cdn.bootcss.com/jquery/3.3.0/jquery.min.js"></script>
+    <script>
+
+        $(function () {
+            $('#userList').on('dblclick','li',function () {
+                var uid = $(this).attr('uid');
+                $.ajax({
+                    url:'/vote',
+                    type:'POST',
+                    data:{uid:uid},
+                    success:function (arg) {
+                        console.log(arg);
+                    }
+                })
+            });
+
+        });
+        /*
+        获取投票信息
+         */
+        function get_vote() {
+            $.ajax({
+                url:'/get/vote',
+                type:"GET",
+                dataType:'JSON',
+                success:function (arg) {
+                    $('#userList').empty();
+                    $.each(arg,function (k,v) {
+                        var li = document.createElement('li');
+                        li.setAttribute('uid',k);
+                        li.innerText = v.name + "(" + v.count + ')' ;
+                        $('#userList').append(li);
+                    })
+
+                }
+            })
+        }
+        
+        setInterval(get_vote,3000);
+    </script>
+</body>
+</html>
+

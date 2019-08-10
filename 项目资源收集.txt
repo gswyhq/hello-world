@@ -82,3 +82,7 @@ https://github.com/kfcd/chaizi
 用图片，生成二次元萌妹子，神情高度还原，反过来也可以
 https://github.com/taki0112/UGATIT.git
 
+基于Keras框架实现加入Attention与BiRNN的机器翻译模型  
+文本生成——利用TensorFlow构建LSTM模型
+https://github.com/NELSONZHAO/zhihu
+
