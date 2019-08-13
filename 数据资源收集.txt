@@ -287,6 +287,12 @@ snli_1.0.zip
 https://nlp.stanford.edu/projects/snli/snli_1.0.zip
 /home/gswyhq/github_projects/DIIN-in-Keras/data/snli_1.0
 
+Glove预训练词嵌入
+该预训练词嵌入根据斯坦福大学提出的Glove模型进行训练，主要包括如下四个文件：
+1） glove.6B：Wikipedia 2014 + Gigaword 5 (6B tokens, 400K vocab, uncased, 50d, 100d, 200d, & 300d vectors, 822 MB download)
+2） glove.42B.300d：Common Crawl (42B tokens, 1.9M vocab, uncased, 300d vectors, 1.75 GB download)
+3）glove.840B.300d：Common Crawl (840B tokens, 2.2M vocab, cased, 300d vectors, 2.03 GB download)
+4）glove.twitter.27B：Twitter (2B tweets, 27B tokens, 1.2M vocab, uncased, 25d, 50d, 100d, & 200d vectors, 1.42 GB download)
 glove.840B.300d.zip
 http://nlp.stanford.edu/data/glove.840B.300d.zip
 /home/gswyhq/github_projects/DIIN-in-Keras/data/glove.840B.300d.txt
@@ -294,4 +300,7 @@ http://nlp.stanford.edu/data/glove.840B.300d.zip
 图像数据集
 http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/data/animeface-character-dataset.zip
 https://www.crcv.ucf.edu/data/Selfie/Selfie-dataset.tar.gz
+
+汉字、词语解释、成语、歇后语
+https://github.com/pwxcoo/chinese-xinhua
 
