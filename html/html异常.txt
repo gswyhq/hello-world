@@ -1,0 +1,26 @@
+
+同样一个网页不同的人，点击submit，有些人出现：
+405: Method Not Allowed
+
+原因：
+出现405错误的是因为不能访问资源：https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js
+解决方案
+下载资源到服务器端，并改写资源路径为本地路径，如下：
+<!--    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>-->
+    <script src="js/jquery-3.4.1.min.js"></script>
+
+
+304(Not Modified)
+因为服务器及客户端的缓存；当服务器端收到客户端的请求，若判断为没有变化及修改，就返回对应的304；
+当你第一次请求一个资源的时候，server会同时生成并返回一个字符串在响应头里，叫Etag。
+浏览器接到资源后，缓存资源的同时也会把这个Etag保存下来，成为If-None_Match 。Etag可以看作是一个资源的唯一标识，当你第二次请求这个资源的时候，请求头里会带着这个Etag,server会拿server该资源现在的Etag跟请求头中的If-None_Match做对比，然后看看If-Modified-Since过没过期，如果一样，直接告诉他：你就用本地的吧，我没变，就不给你返回了。所以返回了304，304就是这样。
+有时候为了防止服务端返回的是304，这个时候可以在请求的时候删除掉‘If-None_Match’即可，如：
+```python
+            self.request.headers.pop('If-None-Match', '')
+            response = await self.http_client.fetch(url,
+                                                    body=None,
+                                                    method=self.request.method,
+                                                    headers=self.request.headers,
+                                                    **kwargs)
+```
+
