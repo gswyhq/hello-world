@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import sys
+import os
 
 '''
 通过iconv -l 命令查看，其支持的编码格式还不少，之间可以互相转换
@@ -19,16 +20,26 @@ import sys
 
 
 '''
-def gbk_to_utf8(input_file):
-    with open(input_file, encoding='gb18030')as f:
-        data = f.read()
-    with open(input_file, 'w', encoding='utf-8')as f:
-        f.write(data)
+def gbk_to_utf8(file_path):
+    if os.path.isfile(file_path):
+        input_files = [file_path]
+    elif os.path.isdir(file_path):
+        input_files = [os.path.join(file_path, f) for f in os.listdir(file_path)]
+    else:
+        raise ValueError('输出参数有误，参数应该为一个文件路径或文件目录')
+    for input_file in input_files:
+        try:
+            with open(input_file, encoding='gb18030')as f:
+                data = f.read()
+            with open(input_file, 'w', encoding='utf-8')as f:
+                f.write(data)
+        except Exception as e:
+            print('`{}`转换失败：{}'.format(input_file, e))
 
 def main():
     # input_file = '/home/gswyhq/下载/测试文件.txt'
-    input_file = sys.argv[1]
-    gbk_to_utf8(input_file)
+    file_path = sys.argv[1]
+    gbk_to_utf8(file_path)
 
 if __name__ == '__main__':
     main()
