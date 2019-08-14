@@ -86,3 +86,23 @@ https://github.com/taki0112/UGATIT.git
 文本生成——利用TensorFlow构建LSTM模型
 https://github.com/NELSONZHAO/zhihu
 
+https://chinesenlp.xyz/#/zh/
+指代消歧 (Co-reference Resolution)
+对话状态管理 (Dialogue State Management)
+情绪分类 (Emotion Classification)
+实体链接 (Entity Linking)
+实体标注 (Entity Tagging)
+语言模型 (Language Modeling)
+机器翻译 (Machine Translation)
+词性标注 (POS Tagging)
+问答 (Question Answering)
+关系抽取 (Relation Extraction)
+情感分析 (Sentiment Analysis)
+繁简转化 (Simplified/traditional Conversion)
+拼写纠正 (Spell Correction)
+文本摘要 (Text Summarization)
+话题分类 (Topic Classification)
+音译 (Transliteration)
+词向量 (Word Embedding)
+中文分词 (Word Segmentation)
+
