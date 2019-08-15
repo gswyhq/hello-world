@@ -106,3 +106,13 @@ https://chinesenlp.xyz/#/zh/
 词向量 (Word Embedding)
 中文分词 (Word Segmentation)
 
+智能问答系统设计与开发
+https://github.com/wangfin/QAsystem.git
+测试数据下载：http://www.cnsoftbei.com/upload_files/other/znwdxtsjykf_cssj.rar
+
+生成式深度学习
+https://github.com/davidADSP/GDL_code
+https://www.oreilly.com/library/view/generative-deep-learning/9781492041931/
+变分自编码器，生成对抗网络(GANs)，教机器绘画、写作、作曲和玩游戏
+
+

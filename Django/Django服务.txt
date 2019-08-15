@@ -1,0 +1,14 @@
+安装：pip3 install django
+
+新建一个项目：
+django-admin startproject my_project
+
+在my_project项目下新建一个应用webdev：
+~/my_project$ python3 manage.py startapp webdev
+
+启动应用：python3 manage.py runserver 127.0.0.1:8001
+默认情况下，会在8000端口启动一个本地服务器。当然，如果遇到端口被占用或者其他情况，可以自定义端口，比如上面的命令中，使用了8001端口、
+PS：如果想要其他计算机也可以访问该页面，则执行如下命令：
+
+python3 manage.py runserver 0.0.0.0:8001
+
