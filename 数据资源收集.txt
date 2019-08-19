@@ -314,4 +314,7 @@ https://github.com/InsaneLife/ChineseNLPCorpus/tree/master/NER/MSRA
 中文完形填空数据集
 https://github.com/ymcui/Chinese-RC-Dataset
 
+英汉互译语料
+cmn-eng.zip
+http://www.manythings.org/anki/cmn-eng.zip
 

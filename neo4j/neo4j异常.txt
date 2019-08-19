@@ -112,3 +112,8 @@ Neo.DatabaseError.General.UnknownError: org.neo4j.io.pagecache.CursorException: 
 若之前没有数据，或索引数据属性对应汉字数＜1367，创建索引，再执行上面语句，则会报错：
 Neo.DatabaseError.General.UnknownError: Property value bytes length: 5426 is longer than 4095, which is maximum supported length of indexed property value.
 
+出现 TransientException=LockClient[10651] can't wait on resource RWLock[NODE(1903109)
+一般是内存不够引起，可通过增加下面的参数设置在一定程度上减少此现象发生：
+dbms.memory.heap.max_size=11900m
+dbms.memory.pagecache.size=12100m
+
