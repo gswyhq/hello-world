@@ -318,3 +318,11 @@ https://github.com/ymcui/Chinese-RC-Dataset
 cmn-eng.zip
 http://www.manythings.org/anki/cmn-eng.zip
 
+/home/gswyhq/data/ERNIE_1.0/ERNIE_stable-1.0.1.tar.gz
+ERNIE 1.0 中文 Base 模型	包含预训练模型参数、词典 vocab.txt、模型配置 ernie_config.json
+https://baidu-nlp.bj.bcebos.com/ERNIE_stable-1.0.1.tar.gz
+
+ERNIE_1.0中文数据
+/home/gswyhq/data/ERNIE_1.0/task_data_zh.tgz
+https://ernie.bj.bcebos.com/task_data_zh.tgz
+
