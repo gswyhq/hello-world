@@ -338,3 +338,9 @@ docker exec -it --env COLUMNS=`tput cols` --env LINES=`tput lines` your_containe
 export COLUMNS=213
 export LINES=`tput lines`
 
+删除容器出现错误：
+gswyhq@gswyhq-PC:~$ docker rmi bf12b323f7b6
+Error response from daemon: conflict: unable to delete bf12b323f7b6 (cannot be forced) - image has dependent child images
+解决方案，先查询对应的依赖，删除对应依赖之后，再删除对应镜像：
+gswyhq@gswyhq-PC:~$ docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=bf12b323f7b6)|grep bf12b323f7b6
+
