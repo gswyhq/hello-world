@@ -1,0 +1,105 @@
+
+模型可视化
+keras.utils.vis_utils 模块提供了一些绘制 Keras 模型的实用功能(使用 graphviz)。
+
+以下实例，将绘制一张模型图，并保存为文件：
+
+from keras.utils import plot_model
+plot_model(model, to_file='model.png')
+plot_model 有 4 个可选参数:
+
+show_shapes (默认为 False) 控制是否在图中输出各层的尺寸。
+show_layer_names (默认为 True) 控制是否在图中显示每一层的名字。
+expand_dim（默认为 False）控制是否将嵌套模型扩展为图形中的聚类。
+dpi（默认为 96）控制图像 dpi。
+此外，你也可以直接取得 pydot.Graph 对象并自己渲染它。 例如，ipython notebook 中的可视化实例如下：
+
+from IPython.display import SVG
+from keras.utils.vis_utils import model_to_dot
+
+SVG(model_to_dot(model).create(prog='dot', format='svg'))
+训练历史可视化
+Keras Model 上的 fit() 方法返回一个 History 对象。History.history 属性是一个记录了连续迭代的训练/验证（如果存在）损失值和评估值的字典。这里是一个简单的使用 matplotlib 来生成训练/验证集的损失和准确率图表的例子：
+
+import matplotlib.pyplot as plt
+
+history = model.fit(x, y, validation_split=0.25, epochs=50, batch_size=16, verbose=1)
+
+# 绘制训练 & 验证的准确率值
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig("train_acc.png")
+plt.show()
+
+# 绘制训练 & 验证的损失值
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig("train_loss.png")
+plt.show()
+
+
+ ————————————————
+
+当然也可以通过启用TensorBoard
+在model的fit函数中加入TensorBoard的回调函数即可，训练数据就会自动保存在log_dir指定的目录内，然后在命令行启动命令 tensorboard --logdir=./log 即可。
+TensorBoard会记录loss及model.metrics里面的值
+
+# 引入Tensorboard
+from keras.callbacks import TensorBoard
+from keras.utils import plot_model
+
+# keras的utils里面专门有一个plot_model函数是用来可视化网络结构的，为了保证格式美观，我们在定义模型的时候给每个层都加了一个名字。
+对于大多数的Keras的layers，都有name这一参数。
+
+plot_model(model,to_file='model.png')
+
+
+model.compile(loss = keras.losses.categorical_crossentropy,
+             optimizer = keras.optimizers.Adadelta(),
+             metrics=['accuracy'])
+
+tb = TensorBoard(log_dir='./logs',  # log 目录
+                 histogram_freq=1,  # 按照何等频率（epoch）来计算直方图，0为不计算
+                 batch_size=32,     # 用多大量的数据计算直方图
+                 write_graph=True,  # 是否存储网络结构图
+                 write_grads=False, # 是否可视化梯度直方图
+                 write_images=False,# 是否可视化参数
+                 embeddings_freq=0, 
+                 embeddings_layer_names=None, 
+                 embeddings_metadata=None)
+callbacks = [tb]
+
+model.fit(x_train,y_train,batch_size=64,epochs=2
+          ,verbose=1,validation_data=(x_test,y_test),
+          callbacks=callbacks)
+
+训练完，运行：
+gswyhq@gswyhq-PC:~$ tensorboard --logdir=./log
+浏览器打开 `http://localhost:6006/` 则可以看到，acc、dev_acc、dev_loss、loss等的曲线图
+1）图中横坐标表示训练次数，纵坐标表示该标量的具体值，从这张图上可以看出，随着训练次数的增加，损失函数的值是在逐步减小的。
+可以看到图上有直线，有曲线，这时使用相同的配置多次训练，然后相同的数据在同一个图上显示的结果，进入该log所在的文件夹，删除历史记录，仅仅保留最新的结果，就会出现一个比较干净的图。
+
+2）tensorboard左侧的工具栏上的smoothing，表示在做图的时候对图像进行平滑处理，这样做是为了更好的展示参数的整体变化趋势。
+如果不平滑处理的话，有些曲线波动很大，难以看出趋势。0 就是不平滑处理，1 就是最平滑，默认是 0.6。
+3）工具栏中的Horizontal Axis指的是横轴的设置：
+STEP：默认选项，指的是横轴显示的是训练迭代次数，也就是训练代数=epochs-initial_epoch；
+RELATIVE：指相对时间，相对于训练开始的时间，也就是说是训练用时 ，单位是小时
+WALL：指训练的绝对时间，如：02:10 PM 开始训练，02:25 PM 第一轮迭代完成等等
+
+4）显示多次训练的结果
+要显示多次训练的结果，就要在每次训练的过程中给FileWriter设置不同的目录。比如第一次训练设置如下：
+ train_writer = tf.summary.FileWriter(log_dir + '/train', self.sess.graph)
+那么第二次训练就可以设置为：
+ train_writer = tf.summary.FileWriter(log_dir + '/train_1', self.sess.graph)
+这样当按照常规步骤打开tensorboard时，在面板的左侧就会显示不同的训练结果文件，如果要打开，则勾选相应的文件即可。
+当勾选多个时，在图中就会以不同的颜色显示不同的图像。
+
+

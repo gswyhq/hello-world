@@ -38,3 +38,18 @@ ImportError: cannot import name '_obtain_input_shape'
 将导入语句修改如下
 from keras_applications.imagenet_utils import _obtain_input_shape
 
+keras可视化时报错：
+  File "/usr/local/lib/python3.5/dist-packages/pydot.py", line 136, in call_graphviz
+    **kwargs
+  File "/usr/lib/python3.5/subprocess.py", line 947, in __init__
+    restore_signals, start_new_session)
+  File "/usr/lib/python3.5/subprocess.py", line 1551, in _execute_child
+    raise child_exception_type(errno_num, err_msg)
+FileNotFoundError: [Errno 2] No such file or directory: 'dot'
+
+解决方法：
+# apt-get install graphviz
+# dot -V
+dot - graphviz version 2.38.0 (20140413.2041)
+
+

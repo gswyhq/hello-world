@@ -1,0 +1,33 @@
+
+下载：
+http://weaver.nlplab.org/~brat/releases/brat-v1.3_Crunchy_Frog.tar.gz
+
+docker run -d -it --name brat -e LANG=C.UTF-8 python:2.7.16-stretch /bin/bash
+root@aa7cdd7c2b80:/# apt-get update && apt-get install -y vim wget
+root@aa7cdd7c2b80:/# wget -c -t 0 http://weaver.nlplab.org/~brat/releases/brat-v1.3_Crunchy_Frog.tar.gz
+root@aa7cdd7c2b80:/# tar -zxvf brat-v1.3_Crunchy_Frog.tar.gz
+root@aa7cdd7c2b80:/# cd brat-v1.3_Crunchy_Frog
+root@aa7cdd7c2b80:/brat-v1.3_Crunchy_Frog# /bin/bash install.sh
+Please the user name that you want to use when logging into brat
+brat
+Please enter a brat password (this shows on screen)
+brat
+Please enter the administrator contact email
+brat@126.com
+
+支持中文：
+brat本身是不支持中文的，如果在配置文件里定义中文会报错，解决办法是修改./server/src/projectconfig.py文件的第163行，加上中文支持即可： 
+
+n  = re.sub(r'[^a-zA-Z0-9_-]', '_', n)
+将英文的这句话注释掉，并添加如下内容：
+n = re.sub(u'[^a-zA-Z\u4e00-\u9fa5<>,0-9_-]', '_', n)
+
+启动服务：
+root@18148abf29a2:/brat-v1.3_Crunchy_Frog# python standalone.py
+
+docker commit -m "brat v1.3" brat gswyhq/brat:v1.3
+
+docker run -d -p 8001:8001 -v $PWD/data:/brat-v1.3_Crunchy_Frog/data -e LANG=C.UTF-8 -w /brat-v1.3_Crunchy_Frog gswyhq/brat:v1.3 python standalone.py
+
+
+

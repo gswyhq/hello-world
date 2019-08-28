@@ -336,3 +336,9 @@ https://dl.fbaipublicfiles.com/XNLI/XNLI-15way.zip
 XNLI-1.0.zip
 https://dl.fbaipublicfiles.com/XNLI/XNLI-1.0.zip
 
+瑞金医院MMC人工智能辅助构建知识图谱大赛
+ner数据：data_source.zip
+链接：https://pan.baidu.com/s/1jKUpBdKh_prpZ1Seb3R3cQ
+提取码：7h1l
+
+

@@ -115,4 +115,9 @@ https://github.com/davidADSP/GDL_code
 https://www.oreilly.com/library/view/generative-deep-learning/9781492041931/
 变分自编码器，生成对抗网络(GANs)，教机器绘画、写作、作曲和玩游戏
 
+用Bi-GRU+Attention和字向量做端到端的中文关系抽取
+https://github.com/crownpku/Information-Extraction-Chinese/tree/master/RE_BGRU_2ATT
+
+构建知识图谱，关系抽取
+https://github.com/beader/ruijin_round2
 
