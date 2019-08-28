@@ -326,3 +326,13 @@ ERNIE_1.0中文数据
 /home/gswyhq/data/ERNIE_1.0/task_data_zh.tgz
 https://ernie.bj.bcebos.com/task_data_zh.tgz
 
+XNLI 15种语言的翻译语料
+包含10,000个句子的15种语言平行语料库
+XNLI-15way.zip
+https://dl.fbaipublicfiles.com/XNLI/XNLI-15way.zip
+
+
+跨语言自然语言推理（XNLI）语料库是MultiNLI语料库的5,000个测试和2,500个开发对的众包集合。这对配有文字蕴涵注释，并翻译成14种语言：法语，西班牙语，德语，希腊语，保加利亚语，俄语，土耳其语，阿拉伯语，越南语，泰语，中文，印地语，斯瓦希里语和乌尔都语。
+XNLI-1.0.zip
+https://dl.fbaipublicfiles.com/XNLI/XNLI-1.0.zip
+
