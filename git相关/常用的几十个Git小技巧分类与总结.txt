@@ -281,8 +281,18 @@ git worktree add -b <branch-name> <path> <start-point>
 从HEAD状态中创建一个新的Working Tree
 git worktree add --detach <path> HEAD
 
-添加子项目：
+添加子项目，关联Subtree
+cd 母项目的路径
+git subtree add --prefix=<子项目的相对路径> <子项目git地址> <分支> --squash：
 gswyhq@gswyhq-PC:~/hello-world$ git remote add deep-learning深度学习/deep-learning-with-python-notebooks https://github.com/gswyhq/deep-learning-with-python-notebooks.git
-gswyhq@gswyhq-PC:~/hello-world$ git fetch deep-learning深度学习/deep-learning-with-python-notebooks --depth 1
-gswyhq@gswyhq-PC:~/hello-world$ git subtree add -P deep-learning深度学习/deep-learning-with-python-notebooks deep-learning深度学习/deep-learning-with-python-notebooks master
+gswyhq@gswyhq-PC:~/hello-world$ git subtree add --prefix=deep-learning深度学习/deep-learning-with-python-notebooks deep-learning深度学习/deep-learning-with-python-notebooks master --squash
+其中--squash 参数是把子项目的记录合成一次 commit 提交到主项目，这样主项目只是合并一次 commit 记录。
+--prefix之后的=等号也可以用空格。
+
+开始 pull 的时候，使用下面的代码
+git subtree pull --prefix=<本地子项目目录> <远程库仓库地址 | 远程库别名> <分支> --squash
+
+提交更改到子项目
+git subtree push --prefix=<子项目的相对路径> <S项目git地址> <分支>
+
 
