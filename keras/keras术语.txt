@@ -1,0 +1,48 @@
+
+stochastic gradient descent
+SGD就是Stochastic gradient descent的缩写，翻译成中文就是随机梯度下降。
+每看一个数据就算一下损失函数，然后求梯度更新参数，这个称为随机梯度下降
+这个方法速度比较快，但是收敛性能不太好，可能在最优点附近晃来晃去，hit不到最优点，两次参数的更新也有可能互相抵消掉，造成目标函数震荡的比较剧烈。
+
+epoch:
+epochs指的就是训练过程接中数据将被“轮”多少次
+训练过程中当一个完整的数据集通过了神经网络一次并且返回了一次，这个过程称为一个epoch
+
+mini-batch gradient decent
+小批的梯度下降，是“随机梯度下降”和“批梯度下降”的折中手段。即把数据分为若干个批，按批来更新参数，这样，一个批中的一组数据共同决定了本次梯度的方向，下降起来就不容易跑偏，减少了随机性。
+另一方面因为批的样本数与整个数据集相比小了很多，计算量也不是很大。
+
+Batch gradient descent,批梯度下降
+遍历全部数据集算一次损失函数，然后算函数对各个参数的梯度，更新梯度。这种方法每更新一次参数都要把数据集里的所有样本都看一遍，计算量开销大，计算速度慢，不支持在线学习
+
+batch_size，批尺寸:
+Keras中参数更新是按批进行的，就是小批梯度下降算法，把数据分为若干组，称为batch，按批更新参数，这样，一个批中的一组数据共同决定了本次梯度的方向，一批数据中包含的样本数量称为batch_size。
+
+iteration, 迭代:
+将数据分为几个batch而不是一次性通过神经网络时，iteration是batch需要完成一个epoch的次数，也就是number of batches (区别于 batch size) ， 在一次epoch中 number of  batches = iteration = 训练样本总数  / batch size 
+比如，对于一个有2000个训练样本的数据集，将2000个样本分成大小为500的batch(batch_size=500)，那么完成一个epoch需要4个iteration
+
+学习率(Learning rate)
+学习率决定了在一个小批量(mini-batch)中权重在梯度方向要移动多远.
+LR很小时,训练会变得可靠,也就是说梯度会向着最/极小值一步步靠近.算出来的loss会越来越小.但代价是,下降的速度很慢,训练时间会很长.
+LR很大时,训练会越过最/极小值,表现出loss值不断震荡,忽高忽低.最严重的情况,有可能永远不会达到最/极小值,甚至跳出这个范围,进入另一个下降区域.
+学习率衰减方案有多种：
+离散下降(discrete staircase)
+  对于深度学习来说，每 t 轮学习，学习率减半。对于监督学习来说，初始设置一个较大的学习率，然后随着迭代次数的增加，减小学习率。
+指数减缓(exponential decay)
+  对于深度学习来说，学习率按训练轮数增长指数差值递减。例如：
+α=0.95epoch_num⋅α0
+import math
+LearningRate = math.pow(0.95, epoch_num) * LearningRate
+
+  又或者公式为：
+LearningRate = k/math.pow(epoch_num, 0.5)
+  其中epoch_num为当前epoch的迭代轮数。不过第二种方法会引入另一个超参 k 。
+
+分数减缓(1/t decay)
+  对于深度学习来说，学习率按照公式 α = α/(1 + decay_rate ∗ epochnum) 变化， decay_rate控制减缓幅度。
+LearningRate = LearningRate * 1/(1 + decay_rate * epoch)
+当衰减参数decay_rate为零（默认值）时，对学习率没有影响。
+
+
+
