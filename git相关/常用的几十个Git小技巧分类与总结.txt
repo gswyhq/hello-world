@@ -280,3 +280,9 @@ Manipulation:操作
 git worktree add -b <branch-name> <path> <start-point>
 从HEAD状态中创建一个新的Working Tree
 git worktree add --detach <path> HEAD
+
+添加子项目：
+gswyhq@gswyhq-PC:~/hello-world$ git remote add deep-learning深度学习/deep-learning-with-python-notebooks https://github.com/gswyhq/deep-learning-with-python-notebooks.git
+gswyhq@gswyhq-PC:~/hello-world$ git fetch deep-learning深度学习/deep-learning-with-python-notebooks --depth 1
+gswyhq@gswyhq-PC:~/hello-world$ git subtree add -P deep-learning深度学习/deep-learning-with-python-notebooks deep-learning深度学习/deep-learning-with-python-notebooks master
+
