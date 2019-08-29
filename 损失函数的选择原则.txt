@@ -1,0 +1,5 @@
+
+对于二分类问题,你可以使用二元交叉熵(binary crossentropy)损失函数;
+对于多分类问题,可以用分类交叉熵(categorical crossentropy)损失函数;
+对于回归问题,可以用均方误差(mean-squared error)损失函数;
+对于序列学习问题,可以用联结主义时序分类(CTC,connectionist temporal classification)损失函数

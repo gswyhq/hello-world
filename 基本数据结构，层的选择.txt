@@ -1,0 +1,9 @@
+
+简单的向量数据保存在形状为 (samples, features) 的 2D 张量中,通常用密集连接层[densely connected layer,也叫全连接层(fully connected layer)或密集层(dense layer),对应于 Keras 的 Dense 类]来处理。
+序列数据保存在形状为 (samples, timesteps, features) 的 3D 张量中,通常用循环层(recurrent layer,比如 Keras 的 LSTM 层)来处理。
+图像数据保存在 4D 张量中,通常用二维卷积层(Keras 的 Conv2D )来处理。
+
+对于Dense 层的堆叠,你需要确定以下两个关键架构:
+ 网络有多少层;
+ 每层有多少个隐藏单元。
+

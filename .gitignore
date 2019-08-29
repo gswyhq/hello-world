@@ -1,0 +1,83 @@
+*.log*
+log.txt
+~$*
+*.*~
+.pydevproject
+.project
+.settings
+.DS_Store
+.idea
+*.swp
+*.bak
+*.o
+.svm
+*.py[cod]
+*$py.class
+# C extensions
+*.so
+*.pyc
+ENV/
+.Python
+.installed.cfg
+*.egg
+#java
+*.class
+# PyInstaller
+#  Usually these files are written by a python script from a template
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+
+# Flask stuff:
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+
+# PyBuilder
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+
+# Spyder project settings
+.spyderproject
+
+# Rope project settings
+.ropeproject
+
+ltp_data
+
+*.model
+*.pkl
+*.db
