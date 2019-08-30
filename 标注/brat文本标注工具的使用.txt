@@ -30,4 +30,50 @@ docker commit -m "brat v1.3" brat gswyhq/brat:v1.3
 docker run -d -p 8001:8001 -v $PWD/data:/brat-v1.3_Crunchy_Frog/data -e LANG=C.UTF-8 -w /brat-v1.3_Crunchy_Frog gswyhq/brat:v1.3 python standalone.py
 
 
+具体标注配置brat通过配置文件来决定对语料的标注可以满足何种任务，包括四个文件          annotation.conf: annotation type configuration          visual.conf: annotation display configuration          tools.conf: annotation tool configuration          kb_shortcuts.conf: keyboard shortcut tool configuration一般只需要修改annotation.conf即可，该文件用于对标注的数据结构进行配置，典型的配置如下： 每个文件需要包含四类模块：entities、relations、events、attributes。各个模块都可以定义为空，其中entities用来定义标注的实体名称，其格式为每行一个实体类型，比如：人名、地名、英雄名、技能名等，可以采用tab来增加二级标注，如下面的实体标注中技能下的二级标注战斗技能等。
+
+
+
+
+
+relations用来定义实体间的关系，格式为每行定义一种关系，第一列为关系类型，随后是用逗号分隔的ArgN:实体名，用来表示关系的各个相关者。比如例子中，同盟关系是存在于英雄之间events用来定义事件，每行定义一类事件，第一列为事件名，随后是用逗号分隔的Participant:实体名，用来表示事件的各个参与者。比如例子中，1v1事件需要多个英雄参加attributes用来定义属性，每行一个属性，第一列为属性名，随后是用逗号分隔的Arg:<模块类型>, Value:属性值，注意属性值可以有多个，比如例子中，定义了实体类型可以有攻击力，值从1-3[entities]英雄    北欧英雄    希腊英雄技能    战斗技能    生活技能        采矿        种地            种白菜            种大米[relations]同盟Arg1:英雄, Arg2:英雄拥有Arg1:英雄, Arg2:技能[events]1v1Participant1:英雄, Participant2:英雄[attributes]攻击力Arg:<ENTITY>, Value:1|2|3|4|5选中要标注的文本，会弹出窗口，选中标注label，然后完成标注
+
+
+
+
+
+
+
+
+
+
+
+标注完成后，鼠标移动到上面，点击data
+
+
+
+
+
+点击OK将标注信息作为ann导出，如下：
+
+
+
+
+
+  1 T2  OTH 3 15    一吨碳挑战的目的是什么？  2 T1  NUM,MNY 37 75   加国政府由自由党主政的2003年至2006年间，通过多少经费来挹注为此计划？  3 T3  OTH 92 114  廖秋成跟刘业经教授和刘棠瑞教授学了什么学科？踩坑记录：1，如果导入文本编码格式不是utf-8，就无法正常导入。导入文本名称为英文.txt2，如果要标注中文标签，直接在annotation.conf中写入中文标签，会出现报错信息
+
+
+
+
+
+最终解决方案是在annotation.conf中用label1，label2来表示，然后在视觉配置visual.conf中对应修改
+
+
+
+
+
+如上面：[labels]label1 | 攻击行为label2 | 违纪行为
+
+链接：https://www.jianshu.com/p/3a70ee9ad632
+https://blog.csdn.net/tcx1992/article/details/80580089
 

@@ -320,6 +320,32 @@ curl -X POST "localhost:9200/my_index/posts/_bulk" -H 'Content-Type: application
 { "tags" : []          }
 '
 
+# 查询某个字段为空值，is null
+{
+  "query": {
+    "bool": {
+      "must_not": {
+        "exists": {
+          "field": "字段名"
+        }
+      }
+    }
+  }
+}
+
+# 查询某个字段不为空 is not null：
+{
+  "query": {
+    "bool": {
+      "must": {
+        "exists": {
+          "field": "字段名"
+        }
+      }
+    }
+  }
+}
+
 # 非空字段， is not null
 curl -X GET "localhost:9200/my_index/posts/_search" -H 'Content-Type: application/json' -d'
 {
