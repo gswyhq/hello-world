@@ -48,7 +48,7 @@ set nohls # 关闭查找高亮
 # 使修改的配置，立即生效
 gswewf@gswewf-PC:~$ source ~/.vimrc
 
-使用Vi/Vim给文件加密和解密
+使用Vi/Vim给文件加密和解密, 用vim给文件设置密码
 一、 利用vi加密：
 1） 首先在root主目录/root/下建立一个实验文件text.txt：
 [root@www ~]# vi text.txt

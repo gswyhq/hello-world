@@ -12,5 +12,15 @@ ctrl+v,进入列编辑模式,横向选中列的个数(如"//"注释符号,需要
 删除行：
 退出插入模式后，将光标定位到某行，用“dd”即可以删除光标所在行；
 
+问题：vim或vi使用的时候，方向键不听使唤，方向键无效
+解决方案：升级vim的版本到8.0
+Ubuntu 16.04 升级vim 到8.0版本的方法(vim 8.0 是非官方的PPA，官方的ppa版本是7.4)：
+sudo add-apt-repository ppa:jonathonf/vim
+sudo apt-get update
+sudo apt-get install vim
+
+如果要卸载它，请使用以下命令：
+sudo apt remove vim
+sudo add-apt-repository --remove ppa:jonathonf/vim
 
 
