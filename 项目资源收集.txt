@@ -121,3 +121,6 @@ https://github.com/crownpku/Information-Extraction-Chinese/tree/master/RE_BGRU_2
 构建知识图谱，关系抽取
 https://github.com/beader/ruijin_round2
 
+命名实体识别
+https://github.com/xiaosongshine/NLP_NER_RNN_Keras
+

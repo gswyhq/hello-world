@@ -294,5 +294,6 @@ git subtree pull --prefix=<本地子项目目录> <远程库仓库地址 | 远�
 
 提交更改到子项目
 git subtree push --prefix=<子项目的相对路径> <S项目git地址> <分支>
+gswyhq@gswyhq-PC:~/hello-world$ git subtree push --prefix deep-learning深度学习/deep-learning-with-python-notebooks deep-learning深度学习/deep-learning-with-python-notebooks master 
 
 
