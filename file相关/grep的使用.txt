@@ -45,7 +45,9 @@ grep -o '好' 文件名.txt | wc -l
 
 操作 grep "xxx" a.log
 结果 Binary file a.log matches
-原因：grep认为a.log是二进制文件
+或者 匹配到二进制文件
+原因：grep如果碰到\000 NUL字符，就会认为文件是二进制文件。
+必须加上-a或--text选项强制让grep认为是文本文件,不要误认为a.log是二进制文件
 解决方法：grep -a "xxx" a.log
 可以看看grep -a参数的功能
 [appadmin@test3 ~/tmp]$ grep --help |grep '/-a'

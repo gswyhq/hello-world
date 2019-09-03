@@ -479,3 +479,10 @@ gswewf@gswewf-PC:~$ curl --user elastic:web12008 'http://192.168.3.145:9200/_xpa
     "start_date_in_millis" : -1
   }
 }
+
+# 证书经常过期，有时候仅仅想启动一个es服务临时使用，这个时候可以准备一个Dockerfile 文件；若之前的过期了，就通过Dockerfile文件重新build一个新的es镜像；
+docker build -t gswyhq/elasticsearch-x-pack-5.6.4:`date +%Y%m%d-%H%M%S` -f Dockerfile .
+docker run -d --name es_test -p 9200:9200 -p 9300:9300 gswyhq/elasticsearch-x-pack-5.6.4:20190903-115229
+默认用户名/密码：elastic/changeme
+
+

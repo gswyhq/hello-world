@@ -1,6 +1,10 @@
 
 来源：http://blog.csdn.net/cctt_1/article/details/44249609
 
+用 markdown 生成的网页, 重新转换回 markdown 的源代码
+被 markdown 解释器解释过后的 html 文件,有办法重新转换回 markdown 语法
+方法：复制HTML网页内容，复制粘贴到 typora，然后查询源码就还原了。
+
 1. 标题与字号
 
 markdown字号太少了，觉得应该再加些。
