@@ -100,6 +100,16 @@ raw_chat_corpus.zip
 https://pan.baidu.com/s/1QUsKcFWZ7Tg1dk_AbldZ1A, 提取码：2dva
 WebQA.v1.0.7z
 
+纯净版：
+链接: https://pan.baidu.com/s/1pLXEYtd 密码: 6fbf
+文件列表：
+WebQA.v1.0/readme.txt
+WebQA.v1.0/me_test.ann.json （一个问题只配一段材料，材料中有答案）
+WebQA.v1.0/me_test.ir.json （一个问题配多段材料，材料可能有也可能没有答案）
+WebQA.v1.0/me_train.json （混合的训练语料）
+WebQA.v1.0/me_validation.ann.json （一个问题只配一段材料，材料中有答案）
+WebQA.v1.0/me_validation.ir.json （一个问题配多段材料，材料可能有也可能没有答案）
+
 mnist.npz:
 下载链接：https://pan.baidu.com/s/1jH6uFFC 密码: dw3d
 测试keras的代码时显示需要下载'https://s3.amazonaws.com/img-datasets/mnist.npz'，下载了多次都无法访问该地址，致使测试搁置。翻墙下载下来，需要的可以从这里下载解压后放在~/.keras/datases/里面，然后可以运行。
@@ -129,6 +139,11 @@ http://download.tensorflow.org/example_images/flower_photos.tgz
 atec_nlp_sim_train.csv
 相似度匹配语料
 数据来源： https://github.com/ziweipolaris/atec2018-nlp.git
+
+同义句语料：
+中文文本语义相似度（Chinese Semantic Text Similarity）语料库建设
+https://github.com/IAdmireu/ChineseSTS.git
+simtrain_to05sts_same.txt  simtrain_to05sts.txt
 
 保险问答用户日志.xlsx
 
@@ -367,4 +382,31 @@ ner数据：data_source.zip
 链接：https://pan.baidu.com/s/1jKUpBdKh_prpZ1Seb3R3cQ
 提取码：7h1l
 
+kvret_dataset_public.zip
+http://nlp.stanford.edu/projects/kvret/kvret_dataset_public.zip
 
+### 中文文本数据集
+
+- [Chinese Treebank](https://catalog.ldc.upenn.edu/LDC2013T21)：来自中国新闻专线，政府文件，杂志文章和各种广播新闻的大约150万字的注释和解析文本
+- [Mandarin Chinese News Text](https://github.com/Lab41/sunny-side-up/wiki/Chinese-Datasets)：人民日报，新华社，中国国际广播电台的2.5亿汉字新闻。
+- [腾讯AI实验室嵌入中文单词和短语](https://ai.tencent.com/ailab/nlp/embedding.html)语料库：该语料库为超过800万个中文单词和短语提供200维矢量表示，即嵌入，这些单词和短语是在大规模，高质量数据上预先培训的。
+- [大规模中文短文摘要数据集](https://arxiv.org/abs/1506.05865)：该语料库由超过200万个真正的中文短文组成，每个文本的作者给出简短的摘要。
+
+### 中文OCR和手写数据集
+
+- [汉字](http://www.iapr-tc11.org/mediawiki/index.php?title=Harbin_Institute_of_Technology_Opening_Recognition_Corpus_for_Chinese_Characters_(HIT-OR3C))：包含909,818张图像的手写汉字数据集，对应于约10篇新闻文章。
+- [汉字生成器](https://www.kaggle.com/dylanli/chinesecharacter)：可用于中文文本OCR的中文字体数据集。
+- [中文文本](https://ctwdataset.github.io/)：中文文本数据集，大约有一百万个汉字由专家在超过30,000个街景图像中注释。对于数据集中的每个字符，注释包括其基础字符，边界框和6个属性。属性表明它是否具有复杂的背景，是否有凸起，是手写还是打印等。
+
+### 中文翻译和并行文本数据集
+
+- [中英文电子邮件](http://catalog.elra.info/en-us/repository/browse/ELRA-W0113/)：包含15,000个中文字符（相当于10,000个单词）和电子邮件，以及英文参考译文。
+- [OntoNotes](https://catalog.ldc.upenn.edu/ldc2013t19)：[带有](https://catalog.ldc.upenn.edu/ldc2013t19)各种文本类型的注释语料库 - 新闻，会话电话语音，网络日志，usenet新闻组，广播，脱口秀 - 中文，英文和阿拉伯文。
+- [新加坡国立大学语料库](http://wing.comp.nus.edu.sg:8080/SMSCorpus/history.jsp)：这个语料库是为社交媒体文本规范化和翻译而创建的。它是通过从新加坡国立大学英语短信语料库中随机选择2,000条消息然后翻译成正式中文而构建的。
+- [中法文本](https://catalog.ldc.upenn.edu/LDC2018T17)：中文广播新闻中约30,000个汉字子集的法语翻译。
+- [GALE第1阶段中文博客平行文本](https://catalog.ldc.upenn.edu/LDC2008T06)：277个中文博客文章翻译成英文。
+
+### 中国情绪分析数据集
+
+- [Ren-CECps](http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html)：1,500篇博文（11k段，35k句），文档段落和句子级别带有情感和情感注释。
+- [微博PCU](https://archive.ics.uci.edu/ml/datasets/microblogPCU#)：来自西安交通大学的研究人员，这个数据集有来自新浪微博的50,000个帖子，包括用户元数据，包括跟随者信息。

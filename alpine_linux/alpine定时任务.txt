@@ -1,0 +1,38 @@
+
+# 撰写需要定时执行的脚本
+/chat_bot/log/crontab-nlp-test.sh
+```
+#!/bin/ash
+
+#echo `date +%Y-%m-%d\ %H:%M:%S,%N` >> /chat_bot/log/定时测试日志.log 
+
+echo `date -D YYYY.MM.DD-hh:mm:ss -Iseconds` >> /chat_bot/log/定时测试日志.log
+#echo `date -D "YYYY-MM-DD hh:mm:ss" -Iseconds`
+
+time curl http://localhost:8000/ -d '{"pid": "xiaoxiao", "base_db": ["1", "3"], "question": "我想绑定微信，怎么绑定", "uid": "123456789", "channel": "wx58a4f70ed71947e6"}' >> /chat_bot/log/定时测试日志.log  
+
+echo `date -D YYYY.MM.DD-hh:mm:ss -Iseconds` >> /chat_bot/log/定时测试日志.log
+
+```
+# 编辑添加定时任务
+root@xiaoyusan-8489b9bbf-fhvjk:/chat_bot/log$ crontab -e
+
+# 查看已有的定时任务
+root@xiaoyusan-8489b9bbf-fhvjk:/chat_bot/log$ crontab -l
+# do daily/weekly/monthly maintenance
+# min   hour    day     month   weekday command
+*/1     *       *       *       *       /bin/bash /chat_bot/log/crontab-nlp-test.sh
+
+# 每分钟执行一次脚本：/chat_bot/log/crontab-nlp-test.sh
+
+若需要做到每30s执行一次，可以再加一条延迟30s的定时任务即可，如：
+root@xiaoyusan-8489b9bbf-fhvjk:/chat_bot/log$ crontab -l
+# do daily/weekly/monthly maintenance
+# min   hour    day     month   weekday command
+*/1     *       *       *       *       /bin/bash /chat_bot/log/crontab-nlp-test.sh
+*/1     *       *       *       *       sleep 30; /bin/bash /chat_bot/log/crontab-nlp-test.sh
+
+# 加载修改的定时任务配置（加载之后,会新添加定时任务；若之前crond服务启动了crontab -e编辑完直接保存退出就生效了，不需要另外再执行crond reload）
+root@xiaoyusan-8489b9bbf-fhvjk:/chat_bot/log$ crond reload
+
+

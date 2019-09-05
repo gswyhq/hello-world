@@ -91,4 +91,7 @@ curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "C
 
 # curl -XGET 192.168.3.105:47474/db/data/labels -u neo4j:gswyhq
 
+# 通过curl命令行请求修改neo4j密码：
+curl -H "Content-Type: application/json" -X POST -d '{"password":"WHATEVER THE PASSWORD IS"}' -u neo4j:neo4j http://localhost:7474/user/neo4j/password
+
 更多的curl查询命令见： https://neo4j.com/docs/stable/rest-api-node-labels.html#rest-api-list-all-labels
