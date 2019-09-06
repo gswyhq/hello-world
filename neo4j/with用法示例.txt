@@ -119,3 +119,23 @@ unwind nodes(p) as mm
 with mm
 where length(mm.name)=a
 return mm.name;
+
+使用with 可以达到管道命令的效果
+查询论文的第一作者及最少引用次数：
+MATCH (p:Paper)-[:`第一作者`]->(a:Author)
+WITH a, p, size((p)-[:`被引用`]->()) as numCit
+WITH a, min(numCit) as minCitations
+RETURN a.authorName as authorName, minCitations
+ORDER BY a.authorName
+
+# 返回作者的最小引用次数及每篇论文的标题及引用次数：
+MATCH (p:Paper)-[:`第一作者`]->(a:Author)
+WITH a, p, size((p)-[:`被引用`]->()) as numCit
+WITH a, min(numCit) as minCitations, collect(p {.title, numCit}) as papers
+UNWIND papers as paper
+RETURN a.authorName as authorName, minCitations, paper.title as title, paper.numCit as numCit
+ORDER BY authorName
+
+
+
+

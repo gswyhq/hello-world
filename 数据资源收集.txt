@@ -410,3 +410,7 @@ http://nlp.stanford.edu/projects/kvret/kvret_dataset_public.zip
 
 - [Ren-CECps](http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html)：1,500篇博文（11k段，35k句），文档段落和句子级别带有情感和情感注释。
 - [微博PCU](https://archive.ics.uci.edu/ml/datasets/microblogPCU#)：来自西安交通大学的研究人员，这个数据集有来自新浪微博的50,000个帖子，包括用户元数据，包括跟随者信息。
+
+样例三元组数据：
+https://github.com/percent4/Neo4j_movie_demo
+
