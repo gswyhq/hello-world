@@ -9,3 +9,13 @@ gswyhq@gswyhq-pc:~$ sudo pip3 install -U jupyter_core jupyter_client
 ImportError: No module named 'nbconvert.exporters.base'
 解决方法：
 gswyhq@gswyhq-pc:~$ sudo pip3 install -U nbconvert
+
+jupyter忘记密码怎么办？
+命令行输入：jupyter notebook list   回车
+在输出的内容中找"token=xxxxxxxxx"，把等号后面一大堆的东西即可理解是密钥
+root@693bafbd7758:/notebooks# jupyter notebook list
+Currently running servers:
+http://localhost:8888/?token=e1658c6cd6bbb3b0a8800ed8efc52ac37c25f29677e0a642 :: /notebooks
+
+
+
