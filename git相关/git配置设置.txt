@@ -102,3 +102,6 @@ Enter new passphrase (empty for no passphrase):
 Enter same passphrase again:
 Your identification has been saved with the new passphrase.
 
+git diff ^M的消除,让git diff的时候忽略换行符的差异：
+git config --global core.whitespace cr-at-eol
+
