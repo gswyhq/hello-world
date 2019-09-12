@@ -98,6 +98,19 @@ where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 =
 with collect(p) as ps, min(length(p)) as len
 UNWIND ps as p1 with p1, len where length(p1)=len return p1
 
+# 查询最后的关系为`理赔金额`，中间经过了节点`身故保险金`的最短的一条路径
+MATCH p=(n)-[*0..9]->()-[r:`理赔金额`]-(n1) 
+where ANY(x in nodes(p) where x.name='身故保险金') and not ()-->(n) 
+with p, length(p) as len_p 
+return extract(n IN nodes(p)| n.name) AS extracted
+order by len_p limit 1
+
+# 查询最后的关系为`理赔金额`，中间经过了节点`身故保险金`的所有最短路径
+MATCH p=(n)-[*0..9]->()-[r:`理赔金额`]-(n1) 
+where ANY(x in nodes(p) where x.name='身故保险金') and not ()-->(n) 
+with collect(p) as ps, min(length(p)) as min_len UNWIND ps as p with p, min_len where length(p)=min_len
+return extract(n IN nodes(p)| n.name) AS extracted
+
 # 对查询结果的路径长度进行筛选：
 profile match p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
 where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
