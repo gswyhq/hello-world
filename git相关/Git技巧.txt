@@ -166,3 +166,7 @@ git checkout -b <new-branch-name>
 3， 下载目录：
 svn co https://github.com/tesseract-ocr/langdata/trunk/chi_sim
 
+# 删除某个文件及其历史记录
+gswyhq@gswyhq-PC:~/hello-world$ git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch ./爬虫/dingding_send_msg.py' --prune-empty --tag-name-filter cat -- --all
+
+
