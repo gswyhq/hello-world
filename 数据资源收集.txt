@@ -283,8 +283,8 @@ https://www.cnblogs.com/sumuncle/p/6370686.html
 http://spaces.ac.cn/usr/uploads/2015/09/829078856.zip
 
 CCKS2019关系抽取数据
--  [origin data](https://pan.baidu.com/s/1EGPYAQp90usvpzROdNilPw) d6vp
-- [preprocessed data](https://pan.baidu.com/s/1lHD-IO7zI4EwyNfi_Fe1HQ) 4f93
+- origin_data [origin data](https://pan.baidu.com/s/1EGPYAQp90usvpzROdNilPw) d6vp
+- preprocess_data [preprocessed data](https://pan.baidu.com/s/1lHD-IO7zI4EwyNfi_Fe1HQ) 4f93
 
 维基百科`598454`个词 50维的词向量模型，包括原始的训练数据
 zhwiki.zip
@@ -413,4 +413,7 @@ http://nlp.stanford.edu/projects/kvret/kvret_dataset_public.zip
 
 样例三元组数据：
 https://github.com/percent4/Neo4j_movie_demo
+
+LIC2019 信息抽取 实体及关系抽取
+https://github.com/melancholicwang/lic2019-information-extraction-baseline
 

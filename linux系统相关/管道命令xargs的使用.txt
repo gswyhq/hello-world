@@ -32,4 +32,8 @@ aaa bbb
 ccc ddd
 a b
 
+# 查找镜像版本号，再删除对应的镜像：
+docker images |grep extraction_20181218_0849|awk '{print $2}'|xargs -n 1 -i docker rmi 89913.dkr.ecr.cn-north-1.com.cn/nlp:{}
+-i 参数直接用 {}就能代替管道之前的标准输出的内容；
+-n num 后面加次数，表示命令在执行的时候一次用的argument的个数，默认是用所有的。
 
