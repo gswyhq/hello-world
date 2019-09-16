@@ -1,0 +1,126 @@
+
+# 最短路径的查找：
+# shortestpath()方法只能查 关系的“跳数”最少的路径
+MATCH (start:Point {title: "Some Point 1"}), (end:Point {title: "Some Point 5"})
+MATCH p=shortestPath((start)-[:distance*]->(end))
+RETURN p
+
+# 按结点的属性：不经过name为'5'的结点
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in nodes(p) where x.name<>'5')
+return p;
+
+# 按关系的属性：只经过那些属性f小于4的关系
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in r where x.f<4) return p;
+
+# 查询多个相同的关系
+match p=(n:国家 {NAME:'中国'})-[:隶属关系*..2]-(m) with *,relationships(p) as r return n,m;
+
+# 按权重查找最短路径：
+# 按照自己权重查最优路径，就遍历全部路径，然后用reduce（）方法筛选
+
+# 样例数据
+// 创建节点
+Create(b:device{id:"B",name:"B",X:4,Y:10})
+Create(e:device{id:"E",name:"E",X:18,Y:10})
+Create(c:device{id:"C",name:"C",X:24,Y:10})
+Create(d:device{id:"D",name:"D",X:40,Y:10})
+Create(a:device{id:"A",name:"A",X:36,Y:5})
+//添加关系
+create (b)-[:to{RC:14}]->(e)  create (e)-[:to{RC:14}]->(b)
+create (e)-[:to{RC:6}]->(c)  create (c)-[:to{RC:6}]->(e)
+create (c)-[:to{RC:16}]->(d)  create (d)-[:to{RC:16}]->(c)
+create (d)-[:to{RC:9}]->(a)  create (a)-[:to{RC:9}]->(d)
+create (a)-[:to{RC:37}]->(b)  create (b)-[:to{RC:37}]->(a)
+
+# 查找A到E之间的最短路径
+MATCH (start {id: "A"}), (end {id: "E"})
+MATCH p=(start)-[:to*]->(end)
+WITH p,reduce(s = 0, r IN rels( p) | s + r.RC) AS dist
+RETURN p, dist ORDER BY dist asc limit 1
+
+# 若不限定关系类型：
+MATCH (start {id: "A"}), (end {id: "E"})
+MATCH p=(start)-[*]->(end)
+WITH p,reduce(s = 0, r IN rels( p) | s + r.RC) AS dist
+RETURN p, dist ORDER BY dist asc limit 1
+
+# 对路径的值进行限定：
+MATCH (start {id: "A"}), (end {id: "E"})
+MATCH p=(start)-[:to*]->(end)
+WITH p, REDUCE(weight=0, rel in rels(p) | weight + rel.RC) as length
+with p, length where length <= 60
+return p, length ORDER BY  length asc
+LIMIT 10
+
+# 或者可以采用  APOC
+MATCH (start {id: "A"}), (end {id: "E"})
+CALL apoc.algo.dijkstra(start, end, "to", "RC") YIELD path, weight
+RETURN DISTINCT path, weight
+
+# 若不限定关系类型：
+MATCH (start {id: "A"}), (end {id: "E"})
+CALL apoc.algo.dijkstra(start, end, '', "RC") YIELD path, weight
+RETURN DISTINCT path, weight
+
+MATCH (start {id: "A"}), (end {id: "E"})
+MATCH p=(start)-[:to*]->(end)
+WITH p, REDUCE(weight=0, rel in rels | weight + rel.RC) as length
+with p, length where length <= 60
+return p, length
+LIMIT 10
+
+# 最短路径-无条件
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))  return p
+
+# 最短路径-按节点的标签：只经过标签为"A"的节点
+match p=shortestPath((m:Person{name:'1'})-[r:A*..4]-(n:Person{name:'4'})) return p
+
+# 最短路径-按节点的属性：不经过name为’5’的结点
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in nodes(p) where x.name<>'5') return p
+
+# 最短路径-按关系的属性：只经过那些属性f小于4的关系
+match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
+where all(x in r where x.f<4) return p
+
+# 最短路径-求多个结点两两间的最短路径
+/**
+使用with定义一个列表变量，里面是所有的点；
+使用match匹配出所有的结点，将结点放到列表中，注意这里列表中的元素是结点类型，上面是业务id；
+使用两个unwind再次将结点列表打散到行，之前提到过两个unwind的结点也是以笛卡尔积的方式返回的（看这篇博客），所以这里是两两的任意组合，甚至两个结点相同的组合，实际上我们这里求最短路径1到2和2到1肯定是一样的，所以用id(source)<id(target)来去除一半；
+最后是shortestPath函数，里面的source,target就是前面的组合；
+**/
+with [10,11,14,15,17,18,23,1,321,123,123,123,12,213,123,123,123,213,123,1321] as id_list
+match (v:Label) where id(v) in id_list
+ with collect(v) as nodes
+ unwind nodes as source
+ unwind nodes as target
+ with source,target where id(source)<id(target)
+match paths = allShortestPaths((source)-[*..6]-(target)) with paths limit 100
+ return paths
+
+# 查询A`发展`或`推荐`了哪些人, 不限定长度，多关系查找
+MATCH (a)-[:发展|推荐*0...2]->(c) RETURN c;
+
+# 所有经过某节点的最短路径
+MATCH p=allShortestPaths((m:Link {name:'Alan'})-[*..6]-(n:Link {name:'Antonio'}))
+WHERE all(x in nodes(p) where id(x)=1231) return p LIMIT  10
+
+# 查看某个用法的帮助：
+CALL apoc.help("dijkstra")
+
+# 查找经过某个节点及关系的所有单向路径，并返回对应的列表数据：
+MATCH p=(n:Admin_bussiness_site_web1_ai_16:Tongyong)-[*0..9]->()-[r:`理赔金额`]-(n1) where ANY(x in nodes(p) where x.name='身故保险金') and not ()-->(n) return extract(n IN nodes(p)| n.name) AS extracted
+
+╒══════════════════════════════════════════════════════════════════════╕
+│"extracted"                                                           │
+╞══════════════════════════════════════════════════════════════════════╡
+│["**财险","驾乘无忧","身故保险金","在保险期间内，被保险人遭受交通意外伤害事故，并自事故发生之日起一百八十日内因该事故为直接原因...│
+│险金。"]                                                                 │
+├──────────────────────────────────────────────────────────────────────┤
+│["**财险","**航意险","身故保险金","在保险期间内，被保险人遭受交通意外伤害事故，并自事故发生之日起一百八十日内因该事故为直接原...│
+│保险金。"]                                                                │
+└──────────────────────────────────────────────────────────────────────┘
+
