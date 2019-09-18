@@ -417,3 +417,6 @@ https://github.com/percent4/Neo4j_movie_demo
 LIC2019 信息抽取 实体及关系抽取
 https://github.com/melancholicwang/lic2019-information-extraction-baseline
 
+Toxic Comment Classification Challenge
+https://raw.githubusercontent.com/gangqing/Toxic-Comment-Classification-Challenge/master/train.csv
+

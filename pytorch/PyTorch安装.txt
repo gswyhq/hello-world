@@ -1,0 +1,7 @@
+
+docker run --rm -it -v $PWD:/pytorch_graph-rel -w /pytorch_graph-rel -p 8000:8000 -e LANG=C.UTF-8 -e TZ=CST-8 python:3.6.8-stretch /bin/bash
+
+pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+https://pytorch.org/
+

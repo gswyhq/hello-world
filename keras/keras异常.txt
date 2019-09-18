@@ -22,6 +22,10 @@ model = load_model('/home/gswyhq/hello-world/bert/model.h5', custom_objects={'To
                                                                              'FeedForward': FeedForward,
                                                                              'gelu_tensorflow': gelu_tensorflow})
 
+ValueError: Unknown layer: Attention
+#这里需要注意两点，
+#1、是'Attention',这里对应了model.summary()打印的attention_1层的type
+#2、AttentionLayer是class Attention实例化出来的对象
 
 # 梯度消失与梯度爆炸、Loss为Nan的原因
 1.梯度爆炸。梯度变得非常大，使得学习过程难以继续。

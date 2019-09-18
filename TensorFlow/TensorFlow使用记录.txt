@@ -1,0 +1,21 @@
+
+
+if __name__ == "__main__":
+    tf.app.run()
+tf.app.run的核心意思：执行程序中main函数，并解析命令行参数！
+
+tf.app.flags主要用于处理命令行参数的解析工作，其实可以理解为一个封装好了的argparse包
+DEFINE_string()限定了可选参数输入必须是string，这也就是为什么这个函数定义为DEFINE_string()，同理，DEFINE_interger()限定可选参数必须是int，DEFINE_float()限定可选参数必须是float，DEFINE_boolean()限定可选参数必须是bool。
+用flags.DEFINE_interger/float()来添加命令行参数，而FLAGS=flags.FLAGS可以实例化这个解析参数的类从对应的命令行参数取出参数。
+import tensorflow as tf  
+flags = tf.app.flags
+flags.DEFINE_string('data_dir', '/tmp/mnist', 'Directory with the MNIST data.')
+flags.DEFINE_integer('batch_size', 5, 'Batch size.')
+flags.DEFINE_integer('num_evals', 1000, 'Number of batches to evaluate.')
+FLAGS = flags.FLAGS
+
+print(FLAGS.data_dir, FLAGS.batch_size, FLAGS.num_evals)
+在命令行中输入test.py -h就可以查看帮助信息，也就是Directory with the MNIST data.，Batch size和Number of batches to evaluate这样的消息。
+在命令行中输入test.py --batchsize 10就可以将batch_size的值修改为10！
+
+
