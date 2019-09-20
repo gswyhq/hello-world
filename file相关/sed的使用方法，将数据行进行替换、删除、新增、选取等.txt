@@ -118,3 +118,20 @@ do
     mv $file $newfile
 done
 
+# 显示文件第9行的内容：
+sed -n '9p' train.txt
+
+# 显示文件第9~12行的内容：
+sed -n '9,12p' train.txt
+
+sed '/pattern/!p' infile //匹配pattern的行不输出 
+sed -n '1,2p' infile //输出文件第1～2行的内容
+sed -n '2,$p' file //输出文件第2行到文件末尾的内容
+
+打印文本： p 
+输出test.txt的第5-7行：sed -n '5,7p' test.txt 
+
+输出文件第99行的内容：
+sed -n '99,p' test.txt。但sed在print后并不会立即退出，还会继续搜索文件直到文件末尾，当文件较大的时候使用sed的效率会比较低。
+可以做如下优化：sed -n '99,p;100q' test.txt，打印完之后在100行退出。
+

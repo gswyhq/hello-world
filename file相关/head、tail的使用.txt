@@ -1,0 +1,13 @@
+
+输出文件前面3行的内容：
+head -n 3 train.txt
+
+输出文件末尾3行的内容：
+tail -n 3 train.txt
+
+输出文件第3行及其之后的内容（包括第3行）
+tail -n +3 train.txt
+
+输出文件倒数第3行(不包括倒数第3行)之前的内容
+head -n -3 train.txt
+
