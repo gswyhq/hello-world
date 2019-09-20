@@ -185,7 +185,7 @@ start a=node(id1) match a-->x return x
 那么返回的结果只有n2。
 我们还可以返回个某个节点相关的所有关系数据,代码如下:
 
-start a=node(id2) match a-[r]-() return r
+start a=node(id2) match p=(a)-[r]-() return r
 上面代码返回的是和n2相关的所有的关系数据,结果如下图所示:
 5
 

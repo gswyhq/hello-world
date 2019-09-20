@@ -74,3 +74,8 @@ neo4j_home$ bin/neo4j-admin import --nodes import/movies-header.csv,import/movie
 https://neo4j.com/docs/operations-manual/3.5/tools/import/syntax/
 
 https://neo4j.com/docs/operations-manual/3.5/tools/import/file-header-format/#import-tool-header-format-nodes
+
+转义字符格式：
+如： o13713,"6'1\" (185 cm)",Tongyonggraph;Tongyong
+应该写成： o13713,"6'1"" (185 cm)",Tongyonggraph;Tongyong
+也就是说字符串中若有双引号，应该替换的两个连续的双引号

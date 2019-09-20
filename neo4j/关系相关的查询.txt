@@ -19,3 +19,8 @@ FOREACH (r IN rr | DELETE r)
 # size()方法，可以获取到关系里面的个数。
 # 查找所有关系数为2的节点：
 match p=(n)-[t]->(m) where size((n)-->())=2 return n
+
+# 查找一个点，再返回与该点连接的所有关系：
+MATCH (n) WHERE n.name='姚明' WITH n LIMIT 1 MATCH p=(n)-[r]->(n1) RETURN p
+MATCH (n) WHERE n.name='姚明' WITH n LIMIT 1 MATCH p=(n)-[r]->(n1) RETURN n.name,type(r), n1.name
+
