@@ -424,3 +424,26 @@ AISHELL-1
 http://www.openslr.org/resources/33/data_aishell.tgz
 AISHELL-ASR0009录音文本涉及智能家居、无人驾驶、工业生产等11个领域。录制过程在安静室内环境中， 同时使用3种不同设备： 高保真麦克风（44.1kHz，16-bit）；Android系统手机（16kHz，16-bit）；iOS系统手机（16kHz，16-bit）。高保真麦克风录制的音频降采样为16kHz，用于制作AISHELL-ASR0009-OS1。400名来自中国不同口音区域的发言人参与录制。经过专业语音校对人员转写标注，并通过严格质量检验，此数据库文本正确率在95%以上。分为训练集、开发集、测试集。（支持学术研究，未经允许禁止商用。）
 
+百科 QA问答数据集
+baike_qa_train.json
+baike_qa_valid.json
+
+中文八卦闲聊问答语料
+https://github.com/zake7749/Gossiping-Chinese-Corpus
+
+一千多个选择题及其答案：
+https://github.com/lindianyin/yol/blob/master/setting/quiz/quiz_issue_question.txt
+https://github.com/prime51/Brainstorm/blob/master/Brainstorm_GamePage/database/QuestionBank.csv
+https://github.com/pagoda-animation/QAhero/blob/master/assets/questions/questions.json
+
+一些文学作品数据，txt格式：
+https://github.com/BlankRain/ebooks
+https://github.com/CaptionwWaterfall/nihong-novel
+https://github.com/HeywoodKing/infinite/tree/master/%E6%94%B6%E5%BD%95
+
+汉语古典文本资料库
+本数据库有13000种文本，10万卷，近13亿字，3.14 GB。可以作为对比的是，《四库全书》共收书3503种，79337卷，近230万页，约8亿字。据《中国古籍总目》，全球现存汉语古籍的总量为177107种。
+https://github.com/mahavivo/scripta-sinica
+
+
+
