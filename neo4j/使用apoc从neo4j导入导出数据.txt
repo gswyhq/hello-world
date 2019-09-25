@@ -174,6 +174,23 @@ CALL apoc.export.csv.data([], relationships, 'edges.csv', {}) YIELD file as edge
 CALL apoc.export.csv.data(nodes, [], 'nodes.csv', {}) YIELD file as nodefile
 RETURN edgefile, nodefile
 
+或者：
+MATCH p=(n)-[r]->(n1)
+WITH [n, n1] as nodes, [r] as relationships
+CALL apoc.export.csv.data([], relationships, 'edges.csv', {}) YIELD file as edgefile
+CALL apoc.export.csv.data(nodes, [], 'nodes.csv', {}) YIELD file as nodefile
+RETURN edgefile, nodefile
+
+MATCH (n)
+WITH collect(n) as nodes
+CALL apoc.export.csv.data(nodes, [], 'nodes.csv', {}) YIELD file as nodefile
+RETURN nodefile
+
+MATCH p=()-[r]->()
+WITH collect(r) as relationships
+CALL apoc.export.csv.data([], relationships, 'edges.csv', {}) YIELD file as edgefile
+RETURN edgefile
+
 nodes.csv
 "_id","_labels","born","name","released","tagline","title","_start","_end","_type"
 "31",":Person","1959","Val Kilmer","","","",,,

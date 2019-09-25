@@ -40,6 +40,13 @@ gswewf@gswewf-PC:~/yhb$ docker exec -it some-mongo /usr/bin/mongoexport -h 192.1
 # 导出的数据在容器`some-mongo`中，再从容器中复制出来即可：
 gswewf@gswewf-PC:~/yhb$ docker cp some-mongo:/pages_百度知道-保险相关问答.json .
 
+带密码验证的数据导出：
+gswyhq@ubuntu:~$ docker exec -it mongodb_27017 env LANG=C.UTF-8 /bin/bash
+root@47b3e7d87191:/data# /usr/bin/mongoexport -h 192.168.3.164 --port 27017 -u root -p 123456 -d "疾病" -c "疾病介绍" -o 疾病介绍.json
+2019-09-25T13:47:59.519+0800	error connecting to db server: server returned error on SASL authentication step: Authentication failed.
+root@47b3e7d87191:/data# /usr/bin/mongoexport -h 192.168.3.164 --port 27017 -u root -p 123456 -d "疾病" -c "疾病介绍" -o 疾病介绍.json --authenticationDatabase admin 
+
+
 mongodump备份数据库
 1，常用命令格
 mongodump -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 -o 文件存在路径

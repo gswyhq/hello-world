@@ -152,3 +152,6 @@ https://github.com/Wangpeiyi9979/InformationExtractionDemo
 人民币面值及编码识别
 https://github.com/Flyfoxs/ty_m
 
+预训练的分词，命名实体识别，语法分析模型：
+https://github.com/rockingdingo/deepnlp.git
+
