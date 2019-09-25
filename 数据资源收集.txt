@@ -445,5 +445,6 @@ https://github.com/HeywoodKing/infinite/tree/master/%E6%94%B6%E5%BD%95
 本数据库有13000种文本，10万卷，近13亿字，3.14 GB。可以作为对比的是，《四库全书》共收书3503种，79337卷，近230万页，约8亿字。据《中国古籍总目》，全球现存汉语古籍的总量为177107种。
 https://github.com/mahavivo/scripta-sinica
 
-
+DeepFashion 服装数据集
+https://www.aiuai.cn/aifarm112.html
 

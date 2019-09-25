@@ -149,3 +149,6 @@ https://github.com/yuhaitao1994/LIC2019_Information_Extraction
 信息抽取展示demo
 https://github.com/Wangpeiyi9979/InformationExtractionDemo
 
+人民币面值及编码识别
+https://github.com/Flyfoxs/ty_m
+

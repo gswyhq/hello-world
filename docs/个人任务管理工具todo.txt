@@ -1,0 +1,23 @@
+
+To Do是一款个人任务管理软件，它通过桌面应用实现任务的创建、任务的规划、任务的分级显示以及任务的颜色标识等功能。
+
+https://gitlab.gnome.org/GNOME/gnome-todo.git
+
+https://wiki.gnome.org/Apps/Todo
+
+
+/home/gswyhq/.local/share/evolution/tasks/system/tasks.ics
+
+gnome-todo使用Evolution-Data-Server作为其存储后端。
+
+其数据存储在这里：
+~/.local/share/evolution/tasks
+
+例如，任务列表在以下文件中：
+~/.local/share/evolution/tasks/system/tasks.ics
+
+它的缓存存储在这里：
+~/.cache/evolution/tasks
+
+https://help.gnome.org/users/evolution/3.10/data-storage.html.en
+

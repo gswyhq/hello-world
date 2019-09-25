@@ -1,5 +1,5 @@
 
-# 查询某个进程对应的程序路径
+# 查询某个进程对应的程序路径,查看某个进程的详情
 # 第一步，查询进程号
 zy@ubuntu:~/dbang$ ps -aux|grep tornado_server.py 
 zy        5476  1.4 45.5 2149796 1843032 pts/7 S    09:08   0:10 python3 /home/zy/qbzz/tornado_server.py --no-templates --wmd

@@ -166,3 +166,30 @@ call apoc.cypher.runFile('/var/lib/neo4j/data/all_baoxian_20181114_1423.plain.cy
 # 或者
 time ./cypher-shell -u neo4j -p gswyhq
 "call apoc.cypher.runFile('/var/lib/neo4j/data/all_baoxian_20181114_1423.plain.cypher')"
+
+导出实体及关系：
+MATCH (movie: Movie { title: 'Top Gun' })<-[acted_in: ACTED_IN]-(actor: Person)
+WITH collect(distinct actor) + movie as nodes, collect(distinct acted_in) as relationships
+CALL apoc.export.csv.data([], relationships, 'edges.csv', {}) YIELD file as edgefile
+CALL apoc.export.csv.data(nodes, [], 'nodes.csv', {}) YIELD file as nodefile
+RETURN edgefile, nodefile
+
+nodes.csv
+"_id","_labels","born","name","released","tagline","title","_start","_end","_type"
+"31",":Person","1959","Val Kilmer","","","",,,
+"34",":Person","1961","Meg Ryan","","","",,,
+"33",":Person","1933","Tom Skerritt","","","",,,
+"30",":Person","1957","Kelly McGillis","","","",,,
+"16",":Person","1962","Tom Cruise","","","",,,
+"32",":Person","1962","Anthony Edwards","","","",,,
+"29",":Movie","","","Top Gun","1986","I feel the need, the need for speed.",,,
+
+edges.csv
+"_id","_labels","_start","_end","_type","roles"
+,,"16","29","ACTED_IN","[""Maverick""]"
+,,"30","29","ACTED_IN","[""Charlie""]"
+,,"31","29","ACTED_IN","[""Iceman""]"
+,,"32","29","ACTED_IN","[""Goose""]"
+,,"33","29","ACTED_IN","[""Viper""]"
+,,"34","29","ACTED_IN","[""Carole""]"
+
