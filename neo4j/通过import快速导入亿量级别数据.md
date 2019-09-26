@@ -69,6 +69,26 @@ neo4j_home$ ls import
 actors-header.csv  actors.csv.zip  movies-header.csv  movies.csv.gz  roles-header.csv  roles.csv.gz
 neo4j_home$ bin/neo4j-admin import --nodes import/movies-header.csv,import/movies.csv.gz --nodes import/actors-header.csv,import/actors.csv.zip --relationships import/roles-header.csv,import/roles.csv.gz
 
+# neo4j-admin import 速度太慢，卡在了：
+输出 c, 或者 i, 提示：
+.......... .......... .......... .......... .......... 50%
+.......... .......... ....c
+
+	******** DETAILS 2019-09-26 05:40:07.744+0000 ********
+
+	Prepare node index
+	[*SORT----------------------------------------------------------------------------------------]29.3M
+	Memory usage: 1.16 GB
+	Duration: 2m 15s 142ms
+	Done batches: 2936
+通过设置下面环境变量都不能解决：
+-e NEO4J_dbms_memory_heap_initial__size=2048m         
+-e NEO4J_dbms_memory_heap_max__size=2048m     
+-e JAVA_OPTS="-Xmx1g -Xss1g" 
+问题出现原因是因为数据中有重复的节点数据
+即使在导入时添加了参数`--ignore-duplicate-nodes=true --ignore-missing-nodes=true`也是无效果；
+解决方案：
+对重复的数据事先进行清洗，再用清洗过后的数据进行导入。
 
 ### 参考资料
 https://neo4j.com/docs/operations-manual/3.5/tools/import/syntax/

@@ -900,3 +900,10 @@ apt-get install xxxx 安装
 apt-get remove xxxx 卸载但不删除配置
 apt-get purge xxxx 卸载并且删除相关配置
 
+查看环境变量：
+gswyhq@gswyhq-PC:~$ env
+CLUTTER_IM_MODULE=xim
+USER=gswyhq
+DESKTOP_SESSION=deepin
+...
+
