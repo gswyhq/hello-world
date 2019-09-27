@@ -236,7 +236,10 @@ Out[22]:
  '_source': {'实体标准词': '金花股份',
   '实体同义词': ['金花企业(集团)股份有限公司', '600080', 'jin hua gu fen', '金花股份']}}
 
-
+es更新数据报错：
+No space left on device 
+i_o_exception
+这个时候一般是因为硬盘空间不足导致
 
 
 

@@ -155,3 +155,9 @@ https://github.com/Flyfoxs/ty_m
 预训练的分词，命名实体识别，语法分析模型：
 https://github.com/rockingdingo/deepnlp.git
 
+图卷积网络 GCN
+https://github.com/tkipf/keras-gcn
+
+实体、关系识别
+https://github.com/tsujuifu/pytorch_graph-rel.git
+
