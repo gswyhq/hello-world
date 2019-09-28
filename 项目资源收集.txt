@@ -161,3 +161,6 @@ https://github.com/tkipf/keras-gcn
 实体、关系识别
 https://github.com/tsujuifu/pytorch_graph-rel.git
 
+TextCNN 文本分类
+https://github.com/rongshunlin/ModifyAI.git
+
