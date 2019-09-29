@@ -51,6 +51,26 @@ docker kill <容器名orID>
 命令格式：docker  rmi   image_name/ID
 若要删除所有的image, 使用命令：docker rmi  $( docker  images -q )
 
+查看Docker Hub 上面的镜像`gswyhq/ner`有哪些tag:
+curl 'https://registry.hub.docker.com/v2/repositories/gswyhq/ner/tags/'|jq '."results"[]["name"]'
+"bilstm_20190929_2136"
+"bilstm_20190922_2136"
+"bilstm_20190916_2136"
+
+# 删除 Docker Hub 上面的镜像：
+export USERNAME=myuser
+export PASSWORD=mypass
+export ORGANIZATION=myorg (如果是个人，则为您的用户名)
+export REPOSITORY=myrepo
+export TAG=latest
+
+curl -u $USERNAME:$PASSWORD -X "DELETE" https://cloud.docker.com/v2/repositories/$ORGANIZATION/$REPOSITORY/tags/$TAG/
+
+如本地删除
+docker rmi gswyhq/ner:bilstm_20190929_2136
+docker hub 删除远程仓库docker镜像tag
+curl -u $USERNAME:$PASSWORD -X "DELETE" https://cloud.docker.com/v2/repositories/gswyhq/ner/tags/bilstm_20190929_2136/
+
 注意：运行导入的镜像的时候必须带command，否则启动报如下错误
 FATA[0000] Error response from daemon: No command specified  
 具体的command需要在导出容器的时候通过docker ps查看到。

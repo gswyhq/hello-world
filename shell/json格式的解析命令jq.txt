@@ -1,0 +1,78 @@
+
+
+gswyhq@gswyhq-PC:~$ cat json_raw.txt
+{"name":"Google","location":{"street":"1600 Amphitheatre Parkway","city":"Mountain View","state":"California","country":"US"},"employees":[{"name":"Michael","division":"Engineering"},{"name":"Laura","division":"HR"},{"name":"Elise","division":"Marketing"}]}
+
+# 上面文件内容就是json字符串，可读性太差；
+# 事实上，jq就可以检查JSON的合法性（如果JSON不合法，jq .会报错），并把JSON格式化成更友好更可读的格式：
+gswyhq@gswyhq-PC:~$ cat json_raw.txt |jq .
+{
+  "name": "Google",
+  "location": {
+    "street": "1600 Amphitheatre Parkway",
+    "city": "Mountain View",
+    "state": "California",
+    "country": "US"
+  },
+  "employees": [
+    {
+      "name": "Michael",
+      "division": "Engineering"
+    },
+    {
+      "name": "Laura",
+      "division": "HR"
+    },
+    {
+      "name": "Elise",
+      "division": "Marketing"
+    }
+  ]
+}
+
+# 更友好，可读形式展示json格式数据：
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .
+{
+  "foo": 42,
+  "bar": "less interesting data"
+}
+
+# 根据key获取value（解析不存在的元素，会返回null）
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .bar
+"less interesting data"
+
+# JSON nested parse（嵌套解析）
+gswyhq@gswyhq-PC:~$ cat json_raw.txt |jq '.employees[1].name'
+"Laura"
+gswyhq@gswyhq-PC:~$ cat json_raw.txt |jq '.location.city'
+"Mountain View"
+# 嵌套解析，获取所有列表元素
+gswyhq@gswyhq-PC:~$ cat json_raw.txt |jq '.employees[].name'
+"Michael"
+"Laura"
+"Elise"
+
+# 内建函数
+  jq还有一些内建函数如 keys，has
+  keys是用来获取JSON中的key元素的：
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq keys
+[
+  "bar",
+  "foo"
+]
+
+#   has是用来是判断是否存在某个key：
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq 'has("abc")'
+false
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq 'has("bar")'
+true
+
+# 获取数组的长度
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq '.bar|length'
+21
+
+# 应用，查看docker的镜像`gswyhq/ner`有哪些tag:
+curl 'https://registry.hub.docker.com/v2/repositories/gswyhq/ner/tags/'|jq '."results"[]["name"]'
+
+
+
