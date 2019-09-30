@@ -448,3 +448,39 @@ https://github.com/mahavivo/scripta-sinica
 DeepFashion 服装数据集
 https://www.aiuai.cn/aifarm112.html
 
+维基百科json版(wiki2019zh)
+104万个词条(1,043,224条; 原始文件大小1.6G，压缩文件519M；数据更新时间：2019.2.7)
+https://pan.baidu.com/s/1uPMlIY3vhusdnhAge318TA
+
+新闻语料json版(news2016zh)
+250万篇新闻( 原始数据9G，压缩文件3.6G；新闻内容跨度：2014-2016年)
+包含了250万篇新闻。新闻来源涵盖了6.3万个媒体，含标题、关键词、描述、正文。
+https://drive.google.com/file/d/1TMKu1FpTr6kcjWXWlQHX7YJsMfhhcVKp/view
+
+百科类问答json版(baike2018qa)
+150万个问答( 原始数据1G多，压缩文件663M；数据更新时间：2018年)
+baike_qa2019.zip
+https://pan.baidu.com/share/init?surl=2TCEwC_Q3He65HtPKN17cA
+fu45
+含有150万个预先过滤过的、高质量问题和答案，每个问题属于一个类别。总共有492个类别，其中频率达到或超过10次的类别有434个。
+
+社区问答json版(webtext2019zh) ：大规模高质量数据集
+410万个问答( 过滤后数据3.7G，压缩文件1.7G；数据跨度：2015-2016年)
+webtext2019zh.zip
+https://drive.google.com/file/d/1u2yW_XohbYL2YAK6Bzc5XrngHstQTf0v/view
+含有410万个预先过滤过的、高质量问题和回复。每个问题属于一个【话题】，总共有2.8万个各式话题，话题包罗万象。
+从1400万个原始问答中，筛选出至少获得3个点赞以上的的答案，代表了回复的内容比较不错或有趣，从而获得高质量的数据集。
+除了对每个问题对应一个话题、问题的描述、一个或多个回复外，每个回复还带有点赞数、回复ID、回复者的标签。
+
+翻译语料(translation2019zh)
+translation2019zh.zip (596M) 
+520万个中英文平行语料( 原始数据1.1G，压缩文件596M)
+https://drive.google.com/file/d/1EX8eE5YWBxCaohBO8Fh4e2j3b9C2bTVQ/view
+中英文平行语料520万对。每一个对，包含一个英文和对应的中文。中文或英文，多数情况是一句带标点符号的完整的话。
+对于一个平行的中英文对，中文平均有36个字，英文平均有19个单词(单词如“she”)
+
+500条中文情感分析语料：
+https://github.com/Zephery/weiboanalysis/blob/master/train/train.txt
+其中1表示积极，2表示消极，3表示客观
+
+

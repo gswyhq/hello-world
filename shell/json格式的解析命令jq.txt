@@ -74,5 +74,123 @@ gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq '.ba
 # 应用，查看docker的镜像`gswyhq/ner`有哪些tag:
 curl 'https://registry.hub.docker.com/v2/repositories/gswyhq/ner/tags/'|jq '."results"[]["name"]'
 
+# 多个json输入：
+gswyhq@gswyhq-PC:~$ echo '{"a":0,"b":{"c":"C"}}{"x":33}{"asd":889}' |   jq -s '.[0]'
+{
+  "a": 0,
+  "b": {
+    "c": "C"
+  }
+}
+
+或 input 输出第一个：
+gswyhq@gswyhq-PC:~$ echo '{"a":0,"b":{"c":"C"}}{"x":33}{"asd":889}' | jq -n input
+{
+  "a": 0,
+  "b": {
+    "c": "C"
+  }
+}
+
+# inputs: 删除第一个对象并输出其他对象
+gswyhq@gswyhq-PC:~$ echo '{"a":0,"b":{"c":"C"}}{"x":33}{"asd":889}' | jq -c inputs
+{"x":33}
+{"asd":889}
+
+# 按行输出，读取第一行：
+gswyhq@gswyhq-PC:~$ echo '{"a":0,"b":{"c":"C"}}{"x":33}{"asd":889}' | jq -c . | head -1
+{"a":0,"b":{"c":"C"}}
+
+# 切片操作：
+gswyhq@gswyhq-PC:~$ echo '["a","b","c","d","e"]' |jq '.[2:4]'
+[
+  "c",
+  "d"
+]
+gswyhq@gswyhq-PC:~$ echo '["a","b","c","d","e"]' |jq '.[2]'
+"c"
+gswyhq@gswyhq-PC:~$ echo '["a","b","c","d","e"]' |jq '.[2:]'
+[
+  "c",
+  "d",
+  "e"
+]
+gswyhq@gswyhq-PC:~$ echo '["a","b","c","d","e"]' |jq '.[-2:]'
+[
+  "d",
+  "e"
+]
+
+# 获取多个字段：
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "something else", "baz": true}' |jq '.foo, .bar'
+42
+"something else"
+
+gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan", "projects": ["jq", "wikiflow"]}' |jq '.user, .projects[1]'
+"stedolan"
+"wikiflow"
+gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan", "projects": ["jq", "wikiflow"]}' |jq '.user, .projects'
+"stedolan"
+[
+  "jq",
+  "wikiflow"
+]
+
+# 管道操作：
+gswyhq@gswyhq-PC:~$ echo '[{"name":"JSON", "good":true}, {"name":"XML", "good":false}]' |jq '.[]'
+{
+  "name": "JSON",
+  "good": true
+}
+{
+  "name": "XML",
+  "good": false
+}
+gswyhq@gswyhq-PC:~$ echo '[{"name":"JSON", "good":true}, {"name":"XML", "good":false}]' |jq '.[]|.name'
+"JSON"
+"XML"
+
+# 计算
+gswyhq@gswyhq-PC:~$ echo '{"name":"JSON", "num":3}' |jq '(.num +2)*4'
+20
+
+# 组合成数组列表：
+gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan", "projects": ["jq", "wikiflow"]}' |jq '[.user, .projects[]]'
+[
+  "stedolan",
+  "jq",
+  "wikiflow"
+]
+
+gswyhq@gswyhq-PC:~$ echo '[1,2,3]'|jq '[.[] |.*3]'
+[
+  3,
+  6,
+  9
+]
+
+# 输出为一个字典：
+gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan","titles":["JQ Primer", "More JQ"]}' | jq '{user, title: .titles[]}'
+{
+  "user": "stedolan",
+  "title": "JQ Primer"
+}
+{
+  "user": "stedolan",
+  "title": "More JQ"
+}
+
+gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan","titles":["JQ Primer", "More JQ"]}' | jq '{(.user): .titles[]}'
+{
+  "stedolan": "JQ Primer"
+}
+{
+  "stedolan": "More JQ"
+}
+
+# 更多示例：
+https://stedolan.github.io/jq/manual/#IO
+https://stedolan.github.io/jq/manual/#example96
+
 
 
