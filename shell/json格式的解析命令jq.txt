@@ -188,6 +188,10 @@ gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan","titles":["JQ Primer", "More JQ"]}'
   "stedolan": "More JQ"
 }
 
+读取标题及主题，按\t分割，并按行写入
+gswyhq@gswyhq-PC:~/data/test$ less web_text_zh_testa.json|jq -c '.title + "\t" + .topic' |xargs -L 1 echo > test.txt
+
+
 # 更多示例：
 https://stedolan.github.io/jq/manual/#IO
 https://stedolan.github.io/jq/manual/#example96
