@@ -88,3 +88,7 @@ export CUDA_VISIBLE_DEVICES=n python main.py
 （n为可见的服务器编号）
 再去执行python 代码.py 才不会占用别的GPU资源
 
+# 禁用GPU,禁止使用GPU，仅仅需要CUDA_VISIBLE_DEVICES设置为空即可；CUDA_DEVICE_ORDER设置为PCI_BUS_ID是为了保证设备ID与物理ID一致(NVML工具nvidia-smi按设备的PCI Bus ID 为设备分配索引序号，由于PCI Bus ID 是硬件相关的，我们把设备的 PCI Bus ID 或者按该ID分配的索引号为物理ID；设置 CUDA_DEVICE_ORDER = PCI_BUS_ID 来要求运行时设备查询按照 PCI_BUS_ID 的顺序索引，从而使得 设备ID=物理ID 保证CUDA应用按期望使用指定设备)
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+

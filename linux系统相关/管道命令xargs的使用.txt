@@ -37,3 +37,40 @@ docker images |grep extraction_20181218_0849|awk '{print $2}'|xargs -n 1 -i dock
 -i 参数直接用 {}就能代替管道之前的标准输出的内容；
 -n num 后面加次数，表示命令在执行的时候一次用的argument的个数，默认是用所有的。
 
+
+# 查看服务器上那个镜像使用了环境变量："42.93.10.10"
+docker ps |awk '{print $1}' |grep -v "CONTAINER" | xargs docker inspect |grep  "42.93.10.10"
+
+# xargs 一次仅仅处理一行 -L 1
+gswyhq@gswyhq-PC:~/data/test$ less web_text_zh_testa.json|jq -c '.title + "\t" + .topic' |xargs -L 1 echo > test.txt
+
+# 若一次处理两行；则 -L 2
+
+# 指定每次读取三行
+[mextest@swarm-node1 ~]$ seq 1 12|xargs -L 3
+1 2 3
+4 5 6
+7 8 9
+10 11 12
+
+# 默认全部读完了
+[mextest@swarm-node1 ~]$ seq 1 12|xargs
+1 2 3 4 5 6 7 8 9 10 11 12
+
+seq 1 12|xargs -L 3|awk '{print $0,":"}'|xargs
+1 2 3 : 4 5 6 : 7 8 9 : 10 11 12 :
+
+在每三行后追加内容，然后合并为一行
+[mextest@swarm-node1 ~]$ seq 1 12|xargs -L 3 echo hi
+hi 1 2 3
+hi 4 5 6
+hi 7 8 9
+hi 10 11 12
+
+在每三行前追加内容
+注意：-n3 表示按照xargs的分隔符（默认是空格），一次接收3个参数
+-L 3表示按照行，上面使用seq的输出是比较简单的，但是如果文件内容处理的话，注意空格的影响。 -d 指定分隔符
+
+ head -9 c1-bidReqResRaw.log|xargs -L 3|nl
+
+ head -9 c1-bidReqResRaw.log|xargs -n3 -d"\n"|nl

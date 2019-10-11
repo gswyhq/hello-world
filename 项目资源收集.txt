@@ -172,3 +172,9 @@ https://wemp.app/posts/c1c3f526-35e4-4cc5-8fef-3304d3031fb5?utm_source=bottom-la
 https://github.com/LarryJiang134/Image_manipulation_detection
 https://github.com/WaLittleMoon/Learning-Rich-Features-for-Image-Manipulation-Detection
 
+使用跨领域语言建模的跨领域命名实体识别
+https://github.com/jiachenwestlake/Cross-Domain_NER
+
+基于知识图谱的问答系统，BERT做命名实体识别和句子相似度，分为online和outline模式
+ https://github.com/WenRichard/KBQA-BERT.git
+

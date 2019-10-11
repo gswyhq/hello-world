@@ -56,4 +56,13 @@ FileNotFoundError: [Errno 2] No such file or directory: 'dot'
 # dot -V
 dot - graphviz version 2.38.0 (20140413.2041)
 
+利用model.fit_generator训练，并且可视化训练过程时，报错：
+  File "/usr/local/lib/python3.5/dist-packages/keras/callbacks.py", line 912, in on_epoch_end
+    raise ValueError("If printing histograms, validation_data must be "
+ValueError: If printing histograms, validation_data must be provided, and cannot be a generator.
+
+解决方法：
+直接把histogram_freq设置为0即可，histogram_freq，按照何等频率（epoch）来计算直方图，0为不计算
+tbCallBack = TensorBoard(log_dir=TENSORBOARD_PATH, histogram_freq=0,  
+                  write_graph=True, write_images=True)
 

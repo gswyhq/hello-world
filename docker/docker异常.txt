@@ -337,6 +337,7 @@ docker exec -it --env COLUMNS=`tput cols` --env LINES=`tput lines` your_containe
 # export COLUMNS=`tput cols`
 export COLUMNS=213
 export LINES=`tput lines`
+export LINES=27
 
 删除容器出现错误：
 gswyhq@gswyhq-PC:~$ docker rmi bf12b323f7b6
