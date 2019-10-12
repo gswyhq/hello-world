@@ -1,0 +1,17 @@
+url的命令行解析
+
+# from urllib.parse import quote, unquote
+# quote('你好')
+# Out[16]: '%E4%BD%A0%E5%A5%BD'
+unquote('%E4%BD%A0%E5%A5%BD')
+Out[17]: '你好'
+# curl -XGET 192.168.3.103:8888/?text=%E4%BD%A0%E5%A5%BD
+# gswewf@gswewf-PC:~$ curl -XPOST 192.168.3.103:8888/ -d '{"message": "你好"}' -H "Content-Type: application/json"
+
+第一步:自定义一个shell函数：
+gswyhq@gswyhq-PC:~/Desktop$ urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
+
+第二步:用自定义的函数进行url解码
+gswyhq@gswyhq-PC:~/Desktop$ urldecode 192.168.3.103:8888/?text=%E4%BD%A0%E5%A5%BD
+192.168.3.103:8888/?text=你好
+

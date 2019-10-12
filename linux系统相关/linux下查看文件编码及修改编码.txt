@@ -31,7 +31,32 @@ iconv -f encoding -t encoding inputfile
 iconv -f UTF-8 -t GBK file1 -o file2
  查看文件编码file命令
 file ip.txt  ip.txt: UTF-8 Unicode text, with escape sequences
-一、利用iconv命令进行编码转换文件内容编码转换  iconv命令用于转换指定文件的编码,默认输出到标准输出设备,亦可指定输出文件。  用法： iconv [选项...] [文件...]  有如下选项可用:  输入/输出格式规范：  -f, --from-code=名称 原始文本编码  -t, --to-code=名称 输出编码  信息：  -l, --list 列举所有已知的字符集    输出控制：  -c 从输出中忽略无效的字符  -o, --output=FILE 输出文件  -s, --silent 关闭警告  --verbose 打印进度信息  -?, --help 给出该系统求助列表  --usage 给出简要的用法信息  -V, --version 打印程序版本号    例子:  iconv -f utf-8 -t gb2312 aaa.txt >bbb.txt  这个命令读取aaa.txt文件，从utf-8编码转换为gb2312编码,其输出定向到bbb.txt文件。
+一、利用iconv命令进行编码转换文件内容编码转换  iconv命令用于转换指定文件的编码,默认输出到标准输出设备,亦可指定输出文件。
+用法： iconv [选项...] [文件...]
+有如下选项可用:  输入/输出格式规范：
+-f, --from-code=名称 原始文本编码
+-t, --to-code=名称 输出编码  信息：
+-l, --list 列举所有已知的字符集    输出控制：
+-c 从输出中忽略无效的字符
+-o, --output=FILE 输出文件
+-s, --silent 关闭警告
+--verbose 打印进度信息
+-?, --help 给出该系统求助列表
+--usage 给出简要的用法信息
+-V, --version 打印程序版本号
+例子:  iconv -f utf-8 -t gb2312 aaa.txt >bbb.txt
+这个命令读取aaa.txt文件，从utf-8编码转换为gb2312编码,其输出定向到bbb.txt文件。
+
+shell中字符串编码的转换也可以用iconv命令来进行：
+gswyhq@gswyhq-PC:~$ echo "��ѹ���룺" |iconv -f gb18030 -t utf-8
+锟斤拷压锟斤拷锟诫：
+gswyhq@gswyhq-PC:~$ echo "你好" |iconv -t gb18030 -f utf-8
+����
+gswyhq@gswyhq-PC:~$ echo "你好" |iconv -t gb18030 -f utf-8 |iconv -f gb18030 -t utf-8
+你好
+gswyhq@gswyhq-PC:~$ echo "avad12345" |iconv -f gb18030 -t utf-8
+avad12345
+
 二、文件名编码转换
 因为现在用linux,原来在windows里的文件都是用GBK编码的。所以copy到linux下是乱码，文件内容可以用iconv来转换可是好多中文的文件名还是乱码，找到个可以转换文件名编码的命令，就是convmv。
 convmv命令详细参数  例如
@@ -39,18 +64,29 @@ convmv -f GBK -t UTF-8 *.mp3
 不过这个命令不会直正的转换，你可以看到转换前后的对比。如果要直正的转换要加上参数 --notest
 convmv -f GBK -t UTF-8 --notest *.mp3
 -f 参数是指出转换前的编码，-t 是转换后的编码。这个千万不要弄错了。不然可能还是乱码哦。还有一个参数很有用。就是 -r 这个表示递归转换当前目录下的所有子目录。
-* 需要安装 convmv-1.10-1.el5.noarch.rpm  
-三、  更好的傻瓜型命令行工具enca，它不但能智能的识别文件的编码，而且还支持成批转换。  　　1.安装  　　
+* 需要安装 convmv-1.10-1.el5.noarch.rpm
+
+三、  更好的傻瓜型命令行工具enca，它不但能智能的识别文件的编码，而且还支持成批转换。  　　
+1.安装  　　
 $sudo apt-get install enca  　　
 2.查看当前文件编码  　　
-enca -L zh_CN ip.txt     Simplified Chinese National Standard; GB2312     Surrounded by/intermixed with non-text data  　　
+enca -L zh_CN ip.txt
+Simplified Chinese National Standard; GB2312
+Surrounded by/intermixed with non-text data  　　
 3.转换  　　命令格式如下  　　
 $enca -L 当前语言 -x 目标编码 文件名  　　
 例如要把当前目录下的所有文件都转成utf-8  　　
 enca -L zh_CN -x utf-8 *     
 检查文件的编码　enca -L zh_CN file   　　
- 将文件编码转换为"UTF-8"编码　 enca -L zh_CN -x UTF-8 file
+将文件编码转换为"UTF-8"编码　 enca -L zh_CN -x UTF-8 file
 如果不想覆盖原文件可以这样         enca -L zh_CN -x UTF-8 < file1 > file2
+
+enca -L zh_CN file  # 检查文件的编码
+enca -L zh_CN -x UTF-8 file  # 将文件编码转换为"UTF-8"编码
+enca -L zh_CN -x utf-8 *   # 把文件夹下的所有文件转换为utf8编码
+4、批量转换
+目录转换报错不影响
+find | grep -v '.svn' | xargs enca -L zh_CN -x UTF-8
 
 # 也可以通过Python获取文件的编码
 import chardet

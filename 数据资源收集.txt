@@ -72,6 +72,10 @@ http://openkg.cn/dataset/ownthink
 五千万知识图谱数据拿走不谢
 链接: https://pan.baidu.com/s/1iATmmV51XwejAAGLsWJ3OA 提取码: fv49 
 data.tar.gz
+1.4亿中文知识图谱：
+ownthink_v2.zip（链接: https://pan.baidu.com/s/1LZjs9Dsta0yD9NH-1y0sAw 提取码: 3hpp ）
+unzip -P "https://www.ownthink.com/" ownthink_v2.zip
+
 
 医疗知识图谱数据
 链接: https://pan.baidu.com/s/178DMxv9P-kK7DssofH6URw 提取码: 5x4m 复制这段内容后打开百度网盘手机App，操作更方便哦
