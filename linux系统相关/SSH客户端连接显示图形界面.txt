@@ -1,0 +1,42 @@
+
+ssh连接成功后，如果想要显示图形界面，需要做一些配置。步骤如下：
+1、服务器端的ssh必须运行转发X界面，在ssh服务器中，找到/etc/ssh/sshd_config 这个配置文件，www.linuxidc.com 其中有一行X11Forwarding yes，确保这个是yes（注意这个配置文件中的#是注释，确保X11Forwarding前面没有#注释），然后重启ssh服务，cd /etc/init.d这个目录下执行 ./ssh restart
+
+2、客户端配置，在/etc/ssh/ssh_config配置文件中，找到ForwardAgent yes，ForwardX11 yes，ForwardX11Trusted yes这3个确保是yes（注意这个配置文件中的#是注释，确保你修改的行没有被注释掉）
+
+3、配置完成后，进入终端，现在假设我们的Ubuntu客户端的ip是1.1.1.1（只是假设），而ssh服务器的ip是2.2.2.2。下面是执行步骤，注意别弄错了：
+
+首先终端未连接ssh之前，执行xhost +2.2.2.2 这个步骤是允许ssh服务器的X界面连接过来
+
+然后执行ssh -X root@2.2.2.2 注意-X这个是大写的X，这个步骤是连接到ssh服务器，接着会要输入密码
+
+这个时候终端已经连接到ssh服务器了，然后执行export DISPLAY=1.1.1.1:0.0这个步骤是把ssh服务器的X显示重新定位到1.1.1.1的0.0显示器中，也就是我们的客户端
+如果是本地显示那么DISPLAY=:0.0
+
+然后做个测试，执行xclock，等待。。。如果这个时候在你的Ubuntu界面中出现了一个时钟界面，那么恭喜你成功了。
+
+# 打开远程的一个excel文件在本地显示：
+/opt/kingsoft/wps-office/office6/et 自助聊天日志.xlsx
+
+# 打开远程的一个Word文件在本地显示：
+/opt/kingsoft/wps-office/office6/wps 记录.doc
+
+# 打开远程的chrome浏览器(若之前打开的浏览器网页较多，可能需要等两三分钟才能打开)：
+/opt/google/chrome/google-chrome
+
+
+当然也可以将图形化登录写成一个脚本，每次执行脚本就可以登录
+vim ssh_167.sh
+```shell
+#!/bin/bash
+
+xhost +167.234.123.21
+ssh -X gswyhq@167.234.123.21
+DISPLAY=:0.0
+
+```
+
+图形化登录，只需：
+./ssh_167.sh
+即可
+
