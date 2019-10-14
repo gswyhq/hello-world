@@ -39,4 +39,11 @@ gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:0-5:3}
 gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:5:3}
 eng
 
+python 字符串子串匹配及获取对应的位置：
+[(i.start(), i.end()) for i in re.finditer('中国', '你好中国，中国你好')]
+Out[13]: [(2, 4), (5, 7)]
+'你好中国，中国你好'[2:4]
+Out[14]: '中国'
+'你好中国，中国你好'[5:7]
+Out[15]: '中国'
 

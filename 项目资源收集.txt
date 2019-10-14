@@ -181,3 +181,6 @@ https://github.com/jiachenwestlake/Cross-Domain_NER
 用Keras  Transformers 简化实现 BERT and GPT models
 https://github.com/kpot/keras-transformer
 
+超轻量级通用人脸检测模型
+https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.git
+

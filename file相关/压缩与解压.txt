@@ -234,12 +234,21 @@ bzip2
 　　-c　　　　　　　//将输出写至标准输出
 　　-d　　　　　　　//进行解压操作
 　　-v　　　　　　　//输出压缩/解压的文件名和压缩比等信息
-　　-k　　　　　　　//在压缩/解压过程中保留原文件
+　　-k　　　　　　　//在压缩/解压过程中保留原文件, bzip2在压缩或解压的过程默认会删除源文件
 　　-digit　　　　 //digit部分为数字(1-9)，代表压缩速度，digit越小，则压缩速度越快，但压缩效果越差，digit越大，则压缩速度越慢，压缩效果越好。默认为6.
 　　　　bzip2 exp1.txt exp2.txt　　　　   //分别将exp1.txt和exp2.txt压缩，且不保留原文件。
 　　　　bzip2 -dv exp1.bz2　　　　　　 //将exp1.bz2解压，并显示压缩比等信息。
 　　　　bzip2 -kd exp1.bz2 　　　　　　  //将exp1.bz2解压，并且原压缩文件exp1.bz2不会消失
+        bzip2 -k sgns.target.word-character.char1-1.dynwin5.thr10.neg5.dim300.iter5 对文件进行压缩成bz2文件，并保留源文件
 　　注：对应于 bzip2，可以使用 bunzip2 进行解压操作，效果类似bunzip2 -d xx，同时可以使用bzcat读取压缩文件的内容并显示在标准输出，功能类似于 bzip2 -c xx.
+
+# 对于.bz2结尾的文件进行解压（若无-k参数会删除原bz2文件）
+# bzip2 -d all.bz2
+# bunzip2 all.bz2
+
+# 压缩成bz2文件，并保留源文件
+# gswyhq@gswyhq-pc:~/data/word-vectors$ bzip2 -k sgns.target.word-character.char1-1.dynwin5.thr10.neg5.dim300.iter5
+
 
 总结
 1、*.tar 用 tar –xvf 解压

@@ -191,6 +191,10 @@ gswyhq@gswyhq-PC:~$ echo '{"user":"stedolan","titles":["JQ Primer", "More JQ"]}'
 读取标题及主题，按\t分割，并按行写入
 gswyhq@gswyhq-PC:~/data/test$ less web_text_zh_testa.json|jq -c '.title + "\t" + .topic' |xargs -L 1 echo > test.txt
 
+有时候因为有特殊字符xargs会报错：
+xargs: unmatched double quote; by default quotes are special to xargs unless you use the -0 option
+这个时候可以使用命令：
+less chat_raw_chat_corpus_20181119_095640_data.json |jq -c '._source.tag1 + "    " +._source.question + "    " + ._source.answer' | sed -e 's/"/"\\""/g' -e 's/.*/"&"/' |xargs -L 1 echo > chat_raw_chat_corpus_20181119_095640_data.txt
 
 # 更多示例：
 https://stedolan.github.io/jq/manual/#IO

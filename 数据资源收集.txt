@@ -271,7 +271,12 @@ WordVector_60dimensional
 60维维基百科词向量
 https://pan.baidu.com/s/1o8f1ELs
 
-官方的中文预训练权重
+词向量
+sgns.target.word-character.char1-1.dynwin5.thr10.neg5.dim300.iter5.bz2
+https://github.com/Embedding/Chinese-Word-Vectors
+https://pan.baidu.com/s/1c9yiosHKNIZwRlLzD_F1ig
+
+官方的中文预训练bert权重
 chinese_L-12_H-768_A-12.zip
 https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zip
 
@@ -510,4 +515,15 @@ https://github.com/huangxiangzhou/NLPCC2016KBQA.git
 /home/gswyhq/github_projects/nl2sql/data/train
 https://github.com/eguilg/nl2sql.git
 
+中文预训练模型 XLNet-mid, Chinese, TensorFlow 
+XLNet-mid：24-layer, 768-hidden, 12-heads, 209M parameters
+chinese_xlnet_mid_L-24_H-768_A-12.zip (741M) 
+https://drive.google.com/open?id=1342uBc7ZmQwV6Hm6eUIN_OnBSz1LcvfA
+https://github.com/ymcui/Chinese-PreTrained-XLNet
+
+人脸识别数据 widerface
+wider_face_add_lm_10_10.zip 3.06G
+（1）过滤掉10px*10px 小人脸后的干净widerface数据压缩包 ：https://pan.baidu.com/s/1m600pp-AsNot6XgIiqDlOw 提取码：x5gt
+wider_face.zip 3.42G
+（2）未过滤小人脸的完整widerface数据压缩包 ：https://pan.baidu.com/s/1ijvZFSb3l7C63Nbz7i6IuQ 提取码：8748
 
