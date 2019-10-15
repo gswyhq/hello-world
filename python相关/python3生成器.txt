@@ -1,0 +1,11 @@
+
+# 生成器拼接
+def gen1(abc):
+    for i in abc:
+        yield i
+
+import itertools
+[i for i in itertools.chain(gen1([1,2,3]), gen1('abcd'))]
+Out[11]: [1, 2, 3, 'a', 'b', 'c', 'd']
+
+

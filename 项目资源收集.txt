@@ -184,3 +184,6 @@ https://github.com/kpot/keras-transformer
 超轻量级通用人脸检测模型
 https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.git
 
+实现完美舞蹈动作迁移
+https://github.com/svip-lab/impersonator
+

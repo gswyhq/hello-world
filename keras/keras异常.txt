@@ -66,3 +66,21 @@ ValueError: If printing histograms, validation_data must be provided, and cannot
 tbCallBack = TensorBoard(log_dir=TENSORBOARD_PATH, histogram_freq=0,  
                   write_graph=True, write_images=True)
 
+在使用GPU训练时报错：
+tensorflow.python.framework.errors_impl.InternalError: Blas GEMM launch failed : a.shape=(6368, 125), b.shape=(125, 125), m=6368, n=125, k=125
+
+原因及解决方案：
+这是调用GPU时，显存分配遇到了问题，所以发生错误。
+比较保险的方式是在模型训练之前为tensorflow或者keras分配显存空间，tensorflow就用如下语句创建session：
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)  
+sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))  
+而keras就在引入keras时进行参数设置：
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.allocator_type = 'BFC' #A "Best-fit with coalescing" algorithm, simplified from a version of dlmalloc.
+config.gpu_options.per_process_gpu_memory_fraction = 0.3
+config.gpu_options.allow_growth = True
+set_session(tf.Session(config=config)) 
+如果使用ipython notebook，做完上述设置后可能出现GPU sync failed，重启一下就应该没问题了。
+
