@@ -187,3 +187,10 @@ https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.git
 实现完美舞蹈动作迁移
 https://github.com/svip-lab/impersonator
 
+基于深度学习的中文关系抽取框架
+https://github.com/zjunlp/deepke
+
+认知图谱问答（CogQA）框架
+算法使用两个系统来维护一张认知图谱（Cognitive Graph），系统一在文本中抽取与问题相关的实体名称并扩展节点和汇总语义向量，系统二利用图神经网络在认知图谱上进行推理计算。
+https://github.com/THUDM/CogQA
+

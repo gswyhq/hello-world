@@ -1,0 +1,41 @@
+
+    early_stopping = EarlyStopping(monitor='val_loss', patience=3)  # 连续 patience 次，val_loss 都没有得到改善则退出训练。
+
+    model_checkpoint = ModelCheckpoint(filepath=os.path.join(model_save_path,
+                                                             'ner-classify-{epoch:02d}-{ner_out_crf_accuracy:.4f}-{rel_out_acc:.4f}.hdf5'),
+                                       save_best_only=True, save_weights_only=False)
+
+    tb = TensorBoard(log_dir=log_dir,  # log 目录
+                     histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
+                     batch_size=batch_size,  # 用多大量的数据计算直方图
+                     write_graph=True,  # 是否存储网络结构图
+                     write_grads=False,  # 是否可视化梯度直方图
+                     write_images=False,  # 是否可视化参数
+                     embeddings_freq=0,
+                     embeddings_layer_names=None,
+                     embeddings_metadata=None)
+
+    hist = model.fit_generator(pre_data.batch_generator(TRAIN_DATA_PATH, batch_size=batch_size, maxlen=input_length),
+                               # batch_size=32,
+                               epochs=epochs,
+                               # verbose=1,
+                               steps_per_epoch = 10 * 10000,
+                               # validation_split=0.1,
+                               validation_data=pre_data.batch_generator(DEV_DATA_PATH, batch_size=batch_size, maxlen=input_length),
+                               validation_steps = 10000,
+                               shuffle=True,
+                               callbacks=[early_stopping, model_checkpoint, tb]
+                     )
+
+
+EarlyStopping是Callbacks的一种，callbacks用于指定在每个epoch开始和结束的时候进行哪种特定操作。Callbacks中有一些设置好的接口，可以直接使用，如’acc’,’val_acc’,’loss’和’val_loss’等等。 
+EarlyStopping是可以用于提前停止训练的callbacks。具体地，可以达到当训练集上的loss不在减小（即减小的程度小于某个阈值）的时候停止继续训练。
+
+patience: 当early stop被激活(如发现 loss 相比上一个 epoch 训练没有下降)，则经过 patience 个 epoch 后停止训练
+
+根本原因就是因为继续训练会导致测试集上的准确率下降。 
+那继续训练导致测试准确率下降的原因猜测可能是
+1. 过拟合 2. 学习率过大导致不收敛 3. 使用正则项的时候，Loss的减少可能不是因为准确率增加导致的，而是因为权重大小的降低。
+
+当然使用EarlyStopping也可以加快学习的速度，提高调参效率。
+
