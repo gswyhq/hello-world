@@ -194,3 +194,7 @@ https://github.com/zjunlp/deepke
 算法使用两个系统来维护一张认知图谱（Cognitive Graph），系统一在文本中抽取与问题相关的实体名称并扩展节点和汇总语义向量，系统二利用图神经网络在认知图谱上进行推理计算。
 https://github.com/THUDM/CogQA
 
+无监督数据增强方法 --Unsupervised
+Data Augmentation for Consistency Training
+https://github.com/google-research/uda.git
+

@@ -119,3 +119,28 @@ lambda_1 (Lambda)               (None, 512)          0           attention_1[0][
 __________________________________________________________________________________________________
 dense_7 (Dense)                 (None, 73)           37449       lambda_1[0][0]
 __________________________________________________________________________________________________
+
+当一个包含keras模型的python脚本执行时，如果没有任何多线程/多处理功能，它将可以正常工作。但是，一旦使用了多线程并且keras模型需要在新线程中执行，就会引起问题。
+tornado启动服务，单线程启动加载模型没有问题；但改成多线程出现下面的问题：
+ValueError: Tensor Tensor("ner_out/cond/Merge:0", shape=(?, ?, 125), dtype=float32) is not an element of this graph.
+解决方案：
+初始化加载模型后，先执行一次model._make_predict_function()操作，之后的调用就不会出问题了
+model = load_model(filepath=model_path)
+model._make_predict_function()
+
+或者多线程报错：
+ValueError: Tensor("training/Adam/Const:0", shape=(), dtype=float32) must be from the same graph as Tensor("sub:0", shape=(), dtype=float32).
+解决方案：
+加载模型时候：
+    self.model = load_model(model_path)
+    self.model._make_predict_function()
+    self.graph = tf.get_default_graph()
+
+预测的时候：
+    with self.graph.as_default():
+        labels = self.model.predict(data)
+
+训练的时候：
+    with self.graph.as_default():
+        hist = self.model.fit(x, y)
+
