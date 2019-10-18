@@ -1,0 +1,11 @@
+
+jar文件运行,如：
+java -jar /tmp/pdfbox-app-2.0.12.jar
+
+java文件的编译运行：
+javac DatabaseUtil.java
+java DatabaseUtil
+
+
+https://search.maven.org/remotecontent?filepath=org/neo4j/driver/neo4j-java-driver/1.7.2/neo4j-java-driver-1.7.2.jar
+

@@ -42,6 +42,12 @@ remote_cmd="grep '2018-06-10' /home/ubuntu/bnrs/log/io.log*| grep -vE '2018-06-0
 grep -o '好' 文件名.txt | wc -l
 
 -o 指示grep显示所有匹配的地方，并且每一个匹配单独一行输出。这样只要统计输出的行数就可以知道这个字符出现的次数了。
+-o 只输出匹配的内容：
+gswyhq@gswyhq-PC:~$ echo "浪潮,original language, of work,德语"| grep "^[^,]*,[^,]*,[^,]*"
+浪潮,original language, of work,德语
+gswyhq@gswyhq-PC:~$ echo "浪潮,original language, of work,德语"| grep -o "^[^,]*,[^,]*,[^,]*"
+浪潮,original language, of work
+
 
 操作 grep "xxx" a.log
 结果 Binary file a.log matches

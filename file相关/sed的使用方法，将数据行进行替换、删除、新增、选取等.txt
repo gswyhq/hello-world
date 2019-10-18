@@ -18,6 +18,34 @@ sed -i ’s/10/$num/g‘ test.xml
 $num=1000
 sed -i "s#10#$num#g" test.xml
 
+可以在结尾指定数字，只是第 n 个匹配出现才要被取代:
+将第三次出现的a替换成b:
+gswyhq@gswyhq-PC:~$ echo aaaaa |sed -e 's/a/b/3'
+aabaa
+
+增加一个 -e 选项的方式能让 sed 接受多个命令。
+sed -e ‘s/foo/bar/g’ -e ‘s/chicken/cow/g’ myfile.txt 1>myfile2.txt 
+
+用 shell 命令将 test.log 文件中第 3-5 行的第 2 个“filter” 替换成“haha”
+sed -i '3，5s/filter/haha/2' test.log
+
+sed 分组匹配, \n 在正则表达式中被称为 正则表达式反向。其中 n 是指第几个 圆括号 () 所匹配的内容；\0 表示匹配的全部内容：
+$ echo "第一,第二,第三" | sed 's|\(\w\+\),\(\w\+\),\(\w\+\)|\1\n\3\n\2\n\0|'
+第一
+第三
+第二
+第一,第二,第三
+
+# 除了 / ,sed 中，竖线 | 也可以作为 模式 的分隔符。
+
+# sed,不支持非贪婪模式；删除前2个 - 的内容
+echo "北京市-朝阳区-土城2F-10" | sed 's/^\([^-]*-\)\{2\}//'
+土城2F-10
+
+非贪婪匹配可以用perl实现：
+$ echo "(a)bb(ccc)dddd(eeeee)f" | perl -pe 's/\(.*?\)//g'
+bbddddf
+
 sed是一个很好的文件处理工具，本身是一个管道命令，主要是以行为单位进行处理，可以将数据行进行替换、删除、新增、选取等特定工作，下面先了解一下sed的用法
 sed命令行格式为：
          sed [-nefri] ‘command’ 输入文本        

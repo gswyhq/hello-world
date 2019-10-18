@@ -47,6 +47,25 @@ def multiple_replace(dic, text):
     return re.sub(pattern, lambda m: dic[m.group()[1:-1]], text)
 print (multiple_replace(dic, template))
 
+# 如何找到表达式中字符串的第n个出现以及如何用正则表达式替换
+有以下字符串
+txt = "aaa-aaa-aaa-aaa-aaa-aaa-aaa-aaa-aaa-aaa"
+想用’|’代替’ – ‘的第五次出现
+和“||”的第7次出现
+期望结果：
+ aaa-aaa-aaa-aaa-aaa|aaa-aaa||aaa-aaa-aaa
+
+方法1，直接一次替换：
+re.sub("(^(.*?-){4}.*?)-(.*?-.*?)-", "\\1|\\3||", txt)
+Out[20]: 'aaa-aaa-aaa-aaa-aaa|aaa-aaa||aaa-aaa-aaa'
+
+方法2，分步替换：
+txt2 = re.sub("(^(.*?-){6}.*?)-", "\\1||", txt)
+txt2
+Out[25]: 'aaa-aaa-aaa-aaa-aaa-aaa-aaa||aaa-aaa-aaa'
+re.sub("(^(.*?-){4}.*?)-", "\\1|", txt2)
+Out[26]: 'aaa-aaa-aaa-aaa-aaa|aaa-aaa||aaa-aaa-aaa'
+
 
 def main():
     pass

@@ -87,7 +87,7 @@ set_session(tf.Session(config=config))
 构建模型时报错：
 TypeError: Layer reshape_1 does not support masking, but was passed an input_mask: Tensor("concatenate_1/All:0", shape=(?, ?), dtype=bool)
 解决方案：
-添加一个lambda层`x = Lambda(lambda x: x[:, 0])(x)`使网络结构由
+添加一个lambda层`dense = Lambda(lambda x: x, output_shape=lambda s: s)(dense)`使网络结构由
 _________________________________________________________________
 bidirectional_1 (Bidirection (None, None, 200)         240800
 _________________________________________________________________

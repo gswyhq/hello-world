@@ -63,3 +63,8 @@ TensorFlow 1.13及更高版本的GPU版本（包括最新标签）需要支持CU
 3 增加pool 层，降低整个网络的维度。
 4 修改输入图片的大小
 
+用bert是会报错：
+tensorflow.python.framework.errors_impl.InvalidArgumentError: indices[11,1] = 5803 is not in [0, 5803)
+主要是因为embedding的个数不对；
+Embedding(input_dim=self.vocab_size, output_dim=self.embedding_size, name='Embedding-Token')
+改为： Embedding(input_dim=self.vocab_size+1, output_dim=self.embedding_size, name='Embedding-Token')

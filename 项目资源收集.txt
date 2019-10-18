@@ -198,3 +198,7 @@ https://github.com/THUDM/CogQA
 Data Augmentation for Consistency Training
 https://github.com/google-research/uda.git
 
+经济责任审计知识图谱：网络爬虫、关系抽取、领域词汇判定
+https://github.com/mengxiaoxu/economic_audit_knowledge_graph.git
+
+
