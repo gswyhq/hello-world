@@ -68,3 +68,10 @@ tensorflow.python.framework.errors_impl.InvalidArgumentError: indices[11,1] = 58
 主要是因为embedding的个数不对；
 Embedding(input_dim=self.vocab_size, output_dim=self.embedding_size, name='Embedding-Token')
 改为： Embedding(input_dim=self.vocab_size+1, output_dim=self.embedding_size, name='Embedding-Token')
+
+用dropout有时候报错：
+TypeError: dropout() got an unexpected keyword argument 'rate'
+解决方法及原因：
+rate在TensorFlow 1.13中是该函数的有效参数，但在早期版本中无效
+
+
