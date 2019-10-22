@@ -17,4 +17,8 @@ gswyhq@gswyhq-PC:~/yhb$ ls -al|awk '{print $NF}'
 # 查找某个程序的进程，再批量kill掉：
 gswyhq@gswyhq-PC:~/yhb$ ps -aux|grep draw|awk '{print $2}'|xargs kill
 
+# awk求解字符串的长度：
+head train3.txt |awk '{print length($0)}'
+11
+10
 

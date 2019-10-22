@@ -71,3 +71,30 @@ docker stats --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 # 更多使用帮助见：
 https://docs.docker.com/engine/reference/commandline/stats/
 
+根据宿主机进程号，查询对应的docker容器号等
+如查找进程号为3127的进程是由哪个容器启动的：
+for i in  `docker ps |grep Up|awk '{print $1}'`;do echo \ &&docker top $i &&echo ID=$i; done |grep -A 10 3127
+
+docker top :查看容器中运行的进程信息，支持 ps 命令参数。
+查看容器mymysql的进程信息：
+runoob@runoob:~/mysql$ docker top mymysql
+UID    PID    PPID    C      STIME   TTY  TIME       CMD
+999    40347  40331   18     00:58   ?    00:00:02   mysqld
+
+查看所有运行容器的进程信息：
+for i in  `docker ps |grep Up|awk '{print $1}'`;do echo \ &&docker top $i; done
+
+docker ps : 列出容器
+语法
+docker ps [OPTIONS]
+OPTIONS说明：
+-a :显示所有的容器，包括未运行的。
+-f :根据条件过滤显示的内容。
+--format :指定返回值的模板文件。
+-l :显示最近创建的容器。
+-n :列出最近创建的n个容器。
+--no-trunc :不截断输出。
+-q :静默模式，只显示容器编号。
+-s :显示总的文件大小。
+
+

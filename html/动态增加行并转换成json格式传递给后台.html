@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+
+    <body>
+        <form id="upload-form" >
+            <table class="table table-responsive table-striped" id="table">
+
+                <thead>
+                    <th>序号</th>
+                    <th>问句</th>
+                    <th>实体</th>
+                    <th>意图</th>
+                    <th>操作</th>
+                </thead>
+                <tbody id="tb">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td align="center" colspan="4">
+                            <input  class="btn btn-info" type="submit" value="训练"  onclick="save3();">
+                            <button class="btn btn-primary" onclick="addrows()">添加标记语料</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+        </form>
+        <div id="msg"></div>
+        <script src="./js/jquery-3.3.1.js"></script>
+<!--        <script src="./js/jquery.serializejson.js"></script>-->
+
+        <script>
+            var rows = 1;
+            function addrows() {
+                var trElement = document.createElement("tr");
+                var td1Element = document.createElement("td");
+                var td2Element = document.createElement("td");
+                var td3Element = document.createElement("td");
+                var td4Element = document.createElement("td");
+                var td5Element = document.createElement("td");
+//                td1Element.innerHTML="<input type='checkbox' value='1' name='chk'>"+rows;
+                td1Element.innerHTML=rows;
+                td2Element.innerHTML="<input type='text' value='' required name='question' class='form-control'>";
+                td3Element.innerHTML="<input type='text' value='' name='entity' class='form-control'>";
+                td4Element.innerHTML="<input type='text' value='' required name='intent' class='form-control'>";
+
+                td5Element.innerHTML="<input type='button' value='删除当前行' class='btn btn-danger' onclick='delrow(this)'>";
+
+                trElement.appendChild(td1Element);
+                trElement.appendChild(td2Element);
+                trElement.appendChild(td3Element);
+                trElement.appendChild(td4Element);
+                trElement.appendChild(td5Element);
+
+                var tbody = document.getElementById("tb");
+                tbody.appendChild(trElement);
+
+                rows++;
+
+            }
+            function delrow(obj){
+                //获取按钮所在的行
+                btnTrElement = obj.parentNode.parentNode;
+                //alert(btnTrElement.nodeName);
+                //获取按钮所在的行的上一级也就是TBODY
+                tbodyElemement = btnTrElement.parentNode;
+                //通过tobody干掉tr
+                tbodyElemement.removeChild(btnTrElement);
+            }
+        </script>
+        <script type="text/javascript">
+
+        function save3() {
+            var $table = $('#table');
+            const $msg = $('#msg')
+            var data = [];
+
+            var headers = ['', 'question', 'entity', 'intent'];
+            // for (var i=0; i<table.rows[0].cells.length; i++) {
+            //     headers[i] = table.rows[0].cells[i].innerHTML.toLowerCase().replace(/ /gi,'');
+            // }
+
+            for (var i=1; i<table.rows.length-1; i++) {
+                var tableRow = table.rows[i];
+                var rowData = {};
+                for (var j=0; j<tableRow.cells.length-1; j++) {
+                    rowData[ headers[j] ] = tableRow.cells[j].childNodes[0].value;
+                }
+                data.push(rowData);
+            }
+            alert('共上传训练语料数：'+data.length);
+            $.ajax({
+                type: 'post',
+                url: '/train',
+                dataType:"json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({"data": data}),
+                success: function (data) {
+                        alert(data.msg);
+                    },
+                error: function(data) {
+                    alert(data.msg);
+                }
+            });
+        }
+
+    </script>
+    </body>
+
+</html>
+

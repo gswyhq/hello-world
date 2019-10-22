@@ -527,3 +527,11 @@ wider_face_add_lm_10_10.zip 3.06G
 wider_face.zip 3.42G
 （2）未过滤小人脸的完整widerface数据压缩包 ：https://pan.baidu.com/s/1ijvZFSb3l7C63Nbz7i6IuQ 提取码：8748
 
+开源生物识别数据
+features.tar.gz 2.4G
+Google Audioset：扩展了 632 个音频分类样本，并从 YouTube 视频中提取了 2，084，320 个人类标记的 10 秒声音片段
+地址：https://research.google.com/audioset/
+https://research.google.com/audioset/download.html
+https://github.com/audioset/ontology.git
+
+

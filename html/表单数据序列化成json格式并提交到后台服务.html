@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>jQuery Form Serialize</title>
+</head>
+<body>
+
+  <form id="form">
+    <input type="text" name="table_name" value="Finding Loot"/>
+    <input type="text" name="identifier" value="John Smith"/>
+    <input type="text" name="test"  value="Legendary Pirate"/>
+
+  <input  class="button" type="submit" value="训练"  onclick="save3();">
+  </form>
+
+<!--  <script src="./js/jquery-3.3.1.js"></script>-->
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+  <script type="text/javascript">
+      function save3() {
+          var arry = $("#form").serializeArray();//序列化表单
+          var obj = {};//分配内存空间
+          for (var i = 0; i < arry.length; i++) {//数据类型为"自定义类的字段名=数据"后台会自动对数据进行匹配
+            obj[arry[i].name] = arry[i].value;
+          }
+          var json_str=  JSON.stringify(obj ); //转换成string数据
+          // alert(str);
+          $.ajax({
+              type: 'post',
+              url: '/train',
+              dataType:"json",
+              contentType: "application/json; charset=utf-8",
+              data:json_str,
+              success: function () {
+                  alert('提交数据：'+json_str);
+              }
+          });
+      }
+  </script>
+</body>
+</html>
