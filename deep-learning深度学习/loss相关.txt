@@ -1,0 +1,40 @@
+
+
+loss 函数：主要有 sse msse 等统计学函数，也可以自定义，作用主要是统计预测值和真实值的距离。
+
+loss_weight:用来计算总的loss 的权重。默认为1，多个输出时，可以设置不同输出loss的权重来决定训练过程。
+
+loss_weights={'ner_out': 0.05, 'rel_out': 0.95}
+最后总的loss = ner_out_loss * 0.05 + rel_out_loss * 0.95
+
+不同的损失值具有不同的取值范围（若中间做了归一化处理，则多输出模型的各个loss的取值范围会是一致的），为了平衡不同损失的贡献，应该对loss_weights进行设置
+
+# 自定义loss函数
+
+from keras.layers import Input,Embedding,LSTM,Dense
+from keras.models import Model
+from keras import backend as K
+
+word_size = 128
+nb_features = 10000
+nb_classes = 10
+encode_size = 64
+
+input = Input(shape=(None,))
+embedded = Embedding(nb_features,word_size)(input)
+encoder = LSTM(encode_size)(embedded)
+predict = Dense(nb_classes, activation='softmax')(encoder)
+
+def mycrossentropy(y_true, y_pred, e=0.1):
+    loss1 = K.categorical_crossentropy(y_true, y_pred)
+    loss2 = K.categorical_crossentropy(K.ones_like(y_pred)/nb_classes, y_pred)
+    return (1-e)*loss1 + e*loss2
+
+model = Model(inputs=input, outputs=predict)
+model.compile(optimizer='adam', loss=mycrossentropy)
+
+# 自定义一个输入为y_pred,y_true的loss函数，放进模型compile即可。这里的mycrossentropy，第一项就是普通的交叉熵，第二项中，先通过K.ones_like(y_pred)/nb_classes构造了一个均匀分布，然后算y_pred与均匀分布的交叉熵。
+# https://spaces.ac.cn/archives/4493/comment-page-1#comments
+
+
+

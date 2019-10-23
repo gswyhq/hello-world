@@ -17,6 +17,9 @@ train loss 不断上升，test loss不断上升，说明网络结构设计不当
 【原因】输入的训练数据没有归一化造成
 【解决方法】把输入数值通过下面的函数过滤一遍，进行归一化
 
+from keras.layers.normalization import BatchNormalization
+x = BatchNormalization(name='normalization')(x)
+
 acc在训练两三轮之后就开始不变化；或者从一开始就是acc只降不升，说明神经网络不收敛不学习
 神经网络不收敛的可能原因:
 

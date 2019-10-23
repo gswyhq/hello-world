@@ -7,6 +7,17 @@ import os
 '''
 通过iconv -l 命令查看，其支持的编码格式还不少，之间可以互相转换
 
+1. enca (如果你的系统中没有安装这个命令，可以用sudo yum install -y enca 安装 )查看文件编码
+$ enca filename
+
+2. enconv 转换文件编码，比如要将一个GBK编码的文件转换成UTF-8编码，操作如下
+enconv -L zh_CN -x UTF-8 filename
+
+3. iconv 转换，iconv的命令格式如下：
+iconv -f encoding -t encoding inputfile
+比如将一个UTF-8 编码的文件转换成GBK编码
+iconv -f UTF-8 -t GBK file1 -o file2
+
 转换gbk编码文件为utf-8编码文件
 简洁命令：iconv  -f gbk -t utf-8 index.html > aautf8.html
 其中-f指的是原始文件编码，-t是输出编码  index.html 是原始文件   aautf8.html是输出结果文件
