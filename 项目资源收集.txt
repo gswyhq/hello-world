@@ -201,4 +201,12 @@ https://github.com/google-research/uda.git
 经济责任审计知识图谱：网络爬虫、关系抽取、领域词汇判定
 https://github.com/mengxiaoxu/economic_audit_knowledge_graph.git
 
+图片中的文本检测及其文本识别
+https://github.com/GlassyWing/text-detection-ocr
+ctpn: https://pan.baidu.com/s/1kUNTl1l#list/path=%2F
+densenet: 链接: https://pan.baidu.com/s/1LT9whsTJx-S48rtRTXw5VA 提取码: rugb
+
+将文字渲染成图片
+https://github.com/Sanster/text_renderer
+
 
