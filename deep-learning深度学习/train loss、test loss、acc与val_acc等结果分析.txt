@@ -14,11 +14,18 @@ train loss 不断上升，test loss不断上升，说明网络结构设计不当
 原文链接：https://blog.csdn.net/SMF0504/article/details/71698354
 
 训练过程中loss数值为负数？
-【原因】输入的训练数据没有归一化造成
+【原因1】输入的训练数据没有归一化造成
 【解决方法】把输入数值通过下面的函数过滤一遍，进行归一化
 
 from keras.layers.normalization import BatchNormalization
 x = BatchNormalization(name='normalization')(x)
+
+【原因1】输入的训练数据有异常
+【解决方法】除去异常值
+比如ner时候，对标签对应填充时候，填充了不恰当的值（正常是用0,1,2...分别代表BIO编码），若填充了-1，计算loss就会出现负数
+pad_sequences(batch_ner_tag, input_length, value=-1)
+改为：
+pad_sequences(batch_ner_tag, input_length, value=0)
 
 acc在训练两三轮之后就开始不变化；或者从一开始就是acc只降不升，说明神经网络不收敛不学习
 神经网络不收敛的可能原因:
