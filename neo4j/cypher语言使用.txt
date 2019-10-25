@@ -65,6 +65,11 @@ MATCH(m:Person) WHERE m.klout = 199 REMOVE m:Kaa RETURN m
 
 重命名某个节点的标签：
 MATCH (n:Person) where n.klout = 199 SET  n:NewLabel  REMOVE n:Person RETURN n
+或者： call apoc.refactor.rename.label("Test1", "Test2")
+# 将所有的"Test", "Test2"，都重命名为：Test1
+unwind ["Test", "Test2"] as cl 
+call apoc.refactor.rename.label(cl, "Test1") yield total
+return cl
 
 # 给所有节点添加一个label:
 match (n) set n:AddLabel return count(n)
@@ -242,6 +247,11 @@ MATCH p=(n:Abc) RETURN EXTRACT(n in nodes(p) | n.name) as name
 # 统计标签对应的节点数：
 CALL db.labels() YIELD label
 RETURN count(label) AS numLabels
+
+# 通过每个标签及其数量：
+CALL db.labels() YIELD label
+CALL apoc.cypher.run('MATCH (:`'+label+'`) RETURN count(*) as count',{}) YIELD value
+RETURN label, value.count
 
 # 统计标签中，包含某个字符串的标签数：
 CALL db.labels() YIELD label

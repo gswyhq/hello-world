@@ -1,0 +1,59 @@
+
+1、range
+定义：range(start, end, step)
+其中step可以省略，默认值是1，需要注意：
+* 返回结果包含start和end。
+* start、end、step必须是Integer 类型。
+* 如果start==end，则只返回一个元素的列表。
+* 如果start > end，则返回一个负数。
+* 如果start > end，且step < 0，则返回一个递减的列表。
+
+2、列表索引
+下标索引：RETURN [1,2,3,4][1]      //返回2
+倒序索引：RETURN [1,2,3,4][-1]     //返回4
+范围索引：RETURN [1,2,3,4][1..3]  //返回[2,3]，注意返回的是列表，不包括4
+范围索引：RETURN [1,2,3,4][-2..]   //返回[3,4]
+越界索引：RETURN [1,2,3,4][2..9]  //只返回[3,4]
+越界索引：RETURN [1,2,3,4][7..9]  //返回一个空列表 []
+越界索引：RETURN [1,2,3,4][9]      //单个元素越界索引，返回 null
+
+3、列表推导
+列表推导是Cypher基于已有列表创建新的列表，可以和where等语句一起使用。功能类似于Python的map操作，也类似于lambda表达式，形式看起来和linux管道符号 | 一样，作用也类似，前面的输出作为后面的输入。
+RETURN [x in range(1,3) | x^2]   //输出[1.0, 4.0, 9.0]，注意这么写是错误的：RETURN [x^2 in range(1,3)]
+RETURN [x in range(1,5) where x%2=0 | x^2]    //返回[4.0, 16.0]
+
+4、列表函数
+reverse：列表反转
+reverse([1,2,3,4])
+
+tail：跳过列表的第一个元素，在路径遍历的时候会用到
+tail([1,2,3,4])
+
+
+# 属性过滤：
+MATCH p =(a)-->(b)-->(c)
+WHERE a.name = 'Alice' AND b.name = 'Bob' AND c.name = 'Daniel'
+RETURN extract(n IN nodes(p)| n.age) AS extracted
+
+# 属性条件筛选：
+MATCH (a)
+WHERE a.name = 'Eskil'
+RETURN a.array, filter(x IN a.array WHERE size(x)= 3)
+
+# 累计：
+MATCH p =(a)-->(b)-->(c)
+WHERE a.name = 'Alice' AND b.name = 'Bob' AND c.name = 'Daniel'
+RETURN reduce(totalAge = 0, n IN nodes(p)| totalAge + n.age) AS reduction
+
+# 遍历列表，执行某项操作，这里是重命名标签：
+unwind ["Test", "Test2"] as cl 
+call apoc.refactor.rename.label(cl, "Test1") yield total
+return cl
+
+# 删除所有的索引：
+call apoc.index.list() yield name as label 
+with label 
+CALL apoc.index.remove(label) yield name
+return true
+
+

@@ -58,3 +58,11 @@ MERGE (n:Person {name: "张三"})
   //删除"王五"节点之后，将与王五节点建立关系也删除掉
   MATCH (n{name: "王五"}) DETACH DELETE n
 
+# 批量删除：
+CALL apoc.periodic.iterate(  'MATCH (n) RETURN n',  'DELETE n',  {batchSize: 10000})YIELD timeTaken, operationsRETURN timeTaken, operations
+
+CALL apoc.periodic.iterate占用空间不是命令了，而是我们要删除的那些节点。 
+为了避免所有结点都加载到内存中，我们可以使用apoc.periodic.commit 代替apoc.periodic.iterate。
+而apoc.periodic.commit所需要的查询语句必须带有LIMIT子句，同时还需要包含一个RETURN子句，只要有返回结果，他就会持续迭代下去。
+neo4j> CALL apoc.periodic.commit('MATCH (n) WITH n LIMIT $limit DELETE n RETURN count(*)', {limit: 10000} )
+

@@ -345,3 +345,10 @@ Error response from daemon: conflict: unable to delete bf12b323f7b6 (cannot be f
 解决方案，先查询对应的依赖，删除对应依赖之后，再删除对应镜像：
 gswyhq@gswyhq-PC:~$ docker image inspect --format='{{.RepoTags}} {{.Id}} {{.Parent}}' $(docker image ls -q --filter since=bf12b323f7b6)|grep bf12b323f7b6
 
+docker exec 执行命令报错：
+y@ubuntu-133:~$ docker exec three_tuple_all_50_schemas_neo4j_7476 /bin/bash "echo abcd"
+/bin/bash: echo abcd: No such file or directory
+解决方案，在命令后面加上-c 参数即可：
+y@ubuntu-133:~$ docker exec three_tuple_all_50_schemas_neo4j_7476 /bin/bash -c "echo abcd"
+abcd
+

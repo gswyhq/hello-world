@@ -149,6 +149,10 @@ UNWIND papers as paper
 RETURN a.authorName as authorName, minCitations, paper.title as title, paper.numCit as numCit
 ORDER BY authorName
 
+# 先查询关系，再统计关系数(间接达到管道命令的效果)：
+CALL db.relationshipTypes() YIELD relationshipType as type
+CALL apoc.cypher.run('MATCH ()-[:`'+type+'`]->() RETURN count(*) as count',{}) YIELD value
+RETURN type, value.count
 
 
 

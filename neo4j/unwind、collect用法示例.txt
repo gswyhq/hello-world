@@ -13,14 +13,80 @@ RETURN collect(x) AS SET
 # unwind,将一个列表拆解为单个值：
 UNWIND[1,2,3] AS x
 RETURN x
+输入的列表，输出的是单个元素
 
+# 列表元素去重
+WITH [1, 1, 2, 2] AS coll
+UNWIND coll AS x
+WITH DISTINCT x
+RETURN x
 
+╒═══╕
+│"x"│
+╞═══╡
+│1  │
+├───┤
+│2  │
+└───┘
+
+# 变量多个列表：
+WITH [1, 2] AS a,[3, 4] AS b
+UNWIND (a + b) AS x
+RETURN x
+
+# 上式等同于：
+UNWIND [1,2,3,4] AS x RETURN x
+╒═══╕
+│"x"│
+╞═══╡
+│1  │
+├───┤
+│2  │
+├───┤
+│3  │
+├───┤
+│4  │
+└───┘
+
+# 对列表中的元素进行筛选：
 WITH ['John', 'Mark', 'Jonathan', 'Bill'] AS somenames
 UNWIND somenames AS names
 WITH names AS candidate
 WHERE candidate STARTS WITH 'Jo'
 RETURN candidate
 
+╒═══════════╕
+│"candidate"│
+╞═══════════╡
+│"John"     │
+├───────────┤
+│"Jonathan" │
+└───────────┘
+
+# 嵌套列表的解析，输出列表中的元素：
+WITH [[1, 2],[3, 4], 5] AS nested
+UNWIND nested AS x
+UNWIND x AS y
+RETURN y
+
+╒═══╕
+│"y"│
+╞═══╡
+│1  │
+├───┤
+│2  │
+├───┤
+│3  │
+├───┤
+│4  │
+├───┤
+│5  │
+└───┘
+
+# 变量路径：
+match p=(n:Person{name:"p1"})-[*1..5]-(m)
+unwind nodes(p) as x
+return x
 
 Match (n)-[r:`下一步`]->(c)
 with collect(n) + collect(c) as colC, collect(r) as colR UNWIND colC AS n with distinct n, colR return n, colR

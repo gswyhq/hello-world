@@ -193,4 +193,13 @@ RETURN n { .name, nrOfMovies }
 │{"name":"小雨伞A款","nrOfMovies":2}  │
 └─────────────────────────────────┘
 
+MATCH (t:time)-[r:next*1]->(n:time) WHERE n.time > 1528601855959 AND t.time <= 1528601855959 
+WITH n, t, r
+CALL apoc.do.when(
+  t.time <> 1528601855959,
+  '  UNWIND r as rd DELETE rd WITH t,n 
+     MERGE (t)-[:next]->(a:time {time: 1528601855959, src: "time"})-[:next]->(n) RETURN a',
+  '', {t: t, r: r, n: n}) YIELD value AS rr
+RETURN t, n, rr.a AS a
+
 

@@ -117,3 +117,15 @@ Neo.DatabaseError.General.UnknownError: Property value bytes length: 5426 is lon
 dbms.memory.heap.max_size=11900m
 dbms.memory.pagecache.size=12100m
 
+# 有时候查询会报错：
+unwind ["Test", "Test1"] as cl 
+call apoc.refactor.rename.label(cl, "Test2") 
+return cl
+错误信息：
+Neo.ClientError.Statement.SyntaxError: Procedure call inside a query does not support naming results implicitly (name explicitly using `YIELD` instead) (line 2, column 1 (offset: 40))
+"call apoc.refactor.rename.label(cl, "Test2") "
+解决方案，将上查询语句改为下面的(添加yield)：
+unwind ["Test", "Test1"] as cl 
+call apoc.refactor.rename.label(cl, "Test2") yield total
+return cl
+

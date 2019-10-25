@@ -28,3 +28,9 @@ CALL apoc.index.remove('Zhiye')
 │"NODE"│"Zhiye"│{"type":"fulltext","to_lower_case":"true","provider":"lucene"}│
 └──────┴───────┴──────────────────────────────────────────────────────────────┘
 
+# 批量删除所有的索引：
+call apoc.index.list() yield name as label 
+with label 
+CALL apoc.index.remove(label) yield name
+return true
+

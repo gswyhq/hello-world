@@ -617,6 +617,15 @@ MIN( expression )	返回expression得到结果的最小值
 COLLECT( expression )	把expression得到的结果以list的形式返回
 所有的聚合操作都能使用DISTINCT操作
 
+# 条件过滤查询：
+MATCH p=(n)-[*]-(m)
+WHERE n.Name = ['A'] and m.Name = ['A']
+AND NONE (node IN NODES(p) WHERE SIZE(
+                FILTER(x IN NODES(p) WHERE node = x AND x.name <> 'A')
+        ) > 1
+    )
+RETURN EXTRACT(n IN NODES(p)| n.Name) AS Paths, length(p)
+order by length(p)
 
 
 http://neo4j.com.cn/public/cypher/default.html

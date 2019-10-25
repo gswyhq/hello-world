@@ -58,3 +58,8 @@ MATCH (a)-[r:`保障项目`|:`保险金额`]->(b) where a.name='保险产品'
 return a,b,type(r) ORDER BY
 CASE type(r) WHEN "保障项目" THEN 0 ELSE 1 END ASC, size(b.name) DESC
 limit 10
+
+MATCH (:RateableEntity)<-[:TAG]-(p:HashTag)
+RETURN p.tag As Tag, COUNT(p) as Count, [(p)-[:TAG]->(m) | m.id][..3] AS 
+RateableEntities ORDER BY Count DESC LIMIT 3
+

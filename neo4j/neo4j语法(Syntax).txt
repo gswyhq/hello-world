@@ -145,6 +145,8 @@ Execute a mutating operation for each relationship in a path.
 FOREACH (value IN coll |
  CREATE (:Person {name: value}))
 Execute a mutating operation for each element in a list.
+在foreach中，可以执行CREATE, CREATE UNIQUE, MERGE, DELETE,等更新语法，还可做foreach嵌套。
+
 CALL
 CALL db.labels() YIELD label
 This shows a standalone call to the built-in procedure db.labels to list all labels used in the database. Note that required procedure arguments are given explicitly in brackets after the procedure name.

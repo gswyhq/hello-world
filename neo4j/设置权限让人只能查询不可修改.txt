@@ -6,6 +6,11 @@ docker run --rm neo4j:3.2.0-enterprise
 
 # 查看当前用户列表：
 :server user list
+或者：
+CALL dbms.security.listUsers()
+
+# 查看当前用户名：
+CALL dbms.showCurrentUser()
 
 添加用户：
 :server user add
