@@ -1,0 +1,246 @@
+
+marp可以将 Markdown 格式的内容渲染成幻灯片PPT，可以导出 PDF 格式。
+这款工具适用于对设计要求不高，对幻灯片产出的速度要求较高的场景。
+
+Marp 是一款基于 Electron 开发的开源工具，可以使用 Github 风格的 Markdown 编写幻灯片。
+
+官网：
+
+https://yhatt.github.io/marp/
+
+Marp 的主要特性：
+
+开源，免费，使用简单；
+支持使用 Markdown 编写幻灯片；
+跨平台，支持 Windows/macOS/Linux 平台；
+支持实时预览，有 3 种模式：Markdown、1:1 Slide、Slide List；
+支持两种主题 (Default 和 Gaia theme)；
+支持表格、表情符号、数学公式和背景图像；
+支持把幻灯片导出为 PDF；
+支持通过指令改变幻灯片的显示效果；
+支持多种指令来调整幻灯片的大小；
+支持显示页码和页脚；
+Marp 的不足之处：
+
+Markdown 和 Slide List 预览模式不支持左右同步滑动；
+1:1 Slide 预览模式不支持上下键切换幻灯片；
+不支持待办事项；
+只支持渲染成幻灯片，但无法直接演示；(毕竟现在才 v0.0.11)
+开始使用 Marp 之前，你应该知道的两个概念：
+
+1. Marp 支持的 Markdown 语法是什么？
+
+Marp 中使用 Github 风格的 Markdown 写作，因此除了标准的 Markown 语法之外，Github 的部分扩展语法也适用于 Marp。
+
+2. Marp 中的指令是什么意思？
+
+Marp 可以通过一些特定的指令来调整幻灯片显示效果，指令的格式为： ``
+
+如：
+
+<!-- page_number: true -->
+多个指令可以这样写：
+
+<!-- page_number: true -->
+<!-- $size: 16:9 -->
+也可以这样写：
+
+<!--
+page_number: true
+$size: 16:9
+-->
+
+
+
+Marp 的界面简介：
+
+Marp 的界面跟常见的 Markdown 编辑器非常类似，左边为编辑区，右边为效果的预览。
+预览模式从左到右依次为：Markdown、1:1 Slide、Slide List。
+Markdown 模式就是普通的 Markdown 效果预览；
+1:1 Slide 模式会根据左边源码中光标的位置显示幻灯片效果；
+Slide List 模式会显示渲染的幻灯片列表，可通过滑动浏览；
+页码会显示当前光标所在位置的页数/总页数。
+
+通过一个简单示例来演示编写幻灯片的基本功能：
+
+<!-- page_number: true -->
+
+# 毕**简介
+
+
+超过 8 年互联网相关工作经验，CSDN 博客专家，百度阅读畅销书作者。
+
+---
+<!-- page_number: true -->
+# 联系方式
+
+
+- 新浪微博：http://weibo.com/wire**
+- 微信公众号：**wi**ssqa**
+
+# ![](./imgs/weixin.jpg)
+
+---
+# 作品列表
+
+- [《AndroidStudio实用指南》](https://yuedu.baidu.com/ebook/31bebb6648d7c1c746e8)
+- [《互联网写作工具一本通》](https://yuedu.baidu.com/ebook/f2ecac850ad020418)
+
+
+1. 页脚
+写上页脚
+<!-- footer: This is a footer -->
+
+去掉页脚
+<!-- footer:-->
+
+Marp 支持的命令还算丰富，包括主题 theme1 、长宽比 size、是否显示页码 paginate、页眉 header、页脚 footer、背景设置 backgroundColor 、backgroundImage 和文字颜色 color 等等。
+
+2. 分页：
+三个减号‘---’代表新建一页ppt，即可进入一张新的幻灯片中。
+
+3.插入图片：
+在插入图片方面，Marp还是非常人性化的，只需拖动图片，放入编辑页就可以了。
+如果你觉得图片太大，还可以手动更改图片的大小。
+例如：
+拖动图片放入编辑页后，会出现图片的地址
+
+“![](C:\Users\xlrocket\Desktop\03.gif)”
+
+这个时候你只需要在“![]”输如百分比就行了，就好像是这样的：“![70%]”
+而当你想将图片显示在中间位置时，你也只需在“![]”中输入“![center]”，这样图片就会显示在中间位置了。
+4.列表：
+（有两种方法）其一，输入“*”空格在输入内容就可以了。
+
+其二，在“-”后空格输入内容即可。
+
+5.页码
+显示页码
+注意本页右下角显示有了页码：<!-- page_number: true -->
+
+只作用当前页
+但命令中加了* 号则只影响当前页:<!-- *page_number: true -->
+
+不显示页码：
+不显示页码(全部)：<!-- page_number: false -->
+仅当前页不显示页码：<!-- *page_number: false -->
+
+06. gaia主题模板反色命令是
+gaia主题模板反色命令是：
+
+<!-- *template: invert -->
+1
+其中* 表示只影响当前页。下同。
+重新在后面页中显示页码：
+
+<!-- page_number: true -->
+1
+07. gaia主题下使用gaia模板
+gaia主题下使用gaia模板
+
+<!-- *template: gaia -->
+1
+其中， * 号表示只影响本页， 若写为：
+
+<!-- template: gaia -->
+1
+则后面的页都受该模板影响。
+
+08. 恢复默认模板
+通过命令：<!-- template: default -->即可恢复默认模板。同样：<!-- *template: default -->则只恢复本页为默认模
+板。
+
+09.数学公式使用LaTeX语法
+
+
+10.字体的大小控制
+使用html标记来控制字体大小 ，这是默认的正文字体。
+大一点的字体用<big></big>标签得到，小一点的字体，使用<small></small>标签得到。
+
+11.字体的位置控制
+可以用<center></center>来设置字体对象居中。
+
+12.横线表示法
+使用<hr></hr>表示横线。
+
+13.强调emph、加粗Bold和高亮
+强调：*强调*
+加粗：**加粗**
+高亮：==高亮==
+14.强制换行
+使用代码<br/>实现强制换行。
+
+15.用html标记灵活控制文字
+背景颜色：<span style="background-color:green;"></span>
+字体颜色+大小：<font color=Yellow size=7 face="黑体">黄色黑体Black，字号1到7 “size=7”</font>
+
+16.表格
+表格：用|分隔。例如：
+
+代码：
+
+|表头1 | 表头2|表头3:$\sqrt{x}$|
+|----- | ------|----|
+|Content Cell | Content Cell|Content Cell|
+|Content Cell | Content Cell|Content Cell|
+
+17.链接-直接在行内
+
+
+18.链接-集中写
+
+
+19.插图
+插图支持很多格式png ，jpg，gif， svg等等，凡是html支持的都可以。其中svg是矢量格式，体积小有高清。gif是动画的。
+插图语法：
+
+！[大小%](myimages/图文件路径和文件名字)例如![200%](myimages/wtclablogo.png)
+
+说明
+GIF动画输出不了到PDF，所以建议不用GIF.
+
+更改长宽
+对于背景图片，更改图片长或宽可以使用关键词 width、height 或简称为 w 和 h
+
+![width:200px](image.png)
+![w:200px, h:400px](image.png)
+图片滤镜（Image Filter）
+基于 CSS 的 filter 属性，Marp 可以对图片进行一些基于模糊、亮度、对比度等的操作，如：
+
+![blur:15px](image.png)
+![brightness:0.5](image.png)
+![contract:150%](image.png)
+背景图片
+针对幻灯片的背景图片，Marp 提供了简单的方式将某张图片设为背景，在方括号中写入 bg 即可
+
+![bg](background.png)
+同时通过在bg 后追加图片的格式属性，如 [bg fit]，可以具体设置背景图片的缩放方式。其中 cover 表示充满页面，fit 表示拉伸以适应页面，auto 为不做缩放使用原图片比例。
+
+更为进阶的背景图片设置需要开启官方提供的所谓 Inline SVG 实验功能，该功能支持多背景图片组合与单侧背景图片的进阶使用方式。在文档中使用输入多个背景图片后，图片将默认横向排列开来。
+
+![bg](background1.png)
+![bg2](background2.png)
+同时，在其中一张图片后加入属性 vertical 将使图片纵向组合。
+
+设置多背景拼接
+如果想将背景图片固定在幻灯的单侧，在 bg 后加入属性 left 或 right，该图片将占据左或右 50% 的空间，并将另外的 50% 留给正文内容。同时，可以在属性后再追加比例值控制图片占幻灯的比例大小，如 [bg left:33%]。
+
+同时，以上所有的图片属性也可以一起使用（比如 [bg left:33% blur:10px brightness:90%]）从而帮助你做出更美观的幻灯片。
+
+20. 幻灯片文件导出为PDF
+File—> Export Slides as PDF
+
+
+21.引用
+采用<引导,空行结束引用，引用的标点是自动加入。
+————————————————
+
+
+你觉得说的不是很清楚，没关系，在Marp中，会有现成的例子给你，你只需点击Marp中“Help”图标，选择“Open Examples”将会显示用法演示
+你会看到在Marp中Markdown的详尽用法。
+
+官网说明：https://marpit.marp.app/directives
+
+原文链接：https://blog.csdn.net/Jiajikang_jjk/article/details/80319059
+原文链接：https://blog.csdn.net/qq_39516859/article/details/80343003
+链接：<a href='https://www.jianshu.com/p/5afc0d1d77f6'>https://www.jianshu.com/p/5afc0d1d77f6</a>

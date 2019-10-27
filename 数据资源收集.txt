@@ -534,4 +534,7 @@ Google Audioset：扩展了 632 个音频分类样本，并从 YouTube 视频中
 https://research.google.com/audioset/download.html
 https://github.com/audioset/ontology.git
 
+chineseGLUEdatasets
+https://github.com/chineseGLUE/chineseGLUE
+https://storage.googleapis.com/chineseglue/chineseGLUEdatasets.v0.0.1.zip
 
