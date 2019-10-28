@@ -15,6 +15,13 @@
   //该语句会直接删除掉name属性，新增age属性
   MATCH (n {name:'张三'}) 
   SET n={age:20}
+
+# 亿级数据量更新操作
+1、根据节点属性对已有节点添加新的标签（更新失败）-超时设置：dbms.transaction.timeout=180s
+MATCH (n:Lable) WHERE n.userDefinedImageUrl IS NOT NULL SET n:头像
+2、根据节点属性对已有节点添加新的标签（更新成功）
+CALL apoc.periodic.iterate('MATCH (n:LinkedinID) WHERE n.userDefinedImageUrl IS NOT NULL RETURN n','WITH {n} AS n SET n:头像',{batchSize:10,parallel:true});
+
 例3:修改节点信息,新增节点属性
 
   //该语句不会删除掉name属性，而是在节点中新增age属性

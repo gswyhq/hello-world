@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<body>
+
+<script type="text/javascript" src="./js/jquery-3.3.1.js"></script>
+<script type="text/javascript">
+	// function onc(){
+	// 	var files = document.getElementById("input").files;
+	// 	for(var i=0; i< files.length; i++){
+	// 		alert(input.files[i].name);
+	// 		}
+	// 	}
+	function onc() {
+		var fd = new FormData();
+		var files = document.getElementById("input").files;
+		for (var i = 0; i < files.length; i++) {
+			var reader = new FileReader();
+			reader.readAsDataURL(files[i]);
+			fd.append(i, files[i]);
+		}
+		$.ajax({
+		        url : `http://${window.location.host}/upload_baoxian`,
+		        type : 'POST',
+		        data : fd,
+		        processData : false,
+		        contentType : false,
+			    cache: false
+		    }).done(function(res) { //回调函数
+				res = JSON.parse(res);
+                alert(res.msg)
+			}).fail(function(res) {
+				console.log(res);
+				res = JSON.parse(res);
+				alert(res.msg)
+			});
+
+		}
+
+</script>
+<form method="get" id="form">
+选择需要上传的一个或多个excel文件：<br><input type="file" id="input" name="input" multiple="multiple"  accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/><br>
+    <br>
+    <input type="button" value="提交" onclick="onc()" />
+
+    </br>
+    <br>
+    <a href="/test/index.html">返回首页</a>
+
+</form>
+<!--<p>请尝试在浏览文件时选取一个以上的文件。</p>-->
+
+</body>
+</html>
+
+

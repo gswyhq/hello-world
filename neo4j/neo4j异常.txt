@@ -129,3 +129,16 @@ unwind ["Test", "Test1"] as cl
 call apoc.refactor.rename.label(cl, "Test2") yield total
 return cl
 
+
+问题：创建的索引不生效（创建时正常）
+CREATE INDEX ON :Tongyonggraph(name)
+Added 1 index, completed after 2 ms.
+但实际上没有生效，输入`:schema`显示是创建失败：
+:schema
+Indexes
+   ON :Tongyonggraph(name) FAILED 
+No constraints
+查看对应的日志是因为对应的属性name的属性值超过了限制：
+root@4308c47c02da:/var/lib/neo4j# tail -f logs/debug.log 
+java.lang.IllegalArgumentException: Index key-value size it to large. Please see index documentation for limitations
+

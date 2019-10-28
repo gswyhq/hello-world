@@ -20,6 +20,19 @@ MATCH (n)
 CALL apoc.index.addNode(n,['name','alias'])
 RETURN count(*)
 
+使用创建的手动索引进行搜索：
+profile call apoc.index.search( 'Tongyonggraph', 'name:太平洋' ) yield node with node as n match (n) -[r:`面积`]->(n1) return n,n1;
+runtime: INTERPRETED. 3 total db hits in 32 ms.
+手动索引创建后，下面的搜索效率并没有提升：
+profile MATCH (n:Tongyonggraph) -[r:`面积`]->(n1) where n.name='太平洋' return n,n1;
+runtime: INTERPRETED. 24260033 total db hits in 17430 ms.
+
+# 亿级数据，创建手动索引报错,内存不足的错误（重新设置了dbms.memory.heap.initial_size、dbms.memory.heap.max_size也无用）：
+neo4j> match (p:Tongyonggraph)-->() call apoc.index.addNode(p,["name"]) RETURN count(*);
+Failed to invoke procedure `apoc.index.addNode`: Caused by: java.lang.OutOfMemoryError: Java heap space
+解决方案，改成批次操作即可：
+neo4j> CALL apoc.periodic.iterate('match (p:Tongyonggraph)-->() return p','call apoc.index.addNode(p,["name"]) RETURN count(*)', {batch:10000, iterateList:true, parallel:true});
+
 # 删除某个索引：
 CALL apoc.index.remove('Zhiye')
 ╒══════╤═══════╤══════════════════════════════════════════════════════════════╕

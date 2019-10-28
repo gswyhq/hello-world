@@ -39,7 +39,7 @@ RETURN count(*)
 
 该语句将创建与本例中的节点的标签名称相同名称的节点索引Airport，并将节点的属性添加到索引。
 一旦添加了，使用apoc.index.list检查节点索引是否存在：
-CALL apoc.index.list（）
+CALL apoc.index.list() 
 通常，apoc.index.addNode将被用作节点创建的一部分，例如， LOAD CSV期间。还有apoc.index.addNodes用于一次添加多个节点的列表。
 
 注意
