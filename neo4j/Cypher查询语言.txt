@@ -206,7 +206,9 @@ return a,x
 
 match除了上面之外还有一些其他的技巧,以后遇到的时候也需要注意!
 
-
+# 随机查询一个节点：
+MATCH (n) WHERE id(n) > rand() * 13078375  RETURN DISTINCT n.name limit 1
+这里的13078357，是最大节点id: MATCH (n) RETURN MAX(id(n))
 
 5).where
 
