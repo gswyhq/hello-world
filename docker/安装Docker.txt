@@ -6,7 +6,8 @@ gswewf@gswewf-pc:~$ sudo apt-get update
 upgrade 是升级已安装的所有软件包，升级之后的版本就是本地索引里的，因此，在执行 upgrade 之前一定要执行 update, 这样才能是最新的。
 
 # 安装docker
-gswewf@gswewf-pc:~$ sudo apt-get install docker.io
+gswewf@gswewf-pc:~$ sudo apt-get install docker.io 
+或者： sudo apt-get install docker-ce
 Created symlink from /etc/systemd/system/sockets.target.wants/docker.socket to /lib/systemd/system/docker.socket.
 正在处理用于 systemd (229-4) 的触发器 ...
 
