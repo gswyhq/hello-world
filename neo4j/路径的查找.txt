@@ -5,6 +5,18 @@ MATCH (start:Point {title: "Some Point 1"}), (end:Point {title: "Some Point 5"})
 MATCH p=shortestPath((start)-[:distance*]->(end))
 RETURN p
 
+# 查询两点间的最短路径，并把路径上的节点属性拿出来：
+match p=allShortestPaths((n1:A_19)-[*0..2]-(n2))  where n1.name='公司1' and n2.name='重大疾病保险金' return extract(n IN nodes(p)| n.name) AS extracted
+╒═════════════════════════╕
+│"extracted"              │
+╞═════════════════════════╡
+│["公司1","保险产品1","重大疾病保险金"]│
+├─────────────────────────┤
+│["公司1","保险产品2","重大疾病保险金"] │
+├─────────────────────────┤
+│["公司1","保险产品3","重大疾病保险金"] │
+└─────────────────────────┘
+
 # 按结点的属性：不经过name为'5'的结点
 match p=shortestPath((m:Person{name:'1'})-[r*1..4]-(n:Person{name:'4'}))
 where all(x in nodes(p) where x.name<>'5')

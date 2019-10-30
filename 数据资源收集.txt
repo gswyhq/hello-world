@@ -360,6 +360,7 @@ OPPO手机搜索排序query-title语义匹配数据集。
 MSRA微软亚洲研究院数据集。
 5 万多条中文命名实体识别标注数据（包括地点、机构、人物）
 https://github.com/InsaneLife/ChineseNLPCorpus/tree/master/NER/MSRA
+https://github.com/Determined22/zh-NER-TF/blob/master/data_path/train_data
 
 中文完形填空数据集
 https://github.com/ymcui/Chinese-RC-Dataset

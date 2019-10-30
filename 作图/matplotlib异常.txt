@@ -1,0 +1,21 @@
+
+报错：
+    self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
+_tkinter.TclError: no display name and no $DISPLAY environment variable
+原因是命令行不能画图，而matplotlib默认选择Xwindows 作为后端，设置一下即可，注意要在导入pyplot 前就设置好。
+错误的设置：
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+
+正确的设置：
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+异常报错：
+AttributeError: module 'sklearn.cluster' has no attribute 'OPTICS'
+原因：scikit-learn的版本不对，0.19.2 版本没有改方法，需要升级，比如升级到0.21.3
+解决方案：
+pip3 install -U scikit-learn -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
