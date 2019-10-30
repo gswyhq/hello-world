@@ -19,3 +19,10 @@ AttributeError: module 'sklearn.cluster' has no attribute 'OPTICS'
 解决方案：
 pip3 install -U scikit-learn -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+问题：jupyter运行时，终端没有展示图片，显示图片
+解决方法，交互窗口运行：
+%matplotlib inline
+再执行对应的作图操作。
+
+
+
