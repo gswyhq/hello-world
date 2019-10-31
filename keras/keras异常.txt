@@ -170,3 +170,15 @@ print(tf.VERSION)
 print(tf.keras.__version__)
 ~$ pip3 install Keras==2.2.4 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+
+错误，使用Merge 时会报下面的错误：
+    attention_mul = merge([inputs, attention_probs], output_shape=32, name='attention_mul', mode='mul')
+TypeError: 'module' object is not callable
+
+问题分析：
+Merge 不能与 sequential model一起使用，在sequential model中，只能有一个输入一个输出；
+上面问题的解决，可以修改成如下
+from keras.layers import Input, Dense, merge, concatenate, multiply
+attention_mul = multiply([inputs, attention_probs], name='attention_mul')
+这里是使用multiply，其他有时候可能是add, concatenate等。
+
