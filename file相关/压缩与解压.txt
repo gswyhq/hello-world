@@ -49,7 +49,7 @@ gswewf@gswewf-pc:~/Downloads$ unzip demo20170315.zip -d demo20170315
 sudo apt-get install zip
 zip [参数] <压缩包> <源文件>
 将目录或文件“__MACOSX”压缩为：  __MACOSX.zip
-gswewf@gswewf-pc:~/doc$ zip __MACOSX.zip __MACOSX
+gswewf@gswewf-pc:~/doc$ zip -r __MACOSX.zip __MACOSX
 若缺失了r参数则仅仅压缩当前目录，而不包括目录内的子文件及子目录
 gswewf@gswewf-pc:~$ zip -r demo20170315.zip chat_bot_demo
 

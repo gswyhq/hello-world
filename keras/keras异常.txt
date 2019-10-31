@@ -144,3 +144,29 @@ ValueError: Tensor("training/Adam/Const:0", shape=(), dtype=float32) must be fro
     with self.graph.as_default():
         hist = self.model.fit(x, y)
 
+有时候使用keras报错：
+AttributeError: module 'keras.backend.tensorflow_backend' has no attribute '_is_tf_1'
+解决方法, 卸载之前的重新安装即可：
+~$ pip3 uninstall keras
+Uninstalling Keras-2.3.1:
+  /home/gswyhq/.local/lib/python3.6/site-packages/Keras-2.3.1.dist-info/INSTALLER
+  /home/gswyhq/.local/lib/python3.6/site-packages/Keras-2.3.1.dist-info/LICENSE
+  /home/gswyhq/.local/lib/python3.6/site-packages/Keras-2.3.1.dist-info/METADATA
+...
+$ sudo pip3 uninstall keras
+Uninstalling Keras-2.2.4:
+  /usr/local/lib/python3.6/dist-packages/Keras-2.2.4.dist-info/INSTALLER
+  /usr/local/lib/python3.6/dist-packages/Keras-2.2.4.dist-info/METADATA
+  /usr/local/lib/python3.6/dist-packages/Keras-2.2.4.dist-info/RECORD
+  /usr/local/lib/python3.6/dist-packages/Keras-2.2.4.dist-info/WHEEL
+...
+$ pip3 install Keras==2.2.4 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+有时候报错：
+TypeError: Tensors in list passed to 'values' of 'ConcatV2' Op have types [bool, float32] that don't all match.
+主要是因为keras版本不对(2.3.1版本有问题，切换回2.2.4版本就可以了):
+import tensorflow as tf
+print(tf.VERSION)
+print(tf.keras.__version__)
+~$ pip3 install Keras==2.2.4 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+

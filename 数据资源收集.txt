@@ -539,3 +539,8 @@ chineseGLUEdatasets
 https://github.com/chineseGLUE/chineseGLUE
 https://storage.googleapis.com/chineseglue/chineseGLUEdatasets.v0.0.1.zip
 
+英文命名实体识别数据：
+/home/gswyhq/.keras/datasets/conll2000.zip
+https://master.dl.sourceforge.net/project/nltk/OldFiles/conll2000.zip
+
+

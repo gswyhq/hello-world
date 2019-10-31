@@ -1,0 +1,52 @@
+
+数据来源：https://www.clips.uantwerpen.be/conll2000/chunking/
+
+wget -c -t 0 https://www.clips.uantwerpen.be/conll2000/chunking/conlleval.txt
+
+wget -c -t 0 https://www.clips.uantwerpen.be/conll2000/chunking/test.txt.gz
+
+wget -c -t 0 https://www.clips.uantwerpen.be/conll2000/chunking/train.txt.gz
+
+wget -c -t 0 https://www.clips.uantwerpen.be/conll2000/chunking/output.txt.gz
+
+# 保留源文件解压
+
+gunzip –c test.txt.gz > test.txt
+
+gunzip –c train.txt.gz > train.txt
+
+# 评估
+被评估文件每行包含四个符号：当前单词，其词性标记（POS），根据语料库的块标记和预测的块标记。句子之间用空行分隔。
+
+gswyhq@gswyhq-PC:~/Downloads/conll2000$ gunzip -c output.txt.gz > output.txt
+gswyhq@gswyhq-PC:~/Downloads/conll2000$ chmod 755 conlleval.txt 
+gswyhq@gswyhq-PC:~/Downloads/conll2000$ ./conlleval.txt < output.txt
+processed 961 tokens with 459 phrases; found: 539 phrases; correct: 371.
+accuracy:  87.20%; precision:  68.83%; recall:  80.83%; FB1:  74.35
+             ADJP: precision:   0.00%; recall:   0.00%; FB1:   0.00  1
+             ADVP: precision:  45.45%; recall:  62.50%; FB1:  52.63  11
+               NP: precision:  64.98%; recall:  78.63%; FB1:  71.16  317
+               PP: precision:  83.18%; recall:  98.89%; FB1:  90.36  107
+             SBAR: precision:  66.67%; recall:  33.33%; FB1:  44.44  3
+               VP: precision:  69.00%; recall:  79.31%; FB1:  73.80  100
+
+conlleval可识别以下命令行选项:
+
+-l：生成输出作为LaTeX表的一部分。 该表的定义可以在示例文档中找到：[latex] [ps] [pdf]
+-d char：在每一行上，使用char而不是空格作为标记之间的分隔符。
+-r：假定原始输出令牌，即没有前缀B-和I-。 在这种情况下，每个单词将被计为一个大块。
+-o：将令牌用作块或其他类之外的项目的输出标签。 该选项仅在同时使用-r时才有效。 外部输出标签的默认值为O。
+
+gswyhq@gswyhq-PC:~/Downloads/conll2000$ vim MYFILE
+0,1,1,0,0,1,giraffe,giraffe
+0,1,0,1,0,1,zebra,giraffe
+0,0,0,0,0,1,NOEXIST,NOEXIST
+
+gswyhq@gswyhq-PC:~/Downloads/conll2000$ ./conlleval.txt -d , -r -o NOEXIST < MYFILE
+processed 3 tokens with 2 phrases; found: 2 phrases; correct: 0.
+accuracy:  33.33%; precision:   0.00%; recall:   0.00%; FB1:   0.00
+          giraffe: precision:   0.00%; recall:   0.00%; FB1:   0.00  0
+         giraffe : precision:   0.00%; recall:   0.00%; FB1:   0.00  2
+            zebra: precision:   0.00%; recall:   0.00%; FB1:   0.00  0
+
+
