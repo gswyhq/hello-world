@@ -215,3 +215,7 @@ https://github.com/qiu997018209/KnowledgeGraph
 端到端对话系统
 https://github.com/ConvLab/ConvLab.git
 
+自然语言处理(PyTorch)
+https://github.com/apachecn/nlp-pytorch-zh
+https://github.com/joosthub/PyTorchNLPBook
+
