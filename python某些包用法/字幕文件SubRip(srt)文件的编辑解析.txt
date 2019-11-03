@@ -1,0 +1,52 @@
+
+git clone http://www.github.com/byroot/pysrt
+
+pysrt是一个 python 库，用于编辑或者创建SubRip文件。
+
+命令行命令用法
+移动：
+$ srt -i shift 2s500ms movie.srt
+拆分：
+$ srt split 58m26s movie.srt
+重新缩放：
+$ srt -i rate 23.9 25 movie.srt
+
+安装
+在pypi上有 pysrt。 要 intall，你可以使用
+
+$ sudo pip3 install pysrt
+库使用情况
+
+导入：
+>>> import pysrt
+解析：
+>>> subs = pysrt.open('some/file.srt')
+# 如果采用默认的utf-8编码出现错误，可以尝试其他的编码
+>>> subs = pysrt.open('some/file.srt', encoding='iso-8859-1')
+>>> subs = pysrt.open('some/file.srt', encoding='gb18030')
+SubRipFile是类似SubRipItem实例对象的列表：
+>>> len(subs)
+>>> first_sub = subs[0]
+SubRipItem实例是可以编辑的，就像纯 python 对象一样：
+>>> first_sub.text ="Hello World!"
+>>> first_sub.start.seconds = 20
+>>> first_sub.end.minutes = 5
+
+移动：
+>>> subs.shift(seconds=-2) # Move all subs 2 seconds earlier
+>>> subs.shift(minutes=1) # Move all subs 1 minutes later
+>>> subs.shift(ratio=25/23.9) # convert a 23.9 fps subtitle in 25 fps
+>>> first_sub.shift(seconds=1) # Move the first sub 1 second later
+>>> first_sub.start += {'seconds': -1} # Make the first sub start 1 second earlier
+
+删除：
+>>> del subs[12]
+
+切片：
+>>> part = subs.slice(starts_after={'minutes': 2, 'seconds': 30}, ends_before={'minutes': 3, 'seconds': 40})
+>>> part.shift(seconds=-2)
+
+保存更改：
+>>> subs.save('other/path.srt', encoding='utf-8')
+
+

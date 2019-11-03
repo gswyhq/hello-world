@@ -1,8 +1,12 @@
+CPU: 
+sudo pip3 install torch -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+sudo pip3 install torchvision -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
 docker run --rm -it -v $PWD:/pytorch_graph-rel -w /pytorch_graph-rel -p 8000:8000 -e LANG=C.UTF-8 -e TZ=CST-8 python:3.6.8-stretch /bin/bash
 
 pip3 install torch==1.2.0 torchvision==0.4.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+GPU:
 pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 pip3 install torch==1.3.0+cpu torchvision==0.4.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
