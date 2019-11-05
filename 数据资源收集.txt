@@ -129,12 +129,22 @@ Keras 内置的IMDB 数据
 wget http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
 tar zxvf aclImdb_v1.tar.gz
 
+https://github.com/charlesliucn/kaggle-in-python/tree/master/kaggle_competitions/IMDB
+labeledTrainData.tsv  testData.tsv  unlabeledTrainData.tsv
+
 2014 年英文维基百科的预计算嵌入
 这是一个 822 MB 的压缩文件,文件名是 glove.6B.zip,里面包含 400 000 个单词(或非单词的标记)的 100 维嵌入向量。
 http://nlp.stanford.edu/data/glove.6B.zip
 
 glove.6B.zip
 http://nlp.stanford.edu/data/glove.6B.zip
+
+gswyhq@gswyhq-PC:~/data/glove.6B$ unzip ../glove.6B.zip 
+Archive:  ../glove.6B.zip
+  inflating: glove.6B.50d.txt        
+  inflating: glove.6B.100d.txt       
+  inflating: glove.6B.200d.txt       
+  inflating: glove.6B.300d.txt  
 
 花卉图像数据集下载
 http://download.tensorflow.org/example_images/flower_photos.tgz

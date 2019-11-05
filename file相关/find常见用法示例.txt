@@ -40,6 +40,14 @@ find   /home   -mtime   -2                 在/home下查最近两天内改动�
 -mtime 0 表示文件修改时间距离当前为0天的文件，即距离当前时间不到1天（24小时）以内的文件
 -mtime -1 表示文件修改时间为小于1天的文件，即距离当前时间1天（24小时）之内的文件
 
+# 查找30天之前的文件并删除：
+location="/root/sqlbak/"
+find $location -mtime +30 -type f |xargs rm -f
+ps:
+location 是设置查找的目录
+--mtime +30 是设置时间为30天前
+-type f 这周查找的类型为文件
+
 find   -name april*                     在当前目录下查找以april开始的文件
 find   -name   april*   fprint file        在当前目录下查找以april开始的文件，并把结果输出到file中
 find   -name ap* -o -name may*   查找以ap或may开头的文件
