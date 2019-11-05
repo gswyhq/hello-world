@@ -1,0 +1,12 @@
+
+设置ls -l命令中显示的日期格式
+1、临时更改显示样式，当回话结束后恢复原来的样式
+    export TIME_STYLE='+%Y-%m-%d %H:%M:%S'    # 直接在命令中执行即可
+
+2、永久改变显示样式，更改后的效果会保存下来
+    修改/etc/profile文件，在文件内容末尾加入
+    export TIME_STYLE='+%Y-%m-%d %H:%M:%S'
+
+    执行如下命令，使你修改后的/etc/profile文件配置内容生效
+    source /etc/profile
+

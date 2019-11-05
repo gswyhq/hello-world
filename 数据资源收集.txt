@@ -543,4 +543,15 @@ https://storage.googleapis.com/chineseglue/chineseGLUEdatasets.v0.0.1.zip
 /home/gswyhq/.keras/datasets/conll2000.zip
 https://master.dl.sourceforge.net/project/nltk/OldFiles/conll2000.zip
 
+中文机器阅读理解评测（CMRC 2018）]所使用的数据
+原始数据(Original Data)
+(https://worksheets.codalab.org/bundles/0x0e6dced40a0d40d980da88882aa8c13a) | cmrc2018_evaluate.py | 4.1k 
+(https://worksheets.codalab.org/bundles/0xcd4c755829064426896ef942a249aced) | cmrc2018_trial.json  | 1.0m                  
+(https://worksheets.codalab.org/bundles/0x296baa11dfbc4ab08cdeb5b4adf182e2) | cmrc2018_train.json  | 9.0m                
+(https://worksheets.codalab.org/bundles/0xb70e5e281fcd437d9aa8f1c4da107ae4) | cmrc2018_dev.json    | 3.4m
+SQuAD样式的数据(SQuAD-style Data)
+(https://worksheets.codalab.org/bundles/0x1ecd59f275a64bbd8cd79868ed059204) | cmrc2018_evaluate.py | 4.2k
+(https://worksheets.codalab.org/bundles/0x182c2e71fac94fc2a45cc1a3376879f7) | cmrc2018_trial.json | 781k 
+(https://worksheets.codalab.org/bundles/0x15022f0c4d3944a599ab27256686b9ac) | cmrc2018_train.json | 7.1m
+(https://worksheets.codalab.org/bundles/0x72252619f67b4346a85e122049c3eabd) | cmrc2018_dev.json  | 3.1m
 

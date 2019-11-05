@@ -222,3 +222,6 @@ https://github.com/joosthub/PyTorchNLPBook
 pytorch使用示例：
 https://github.com/pytorch/examples
 
+基于预训练模型BERT的阅读理解
+https://github.com/truantmuse/chinese-qa-with-bert
+
