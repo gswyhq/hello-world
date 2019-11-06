@@ -66,6 +66,11 @@ ValueError: If printing histograms, validation_data must be provided, and cannot
 tbCallBack = TensorBoard(log_dir=TENSORBOARD_PATH, histogram_freq=0,  
                   write_graph=True, write_images=True)
 
+Keras Reshape层报错：
+TypeError: Layer reshape_1 does not support masking, but was passed an input_mask: Tensor("WordEmbedding/NotEqual:0", shape=(?, 100), dtype=bool)
+解决方案，添加一层：
+x = Lambda(lambda x: x, output_shape=lambda s:s)(x)
+
 在使用GPU训练时报错：
 tensorflow.python.framework.errors_impl.InternalError: Blas GEMM launch failed : a.shape=(6368, 125), b.shape=(125, 125), m=6368, n=125, k=125
 

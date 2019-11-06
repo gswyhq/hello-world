@@ -231,3 +231,6 @@ https://github.com/richliao/textClassifier
 高性能向量搜索引擎
 https://github.com/milvus-io/milvus/blob/master/README_CN.md
 
+中文预训练模型zen
+https://github.com/sinovation/ZEN.git
+

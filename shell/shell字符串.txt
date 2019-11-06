@@ -26,6 +26,29 @@ ${变量名：起始索引：子串长度}
 string="runoob is a great site"
 echo ${string:1:4} # 输出 unoo
 
+# 获取某个字符之后的所有字符
+非贪婪模式
+${var#*word}:其中word可以是指定任意字符
+功能：自左向右，查找var变量所存储的字符串中，第一次出现的word,删除字符串开头至第一次出现word字符之间的所有字符
+
+hq@ubuntu-130:~$ alpha="abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+hq@ubuntu-130:~$ echo ${alpha#*mnop}
+qrstuvwxyzabcdefghijklmnopqrstuvwxyz
+
+# 贪婪模式
+${var##*word}:删除的是字符串开头至最后一次由work指定的字符之间的所有内容
+hq@ubuntu-130:~$ echo ${alpha##*mnop}
+qrstuvwxyz
+
+${var%word*}:其中word可以是指定的任意字符； 
+功能：自右而左，查找var变量所存储的字符串中，第一次出现的word，删除字符串最后一个字符向左至第一次出现word字符之间的所有字符 
+hq@ubuntu-130:~$ echo ${alpha%mnop*}
+abcdefghijklmnopqrstuvwxyzabcdefghijkl
+
+${var%%word*}:同上，只不过删除字符串最右侧的字符向左直至最后一次出现word字符之间的所有字符
+hq@ubuntu-130:~$ echo ${alpha%%mnop*}
+abcdefghijkl
+
 （6）查找子串
 查找字符 "i 或 s" 的位置：
 string="runoob is a great company"
@@ -88,9 +111,36 @@ echo “abcdefg” | cut -c3-6 输出为 def
 
 截取指定字符串
 echo | awk '{print substr("'${string}'",2,4)}' 
- 
 // 从第2个字符开始获取4个字符   结果为：home 
- 
+
+gswyhq@gswyhq-PC:~$ alpha=abcdefghijklmnopqrstuvwxyz
+gswyhq@gswyhq-PC:~$ echo $alpha
+abcdefghijklmnopqrstuvwxyz
+
+# 字符串长度
+gswyhq@gswyhq-PC:~$ echo ${#alpha}
+26
+
+# 截取第三个字符之后的字符
+gswyhq@gswyhq-PC:~$ echo ${alpha:3} 
+defghijklmnopqrstuvwxyz
+
+# 截取第三个字符之后的4个字符
+gswyhq@gswyhq-PC:~$ echo ${alpha:3:4} 
+defg
+
+# 截取倒数3个字符，冒号后面必需有一个空白字符
+gswyhq@gswyhq-PC:~$ echo ${alpha: -3} 
+xyz
+
+# 截取第三个字符之后到倒数第四个字符
+gswyhq@gswyhq-PC:~$ echo ${alpha:3:-4} 
+defghijklmnopqrstuv
+
+# 截取倒数第五个字符后面到倒数第二个字符， 第一个冒号后面有空格
+gswyhq@gswyhq-PC:~$ echo ${alpha: -5:-2} 
+vwx
+
 计算字符串长度 
  
 echo | awk '{print length("'${string}'")}' 

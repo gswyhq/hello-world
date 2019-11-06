@@ -10,6 +10,12 @@ $ ls -al |awk '{print $9}'|xargs -I x echo "测试"---x
 测试---终端复用器tmux.txt
 测试---重定向输出.py
 
+默认xargs会将换行符以空格替换, 单行显示
+-n 多行显示，使用-n number参数
+number值表示每行显示的参数的数量且number必须大于0，如果number大于参数的数量就以参数最大的数量显示,例如每行显示一个参数。
+
+docker ps |awk '{print $2}' |xargs -n 1 |xargs -I image_name echo image_name
+
 -a file 从文件中读入作为sdtin
 $ cat 1.txt 
 aaa  bbb ccc ddd
