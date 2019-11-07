@@ -522,3 +522,16 @@ curl -XGET "192.168.3.105:9200/twitter/_msearch" -H 'Content-Type: application/j
 # 3..5，可以有一个编辑距离的模糊度
 # >5，可以有两个编辑距离的模糊度
 
+指定返回字段，或者指定某字段不返回
+GET /_search
+{
+    "_source": {
+        "includes": [ "obj1.*", "obj2.*" ],
+        "excludes": [ "*.description" ]
+    },
+    "query" : {
+        "term" : { "user" : "kimchy" }
+    }
+}
+
+

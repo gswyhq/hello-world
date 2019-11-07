@@ -187,3 +187,10 @@ from keras.layers import Input, Dense, merge, concatenate, multiply
 attention_mul = multiply([inputs, attention_probs], name='attention_mul')
 这里是使用multiply，其他有时候可能是add, concatenate等。
 
+有时候会报错：
+ValueError: Graph disconnected: cannot obtain value for tensor Tensor
+问题分析：
+一般是Input和下面的变量重名了，导致model里面的input变成了第二次出现的Input变量，而不是最开始模型中作为输入的Input变量
+解决方案：
+重新给第二个变量赋值下名字即可；
+

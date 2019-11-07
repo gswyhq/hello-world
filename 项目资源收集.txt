@@ -234,3 +234,6 @@ https://github.com/milvus-io/milvus/blob/master/README_CN.md
 中文预训练模型zen
 https://github.com/sinovation/ZEN.git
 
+中文的GPT2训练代码
+https://github.com/Morizeyao/GPT2-Chinese
+
