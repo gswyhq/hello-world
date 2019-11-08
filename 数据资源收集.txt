@@ -574,3 +574,6 @@ tar -zxvf bert-base-chinese.tar.gz
 $md5sum bert-base-chinese.tar.gz 
 22ab8d5c0f45ab0705cfff2cebcc53b4  bert-base-chinese.tar.gz
 
+繁体中文阅读理解语料：DRCD
+https://github.com/DRCKnowledgeTeam/DRCD
+
