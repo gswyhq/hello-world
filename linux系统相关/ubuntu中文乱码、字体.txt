@@ -1,6 +1,10 @@
 
 查看支持的语言编码：
 root@10-13-101-154:~# less /usr/share/i18n/SUPPORTED 
+或者：~# locale -a
+
+查看当前使用的编码命令：
+~# locale
 
 # 重新设置
 root@10-13-101-154:~# vim /etc/locale.gen 

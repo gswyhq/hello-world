@@ -3,9 +3,10 @@ MobaXterm有些图形化界面的功能
 
 下载MobaXterm
 进到MobaXterm的官网，我们可以看到，官网为我们提供了两种形式的MobaXterm，一种是便携版，一种是安装版，我个人比较喜欢便携版，当切换工作机时，ssh记录等一些信息能够附带的拷贝过去
+MobaXterm_Portable_v12.1.zip
 
 安装打开MobaXterm
-下载完成之后解压出来的目录是这样式的，版本的不同文件结构可能也会不同， 双击MobaXterm_Personal_9.4.exe即可打开软件，软件启动之后界面
+下载完成之后解压出来的目录是这样式的，版本的不同文件结构可能也会不同， 双击MobaXterm_Personal_12.1.exe即可打开软件，软件启动之后界面
 
 建立SSH连接到一台服务器
 点击左上角的Session新建一个会话，在会话对话框中点击SSH，切换到SSH参数页。remote host填写远端服务器的地址，Specify username填写用户名，port填写端口，点击OK就可以登录到远端服务器了

@@ -12,3 +12,26 @@ Settings -> Configuration -> Terminal -> Use Windows PATH environment
 解决方法是安装Git插件
 在mobaxterm图形界面上点击packages，查找git进行安装。
 
+MobaXterm远程连接服务器中文乱码的问题
+分析，主要是因为编码设置的问题；
+解决方案：
+方法1，点击顶端的 Settings -> configuration -> Terminal -> Font 选择 MobaFont; Charset 选择 UTF-8(Unicode)
+方法2，点击左侧的 Sessions -> 选择登录的服务器,右键 -> Edit session -> Terminal settings -> Terminal font settings -> Font 选择 MobaFont; Charset 选择 UTF-8(Unicode)
+
+MobaXterm终端输入中文正常，但vi 编辑文件，文件内中文显示乱码，或者登录后各项操作，提示:
+-bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+/bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+在服务器端运行，查看当前使用的编码：
+~# locale
+LANG=C.UTF-8
+LC_CTYPE="C.UTF-8"
+而通过 `locale -a` 命令查看，当前机器压根不支持C.UTF-8编码，但支持 en_US.UTF-8 编码
+解决方案，修改登录设置：
+Settings -> Terminal -> Local shell settings -> Terminal shell 的下拉选值 由`WSL default` 更改为`Bash` 即可。
+更改后，登录服务器，查看当前使用的编码变成了系统支持的了：
+~# locale
+LANG=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+
+
+

@@ -48,4 +48,34 @@ source ~/.bashrc
 
 就ok了。
 
+如何在shell脚本里使用服务器设置的alias别名
+问题：在命令行模式能使用alias设置的别名，但在shell脚本里就使用不了
+问题分析：Linux shell有交互式与非交互式两种工作模式。我们日常使用shell输入命令得到结果的方式是交互式的方式，而shell脚本使用的是非交互式方式。
+    在交互式模式下，shell的alias扩展功能是打开的，因此我们可以键入自己定义的alias别名来执行对应的命令。
+    但是，在非交互式模式下alias扩展功能默认是关闭的，此时仍然可以定义alias别名，但是shell不会将alias别名扩展成对应的命令，而是将alias别名本身当作命令执行，如果shell内置命令和PATH中均没有与alias别名同名的命令，则shell会“抱怨”找不到指定的命令。
+
+在非交互式模式下启用alias扩展的方法：
+使用shell内置命令shopt命令来开启alias扩展选项。shopt是shell的内置命令，可以控制shell功能选项的开启和关闭，从而控制shell的行为。shopt的使用方式如下：
+shopt -s opt_name    # 开启某项功能选项
+shopt -u opt_name    # 关闭某项功能选项
+shopt opt_name       # 查看某项功能选项的状态
+alias扩展功能的选项名称是expand_aliases，我们可以在交互式模式下查看此选项是否开启：
+sw@gentoo ~ $ shopt expand_aliases
+expand_aliases  on
+在shell脚本中放入命令：echo `shopt expand_aliases`
+执行脚本的结果如下：
+expand_aliases off
+
+可以看到，在非交互式模式下alias扩展功能默认是关闭的，但是我们可以用shopt来将其开启。
+另外，alias别名只在当前shell有效，不能被子shell继承，也不能像环境变量一样export。
+执行shell脚本时，启动的子shell处于非交互式模式，是不会读取 ~/.bash_aliases 的。
+让执行脚本的shell读取 ~/.bash_aliases，在脚本中主动source ~/.bash_aliases 即可
+总结起来，若想让shell 脚本中能运行自定义的命令, 这里自定义命令是`docker_login_aliyun`，需要如下配置：
+shopt -s expand_aliases
+source ~/.bash_aliases
+docker_login_aliyun
+
+
+
+
 

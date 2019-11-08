@@ -39,6 +39,18 @@ gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:0-5:3}
 gswyhq@gswyhq-PC:~/nlp_server$ echo ${input_file:5:3}
 eng
 
+文件路径参数进行截取：
+file=/dir1/dir2/dir3/my.file.txt
+我们可以用${ }分别替换获得不同的值：
+${file#*/}：拿掉第一条/及其左边的字串：dir1/dir2/dir3/my.file.txt
+${file##*/}：拿掉最后一条/及其左边的字串：my.file.txt
+${file#*.}：拿掉第一个.及其左边的字串：file.txt
+${file##*.}：拿掉最后一个.及其左边的字串：txt
+${file%/*}：拿掉最后条/及其右边的字串：/dir1/dir2/dir3
+${file%%/*}：拿掉第一条/及其右边的字串：（空值）
+${file%.*}：拿掉最后一个.及其右边的字串：/dir1/dir2/dir3/my.file
+${file%%.*}：拿掉第一个.及其右边的字串：/dir1/dir2/dir3/my
+
 python 字符串子串匹配及获取对应的位置：
 [(i.start(), i.end()) for i in re.finditer('中国', '你好中国，中国你好')]
 Out[13]: [(2, 4), (5, 7)]
