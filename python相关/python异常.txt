@@ -14,3 +14,11 @@ UnicodeEncodeError: 'ascii' codec can't encode character '\u5408' in position 0:
 root@6c6656292234:~# export LANG=en_US.UTF-8
 root@6c6656292234:~# export PYTHONIOENCODING=UTF-8
 
+问题：终端的输出不能重定向到文件
+在脚本中运行： nohup python3 -u main.py 2>&1 > train.log &
+不能将终端显示的内容重定向到文件 train.log ; 但直接在终端训练命令，却有输出。
+原因是python缓存机制，虽然stderr和stdout默认都是指向屏幕的，但是stderr是无缓存的，程序往stderr输出一个字符，就会在屏幕上显示一个；而stdout是有缓存的，只有遇到换行或者积累到一定的大小，才会显示出来。
+解决方案：-u参数的使用
+python命令加上-u（unbuffered）参数后会强制其标准输出也同标准错误一样不通过缓存直接打印到屏幕。
+上命令改成下面这个即可解决： nohup python3 -u main.py 2>&1 > train.log &
+

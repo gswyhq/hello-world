@@ -164,9 +164,6 @@ https://github.com/tsujuifu/pytorch_graph-rel.git
 TextCNN 文本分类
 https://github.com/rongshunlin/ModifyAI.git
 
-中文关系抽取：
-https://github.com/zjunlp/deepke
-
 一个能找出PS痕迹的AI算法
 https://wemp.app/posts/c1c3f526-35e4-4cc5-8fef-3304d3031fb5?utm_source=bottom-latest-posts
 https://github.com/LarryJiang134/Image_manipulation_detection
@@ -236,4 +233,7 @@ https://github.com/sinovation/ZEN.git
 
 中文的GPT2训练代码
 https://github.com/Morizeyao/GPT2-Chinese
+
+中文XLNet预训练模型：
+https://github.com/ymcui/Chinese-PreTrained-XLNet
 
