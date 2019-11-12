@@ -28,3 +28,26 @@
                                                     **kwargs)
 ```
 
+ajax,发送POST数据，success,获取不到返回值，ajax 返回的是整个页面的html
+可能原因是后端耗时较久，而前端又不愿意等待，这个时候可以关闭掉异步功能即可,async:false；
+            $.ajax({
+                type: 'post',
+                url: ACTION_URL,
+                dataType:"json",
+                async:false,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({"data": data, "action": "train"}),
+                beforeSend () {
+                    if(!confirm('共上传训练语料数：'+data.length)){
+                         return false;
+                    }
+                },
+                success: function(ret) {
+                    document.write(ret.msg)
+                },
+                error: function(ret) {
+                    document.write(ret.msg);
+                }
+            })
+
+
