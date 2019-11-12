@@ -24,5 +24,16 @@ pip3 install -U scikit-learn -i http://pypi.douban.com/simple --trusted-host=pyp
 %matplotlib inline
 再执行对应的作图操作。
 
+问题：使用 plt.savefig 保存图片时一片空白
+原因分析：
+其实产生这个现象的原因很简单：在 plt.show() 后调用了 plt.savefig() ，在 plt.show() 后实际上已经创建了一个新的空白的图片（坐标轴），这时候你再 plt.savefig() 就会保存这个新生成的空白图片。
+解决方案1：
+在 plt.show() 之前调用 plt.savefig()；
+解决方案2：
+画图的时候获取当前图像（这一点非常类似于 Matlab 的句柄的概念）：
+# gcf: Get Current Figure
+fig1 = plt.gcf()
+plt.show()
+fig1.savefig('tessstttyyy.png', dpi=100)
 
 

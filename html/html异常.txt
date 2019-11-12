@@ -9,6 +9,10 @@
 <!--    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>-->
     <script src="js/jquery-3.4.1.min.js"></script>
 
+另外随便一个点击都是错误：405: Method Not Allowed
+很有可能是HTML文件语法格式有误；
+这个时候可以通过开发者模式查看，以chrome浏览器为例：
+右键-> 检查 -> Sonsole 查看报错信息位置
 
 304(Not Modified)
 因为服务器及客户端的缓存；当服务器端收到客户端的请求，若判断为没有变化及修改，就返回对应的304；

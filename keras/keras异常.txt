@@ -194,3 +194,27 @@ ValueError: Graph disconnected: cannot obtain value for tensor Tensor
 解决方案：
 重新给第二个变量赋值下名字即可；
 
+在已有的模型上继续训练时，感觉模型还没开始训练就结束了，训练日志什么的，也没有：
+        hist = model.fit(
+            *train_data,
+            epochs=6,
+            initial_epoch=8,
+            validation_data=validation_data,
+            callbacks=[early_stopping, model_checkpoint, tb]
+        )
+        print(hist.history.items())
+问题分析：
+主要是因为设置不对；
+epochs：整数，训练终止时的epoch值，训练将在达到该epoch值时停止，当没有设置initial_epoch时，它就是训练的总轮数，否则训练的总轮数为epochs - inital_epoch
+而此处的 epochs 设置的值比 inital_epoch 还小，故而出现还没训练，流程就已经结束了。
+解决方案，重新设置 epochs、inital_epoch：
+        hist = model.fit(
+            *train_data,
+            epochs=14,
+            initial_epoch=8,
+            validation_data=validation_data,
+            callbacks=[early_stopping, model_checkpoint, tb]
+        )
+        print(hist.history.items())
+
+
