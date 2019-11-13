@@ -16,6 +16,14 @@ File=》Download as =》Python（.py）即可把ipynb文件转化为py文件
  jupyter nbconvert --to script demo.ipynb 
 如：
 gswyhq@gswyhq-PC:~/github_projects/deep-learning-with-python-notebooks$ jupyter nbconvert --to script 2.1-a-first-look-at-a-neural-network.ipynb 
+一般时候 --to script 会将ipynb文件转换为py文件，但有些时候，该命令会将ipynb文件转换为py文件，这个时候，可以用下面的命令进行转换：
+root@14a07da8fd37:/notebooks# jupyter nbconvert --to python 2_getting_started.ipynb 
+同理，若想将ipynb文件转换成HTML文件，的命令是：
+root@14a07da8fd37:/notebooks# jupyter nbconvert --to html 2_getting_started.ipynb 
+to 后面的可选参数有： ['asciidoc', 'custom', 'html', 'latex', 'markdown', 'notebook', 'pdf', 'python', 'rst', 'script', 'slides']
+对应的将ipynb 转换为pdf, markdown等格式类型
+具体详情可通过下命令查看：
+root@14a07da8fd37:/notebooks# jupyter nbconvert --help
 
 
 # 远程访问 
