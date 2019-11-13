@@ -187,6 +187,11 @@ from keras.layers import Input, Dense, merge, concatenate, multiply
 attention_mul = multiply([inputs, attention_probs], name='attention_mul')
 这里是使用multiply，其他有时候可能是add, concatenate等。
 
+另外，Keras2.2.4中Merge功能已经删除；
+若实现的是concat的功能，则可使用以下方法替代merge([tensor1, tensor2], mode='concat', concat_axis=3)：
+from keras.layers import concatenate
+merge = concatenate([tensor1, tensor2], axis=3)
+
 有时候会报错：
 ValueError: Graph disconnected: cannot obtain value for tensor Tensor
 问题分析：

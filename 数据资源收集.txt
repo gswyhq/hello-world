@@ -573,7 +573,13 @@ tar -zxvf bert-base-chinese.tar.gz
 ./bert_config.json
 $md5sum bert-base-chinese.tar.gz 
 22ab8d5c0f45ab0705cfff2cebcc53b4  bert-base-chinese.tar.gz
+nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz -O bert-base-chinese.tar.gz > bert-base-chinese.log &
+nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt -O bert-base-chinese-vocab.txt > bert-base-chinese-vocab.log &
+nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-pytorch_model.bin > bert-base-chinese-pytorch_model.log &
 
 繁体中文阅读理解语料：DRCD
 https://github.com/DRCKnowledgeTeam/DRCD
+
+食品，餐饮情感分析二分类数据：
+https://github.com/YIMIxxxxx/NLP-bert-try
 

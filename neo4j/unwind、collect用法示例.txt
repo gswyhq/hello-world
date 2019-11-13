@@ -111,3 +111,19 @@ return m,n
 
 # 笛卡尔积-match中的多个变量也是以笛卡尔积形式返回
 match (m:vertices:{type:'a'}),(n:vertices{type:'b'}) return m, n;
+
+# 统计每个标签有多少个节点：
+UNWIND ['Baoxiangongsi', 'Baoxianchanpin', 'Baozhangxiangmu', 'Baoquanxiangmu', 'Fuwuwangdianmingcheng', 'Yiwai', 'Jibing', 'Shiyi', 'Didian'] as label
+CALL apoc.cypher.run('MATCH (:`'+label+'`) RETURN count(*) as count',{}) YIELD value
+RETURN label, value.count
+
+╒═══════════════════════╤═════════════╕
+│"label"                │"value.count"│
+╞═══════════════════════╪═════════════╡
+│"Baoxiangongsi"        │39           │
+├───────────────────────┼─────────────┤
+│"Shiyi"                │11625        │
+├───────────────────────┼─────────────┤
+│"Didian"               │34341        │
+└───────────────────────┴─────────────┘
+

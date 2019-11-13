@@ -352,3 +352,10 @@ y@ubuntu-133:~$ docker exec three_tuple_all_50_schemas_neo4j_7476 /bin/bash "ech
 y@ubuntu-133:~$ docker exec three_tuple_all_50_schemas_neo4j_7476 /bin/bash -c "echo abcd"
 abcd
 
+[root@iasdfa ~]#nvidia-docker run -it -d --name py3_1_tf2 --restart=always -v /root/common_sense_qa:/notebooks/common_sense_qa -e LANG=C.UTF-8 -p 1635:8888 -p 1636:8889 -p 1637:8890 py3_1_tf2_20191113_2033
+docker: Error response from daemon: Unknown runtime specified nvidia.
+解决方案：
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+
