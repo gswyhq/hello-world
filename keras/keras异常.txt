@@ -149,6 +149,69 @@ ValueError: Tensor("training/Adam/Const:0", shape=(), dtype=float32) must be fro
     with self.graph.as_default():
         hist = self.model.fit(x, y)
 
+问题： keras 并发load_model报错,即同时加载两个不同的模型报错, 两个不同的模型放在同一个py文件中在不同函数中加载运行；
+单独加载模型预测没有问题，两个函数都执行时，就会报错，即使在第一次加载预测完成后手动清理内存也没有用 gc.collect()；
+ValueError: Weights must be of equal size to apply a reshape operation. Layer conv1d_4's weights have shape (3, 100, 128) and size 38400. The weights for loading have shape (5, 128, 128) and size 81920. 
+解决方案1：
+在第一个模型加载预测完成后，第二个模型加载模型文件前（不仅仅是model.load_weights前面, 而是构建模型之前运行，若仅仅是model.load_weights前则前面构建模型的变量等也会被清空，导致model.load_weights失败）添加下面的语句：
+keras.backend.clear_session()
+错误示例：
+    model = Model(sequence_input, preds)
+    keras.backend.clear_session()
+    model.load_weights('./models/model_conv_2.h5', by_name=True, reshape=True)
+正确示例：
+    keras.backend.clear_session()
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    ...
+    preds = Dense(2, activation='softmax')(l_dense)
+    model = Model(sequence_input, preds)
+    model.load_weights('./models/model_conv_2.h5', by_name=True, reshape=True)
+解决方案2：
+    graph = tf.Graph()  # Tensorflow graph
+    with graph.as_default():
+        session = tf.Session()  # Tensorflow session
+        with session.as_default():
+            sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+            ...
+            preds = Dense(2, activation='softmax')(l_dense)
+
+            model = Model(sequence_input, preds)
+            model.load_weights('./models/model_conv_2.h5', by_name=True, reshape=True)
+
+            sequences = tokenizer.texts_to_sequences([text])
+
+            X = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+            ret = model.predict(X)
+            print(ret)
+
+keras==2.2.4版本，使用tensorflow作后端，Attention GRU network出现以下错误：
+    y_permute_dim = [y_permute_dim.pop(-2)] + y_permute_dim
+IndexError: pop index out of range
+解决方案， 更改AttLayer层的call函数：
+def call(self, x, mask=None):
+    eij = K.tanh(K.dot(x, self.W))
+
+    ai = K.exp(eij)
+    weights = ai/K.sum(ai, axis=1).dimshuffle(0,'x')
+
+    weighted_input = x*weights.dimshuffle(0,1,'x')
+    return weighted_input.sum(axis=1)
+改为：
+def call(self, x, mask=None):
+    eij = K.tanh(K.squeeze(K.dot(x, K.expand_dims(self.W)), axis=-1))
+
+    ai = K.exp(eij)
+    weights = ai/K.expand_dims(K.sum(ai, axis=1),1)
+
+    weighted_input = x*K.expand_dims(weights,2)
+    return K.sum(weighted_input, axis=1)
+
+在使用Attention GRU network时，网络结构不对，报错：
+ValueError: Error when checking target: expected dense_1 to have shape (1000, 2) but got array with shape (2)
+解决方案， 更改AttLayer层的get_output_shape_for函数,重命名为compute_output_shape：
+def compute_output_shape(self, input_shape):
+    return (input_shape[0], input_shape[-1])
+
 有时候使用keras报错：
 AttributeError: module 'keras.backend.tensorflow_backend' has no attribute '_is_tf_1'
 解决方法, 卸载之前的重新安装即可：

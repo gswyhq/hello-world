@@ -576,6 +576,7 @@ $md5sum bert-base-chinese.tar.gz
 nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz -O bert-base-chinese.tar.gz > bert-base-chinese.log &
 nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt -O bert-base-chinese-vocab.txt > bert-base-chinese-vocab.log &
 nohup wget -c -t 0 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-pytorch_model.bin > bert-base-chinese-pytorch_model.log &
+最后下载的`bert-base-chinese-pytorch_model.bin`文件，实际上是与`bert-base-chinese.tar.gz`解压出来的文件`pytorch_model.bin`是同一个文件；
 
 繁体中文阅读理解语料：DRCD
 https://github.com/DRCKnowledgeTeam/DRCD

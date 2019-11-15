@@ -1,0 +1,44 @@
+
+第一步：导入对应的模型
+from pytorch_transformers.modeling_bert import BertForQuestionAnswering, BertModel
+
+第二步：设置模型所在路径
+model = BertModel.from_pretrained('bert-base-uncased', from_tf=False)
+
+若参数`from_tf`为true, 则加载指定路径下的 `model.ckpt.index` 文件；这里的即是文件：'bert-base-uncased/model.ckpt.index'
+若参数`from_tf`为false, 则加载指定路径下的 `pytorch_model.bin` 文件；这里的即是文件：'bert-base-uncased/pytorch_model.bin'
+
+若模型路径设置有误，或者设置的路径下面没有对应的文件，则从远程服务器下载对应的模型文件，保存到本地：
+/root/.cache/torch/pytorch_transformers/
+
+文件`/usr/local/lib/python3.6/site-packages/pytorch_transformers/modeling_bert.py`中定义了对应模型的下载路径：
+BERT_PRETRAINED_MODEL_ARCHIVE_MAP = {
+    'bert-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-pytorch_model.bin",
+}
+
+BERT_PRETRAINED_CONFIG_ARCHIVE_MAP = {
+    'bert-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-config.json",
+}
+
+response = requests.head(url, allow_redirects=True, proxies=None)
+etag = response.headers.get("ETag")
+etag
+Out[18]: '"5a19f4b6d34138eecb84db262f610f46-50"'
+url_bytes = url.encode('utf-8')
+url_hash = sha256(url_bytes)
+filename = url_hash.hexdigest()
+filename
+Out[23]: 'b1b5e295889f2d0979ede9a78ad9cb5dc6a0e25ab7f9417b315f0a2c22f4683d'
+etag_bytes = etag.encode('utf-8')
+etag_hash = sha256(etag_bytes)
+filename += '.' + etag_hash.hexdigest()
+filename
+Out[25]: 'b1b5e295889f2d0979ede9a78ad9cb5dc6a0e25ab7f9417b315f0a2c22f4683d.929717ca66a3ba9eb9ec2f85973c6398c54c38a4faa464636a491d7a705f7eb6'
+
+最终，会在 `/root/.cache/torch/pytorch_transformers/`路径下，下载一个名为'b1b5e295889f2d0979ede9a78ad9cb5dc6a0e25ab7f9417b315f0a2c22f4683d.929717ca66a3ba9eb9ec2f85973c6398c54c38a4faa464636a491d7a705f7eb6'的文件；
+实际上，该文件即是“pytorch_model.bin” 文件
+tar -zxvf bert-base-chinese.tar.gz
+./pytorch_model.bin
+./bert_config.json
+
+
