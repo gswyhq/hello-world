@@ -1,0 +1,16 @@
+
+sudo pip3 install spacy==2.2.2
+
+wget -c -t 0 https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.2.0/en_core_web_md-2.2.0.tar.gz
+wget -c -t 0 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz
+
+sudo pip3 install Downloads/en_core_web_md-2.2.0.tar.gz 
+sudo pip3 install Downloads/en_core_web_sm-2.2.0.tar.gz  
+
+
+>>> import spacy
+>>> nlp = spacy.load("en_core_web_sm")
+>>> nlp = spacy.load("en_core_web_md")
+>>> doc = nlp(u"This is a sentence.")
+
+
