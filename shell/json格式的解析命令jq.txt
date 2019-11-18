@@ -41,6 +41,73 @@ gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .
 gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .bar
 "less interesting data"
 
+# 有时候，根据元素进行解析，会出错：
+gswyhq@gswyhq-PC:~/hello-world$ echo '{
+  "1_faq_20190722_173322": {
+    "aliases": {
+      "1_faq_alias": {}
+    }
+  }
+}'|jq .1_faq_20190722_173322
+jq: error: syntax error, unexpected IDENT, expecting $end (Unix shell quoting issues?) at <top-level>, line 1:
+.1_faq_20190722_173322
+jq: 1 compile error
+可以通过下面的方法解决：
+gswyhq@gswyhq-PC:~/hello-world$ echo '{
+  "1_faq_20190722_173322": {
+    "aliases": {
+      "1_faq_alias": {}
+    }
+  }
+}'|jq '.["1_faq_20190722_173322"]'
+{
+  "aliases": {
+    "1_faq_alias": {}
+  }
+}
+
+# 利用jq的管道取出特定的字段
+gswyhq@gswyhq-PC:~/hello-world$ echo '{
+  "1_faq_20190722_173322": {
+    "aliases": {
+      "1_faq_alias": {}
+    }
+  }
+}'|jq '.[]|.aliases'
+
+{
+  "1_faq_alias": {}
+}
+
+# jq 管道过滤
+## 筛选状态码为404的；select 接受一个条件表达式作为参数。其输入可以是迭代器，或者和 map 函数配合使用来处理数组。当输入中的某个元素使 select 参数中的条件表达式结果为真时，则在结果中保留该元素，否则不保留该元素。
+curl localhost:9200/1_faq_alias2/_alias/* |jq '.|select(.status==404)'
+
+# 变量作用域
+#会抛出 arraylen 没定义的异常
+jq -nr '[1,2,3]|(length as $arraylen|$arraylen)|$arraylen+1'
+
+#正常执行，结果为 4.
+jq -nr '[1,2,3]|(length as $arraylen|$arraylen+1)'
+
+#函数作用域。该表达式会抛出异常，因为变量$fn 是在函数 fname 中定义，对最后一个子表达式##来说，$fn 是不可见的。
+jq -nr '{"firstname":"tom","lastname":"clancy"}|def fname:. as {firstname:$fn, lastname:$ln}|$fn; fname|$fn'
+
+# reduce 关键字
+reduce 关键字用来通过运算将迭代器的所有值合并为一个值。其调用形式为：reduce <itexp> as $var (INIT; UPDATE)。
+其中，表达式 itexp 产生的迭代器被赋值给变量 var, UPDATE 是关于变量 var 的表达式。INIT 是该表达式的初始输入。
+相对于 itexp 结果中的每个元素，UPDATE 表达式被调用一次，计算出结果用作下一次 UPDATE 调用的输入。
+#结果是 6
+jq -nr 'reduce ([1,2,3]|.[]) as $item (0; .+$item)'
+#上面的表达式等同于
+jq -nr '0 | (3 as $item|.+$item)|(2 as $item | . + $item)|(1 as $item | . + $item)'
+
+# foreach 关键字
+关键字 foreach 的作用和 reduce 类似。其调用形式为 foreach EXP as $var (INIT; UPDATE; EXTRACT)。
+和 reduce 关键字不同的是，foreach 关键字的每次迭代是先调用 UPDATE 再调用 EXTRACT，并以一个迭代器保留每一次的中间结果。该迭代器最后作为整个表达式的结果输出。
+#下面的表达式，结果是 1 3 6
+jq -nr 'foreach ([1,2,3]|.[]) as $item (0; .+$item;.)'
+
 # JSON nested parse（嵌套解析）
 gswyhq@gswyhq-PC:~$ cat json_raw.txt |jq '.employees[1].name'
 "Laura"
@@ -199,6 +266,6 @@ less chat_raw_chat_corpus_20181119_095640_data.json |jq -c '._source.tag1 + "   
 # 更多示例：
 https://stedolan.github.io/jq/manual/#IO
 https://stedolan.github.io/jq/manual/#example96
-
+https://www.ibm.com/developerworks/cn/linux/1612_chengg_jq/
 
 

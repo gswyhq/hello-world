@@ -1,0 +1,36 @@
+
+Python代码格式化工具
+
+Python 官方同时推出了一个检查代码风格是否符合 PEP8 的工具，名字也叫 pep8，后来被重命名为了 pycodestyle。
+
+用 pycodestyle 可检测.py有哪些地方不符合 PEP8 风格
+
+$ pycodestyle link.py
+link.py:1: [E401] multiple imports on one line
+link.py:3: [E302] expected 2 blank lines, found 1
+
+工具 Black，号称不妥协的代码格式化工具，为什么叫不妥协呢？因为它检测到不符合规范的代码风格直接就帮你全部格式化好，根本不需要你确定，直接替你做好决定。
+
+使用非常简单，安装成功后，和其他系统命令一样使用，只需在 black 命令后面指定需要格式化的文件或者目录就ok
+
+black link.py
+
+Black 是 PEP8 的严格子集。我的最佳实践方式就是使用 PyCharm 自带的格式化工具配合 Black 使用。因为 Black 也支持集成到 Pycharm 中。
+
+如何集成 Pycharm
+
+1、 安装black：
+sudo pip3 install black
+
+2、 找到 black 的安装路径
+ gswyhq@gswyhq-PC:~$ which black  # linux/mac
+/usr/local/bin/black
+
+ $ where black  # windows
+
+3、 添加扩展工具，打开 File -> Settings -> Tools -> External Tools ，添加一个新的扩展工具，Program 填 black 的安装路径,如： /usr/local/bin/black，Arguments 填  $FilePath$
+
+4、选择 Tools-> External Tools-> Black 即可对当前打开的文件斤西瓜代码格式化，当然，你还可以为其指定一个快捷键，使操作起来更方便。
+
+
+

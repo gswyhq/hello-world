@@ -1,0 +1,12 @@
+
+# 查询无别名的索引
+for index_name in `curl 192.168.3.105:9200/_cat/indices/*|grep open |awk '{print $3}'|sort`:
+    do
+    alias_ret=`curl 192.168.3.105:9200/$index_name/_alias/*`
+    if [[ "$alias_ret" == "{}"  && $index_name != *alias ]];
+    then
+    echo "无别名   $index_name";
+    fi;
+    done
+
+

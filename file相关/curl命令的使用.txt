@@ -17,3 +17,6 @@ curl中超时时间timeout设置：
 示例：
 time curl http://192.168.3.105:18900/parser -d @ner_args_data.json --max-time 6000
 
+命令行利用curl 获取HTTP返回的状态码:
+curl https://www.baidu.com -w %{http_code}
+

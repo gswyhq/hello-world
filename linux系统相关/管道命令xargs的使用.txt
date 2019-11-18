@@ -80,3 +80,7 @@ hi 10 11 12
  head -9 c1-bidReqResRaw.log|xargs -L 3|nl
 
  head -9 c1-bidReqResRaw.log|xargs -n3 -d"\n"|nl
+
+Shell中（至少是bash），管道符左右的命令都是在子shell中执行的。
+由于子shell无法修改父shell的变量，因此管道符两边的变量互相不影响，并且无法修改父shell的变量。
+

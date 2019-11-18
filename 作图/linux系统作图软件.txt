@@ -8,3 +8,7 @@ gswyhq@gswyhq-PC:~$ sudo dpkg -i draw.io-amd64-8.8.0.deb
 
 第三步，启动，设置语言（默认英文），使用
 
+通过“sudo dpkg -l”查看已经安装的软件，并找到自己的安装的软件名。 
+使用”sudo dpkg -r 软件名“进行卸载。对应deepin系统，直接在启动器里头进行删除更方便。
+ 
+

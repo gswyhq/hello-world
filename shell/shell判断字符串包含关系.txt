@@ -1,0 +1,43 @@
+
+方法一：利用grep查找, 判断字符串包含关系
+strA="long string"
+strB="string"
+result=$(echo $strA | grep "${strB}")
+if [[ "$result" != "" ]]
+then
+    echo "包含"
+else
+    echo "不包含"
+fi
+
+先打印长字符串，然后在长字符串中 grep 查找要搜索的字符串，用变量result记录结果
+如果结果不为空，说明strA包含strB。如果结果为空，说明不包含。
+
+方法二：利用字符串运算符，利用字符串运算符 =~ 直接判断strA是否包含strB。
+strA="helloworld"
+strB="low"
+if [[ $strA =~ $strB ]]
+then
+    echo "包含"
+else
+    echo "不包含"
+fi
+
+方法三：利用通配符，用通配符*号代理strA中非strB的部分，如果结果相等说明包含，反之不包含。
+注意：通配符需要写在等号的右边，且通配符不能在引号内；
+A="helloworld"
+B="low"
+if [[ $A == *$B* ]]
+then
+    echo "包含"
+else
+    echo "不包含"
+fi
+
+
+~$ index_name="zx_kg_entity_synonyms_alias"
+错误示例1(通配符写在了引号内)： if [[ ${index_name} == "*alias*" ]]; then echo "abdddd"; fi;
+错误示例2(通配符写在了等号左边): if [[ *alias* == ${index_name} ]]; then echo "abdddd"; fi;
+正确示例1：$ if [[ ${index_name} == *alias* ]]; then echo "abdddd"; fi;
+正确示例2：if [[ ${index_name} == *"alias"* ]]; then echo "abdddd"; fi;
+
