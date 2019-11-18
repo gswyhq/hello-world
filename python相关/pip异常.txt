@@ -1,0 +1,13 @@
+
+使用下面的命令升级了pip版本后，
+sudo pip3 install --upgrade pip
+在使用pip3的时候，会报错：
+hq@gswyhq-PC:~/Downloads$ pip3 list
+Traceback (most recent call last):
+  File "/usr/bin/pip3", line 9, in <module>
+    from pip import main
+ImportError: cannot import name 'main'
+解决方案（卸载掉pip，并重新安装）：
+sudo python3 -m pip uninstall pip && sudo apt install python3-pip --reinstall
+
+

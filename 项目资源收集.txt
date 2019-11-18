@@ -237,3 +237,10 @@ https://github.com/Morizeyao/GPT2-Chinese
 中文XLNet预训练模型：
 https://github.com/ymcui/Chinese-PreTrained-XLNet
 
+基于知识库的自动问答：seq2seq模型实践
+https://github.com/wavewangyue/kbqa
+
+seq2seq生成模型设计对话系统
+https://github.com/Dikea/Dialog-System-with-Task-Retrieval-and-Seq2seq
+
+
