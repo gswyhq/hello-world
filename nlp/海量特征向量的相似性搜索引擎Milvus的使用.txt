@@ -1,0 +1,130 @@
+
+安装Milvus
+
+gswyhq@ubuntu:~$ docker pull milvusdb/milvus:latest
+gswyhq@ubuntu:~$ mkdir -p /home/$USER/milvus/conf
+gswyhq@ubuntu:~$ cd home/$USER/milvus/conf
+gswyhq@ubuntu:~$ wget https://raw.githubusercontent.com/milvus-io/docs/master/assets/server_config.yaml
+gswyhq@ubuntu:~$ wget https://raw.githubusercontent.com/milvus-io/docs/master/assets/log_config.conf
+gswyhq@ubuntu:~$ docker run -td --gpus all -e "TZ=CST-8" -p 19530:19530 -p 8080:8080 -v /home/$USER/milvus/db:/opt/milvus/db -v /home/$USER/milvus/conf:/opt/milvus/conf -v /home/$USER/milvus/logs:/opt/milvus/logs milvusdb/milvus:latest
+
+$ pip3 install pymilvus==0.2.3
+
+```
+#该程序演示了如何连接Milvus矢量数据库，
+#创建向量表，
+#插入10个向量，
+#并执行向量相似度搜索。
+
+import sys
+import numpy as np
+import random
+sys.path.append(".")
+from milvus import Milvus, IndexType, MetricType
+import time
+
+    #连接到Milvus服务器
+    #您可能需要相应地更改_HOST和_PORT
+_HOST = '127.0.0.1'
+_PORT = '19530'  # default value
+
+
+def main():
+    milvus = Milvus()
+
+    #连接到Milvus服务器
+    #您可能需要相应地更改_HOST和_PORT
+    param = {'host': _HOST, 'port': _PORT}
+    status = milvus.connect(**param)
+    if status.OK():
+        print("Server connected.")
+    else:
+        print("Server connect fail.")
+        sys.exit(1)
+
+    #创建表demo_table（如果不存在）。
+    table_name = 'demo_table'
+
+    status, ok = milvus.has_table(table_name)
+    if not ok:
+        param = {
+            'table_name': table_name,
+            'dimension': 16,
+            'index_file_size': 1024,  # optional
+            'metric_type': MetricType.L2  # optional
+        }
+
+        milvus.create_table(param)
+
+    #在Milvus服务器中显示表格
+    _, tables = milvus.show_tables()
+
+    # Describe demo_table
+    _, table = milvus.describe_table(table_name)
+    print(table)
+
+    # 10000个16维向量
+    #每个维度的元素为float32类型
+    #向量应为二维数组
+    vectors = [[random.random() for _ in range(16)] for _ in range(10000)]
+    #您也可以使用numpy生成随机向量：
+    #     `vectors = np.random.rand(10000, 16).astype(np.float32).tolist()`
+
+    #将向量插入demo_table，返回状态和向量ID列表
+    status, ids = milvus.insert(table_name=table_name, records=vectors)
+
+    #等待6秒钟，直到Milvus服务器保留矢量数据为止。
+    time.sleep(6)
+
+    #获取demo_table行数
+    status, result = milvus.count_table(table_name)
+
+    #创建向量索引，搜索更快
+    index_param = {
+        'index_type': IndexType.IVFLAT,  # 选择 ivflat 指数
+        'nlist': 2048
+    }
+
+    #在demo_table中创建ivflat索引
+    #您可以搜索向量而无需创建索引。但是，创建索引帮助
+    #搜索速度更快
+    status = milvus.create_index(table_name, index_param)
+
+    #描述索引，获取索引信息
+    status, index = milvus.describe_index(table_name)
+    print(index)
+
+    #使用第三个向量进行相似度搜索
+    query_vectors = [
+        vectors[3]
+    ]
+
+    #执行向量相似度搜索
+    param = {
+        'table_name': table_name,
+        'query_records': query_vectors,
+        'top_k': 1,
+        'nprobe': 16
+
+    }
+    status, results = milvus.search_vectors(**param)
+
+    if status.OK():
+        if results[0][0].distance == 0.0 or results[0][0].id == ids[3]:
+            print('Query result is correct')
+        else:
+            print('Query result isn\'t correct')
+
+    # Delete demo_table
+    status = milvus.drop_table(table_name)
+
+    #与Milvus断开连接
+    status = milvus.disconnect()
+
+
+if __name__ == '__main__':
+    main()
+```
+
+# https://github.com/milvus-io/pymilvus/blob/master/examples/example.py
+
