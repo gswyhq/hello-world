@@ -285,4 +285,9 @@ epochs：整数，训练终止时的epoch值，训练将在达到该epoch值时�
         )
         print(hist.history.items())
 
+问题：
+ImportError: No module named 'keras_layer_normalization'
+解决方案：
+~# pip3 install keras-transformer==0.29.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
 
