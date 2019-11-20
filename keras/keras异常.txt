@@ -290,4 +290,9 @@ ImportError: No module named 'keras_layer_normalization'
 解决方案：
 ~# pip3 install keras-transformer==0.29.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+训练一开始的loss,acc都是nan:
+loss: nan - acc: nan
+问题出现原因：
+数据异常所致，比如传入的数据为空等。
+
 

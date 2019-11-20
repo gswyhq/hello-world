@@ -243,4 +243,6 @@ https://github.com/wavewangyue/kbqa
 seq2seq生成模型设计对话系统
 https://github.com/Dikea/Dialog-System-with-Task-Retrieval-and-Seq2seq
 
+机器翻译：
+https://github.com/Imkaran/Machine-Translation
 

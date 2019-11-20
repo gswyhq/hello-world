@@ -584,3 +584,7 @@ https://github.com/DRCKnowledgeTeam/DRCD
 食品，餐饮情感分析二分类数据：
 https://github.com/YIMIxxxxx/NLP-bert-try
 
+法研杯CAIL2019阅读理解数据
+CAIL2019-RC-big.zip
+数据集：https://pan.baidu.com/s/1p4NJDhboKSsbFQOwRgDszg 提取码：8w0y
+

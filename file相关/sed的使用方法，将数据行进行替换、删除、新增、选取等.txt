@@ -75,7 +75,7 @@ sed命令行格式为：
 　　显示某行
 .    [root@localhost ruby] # sed -n '1p' ab           #显示第一行 
      [root@localhost ruby] # sed -n '$p' ab           #显示最后一行
-     [root@localhost ruby] # sed -n '1,2p' ab        #显示第一行到第二行
+     [root@localhost ruby] # sed -n '1,2p' ab        #显示第一行到第二行(显示内容行数: 1 ≤ 行数 ≤ 2 )
      [root@localhost ruby] # sed -n '2,$p' ab        #显示第二行到最后一行
 
 　　使用模式进行查询

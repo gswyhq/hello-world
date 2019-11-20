@@ -1,0 +1,25 @@
+
+batch_size：整数，指定进行梯度下降时每个batch包含的样本数。训练时一个batch的样本会被计算一次梯度下降，使目标函数优化一步。
+
+epochs：整数，训练终止时的epoch值，训练将在达到该epoch值时停止，当没有设置initial_epoch时，它就是训练的总轮数，否则训练的总轮数为epochs - inital_epoch
+        epoch: 迭代次数，1个epoch等于使用训练集中的全部样本训练一次；
+
+verbose：日志显示，0为不在标准输出流输出日志信息，1为输出进度条记录，2为每个epoch输出一行记录
+
+validation_split：0~1之间的浮点数，用来指定训练集的一定比例数据作为验证集。验证集将不参与训练，并在每个epoch结束后测试的模型的指标，如损失函数、精确度等。注意，validation_split的划分在shuffle之后，因此如果你的数据本身是有序的，需要先手工打乱再指定validation_split，否则可能会出现验证集样本不均匀。
+
+validation_data：形式为（X，y）或（X，y，sample_weights）的tuple，是指定的验证集。此参数将覆盖validation_spilt。
+
+shuffle：布尔值，表示是否在训练过程中每个epoch前随机打乱输入样本的顺序。
+
+class_weight：字典，将不同的类别映射为不同的权值，该参数用来在训练过程中调整损失函数（只能用于训练）。该参数在处理非平衡的训练数据（某些类的训练样本数很少）时，可以使得损失函数对样本数不足的数据更加关注。
+
+sample_weight：权值的numpy array，用于在训练时调整损失函数（仅用于训练）。可以传递一个1D的与样本等长的向量用于对样本进行1对1的加权，或者在面对时序数据时，传递一个的形式为（samples，sequence_length）的矩阵来为每个时间步上的样本赋不同的权。这种情况下请确定在编译模型时添加了sample_weight_mode='temporal'。
+
+initial_epoch: 从该参数指定的epoch开始训练，在继续之前的训练时有用。
+
+steps_per_epoch: 一个epoch包含的步数（每一步是一个batch的数据送入）; batch_size = 数据集大小/steps_per_epoch的，如果我们在生成函数里设置了batch_size的大小，那么在fit_generator传参的时候，steps_per_epoch=len(x_train)//(batch_size)
+
+validation_steps: 仅当steps_per_epoch被指定时有用，在验证集上的step总数。
+
+
