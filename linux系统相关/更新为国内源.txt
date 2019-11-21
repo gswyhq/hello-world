@@ -1,0 +1,41 @@
+
+不同的系统，更新镜像源的方法不一致
+
+image: python:3.6.8-stretch
+# head /etc/issue
+Debian GNU/Linux 9 \n \l
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb http://mirrors.aliyun.com/debian/ stretch main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/debian/ stretch main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/debian-security stretch/updates main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/debian-security stretch/updates main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list
+
+
+tensorflow/tensorflow:1.13.1-py3
+# head /etc/issue
+Ubuntu 16.04.6 LTS \n \l
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-updates universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security universe" >> /etc/apt/sources.list
+
+
+image: python:3.5.6-alpine3.8
+$ head /etc/issue
+Welcome to Alpine Linux 3.8
+mv /etc/apk/repositories /etc/apk/repositories.bak
+echo "https://mirrors.aliyun.com/alpine/v3.8/main" >> /etc/apk/repositories && \
+echo "https://mirrors.aliyun.com/alpine/v3.8/community" >> /etc/apk/repositories

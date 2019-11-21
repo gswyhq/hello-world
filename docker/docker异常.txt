@@ -358,4 +358,12 @@ docker: Error response from daemon: Unknown runtime specified nvidia.
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
+docker push ***时报错：
+Error response from daemon: Get https://registry-1.docker.io/v2/: dial tcp: lookup registry-1.docker.io on 223.5.5.5:53: server misbehaving
+解决方案：
+docker logout
+docker login
+输入用户名，密码；若网络不好，过一会儿再重复上面两步，直到登录成功，再
+docker push *** 即可
+
 
