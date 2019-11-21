@@ -7,6 +7,7 @@ toutiao_data.csv:
     来源: https://github.com/mattzheng/LangueOne/toutiao_data.rar; https://github.com/fateleak/toutiao-text-classfication-dataset.git
 
 GoogleNews-vectors-negative300.bin.gz
+gunzip -c GoogleNews-vectors-negative300.bin.gz > GoogleNews-vectors-negative300.bin
     https://github.com/3Top/word2vec-api
     https://pan.baidu.com/s/1kTCQqft
 
@@ -64,6 +65,68 @@ http://openkg1.oss-cn-beijing.aliyuncs.com/30ee798a-3199-4de4-9792-7746bc8891e0/
 
 中文百科知识图谱Zhishi.me-提供Dump
 zhishimejson.tar.gz
+~$ tar -zxvf zhishimejson.tar.gz
+zhishime_json/
+zhishime_json/sameAs/
+zhishime_json/sameAs/2.9_baidubaike_zhwiki_links_zh.zip
+zhishime_json/sameAs/2.9_hudongbaike_zhwiki_links_zh.zip
+zhishime_json/sameAs/2.9_baidubaike_hudongbaike_links_zh.zip
+zhishime_json/sameAs/2.9_zhwiki_baidubaike_links_zh.zip
+zhishime_json/sameAs/2.9_zhwiki_hudongbaike_links_zh.zip
+zhishime_json/sameAs/2.9_hudongbaike_baidubaike_links_zh.zip
+zhishime_json/3.0_zhishi_ontology_zh.zip
+zhishime_json/baidubaike/
+zhishime_json/baidubaike/3.0_baidubaike_redirects_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_abstracts_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_external_links_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_images_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_infobox_property_definitions_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_internal_links_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_related_pages_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_labels_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_article_categories_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_image_information_zh.zip
+zhishime_json/baidubaike/baidubaike_instance_types_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_disambiguations_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_infobox_properties_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_article_links_zh.zip
+zhishime_json/baidubaike/3.0_baidubaike_category_labels_zh.zip
+zhishime_json/zhwiki/
+zhishime_json/zhwiki/2.0_zhwiki_external_links_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_article_links_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_resource_ids_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_revisions_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_abstracts_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_dbpedia_links_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_skos_categories_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_internal_links_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_images_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_aliases_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_infobox_property_definitions_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_labels_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_category_labels_zh.zip
+zhishime_json/zhwiki/zhwiki_instance_types_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_redirects_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_disambiguations_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_infobox_properties_zh.zip
+zhishime_json/zhwiki/2.0_zhwiki_article_categories_zh.zip
+zhishime_json/hudongbaike/
+zhishime_json/hudongbaike/3.0_hudongbaike_abstracts_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_article_links_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_category_labels_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_infobox_properties_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_external_links_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_image_information_zh.zip
+zhishime_json/hudongbaike/hudongbaike_instance_types_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_internal_links_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_disambiguations_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_labels_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_images_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_related_pages_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_redirects_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_article_categories_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_infobox_property_definitions_zh.zip
+zhishime_json/hudongbaike/3.0_hudongbaike_skos_categories_zh.zip
 http://openkg1.oss-cn-beijing.aliyuncs.com/d71361be-b741-480f-95ca-e0eae5931877/zhishimejson.tar.gz
 http://openkg.cn/dataset/zhishi-me-dump
 
@@ -72,10 +135,17 @@ http://openkg.cn/dataset/ownthink
 五千万知识图谱数据拿走不谢
 链接: https://pan.baidu.com/s/1iATmmV51XwejAAGLsWJ3OA 提取码: fv49 
 data.tar.gz
+~$ tar -zxvf data.tar.gz
+data.txt
+~$ md5sum data.txt
+c937abff957fdf75d633df14a21b01ea  data.txt
 1.4亿中文知识图谱：
 ownthink_v2.zip（链接: https://pan.baidu.com/s/1LZjs9Dsta0yD9NH-1y0sAw 提取码: 3hpp ）
 unzip -P "https://www.ownthink.com/" ownthink_v2.zip
-
+Archive:  ownthink_v2.zip
+  inflating: ownthink_v2.csv
+~$ md5sum ownthink_v2.csv
+f4c491f051b8af6bc4ab2d68b6b8b82a  ownthink_v2.csv
 
 医疗知识图谱数据
 链接: https://pan.baidu.com/s/178DMxv9P-kK7DssofH6URw 提取码: 5x4m 复制这段内容后打开百度网盘手机App，操作更方便哦
@@ -84,11 +154,17 @@ Disease.zip
 
 数据下载于：http://openkg.cn/dataset/cndbpedia
 /home/gswyhq/data/中文通用百科知识图谱（CN-DBpedia）/baiketriples.zip
+$ unzip baiketriples.zip
+Archive:  baiketriples.zip
+  inflating: baike_triples.txt
 CN-DBpedia Dump数据（2015.07）CSV
 包含900万+的百科实体以及6600万+的三元组关系。其中摘要信息400万+，标签信息1980万+，infobox信息4100万+
 
 
 /home/gswyhq/data/中文通用百科知识图谱（CN-DBpedia）/m2e.zip
+$ unzip m2e.zip
+Archive:  m2e.zip
+  inflating: m2e.txt
 CN-DBpedia Mention2Entity数据（2015.07）CSV
 包含110万+的mention2entity数据
 
@@ -286,6 +362,30 @@ sgns.target.word-character.char1-1.dynwin5.thr10.neg5.dim300.iter5.bz2
 https://github.com/Embedding/Chinese-Word-Vectors
 https://pan.baidu.com/s/1c9yiosHKNIZwRlLzD_F1ig
 
+120G+训练好的word2vec模型（中文词向量）
+$ md5sum pack.zip
+fa9af79358c746805fa61662928e019b  pack.zip
+$ unzip pack.zip
+Archive:  pack.zip
+   creating: dong/word2vec/
+ extracting: dong/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.model
+ extracting: dong/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin
+ extracting: dong/word2vec/news12g_bdbk20g_nov90g_dim128.tar.gz
+ extracting: dong/word2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.model.syn0.npy
+ 模型参数：
+ window=5
+ min_count=5
+ size=64
+ ps：其它参数见gensim库，执行代码为：Word2Vec(sentence, window=5, min_count=5,size=64, workers=4)
+ 其它相关：
+ 分词词典使用了130w+词典。分词代码：jieba.lcut(sentence)，默认使用了HMM识别新词；
+ 剔除了所有非中文字符；
+ 最终得到的词典大小为6115353；
+ 目前只跑了64维的结果，后期更新128维词向量；
+ 模型格式有两种bin和model；
+ 下载链接：链接: https://pan.baidu.com/s/1o7MWrnc 密码:wzqv
+ https://weibo.com/p/23041816d74e01f0102x77v?luicode=20000061&lfid=4098518198740187&featurecode=newtitle
+
 官方的中文预训练bert权重
 chinese_L-12_H-768_A-12.zip
 https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zip
@@ -295,6 +395,11 @@ neg.xls  pos.xls
 https://www.cnblogs.com/sumuncle/p/6370686.html
 http://spaces.ac.cn/usr/uploads/2015/08/646864264.zip
 https://github.com/zhuanxuhit/nd101/tree/master/1.Intro_to_Deep_Learning/3.How_to_Do_Sentiment_Analysis/data
+
+中文语音语料（13388个片段）
+thchs30: 清华大学30小时的数据集，可以在http://www.openslr.org/18/下载
+data_thchs30.tgz [6.4G]
+http://blog.sina.com.cn/s/blog_8af106960102xdev.html
 
 评论数据
 sum.xls
@@ -310,6 +415,9 @@ zhwiki.zip
 
 中文Wiki语料获取
 /home/gswyhq/Downloads/zhwiki-latest-pages-articles.xml.bz2
+~$ bunzip2 zhwiki-latest-pages-articles.xml.bz2
+~$ ls
+zhwiki-latest-pages-articles.xml
 wiki中文数据的下载地址是：https://dumps.wikimedia.org/zhwiki/latest/zhwiki-latest-pages-articles.xml.bz2
 
 短文本语义匹配数据集
@@ -378,6 +486,8 @@ https://github.com/ymcui/Chinese-RC-Dataset
 英汉互译语料
 cmn-eng.zip
 http://www.manythings.org/anki/cmn-eng.zip
+英法互译语料
+http://www.manythings.org/anki/fra-eng.zip
 
 /home/gswyhq/data/ERNIE_1.0/ERNIE_stable-1.0.1.tar.gz
 ERNIE 1.0 中文 Base 模型	包含预训练模型参数、词典 vocab.txt、模型配置 ernie_config.json
@@ -480,6 +590,10 @@ https://drive.google.com/file/d/1TMKu1FpTr6kcjWXWlQHX7YJsMfhhcVKp/view
 百科类问答json版(baike2018qa)
 150万个问答( 原始数据1G多，压缩文件663M；数据更新时间：2018年)
 baike_qa2019.zip
+~$ unzip baike_qa2019.zip
+Archive:  baike_qa2019.zip
+  inflating: baike_qa_train.json
+  inflating: baike_qa_valid.json
 https://pan.baidu.com/share/init?surl=2TCEwC_Q3He65HtPKN17cA
 fu45
 含有150万个预先过滤过的、高质量问题和答案，每个问题属于一个类别。总共有492个类别，其中频率达到或超过10次的类别有434个。
@@ -587,4 +701,14 @@ https://github.com/YIMIxxxxx/NLP-bert-try
 法研杯CAIL2019阅读理解数据
 CAIL2019-RC-big.zip
 数据集：https://pan.baidu.com/s/1p4NJDhboKSsbFQOwRgDszg 提取码：8w0y
+
+15亿参数 GPT2 中文预训练模型( 15G 语料，训练 10w 步 )
+model.ckpt-100000.data-00000-of-00001 (5.2G) 
+https://drive.google.com/open?id=1n_5-tgPpQ1gqbyLPbP1PwiFi2eo7SWw_
+
+pytorch: https://github.com/qywu/Chinese-GPT
+encoder.pth
+https://drive.google.com/uc?id=1Mr2-x_qT2hgyo0RalPjc09NmyNi6a_gs&export=download
+model_state_epoch_62.th
+https://drive.google.com/uc?id=1W6n7Kv6kvHthUX18DhdGSzBYkyzDvxYh&export=download
 

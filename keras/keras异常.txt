@@ -295,4 +295,15 @@ loss: nan - acc: nan
 问题出现原因：
 数据异常所致，比如传入的数据为空等。
 
+模型训练时，有时报下面的错误：
+InvalidArgumentError: Incompatible shapes: [1920] vs. [32,60]
+     [[{{node metrics_3/acc/Equal}}]]
+可能是metrics函数`accuracy`不会改变y_pred的形状。您可以使用自定义指标功能，例如：
+def custom_sparse_categorical_accuracy(y_true, y_pred):
+    flatten_y_true = K.cast( K.reshape(y_true,(-1,1) ), K.floatx())
+    flatten_y_pred = K.cast(K.reshape(y_pred, (-1, y_pred.shape[-1])), K.floatx())
+    y_pred_labels = K.cast(K.argmax(flatten_y_pred, axis=-1), K.floatx())
+    return K.cast(K.equal(flatten_y_true,y_pred_labels), K.floatx())
+然后符合以下指标：
+model.compile（...，metrics = [custom_sparse_categorical_accuracy]）
 

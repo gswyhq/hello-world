@@ -17,5 +17,16 @@ root@693bafbd7758:/notebooks# jupyter notebook list
 Currently running servers:
 http://localhost:8888/?token=e1658c6cd6bbb3b0a8800ed8efc52ac37c25f29677e0a642 :: /notebooks
 
+在终端运行：jupyter notebook --ip 0.0.0.0 --port 9999
+浏览器打开对应页面，却不能运行代码块，报如下信息：
+[I 15:12:51.804 NotebookApp] Adapting to protocol v5.1 for kernel 265ecdfd-6e38-4514-adfa-8c449ef8b2bc
+/usr/local/lib/python3.6/dist-packages/notebook/base/zmqhandlers.py:284: RuntimeWarning: coroutine 'WebSocketHandler.get' was never awaited
+  super(AuthenticatedZMQStreamHandler, self).get(*args, **kwargs)
+[W 15:12:52.822 NotebookApp] Replacing stale connection: 265ecdfd-6e38-4514-adfa-8c449ef8b2bc:dc1f1a1c8e6347c5807dc72ce7715d94
+原因分析：
+tornado版本冲突，jupyter 5.7.5版本以下并不支持tornado6.0。
+jupyter notebook 5.7.5版本已经修复该bug
+解决方案(可将tornado降级为6.0以下版本，或者升级jupyter notebook到5.7.5版本以上)：
+~$ sudo pip3 install -U notebook==5.7.5 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
 
