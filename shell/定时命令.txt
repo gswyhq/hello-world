@@ -1,0 +1,4 @@
+
+# 每隔一秒，执行一次 `free -h` 命令：
+while true; do  free -h; sleep 1; done
+

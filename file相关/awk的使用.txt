@@ -22,3 +22,11 @@ head train3.txt |awk '{print length($0)}'
 11
 10
 
+# awk给文本文件每行添加行号， 插入行号, 下面例子是插入行号及tab建
+awk '$0=NR"\t"$0' semantic_test.txt > semantic_test2.txt
+此处`NR`代表的就是插入的行号
+同理，如需要在每行的末尾插入行号，并且用字符‘---’隔开：
+awk '$0=$0"---"NR' semantic_test.txt
+除了插入行号外，我们也可以在行首或行尾插入其他的固定字符：
+awk '$0="句子开头\t"$0"\t句子结尾"' semantic_test.txt
+

@@ -712,3 +712,10 @@ https://drive.google.com/uc?id=1Mr2-x_qT2hgyo0RalPjc09NmyNi6a_gs&export=download
 model_state_epoch_62.th
 https://drive.google.com/uc?id=1W6n7Kv6kvHthUX18DhdGSzBYkyzDvxYh&export=download
 
+真假新闻数据： George Mclntire 的假新闻数据集的子集。它包含大约 1000 篇假新闻和真实新闻的文章
+https://raw.githubusercontent.com/cabhijith/Fake-News/master/fake_or_real_news.csv.zip
+~$ unzip fake_or_real_news.csv.zip 
+Archive:  fake_or_real_news.csv.zip
+  inflating: fake_or_real_news.csv 
+
+
