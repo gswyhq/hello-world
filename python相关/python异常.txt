@@ -22,3 +22,9 @@ root@6c6656292234:~# export PYTHONIOENCODING=UTF-8
 python命令加上-u（unbuffered）参数后会强制其标准输出也同标准错误一样不通过缓存直接打印到屏幕。
 上命令改成下面这个即可解决： nohup python3 -u main.py 2>&1 > train.log &
 
+# Python 3.5.3 使用 pathlib 读取文件时，明明文件存在，却报错：
+TypeError: invalid file: PosixPath('/home/gswyhq/data/Fashion-Mnist/train-images-idx3-ubyte')
+解决方案：
+将 with open(DATA_PATH / "train-images-idx3-ubyte", 'rb') as file_object:
+改为： with open(str(DATA_PATH / "train-images-idx3-ubyte"), 'rb') as file_object: 
+

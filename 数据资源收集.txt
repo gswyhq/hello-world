@@ -718,4 +718,9 @@ https://raw.githubusercontent.com/cabhijith/Fake-News/master/fake_or_real_news.c
 Archive:  fake_or_real_news.csv.zip
   inflating: fake_or_real_news.csv 
 
-
+Fashion MNIST数据集 是kaggle上提供的一个图像分类入门级的数据集，其中包含10个类别的70000个灰度图像
+wget -c -t 0 https://gitlab.aiacademy.tw/aai/examples/raw/c13d5198f80d4763216cafa63982ec58d9116365/Fashion-Mnist/fashion-mnist_train.csv
+wget -c -t 0 https://gitlab.aiacademy.tw/aai/examples/raw/c13d5198f80d4763216cafa63982ec58d9116365/Fashion-Mnist/fashion-mnist_test.csv
+http://yann.lecun.com/exdb/mnist/
+wget -c -t 0 http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
+wget -c -t 0 http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
