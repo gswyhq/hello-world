@@ -1,4 +1,4 @@
-
+方案一：
 可以通过Java的pdfbox包来实现；
 
 第一步, 构建镜像：
@@ -11,3 +11,14 @@ docker run -v $PWD:/mnt --rm -it pdfbox-app:2.0.12 ExtractText /mnt/information_
 PDF文档具有可应用于它们的某些安全权限以及与其关联的两个密码，用户密码和主密码。
 如果设置了“无法提取文本”权限位，则需要使用主密码解密文档以提取文本。
 解决方案：打开PDF文件，将该PDF文件打印到文件（PDF格式），再使用打印到文件后的文件重试即可。
+
+方案二：
+pdfminer 工具 https://github.com/euske/pdfminer/
+第一步：安装
+$ sudo pip3 install pdfminer -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+第二步：PDF to txt
+$ pdf2txt.py /home/gswyhq/Downloads/预训练语言模型.pdf
+$ pdf2txt.py |head
+usage: /home/gswyhq/.local/bin/pdf2txt.py [-d] [-p pagenos] [-m maxpages] [-P password] [-o output] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin] [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-t text|html|xml|tag] [-c codec] [-s scale] file ...
+
+

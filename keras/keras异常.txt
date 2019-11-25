@@ -307,3 +307,11 @@ def custom_sparse_categorical_accuracy(y_true, y_pred):
 然后符合以下指标：
 model.compile（...，metrics = [custom_sparse_categorical_accuracy]）
 
+问题：keras 通过 ModelCheckpoint 保存最佳的模型，出错：
+RuntimeWarning: Can save best model only with val_loss available, skipping.
+  'skipping.' % (self.monitor), RuntimeWarning)
+主要是训练时候，没有val训练数据，且又没有设置：validation_split
+解决方案：设置validation_data数据，或者设置 validation_split, 或者设置 save_best_only=False
+
+
+

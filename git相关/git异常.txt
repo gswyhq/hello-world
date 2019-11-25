@@ -73,3 +73,19 @@ gswyhq@gswyhq-pc:~$ sudo git config http.postBuffer
 解决方案：
 gswyhq@gswyhq-pc:~$ sudo git config --global  http.postBuffer 524288000
 
+异常：git clone github 速度太慢；
+问题分析：
+git clone特别慢是因为github.global.ssl.fastly.net域名被限制了。
+只要找到这个域名对应的ip地址，然后在hosts文件中加上ip–>域名的映射，刷新DNS缓存便可。
+解决方案：
+1.在网站 https://www.ipaddress.com/ 分别搜索：
+github.global.ssl.fastly.net
+github.com
+2.在hosts文件末尾添加两行(对应上面查到的ip，注意IP地址在左侧)
+151.101.185.194 github.global-ssl.fastly.net
+192.30.253.112 github.com
+3.刷新DNS缓存
+sudo /etc/init.d/networking restart
+
+
+

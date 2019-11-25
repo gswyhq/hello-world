@@ -724,3 +724,12 @@ wget -c -t 0 https://gitlab.aiacademy.tw/aai/examples/raw/c13d5198f80d4763216caf
 http://yann.lecun.com/exdb/mnist/
 wget -c -t 0 http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
 wget -c -t 0 http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+
+THUCTC(THU Chinese Text Classification)清华大学自然语言处理实验室，中文文本分类数据集
+THUCNews.zip	THUCNews中文文本数据集	1.56GB
+http://thuctc.thunlp.org/#%E8%8E%B7%E5%8F%96%E9%93%BE%E6%8E%A5
+
+斗破苍穹、诗词、知乎语料
+https://github.com/GaoPeng97/transformer-xl-chinese/blob/master/data/doupo/train.txt
+
+
