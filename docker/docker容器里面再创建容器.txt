@@ -1,0 +1,51 @@
+
+如何在一个container里面启动另一个container？
+
+一般情况下，在docker容器内部是不能执行docker相关命令的，如：
+# docker --version
+bash: docker: command not found
+
+实际上只要能拿到宿主机docker deamon的一些参数就可以直接发送REST API请求
+
+$ docker run --rm -it -v /usr/bin/docker:/usr/bin/docker \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7 \
+            -e LANG=C.UTF-8 ubuntu:16.04 \
+            /bin/bash
+root@0e3d8151aca7:/# docker --version
+Docker version 18.06.1-ce, build e68fc7a
+
+第一步：
+启动第一个container的时候，把宿主机的docker endpoint socket文件，和docker command文件使用volume参数映射进container。
+
+docker run -it \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /usr/bin/docker:/usr/bin/docker \
+-v /lib64/libltdl.so.7:/lib64/libltdl.so.7 \
+<imgname> bash
+这个命令添加了三个volumne
+
+/var/run/docker.sock host的docker endpoint
+/usr/bin/docker docker可执行命令
+/lib64/libltdl.so.7 docker可执行命令的依赖库。
+第二步：
+至此我们就可以在container里面运行docker命令了。
+
+$ docker images
+$ docker ps
+$ docker run -it <imagename> bash
+...
+第三步：
+注意如果我们要在container里面运行一个container，而需要加载volume时，这个路径是基于宿主机(host)的，也就是docker endpoint daemon所在的主机环境的。例如：
+
+假设有主机路径：/home/testuser/hello
+
+第一个container启动参数：-v /home/testuser/hello/:/home/hello/
+此时在第一个容器内我们可以看到/home/hello路径下面的内容。
+
+第二个container启动参数：-v /home/hello/:/home/hello/
+此时在第二个container里面将不能看到/home/hello/的内容，因为docker daemon试图映射主机上的路径/home/hello/，而这个路径在主机上是不存在的，主机上只有/home/testuser/hello/这个路径，/home/hello/是第一个容器内的路径；也就是启动第二个容器(在第一个容器内操作)的时候也要使用/home/testuser/hello/路径来映射。
+
+原因是命令都是发给docker demon来处理的，而docker daemon原始进程运行在主机环境，而不是容器环境，所以它是根据主机环境来处理命令的。
+
+来源：https://www.jianshu.com/p/c62ca14ed9ba

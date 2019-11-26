@@ -1,0 +1,55 @@
+
+方式一：
+通过容器内的端口映射到宿主机，再访问宿主机的端口进行通信
+docker run -p 18095:8000 --name semantic-analysis_1 ...
+curl "http://192.168.3.133:18095/nlp/infer" -d '{"database": ["你们有什么产品", "你们产品保什么"], "question": "你们都有什么产品"}'
+
+方式二：
+获取容器的对外IP地址，使用容器的IP进行通信
+$ docker inspect semantic-analysis_1|jq .[0].NetworkSettings.Networks[].IPAddress
+"192.168.64.7"
+curl 192.168.64.7:8000/nlp/infer -d '{"database": ["你们有什么产品", "你们产品保什么"], "question": "你们都有什么产品"}'
+
+方式三：
+使用容器名进行通信（前提条件必须是使用的自定义网络, 默认网络是不可用通过容器名进行通信，即默认的 bridge 网络是无法使用 DNS 通信）
+docker daemon 实现了一个内嵌的 DNS server, 故可以通过容器名进行通信
+具体做法：
+1，新建一个自定义网络：
+docker network create my_net2 
+这里 my_net2 即是自定义网络名
+2，在容器创建时通过 --network 指定到自定义网络，或者通过 docker network connect 将现有容器加入到指定自定义网络
+若是在`docker-compose.yml`文件中使用自定义网络, 格式如下（这里自定义网络名为：tagkit_mynet）：
+```
+services:
+  container-name:
+    image: ...
+    ...
+    networks:
+      - tagkit_mynet
+
+networks:
+  tagkit_mynet:
+    external: true
+```
+3，使用容器名进行通信
+$ curl semantic-analysis_1:8000/nlp/infer -d '{"database": ["你们有什么产品", "你们产品保什么"], "question": "你们都有什么产品"}'
+
+方式四：
+joined 容器进行通信
+joined 容器非常特别，它可以使两个或多个容器共享一个网络栈，共享网卡和配置信息，joined 容器之间可以通过 127.0.0.1 或 localhost 直接通信。
+1、创建一个服务端容器，这里的名字为：semantic-analysis_1
+docker run -p 18095:8000 --name semantic-analysis_1 ...
+2、创建客户端容器并通过 --network=container:semantic-analysis_1 指定 jointed 容器为 semantic-analysis_1：
+ubuntu-133:~$ docker run --rm -it --network=container:semantic-analysis_1 --name my_container2 -e LANG=C.UTF-8 ubuntu:16.04 /bin/bash
+查看下两个容器的网络配置信息，发现网卡mac地址与IP完全一样，它们共享相同的网络栈
+ubuntu-133:~$ docker inspect my_container2|jq .[0].NetworkSettings.Networks[].IPAddress
+"192.168.64.7"
+ubuntu-133:~$ docker inspect semantic-analysis_1|jq .[0].NetworkSettings.Networks[].IPAddress
+"192.168.64.7"
+3、客户端容器my_container2通过127.0.0.1或localhost,访问服务端容器semantic-analysis_1
+# curl localhost:8000/nlp/infer -d '{"database": ["你们有什么产品", "你们产品保什么"], "question": "你们都有什么产品"}'
+# curl 127.0.0.1:8000/nlp/infer -d '{"database": ["你们有什么产品", "你们产品保什么"], "question": "你们都有什么产品"}'
+
+
+
+

@@ -41,6 +41,28 @@ gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .
 gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .bar
 "less interesting data"
 
+# 当字典仅有一个key时，不知道key, 获取对应的values：
+gswyhq@gswyhq-PC:~$ echo '{"tagkit_mynet": {"Gateway": "192.168.64.1", "IPAddress": "192.168.64.7"}}' |jq .[]
+{
+  "Gateway": "192.168.64.1",
+  "IPAddress": "192.168.64.7"
+}
+gswyhq@gswyhq-PC:~$ echo '{"tagkit_mynet": {"Gateway": "192.168.64.1", "IPAddress": "192.168.64.7"}}' |jq .[].IPAddress
+"192.168.64.7"
+
+# 当字典有多个key时，不指定key, 获取对应的values, 则需要对应的管道操作：
+gswyhq@gswyhq-PC:~$ echo '{"tagkit_mynet": {"Gateway": "192.168.64.1", "IPAddress": "192.168.64.7"}, "key2": {"foo": "bar"}}' |jq .[]
+{
+  "Gateway": "192.168.64.1",
+  "IPAddress": "192.168.64.7"
+}
+{
+  "foo": "bar"
+}
+gswyhq@gswyhq-PC:~$ echo '{"tagkit_mynet": {"Gateway": "192.168.64.1", "IPAddress": "192.168.64.7"}, "key2": {"foo": "bar"}}' |jq '.[]|.foo'
+null
+"bar"
+
 # 有时候，根据元素进行解析，会出错：
 gswyhq@gswyhq-PC:~/hello-world$ echo '{
   "1_faq_20190722_173322": {
