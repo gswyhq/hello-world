@@ -55,7 +55,16 @@ pip install memory_profiler
 
 $ pip install psutil
 
-与line_profiler相似，使用@profile装饰器来标识需要追踪的函数。接着，输入：
+与line_profiler相似，使用@profile装饰器来标识需要追踪的函数。
+```
+from memory_profiler import profile
+
+@profile(precision=6)
+def main():
+    ...
+
+```
+接着，输入：
 
 $ python -m memory_profiler timing_functions.py
 脚本的执行时间比以前长1或2秒。如果没有安装psutil包，也许会更长。

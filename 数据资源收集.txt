@@ -732,4 +732,6 @@ http://thuctc.thunlp.org/#%E8%8E%B7%E5%8F%96%E9%93%BE%E6%8E%A5
 斗破苍穹、诗词、知乎语料
 https://github.com/GaoPeng97/transformer-xl-chinese/blob/master/data/doupo/train.txt
 
+保险问答语料，中文是由英文翻译而成
+https://github.com/Samurais/insuranceqa-corpus-zh.git
 
