@@ -25,7 +25,7 @@ c.Completer.greedy = True
 c.Completer.jedi_compute_type_timeout = 400
 ## Experimental: Use Jedi to generate autocompletions. Off by default.
 c.Completer.use_jedi = True
-复制代码
+
 重启jupyter后生效。
 
  

@@ -1,4 +1,10 @@
 
+from pytorch_transformers import BertModel,BertTokenizer,AdamW,BertForTokenClassification
+pretrained_weights = 'bert-base-chinese'
+tokenizer = BertTokenizer.from_pretrained(pretrained_weights)
+model = BertModel.from_pretrained(pretrained_weights)
+
+
 第一步：导入对应的模型
 from pytorch_transformers.modeling_bert import BertForQuestionAnswering, BertModel
 

@@ -30,3 +30,6 @@ awk '$0=$0"---"NR' semantic_test.txt
 除了插入行号外，我们也可以在行首或行尾插入其他的固定字符：
 awk '$0="句子开头\t"$0"\t句子结尾"' semantic_test.txt
 
+# 取出前三列，并用tab键进行分割：
+head test.txt |awk '{print $1"\t"$2"\t"$3}'
+

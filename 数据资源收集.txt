@@ -735,3 +735,22 @@ https://github.com/GaoPeng97/transformer-xl-chinese/blob/master/data/doupo/train
 保险问答语料，中文是由英文翻译而成
 https://github.com/Samurais/insuranceqa-corpus-zh.git
 
+XLNet-Base, Cased: 12-layer, 768-hidden, 12-heads.
+wget -c -t 0 https://storage.googleapis.com/xlnet/released_models/cased_L-12_H-768_A-12.zip .
+mv cased_L-12_H-768_A-12.zip xlnet_base_L-12_H-768_A-12.zip
+~$ md5sum xlnet_base_L-12_H-768_A-12.zip 
+4edf4bf8712997899fcf4c8a678ec6d9  xlnet_base_L-12_H-768_A-12.zip
+
+微博语料
+7z x weibo.7z
+~$ ls
+weibo.7z  weibo.txt
+$ md5sum weibo.txt 
+78b4644d6baabbab1b425931a99d0753  weibo.txt
+
+BERT-Base, Multilingual Cased (New)    104 languages, 12-layer, 768-hidden, 12-heads, 110M parameters
+https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip
+
+MNLI.zip
+https://firebasestorage.googleapis.com/v0/b/mtl-sentence-representations.appspot.com/o/data%2FMNLI.zip?alt=media&token=50329ea1-e339-40e2-809c-10c40afff3ce
+

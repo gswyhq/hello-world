@@ -73,7 +73,7 @@ https://docs.docker.com/engine/reference/commandline/stats/
 
 根据宿主机进程号，查询对应的docker容器号等
 如查找进程号为3127的进程是由哪个容器启动的：
-for i in  `docker ps |grep Up|awk '{print $1}'`;do echo \ &&docker top $i &&echo ID=$i; done |grep -A 10 3127
+for i in  `docker ps |grep Up|awk '{print $1}'`;do echo \ &&docker top $i &&echo ID=$i; done |grep -A 20 3127
 
 docker top :查看容器中运行的进程信息，支持 ps 命令参数。
 查看容器mymysql的进程信息：
@@ -97,4 +97,34 @@ OPTIONS说明：
 -q :静默模式，只显示容器编号。
 -s :显示总的文件大小。
 
+docker ps 显示指定的列:
+例如：
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}"
+table - 表示显示表头列名
+{{.ID}} - 容器ID
+{{.Command}} - 启动执行的命令
+显示结果：
+$ docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}"
+CONTAINER ID        NAMES                                   PORTS
+db3df460fe14        dev-peer0.org1.example.com-fabcar-1.0
+b6f803814cce        cli
+
+若不需要显示表头：
+~$ docker ps --format "{{.ID}}\t{{.Names}}"
+2ca6eaf1eb31	web13-dev_redis_1
+66d6c84c5b2f	web13-dev_web1_1
+
+可用的占位符
+名称	含义
+.ID	容器ID
+.Image	镜像ID
+.Command	执行的命令
+.CreatedAt	容器创建时间
+.RunningFor	运行时长
+.Ports	暴露的端口
+.Status	容器状态
+.Names	容器名称
+.Label	分配给容器的所有标签
+.Mounts	容器挂载的卷
+.Networks	容器所用的网络名称
 
