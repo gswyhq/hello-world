@@ -769,4 +769,11 @@ MRPC_TRAIN = 'https://dl.fbaipublicfiles.com/senteval/senteval_data/msr_paraphra
 MRPC_TEST = 'https://dl.fbaipublicfiles.com/senteval/senteval_data/msr_paraphrase_test.txt'
 来源：https://github.com/alibaba/ai-matrix/blob/7e15f4f31a081cfe8e0d526f8f27d2cbe2de3691/macro_benchmark/BERT_Google/download_glue_data.py
 
+SQuAD2.0
+https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v2.0.json
+https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v2.0.json
+
+Nottingham : 超过 1000 首民谣
+地址：http://abc.sourceforge.net/NMD/
+
 
