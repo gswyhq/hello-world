@@ -1,0 +1,142 @@
+
+获取图片如jpg, png等文件，大小，拍摄手机，拍摄时间，拍摄地点经纬度等属性详细信息：
+
+# 命令行打开一张图片命令：
+~$ display /home/gswyhq/Downloads/lADPBE1XYHSA5jHNA_nNAoA_640_1017.jpg
+
+root@f5e68b0ae170:/Downloads# apt-get install exiftool
+root@f5e68b0ae170:/Downloads# exiftool 20191202125948.jpg 
+ExifTool Version Number         : 10.10
+File Name                       : 20191202125948.jpg
+Directory                       : .
+File Size                       : 3.2 MB
+File Modification Date/Time     : 2019:12:02 05:00:00+00:00
+File Access Date/Time           : 2019:12:02 05:00:31+00:00
+File Inode Change Date/Time     : 2019:12:02 05:00:00+00:00
+File Permissions                : rw-r--r--
+File Type                       : JPEG
+File Type Extension             : jpg
+MIME Type                       : image/jpeg
+Exif Byte Order                 : Big-endian (Motorola, MM)
+Make                            : HUAWEI
+Camera Model Name               : SCL-TL00H
+Orientation                     : Horizontal (normal)
+X Resolution                    : 72
+Y Resolution                    : 72
+Resolution Unit                 : inches
+Modify Date                     : 2019:12:01 11:39:53
+Y Cb Cr Positioning             : Centered
+Exposure Time                   : 1/284
+F Number                        : 2.0
+Exposure Program                : Not Defined
+ISO                             : 100
+Exif Version                    : 0220
+Date/Time Original              : 2019:12:01 11:39:53
+Create Date                     : 2019:12:01 11:39:53
+Components Configuration        : Y, Cb, Cr, -
+Shutter Speed Value             : 1/284
+Aperture Value                  : 2.0
+Brightness Value                : 5.8
+Metering Mode                   : Average
+Flash                           : Auto, Did not fire
+Focal Length                    : 2.9 mm
+Warning                         : [minor] Unrecognized MakerNotes
+Sub Sec Time                    : 123765
+Sub Sec Time Original           : 123765
+Sub Sec Time Digitized          : 123765
+Flashpix Version                : 0100
+Color Space                     : sRGB
+Exif Image Width                : 2448
+Exif Image Height               : 3264
+Interoperability Index          : R98 - DCF basic file (sRGB)
+Interoperability Version        : 0100
+Exposure Index                  : 184
+Sensing Method                  : Unknown (0)
+Scene Type                      : Directly photographed
+Exposure Mode                   : Auto
+White Balance                   : Auto
+Focal Length In 35mm Format     : 28 mm
+Scene Capture Type              : Standard
+Gain Control                    : Low gain up
+GPS Latitude Ref                : North
+GPS Longitude Ref               : East
+GPS Altitude Ref                : Above Sea Level
+GPS Time Stamp                  : 03:39:51
+GPS Processing Method           : ASCII
+GPS Date Stamp                  : 2019:12:01
+Compression                     : JPEG (old-style)
+Thumbnail Offset                : 1078
+Thumbnail Length                : 35061
+Image Width                     : 2448
+Image Height                    : 3264
+Encoding Process                : Baseline DCT, Huffman coding
+Bits Per Sample                 : 8
+Color Components                : 3
+Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
+Aperture                        : 2.0
+GPS Altitude                    : 0 m Above Sea Level
+GPS Date/Time                   : 2019:12:01 03:39:51Z
+GPS Latitude                    : 21 deg 13' 12.47" N
+GPS Longitude                   : 108 deg 12' 14.38" E
+GPS Position                    : 21 deg 13' 12.47" N, 108 deg 12' 14.38" E
+Image Size                      : 2448x3264
+Megapixels                      : 8.0
+Scale Factor To 35 mm Equivalent: 9.6
+Shutter Speed                   : 1/284
+Create Date                     : 2019:12:01 11:39:53.123765
+Date/Time Original              : 2019:12:01 11:39:53.123765
+Modify Date                     : 2019:12:01 11:39:53.123765
+Thumbnail Image                 : (Binary data 35061 bytes, use -b option to extract)
+Circle Of Confusion             : 0.003 mm
+Field Of View                   : 65.5 deg
+Focal Length                    : 2.9 mm (35 mm equivalent: 28.0 mm)
+Hyperfocal Distance             : 1.37 m
+Light Value                     : 10.1
+
+
+root@f5e68b0ae170:/Downloads# apt-get install -y exiv2
+root@f5e68b0ae170:/Downloads# exiv2 20191202125948.jpg 
+File name       : 20191202125948.jpg
+File size       : 3385597 Bytes
+MIME type       : image/jpeg
+Image size      : 2448 x 3264
+Camera make     : HUAWEI
+Camera model    : SCL-TL00H
+Image timestamp : 2019:12:01 11:39:53
+Image number    : 
+Exposure time   : 1/284 s
+Aperture        : F2
+Exposure bias   : 
+Flash           : No, auto
+Flash bias      : 
+Focal length    : 2.9 mm (35 mm equivalent: 28.0 mm)
+Subject distance: 
+ISO speed       : 100
+Exposure mode   : Not defined
+Metering mode   : Average
+Macro mode      : 
+Image quality   : 
+Exif Resolution : 2448 x 3264
+White balance   : Auto
+Thumbnail       : image/jpeg, 35061 Bytes
+Copyright       : 
+Exif comment    : 
+
+root@f5e68b0ae170:/Downloads# apt-get install -y mediainfo
+root@f5e68b0ae170:/Downloads# mediainfo 20191202125948.jpg 
+General
+Complete name                            : 20191202125948.jpg
+Format                                   : JPEG
+File size                                : 3.23 MiB
+
+Image
+Format                                   : JPEG
+Width                                    : 2 448 pixels
+Height                                   : 3 264 pixels
+Color space                              : YUV
+Chroma subsampling                       : 4:2:0
+Bit depth                                : 8 bits
+Compression mode                         : Lossy
+Stream size                              : 3.23 MiB (100%)
+
+

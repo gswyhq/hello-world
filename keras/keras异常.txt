@@ -313,5 +313,9 @@ RuntimeWarning: Can save best model only with val_loss available, skipping.
 主要是训练时候，没有val训练数据，且又没有设置：validation_split
 解决方案：设置validation_data数据，或者设置 validation_split, 或者设置 save_best_only=False
 
+# 预测的时候，报错：
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Expected multiples[0] >= 0, but got -4
+	 [[{{node Memory-0/Tile}}]]
+可能是因为机器内存不够，这个时候，将batch_size改小即可解决。
 
 
