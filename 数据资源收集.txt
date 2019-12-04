@@ -776,4 +776,30 @@ https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v2.0.json
 Nottingham : 超过 1000 首民谣
 地址：http://abc.sourceforge.net/NMD/
 
+# 中文症状知识图谱
+包含症状实体和症状相关三元组的数据集。
+dsc.nlp-bigdatalab.org.rar 
+http://openkg.cn/dataset/symptom-in-chinese
+
+四千多个都不电影
+豆瓣电影的知识图谱，展示导演、编剧、演员与电影的关系
+dbmovies.json
+http://openkg1.oss-cn-beijing.aliyuncs.com/be21c7c4-78a4-416f-b8aa-8d4bf6d2ae0d/dbmovies.json
+
+索答菜谱本体信息
+索答50w菜谱本体信息，每个菜谱包含菜名，食材，味道，烹饪时间等属性。
+summbarecipedataowl.tar.gz
+http://openkg.cn/dataset/summba-recipe
+
+200万条商品画像数据
+使用说明： 每一行表示一条商品信息，包括字段：商品标题、商品url、价格、商品描述、品牌、对应百分点类目
+http://openkg.cn/dataset/200
+gswyhq@gswyhq-PC:~/data$ md5sum 200.zip 
+618d0be75945827928ebc6b3c8ca48b5  200.zip
+
+音乐数据
+四千多首歌曲及歌词：musicknowledgegraph.rdf; 来源：http://openkg.cn/dataset/music
+两万多首歌曲，音乐知识图谱，包括歌曲名、歌手、原唱、语种、热门歌手、热门歌曲等属性，来源：
+http://openkg1.oss-cn-beijing.aliyuncs.com/ded3c185-fb07-4dfc-8c44-7a2626ab3f09/musicknowledge.ttl
+http://openkg.cn/dataset/http-www-summba-com-ontologies-music-tdb
 
