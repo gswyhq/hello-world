@@ -100,7 +100,7 @@ merge (m:Changjing { name:"在本合同保险期间内，且本合同有效的�
 Neo.DatabaseError.General.UnknownError: Property value bytes length: 5426 is longer than 4095, which is maximum supported length of indexed property value.
 
 但若不创建索引，或者删除索引
-durp INDEX ON :Changjing(name)
+DROP INDEX ON :Changjing(name)
 则能正常运行；
 
 删除数据（MATCH (n:Changjing) delete n），删除索引（drop INDEX ON :Changjing(name)），创建索引（CREATE INDEX ON :Changjing(name)），再执行merge则会引发该异常；

@@ -63,3 +63,7 @@ MATCH (:RateableEntity)<-[:TAG]-(p:HashTag)
 RETURN p.tag As Tag, COUNT(p) as Count, [(p)-[:TAG]->(m) | m.id][..3] AS 
 RateableEntities ORDER BY Count DESC LIMIT 3
 
+MATCH p=(n0)-[r]->(n9)
+where n9.name="恶性肿瘤"
+with DISTINCT r, STARTNODE(r) as n, ENDNODE(r) as m
+RETURN n.name as source, id(n) as source_id, labels(n) as source_type, m.name as target, id(m) as target_id, labels(m) as target_type, type(r) as label, id(r) as label_id

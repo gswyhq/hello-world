@@ -1,0 +1,12 @@
+
+alpine 系统默认是没有/bin/bash命令的，需要安装：
+apk add bash
+
+设置bash 的显示，显示用户名及绝对路径
+bash-5.0# vim ~/.bash_profile
+export PS1='\u@\h:\w\a$ '
+bash-5.0# source ~/.bash_profile
+root@ba09025a45f3:/usr/bin$ head ~/.bash_profile
+export PS1='\u@\h:\w\a$ '
+
+

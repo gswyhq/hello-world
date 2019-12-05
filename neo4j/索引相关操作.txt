@@ -116,7 +116,7 @@ CALL apoc.index.between(f,'DESTINATION',a,'taxi_time:7') YIELD rel, weight
 RETURN *
 
 为了使用全文搜索功能，我们必须首先通过指定我们想要索引的所有属性来索引我们的数据。在这里，我们创建了一个名为“locations”的全文索引（我们将在索引中搜索时使用该名称）和我们的数据：
-CALL apoc.index.addAllNodes('locations',{
+CALL apoc.index.addAllNodes('locations', {
   Company: ["name", "description"],
   Person:  ["name","address"],
   Address: ["address"]})

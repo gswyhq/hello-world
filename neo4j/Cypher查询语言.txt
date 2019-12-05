@@ -567,6 +567,10 @@ where  n0.name = "保险产品" and n9.name="恶性肿瘤"
 WITH extract(rel in relationships(p) | [STARTNODE(rel).name, type(rel), endnode(rel).name]) as relationshipLabels
 RETURN distinct relationshipLabels
 
+MATCH p=(n0)-->(n9)
+where n9.name="恶性肿瘤"
+WITH extract(rel in relationships( p) | {a: STARTNODE(rel).name, b: type(rel), c:endnode(rel).name}) as abc
+unwind  abc as k return distinct k
 
 设置属性(Setting properties)
 节点和关系是重要的，但是Neo4j在节点和关系上使用属性，也可以用于稠密图模型(Neo4j uses properties on both of these to allow for far denser graphs models)

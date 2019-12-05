@@ -141,6 +141,11 @@ WITH a, min(numCit) as minCitations
 RETURN a.authorName as authorName, minCitations
 ORDER BY a.authorName
 
+call apoc.index.nodes('Tongyonggraph','name:天龙八部') YIELD node
+with node as n
+match (n)-[r:`主演`]->(m)
+return n, m
+
 # 返回作者的最小引用次数及每篇论文的标题及引用次数：
 MATCH (p:Paper)-[:`第一作者`]->(a:Author)
 WITH a, p, size((p)-[:`被引用`]->()) as numCit
