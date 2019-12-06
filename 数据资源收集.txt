@@ -644,6 +644,9 @@ https://github.com/eguilg/nl2sql.git
 XLNet-mid：24-layer, 768-hidden, 12-heads, 209M parameters
 chinese_xlnet_mid_L-24_H-768_A-12.zip (741M) 
 https://drive.google.com/open?id=1342uBc7ZmQwV6Hm6eUIN_OnBSz1LcvfA
+XLNet-base：12-layer, 768-hidden, 12-heads, 117M parameters
+chinese_xlnet_base_L-12_H-768_A-12.zip
+https://drive.google.com/open?id=1m9t-a4gKimbkP5rqGXXsEAEPhJSZ8tvx
 https://github.com/ymcui/Chinese-PreTrained-XLNet
 
 人脸识别数据 widerface

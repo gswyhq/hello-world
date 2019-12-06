@@ -1,0 +1,254 @@
+
+一个 query 查询多个字段，比如一个 doc 有 title、content、pagetag 等文本字段，要在这些字段查询含多个 term 的 query，就要对它们的相关度评分做合理的合并。这被称为多词（multiword）、多字段（multifield）查询。
+
+如果一个 query 可以结构化，如哪些词是 title，哪些词是 author，那么就可以直接在相关字段中查询，使用 bool 查询即可解决问题，bool 查询是“匹配越多越好”，如搜“War and Peace Leo Tolstoy”，查询语句如下：
+
+query 可以结构化（能区分清楚，query的哪些子串是要查询哪些字段）, 多字段搜索示例：
+比如，要查哪些人的国籍是中国（其中query_question字段是由主体及其属性组成的字段）
+示例1：
+GET /_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "query_question": "国籍"
+          }
+        },
+        {
+          "match": {
+            "object": "中国"
+          }
+        }
+      ]
+    }
+  }
+}
+
+但更多时候，我们是不能结构化，也即是不能区分清楚query的子串分别要在哪个字段进行查找（如，query=国籍是中国、中国国籍）；
+一个 query 在多个字段中的查询，有三种策略：best_fields、most_fields、cross_fields。
+
+方法1： bool 查询
+一个 query 在多个字段中的查询，同样可使用 bool 查询。
+示例2：
+GET /_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "query_question": "国籍中国"
+          }
+        },
+        {
+          "match": {
+            "object": "国籍中国"
+          }
+        }
+      ]
+    }
+  }
+}
+不过由于 bool 查询评分公式的问题，效果不太好，比如一个文档 `query_question` 和 `object` 都包含 `国籍`，不包含 `中国`，
+另一个文档在 `query_question` 字段包含了 `国籍` 和 `object` 包含 `中国`，显然后者更符合搜索意图，但 bool 查询的评分前者高，为了理解导致这样的原因，需要看下 bool 查询是如何计算评分的：
+    它会执行 should 语句中的两个查询。
+    加和两个查询的评分。
+    乘以匹配字段的总数（这里不知是否理解正确，存疑，待验证）。
+    除以所有语句总数（这里为：2）。
+    注意这里的“乘以匹配语句的总数”是关键，这会导致匹配字段越多，分值越大。（后面的 most_fields 也是使用这个计算，才使得匹配字段数越多，分值越大）
+    解决方案是，使用最佳匹配字段的分值作为整个查询的整体分值，让包含 query 两个单词的字段有更高的权重，而不是在不同的字段中重复出现的相同单词。dis_max 查询应运而生。
+
+方法2： dis_max
+dis_max 查询就是返回匹配了 query 的文档，分值是最佳匹配字段产生的分值。加上 tie_breaker 可得出很好的搜索效果。
+示例3：
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "query_question": "国籍中国"
+          }
+        },
+        {
+          "match": {
+            "object": "国籍中国"
+          }
+        }
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+方法3： best_fields
+
+multi_match 查询提供了一个简便的方法对多个字段执行相同的查询。默认情况下，该查询以 best_fields 类型执行，它会为每个字段生成一个 match 查询，然后将这些查询包含在一个 dis_max 查询中。
+
+示例4：
+GET /_search
+{
+  "query": {
+    "multi_match": {
+      "query": "国籍中国",
+      "type": "best_fields",
+      "fields": [
+        "query_question",
+        "object"
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+执行时就变成了`示例3`的查询语句，并且查询结果也与`示例3`的完全一致；
+
+可通过 caret 语法(^) 对个别字段加权，如：
+示例5：
+{
+  "query": {
+    "multi_match": {
+      "query": "国籍中国",
+      "type": "best_fields",
+      "fields": [
+        "query_question",
+        "object^2"
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+best_fields 和 most_fields 都是以字段为中心的查询，参数 operator 和 minimum_should_match 也是针对每个字段生效的，至少有一个字段满足要求，才会通过筛选并进入下一步计分，计分时也只有符合要求的字段才会参与计分。
+
+operator 默认为 or，如果设置为 and，那么字段必须匹配所有 query 分词。当 operator 设为默认值 or 时，minimum_should_match 才会生效，设置每个字段应匹配分词数。
+
+所以有些 query 信息是分布在多个字段上的，这时就不适合设置 operator 为 and，会减少召回量。如果确认 query 信息一定完全在某个字段上，则可设为 and。
+
+为与 cross_fields 做对比，这里举个实际应用的例子。
+
+搜索词为“国籍中国”，搜索2个字段：query_question、object。
+看下 best_fields 查询的实际执行。
+示例6：
+curl -XGET ip:port/_index/_search?explain -d '
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "multi_match": {
+                "query": "国籍中国",
+                "fields": [
+                  "query_question^1.0",
+                  "object^1.0"
+                ],
+                "type": "best_fields",
+                "operator": "AND",
+                "tie_breaker": 0.3
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+'
+
+明显的以字段为中心的查询。
+
+tips：字段名可以通过通配符指定，如：
+
+{
+    "multi_match": {
+        "query":  "Quick brown fox",
+        "fields": "*_title"
+    }
+}
+
+方法4： most_fields 查询
+有时为了尽可能多地匹配文档，会将同一文本的不同形式索引到多个字段。
+ES语句（注意不要加 operator 或 minimum_should_match，不然就跟 best_fields 一样了）：
+示例7：
+curl -XGET ip:port/_index/_search?explain -d '
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "multi_match": {
+                "query": "国籍中国",
+                "fields": [
+                  "query_question^1.0",
+                  "object^1.0"
+                ],
+                "type": "most_fields"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+'
+
+根据文档，most_fields 查询是用 bool 查询将两个字段语句包在里面，而不是像 best_fields 一样用 dis_max。
+通过查询结果可以看到，`示例7`与`示例2`的查询结果是完全一致的。
+
+方法5. cross_fields 查询
+cross_fields 使用词中心式（term-centric）的查询方式，这与 best_fields 和 most_fields 使用字段中心式（field-centric）的查询方式非常不同，它将所有字段当成一个大字段，并在 每个字段 中查找 每个词 。
+cross_fields 类型首先分析查询字符串并生成一个词列表，然后它从所有字段中依次搜索每个词。
+同时在 多个个字段中查找 词 的 IDF ，然后用最小值作为多字段的 IDF 。
+示例8：
+curl -XGET ip:port/_index/_search?explain -d '
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "multi_match": {
+                "query": "国籍中国",
+                "fields": [
+                  "query_question^1.0",
+                  "object^1.0"
+                ],
+                "type": "cross_fields",
+                "operator": "AND",
+                "tie_breaker": 0.3
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+'
+
+示例9：
+curl -XGET ip:port/_index/_search?explain -d '
+{
+  "query": {
+    "multi_match": {
+      "query": "国籍中国",
+      "type": "cross_fields",
+      "operator": "and",
+      "fields": [
+        "query_question",
+        "object"
+      ]
+    }
+  }
+}
+'
+
+

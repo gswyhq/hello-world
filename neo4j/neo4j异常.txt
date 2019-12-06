@@ -142,3 +142,16 @@ No constraints
 root@4308c47c02da:/var/lib/neo4j# tail -f logs/debug.log 
 java.lang.IllegalArgumentException: Index key-value size it to large. Please see index documentation for limitations
 
+这个时候可以通过类似下面的索引查询：
+call apoc.index.nodes('Tongyonggraph','name:"北京"') YIELD node
+with node as n
+match (n)-[r]-(m)
+with DISTINCT r, STARTNODE(r) as n, ENDNODE(r) as m
+RETURN n.name as source, id(n) as source_id, labels(n) as source_type, m.name as target, id(m) as target_id, labels(m) as target_type, type(r) as label, id(r) as label_id
+limit 10
+注意：这里查找，结果`I LOVE U 北京`，也会被查询到，但是`我爱北京`不会被查询到；
+这里的`"北京"`，若替换成了`北京*`, 则可实现正则匹配查询，但速度会变慢，若替换成`"北京*"`, 则会匹配"北京*"
+
+也可以组成查询，如：
+CALL apoc.index.nodes('Tongyonggraph','name:姚明 OR name:叶莉')YIELD node
+
