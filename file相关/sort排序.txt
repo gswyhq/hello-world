@@ -8,3 +8,9 @@ gswyhq@gswyhq-PC:~/test$ ls -al |sort +5 # 对第六列进行排序，增序排�
 gswyhq@gswyhq-PC:~/test$ ls -al |sort +5 +6 +7
 gswyhq@gswyhq-PC:~/test$ ls -al |sort -r +5 +6 +7  # 逆序排列
 
+按字符串长度升序排序：
+less abc.txt|sort -n
+
+按字符串长度降序排序：
+less abc.txt|sort -nr
+

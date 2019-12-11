@@ -13,6 +13,7 @@ Status: Downloaded newer image for frnkenstien/corenlp:latest
 
 第二步：下载模型
 下载中文模型（version 3.9.1）： http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-02-27-models.jar
+下载中文模型（version 3.9.2）： https://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-10-05-models.jar
 gswyhq@gswyhq-PC:~/stanford_corenlp$ ls
 readme.txt  stanford-chinese-corenlp-2018-02-27-models.jar
 
@@ -64,3 +65,20 @@ https://blog.csdn.net/thriving_fcl/article/details/76595253?locationNum=10&fps=1
 CoreNLP官方也有提供封装好的Python接口：https://github.com/stanfordnlp/python-stanford-corenlp
 其他模型下载地址： https://stanfordnlp.github.io/CoreNLP/download.html
 https://github.com/stanfordnlp/CoreNLP
+
+也可以通过如下方式安装：
+In [1]: import stanfordnlp
+
+In [2]: stanfordnlp.download('en')
+Using the default treebank "en_ewt" for language "en".
+Would you like to download the models for: en_ewt now? (Y/n)
+y
+
+Default download directory: /home/gswyhq/stanfordnlp_resources
+Hit enter to continue or type an alternate directory.
+
+
+Downloading models for: en_ewt
+Download location: /home/gswyhq/stanfordnlp_resources/en_ewt_models.zip
+
+#from http://nlp.stanford.edu/software/stanfordnlp_models/latest/en_ewt_models.zip

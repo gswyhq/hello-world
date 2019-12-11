@@ -28,3 +28,10 @@ TypeError: invalid file: PosixPath('/home/gswyhq/data/Fashion-Mnist/train-images
 将 with open(DATA_PATH / "train-images-idx3-ubyte", 'rb') as file_object:
 改为： with open(str(DATA_PATH / "train-images-idx3-ubyte"), 'rb') as file_object: 
 
+
+错误：python, print, f开头的字符串，语法错误；
+    print(f'Logging Info - Reading item2entity file: {file_path}' )                                                                ^
+SyntaxError: invalid syntax
+原因，python 版本不对
+Python 3.6版本以后允许在字符串前置f的形式代替 .format语句
+

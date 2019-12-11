@@ -806,3 +806,17 @@ gswyhq@gswyhq-PC:~/data$ md5sum 200.zip
 http://openkg1.oss-cn-beijing.aliyuncs.com/ded3c185-fb07-4dfc-8c44-7a2626ab3f09/musicknowledge.ttl
 http://openkg.cn/dataset/http-www-summba-com-ontologies-music-tdb
 
+MovieLen 1M数据及简介
+MovieLens 1M数据集包含包含6000个用户在近4000部电影上的100万条评分，也包括电影元数据信息和用户属性信息。下载地址为：
+http://files.grouplens.org/datasets/movielens/ml-1m.zip
+或者：
+wget -c -t 0 https://dgl.ai.s3.us-east-2.amazonaws.com/dataset/ml-1m.tar.gz --no-check-certificate
+数据集分为三个文件：电影元数据信息（movie.data）、用户属性信息（users.data)和用户评分数据（ratings.dat)。
+$ tar -zxvf ml-1m.tar.gz 
+ml-1m/
+ml-1m/README
+ml-1m/users.dat
+ml-1m/movies.dat
+ml-1m/ratings.dat
+$ wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-20m.zip
+
