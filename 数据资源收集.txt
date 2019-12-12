@@ -284,6 +284,7 @@ dmsc
 movies.csv ratings.zip
  28 部电影，超 70 万 用户，超 200 万条 评分/评论 数据
 https://pan.baidu.com/s/1c0yn3TlkzHYTdEBz3T5arA#list/path=%2F
+原始数据集：Douban Movie Short Comments Dataset V2  大小：DMSC.csv 387 MB ；https://www.kaggle.com/utmhikari/doubanmovieshortcomments#DMSC.csv
 
 yf_dianping
 ratings.zip links.csv restaurants.csv
@@ -299,7 +300,13 @@ https://github.com/hltcoe/golden-horse
 
 ez_douban
 5 万多部电影（3 万多有电影名称，2 万多没有电影名称），2.8 万 用户，280 万条评分数据
-https://pan.baidu.com/s/1DkN1LmdSMzm_jCBKhbPbig
+1.1M	links.csv
+948K	movies.csv
+17M	ratings.zip
+8.0K	使用说明.txt
+ratings.zip 解压后，会得到文件：62M	ratings.csv
+下载地址：https://pan.baidu.com/s/1DkN1LmdSMzm_jCBKhbPbig
+数据说明：https://github.com/SophonPlus/ChineseNlpCorpus/blob/master/datasets/ez_douban/intro.ipynb
 
 ACL2019-DuConv
 数据下载地址：
@@ -784,7 +791,7 @@ Nottingham : 超过 1000 首民谣
 dsc.nlp-bigdatalab.org.rar 
 http://openkg.cn/dataset/symptom-in-chinese
 
-四千多个都不电影
+四千多部电影
 豆瓣电影的知识图谱，展示导演、编剧、演员与电影的关系
 dbmovies.json
 http://openkg1.oss-cn-beijing.aliyuncs.com/be21c7c4-78a4-416f-b8aa-8d4bf6d2ae0d/dbmovies.json
@@ -819,4 +826,30 @@ ml-1m/users.dat
 ml-1m/movies.dat
 ml-1m/ratings.dat
 $ wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-20m.zip
+
+电影数据集 Moviedata-10M
+moviedata-10m.tar.gz
+数据集包含如下文件：
+gswyhq@gswyhq-PC:~/data/moviedata-10m$ ls |xargs -i md5sum {}
+dcd5e4753b8c8610f9cfd8163ae4e28a  comments.csv
+937fc28e93da49989b6d0ec6a70a9dcd  movies.csv
+e499b499fc3bbd89ff6c64d110fd66b7  person.csv
+c3597594060c46eef57e37cdc473b537  ratings.csv
+94af28a4700aa447d7d117df580e28f7  README.md
+18993f170d30faead920c879b3a6de13  users.csv
+74f86fd42ca2544e90f6f578ed5416e5  wx.png
+下载链接：https://pan.baidu.com/s/1YdCTPOcnowJuP5XZrjOiVA
+密码获取方式如下(不定期更换):
+微信搜索【斗码小院】公众号并点击关注;
+后台回复【电影数据集】获取密码.
+
+情感分析数据集：
+链接:https://pan.baidu.com/s/1WD2-gDU_96LiDuobsE2i-Q ；密码获取方式如下(不定期更换); 微信搜索【斗码小院】公众号并点击关注; 后台回复【电影数据集】获取密码
+本数据集包括两个文件：
+comment_trainset_2class.csv 45.6M
+comment_testset_2class.csv 5.2M
+
+50w中文闲聊语料 https://github.com/yangjianxin1/GPT2-chitchat
+百度网盘【提取码:jk8d】https://pan.baidu.com/s/1mkP59GyF9CZ8_r1F864GEQ 
+由作者GaoQ1(https://github.com/GaoQ1)提供的比较高质量的闲聊数据集，整理出了50w个多轮对话的语料
 
