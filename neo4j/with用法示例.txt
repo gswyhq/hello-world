@@ -159,5 +159,31 @@ CALL db.relationshipTypes() YIELD relationshipType as type
 CALL apoc.cypher.run('MATCH ()-[:`'+type+'`]->() RETURN count(*) as count',{}) YIELD value
 RETURN type, value.count
 
+通过管道操作符进行过滤操作：
+match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x ) as s return s limit 2;
+╒═══════════════════════════════════╕
+│"s"                                │
+╞═══════════════════════════════════╡
+│null                               │
+├───────────────────────────────────┤
+│[{"name":"糊糊酸"},{},{"name":"延胡索酸"}]│
+└───────────────────────────────────┘
 
+match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x is null ) as s return s limit 2;
+╒═════╕
+│"s"  │
+╞═════╡
+│true │
+├─────┤
+│false│
+└─────┘
+
+match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND [x IN [q, p1, p2] where not x is null | x ] as s return s limit 2;
+╒═══════════════════════════════════╕
+│"s"                                │
+╞═══════════════════════════════════╡
+│[{"name":"糊糊酸"},{},{"name":"延胡索酸"}]│
+├───────────────────────────────────┤
+│[{"name":"柠檬酸"},{},{"name":"顺乌头酸"}]│
+└───────────────────────────────────┘
 

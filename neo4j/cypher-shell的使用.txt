@@ -168,5 +168,9 @@ neo4j-sh (?)$ match (m:Movie) return m limit 2;
  (me)-[:LIKES,0]->(Jon,0)
  (me)<-[:KNOWS,1]-(Bob,2)
 
+# 将cypher查询结果，通过命令行方式导出到csv文件：
+bash-4.4# ./bin/cypher-shell -u neo4j -p my_password "MATCH (n:Movie) -[r]-> (m) return id(n), type(r), id(m), n.id, n.name ;" > neo4j_export.csv
+
+
 更多示例见：http://neo4j.com/docs/2.3.11/shell-matrix-example.html
 
