@@ -1,0 +1,3 @@
+按行合并文件：
+paste -d " " file1 file2 > result-file
+

@@ -40,3 +40,28 @@ $ head ratings.csv |awk 'BEGIN{FS=","}''{print $3}'
 # 注意，两个单引号之间是没有空格的；或者改成：
 $ head ratings.csv |awk 'BEGIN{FS=","}{print $3}'
 
+多分隔符：
+head io.log | awk -F "aaa|bbb" '{print $2}'
+
+# awk时间函数：
+# systime函数返回当前时间戳
+gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{print systime()}'
+1576475261
+gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{now=systime();print now}'
+1576475186
+# strftime函数，可以对时间戳进行格式化，格式化形式可以为%Y-%m-%d等（可见下表），如果函数有传参时间戳，则相应进行时间戳的格式转化，如果函数当中没有传参，则默认使用当前时间戳进行格式转化
+strftime函数使用格式如下：
+strftime([format],[ timestamp])
+gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{tmp=strftime("%Y-%m-%d %H:%M:%S",1576474706);print tmp}'
+2019-12-16 13:38:26
+# mktime函数创建指定时间，转化为时间戳
+mktime函数用法如下：
+mktime(YYYY" "MM" "DD" "HH" "MM" "SS)
+注意必须使用空格分割
+其中YYYY为年 MM为月 DD为日 HH为小时 MM是分 SS为秒，如2018" "09" "20" "20" "22" "30
+gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{print mktime(2018" "09" "20" "20" "22" "30)}'
+1537446150
+
+
+
+
