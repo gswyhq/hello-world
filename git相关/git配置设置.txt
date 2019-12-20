@@ -113,4 +113,6 @@ git config --global core.whitespace cr-at-eol
 
 github 修改密码方法：
 Settings -> Security -> Change password
+更新本地密码方法：
+gswyhq@gswyhq-PC:~/hello-world$ git config --unset user.password
 

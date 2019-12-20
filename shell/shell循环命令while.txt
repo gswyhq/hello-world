@@ -1,0 +1,4 @@
+
+# 每隔一秒钟查看下系统的内存：
+~$ while true; do free -h ; sleep 1; done ;
+
