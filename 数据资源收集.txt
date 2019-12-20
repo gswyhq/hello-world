@@ -487,7 +487,7 @@ MSRA微软亚洲研究院数据集。
 https://github.com/InsaneLife/ChineseNLPCorpus/tree/master/NER/MSRA
 https://github.com/Determined22/zh-NER-TF/blob/master/data_path/train_data
 
-中文完形填空数据集
+中文完形填空, 阅读理解数据集
 https://github.com/ymcui/Chinese-RC-Dataset
 
 英汉互译语料
@@ -688,6 +688,7 @@ SQuAD样式的数据(SQuAD-style Data)
 (https://worksheets.codalab.org/bundles/0x182c2e71fac94fc2a45cc1a3376879f7) | cmrc2018_trial.json | 781k 
 (https://worksheets.codalab.org/bundles/0x15022f0c4d3944a599ab27256686b9ac) | cmrc2018_train.json | 7.1m
 (https://worksheets.codalab.org/bundles/0x72252619f67b4346a85e122049c3eabd) | cmrc2018_dev.json  | 3.1m
+或者：https://github.com/ymcui/cmrc2018.git
 
 pytorch版本，预训练的bert模型
 Tokenizer需要的是词表: https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt
@@ -852,4 +853,24 @@ comment_testset_2class.csv 5.2M
 50w中文闲聊语料 https://github.com/yangjianxin1/GPT2-chitchat
 百度网盘【提取码:jk8d】https://pan.baidu.com/s/1mkP59GyF9CZ8_r1F864GEQ 
 由作者GaoQ1(https://github.com/GaoQ1)提供的比较高质量的闲聊数据集，整理出了50w个多轮对话的语料
+
+中文多项选择题数据集：
+https://github.com/nlpdata/c3
+收集的主要是形式自由的多项选择题，阅读材料来自汉语水平考试和民族汉语考试，包括试卷和练习。
+一共有13369篇文章和19577个问题，其中的60%用是训练集，20%是开发集，20%是测试集。
+数据集从类型上分为两个部分：正式书面文本(M)和口语化文本(D)
+
+百度知道问答数据
+https://github.com/liuhuanyong/MiningZhiDaoQACorpus
+zhidao_qa.json.zip 1.54G
+其中: 1, 问题个数583万个。
+2, 问答对983万个。
+3, 每个问题的答案个数1.7个。
+4, 问题标签个数5824个。
+网盘地址为链接:https://pan.baidu.com/s/1Eesx24tAbfJ3Mch-6OeGrA 密码:oin3
+
+一些词库：
+https://github.com/fighting41love/funNLP.git
+IT词库    财经词库  成语词库  动物词库  繁简体转换词库  古诗词库      敏感词库            诗词短句词库  停用词                        医学词库  中文分词词库整理  中文谣言数据
+NLP_BOOK  拆字词库  地名词库  法律词库  公司名字词库    历史名人词库  汽车品牌、零件词库  食物词库      同义词库、反义词库、否定词库  职业词库  中文缩写库        中英日文名字库
 

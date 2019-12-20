@@ -1,0 +1,20 @@
+
+# logging.info信息不输出到终端屏幕
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.info("123456")
+终端上面不显示logger.info的信息
+解决方案：
+在import logging 之前插入：
+try:
+    # pip3 install -U absl-py==0.7.1 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+    # absl 0.9.0版本，貌似没有这样的效果；
+    import absl.logging
+    absl.logging.set_verbosity('info')
+    absl.logging.set_stderrthreshold('info')
+    absl.logging._warn_preinit_stderr = False
+except:
+    pass
+即可使logging.info的信息显示到终端上面了；
+

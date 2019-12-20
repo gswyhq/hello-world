@@ -73,3 +73,24 @@ CALL apoc.periodic.iterate占用空间不是命令了，而是我们要删除的
 而apoc.periodic.commit所需要的查询语句必须带有LIMIT子句，同时还需要包含一个RETURN子句，只要有返回结果，他就会持续迭代下去。
 neo4j> CALL apoc.periodic.commit('MATCH (n) WITH n LIMIT $limit DELETE n RETURN count(*)', {limit: 10000} )
 
+批量删除关系：
+neo4j> CALL apoc.periodic.commit('MATCH (n:Baoxian)-[r]-(m) WITH n, r, m LIMIT $limit DELETE r RETURN count(*)', {limit: 10000});
++------------------------------------------------------------------------------------------------------------------------+
+| updates  | executions | runtime | batches | failedBatches | batchErrors | failedCommits | commitErrors | wasTerminated |
++------------------------------------------------------------------------------------------------------------------------+
+| 22167056 | 2217       | 8846    | 2218    | 0             |             | 0             |              | FALSE         |
++------------------------------------------------------------------------------------------------------------------------+
+
+1 row available after 8846101 ms, consumed after another 0 ms
+
+批量删除节点：
+neo4j> CALL apoc.periodic.commit('MATCH (n:Baoxian) WITH n LIMIT $limit DELETE n RETURN count(*)', {limit: 10000});
++------------------------------------------------------------------------------------------------------------------------+
+| updates  | executions | runtime | batches | failedBatches | batchErrors | failedCommits | commitErrors | wasTerminated |
++------------------------------------------------------------------------------------------------------------------------+
+| 22240165 | 2225       | 800     | 2226    | 0             |             | 0             |              | FALSE         |
++------------------------------------------------------------------------------------------------------------------------+
+
+1 row available after 800171 ms, consumed after another 0 ms
+
+

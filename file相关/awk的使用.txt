@@ -14,6 +14,9 @@ awk '{print $1 $2}' filename
 4、打印最后一列：
 gswyhq@gswyhq-PC:~/yhb$ ls -al|awk '{print $NF}'
 
+5、输出倒数第二列：
+~$ head train.csv |awk '{print $(NF-1)}'
+
 # 查找某个程序的进程，再批量kill掉：
 gswyhq@gswyhq-PC:~/yhb$ ps -aux|grep draw|awk '{print $2}'|xargs kill
 

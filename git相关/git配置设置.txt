@@ -2,6 +2,12 @@ git config --global log.date iso8601
 git config --global core.quotepath false
 git config --global credential.helper store
 
+git config --global credential.helper store
+使用这个会在当前用户根目录下创建一个.git-credentials的文件用于明文保存用户名密码及相关链接
+
+也可以使用下面的命令，将密码保存在内存中，默认的是保存时间timeout=900(15分钟)
+git config --global credential.helper cache --timeout 3600
+
 git config是用于进行一些配置设置，有三种不同的方式来指定这些配置适用的范围：
 1) git config   针对一个git仓库
 2) git config --global    针对一个用户
@@ -104,4 +110,7 @@ Your identification has been saved with the new passphrase.
 
 git diff ^M的消除,让git diff的时候忽略换行符的差异：
 git config --global core.whitespace cr-at-eol
+
+github 修改密码方法：
+Settings -> Security -> Change password
 

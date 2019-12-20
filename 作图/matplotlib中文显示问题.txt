@@ -63,6 +63,18 @@ plt.plot(z, gauss, label='高斯分布（正态分布）')
 plt.plot(z, cauchy, label='柯西分布')
 plt.legend(prop=matplotlib.font_manager.FontProperties(fname='/usr/share/fonts/deepin-font-install/STKaiti/STKAITI.TTF'))
 
+矩形图：
+
+x=['None', '导演', '国籍', '祖籍', '主持人', '出生地', '所在城市', '所属专辑', '连载网站', '出品公司', '毕业院校']
+height=[4.1607476e-05, 0.1968035, 0.0008424314, 0.002847272, 0.7719255, 0.0005891507, 0.0050658253, 0.0041004117, 0.01721394, 0.00051249505, 5.7812886e-05]
+plt.bar(x, height)
+for x, y in zip(x, height):
+    plt.text(x, y, '%.2f' % y, ha="center", va="bottom", fontproperties="STKAITI")
+plt.xlabel('关系', fontproperties="STKAITI")
+plt.ylabel('置信度', fontproperties="STKAITI")
+plt.xticks(rotation=315, fontproperties="STKAITI")
+plt.show()
+
 
 一些中文字体的英文名：
 宋体     SimSun

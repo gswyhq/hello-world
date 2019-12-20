@@ -1,0 +1,46 @@
+t3 = np.array([[49, np.array([0., 0., 1.], dtype=np.float32)],
+       [64, np.array([0., 0., 1.], dtype=np.float32)],
+       [40, np.array([0., 1., 0.], dtype=np.float32)]], dtype=np.object)
+
+x13 = t3[:, 1:2]
+x23 = np.array([t for t in t3[:, 1]], dtype=np.object)
+x13
+Out[128]:
+array([[array([0., 0., 1.], dtype=float32)],
+       [array([0., 0., 1.], dtype=float32)],
+       [array([0., 1., 0.], dtype=float32)]], dtype=object)
+x23
+Out[134]:
+array([[0.0, 0.0, 1.0],
+       [0.0, 0.0, 1.0],
+       [0.0, 1.0, 0.0]], dtype=object)
+x13.shape
+Out[135]: (3, 1)
+x23.shape
+Out[136]: (3, 3)
+
+将上面的(3,3)转换为(3,1)维数组：
+x232 = zeros((x23.shape[0], 1), dtype=np.object)
+for i, x in enumerate(x23):
+    x232[i][0] = x
+
+x232.shape
+Out[192]: (3, 1)
+x232
+Out[193]:
+array([[array([0.0, 0.0, 1.0], dtype=object)],
+       [array([0.0, 0.0, 1.0], dtype=object)],
+       [array([0.0, 1.0, 0.0], dtype=object)]], dtype=object)
+
+z= zeros((2, 1), dtype=np.object)
+z[0][0] = np.array([1,2,3], np.float32)
+z[1][0] = np.array([4,5,6], np.float32)
+z
+Out[182]:
+array([[array([1., 2., 3.], dtype=float32)],
+       [array([4., 5., 6.], dtype=float32)]], dtype=object)
+z.shape
+Out[183]: (2, 1)
+
+
+
