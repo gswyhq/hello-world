@@ -828,6 +828,12 @@ ml-1m/movies.dat
 ml-1m/ratings.dat
 $ wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-20m.zip
 
+电影数据集：ml-100k.zip
+wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-100k.zip .
+
+电影数据集：ml-latest-small.zip
+http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
+
 电影数据集 Moviedata-10M
 moviedata-10m.tar.gz
 数据集包含如下文件：
