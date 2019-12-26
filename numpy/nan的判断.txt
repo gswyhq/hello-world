@@ -1,0 +1,12 @@
+
+from math import isnan
+
+isnan(np.float64('nan')) # True，输入参数不能是字符串
+
+np.isnan(np.float64('nan')) # True, 输入参数不能是字符串
+
+np.float64('nan') is np.nan # False
+
+
+
+

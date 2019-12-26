@@ -92,3 +92,8 @@ Out[11]:
 有的服务器不能locale不能设置成功,需要安装语言包:
 sudo apt-get install language-pack-zh*
 
+# 去重，并保有原有的顺序不变
+recommend_question =[7,5, 5,4, 3, 2, 7,5]
+uniq_recommend_question = list(set(recommend_question))
+uniq_recommend_question.sort(key=recommend_question.index)
+

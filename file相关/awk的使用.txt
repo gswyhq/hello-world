@@ -65,6 +65,8 @@ mktime(YYYY" "MM" "DD" "HH" "MM" "SS)
 gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{print mktime(2018" "09" "20" "20" "22" "30)}'
 1537446150
 
+# 按字段的值进行筛选, 示例：筛选第二个字段的内容为Stock的行：
+$ less table_schema.csv |awk -F "," '($2=="Stock"){print}'
 
 
 

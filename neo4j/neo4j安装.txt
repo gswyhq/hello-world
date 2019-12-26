@@ -221,3 +221,10 @@ Starting Neo4j Server...HA instance started in process [2690]. Will be operation
 
 ##Web UI上观看高可用集群状态
 http://10.10.10.8:7474/webadmin/#/info/org.neo4j/High%20Availability/
+
+neo4j browser web端显示问题：
+browser 包括灰色在内，共有7种演示Color；五种大小 Size; Caption:因不同节点的属性不同而不同，但一般都有<id>
+设置节点颜色，或显示属性字段：
+点击某种类型的节点，如Company -> 点击左上方的 Company(84), 括号内84，表示当前实体类型为Company的有84个；-> 点击下方的Color即可设置颜色；若点击 Caption, 则可以选择需要显示属性字段。若太多属性时，可能需要点击右侧的小三角符合来显示全部。
+
+

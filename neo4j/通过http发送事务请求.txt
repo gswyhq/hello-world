@@ -32,6 +32,55 @@ curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H 
   } ]
 }'
 
+# 一次提交多个请求2：
+curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
+{
+  "statements" : [
+  {
+      "statement" : "CREATE (n:Person1 { name: \"this property is to be deleted\" } ) SET n = { props } RETURN n",
+      "parameters" : {
+        "props" : {
+          "position" : "Developer",
+          "firstName" : "Michael",
+          "awesome" : true,
+          "children" : 3
+        }
+      }
+  },
+  {
+      "statement" : "UNWIND {props} AS properties CREATE (n:Person2) SET n = properties RETURN n",
+      "parameters" : {
+        "props" : [ {
+          "name" : "Andres",
+          "position" : "Developer"
+        }, {
+          "name" : "Michael",
+          "position" : "Developer"
+        } ]
+      }
+    },
+    {
+          "statement" : "UNWIND {props} AS properties CREATE (n:Person3) SET n = properties.property RETURN n",
+          "parameters" : {
+            "props" : [
+                {
+                    "property": {
+                        "name" : "Andres",
+                        "position" : "Developer"
+                    }
+                },
+                {
+                    "property": {
+                      "name" : "Michael",
+                      "position" : "Developer"
+                      }
+                }
+            ]
+          }
+        }
+  ]
+}'
+
 # 以图表格式返回结果
 # 如果要了解查询返回的节点和关系的图形结构，可以指定“图形”结果数据格式。 例如，当您想要可视化图形结构时，这非常有用。 格式整理结果的所有列中的所有节点和关系，并且还展平节点和关系的集合，包括路径。
 curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '{

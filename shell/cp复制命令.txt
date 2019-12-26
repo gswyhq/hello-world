@@ -1,0 +1,52 @@
+
+# linux下cp目录时排除一个或者多个目录
+说明：/home目录里面有data目录，data目录里面有a、b、c、d、e五个目录，现在要把data目录里面除过e目录之外的所有目录拷贝到/bak目录中
+
+方法一：终端命令行下执行以下命令
+
+cp -R `find /home/data -type d -path /home/data/e -prune -o -print | sed 1d ` /bak
+
+###上述命令说明###
+
+1. find /home/data -type d 找出该目录下的文件夹，如果是-type f则是找出该目录下的文件。
+
+2. 再加上路径选项：-path /home/data/e 表是找出/home/data指定路径下的文件夹。
+
+3. -prune：使得find命令不进入到当前路径。
+
+4. -o类似于逻辑或运算，find /home/data -type d -path /home/data/e -prune -o -print是find /home/data -type d -path /home/data/e -a -prune -o -print的缩写。
+
+其中-a相当于逻辑与&&，-o相当于逻辑或||，上述命令等价于：
+
+if -path "/home/data/e" then  
+
+-prune  
+
+else  
+
+-print  
+
+意思就是查找/home/data目录下的文件夹，如果路径是/home/data/e,就执行“-prune”(跳过)操作，如果不是该路径，则执行 “-print”(打印)操作。
+
+参考链接1：http://blog.csdn.net/sosodream/article/details/6410846
+
+参考链接2：http://www.cnblogs.com/peida/archive/2012/11/16/2773289.html
+
+5. sed 1d:通过管道执行该命令，表示上面查找出来的文件列表删除第一行(/home/data)，即根目录不需要加进来，否则的话就相当于把所有文件夹进行了拷贝。
+
+方法二：使用cp命令复制的时候，只能排除一个目录不被复制，如果想排除两个或者多个目录的话，就需要使用rsync命令来实现了，看下面的例子
+
+如果要排除/home/data目录下面的a、b、c、三个目录，同时拷贝其它所有目录，执行以下命令
+yum install rsync #安装rsync
+rsync -av --exclude data/a --exclude data/b --exclude data/c data /bak
+
+注意：--exclude后面的路径不能为绝对路径，必须为相对路径才可以，否则出错。
+
+注解：
+
+rsync命令是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。-a参数表示archive模式，-v表示详细链模式输出，-z表示传输文件时使用压缩传输的模式。
+
+参考链接：http://man.linuxde.net/rsync
+
+https://www.cnblogs.com/hubavyn/p/5452039.html
+
