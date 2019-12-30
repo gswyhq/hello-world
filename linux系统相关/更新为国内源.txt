@@ -1,6 +1,9 @@
 
 不同的系统，更新镜像源的方法不一致
 
+debian 5是Debian 6是squeeze 7是wheezy 8是jessie 9是stretch; Debian 10 代号为 Buster
+如，将debian 9的换成debian 10的，只需要：root@a81ad9d37580:/# sed -i 's/stretch/buster/g' /etc/apt/sources.list
+
 image: python:3.6.8-stretch
 # head /etc/issue
 Debian GNU/Linux 9 \n \l
@@ -14,6 +17,18 @@ echo "deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free co
 echo "deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list && \
 echo "deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list
 
+image:openjdk:11-jdk-slim
+# head /etc/issue
+Debian GNU/Linux 10 \n \l
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb http://mirrors.163.com/debian/ buster main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.163.com/debian/ buster-updates main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.163.com/debian/ buster-backports main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.163.com/debian/ buster main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.163.com/debian/ buster-updates main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.163.com/debian/ buster-backports main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.163.com/debian-security/ buster/updates main non-free contrib" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.163.com/debian-security/ buster/updates main non-free contrib" >> /etc/apt/sources.list
 
 tensorflow/tensorflow:1.13.1-py3
 # head /etc/issue

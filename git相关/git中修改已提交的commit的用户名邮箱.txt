@@ -1,0 +1,48 @@
+
+修改用户名邮箱
+git config user.name "newName"
+git config user.email "newEmail"
+加上--global可以全局修改，否则仅在本git-repo生效。
+但是这种修改方式只能对未来的commit生效，过去的commit的用户名邮箱信息是不会改变的，而对已提交的commit修改的方法如下。
+
+修改已提交commit的用户名邮箱
+修改最近一次
+git commit --amend --author="userName <userEmail>"
+注意不能缺少< >
+此指令仅能更新最近的一次commit的用户名邮箱
+
+批量修改
+git filter-branch --env-filter '
+if [ "$GIT_AUTHOR_NAME" = "oldName" ]
+then
+export GIT_AUTHOR_NAME="newName"
+export GIT_AUTHOR_EMAIL="newEmail"
+fi
+' ref..HEAD
+
+git filter-branch --env-filter '
+if [ "$GIT_COMMITTER_NAME" = "oldName" ]
+then
+export GIT_COMMITTER_NAME="newName"
+export GIT_COMMITTER_EMAIL="newEmail"
+fi
+' ref..HEAD
+分别修改AUTHOR_NAME和COMMITTER_NAME，不太清楚二者的区别。
+好像GIT_AUTHOR是用来在push时验证用户信息的，所以可以只修改第一个。
+其中ref是起始commit的sha-1的简写，指定生效范围为此commit(exclude)到HEAD(include)，避免对整个git的提交历史的修改，可以缩短运行时间。
+这一方法不知会不会影响已push过的commit，不过一般都是因为用户名没有push权限，才需要纠正commit的用户名，所以无需在意。
+
+如果提示
+
+
+Cannot create a new backup.
+A previous backup already exists in refs/original/
+Force overwriting the backup with -f
+可以加上-f，即git filter-branch -f --env-filter，不明原理，但加上了确实管用，谨慎使用。
+
+作者：ntjsz
+链接：https://www.jianshu.com/p/7def4f387e9f
+来源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+

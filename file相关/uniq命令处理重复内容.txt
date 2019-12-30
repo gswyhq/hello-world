@@ -1,0 +1,40 @@
+
+Linux uniq 命令用于检查及删除文本文件中重复出现的行列，一般与 sort 命令结合使用。
+
+less file.txt | uniq > uniq_file.txt
+上面的linux uniq去重不生效
+因为uniq去重只对相邻的数据进行迭代处理，当遇到相邻的数据不重复时，就会该处的数据加一，进行新的迭代处理。
+正确做法是，对文件数据进行去重处理时，先对文件的数据进行排序，然后再进行去重处理：
+less file.txt |sort |uniq > uniq_file.txt
+
+语法
+uniq [-cdu][-f<栏位>][-s<字符位置>][-w<字符位置>][--help][--version][输入文件][输出文件]
+参数：
+
+-c或--count 在每列旁边显示该行重复出现的次数。
+-d或--repeated 仅显示重复出现的行列。
+-f<栏位>或--skip-fields=<栏位> 忽略比较指定的栏位。
+-s<字符位置>或--skip-chars=<字符位置> 忽略比较指定的字符。
+-u或--unique 仅显示出一次的行列。
+-w<字符位置>或--check-chars=<字符位置> 指定要比较的字符。
+--help 显示帮助。
+--version 显示版本信息。
+[输入文件] 指定已排序好的文本文件。如果不指定此项，则从标准读取数据；
+[输出文件] 指定输出的文件。如果不指定此选项，则将内容显示到标准输出设备（显示终端）。
+
+# 检查文件并删除文件中重复出现的行，并在行首显示该行重复出现的次数。使用如下命令：
+uniq -c testfile 
+
+去除重复行 
+sort file |uniq
+
+查找非重复行 
+sort file |uniq -u
+
+查找重复行 
+sort file |uniq -d
+
+统计 
+sort file | uniq -c
+
+

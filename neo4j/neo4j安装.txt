@@ -227,4 +227,5 @@ browser 包括灰色在内，共有7种演示Color；五种大小 Size; Caption:
 设置节点颜色，或显示属性字段：
 点击某种类型的节点，如Company -> 点击左上方的 Company(84), 括号内84，表示当前实体类型为Company的有84个；-> 点击下方的Color即可设置颜色；若点击 Caption, 则可以选择需要显示属性字段。若太多属性时，可能需要点击右侧的小三角符合来显示全部。
 
+图数据库使用排名：https://db-engines.com/en/ranking/graph+dbms
 
