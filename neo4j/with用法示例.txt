@@ -1,5 +1,5 @@
 
-with语句给cypher提供了强大的pipeline能力，可以一个或者query的输出，或者下一个query的输入 和return语句非常类似，唯一不同的是，with的每一个结果，必须使用别名标识。
+WITH语句给cypher提供了强大的pipeline能力，可以一个或者query的输出，或者下一个query的输入 和RETURN语句非常类似，唯一不同的是，WITH的每一个结果，必须使用别名标识。
 通过这个功能，我们可以轻而易举的做到在查询结果里面在继续嵌套查询。
 
 MATCH (person:Person)-[:ACTED_IN]->(m:Movie)
@@ -14,7 +14,7 @@ WITH otherPerson, count(*) AS foaf
 WHERE foaf > 1
 RETURN otherPerson
 
-代码块解释：（1）match与”David”关联（无向）的otherPerson；（2）然后return出度大于1的otherPerson。
+代码块解释：（1）MATCH与”David”关联（无向）的otherPerson；（2）然后RETURN出度大于1的otherPerson。
 
 1.2 对collect的元素进行排序
 
@@ -23,7 +23,7 @@ WITH n
 ORDER BY n.name DESC LIMIT 3
 RETURN collect(n.name)
 
-代码块解释：（1）match所有人；（2）对所有人的name进行降序排列，并取top-3；（3）返回top-3的name并组成collect：返回结果为：[“Emil”,”David”,”Ceasar”]
+代码块解释：（1）MATCH所有人；（2）对所有人的name进行降序排列，并取top-3；（3）返回top-3的name并组成collect：返回结果为：[“Emil”,”David”,”Ceasar”]
 
 1.3 在路径搜索的时候限制分支数
 
@@ -35,7 +35,7 @@ RETURN o.name
 
 代码块解释：（1）从”Anders”出发，找到关联（无向）的所有人的集合m；（2）对集合m按照name降序排列，取top-1；（3）返回与top-1关联（无向）的所有人的name。
 
-MATCH (n1)-[r]->(n:Qingjing) with labels(n1) as l, count(*) as count where count > 1  RETURN l, count
+MATCH (n1)-[r]->(n:Qingjing) WITH labels(n1) as l, count(*) as count WHERE count > 1  RETURN l, count
 
 CALL apoc.help("apoc") YIELD name, text
 WITH * WHERE text IS null
@@ -90,50 +90,50 @@ WITH n, collect(relType) AS relTypes
 WHERE size(relTypes) > 10 RETURN n,relTypes LIMIT 25
 
 # 根据两个值，查询其对应的最短路径：
-MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) ) where n1.name =~ "条件1" and n2.name =~ "条件2"  return p
+MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) ) WHERE n1.name =~ "条件1" and n2.name =~ "条件2"  RETURN p
 上句会查找所有满足条件的节点，再返回节点之间的最短路径；
 有时候，并不是希望返回所有的最短路径，而是在最短路径中，筛选最短路径；
-profile match p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
-where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
-with collect(p) as ps, min(length(p)) as len
-UNWIND ps as p1 with p1, len where length(p1)=len return p1
+profile MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
+WHERE n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+WITH collect(p) as ps, min(length(p)) as len
+UNWIND ps as p1 WITH p1, len WHERE length(p1)=len RETURN p1
 
 # 查询最后的关系为`理赔金额`，中间经过了节点`身故保险金`的最短的一条路径
 MATCH p=(n)-[*0..9]->()-[r:`理赔金额`]-(n1) 
-where ANY(x in nodes(p) where x.name='身故保险金') and not ()-->(n) 
-with p, length(p) as len_p 
-return extract(n IN nodes(p)| n.name) AS extracted
-order by len_p limit 1
+WHERE ANY(x in nodes(p) WHERE x.name='身故保险金') and not ()-->(n) 
+WITH p, length(p) as len_p 
+RETURN extract(n IN nodes(p)| n.name) AS extracted
+ORDER BY len_p limit 1
 
 # 查询最后的关系为`理赔金额`，中间经过了节点`身故保险金`的所有最短路径
 MATCH p=(n)-[*0..9]->()-[r:`理赔金额`]-(n1) 
-where ANY(x in nodes(p) where x.name='身故保险金') and not ()-->(n) 
-with collect(p) as ps, min(length(p)) as min_len UNWIND ps as p with p, min_len where length(p)=min_len
-return extract(n IN nodes(p)| n.name) AS extracted
+WHERE ANY(x in nodes(p) WHERE x.name='身故保险金') and not ()-->(n) 
+WITH collect(p) as ps, min(length(p)) as min_len UNWIND ps as p WITH p, min_len WHERE length(p)=min_len
+RETURN extract(n IN nodes(p)| n.name) AS extracted
 
 # 对查询结果的路径长度进行筛选：
-profile match p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
-where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
-with collect(p) as ps, length(p) as len
-UNWIND ps as p1 with p1, len where len=2 return p1
+profile MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
+WHERE n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+WITH collect(p) as ps, length(p) as len
+UNWIND ps as p1 WITH p1, len WHERE len=2 RETURN p1
 
 # 按路径长度进行升序排列：
 PROFILE MATCH p = shortestPath((n1:T7_site_web1_ai_150)-[*..4]- (n2) )
-where n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
-return p,length(p)
-order by length(p)
+WHERE n1.name =~ ".{0,15}生物公司.{0,15}" and  n2.name = "3285" and not n1 = n2
+RETURN p,length(p)
+ORDER BY length(p)
 
-match (n:mechword{name:'生物工程'}),(m:mechword{name:'现代化'})
-with n,m
-match p=shortestPath((n)-[r*..]-(m))
-unwind nodes(p) as nn
-with p,min(length(nn.name))as a
-unwind nodes(p) as mm
-with mm
-where length(mm.name)=a
-return mm.name;
+MATCH (n:mechword{name:'生物工程'}),(m:mechword{name:'现代化'})
+WITH n,m
+MATCH p=shortestPath((n)-[r*..]-(m))
+UNWIND nodes(p) as nn
+WITH p,min(length(nn.name))as a
+UNWIND nodes(p) as mm
+WITH mm
+WHERE length(mm.name)=a
+RETURN mm.name;
 
-使用with 可以达到管道命令的效果
+使用WITH 可以达到管道命令的效果
 查询论文的第一作者及最少引用次数：
 MATCH (p:Paper)-[:`第一作者`]->(a:Author)
 WITH a, p, size((p)-[:`被引用`]->()) as numCit
@@ -142,9 +142,9 @@ RETURN a.authorName as authorName, minCitations
 ORDER BY a.authorName
 
 call apoc.index.nodes('Tongyonggraph','name:天龙八部') YIELD node
-with node as n
-match (n)-[r:`主演`]->(m)
-return n, m
+WITH node as n
+MATCH (n)-[r:`主演`]->(m)
+RETURN n, m
 
 # 返回作者的最小引用次数及每篇论文的标题及引用次数：
 MATCH (p:Paper)-[:`第一作者`]->(a:Author)
@@ -160,7 +160,7 @@ CALL apoc.cypher.run('MATCH ()-[:`'+type+'`]->() RETURN count(*) as count',{}) Y
 RETURN type, value.count
 
 通过管道操作符进行过滤操作：
-match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x ) as s return s limit 2;
+MATCH p1=(a:Tca {name:"糊糊酸"})-[*..1]-() MATCH p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x ) as s RETURN s limit 2;
 ╒═══════════════════════════════════╕
 │"s"                                │
 ╞═══════════════════════════════════╡
@@ -169,7 +169,7 @@ match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"}
 │[{"name":"糊糊酸"},{},{"name":"延胡索酸"}]│
 └───────────────────────────────────┘
 
-match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x is null ) as s return s limit 2;
+MATCH p1=(a:Tca {name:"糊糊酸"})-[*..1]-() MATCH p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND extract(x IN [q, p1, p2] | x is null ) as s RETURN s limit 2;
 ╒═════╕
 │"s"  │
 ╞═════╡
@@ -178,7 +178,7 @@ match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"}
 │false│
 └─────┘
 
-match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND [x IN [q, p1, p2] where not x is null | x ] as s return s limit 2;
+MATCH p1=(a:Tca {name:"糊糊酸"})-[*..1]-() MATCH p2=(b:Tca {name:"柠檬酸"})-[*..1]-() OPTIONAL MATCH q=(a)-[*..2]-(b)  UNWIND [x IN [q, p1, p2] WHERE not x is null | x ] as s RETURN s limit 2;
 ╒═══════════════════════════════════╕
 │"s"                                │
 ╞═══════════════════════════════════╡
@@ -186,4 +186,23 @@ match p1=(a:Tca {name:"糊糊酸"})-[*..1]-() match p2=(b:Tca {name:"柠檬酸"}
 ├───────────────────────────────────┤
 │[{"name":"柠檬酸"},{},{"name":"顺乌头酸"}]│
 └───────────────────────────────────┘
+
+# 查找最近一次（筛选、过滤）的股东变动情况，并将变动的股东，按照股东类型及名次排序：
+MATCH (n:Company)-[r:`股东变动`]->(m:Holder)
+WHERE n.name='富瑞特装'
+WITH max(datetime(m.`报告时间`)) as max_time, collect(m) as holders
+UNWIND holders as holder
+WITH max_time, holder
+WHERE datetime(holder.`报告时间`) = max_time
+RETURN max_time, holder.`股东名次`, holder.`股东类型`
+ORDER BY [holder.`股东类型`, holder.`股东名次`]
+
+# 上句等同于下面的结果
+MATCH (n:Company)-[r:`股东变动`]->(m:Holder)
+WHERE n.name='富瑞特装'
+WITH n, max(datetime(m.`报告时间`)) as max_time
+OPTIONAL MATCH(n:Company)-[r:`股东变动`]->(holder:Holder)
+WHERE datetime(holder.`报告时间`) = max_time
+RETURN max_time, holder.`股东名次`, holder.`股东类型`
+ORDER BY [holder.`股东类型`, holder.`股东名次`]
 

@@ -24,3 +24,8 @@
 选择一个你想要对比的文件夹，点击右键->Sync with Local，打开同步对比窗口，使用左右箭头来同步内容。
 上面是服务器与本地对比，那么本地文件通服务器对比，就先在PyCharm里面选择文件或文件夹，然后右键->Deployment->Sync with deployed to即可
 
+pycharm 打开 带有本地图片的markdown格式文件时，闪退，直接退出pycharm；
+问题原因：martdown 自带“Markdown support”插件原因；
+解决方案：
+在File -> settings -> plugins -> installed中查看是否有“Markdown support”插件，若有，则取消对应的勾选，点击应用“Apply”；
+并在在Marketplace中搜索安装Markdown Image Kit插件即可。

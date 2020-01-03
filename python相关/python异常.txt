@@ -35,3 +35,9 @@ SyntaxError: invalid syntax
 原因，python 版本不对
 Python 3.6版本以后允许在字符串前置f的形式代替 .format语句
 
+# python 代码检查都是正常的，但是报错：
+ValueError: bad marshal data (unknown type code)
+问题原因，重命名了路径或文件名所致
+解决方案：对应的模块目录下的.pyc文件删除 
+find . -name "__pycache__" |xargs -i rm -rf {}
+

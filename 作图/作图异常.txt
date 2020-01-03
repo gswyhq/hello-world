@@ -27,3 +27,9 @@ gswyhq@gswyhq-PC:~$ sudo mv chromedriver /usr/local/bin/
 或者在调用的时候，指明绝对路径即可，如：
 browser = webdriver.Chrome(executable_path='/home/gswyhq/Downloads/chromedriver')
 
+# pyecharts在linux下使用phantomjs生成图片后中文乱码及样式问题解决
+问题分析：因为Linux服务器上没有字体库导致的，所以需要先安装字体库
+解决方案：安装“文泉驿”字体，这个是Linux上最流行的免费中文字体：
+apt-get install -y fonts-wqy-zenhei
+
+

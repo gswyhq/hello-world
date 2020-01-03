@@ -260,3 +260,16 @@ https://github.com/ymcui/Chinese-BERT-wwm
 中文文本纠错：
 https://github.com/zedom1/error-detection
 
+金融图谱问答：
+https://github.com/shinezai/QASystemOnFinancialKG
+
+金融司法领域聊天机器人：
+https://github.com/charlesXu86/Chatbot_CN
+
+小型金融知识图谱构建流程
+https://github.com/jm199504/Financial-Knowledge-Graphs
+
+基于知识图谱的金融资讯推荐
+https://github.com/codeants2012/FinancialKnowledgeGraph
+
+
