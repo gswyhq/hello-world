@@ -592,7 +592,9 @@ https://pan.baidu.com/s/1uPMlIY3vhusdnhAge318TA
 新闻语料json版(news2016zh)
 250万篇新闻( 原始数据9G，压缩文件3.6G；新闻内容跨度：2014-2016年)
 包含了250万篇新闻。新闻来源涵盖了6.3万个媒体，含标题、关键词、描述、正文。
+new2016zh.zip
 https://drive.google.com/file/d/1TMKu1FpTr6kcjWXWlQHX7YJsMfhhcVKp/view
+或者：https://pan.baidu.com/s/1MLLM-CdM6BhJkj8D0u3atA 密码：k265
 
 百科类问答json版(baike2018qa)
 150万个问答( 原始数据1G多，压缩文件663M；数据更新时间：2018年)
@@ -882,4 +884,8 @@ NLP_BOOK  拆字词库  地名词库  法律词库  公司名字词库    历史
 
 豆瓣电影与书籍详细信息
 数据链接: https://pan.baidu.com/s/1cLdsAXLGH2akJqMIsGdoig 提取码: n97y
+
+文本与wiki实体关系链接数据
+linked-wikitext-2.142e2e52.zip
+https://rloganiv.github.io/linked-wikitext-2/?spm=a2c4e.10696291.0.0.10b419a4otnaBv#/
 

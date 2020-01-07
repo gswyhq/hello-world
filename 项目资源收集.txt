@@ -260,6 +260,9 @@ https://github.com/ymcui/Chinese-BERT-wwm
 中文文本纠错：
 https://github.com/zedom1/error-detection
 
+农业知识图谱，实体，关系查询等前端界面及后台数据库；
+https://github.com/gswyhq/Agriculture_KnowledgeGraph/blob/master/docker-compose.yml
+
 金融图谱问答：
 https://github.com/shinezai/QASystemOnFinancialKG
 

@@ -10,6 +10,44 @@ CALL apoc.export.cypher.all("/var/lib/neo4j/data/all_data_20190423.cypher",{form
 bash-4.4# cat data/all_data_20190423.cypher |./bin/cypher-shell -u neo4j -p 123456
 因为3.5.4版本没有`neo4j-shell`命令；而默认情况下，导致格式`format`的参数是neo4j-shell。
 
+注意：./bin/cypher-shell导入时，默认是没有日志显示的，若需要查看导入的进度则通过`--format verbose`来输出对应的日志信息：
+bash-4.4# less data/all_data.cypher |./bin/cypher-shell -u neo4j -p 123456 --format verbose
+若日志太多，也可以将日志输出到文件：
+bash-4.4# less data/all_data.cypher |./bin/cypher-shell -u neo4j -p 123456 --format verbose > data/import.log
+
+有时候 neo4j-shell 导入数据(通过命令`CALL apoc.export.cypher.all`导出的数据)，会出现如下的错误：
+WARNING: Unexpected end of input: expected '\', ANY or '"' (line 8, column 107 (offset: 927))
+"\n投资方向:本基金投资于法律法规及监管机构允许投资的金融工具,具体如下:1、现金;2、期限在 1 年以内(含 1 年)的银行存款(包括活期存款、定期存款、通知存款、大额存单等)、债券回购、中央银行票据、同业存单"                                                                                                           ^
+ERROR (-v for expanded information):
+        Unknown command '\n3、剩余期限在'
+问题原因：可能是因为文件中存在特殊换行符：^M
+解决方案，删除特殊换行符^M
+~$ sed -i "s/^M//g" all_data.cypher
+#注意：去掉^M的方法中, ^M的输入方式是 Ctrl + v ，然后Ctrl + M
+但上方法可能将match 替换为了atch,会出现如下错误：
+ERROR (-v for expanded information):
+	Unknown command 'atch'
+通过下方法再改回来即可；
+bash-4.4# sed -i 's/ATCH/MATCH/g' data/all_data.cypher
+
+有时候，通过neo4j-shell 导入数据出现错误：
+Unknown action: AWAIT
+USAGE:
+Accesses db schema. Usage: schema <action> <options...>
+...
+Awaiting indexes to come online
+  schema await -l :Person -p name
+解决方案：
+sed -i 's/SCHEMA AWAIT/schema await/g' file
+若数据量比较大，之前导入的不想浪费，再继续导入，可以切换await后面的内容，继续导入，步骤如下：
+# 1，查找`SCHEMA AWAIT`在文件中的行号
+bash-4.4# grep "SCHEMA AWAIT" -n data/all_data.cypher
+8780374:SCHEMA AWAIT
+# 2，截取SCHEMA AWAIT行之后的内容到新文件
+bash-4.4# sed -n '8780375,$p' data/all_data.cypher > data/all_data_rel.cypher
+# 3，在新文件基础上继续导入；
+bash-4.4# ./bin/neo4j-shell -file data/all_data_rel.cypher
+
 通过cypher文件实现数据的写入远程neo4j:
     步骤1： 在拟导入数据的机器人上新建一个neo4j服务
     gswyhq@192.168.3.164:~$ docker run --detach --name=multiple_projects_27474  -e NEO4J_AUTH=neo4j/123456 -p 1337:1337 -p 27474:7474 -v $PWD/data:/data -p 27687:7687 -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=0.0.0.0 -e NEO4J_dbms_shell_port=1337 -e NEO4J_dbms_memory_heap_initial__size=1024m -e NEO4J_dbms_memory_heap_max__size=2048m neo4j:3.4.5

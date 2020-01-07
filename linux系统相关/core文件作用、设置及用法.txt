@@ -90,3 +90,55 @@ QUOTE:
 -t size:设置CPU使用时间的最大上限.单位:seconds
 -v size:设置虚拟内存的最大值.单位:kbytes
 
+
+docker中的ulimit
+docker不能直接配置ulimit参数，因为ulimit是Linux内核参数，而docker是共享系统资源的 只不过是做了资源隔离和运行时隔离 ，如果需要调整容器的ulimit参数，把宿主机系统的调大即可。
+但是若宿主机设置一个大的范围，在docker容器内，则可以将对应的ulimit设置更小的值；
+极端情况，宿主机：
+gswyhq@gswyhq-PC:~/Downloads/wmd$ ulimit -a
+core file size          (blocks, -c) 0
+但容器内即使不限制core file也是不会产生core文件的；
+/usr/src/app/wmd_api_alpine # ulimit -a
+-c: core file size (blocks)        unlimited
+
+这个时候，只有将宿主机的ulimit进行修改才可以；
+
+产生core文件的方法：
+1、允许core dump，或者用ulimit -c unlimited设置core dump文件的大小为unlimited；若是在docker容器内，则需要修改宿主机的ulimit 大小；
+2、编写测试文件
+vim test.c
+#include <stdio.h>
+
+int main()
+{
+    int *ptr = NULL;
+    *ptr = 10;
+
+    return 0;
+}
+
+3.变成测试文件
+C/C++的编译开关-g（产生调试符号）
+~$ gcc -g -o test test.c
+
+4、运行编译好的程序test
+~$ ./test
+Segmentation fault
+在当前文件目录中，有一个core文件；
+
+5、gdb一下
+~$ gdb testc core
+
+ulimit的硬限制和软限制
+硬限制用-H参数,软限制用-S参数.
+ulimit -a看到的是软限制,通过ulimit -a -H可以看到硬限制.
+如果ulimit不限定使用-H或-S,此时它会同时把两类限制都改掉的.
+软限制可以限制用户/组对资源的使用,硬限制的作用是控制软限制.
+超级用户和普通用户都可以扩大硬限制,但超级用户可以缩小硬限制,普通用户则不能缩小硬限制.
+硬限制设定后,设定软限制时只能是小于或等于硬限制.
+1)软限制不能超过硬限制
+2)硬限制不能小于软限制
+3)普通用户只能缩小硬限制,超级用户可以扩大硬限制
+4)硬限制控制软限制,软限制来限制用户对资源的使用
+
+

@@ -109,3 +109,27 @@ privileged参数:
 否则，container内的root只是外部的一个普通用户权限。
 
 
+Docker-compose command 有多个命令例子
+cat docker-compose.yml
+
+version: '3.4'
+services:
+  klvchen:
+    image: python_django:19.03.0
+    ports:
+      - 8000:8000
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cd /app01
+        python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - /iba/app01:/app01
+
+# docker run 多个命令， 多个command
+docker run --rm -p 18200:8000 -e LANG=C.UTF-8 -it image_name:20200107_1959 /bin/sh -c "echo '你好' && /bin/sh"
+
+
+
+

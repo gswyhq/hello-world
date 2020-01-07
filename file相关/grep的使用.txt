@@ -52,6 +52,9 @@ gswyhq@gswyhq-PC:~$ echo "浪潮,original language, of work,德语"| grep "^[^,]
 gswyhq@gswyhq-PC:~$ echo "浪潮,original language, of work,德语"| grep -o "^[^,]*,[^,]*,[^,]*"
 浪潮,original language, of work
 
+grep -n 显示行号
+[root@86 ~]# grep  -n "StartDiscoverers" /usr/local/zabbix/etc/zabbix_server.conf
+176:### Option: StartDiscoverers
 
 操作 grep "xxx" a.log
 结果 Binary file a.log matches
