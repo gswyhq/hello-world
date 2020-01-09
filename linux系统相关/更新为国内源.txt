@@ -47,6 +47,35 @@ echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main" >> /etc/ap
 echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security universe" >> /etc/apt/sources.list && \
 echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security universe" >> /etc/apt/sources.list
 
+tensorflow/tensorflow:1.14.0-py3
+# 查看版本信息及系统代号
+root@80fcd3881d42:# head /etc/lsb-release
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=18.04
+DISTRIB_CODENAME=bionic
+DISTRIB_DESCRIPTION="Ubuntu 18.04.2 LTS"
+
+我们可以看到新版本的 Ubuntu 18.04.2 LTS 系统代号为bionic
+同样的我们也可以得到之前任意版本的系统代号：
+Ubuntu 12.04 (LTS)代号为precise。
+Ubuntu 14.04 (LTS)代号为trusty。
+Ubuntu 15.04 代号为vivid。
+Ubuntu 15.10 代号为wily。
+Ubuntu 16.04 (LTS)代号为xenial。
+故 Ubuntu 18.04.2 LTS 更改镜像源的方法，仅仅是将 Ubuntu 16.04 LTS 方法中的 xenial 替换为 bionic 即可，如下：
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-security universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security universe" >> /etc/apt/sources.list
 
 image: python:3.5.6-alpine3.8
 $ head /etc/issue

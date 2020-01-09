@@ -36,7 +36,7 @@ print(sp.EncodeAsPieces(text))
 
 
 less translation2019zh_train.json|jq '.chinese' > translation2019zh_train.txt
-gswyhq@gswyhq-PC:~/data/translation2019zh$ spm_train --input=./translation2019zh_train.txt --model_prefix=./model800000 --vocab_size=800000
+gswyhq@gswyhq-PC:~/data/translation2019zh$ spm_train --input=./translation2019zh_train.txt --model_prefix=./model_80w --vocab_size=800000
 
 echo "今天晴空万里，小明穿着新衣服高高兴兴地上学校" |spm_encode --model=./model_8000.model
 ▁ 今天 晴 空 万 里 , 小 明 穿着 新 衣服 高 高兴 兴 地上 学校

@@ -1,4 +1,7 @@
 
+安装：
+~$ pip3 install opencc-python-reimplemented -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
 docker pull 1docker/opencc
 
 # 简体转繁体
