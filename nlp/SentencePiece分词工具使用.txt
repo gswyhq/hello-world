@@ -1,0 +1,90 @@
+
+SentencePiece是一个google开源的自然语言处理工具包。
+SentencePiece就是需要大量文本来训练，让机器自动学习经常组合出现的短语和词。
+
+SentencePiece的用途不限于自然语言处理，如蛋白质的一级结构是氨基酸序列，需要研究氨基酸序列片断，片断的长度又是不固定的，此处就可以用SentencePiece进行切分。原理是重复出现次数多的片断，就认为是一个意群（词）。
+
+# 安装：
+第一步：安装Python支持
+sudo pip3 install SentencePiece -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+第二步：安装命令行工具
+~$ git clone https://github.com/google/sentencepiece
+~$ cd sentencepiece
+~sentencepiece$ mkdir build
+~sentencepiece$ cd build
+~sentencepiece/build$ cmake ..
+~sentencepiece/build$ make -j $(nproc)
+~sentencepiece/build$ sudo make install
+~sentencepiece/build$ sudo ldconfig -v
+
+# 训练模型
+$ spm_train --input=/tmp/a.txt --model_prefix=/tmp/test
+# --input指定需要训练的文本文件，--model_prefix指定训练好的模型名，本例中生成/tmp/test.model和/tmp/test.vocab两个文件，vocab是词典信息。
+
+# 使用模型
+(1) 命令行调用
+$ echo "食材上不会有这样的纠结" | spm_encode --model=/tmp/test.model
+(2) Python程序调用
+import sentencepiece as spm
+
+sp = spm.SentencePieceProcessor()
+text = "食材上不会有这样的纠结"
+
+sp.Load("/tmp/test.model")
+print(sp.EncodeAsPieces(text))
+
+
+less translation2019zh_train.json|jq '.chinese' > translation2019zh_train.txt
+gswyhq@gswyhq-PC:~/data/translation2019zh$ spm_train --input=./translation2019zh_train.txt --model_prefix=./model800000 --vocab_size=800000
+
+echo "今天晴空万里，小明穿着新衣服高高兴兴地上学校" |spm_encode --model=./model_8000.model
+▁ 今天 晴 空 万 里 , 小 明 穿着 新 衣服 高 高兴 兴 地上 学校
+
+gswyhq@gswyhq-PC:~/data/sentencepiece_model$ echo "今天晴空万里，小明穿着新衣服高高兴兴地上学校" |spm_encode --model=./model_80w.model
+▁今天 晴空万里 , 小明 穿着 新衣服 高高兴兴地 上 学校
+
+gswyhq@gswyhq-PC:~/data/webtext2019zh$ less web_text_zh_train.json | jq .content > web_text_zh_train.txt
+
+~$ spm_train --help
+sentencepiece
+
+Usage: spm_train [options] files
+
+   --accept_language (comma-separated list of languages this model can accept)  type: string  default:
+   --add_dummy_prefix (Add dummy whitespace at the beginning of text)  type: bool  default: true
+   --bos_id (Override BOS (<s>) id. Set -1 to disable BOS.)  type: int32  default: 1
+   --bos_piece (Override BOS (<s>) piece.)  type: string  default: <s>
+   --character_coverage (character coverage to determine the minimum symbols)  type: double  default: 0.9995
+   --control_symbols (comma separated list of control symbols)  type: string  default:
+   --eos_id (Override EOS (</s>) id. Set -1 to disable EOS.)  type: int32  default: 2
+   --eos_piece (Override EOS (</s>) piece.)  type: string  default: </s>
+   --hard_vocab_limit (If set to false, --vocab_size is considered as a soft limit.)  type: bool  default: true
+   --input (comma separated list of input sentences)  type: string  default:
+   --input_format (Input format. Supported format is `text` or `tsv`.)  type: string  default:
+   --input_sentence_size (maximum size of sentences the trainer loads)  type: int32  default: 0
+   --max_sentence_length (maximum length of sentence in byte)  type: int32  default: 4192
+   --max_sentencepiece_length (maximum length of sentence piece)  type: int32  default: 16
+   --model_prefix (output model prefix)  type: string  default:
+   --model_type (model algorithm: unigram, bpe, word or char)  type: string  default: unigram
+   --normalization_rule_name (Normalization rule name. Choose from nfkc or identity)  type: string  default: nmt_nfkc
+   --normalization_rule_tsv (Normalization rule TSV file. )  type: string  default:
+   --num_sub_iterations (number of EM sub-iterations)  type: int32  default: 2
+   --num_threads (number of threads for training)  type: int32  default: 16
+   --pad_id (Override PAD (<pad>) id. Set -1 to disable PAD.)  type: int32  default: -1
+   --pad_piece (Override PAD (<pad>) piece.)  type: string  default: <pad>
+   --remove_extra_whitespaces (Removes leading, trailing, and duplicate internal whitespace)  type: bool  default: true
+   --seed_sentencepiece_size (the size of seed sentencepieces)  type: int32  default: 1000000
+   --self_test_sample_size (the size of self test samples)  type: int32  default: 0
+   --shrinking_factor (Keeps top shrinking_factor pieces with respect to the loss)  type: double  default: 0.75
+   --shuffle_input_sentence (Randomly sample input sentences in advance. Valid when --input_sentence_size > 0)  type: bool  default: true
+   --split_by_number (split tokens by numbers (0-9))  type: bool  default: true
+   --split_by_unicode_script (use Unicode script to split sentence pieces)  type: bool  default: true
+   --split_by_whitespace (use a white space to split sentence pieces)  type: bool  default: true
+   --treat_whitespace_as_suffix (treat whitespace marker as suffix instead of prefix.)  type: bool  default: false
+   --unk_id (Override UNK (<unk>) id.)  type: int32  default: 0
+   --unk_piece (Override UNK (<unk>) piece.)  type: string  default: <unk>
+   --unk_surface (Dummy surface string for <unk>. In decoding <unk> is decoded to `unk_surface`.)  type: string  default:  ⁇
+   --use_all_vocab (If set to true, use all tokens as vocab. Valid for word/char models.)  type: bool  default: false
+   --user_defined_symbols (comma separated list of user defined symbols)  type: string  default:
+   --vocab_size (vocabulary size)  type: int32  default: 8000

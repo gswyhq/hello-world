@@ -41,6 +41,9 @@ gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .
 gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .bar
 "less interesting data"
 
+gswyhq@gswyhq-PC:~$ echo '{"foo": 42, "bar": "less interesting data"}' | jq .bar|xargs -L 1 echo
+less interesting data
+
 # 当字典仅有一个key时，不知道key, 获取对应的values：
 gswyhq@gswyhq-PC:~$ echo '{"tagkit_mynet": {"Gateway": "192.168.64.1", "IPAddress": "192.168.64.7"}}' |jq .[]
 {
