@@ -889,3 +889,8 @@ NLP_BOOK  拆字词库  地名词库  法律词库  公司名字词库    历史
 linked-wikitext-2.142e2e52.zip
 https://rloganiv.github.io/linked-wikitext-2/?spm=a2c4e.10696291.0.0.10b419a4otnaBv#/
 
+中文实体链接数据集：
+https://github.com/panchunguang/ccks_baidu_entity_link
+比赛网址： https://biendata.com/competition/ccks_2019_el/ 
+数据集：https://pan.baidu.com/s/1SShtugdAMVf0fdaBowtMiA 提取码:8r80
+

@@ -275,4 +275,10 @@ https://github.com/jm199504/Financial-Knowledge-Graphs
 基于知识图谱的金融资讯推荐
 https://github.com/codeants2012/FinancialKnowledgeGraph
 
+实体链接
+https://github.com/panchunguang/ccks_baidu_entity_link
+
+将知识库中的结构化信息（三元组）融入到预训练模型中
+K-BERT: Enabling Language Representation with Knowledge Graph(2019)
+https://github.com/autoliuweijie/K-BERT
 
