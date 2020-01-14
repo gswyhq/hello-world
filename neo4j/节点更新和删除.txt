@@ -39,11 +39,13 @@ CALL apoc.periodic.iterate('MATCH (n:LinkedinID) WHERE n.userDefinedImageUrl IS 
 
   MATCH (n{name:'张三'}) REMOVE n:Person RETURN n
 例7:为已经存在的两个节点添加关系
-
-
   MATCH (a:Person {name: "张三"}),
         (b:Person {name: "李四"})
   MERGE (a)-[r:FRIENDS]->(b)
+
+# 批量删除重复的关系：
+CALL apoc.periodic.commit('match(n1)-[r1]->(n2)<-[r2]-(n1) where id(r2) <> id(r1) and type(r1)=type(r2) WITH r2 LIMIT $limit delete r2 RETURN count(*)', {limit: 10000} )
+
 例8:匹配一个节点，更新属性如果属性不存在则创建该属性
 
 MERGE (n:Person {name: "张三"})
