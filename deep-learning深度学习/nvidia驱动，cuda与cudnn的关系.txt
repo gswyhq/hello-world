@@ -1,0 +1,70 @@
+
+nvidia驱动，cuda与cudnn的关系
+
+NVIDIA的显卡驱动程序和CUDA完全是两个不同的概念
+CUDA是NVIDIA推出的用于自家GPU的并行计算框架，也就是说CUDA只能在NVIDIA的GPU上运行，而且只有当要解决的计算问题是可以大量并行计算的时候才能发挥CUDA的作用。
+CUDA本质上只是一个工具包而已，所以我可以在同一个设备上安装很多个不同版本的CUDA工具包，CUDA和显卡驱动是没有一一对应的。
+
+cuDNN是一个SDK，是一个专门用于神经网络的加速包，注意，它跟我们的CUDA没有一一对应的关系，即每一个版本的CUDA可能有好几个版本的cuDNN与之对应
+
+nvidia与cuda需要满足关系：
+https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+
+cuda与cudnn需要满足关系：
+https://developer.nvidia.com/rdp/cudnn-archive
+
+查看显卡信息, 包括显卡驱动版本（Driver Version）等
+nvidia-smi
+
+查看 CUDA 版本：
+cat /usr/local/cuda/version.txt
+
+查看 CUDNN 版本：
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+
+查看gcc版本：
+gcc -v
+
+CUDA ToolKit的安装：
+CUDA的下载地址为：https://developer.nvidia.com/cuda-downloads
+
+或者直接使用docker镜像, 如
+nvidia-docker run -it tensorflow/tensorflow:1.13.1-gpu-py3 /bin/bash
+
+docker镜像版本， python版本，编译器gcc版本，编译工具，cuDNN, CUDA版本映射关系见：
+https://tensorflow.google.cn/install/source
+
+docker镜像中，有可能没有安装cuDNN, 这个时候可以通过下面链接查找与当前CUDA版本配套的最新cuDNN版本并注册登录下载安装文件
+https://developer.nvidia.com/rdp/cudnn-archive
+
+下载好后，可通过如下命令进行安装cuDNN：
+root@0e100ce59d41:~# dpkg -i libcudnn7_7.6.4.38-1+cuda9.0_amd64.deb 
+
+# 安装指定版本的gcc
+apt-get install gcc-4.8
+
+# 寻找合适的驱动版本
+root@c234e4bf7ad3:/notebooks# apt-get install ubuntu-drivers-common
+root@c234e4bf7ad3:/notebooks# ubuntu-drivers devices
+== /sys/devices/pci0000:80/0000:80:03.0/0000:83:00.0 ==
+vendor   : NVIDIA Corporation
+modalias : pci:v000010DEd00001B06sv0000107Dsd00002773bc03sc00i00
+driver   : xserver-xorg-video-nouveau - distro free builtin
+driver   : nvidia-396 - third-party non-free
+driver   : nvidia-387 - third-party non-free
+driver   : nvidia-384 - third-party non-free
+driver   : nvidia-418 - third-party non-free
+driver   : nvidia-390 - third-party non-free
+driver   : nvidia-410 - third-party non-free
+driver   : nvidia-440 - third-party non-free recommended
+
+显示建议的驱动版本是440
+安装nvidia driver
+root@c234e4bf7ad3:/notebooks# apt-get install -y nvidia-440
+
+#若使用docker的话， 宿主机显卡驱动版本要跟容器显卡驱动版本一致
+为了使docker image能很便利的使用Nvidia GPU，从而产生了nvidia-docker，由它来制作nvidia driver的image，这就要求在目标机器上启动container时，确保字符设备以及驱动文件已经被挂载。
+
+nvidia-docker-plugin是一个docker plugin，被用来帮助我们轻松部署container到GPU混合的环境下。类似一个守护进程，发现宿主机驱动文件以及GPU 设备，并且将这些挂载到来自docker守护进程的请求中。以此来支持docker GPU的使用。
+
+
