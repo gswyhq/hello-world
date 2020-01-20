@@ -1,0 +1,29 @@
+
+keras中TimeDistributed
+
+TimeDistributed,这个层我们可以实现从二维像三维的过渡。
+
+考虑一批32个样本，其中每个样本是一个由16个维度组成的10个向量的序列。该层的批输入形状然后(32, 10, 16)。
+
+可以这么理解，输入数据是一个特征方程，X1+X2+...+X10=Y，从矩阵的角度看，拿出未知数，就是10个向量，每个向量有16个维度，这16个维度是评价Y的16个特征方向。
+
+TimeDistributed层的作用就是把Dense层应用到这10个具体的向量上，对每一个向量进行了一个Dense操作，假设是下面这段代码：
+
+model = Sequential()
+model.add(TimeDistributed(Dense(8), input_shape=(10, 16)))
+
+输出还是10个向量，但是输出的维度由16变成了8，也就是（32,10,8）。
+
+事实上，TimeDistributed层给予了模型一种一对多，多对多的能力，增加了模型的维度。
+
+TimeDistributed层在每个时间步上均操作了Dense，增加了模型实现一对多和多对多的能力。如果你使用正常的Dense层，你最后只会得到一个结果。
+
+另外也可以通过如下方法使用：
+x = model.output
+x = TimeDistributed(Dropout(dropout))(x)
+
+TimeDistributed的真正意义在于使不同层的特征图共享权重
+
+
+
+

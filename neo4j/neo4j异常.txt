@@ -155,3 +155,10 @@ limit 10
 也可以组成查询，如：
 CALL apoc.index.nodes('Tongyonggraph','name:姚明 OR name:叶莉')YIELD node
 
+启动一个neo4j容器时报错：
+/var/lib/neo4j/bin/neo4j: line 233: cannot create temp file for here-document: No space left on device
+问题原因：
+    不能创建临时文件文档,设备上没有剩余空间(告诉我们磁盘空间满了)
+解决方法：
+提供足够的硬盘空间即可。
+

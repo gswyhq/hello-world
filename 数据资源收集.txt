@@ -894,3 +894,7 @@ https://github.com/panchunguang/ccks_baidu_entity_link
 比赛网址： https://biendata.com/competition/ccks_2019_el/ 
 数据集：https://pan.baidu.com/s/1SShtugdAMVf0fdaBowtMiA 提取码:8r80
 
+阅读理解数据集：
+阅读理解模型，主要根据问题和答案选取出和问题相关的答案。
+https://github.com/LIANGQINGYUAN/Q-A-TextClassification/blob/master/preprocess/train_data_sample.json
+
