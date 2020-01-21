@@ -11,3 +11,10 @@ df = pd.read_excel(yiyuan_excel_file, sheet_name="Sheet1", index_col=0, dtype={'
 但这两种方案，只能是针对excel数据中，本就是文本类型的数据；
 若原excel中是自定义的`0000`类型的数据， 如0001，读取出来的结果仍旧是: "1".
 
+import pandas 出现以下错误：
+ImportError: Missing required dependencies ['numpy']
+解决方法：
+第一步，卸载numpy: pip3 uninstall numpy
+第二步，卸载不彻底，删除安装目录：rm /usr/local/lib/python3.5/dist-packages/numpy/
+第三步，重新安装numpy: pip3 install numpy==1.16.3 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
