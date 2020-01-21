@@ -74,4 +74,7 @@ TypeError: dropout() got an unexpected keyword argument 'rate'
 解决方法及原因：
 rate在TensorFlow 1.13中是该函数的有效参数，但在早期版本中无效
 
+问题：
+AttributeError: module 'tensorflow' has no attribute 'batch_gather'
+解决方法，更改 tensorflow 版本，比如更新为 version:1.12.0
 
