@@ -1,0 +1,10 @@
+
+有时候压缩文件的解压密码忘记了，只能采用暴力破解
+
+rarcrack安装方法
+sudo apt-get install rarcrack
+
+使用方法：
+执行命令: rarcrack 文件名 -threads 线程数 -type rar|zip|7z
+
+
