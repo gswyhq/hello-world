@@ -1,0 +1,64 @@
+
+attention的通用定义如下：
+
+给定一组向量集合values，以及一个向量query，attention机制是一种根据该query计算values的加权求和的机制。
+attention的重点就是这个集合values中的每个value的“权值”的计算方法。
+
+换句话说，attention机制就是一种根据某些规则或者某些额外信息（query）从向量表达集合（values）中抽取特定的向量进行加权组合（attention）的方法。
+简单来讲，只要我们从部分向量里面搞了加权求和，那就算用了attention。
+
+Attention函数的本质可以被描述为一个查询（query）到一系列（键key-值value）对的映射。
+Attention表示为将query(Q)和key-value pairs映射到输出上，其中query、每个key、每个value都是向量，输出是V中所有values的加权，
+其中权重是由Query和每个key计算出来的.
+
+在计算attention时主要分为三步，第一步是将query和每个key进行相似度计算得到权重，常用的相似度函数有点积，拼接，感知机等；
+然后第二步一般是使用一个softmax函数对这些权重进行归一化；最后将权重和相应的键值value进行加权求和得到最后的attention。
+第一步：计算比较Q和每个K的相似度；
+第二步：将得到的相似度进行softmax归一化；
+第三步：针对计算出来的权重，对所有的values进行加权求和，得到Attention向量。
+
+目前在NLP研究中，key和value常常都是同一个，即key=value。
+
+放缩点积attention（scaled dot-Product attention）:
+放缩点积attention（scaled dot-Product attention）就是使用点积进行相似度计算的attention，只是多除了一个（为K的维度）起到调节作用，使得内积不至于太大。
+
+多头注意力（Multi-headed attention）:
+多头attention（Multi-head attention），Query，Key，Value首先进过一个线性变换，然后输入到放缩点积attention，
+注意这里要做h次，其实也就是所谓的多头，每一次算一个头。
+而且每次Q，K，V进行线性变换的参数W是不一样的。然后将h次的放缩点积attention结果进行拼接，再进行一次线性变换得到的值作为多头attention的结果。
+这样的好处是可以允许模型在不同的表示子空间里学习到相关的信息。
+
+多头自注意力机制（Multi-headed self-attention）：
+自注意力（self-attention），即 K=V=Q，例如输入一个句子，那么里面的每个词都要和该句子中的所有词进行attention计算。
+目的是学习句子内部的词依赖关系，捕获句子的内部结构。
+如果输入序列n小于表示维度d的话，每一层的时间复杂度self-attention是比CNN、RNN较有优势的。
+当输入序列n比较大时，每个词不是和所有词计算attention，而是只与限制的r个词去计算attention。
+在并行方面，多头attention和CNN一样不依赖于前一时刻的计算，可以很好的并行，优于RNN。
+在长距离依赖上，由于self-attention是每个词和所有词都要计算attention，所以不管他们中间有多长距离，最大的路径长度也都只是1。可以捕获长距离依赖关系。
+总结起来，多头自注意力的优势在于：每一层的复杂度，是否可以并行，长距离依赖学习
+
+Soft attention、global attention、动态attention
+    这三个其实就是Soft attention，也就是我们上面讲过的那种最常见的attention，是在求注意力分配概率分布的时候，
+    对于输入句子X中任意一个单词都给出个概率，是个概率分布，把attention变量,即上下文向量（context vecor）在经过了softmax过后的加权权值即为attention得分
+
+Hard attention
+    Soft是给每个单词都赋予一个单词match概率，那么如果不这样做，直接从输入句子里面找到某个特定的单词，然后把目标句子单词和这个单词对齐，
+    而其它输入句子中的单词硬性地认为对齐概率为0，这就是Hard Attention Model的思想。
+
+local attention
+    Soft attention 每次对齐的时候都要考虑前面的encoder的所有隐藏状态（hidden state，hi），所以计算量会很大，
+    因此一种朴素的思想是只考虑部分窗口内的encoder隐藏输出，其余部分为0，在窗口内使用softmax的方式转换为概率。
+    这个local attention相反概念的是global attention，global attention其实就是softmax attention，要考虑前面的encoder的所有隐藏状态。
+    local attention对于是时刻t的每一个目标词汇，模型首先产生一个对齐的位置 pt（aligned position），
+    context vector 由编码器中一个包含在窗口[pt-D,pt+D]中的隐藏层状态计算得到，D的大小通过经验选择。
+
+静态attention
+    静态attention：对输出句子共用一个第t步隐藏状态（st）的attention就够了，一般用在BiLSTM的首位hidden state输出拼接起来作为st
+
+key-value attention
+    Key-value attention 是将隐藏状态（hidden state，hi）拆分成了两部分[keyt;valuet]，
+    然后使用的时候只针对key部分计算attention权重，然后加权求和的时候只使用value部分进行加权求和。
+
+
+
+
