@@ -1,0 +1,9 @@
+
+github.io
+
+利用 Github pages 搭建静态网页项目时，Github 提个一个和用户名有关的免费域名：username.github.io 
+
+所以当发现一个 github.io 为后缀的网页时，可以轻易clone到本地，如：
+git clone http://github.com/username/username.github.io
+
+

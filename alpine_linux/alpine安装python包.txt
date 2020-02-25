@@ -1,4 +1,7 @@
 
+# 查找某个程序包的存在版本：
+~$ apk info -a grep
+
 1、安装numpy:
 RUN apk --update add --no-cache --virtual .build-deps \
         g++ \

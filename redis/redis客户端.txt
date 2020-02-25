@@ -1,0 +1,27 @@
+在桌面上新建一个名为`redis.desktop`的文件，当然也可以是其他的文件名，
+文件内容如下(保证对应的 Exec 命令能运行后，后面只需要双击该文件即可打开对应的客户端)：
+```
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+
+Encoding=UTF-8
+
+Name=Redis Web 客户端
+
+Comment=The Smarter Way to manage dadabase
+
+Exec=/usr/bin/mono "/home/gswyhq/github_projects/RedisReact/RedisReact-console.exe"
+
+Icon=/home/gswyhq/github_projects/RedisReact/redis.jpg
+
+Categories=Application;Database;Redis;React
+
+Version=1.0
+
+Type=Application
+
+Terminal=0
+
+```
+
+

@@ -10,4 +10,5 @@ ubuntu@54.222.11.43:~$ ssh -fCNL *:18002:localhost:7772 localhost
 第三步：外网访问内网
 gswewf@gswewf-PC:~$ ssh -p 18002 zy@54.222.11.43
 
+当然也可以通过代理工具平台进行设置管理：https://github.com/ehang-io/nps
 
