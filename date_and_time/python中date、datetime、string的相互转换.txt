@@ -66,6 +66,12 @@ Out[12]: '2017-04-14 14:56:09 093717'
 >>> b = time.mktime(time.strptime(a,"%a %b %d %H:%M:%S %Y"))
 >>> b
 1238250264.0
+# 若需要毫秒级的精度不丢失，需要如下转换：
+>>> datetime_obj = datetime.strptime('2020-02-27 20:31:57,609',"%Y-%m-%d %H:%M:%S,%f")
+>>> datetime_obj
+datetime.datetime(2020, 2, 27, 20, 31, 57, 609000)
+>>> time.mktime(datetime_obj.timetuple()) + datetime_obj.microsecond / 1e6
+1582806717.609
 
 datetime转化为时间戳：
 >>> time.mktime(datetime.datetime(2014,1,8,11,59,58).timetuple())

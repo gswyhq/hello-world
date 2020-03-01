@@ -1,4 +1,5 @@
 
+
 Name:LDC2013T21.tgz： https://wakespace.lib.wfu.edu/bitstream/handle/10339/39379/LDC2013T21.tgz?sequence=1
 
 toutiao_data.csv: 
@@ -352,6 +353,8 @@ dureader的文章title	20k类，大概可以生成 400K个不重复的句子对
 
 preprocessed
 百度知道数据；包括一些相似句等；
+来源：百度 智能问答大赛 
+https://www.kesci.com/home/competition/5ad56e667238515d80b53704/content/2
 
 nietzsche.txt
 #尼采的一些作品
