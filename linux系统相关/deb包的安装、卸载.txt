@@ -6,4 +6,6 @@ deb包是debian，ubuntu等LINUX发行版的软件安装包，是类似于rpm的
 打开终端后，输入：sudo dpkg -i package_file.deb
 但是在包含有依赖关系的安装包手动安装的过程中会出现安装不成功的问题，这时只需输入命令：sudo apt-get -f install 待命令执行完成，软件也就安装成功了。
 卸载安装包时，在终端中，输入:sudo dpkg -r package_name
+如果要卸载安装的应用我们通过“sudo dpkg -l”查看已经安装的软件,并找到自己的安装的软件名。
+最后使用”sudo dpkg -r 软件名“进行卸载。
 

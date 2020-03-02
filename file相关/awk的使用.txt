@@ -43,6 +43,25 @@ $ head ratings.csv |awk 'BEGIN{FS=","}''{print $3}'
 # 注意，两个单引号之间是没有空格的；或者改成：
 $ head ratings.csv |awk 'BEGIN{FS=","}{print $3}'
 
+# 输入分隔符也可以这样：
+head 主题分类数据.txt |awk -v FS="t" '{print $2}'
+
+# 输出分隔符：
+可以使用awk的内置变量OFS来设定awk的输出分隔符，当然，使用变量的时候要配合使用-v选项，示例如下:
+awk -v OFS="---" '{print $1,$2}' test1
+
+若输出的时候，不需要分隔符，只需要把逗号去掉即可
+awk '{print $1 $2}' 表示每行分割后，将第一列（第一个字段）和第二列（第二个字段）连接在一起输出。
+awk '{print $1,$2}' 表示每行分割后，将第一列（第一个字段）和第二列（第二个字段）以输出分隔符隔开后显示。
+
+# 将\t(文中一个'\'和一个't')，替换为：tab
+head /notebooks/data/主题分类数据.txt |awk -v OFS="\t" 'BEGIN{FS="\\\\t"}{print $1,$2}'
+
+# 字符串"\t"（是两个字符，而不是指tab）分割：
+awk 'BEGIN{FS="\\\\t"}{print $1,$2}' test1
+下面这样写却无效：
+awk -v FS="\\\\t" '{print $1,$2}' test1
+
 多分隔符：
 head io.log | awk -F "aaa|bbb" '{print $2}'
 
