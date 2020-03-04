@@ -69,3 +69,20 @@ grep -n 显示行号
 -a, --text equivalent to --binary-files=text
 即，让二进制文件等价于文本文件
 
+# 以一个文件的内容在另一个文件中过滤，筛选：
+gswyhq@gswyhq-PC:~$ cat a.txt
+100
+200
+300
+gswyhq@gswyhq-PC:~$ cat b.txt
+This is 100.
+That is 200.
+Hello 400.
+gswyhq@gswyhq-PC:~$ grep -f a.txt b.txt
+This is 100.
+That is 200.
+
+使用awk的话，可以这样awk 'NR==FNR{x[$0];next}{for(i in x)if($0~i)print}' a.txt b.txt
+
+
+

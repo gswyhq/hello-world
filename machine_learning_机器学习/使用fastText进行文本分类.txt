@@ -1,0 +1,43 @@
+
+# 安装
+pip3 install fastText==0.9.1 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+
+# 准备训练语料，格式如下：
+__label__教育 做 客 孩 子 临 走 时 带 走 几 只 玩 具 ， 我 的 孩 子 抗 拒 并 一 直 哭 ， 要 怎 么 开 导 ？ 
+__label__税务 在 四 大 做 税 务 的 工 作 体 验 如 何 ？
+
+当然，语料数据也可以是多标签的：
+__label__sauce __label__cheese How much does potato starch affect a cheese sauce recipe?
+__label__food-safety __label__acidity Dangerous pathogens capable of growing in acidic environments
+
+
+import fasttext
+
+train_file = "fastText_主题分类数据.txt" # 数据来源：webtext2019zh.zip -> web_text_zh_testa.json
+model = fasttext.train_supervised(train_file)
+
+def print_results(N, p, r):
+    # 通过在测试集上计算在P@1的准确度和召回率，（P@1 表示top1精确率，R@1表示top1召回率），使用如下测试函数
+    print("N\t" + str(N))
+    print("P@{}\t{:.3f}".format(1, p))
+    print("R@{}\t{:.3f}".format(1, r))
+
+print_results(*model.test('fastText_dev.txt'))
+
+ret = model.predict("怎 么 看 待 大 众 司 机 违 章 变 道 ， 被 比 亚 迪 司 机 碰 翻 一 事 ？")
+print(ret)
+
+model.save_model("model_filename.ftz")
+
+# 训练结果：
+root@0e100ce59d41:/notebooks/fastText# python3 train.py 
+Read 1M words
+Number of words:  5123
+Number of labels: 5464
+Progress: 100.0% words/sec/thread:    5806 lr:  0.000000 loss: 10.177662 ETA:   0h 0m
+N	7979
+P@1	0.180
+R@1	0.180
+(('__label__法律',), array([0.1387029]))
+
+
