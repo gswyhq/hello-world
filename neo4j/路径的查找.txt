@@ -136,3 +136,19 @@ MATCH p=(n:Admin_bussiness_site_web1_ai_16:Tongyong)-[*0..9]->()-[r:`理赔金�
 │保险金。"]                                                                │
 └──────────────────────────────────────────────────────────────────────┘
 
+根据最后一个节点的属性，查找对应的最长路径：
+MATCH p=(n:baoxianceshi2)-[*0..9]->(n1) 
+where EXISTS( last(nodes(p)).`保障期限`)
+with collect(p) as ps, MAX(length(p)) as max_len 
+UNWIND ps as p with p, max_len where length(p)=max_len
+return extract(n IN nodes(p)| n.name) + last(nodes(p)).`保障期限` AS extracted
+查询结果：
+╒════════════════════════════════════╕
+│"extracted"                         │
+╞════════════════════════════════════╡
+│["百年人寿","百年康惠保旗舰版重大疾病保险条款","至70周岁"] │
+├────────────────────────────────────┤
+│["中国人寿","中国人寿国寿爱无忧重大疾病保险","保障至85周岁"]│
+└────────────────────────────────────┘
+
+
