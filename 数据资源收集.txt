@@ -905,3 +905,36 @@ https://github.com/LIANGQINGYUAN/Q-A-TextClassification/blob/master/preprocess/t
 NLP 数据集囊括了 NER、QA、情感分析、文本分类、文本分配、文本摘要、机器翻译、知识图谱、语料库以及阅读理解等 10 大类共 142 个数据集。
 https://github.com/CLUEbenchmark/CLUEDatasetSearch
 
+语音语料Librispeech
+http://www.openslr.org/12
+dev-clean.tar.gz [337M]   (development set, "clean" speech )   Mirrors: [China]   
+dev-other.tar.gz [314M]   (development set, "other", more challenging, speech )   Mirrors: [China]   
+test-clean.tar.gz [346M]   (test set, "clean" speech )   Mirrors: [China]   
+test-other.tar.gz [328M]   (test set, "other" speech )   Mirrors: [China]   
+train-clean-100.tar.gz [6.3G]   (training set of 100 hours "clean" speech )   Mirrors: [China]   
+train-clean-360.tar.gz [23G]   (training set of 360 hours "clean" speech )   Mirrors: [China]   
+train-other-500.tar.gz [30G]   (training set of 500 hours "other" speech )   Mirrors: [China]   
+intro-disclaimers.tar.gz [695M]   (extracted LibriVox announcements for some of the speakers )   Mirrors: [China]   
+original-mp3.tar.gz [87G]   (LibriVox mp3 files, from which corpus' audio was extracted )   Mirrors: [China]   
+original-books.tar.gz [297M]   (Project Gutenberg texts, against which the audio in the corpus was aligned )   Mirrors: [China]   
+raw-metadata.tar.gz [33M]   (Some extra meta-data produced during the creation of the corpus )   Mirrors: [China]   
+md5sum.txt [600 bytes]   (MD5 checksums for the archive files )   Mirrors: [China]  
+
+wget -c -t 0 http://www.openslr.org/resources/12/dev-clean.tar.gz
+
+tar zxvf dev-clean.tar.gz
+LibriSpeech/LICENSE.TXT
+LibriSpeech/README.TXT
+LibriSpeech/CHAPTERS.TXT
+LibriSpeech/SPEAKERS.TXT
+LibriSpeech/BOOKS.TXT
+LibriSpeech/dev-clean/
+LibriSpeech/dev-clean/2277/
+LibriSpeech/dev-clean/2277/149896/
+LibriSpeech/dev-clean/2277/149896/2277-149896-0026.flac
+LibriSpeech/dev-clean/2277/149896/2277-149896-0005.flac
+LibriSpeech/dev-clean/2277/149896/2277-149896-0033.flac
+LibriSpeech/dev-clean/2277/149896/2277-149896-0006.flac
+...
+
+
