@@ -104,3 +104,11 @@ gswyhq@gswyhq-PC:~/hello-world/docker$ docker pull gswyhq/neural-painters@sha256
 sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd: Pulling from gswyhq/neural-painters
 Digest: sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
 Status: Image is up to date for gswyhq/neural-painters@sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
+
+# 使用国内镜像源加速拉取镜像：
+正常拉取镜像：docker pull ufoym/deepo
+使用网易镜像源加速下载：docker pull hub-mirror.c.163.com/ufoym/deepo
+使用中科大镜像源加速下载：docker pull docker.mirrors.ustc.edu.cn/ufoym/deepo
+
+
+
