@@ -103,6 +103,11 @@ core file size          (blocks, -c) 0
 
 这个时候，只有将宿主机的ulimit进行修改才可以；
 
+或者在启动的时候将启动命令由：
+command: /usr/src/app/docker-entrypoint.sh
+更新为：
+command:  ["/bin/sh", "-c", "ulimit -c 0 && /usr/src/app/docker-entrypoint.sh"]
+
 产生core文件的方法：
 1、允许core dump，或者用ulimit -c unlimited设置core dump文件的大小为unlimited；若是在docker容器内，则需要修改宿主机的ulimit 大小；
 2、编写测试文件
