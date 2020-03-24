@@ -24,3 +24,8 @@ match p=(n)-[t]->(m) where size((n)-->())=2 return n
 MATCH (n) WHERE n.name='姚明' WITH n LIMIT 1 MATCH p=(n)-[r]->(n1) RETURN p
 MATCH (n) WHERE n.name='姚明' WITH n LIMIT 1 MATCH p=(n)-[r]->(n1) RETURN n.name,type(r), n1.name
 
+# 对关系进行过滤,限定：
+MATCH p=(n0:Baoxianchanpin)-[r1]->(n1:Jibing {name: "恶性肿瘤"}) with collect(r1) as coll_r, n0
+WHERE any(r in coll_r where type(r)="保障疾病") and not any(r in coll_r where type(r)="免责疾病") 
+return n0.name as recommend_question order by n0.`推荐指数`
+

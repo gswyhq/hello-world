@@ -6,6 +6,9 @@ gswewf@gswewf-PC:~/graph_qa$ date -d "2013-02-03 -i -2 day" +"%Y-%m-%d %T"
 gswewf@gswewf-PC:~$ date_key=`date +%Y-%m-%d`
 gswewf@gswewf-PC:~$ echo $date_key
 2018-06-11
+# 获取当前时间精确到毫秒、微秒、纳秒
+gswyhq@gswyhq-PC:~$ date "+%F %T,%N"
+2020-03-24 09:04:23,993974168
 gswewf@gswewf-PC:~$ last_snapshot_name=`date +%Y%m%d --date="-7 day"`
 gswewf@gswewf-PC:~$ echo $last_snapshot_name
 20180604
