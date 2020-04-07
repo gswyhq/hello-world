@@ -1,0 +1,89 @@
+
+javascript代码
+
+# 对英文字符进行base64编码解码
+var str = 'javascript';
+
+// 编码
+window.btoa(str)  // "amF2YXNjcmlwdA=="
+
+// 解码
+window.atob("amF2YXNjcmlwdA==")  // "javascript"
+
+# 对中文字符进行base64编码解码
+var str = "China，中国"
+
+window.btoa(str)
+
+// 先对字符串进行编码
+encodeURIComponent(str) // "China%EF%BC%8C%E4%B8%AD%E5%9B%BD"
+
+// 编码
+window.btoa(encodeURIComponent(str))  // "Q2hpbmElRUYlQkMlOEMlRTQlQjglQUQlRTUlOUIlQkQ="
+
+// 解码
+decodeURIComponent(window.atob("Q2hpbmElRUYlQkMlOEMlRTQlQjglQUQlRTUlOUIlQkQ="))  // "China，中国"
+
+
+
+python3代码
+对英文字符进行base64编码解码
+import base64
+
+name = "javascript"
+
+# 编码
+base64.b64encode(name.encode())  # b'amF2YXNjcmlwdA=='
+
+# 解码
+base64.b64decode(b'amF2YXNjcmlwdA==').decode()  # javascript
+
+
+对中文字符进行base64编码解码
+
+name = "China，中国"
+
+# 编码
+base64.b64encode(name.encode())  # b'Q2hpbmHvvIzkuK3lm70='
+
+# 解码
+base64.b64decode(b'Q2hpbmHvvIzkuK3lm70=').decode()  # China，中国
+
+
+总结：
+js和py3对英文的处理方式基本一致，编码结果也一样
+发现，js对中文编码会报错，py对中文可以直接编码
+
+按照js的思路，先按照URI的编码方式将字符编码
+
+
+from urllib.request import quote, unquote
+ 
+name = "China，中国"
+
+# 先对文字进行url方式编码
+quote(name)  # 'China%EF%BC%8C%E4%B8%AD%E5%9B%BD'
+
+# 编码
+base64.b64encode(quote(name).encode()) 
+# b'Q2hpbmElRUYlQkMlOEMlRTQlQjglQUQlRTUlOUIlQkQ='
+
+# 解码
+unquote(base64.b64decode(b'Q2hpbmElRUYlQkMlOEMlRTQlQjglQUQlRTUlOUIlQkQ=').decode())
+# China，中国
+
+总结：
+
+语言	编码	解码
+javascript	window.btoa(encodeURIComponent(s))	decodeURIComponent(window.atob(b))
+pyhton	base64.b64encode(quote(s).encode())	unquote(base64.b64decode(b).decode())
+其中：
+s 表示字符串
+b 表示编码后的字符
+
+————————————————
+
+版权声明：本文为CSDN博主「彭世瑜」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+
+原文链接：https://blog.csdn.net/mouday/java/article/details/83027613
+
