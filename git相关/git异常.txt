@@ -87,5 +87,12 @@ github.com
 3.刷新DNS缓存
 sudo /etc/init.d/networking restart
 
+删除远程github的master分支报错：
+ ! [remote rejected] master (refusing to delete the current branch: refs/heads/master)
+error: 无法推送一些引用到 ******
+解决方案：
+第一步：git config receive.denyDeleteCurrent false
+第二步：登录github,进入对应仓库-> Settings -> Branches -> 修改 Default branch; 即将默认的分支修改为非master分支。
+第三步：git push origin  :master
 
 
