@@ -285,3 +285,9 @@ https://github.com/autoliuweijie/K-BERT
 股票数据可视化
 https://github.com/michaelguan/michaelguan.github.io
 
+人像转卡通
+将真实照片转换为卡通风格的非真实感图像
+选择生成图像的滤镜和风格，如怀旧、字云、素描、剪纸、豹纹等。
+https://github.com/minivision-ai/photo2cartoon
+https://mp.weixin.qq.com/s/Apy3yqyo-VHTwtjr9xTrxA
+
