@@ -48,3 +48,18 @@ none            100M     0  100M   0% /run/user
 
 参考：http://bruce007.blog.51cto.com/7748327/1322236
 
+u盘出现不可创建文件夹，不可删除文件
+无法创建目录"××××": 只读文件系统
+无法访问'*****': 输入/输出错误
+问题原因：
+之前u盘非正常插拔所致；
+解决方案：
+1，找到U盘挂载目录
+gswyhq@gswyhq-PC:~$ df -lh
+/dev/sdb1        15G  5.7G  9.2G   39% /media/gswyhq/DEEPINOS
+2，卸载U盘
+gswyhq@gswyhq-PC:~$ sudo umount /dev/sdb1
+3，修复U盘
+gswyhq@gswyhq-PC:~$ sudo dosfsck -v -a /dev/sdb1
+4，拔掉U盘，重新插入USB即可；
+
