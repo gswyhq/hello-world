@@ -1,0 +1,13 @@
+
+from flask import request
+
+curl发送json的方法：curl -H "Content-Type: application/json" -X POST  --data '{"uid":"1"}'  http://127.0.0.1:8088/v1/intelli_press_end
+
+python的接收json的方法：uid = request.json.get('uid')
+
+ 
+
+curl发送form的方法：curl -X POST  --data 'uid=2&stop_type=normal'  http://127.0.0.1:8088/v1/intelli_press_end
+
+flask接收form的方法：uid = request.form['uid']
+
