@@ -68,3 +68,5 @@ for i,sentence in enumerate(answer):
 #
 # 此外，由于各项任务共享词表、词嵌入，即使不切换模型的分词风格，模型对繁体字、英文字母、数字均具有一定识别能力。
 
+# 利用下载好了模型的docker镜像，直接使用示例：
+# docker run --rm -it -w /root gswyhq/fasthan:1.2 python3 使用fastHan理中文分词、词性标注、依存分析、命名实体识别四项任务.py
