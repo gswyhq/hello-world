@@ -1,0 +1,243 @@
+
+SoX 可以读取和写入常见格式的音频文件，并在此过程中选择性的加入一些声音效果。
+SoX 工具的所有功能都可以通过一个简单的sox命令及相应的选项实现。
+但它同时提供了play命令用于播放音频文件，rec命令用于录制音频，以及 soxi命令用于获取音频的文件头中包含的信息。
+
+soxi或 sox --i命令可以通过分析音频文件的文件头，获取其元数据（如通道数、采样率、编码等）。
+
+# 查看音频文件信息
+# sudo apt-get install sox
+# 通过 apt-get install sox 是不支持 mp3 格式语音转换,会报如下错误：
+soxi FAIL formats: no handler for file extension `mp3'
+解决方案：卸载重新安装，如：
+apt-get remove sox
+sudo apt-get install libsox-fmt-mp3 sox libchromaprint-dev
+或者：apt-get install libsox-fmt-all sox libchromaprint-dev
+
+sox 不支持MP3格式，可以将MP3格式转换为wav;
+# mp3 -> wav
+apt-get install lame
+lame --decode music.mp3 music.wav
+
+# 采样频率(sample rate)
+# root@fd2e4bb3039f:~/masr# soxi 作品1号.wav
+#
+# Input File     : '作品1号.wav'
+# Channels       : 2
+# Sample Rate    : 44100
+# Precision      : 16-bit
+# Duration       : 00:02:58.70 = 7880832 samples = 13402.8 CDDA sectors
+# File Size      : 31.5M
+# Bit Rate       : 1.41M
+# Sample Encoding: 16-bit Signed Integer PCM
+
+#～$ soxi 作品1号.mp3
+Input File     : '作品1号.mp3'
+Channels       : 2
+Sample Rate    : 44100
+Precision      : 16-bit
+Duration       : 00:02:58.71 = 7881067 samples = 13403.2 CDDA sectors
+File Size      : 4.29M
+Bit Rate       : 192k
+Sample Encoding: MPEG audio (layer I, II or III)
+
+soxi 命令跟上某个特定的选项可以只获取该选项对应的信息，如只显示某音频文件 Faded.wav的比特率（Bit Rate）：
+root@fd2e4bb3039f:~/masr# soxi -B 作品1号.wav
+1.41M
+
+# 比特率=采样率(Sample Rate)X采样精度（位数,Precision）(*通道数,Channels)
+# 44100*16*2= 1.4112M
+
+播放与录制
+play 和rec 命令提供了最基本的播放和录制功能。
+播放：$ play existing-file.wav
+录制：$ rec new-file.wav
+
+上述命令等同于 sox 命令的如下形式：
+$ sox existing-file.wav −d（播放）和sox −d new-file.wav（录制）
+其中-d 选项用于指定播放或录制时使用的音频设备，不指定时则表示使用默认设备。
+
+可以这样理解：
+
+sox existing-file.wav -d 就是从existing-file.wav文件中读取其包含的音频数据，再输出到-d（默认音频设备，扬声器）进行播放；
+-sox -d new-file.wav就是从-d（默认音频设备，麦克风）中读取音频数据，再输出（录制）到new-file.wav文件中。
+
+其实都遵循了一个基本的格式，即sox <input> <output>。而其中的<input>和 <output> 根据需要既可以为某个具体的音频文件，也可以是某个具体的音频设备。
+
+播放或录制的同时，也可以对音频文件应用指定的编辑操作或效果选项，因此在对音频数据应用某效果前，可以先使用 play 命令进行“预览”。
+
+如 trim效果可以从音频文件中裁剪提取指定的片段到输出文件。play命令通过该效果可以直接播放指定片段：
+
+$ play foo.wav trim 10.0 5.0或 $play foo.wav trim 10.0 =15.0
+播放foo.wav 文件中 10-15s 之间的音频片段
+
+gswyhq@gswyhq-PC:~/github_projects/masr$ play 作品1号.wav
+
+作品1号.wav:
+
+ File Size: 31.5M     Bit Rate: 1.41M
+  Encoding: Signed PCM
+  Channels: 2 @ 16-bit
+Samplerate: 44100Hz
+Replaygain: off
+  Duration: 00:02:58.70
+
+In:55.9% 00:01:39.85 [00:01:18.86] Out:4.40M [ -====|====- ] Hd:4.2 Clip:0
+
+音频格式转换
+文件格式类型
+
+对于音频数据格式的描述，主要通过以下 4 种属性：
+
+采样率（sample rate）：指声音由模拟信号转换成数字信号的过程中，每秒从连续信号中提取的用于组成离散信号的样本个数。
+音频CD所用的采样率为 44100 Hz，数字音频磁带和许多计算机系统使用 48000 Hz，专业级音频系统通常使用 96000 Hz。
+采样大小（sample size 或 Precision）：音频采样时用于存储每个样本的数据位数（bits）。
+如今 16 bit 的采样大小已被广泛使用，24 bit 主要用于专业音频领域。
+编码格式（data encoding）：即每个音频样本的表示（即“编码”）方式。常用的编码类型包括 floating-point、μ-law、ADPCM、singed-integer PCM、MP3 和 FLAC 等。
+通道（channel）：即文件中包含的音频通道的数量。其中单声道（mono）和双声道（stereo）是最常见的两种，“环绕声”音频（Surround sound）通常包含六个或更多声道。
+此外，音频文件还使用比特率（Bit Rate）表示一个单位时间内编码音频信号占用的存储空间大小， 它的数值一般取决于所有的上述四个参数。
+MP3 编码的立体声音乐通常具有 128-196kbps 的比特率， FLAC 编码的立体声音乐通常具有 550-760kbps 的比特率。
+
+格式转换
+
+形式最简单的 sox 命令即使用两个文件名作为参数，如：
+$ sox Faded.wav Faded.mp3：将 Faded.wav文件的格式由 wav 转为 mp3
+
+上述命令执行时，SoX 会先从Faded.wav文件中读取音频数据，再将其输出到 Faded.mp3文件中。而 SoX 程序会根据参数中文件名的后缀推断出相应的格式，并在复制音频数据的过程中自动进行转码。
+
+SoX 可以处理 self-describing 和 raw 格式的音频文件。
+self-describing 格式（如 WAV、FLAC、MP3）的文件包含一个用于描述信号和编码属性的文件头，而 raw 或 headless 格式的音频则不包含这些信息。
+
+所以当 raw 格式的音频作为输入文件时，需要在 sox 命令的格式选项里指定其信号和编码属性。
+常用的音频格式选项：
+
+选项	描述
+-b, --bits BITS	每个编码样本占用的数据位数
+-c, --channels CHANNELS	音频文件包含的通道数
+-e, --encoding ENCODING	音频文件的编码类型
+-r, --rate RATE	音频文件的采样率
+-t, --type FILE-TYP	E音频文件的文件类型
+上述选项适用于输入或输出文件，主要用于说明 raw（或 headless）文件作为输入时的格式信息，或格式转换时指定输出文件的具体参数。
+
+$ sox −r 48k −e float −b 32 −c 2 input.raw output.wav
+将某个特定的 raw 格式的音频文件转换为 wav 格式
+
+$ sox Faded.wav Faded.raw
+将音频文件 Faded.wav 转为 raw 格式
+
+$ play -r 44800 -b 16 -e signed-integer -c 2 Faded.raw
+播放 raw 格式的音频文件
+
+$ sox Faded.wav -c 1 Faded-mono.wav
+将 Faded.wav 文件转换成单声道（-c 1）后输出
+
+三、音频效果
+SoX 工具可以在音频处理的过程中，对输入的音频数据应用众多的效果。
+可以使用如下命令查看所有效果的帮助信息：
+
+
+以下是一些简单的应用场景。
+
+1. 更改声道数
+sox 命令可以更改音频文件中声道的数目，如将单声道音频转换成双声道：
+$ sox foo.wav foostereo.wav channels 2 或 $ sox foo.wav -c 2 foostereo.wav
+
+但是上述命令并没有创建一个“真实”的双声道音频，而是将单声道音频复制成完全一致的两个声道再合并到输出文件中。
+
+可以通过 sox 命令的 -M 选项将左右两个声道的单声道音频合并成一个双声道文件：
+$ sox -M left.wav right.wav stereo.wav
+
+当然，也可以通过对双声道文件中两个声道的均一化处理，将其输出为单声道音频：
+$ sox original.wav mono.wav channels 1 或$ sox original.wav -c 1 mono.wav
+remix
+
+通过 sox 命令的 remix 效果也可以完成对声道数据的提取或融合。
+
+提取双声道音频文件中单个声道的数据并作为单声道音频输出：
+$ sox stereo.wav left.wav remix 1（提取左声道音频）
+$ sox stereo.wav right.wav remix 2（提取右声道音频）
+
+融合双声道文件中两个声道的音频数据并作为单声道音频输出：
+$ sox stereo.wav mono.wav remix 1,2 或
+$ sox stereo.wav mono.wav remix 1-2
+
+此外，remix 还可以将输入文件中的多个声道数据分别进行融合。
+如使用 -M选项将两个双声道音频合并，再通过 remix 将合并得到的四个声道两两融合，生成一个只包含两个声道的输出文件。
+$ sox -M stereo1.wav stereo2.wav output.wav remix 1,3 2,4
+
+2. 改变音量
+sox命令的-v选项可以用来（成倍地）改变音量的大小：
+$ sox -v 0.5 foo.wav bar.wav
+上述命令将foo.wav音频放大 0.5 倍音量后输出至bar.wav文件
+
+可以将音量放大功能与 stat效果结合。
+以 sox foo.wav -n stat -v命令返回的数字作为放大倍数，将最大化 foo.wav的音量而不至于出现削波：
+
+$ sox foo.wav -n stat -v 2> vc
+$ sox -v `cat vc` foo.wav foo-maxed.wav
+
+此外，还有一个选项 --norm 用来归一化音频响度。为了最大化音频的声音强度，可以在处理输入音频时将该选项设置为 -1：
+sox --norm=-1 <inputfile> <outputfile>
+
+3. 提取文件的某个部分
+sox 命令的 trim效果可以将输入音频的某一段裁剪出来并提取到输出文件中。
+
+trim 接收两个参数，一个作为裁剪片段的起始位置，另一个作为该片段持续的时间。
+可以使用整数+s格式的参数以样本个数作为计量单位，也可以直接使用 ((hh:)mm:)ss(.fs)形式的时间参数。当参数为纯整数时，单位为秒。
+
+$ sox Input.wav Half1.wav trim 0 30:00 截取输入文件中前 30 分钟的音频
+$ sox Input.wav Half2.wav trim 30:00 30:00 截取输入文件中从第 30 分钟开始到第 60 分钟的音频
+
+4. 拼接文件
+与前面裁剪提取的操作相反，sox 命令还可以实现对两个或多个音频文件的拼接。
+
+$ sox Half1.wav Half2.wav Full.wav
+将 Half1.wav 和Half2.wav合并至Full.wav 文件。注意合并前的音频文件需保持一致的类型和采样率等。
+
+5. 合成音频
+sox 命令可以通过synth效果合成许多标准波形和噪声类型。
+
+$ sox -n sine.wav synth 1.0 sine 1000.0
+合成频率为 1000 Hz 长度为 1 秒的正弦波，保存至 sine.wav 文件中。
+
+synth 支持合成的声音类型包括 sine、square、triangle、sawtooth、trapetz (trapezoidal)、exp (exponential)、whitenoise、pinknoise 和 brownnoise。
+
+6. 静音效果
+sox 命令可以创建静音状态的音频片段，使用-n选项表示没有输入，通过trim效果指定需要静音的片段。
+
+$ sox -n -r 48000 silence.wav trim 0.0 0.250
+在 slience.wav文件中创建一段长度为 250ms 采样率为 48000Hz 的静音片段。
+
+7. 混合音频
+sox 命令的 -m选项可以将两个音频文件混合以后生成输出文件。
+
+$ sox -m sine100.wav sine250.wav sine100-250.wav
+将sine100.wav 和 sine250.wav 两个音频文件融合以后作为sine100-250.wav文件的音频数据。
+
+$ sox -m -v0.5 music.mp3 -v2 speech.wav presentation.wav
+将背景音乐（music.mp3）音量降低一半后与放大 2 倍音量的人声数据（speech.wav）融合。
+如果不确定融合效果，可以先通过 play 命令使用相同的参数对结果进行“预览”：
+
+$ play -m -v0.5 music.mp3 -v2 speech.wav
+
+PS：
+
+与前面的-M 选项不同，-m选项倾向于对声道数据的混合，即两个单声道文件通过 -m混合以后输出仍是单声道数据。输出文件中的单个声道包含了输入的两个声道的特征。
+
+而 -M 选项更倾向于对音频文件的合并，默认不对声道数据进行混合。所以两个单声道文件通过 -M 合并以后默认输出双声道音频。输出文件中的两个声道分别对应于输入的两个声道（数据没有混合）。除非通过-c选项手动指定输出文件的声道数量。
+
+8. 改变播放速度
+可以通过 stretch 效果改变音频文件的播放速度，同时不会导致音高的变化。
+
+如以 2x 倍速播放 Faded.wav文件：
+$ play Faded.wav stretch 0.5
+
+也可以通过speed效果调节播放速度（相应地音高也会发生变化）：
+$ play Faded.wav speed 2
+
+此外，可以使用 pitch 效果调节音频片段的音高，以音分（cents）为单位。
+
+$ play Faded.wav pitch 200
+将 Faded.wav 文件中的音频提高 200 音分，即提高 2 个半音的音程（每一个半音的音程等于 100 音分）。
+
+资料来源：https://blog.csdn.net/qq_39516859/article/details/87980189
