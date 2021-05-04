@@ -1,0 +1,17 @@
+
+问题：使用BeautifulSoup对网页进行解析，想要获取网页的数据，如下代码：
+soup = BeautifulSoup( resp.text, 'lxml' )
+结果发现根据特定的id找不到对应那个标签，还出现找到了标签，但是标签结构破坏的情况
+
+解决方法：
+可能是因为使用的解析器为"lxml"，需要解析的文档太大，解析器的缓存不够而导致了数据的丢失。
+把解析器换成"html.parser"，如下代码：
+soup = BeautifulSoup( resp.text, 'html.parser' )
+
+一些BeautifulSoup常见的解析器：
+解析器 使用方法    优势  劣势
+Python标准库        BeautifulSoup(markup, "html.parser")	    Python的内置标准库;执行速度适中;文档容错能力强                    Python 2.7.3 or 3.2.2)前 的版本中文档容错能力差
+lxml HTML 解析器	BeautifulSoup(markup, "lxml")	            速度快;文档容错能力强                                             需要安装C语言库
+lxml XML 解析器	    BeautifulSoup(markup, ["lxml", "xml"])BeautifulSoup(markup, "xml")	   速度快;唯一支持XML的解析器             需要安装C语言库
+html5lib	        BeautifulSoup(markup, "html5lib")	        最好的容错性;以浏览器的方式解析文档;生成HTML5格式的文档           速度慢
+

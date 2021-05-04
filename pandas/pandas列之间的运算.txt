@@ -1,0 +1,91 @@
+
+pandas 实现对一行中的多个列运算 ，生成新的列的方法:
+df = pd.DataFrame({'A':[1,2,3], 'B':[8,9, 10]})
+df
+Out[4]:
+   A   B
+0  1   8
+1  2   9
+2  3  10
+df.eval('c=A/B')
+Out[5]:
+   A   B         c
+0  1   8  0.125000
+1  2   9  0.222222
+2  3  10  0.300000
+
+# 默认情况下是 inplace=False
+inplace参数： 是否在原数据上操作。
+inplace=False 将会生成新的DataFrame
+
+df.eval('c=A/B', inplace=True)
+df
+Out[10]: 
+   A   B         c
+0  1   8  0.125000
+1  2   9  0.222222
+2  3  10  0.300000
+
+当然也可以一次同时操作几个列：
+df.eval('''C=A+B
+        D=A-B
+        E=A*B
+        F=A/B
+        G=A**B''', inplace=False)
+Out[12]: 
+   A   B   C  D   E         F        G
+0  1   8   9 -7   8  0.125000      1.0
+1  2   9  11 -7  18  0.222222    512.0
+2  3  10  13 -7  30  0.300000  59049.0
+
+# 按列的数值进行过滤，如：
+df = pd.DataFrame({'A':[1,2,3], 'B':[8,9, 10]})
+df
+Out[14]:
+   A   B
+0  1   8
+1  2   9
+2  3  10
+df.query('A>=2')
+Out[15]:
+   A   B
+1  2   9
+2  3  10
+
+# 同样inplace参数若真时，会在原DataFrame上操作；若inplace为默认假，则会生成一个新的DataFrame。
+df.query('A>=2', inplace=True)
+df
+Out[17]: 
+   A   B
+1  2   9
+2  3  10
+
+另外有时候，列名如内置变量名重叠了，会出现类似下面的错误：
+NumExprClobberingError: Variables in expression "(sum) > (0)" overlap with builtins: ('sum')
+解决方案：
+重新赋值给另一个新的列名，如：df['new_sum']=df['sum'], 再用新的列名进行计算；
+
+# 需要注意的是NAN值问题，NAN值会无法计算。因此执行前，需要先替换掉NAN值.
+df.fillna(0.0,inplace=True) 
+
+# 一般情况下，np.nan和None到了df中都被转化成了np.nan
+df = pd.DataFrame(dict(a=range(5), b=[5, np.nan, 7, 8, None]))
+df
+Out[44]:
+   a    b
+0  0  5.0
+1  1  NaN
+2  2  7.0
+3  3  8.0
+4  4  NaN
+但有些时候，np.nan和None就不等价了：
+x, y = None, np.nan
+[x==None, y==np.nan, x is None, y is np.nan]
+Out[62]: [True, False, True, True]
+pd.isna(y)
+Out[63]: True
+pd.isna(x)
+Out[64]: True
+
+
+

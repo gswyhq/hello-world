@@ -108,4 +108,6 @@ neo4j> CALL apoc.periodic.commit('MATCH (n:Baoxian) WITH n LIMIT $limit DELETE n
 
 1 row available after 800171 ms, consumed after another 0 ms
 
+CALL apoc.periodic.list()
+列出所有在后台运行的查询任务。
 

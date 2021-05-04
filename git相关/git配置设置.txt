@@ -4,6 +4,9 @@ git config --global credential.helper 'cache --timeout 36000'
 git config --global credential.helper erase
 git config --global credential.helper store
 
+git重置账号密码：
+git config --system --unset credential.helper
+
 credential.helper的几种模式：
 默认所有都不缓存。 每一次连接都会询问你的用户名和密码。
 “cache”模式会将凭证存放在内存中一段时间。 密码永远不会被存储在磁盘中，并且在15分钟后从内存中清除。

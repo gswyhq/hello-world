@@ -1,0 +1,8 @@
+
+soup = BeautifulSoup(html)
+nameTags = soup.findAll('div',{"name":True})
+for n in nameTags:
+    name = n['name']
+
+传递第二个参数{"name":True}将结果限制为div具有name属性的标记。如果你正在寻找具有标签特定值的name标签，可以通过{"name":"specificNameValue"}
+

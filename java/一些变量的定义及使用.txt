@@ -1,0 +1,21 @@
+# 字典，列表的使用：
+List<JSONObject> retList = new ArrayList<>();
+Object [][] data=new Object[][]{{0, 2,"元/次"},{0, 1000, "元/月"},{0, 10000, "元"}};
+for (int i = 0; i < data.length; i++) {
+    JSONObject retJson=new JSONObject();
+    retJson.put("minPrice", data[i][0]);
+    retJson.put("maxPrice", data[i][1]);
+    retJson.put("modeName", data[i][2]);
+    retList.add(retJson);
+}
+
+
+# 二维列表的定义及使用：
+int [][] arr=new int[][]{{4,5,6,8},{2,3},{1,6,9}}; 
+System.out.println(arr.length);//输出行数
+System.out.println(arr[0].length);//输出列数
+
+
+
+
+

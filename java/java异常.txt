@@ -1,0 +1,37 @@
+
+运行Java项目报错：
+如运行：java项目目录\reveal\src\main\java\com\ppaa\bbd\reveal\RevealApplication.java
+报错：java: 程序包org.apache.commons.csv不存在
+解决方案：
+在pom.xml文件中添加：
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-csv</artifactId>
+    <version>3.4</version>
+</dependency>
+
+# java异常捕获 获取异常的详细信息
+如果需要访问异常对象的详细信息，可以在catch代码块中调用对应的方法来访问
+以下几个方法为获取异常相关信息：
+getMessage（）返回改异常信息的详细描述
+printStacktrace（）将改异常的跟踪栈信息输出到标准错误输出
+printStackTrace（PrintStream S）将该异常信息输出到指定的输出流
+getStarckTrace（）返回该异常的跟踪栈信息
+示例：
+
+import java.io.FileInputStream;
+import java.io.IOError;
+import java.io.IOException;
+ 
+public class AccessException {
+ 
+    public static void main(String args[]){
+        try{
+            FileInputStream fis = new FileInputStream("a.txt");
+        }catch (IOException ioe){
+            System.out.println(ioe.getMessage());
+            ioe.printStackTrace();
+        }
+    }
+}
+

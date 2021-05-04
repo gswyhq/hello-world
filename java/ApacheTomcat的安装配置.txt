@@ -1,0 +1,32 @@
+
+Tomcat 是一个小型的轻量级应用服务器
+
+Eclipse创建maven项目,可以创建java项目，也可以创建java web项目；
+打开eclipse，file—》new —》project，选择Maven—》Maven Project，
+点击Next
+Artifact ID选择 maven-archetype-quickstart;
+若是web项目则选择maven-archetype-webapp，点击Next：
+Group ID可以是com.test; Artifact ID 可以是 testDemo;
+再点击 Finish完成；
+
+
+# Apache Tomcat 配置设置
+eclipse中选中项目，右键，选择 properties,找到 maven, 点击 Targeted Runtimes;
+点击 New... 选择对应Tomcat版本，如 Apache Tomcat v8.5, 再点击 Next;
+在 Tomcat installation directory下，选择 Browse...;
+找到apache-tomcat的解压路径，如：D:\Users\user123\apache-tomcat-8.5.65；
+点击Finish完成；
+勾选上Apache Tomcat v8.5,并点击Apply.
+
+# 启动一个tomcat服务；
+在项目上面，右键，Run as -> Run on Server；
+若之前启动过，则选择“Choose an existing server”;
+否则选择“Manually define a new server”, 并在“Select the server type”下选择：
+Apache -> Tomcat版本，如：Tomcat v8.5 Server -> Finish;
+再浏览器打开，http://localhost:8080/testDemo/
+
+# 如何删除，暂停或重新启动Tomcat Server:
+在 eclipse 菜单中依次选择 Window→Show View→Server→Servers，打开这个服务窗口,
+找到已存在的server, 选中右键，选择：Delete, Stop, 或者 Restart；
+
+

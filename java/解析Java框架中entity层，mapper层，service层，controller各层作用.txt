@@ -1,0 +1,170 @@
+一、entity层
+别名： model层 ，domain层
+用途： 实体层，用于存放我们的实体类，与数据库中的属性值基本保持一致，实现set和get的方法。
+例子：user表的实体User
+
+public class User {
+    /**
+     * 用户id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * 用户昵称
+     */
+    private String nick;
+
+    /**
+     * 手机号
+     */
+    private String mobile;
+
+    /**
+     * 头像地址
+     */
+    @Column(name = "head_image_url")
+    private String headImageUrl;
+
+
+    /**
+     * 获取用户id
+     *
+     * @return id - 用户id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * 设置用户id
+     *
+     * @param id 用户id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取用户昵称
+     *
+     * @return nick - 用户昵称
+     */
+    public String getNick() {
+        return nick;
+    }
+
+    /**
+     * 设置用户昵称
+     *
+     * @param nick 用户昵称
+     */
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
+    /**
+     * 获取手机号
+     *
+     * @return mobile - 手机号
+     */
+    public String getMobile() {
+        return mobile;
+    }
+
+    /**
+     * 设置手机号
+     *
+     * @param mobile 手机号
+     */
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    /**
+     * 获取头像地址
+     *
+     * @return head_image_url - 头像地址
+     */
+    public String getHeadImageUrl() {
+        return headImageUrl;
+    }
+
+    /**
+     * 设置头像地址
+     *
+     * @param headImageUrl 头像地址
+     */
+    public void setHeadImageUrl(String headImageUrl) {
+        this.headImageUrl = headImageUrl;
+    }
+
+
+}
+
+
+二、mapper层
+别名： dao层
+用途： 对数据库进行数据持久化操作，他的方法语句是直接针对数据库操作的，主要实现一些增删改查操作，在mybatis中方法主要与与xxx.xml内相互一一映射。
+示例：userMapper
+
+public interface userMapper {
+    int deleteByPrimaryKey(Long id);
+    int insert(user record);
+    int insertSelective(user record);
+    user selectByPrimaryKey(Long id);
+    int updateByPrimaryKeySelective(user record);
+    int updateByPrimaryKey(user record);
+}
+
+三、service层
+用途：业务service层，给controller层的类提供接口进行调用。一般就是自己写的方法封装起来，就是声明一下，具体实现在serviceImpl中。
+示例：UserService
+
+public interface UserService extends Service<User> {
+}
+
+四、controller层
+别名：web 层
+用途： 控制层，负责具体模块的业务流程控制，需要调用service逻辑设计层的接口来控制业务流程。因为service中的方法是我们使用到的，controller通过接收前端H5或者App传过来的参数进行业务操作，再将处理结果返回到前端。
+示例：UserController
+
+@RestController
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    private UserService userService;
+
+    @PostMapping("/add")
+    public Result add(User user) {
+        userService.save(user);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @PostMapping("/delete")
+    public Result delete(@RequestParam Integer id) {
+        userService.deleteById(id);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @PostMapping("/update")
+    public Result update(User user) {
+        userService.update(user);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @PostMapping("/detail")
+    public Result detail(@RequestParam Integer id) {
+        User user = userService.findById(id);
+        return ResultGenerator.genSuccessResult(user);
+    }
+
+    @PostMapping("/list")
+    public Result list(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "0") Integer size) {
+        PageHelper.startPage(page, size);
+        List<User> list = userService.findAll();
+        PageInfo pageInfo = new PageInfo(list);
+        return ResultGenerator.genSuccessResult(pageInfo);
+    }
+}

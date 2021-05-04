@@ -91,6 +91,86 @@ y_test = [0, 0, 2, 2, 1]
 target_names = ['class 0', 'class 1', 'class 2']
 print(classification_report(y_true, y_test, target_names=target_names))
 
+# 多分类的计算
+# 'micro':通过先计算总体的TP，FN和FP的数量，再计算F1
+# 'macro':分布计算每个类别的F1，然后做平均（各类别F1的权重相同）
+# 宏平均（macro-average）和微平均（micro-average）
+# 在n个二分类混淆矩阵上要综合考察评价指标的时候就会用到宏平均和微平均。宏平均（macro-average）和微平均（micro-average）是衡量文本分类器的指标。
+# 宏平均（Macro-averaging），是先对每一个类统计指标值，然后在对所有类求算术平均值。宏平均指标相对微平均指标而言受小类别的影响更大。
+# 微平均（Micro-averaging），是对数据集中的每一个实例不分类别进行统计建立全局混淆矩阵，然后计算相应指标。
+
+# 二分类
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+y_true = [0, 1, 1, 0, 1, 0]
+y_pred = [1, 1, 1, 0, 0, 1]
+
+Accuracy = accuracy_score(y_true, y_pred)  # 注意没有average参数
+Precision = precision_score(y_true, y_pred, average='binary')
+recall = recall_score(y_true, y_pred, average='binary')
+f1score = f1_score(y_true, y_pred, average='binary')
+
+# 微平均（Micro-averaging）
+y_true = [1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4]
+y_pred = [1, 1, 1, 0, 0, 2, 2, 3, 3, 3, 4, 3, 4, 3]
+# 首先计算总TP值(正真)，TN值(真负,预测为不是此类，实际上也不是此类)，这个很好就算，就是数一数上面有多少个类别被正确分类，比如1这个类别有3个分正确，2有2个，3有2个，4有1个，那TP=3+2+2+1=8
+# 其次计算总FP值(假正,预测为此类实际上不是此类)，简单的说就是不属于某一个类别的元数被分到这个类别的数量，比如上面不属于4类的元素被分到4的有1个
+# 如果还比较迷糊，我们在计算时候可以把4保留，其他全改成0，就可以更加清楚地看出4类别下面的FP数量了，其实这个原理就是 One-vs-All (OvA)，把4看成正类，其他看出负类
+
+# 同理我们可以再计算FN(假负,预测为不是此类实际上是此类)的数量
+
+#   	0类	1类	2类	3类	4类	总数
+# TP	0	3	2	2	1	8
+# TN	12	9	10	8	11	50
+# FP	2	0	0	3	1	6
+# FN	0	2	2	1	1	6
+
+# 所以micro的 精确度P 为 TP/(TP+FP)=8/(8+6)=0.5714    召回率R TP/(TP+FN)=8/(8+6)=0.571   所以F1-micro的值为：0.6153
+
+# 准确率
+acc = 8/14
+Out[44]: 0.5714285714285714
+accuracy_score(y_true, y_pred)
+Out[31]: 0.5714285714285714
+# 微平均精确率
+precision_score(y_true, y_pred, average='micro')
+Out[29]: 0.5714285714285714
+# 微平均召回率
+recall_score(y_true, y_pred, average='micro')
+Out[32]: 0.5714285714285714
+# 微平均f1
+f1_score(y_true, y_pred, average='micro')
+Out[33]: 0.5714285714285714
+# f1 = 2 * p * r / (p + r )
+2 * (8/14) * (8/14) / ((8/14) + (8/14) )
+Out[53]: 0.5714285714285714
+
+
+
+# 宏平均精确率, “宏查准率”（macro-P）
+precision_score(y_true, y_pred, average='macro')
+Out[30]: 0.58
+# 每一类的精确率再求平均
+# p = tp / (tp + fp )  # 精确率，预测为正的样本中有多少是真正的正样本
+sum([0/2, 3/3, 2/2, 2/5, 1/2])/5
+Out[51]: 0.58
+
+# 宏平均召回率, “宏查全率”（macro-R）
+recall_score(y_true, y_pred, average='macro')
+Out[34]: 0.4533333333333333
+# r = tp / (tp + fn )  # 召回率，样本中的正例有多少被预测正确了
+sum([0/0.00001, 3/5, 2/4, 2/3, 1/2])/5
+Out[54]: 0.4533333333333333
+
+# 宏平均f1, “宏F1”（macro-F1）
+f1_score(y_true, y_pred, average='macro')
+Out[35]: 0.4833333333333333
+# f1 = 2 * p * r / (p + r )
+p_list = [0/2, 3/3, 2/2, 2/5, 1/2]
+r_list = [0/0.00001, 3/5, 2/4, 2/3, 1/2]
+sum([2 * p * r / (p + r + 0.00001) for p, r in zip(p_list, r_list)])/5
+Out[57]: 0.4833295694750185
+
 
 def main():
     pass

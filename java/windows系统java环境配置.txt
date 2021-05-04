@@ -1,0 +1,44 @@
+
+我的电脑 -> 属性 -> 高级系统设置 -> 环境变量，对用户变量进行设置；
+•	变量名：JAVA_HOME
+•	变量值：C:\Program Files (x86)\Java\jdk1.8.0_91        // 要根据自己的实际路径配置
+•	变量名：CLASSPATH
+•	变量值：.;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;    //记得前面有个"."
+•	变量名：Path
+•	变量值：%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;
+
+若环境变量设置好了后，重新打开cmd窗口；输入命令java和javac命令即可测试是否配置成功。
+
+javac，可以将 ***.java 程序编译成 ***.class，如：javac HelloWorld.java
+运行完成后，当前目录下会新增一个文件HelloWorld.class;
+再输入命令 java HelloWorld 即可运行编译好的***.class程序，注意java 后面是对应的class文件名不包含后缀；
+注：在windows命令行窗口，命令del HelloWorld.class ,可以删除 HelloWorld.class文件；等同于linux命令： rm HelloWorld.class
+dir 命令可以查看当前目录下面的文件；等同于linux命令：ls;
+有时候运行编译后的文件却出现中文乱码，这个时候可以指定编码类型进行编译，如：
+javac -encoding UTF-8 HelloWorld.java
+
+
+# Maven 工具
+Maven就是是专门为Java项目打造的管理和构建工具，它的主要功能有：
+•	提供了一套标准化的项目结构；
+•	提供了一套标准化的构建流程（编译，测试，打包，发布……）；
+•	提供了一套依赖管理机制。
+一个使用Maven管理的普通的Java项目，它的目录结构默认如下：
+maven-project
+├── pom.xml
+├── src
+│   ├── main
+│   │   ├── java
+│   │   └── resources
+│   └── test
+│       ├── java
+│       └── resources
+└── target
+
+Maven 环境配置：
+我的电脑 -> 属性 -> 高级系统设置 -> 环境变量，对用户变量进行设置；
+M2_HOME=D:\JamesLu\jar\apache-maven-3.6.3  --根据实际调整
+PATH=D:\JamesLu\jar\apache-maven-3.6.3\bin
+配置好后，重新打开cmd，输入命令 mvn --version 进行验证；
+
+

@@ -29,3 +29,5 @@ sftp服务
 切换到本地硬盘，切换到c盘：
 执行 cd /drives/c
 
+# 查找文件，并在文件内容中进行搜索
+find . -name "*.py" |xargs grep "requests"

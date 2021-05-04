@@ -29,4 +29,15 @@ jupyter notebook 5.7.5版本已经修复该bug
 解决方案(可将tornado降级为6.0以下版本，或者升级jupyter notebook到5.7.5版本以上)：
 ~$ sudo pip3 install -U notebook==5.7.5 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+ipython在使用时候，有时候粘贴代码块会自动缩进，可以通过设置不让缩进；
+In [18]: %autoindent
+Automatic indentation is: OFF
+但上面方法仅仅在当前有效，若退出了ipython,重新打开时，又得重新设置一次；
+若想永久设置，则需修改 ~/.ipython/profile_default/ipython_config.py
+若该文件不存在，则通过下命令生成该文件；
+~$ ipython profile create
+vim ~/.ipython/profile_default/ipython_config.py
+将“# c.InteractiveShell.autoindex = True”,取消注释，并改为False,即：
+c.InteractiveShell.autoindex = False
+
 

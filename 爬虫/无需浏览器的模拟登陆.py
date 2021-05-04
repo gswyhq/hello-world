@@ -84,6 +84,34 @@ def test3():
         driver.add_cookie({k: cookie[k] for k in ('name', 'value', 'domain', 'path', 'expiry')})
 
 
+def getResponseHeaders(driver):
+    """解析出headers,如：
+    {'Age': '0',
+     'Via': 'http/1.1 ORI-CLOUD-JN2-MIX-116 (jcs [cMsSf ]), http/1.1 ZJ-CT-1-MIX-11 (jcs [cMsSf ])',
+     'Date': 'Fri, 08 Jan 2021 02:37:09 GMT',
+     'Pragma': 'no-cache',
+     'Server': 'nginx',
+     'Expires': 'Fri, 08 Jan 2021 02:37:09 GMT',
+     'X-Trace': '200;200-1610073429318-0-0-0-629-629;200-1610073429317-0-0-0-644-644',
+     'Connection': 'Keep-Alive',
+     'Content-Type': 'text/html;charset=UTF-8',
+     'Cache-Control': 'max-age=0',
+     'Content-Language': 'zh-CN',
+     'Transfer-Encoding': 'chunked',
+     'Strict-Transport-Security': 'max-age=360'}
+    """
+    har = json.loads(driver.get_log('har')[0]['message'])
+    return {header["name"]: header["value"] for header in har['log']['entries'][0]['response']["headers"]}
+
+def getResponseStatus(driver):
+    """
+    返回状态码和状态
+    :param driver:
+    :return: (200, 'OK')
+    """
+    har = json.loads(driver.get_log('har')[0]['message'])
+    return (har['log']['entries'][0]['response']["status"], str(har['log']['entries'][0]['response']["statusText"]))
+
 def main():
     test1()
 

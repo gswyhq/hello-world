@@ -33,6 +33,12 @@ Out[6]:
 In [7]: wv_from_text.similarity("篮球", "足球")
 Out[7]: 0.65106
 
+# model.predict_output_word(['social_listening', '口碑', '情报'], topn=20)
+#     给定上下文词汇（the context words）作为输入，你可以获得中心词汇的概率分布
+
+# model.wv.doesnt_match("舆情 互联网 媒体 商业 场景 咨询 ".split())
+#     找出与其他词差异最大的词汇
+
 In [8]: wv_from_text.get_vector("篮球")
 Out[8]:
 array([ 0.064134, -0.015182,  0.124212, -0.073151,  0.216761,  0.065487,

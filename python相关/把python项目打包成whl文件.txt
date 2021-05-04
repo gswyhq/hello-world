@@ -1,0 +1,83 @@
+
+1, 构建项目及setup.py文件，如：
+
+  25/02/2021   18:21.03   /home/mobaxterm/data/data_trade  tree
+ .
+ +--- abc_trade
+ |   +--- data
+ |   |   +--- veriden_no.json
+ |   +--- veriden_no.py
+ |   +--- __init__.py
+ +--- README.md
+ +--- setup.py
+
+
+ 25/02/2021   18:21.03   /homhome/mobaxterm/data_trade  cat setup.py
+#!/usr/bin/env python
+
+import os
+import sys
+from setuptools import setup
+
+version = '1.0.0'
+
+if sys.argv[-1] == 'publish':
+    os.system("python3 setup.py sdist upload")
+    os.system("python3 setup.py bdist_wheel upload")
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git push --tags")
+    sys.exit()
+
+if sys.argv[-1] == 'tag':
+    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags")
+    sys.exit()
+
+setup(
+    name='data_trade',  # pip list,查询到的名字
+    version=version,
+    author='abcd',
+    author_email='abcd@abc.com',
+    url='',
+    description='python工具包',
+    long_description=open('README.md', encoding='utf-8').read(),
+
+    # https://pypi.python.org/pypi?:action=list_classifiers
+    classifiers=[
+        'Development Status :: 1 - Planning',  # 开发状态
+        'Intended Audience :: Developers',  # 计划读者群
+        'License :: OSI Approved :: BSD License',  # 版权许可
+        'Operating System :: POSIX :: Linux',  # 操作系统
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Software Development :: Libraries :: Python Modules',  # 主题
+    ],
+    py_modules=['data_trade'],  # import data_trade，导入时候的包名
+
+    # 告诉Distutils需要处理那些包（包含__init__.py的文件夹）
+    packages=['data_trade', ], # 'data_trade.veriden_no'
+
+    # 通常包含与包实现相关的一些数据文件或类似于readme的文件。如果没有提供模板，会被添加到MANIFEST文件中。
+    # package_data = {'': ['*.txt'], 'mypkg': ['data/*.dat'],} 表示包含所有目录下的txt文件和mypkg/data目录下的所有dat文件。
+    package_data={'data_trade': ['data/veriden_no.json']},
+    include_package_data = True,
+    install_requires=[],
+    dependency_links=[],
+    test_suite='tests',  # 运行“python3 setup.py test” 即可测试当前目录下的tests目录中的单元测试文件
+)
+
+2, 打包成whl文件；
+在setup.py目录运行：python setup.py bdist_wheel
+运行完后，在setup.py目录中会多出目录：build  dist   *.egg-info
+.whl文件在dist目录下
+
+3，安装whl文件
+将打包好的whl迁移到其他机器上，不局限于操作系统（在windows上打包的whl文件也可以放到Linux系统上安装）；
+~$ pip3 install data_trade-1.0.0-py3-none-any.whl
+
+4, 进入python环境使用
+>>> from data_trade import *
+
+5，卸载whl
+推出python环境，pip3 uninstall 包名
+如：pip3 uninstall data_trade

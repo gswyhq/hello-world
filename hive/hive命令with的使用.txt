@@ -1,0 +1,82 @@
+# 给一个表赋值：
+
+with mytable as
+(
+        select stack
+        (
+                5
+                , 1, 1.2, date '2017-06-21', null
+                , 2, 2.3, null, null
+                , 3, null, null, 'hello'
+                , 4, 4.5, null, 'world'
+                , 5, null, date '2017-07-22', null
+                ) as(id, amt, dt, txt)
+        )
+select * from mytable ;
+
+输出结果：
+OK
+mytable.id      mytable.amt     mytable.dt      mytable.txt
+1       1.2     2017-06-21      NULL
+2       2.3     NULL    NULL
+3       NULL    NULL    hello
+4       4.5     NULL    world
+5       NULL    2017-07-22      NULL
+
+
+# Hive使用with...as建立子查询
+with tmp_a as (
+select * from db_name.table_name
+)
+select * from tmp_a limit 3;
+
+或者：
+with sub_query_name1 as (
+	select 
+		xx
+	from
+		xxx
+), -- 注意这里用逗号分割
+sub_query_name2 as ( --注意这里没有as，上面一个as跟多个sub_query
+	select
+		xx
+	from
+		xx
+)
+select --正式查询语句，与上面的with as直接没有符号分割
+	xx
+from
+	xx
+注意事项
+sub_query直接用逗号分割，一个sub_query用圆括号扩起来
+with 只能使用一次，后面跟多个sub_query
+sub_query之后必须跟上主体的查询语句（可以不用到sub_query中的表）
+with as中不能嵌套 with as
+下面的sub_query可以使用上面生成的sub_query，比如sub_query_name2中可以使用sub_query_name1的信息
+
+# 对数据表各类的空值进行统计计数：
+with        mytable as 
+            (
+                select  stack
+                        (
+                            5
+
+                           ,1   ,1.2     ,date '2017-06-21'     ,null
+                           ,2   ,2.3     ,null                  ,null
+                           ,3   ,null    ,null                  ,'hello'
+                           ,4   ,4.5     ,null                  ,'world'
+                           ,5   ,null    ,date '2017-07-22'     ,null
+                        ) as (id,amt,dt,txt)
+            )
+select      pe.pos                                          as col_index
+           ,count(case when pe.val='null' then 1 end)       as nulls_count
+from        mytable t lateral view posexplode (split(printf(concat('%s',repeat('\u0001%s',field(unhex(1),t.*,unhex(1))-2)),t.*),'\\x01')) pe
+group by    pe.pos       ;
+返回结果：
+OK
+col_index       nulls_count
+0       0
+1       2
+2       3
+3       3
+

@@ -1,0 +1,92 @@
+
+MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。
+
+l 提供映射标签，支持对象与数据库的orm字段关系映射
+l 提供对象关系映射标签，支持对象关系组建维护
+l 提供xml标签，支持编写动态sql。
+
+
+# foreach标签 - collection属性的使用介绍
+Foreach 也就是遍历迭代，主要用在构建 in 条件中，它可以在 SQL 语句中迭代一个集合；
+foreach 元素的主要属性有： item,  index,  collection,  open,  separator,  close
+item ---> 集合中每一个元素进行迭代的别名
+index ---> 表示迭代过程中，每次迭代的位置
+open ---> 该语句以什么开始
+separator ---> 在每次进行迭代之间以什么符号作为分隔符
+close ---> 该语句以什么结束
+
+  <select id="ForeachTest" resultType="Blog">
+          select * from t_blog where id in
+       <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+               #{item}       
+       </foreach>    
+   </select>
+
+
+在使用 foreach 的时候最关键的也是容易出错的就是 collection 属性，该属性是必须指定的，不同情况，属性值不同；
+
+
+有一下3种情况：
+① 如果传入的是单参数且参数类型是一个 List 的时候，collection 属性值为 List；	
+② 如果传入的是单参数且参数类型是一个 Array 数组的时候，collection 的属性值为 Array；
+③ 如果传入的参数是多个的时候，我们就需要把它们封装成一个 Map 。
+示例2：
+    <update id = "updateColRelation">
+        <if test="hiveSubResultList!=null and hiveSubResultList.size>0">
+            <foreach collection="hiveSubResultList" item="hiveSubResult" index="index">
+                update pg_db.pg_table
+                set
+                    distribution = #{hiveSubResult.distribution},
+                    sample = #{hiveSubResult.sample},
+                    updated_date=CURRENT_TIMESTAMP
+                where
+                    db = #{hiveSubResult.hiveDb}
+                    and table_col = #{hiveSubResult.hiveTable}
+                    and column_col = #{hiveSubResult.hiveCol};
+            </foreach>
+        </if>
+    </update>
+
+# 插入当前时间， current_timestamp：
+    <update id = "batchUpdatePriceRangeInfo">
+        <if test="priceRangeArrayList!=null and priceRangeArrayList.size>0">
+            INSERT INTO
+            pg_db.pg_table (
+                mode_name,
+                mode_desc,
+                min_price,
+                max_price,
+                price_unit,
+                last_update_date,
+                last_update_by
+            )
+            VALUES
+            <foreach collection="priceRangeArrayList" index="index" item="priceRange" open="(" separator="), (" close=")">
+                #{priceRange.modeName},
+                #{priceRange.modeDesc},
+                #{priceRange.minPrice},
+                #{priceRange.maxPrice},
+                #{priceRange.priceUnit},
+                current_timestamp,
+                #{priceRange.lastUpdateBy}
+            </foreach>
+
+            ON CONFLICT (mode_name) DO UPDATE
+            SET
+                mode_desc = excluded.mode_desc,
+                min_price = excluded.min_price,
+                max_price = excluded.max_price,
+                price_unit = excluded.price_unit,
+                last_update_date = excluded.last_update_date,
+                last_update_by = excluded.last_update_by;
+        </if>
+    </update>
+
+# 查询时，将时间戳转换为字符串输出
+    <select id="selectPriceRangeInfo" resultType="com.alibaba.fastjson.JSONObject">
+        select to_char(create_date,'yyyy-MM-dd hh24:mi:ss') create_date,
+                to_char(last_update_date,'yyyy-MM-dd hh24:mi:ss') last_update_date,
+                *
+        from pg_db.pg_table
+    </select>
+

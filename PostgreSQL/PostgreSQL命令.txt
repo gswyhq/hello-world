@@ -1,0 +1,27 @@
+
+1. 添加主键
+alter table goods add primary key(sid);
+
+2. 添加外键
+alter table orders add foreign key(goods_id) references goods(sid)  on update cascade on delete cascade;
+
+on update cascade: 被引用行更新时，引用行自动更新； 
+on update restrict: 被引用的行禁止更新；
+on delete cascade: 被引用行删除时，引用行也一起删除；
+on dellete restrict: 被引用的行禁止删除；
+
+3. 删除外键
+alter table orders drop constraint orders_goods_id_fkey;
+
+4. 添加唯一约束
+alter table goods add constraint unique_goods_sid unique(sid);
+
+5. 删除默认值
+alter table goods  alter column sid drop default;
+
+6. 修改字段的数据类型
+alter table goods alter column sid type character varying;
+
+7. 重命名字段
+alter table goods rename column sid to ssid;
+

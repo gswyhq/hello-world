@@ -1,0 +1,36 @@
+
+创建索引,这里是给表table_name的name字段创建索引：
+create index t1_index on table table_name(name)
+as 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
+with deferred rebuild in table t1_index_table
+COMMENT "给表table_name的name字段构建索引";
+
+as：指定索引器；
+如果指定了deferred rebuild，那么，新索引将呈现空白状态。在任何时候，都可以进行第一次索引创建或者使用alter index对索引进行重建；
+in table：指定索引表，若不指定默认生成在 "db_name__table_name_t1_index__"表中
+COMMENT:索引说明
+
+create index t1_index on table table_name(name)
+as 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler' with deferred rebuild;
+
+查询索引
+use db_name;
+show index on table_name;
+查询结果一般包括如下几列：
+idx_name	tab_name	col_names	idx_tab_name	idx_type	comment
+依次代表：索引名称，索引表（指需要构建索引的数据表名），索引列名，索引表名（用来存储索引的表），索引器类型，索引说明；
+
+重建索引（建立索引之后必须重建索引才能生效）
+ALTER INDEX t1_index ON table_name REBUILD;
+如果重建索引省略掉partition，那么将会对所有分区进行重建索引。
+如果重建索引失败，那么在重建开始之前，索引将停留在之前的版本状态。
+当然，也可以指定分区进行索引重建，示例：
+alter index index_name 
+on table_name
+partition (country = 'US') 
+rebuild;
+
+删除索引
+DROP INDEX IF EXISTS t1_index ON table_name;
+
+

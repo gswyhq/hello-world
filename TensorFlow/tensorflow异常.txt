@@ -78,3 +78,35 @@ rate在TensorFlow 1.13中是该函数的有效参数，但在早期版本中无�
 AttributeError: module 'tensorflow' has no attribute 'batch_gather'
 解决方法，更改 tensorflow 版本，比如更新为 version:1.12.0
 
+为什么服务器上面有gpu, 写的代码也支持GPU,但实际运行起来却没有使用GPU:
+出现这种情况除了要检查支持GPU使用的代码是否正常外，还得检查tensorflow的版本与CUDA的版本是否配对。
+用如下代码可检测tensorflow的能使用设备情况：
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())　
+若版本不配套的话，输出结果可能是仅包括：name: "/device:CPU:0"
+若GPU可用，其输出结果可能是包括，name: "/device:GPU:0"，name: "/device:GPU:1"
+`nvidia-smi` 命令 或者 `nvcc --version` 命令可以查看对应的CUDA版本。
+查看cudnn版本:
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+安装指定版本tensorflow:
+pip3 install tensorflow-gpu==2.0.0
+
+版本	Python 版本	编译器	构建工具	cuDNN	CUDA
+tensorflow-2.1.0	2.7、3.5-3.7	GCC 7.3.1	Bazel 0.27.1	7.6	10.1
+tensorflow-2.0.0	2.7、3.3-3.7	GCC 7.3.1	Bazel 0.26.1	7.4	10.0
+tensorflow_gpu-1.14.0	2.7、3.3-3.7	GCC 4.8	Bazel 0.24.1	7.4	10.0
+tensorflow_gpu-1.13.1	2.7、3.3-3.7	GCC 4.8	Bazel 0.19.2	7.4	10.0
+tensorflow_gpu-1.12.0	2.7、3.3-3.6	GCC 4.8	Bazel 0.15.0	7	9
+
+有时候，通过pip3 list|grep tensorflow查出来的 tensorflow 和tensorflow-gpu 与 cuDNN, CUDA 版本都是配对的，但是代码运行的时候，就是不使用GPU;
+问题可能原因：可能是因为tensorflow比tensorflow-gpu后安装，虽说两个的版本号一样，但程序默认使用了后面安装的cpu版本的。
+解决方案：将 tensorflow卸载掉；或者将tensorflow-gpu卸载掉并重新安装相同的版本tensorflow-gpu；
+
+在tf 1.12上运行正常，在1.14版本运行报错：
+    early_stopping_hook = tf.contrib.estimator.stop_if_no_decrease_hook(
+    AttributeError: module 'tensorflow.contrib.estimator' has no attribute 'stop_if_no_decrease_hook'
+
+解决方案：
+在1.14版本中 应该是
+tf.estimator.experimental.stop_if_no_decrease_hook
+

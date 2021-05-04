@@ -1,0 +1,82 @@
+删除表数据但保留表结构使用truncate更快速安全，使用方法为：
+//当表没有其他关系时
+TRUNCATE TABLE tablename;
+//当表中有外键时，要用级联方式删所有关联的数据
+TRUNCATE TABLE tablename CASCADE;
+
+
+SELECT * FROM "c_relation" where db = 'de_safe' and table_collision = 'data_collision_info';
+where 后面限定条件查询值需是单引号，若是双引号会报错：
+[column does not exist]
+
+查询空值，若是下面这样查询空值可能查询不到：
+select * from pg_db.pg_table where guid in ('', null, '""') ;
+需要改成：
+select * from pg_db.pg_table  where guid in ('', null, '""') or guid is null;
+
+# 插入数据
+INSERT INTO pg_db.pg_table (uuid,name,update_time,tag) VALUES 
+('ab060a4a-fdec-44d4-be6e-30de4292920a','abc','2021-04-23 10:35:10.070',NULL);
+
+# 一次插入多条数据：
+INSERT INTO pg_db.pg_table (uuid,name,update_time,tag) VALUES
+('ab060a4a-fdec-44d4-be6e-30de4292920a','abc','2021-04-23 10:35:10.070',NULL),
+('abcdefaa-fdec-44d4-be6e-30de4292222a','123','2021-04-23 10:35:10.070',NULL);
+
+# 删除数据
+Delete from pg_db.pg_table  where id=3;
+
+# 更新数据
+UPDATE pg_db.pg_table set guid = '24' where id=3 ;
+
+# 方法一、新增数据，若不存在则新增，否则更新：
+INSERT INTO pg_db.pg_table (mode_name,min_price, max_price) 
+VALUES ('元/次', 0, 5), ('元/月', 0, 500)
+ON CONFLICT (mode_name) DO UPDATE 
+  SET min_price = excluded.min_price, 
+      max_price = excluded.max_price;
+注：这里mode_name,是唯一约束字段；excluded可理解是语法词，是固定的；min_price,max_price是存在时，需要更新的字段；
+
+
+# 方法二、新增数据，若存在则更新，否则新增：
+INSERT INTO public.table_name as tb (quantified_measure, weight) 
+VALUES ( '字段数', '0.013' ) 
+ON CONFLICT ON CONSTRAINT table_name_quantified_measure DO
+UPDATE 
+	SET weight = '0.015'
+WHERE
+	tb.quantified_measure = '字段数';
+注意：这里唯一性约束是字段quantified_measure，故而先需对quantified_measure字段进行唯一性约束；这里 table_name_quantified_measure，是对应的唯一性约束名称；
+
+# 添加字段唯一性约束的方法：
+ALTER TABLE public.table_name DROP CONSTRAINT IF EXISTS table_name_quantified_measure;
+alter table public.table_name add constraint table_name_quantified_measure unique (quantified_measure);
+
+# 当然，也可以在建表的时候就添加唯一性约束，如：
+CREATE TABLE public.table_name (
+	id bigserial NOT NULL, -- 唯一ID
+	quantified_measure varchar(200) NULL, -- 量化指标
+	weight varchar(200) NULL, -- 权重项
+	create_date timestamp NULL DEFAULT CURRENT_TIMESTAMP, -- 创建时间
+	create_by varchar(200) NULL, -- 创建人
+	last_update_date timestamp NULL DEFAULT CURRENT_TIMESTAMP, -- 更新时间
+	last_update_by varchar(200) NULL, -- 最后更新人
+	CONSTRAINT table_name_pkey PRIMARY KEY (id),
+	CONSTRAINT table_name_quantified_measure UNIQUE (quantified_measure)
+);
+
+# 方法三、若没有添加唯一约束，又想达到“若不存在则新增，否则更新”的目的，可通过下面两条语句来完成：
+UPDATE table SET field='C', field2='Z' WHERE id=3;
+INSERT INTO table (id, field, field2)
+       SELECT 3, 'C', 'Z'
+       WHERE NOT EXISTS (SELECT 1 FROM table WHERE id=3);
+
+
+# 添加索引：
+CREATE INDEX idx_table_name_quantified_measure ON public.table_name USING btree (quantified_measure);
+
+# 删除某个字段为空的数据：
+delete from da_name.table_name where label_1 = null;
+上面语句可能无效，需要改为：
+delete from da_name.table_name where label_1 is null;
+

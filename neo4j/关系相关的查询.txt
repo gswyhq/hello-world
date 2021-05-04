@@ -29,3 +29,6 @@ MATCH p=(n0:Baoxianchanpin)-[r1]->(n1:Jibing {name: "恶性肿瘤"}) with collec
 WHERE any(r in coll_r where type(r)="保障疾病") and not any(r in coll_r where type(r)="免责疾病") 
 return n0.name as recommend_question order by n0.`推荐指数`
 
+# 查找倒数第一层的关系：
+MATCH p=(n1:Abstract)-[*0..9]->(n2:Abstract) where n1<>n2 return [r IN relationships(p)][-1].text limit 3;
+

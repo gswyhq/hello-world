@@ -206,3 +206,22 @@ WHERE datetime(holder.`报告时间`) = max_time
 RETURN max_time, holder.`股东名次`, holder.`股东类型`
 ORDER BY [holder.`股东类型`, holder.`股东名次`]
 
+# 查询某个节点，但其关联节点不能出现某种条件的节点：
+match (n:Abstract) where id(n) = 437524
+match p=(n0)-[r1:`抽象化`]->(n)-[r2:`因果`]-(n1:Abstract) 
+match (n1)<-[:`抽象化`]-(n2) 
+with collect(n2) as n2_ids, r1,r2,n1,n0,n
+where not any(x in n2_ids where id(x) in [r2.cause_id, r2.effect_id])
+return r1,r2,n1,n0,n limit 10
+
+# 第一层需要主营产品日期最近的节点关系图。第二层关系，需要获取profit字段和data_date最大值的节点
+MATCH (c1:company)-[r1: `主营产品`]->(p1:product)
+where  c1.name_short="平安银行" 
+with p1,c1
+match (c2:company)-[r3: `主营产品`]->(p1) 
+with p1,c1, max([r3.data_date, r3.profit]) as max_r3, collect([c2, r3]) as c2r3_list
+UNWIND c2r3_list as c2r3
+with c2r3[0] as c2, c2r3[1] as r3, max_r3, p1,c1
+where [r3.data_date, r3.profit] = max_r3
+return distinct c1.name, p1.name, max_r3,c2.name
+

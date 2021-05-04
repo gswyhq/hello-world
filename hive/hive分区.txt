@@ -1,0 +1,59 @@
+Hive的分区种类
+静态分区：「加载数据」的时候指定分区的值
+动态分区：数据未知,根据分区的值确定建立分区
+混合分区：静态+动态
+
+# 查询有哪些分区，显示分区
+show partitions 库名.表名;
+
+# 创建分区表：
+CREATE TABLE `db_name.caijing_jinritoutiao_info`
+( `id` string COMMENT '文章ID',
+`creator_uid` string COMMENT '创作者UID',
+`screen_name` string COMMENT '博主名称',
+`media_user_id` string COMMENT '博主ID',
+`user_auth_info` string COMMENT '博主简介',
+`publish_time` string COMMENT '发布时间',
+`title` string COMMENT '标题'
+)COMMENT '头条财经大V号'
+PARTITIONED BY ( `y` string, `m` string, `d` string)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.LazyBinaryColumnarSerDe'
+WITH SERDEPROPERTIES ( 'field.delim'='\u0001', 'serialization.format'='\u0001')
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.RCFileInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.RCFileOutputFormat';
+注：这里分区字段(y,m,d)不能和表中的字段重复。
+
+# 将一个无分区的表table1的数据导入到另一个分区表table2；
+insert into db_name.table2
+partition (y='2021',m='03',d='15')
+select party_id, mobile, data_source, data_upd
+from db_name.table1;
+
+# 添加分区，增加一个分区文件
+alter table t1 add partition (pt_d = ‘333333’);
+
+# 一次增加一个分区
+alter table testljb add partition (age=2);
+
+# 一次增加多个分区
+alter table testljb add partition(age=3) partition(age=4);
+
+# 注意：一定不能写成如下方式：
+alter table testljb add partition(age=5,age=6);
+具有多个分区字段表的分区添加，而我们写两次同一个字段，而系统中并没有两个age分区字段，那么就会随机添加其中一个分区。
+
+# 有个表具有两个分区字段：age分区和sex分区。那么我们添加一个age分区为1，sex分区为male的数据，可以这样添加：
+alter table testljb add partition(age=1,sex='male');
+
+# 删除分区,删除分区age=1
+alter table testljb drop partition(age=1);
+注：加入表testljb有两个分区字段（上文已经提到多个分区先后顺序类似于windows的文件夹的树状结构），partitioned by(age int ,sex string)，那么我们删除age分区（第一个分区）时，会把该分区及其下面包含的所有sex分区一起删掉。
+
+# 修复分区,修复分区就是重新同步hdfs上的分区信息。
+msck repair table table_name;
+
+# 查询分区
+show partitions table_name;
+
+
+

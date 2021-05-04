@@ -33,5 +33,19 @@ Settings -> Terminal -> Local shell settings -> Terminal shell 的下拉选值 �
 LANG=en_US.UTF-8
 LC_CTYPE="en_US.UTF-8"
 
+问题：MobaXterm.exe启动后，界面只有“New session”，没有“Start local terminal”;
+问题分析：发现界面中有这么个提示“CygUtils plugin not found on your system”;
+解决方案：下载CygUtils.plugin（http://mobaxterm.mobatek.net/CygUtils.plugin），放在与MobaXterm_Personal_11.1.exe同一个文件目录中, 再启动MobaXterm即可；
 
+问题：有时候，MobaXterm.exe启动后，再打开‘Start local terminal’出现：“mobaxterm local terminal failed to start due to memory access denied. Please REBOOT YOUR COMPUTER if the problem persists: this is the only safe way to ensure that memory which has been allocated by other Windows applications is properly cleared. if the issue persists after reboot, please contact us to report the issue”
+解决方案：若确定不是权限的问题，有时候重启下电脑就可以解决；
+
+问题：mobaxterm 创建的超链接等信息，每次重启后就丢失了；
+原因：MobaXterm会产生临时文件，但是临时文件随时可能被删除或丢失，建议指定文件夹作为/home和/目录，以免出现异常。
+打开Settings – Configuration – Genernal进行设置
+Persistent home directory  在mobaxterm终端打开的初始目录，ls 即可显示该目录下的内容；
+Persistent root(/) directory
+
+MobaXterm使用apt-get install *** 安装软件时，出现：package *** has not been found.
+解决方法：apt-get update 之后，再尝试 apt-get install *** 
 

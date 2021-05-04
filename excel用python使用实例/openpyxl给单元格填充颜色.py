@@ -11,8 +11,10 @@ ws = wb.active
 
 #随便赋个值
 d4 = ws['D4']
-d4 = '43'
-d4.value
+d4.value = '43'
+
+# 也可以通过下标（第五行第二列）往“B5”单元格写入数据；
+ws.cell(row=5, column=2).value = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 #3-设置样式，并且加载到对应单元格
 fill = PatternFill("solid", fgColor="1874CD")

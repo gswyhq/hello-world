@@ -9,6 +9,10 @@ save_excel_file = '/home/gswyhq/保险产品实体同义词.xls'
 
 HEAD_TITLES = ['实体类型', '实体标准词']
 
+# 从指定行读取, （header=2实际上是从第三行开始读取）：
+df=pd.read_excel('文件名',header=2)
+print(df)
+
 def transform(excel_file, save_excel_file):
     ds = {}
     # 读取excel文件内容； header=0,代表第0行（也就是excel文件第一行，若不设标题行，默认header=None）,names: 重命名标题列
@@ -33,7 +37,14 @@ def transform(excel_file, save_excel_file):
     df = pd.DataFrame([HEAD_TITLES]+[['保险产品', standard_word] + entity_synonyms for standard_word, entity_synonyms in ds.items()])
     # header = False, index = False 分别忽略 DataFrame 数据的序号列，序号行
     df.to_excel(save_excel_file, sheet_name='总表', header=False, index=False)
-    
+
+
+# 同时向多个sheet写数据，正常写会覆盖之前的工作表：
+writer = pd.ExcelWriter(r'test.xlsx')
+df.to_excel(writer, sheet_name='sheet_name1', index=False)
+df2.to_excel(writer, sheet_name='sheet_name2', index=False)
+writer.save()
+
 def main():
     transform(excel_file, save_excel_file)
 

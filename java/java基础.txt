@@ -1,0 +1,6 @@
+# 创建一个应用程序
+public class RevealApplication {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}

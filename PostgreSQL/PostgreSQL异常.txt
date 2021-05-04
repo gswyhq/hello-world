@@ -1,0 +1,12 @@
+
+# 往PostgreSQL中插入数据时，报错：
+org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint ...
+Key (id)=(2245) already exists.
+
+因为 postgresql 的自增id是通过序列 sequence来完成的，
+所以清空数据后，还需要还原序列 sequence：
+TRUNCATE db_name.table_name RESTART IDENTITY;
+
+# ERROR:  must be owner of relation tb_door
+解决方案，需要管理员用户登录；管理员postgres登录相应数据库
+

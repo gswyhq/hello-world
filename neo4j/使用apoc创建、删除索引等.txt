@@ -20,6 +20,32 @@ MATCH (n)
 CALL apoc.index.addNode(n,['name','alias'])
 RETURN count(*)
 
+# 创建索引：
+CALL apoc.index.addAllNodes('abstract', { Abstract:["name"]}, {autoUpdate:true})
+# 利用创建的索引进行模糊搜索：
+CALL apoc.index.search("abstract", "Abstract.name:财务造假~") YIELD node, weight match (node) -[r]->(:Abstract) with node as n, weight, count(r) as num order by [weight, num] desc limit 10
+RETURN n.name, weight, num
+# 上面的模糊搜索，会将 Node Labels 为Abstract, 属性为name的，包含‘财务造假’任何一个字符的，都会搜索到；
+# 更多参考资料见：http://we-yun.com/apoc/index34.html
+Version:3.5.6；Edition:	Community（下载地址：https://neo4j.com/artifact.php?name=neo4j-community-3.5.6-windows.zip）
+apoc插件的版本；通过命令 return apoc.version()，可以查看；
+有时候通过上面方法创建索引不能使用，会报错：
+"apoc.index.addAllNodes is unavailable because it is sandboxed and has dependencies outside of the sandbox. Sandboxing is controlled by the dbms.security.procedures.unrestricted setting. Only unrestrict procedures you can trust with access to database internals."
+主要是因为neo4j的配置文件没有允许使用，可以通过下面的方法来开启（若有多个需要在同一行写）：
+dbms.security.procedures.unrestricted=apoc.*
+
+CALL apoc.index.search("abstract", "Abstract.name:瑞幸财务造假~",1000) yield node, weight
+用上面的语句进行搜索，最多只有50个结果；哪怕把maxNumberOfResults，设置最大也无用；
+
+# 联合搜索，先精确匹配，再模糊匹配：
+MATCH (f:Abstract) where f.name ="财务造假"
+WITH REDUCE(
+    s = 'Abstract.name:', n IN COLLECT(DISTINCT f.name) |
+    s + n + '~ '
+  ) AS query
+CALL apoc.index.search("abstract", query) yield node, weight
+return node, weight
+
 使用创建的手动索引进行搜索：
 profile call apoc.index.search( 'Tongyonggraph', 'name:太平洋' ) yield node with node as n match (n) -[r:`面积`]->(n1) return n,n1;
 runtime: INTERPRETED. 3 total db hits in 32 ms.

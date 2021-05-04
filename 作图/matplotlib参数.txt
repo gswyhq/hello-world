@@ -1,0 +1,19 @@
+
+matplotlib画图工具add_subplot参数意义
+import matplotlib.pyplot as plt
+fig = plt.figure(figsize = (2,2)) 
+ax = fig.add_subplot(111)
+111, 代表1*1的网格，且第一个子图；
+（xxx）这里前两个表示几*几的网格，最后一个表示第几子图
+
+import matplotlib.pyplot as plt
+fig = plt.figure(figsize = (5,5)) 
+ax = fig.add_subplot(221) # 2*2的网格，第1个子图
+ax = fig.add_subplot(222) # 2*2的网格，第2个子图
+ax = fig.add_subplot(223) # 2*2的网格，第3个子图
+ax = fig.add_subplot(224) # 2*2的网格，第4个子图
+
+349将画布分割成3行4列，图像画在从左到右从上到下的第9块
+第10块要写成
+ax = fig.add_subplot(3，4，10)
+

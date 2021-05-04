@@ -1,0 +1,30 @@
+
+Windows 安装mkvirtualenv虚拟python环境
+
+pip install virtualenvwrapper-win
+
+mkvirtualenv --python=python.exe 新python虚拟环境名称
+
+使用方法
+
+所有的命令可使用：virtualenvwrapper --help 进行查看，这里列出几个常用的：
+
+创建基本环境：mkvirtualenv [环境名]
+
+删除环境：rmvirtualenv [环境名]
+
+激活环境：workon [环境名]
+
+退出环境：deactivate
+
+列出所有环境：workon 或者 lsvirtualenv -b
+
+问题：'mkvirtualenv' 不是内部或外部命令，也不是可运行的程序
+解决方案：
+1，找到 mkvirtualenv.bat 的所在路径，如：D:\Users\gswyhq\AppData\Roaming\Python\Python36\Scripts
+2,将路径 D:\Users\gswyhq\AppData\Roaming\Python\Python36\Scripts， 添加到环境变量PATH中；即在环境变量“Path”的值中追加“D:\Users\gswyhq\AppData\Roaming\Python\Python36\Scripts”
+3、并修改路径D:\Users\gswyhq\AppData\Roaming\Python\Python36\Scripts下的‘mkvirtualenv.bat’文件的第24行，改为“set "venvwrapper.default_workon_home=%WORKON_HOME%\Envs"”，并在环境变量中，设置‘WORKON_HOME’的值为工作目录，如：“D:\Users\gswyhq”
+
+pycharm使用虚拟环境：
+file->settings->Project Interpreter-> Show All ... -> 点击 “+” -> Virtualenv Environment -> New environment
+Location: D:\Users\gswyhq\my_venv

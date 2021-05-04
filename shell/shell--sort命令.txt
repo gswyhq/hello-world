@@ -97,4 +97,9 @@ ls -tl
 // 格式化文件大小形式
  ll -Sh | grep '^[^d]'  
 
+# 统计一个文件里某行出现的次数并排序
+less abcd.txt|sort | uniq -c | sort -n -r
+uniq -c，统计各行出现的次数，并把次数打印在每行前端
+sort -n -r 每行都以数字开头，按数字从达到小，排列各行
+
  

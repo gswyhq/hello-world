@@ -1,0 +1,44 @@
+
+创建、删除索引，方法1：
+# 为节点创建索引：
+CREATE INDEX ON :Person(name)
+# 删除索引：
+DROP INDEX ON :Person(name)
+
+创建、删除索引，方法2：
+# 创建索引：
+CALL apoc.index.addAllNodes('abstract', { Abstract:["name"]}, {autoUpdate:true})
+要删除abstract索引:
+CALL apoc.index.remove('abstract')
+# 查看现有的索引：
+call apoc.index.list()
+
+创建、删除索引，方法3：
+创建节点索引：
+CALL db.index.fulltext.createNodeIndex("db_abstract",["Abstract"],["name"], {analyzer:"cjk"})
+若创建索引的时候，设置了analyzer为cjk, 则在搜索的时候，会有分词，可能出现下面的情况：
+搜索`开源`有结果：
+CALL db.index.fulltext.queryNodes("db_abstract", "开源") YIELD node, score RETURN node.name, score
+但搜索`开`的结果却为空：
+CALL db.index.fulltext.queryNodes("db_abstract", "开") YIELD node, score RETURN node.name, score
+删除索引：
+call db.index.fulltext.drop('db_abstract')
+利用创建的节点模糊搜索：
+CALL db.index.fulltext.queryNodes("db_abstract", "开源操作系统") YIELD node, score RETURN node.name, score
+如果需要完全匹配（并不是说完全相等，而是子串搜索，如下面的是搜索所有包含“生态系统”这个短句的），则加双引号：
+CALL db.index.fulltext.queryNodes("db_abstract", "\"生态系统\"") YIELD node, score RETURN node.name, score
+
+可以使用逻辑操作符，例如AND OR, 但大小写不同的时候，结果不一样：
+CALL db.index.fulltext.queryNodes("db_abstract", "生态 AND 系统") YIELD node, score RETURN node.name, score
+CALL db.index.fulltext.queryNodes("db_abstract", "生态 and 系统") YIELD node, score RETURN node.name, score
+大写 AND: 生态模糊搜索的结果 且 系统模糊搜索的结果
+小写 and: 结果等同于 “生态系统”的模糊搜索结果，也等同于 “生态 OR 系统”的模糊搜索的结果；
+
+对指定的属性进行查询，这里是属性description
+CALL db.index.fulltext.queryNodes("titlesAndDescriptions", 'description:"surreal adventure"') YIELD node, score
+RETURN node.title, node.description, score
+
+若是英文某个字符的子串，可能需要通过正则了，如：
+CALL db.index.fulltext.queryNodes('db_abstract', '*ell*')
+
+方法1、方法3创建的索引可通过·call db.indexes·查看；

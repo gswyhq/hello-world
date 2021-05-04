@@ -1,0 +1,9 @@
+
+DBeaver如何连接PostgreSQL数据库
+
+1,安装好了DBeaver后，双击打开；
+2、点击“数据库”->"驱动管理"，在弹出的“Driver Manager”对话框中，选中“PostgreSQL”,点击“Edit ...”, 弹出“Edit Driver 'PostgreSQL'”对话框；切换到“Libraries”选项卡，点击“Add File”, 添加jar驱动包，如“Z:\gswyhq\postgresql-42.2.5.jre6.jar”;点击“OK”完成。
+3、点击“数据库”->"新建连接"，弹出“Create new connection”对话框；选中“PostgreSQL”点击“Next”,填写Host,Port,Database,User,Password;点击“Finish”.
+4、查看数据：点击“数据库导航”-> "PostgreSQL - 数据库名" -> 数据库名 -> Schemas -> public -> Tables -> 选中需要查看的“表名”，默认是看到“属性”,点击“数据”选项卡，即可看到对应的数据。
+
+

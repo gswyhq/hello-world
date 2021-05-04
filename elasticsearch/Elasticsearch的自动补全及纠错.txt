@@ -39,7 +39,7 @@ curl -XPUT 'localhost:9200/index/test/2?refresh=true' -d '{
 curl -XPUT 'localhost:9200/index/test/3?refresh=true' -d '{
     "name" : "xck",
     "name_suggest" : {
-        "input": ["xck", "gbd"]
+        "input": ["xck", "bbd"]
     }
 }'
 

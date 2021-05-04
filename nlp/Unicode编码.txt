@@ -37,6 +37,10 @@ Out[16]: 12032
 0x2FDF
 Out[17]: 12255
 
+for i in range(0x4E00, 0x4eA5):
+    t = b'\\u' + hex(i).encode()[-4:] # b'\\u4e00', b'\\u4e01', b'\\u4e02', b'\\u4e03', b'\\u4e04'
+    print(t.decode('unicode_escape')) # 一 丁 丂 七 丄
+
 ts = [ hex(i) for i in range(12032, 12256)]
 In[29]: ts[:2]
 Out[29]: ['0x2f00', '0x2f01']

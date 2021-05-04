@@ -36,6 +36,10 @@ awk '$0="句子开头\t"$0"\t句子结尾"' semantic_test.txt
 # 取出前三列，并用tab键进行分割：
 head test.txt |awk '{print $1"\t"$2"\t"$3}'
 
+# 过滤指定列：
+awk  -F ',' '$6=="山东"{print $6}' W20112701831574791524466.csv | wc -l
+csv文件中第6列为山东的行数
+
 awk指定分隔符：
 $ head ratings.csv |awk -F "," '{print $3}'
 或者：
@@ -64,6 +68,13 @@ awk -v FS="\\\\t" '{print $1,$2}' test1
 
 多分隔符：
 head io.log | awk -F "aaa|bbb" '{print $2}'
+
+awk 同时匹配多个条件：
+同时匹配ABC 和 123:
+awk '/ABC/&&/123/{ print $0 }'  
+
+匹配ABC 或 123:
+awk '/ABC/||/123/{ print $0 }'
 
 # awk时间函数：
 # systime函数返回当前时间戳

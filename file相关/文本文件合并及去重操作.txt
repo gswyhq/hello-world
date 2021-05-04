@@ -7,6 +7,13 @@ less file.txt | uniq > uniq_file.txt
 正确做法是，对文件数据进行去重处理时，先对文件的数据进行排序，然后再进行去重处理：
 less file.txt |sort |uniq > uniq_file.txt
 
+按照指定列去重：
+sort -t $',' -k 2 -u test_3.csv >> test_4.csv
+sort 排序命令参数解释： 
+-t 指定分隔符为"," 
+-k 指定第2列 
+-u 去重
+
 一 命令简单介绍
 cat：将文本文件读出来
     文件去重合并的前提条件是先取出文件的内容。

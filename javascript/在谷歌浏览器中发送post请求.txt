@@ -1,0 +1,23 @@
+
+# 在google chrome浏览器发送get请求比较简单，直接在地址里头输入对应的url，回车就可以了；
+
+
+# 但如要发送post请求呢？
+如：
+curl -XPOST 'http://localhost:8020/price/update/range' -H 'Content-Type: application/json' -d '{"modeName": "元/次", "minPrice": 0, "maxPrice": 2.0}'
+通过谷歌浏览器发送post请求：
+第一步：打开浏览器
+第二步：F12打开开发模式
+第三步：点击Console
+第四步：输入如下JavaScript 代码，回车即可；
+
+var xml = new XMLHttpRequest();
+var url = "http://localhost:8020/price/update/range";
+xml.open("POST", url, true);
+xml.setRequestHeader("Content-type", "application/json");
+xml.send('{"modeName": "元/次", "minPrice": 0, "maxPrice": 2.2}');;
+xml.onreadystatechange = function() {
+        console.log(xml.responseText);
+}
+
+

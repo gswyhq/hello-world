@@ -15,4 +15,10 @@ gswewf@gswewf-PC:~$ cal
 17 18 19 20 21 22 23  
 24 25 26 27 28 29 30  
                
+import time
+from datetime import datetime
+datetime.now().strftime('%Y-%m-%d %H:%M:%S %f')
+Out[29]: '2020-10-10 14:29:09 263855'
 
+time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+Out[27]: '2020-10-10 14:28:51'

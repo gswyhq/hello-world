@@ -1,0 +1,13 @@
+
+Xshell是windows连接linux服务器的工具，可以上传、下载文件；
+上传下载文件，需要安装linux工具lrzsz，使用linux命令（yum -y install lrzsz）；
+
+# 通过Xshell 上传文件到linux服务器：
+1，先在Xshell登录到对应服务器，cd到指目录；
+2，在windows上选中文件，拖到Xshell窗口中，即可上传到linux服务器；
+
+# 通过Xshell下载文件：
+1，先在Xshell登录到对应服务器，cd到指目录；
+2，在linux命令中终端运行名：sz 待下载的文件.txt
+
+

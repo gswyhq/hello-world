@@ -206,6 +206,17 @@ WITH apoc.date.format(timestamp(),'ms','yyyy-MM-dd HH:mm:ss','CTT') as createTim
 CREATE (testNode:TestNode {pro:"test",createTime:createTime})
 return testNode
 
+# 创建时间属性：
+CREATE (le:Person {name: "Euler" }),
+  (db:Person {name: "Bernoulli" }),
+  (le)-[:KNOWS {since:1768, create_time:datetime("2010-09-23T12:34:00")}]->(db)
+RETURN le, db
+
+# 根据时间属性查询：
+MATCH p=(n:Person)-[r]->()
+where r.create_time.year = 2010 and r.create_time.month=9 and r.create_time.day = 23
+return p
+
 timezone时区：
 EST - -05:00 
 HST - -10:00 

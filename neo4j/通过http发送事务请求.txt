@@ -32,6 +32,9 @@ curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H 
   } ]
 }'
 
+# 批量查询：
+r = requests.post('http://localhost:7474/db/data/batch', data=json.dumps([{ "method" : "POST", "to" : "/node", "body" : { "name" : '土地房地产' }, "id" : 2 }, { "method" : "POST", "to" : "/node", "body" : { "name" : '价格上涨' }, "id" : 3 } ], ensure_ascii=0).encode('utf-8'), stream=True, auth=('neo4j', '123456'))
+
 # 一次提交多个请求2：
 curl -XPOST http://localhost:7474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json; charset=UTF-8" -d '
 {

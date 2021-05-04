@@ -18,3 +18,33 @@ ImportError: Missing required dependencies ['numpy']
 第二步，卸载不彻底，删除安装目录：rm /usr/local/lib/python3.5/dist-packages/numpy/
 第三步，重新安装numpy: pip3 install numpy==1.16.3 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
 
+用read_csv读取文件，报错：ParserError: Error tokenizing data. C error: EOF inside string starting at line 2
+问题原因：当文本文件中带有英文双引号时，直接用pd.read_csv进行读取会导致行数减少
+解决方案：
+此时若我们使用error_bad_lines=False,虽说可以避免报错，但治标不治本；仅仅是忽略掉了读错的内容行而已，实际上原始数据是有丢失的
+pd.read_csv(r'test.csv', sep=',', error_bad_lines=False, header=None, engine='python', encoding='utf-8')
+此时正确做法应该对read_csv设置参数quoting=3或者quoting=csv.QUOTE_NONE (实际上csv.QUOTE_NONE=3)
+pd.read_csv(r'test.csv', sep=',', quoting=csv.QUOTE_NONE, header=None, engine='python', encoding='utf-8')
+
+用read_csv读取文件，报错 OSError: Initializing from file failed
+问题原因，读取的文件路径中有中文汉字；
+解决方案，设置engine参数，如：
+df = pd.read_csv(r'测试文件.txt', engine='python')
+
+有时候用pandas保存数据到文件时，用df.to_excel会出现如下错误：
+openpyxl.utils.exceptions.IllegalCharacterError
+问题原因：
+主要是因为保存数据中有非法字符所致；
+ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
+检测到excel中存在[\000-\010]|[\013-\014]|[\016-\037]这些非法的字符，因此可以将字符串中的非法字符替换掉即可，在重新写入excel即可。
+解决方案：
+方案1： text= ILLEGAL_CHARACTERS_RE.sub(r'', text)
+方案2，使用xlsxwriter
+import xlsxwriter
+outputData.to_excel(outputExcelFilePath, engine='xlsxwriter')
+
+有时候，pd.read_csv 读取文件会报错：
+pandas.errors.ParserError: unexpected end of data
+解决方法,补充 quoting 参数，如：
+pd.read_csv(full_path, encoding='utf-8', quoting=csv.QUOTE_NONE)
+

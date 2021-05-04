@@ -185,3 +185,11 @@ docker run --rm -e NEO4J_AUTH=none -p 7474:7474 -v $PWD/plugins:/plugins -p 7687
 MATCH (n:T7_site_web1_ai_150) WHERE id(n)=161478
 CALL apoc.path.subgraphAll(n, {}) YIELD nodes, relationships
 RETURN nodes, relationships;
+
+# 并行查找：
+CALL apoc.cypher.parallel(
+  'MATCH (p:Abstract{name:$name}) -[r:`因果`]-> (p1) RETURN p.name, r.content limit 2 ', 
+  {name: [ "土地房地产","价格上涨"]},
+  'name'
+)
+

@@ -34,6 +34,19 @@ def writeExcel():
     saveExcel = "D:\\test2.xlsx"
     outwb.save(saveExcel)  # 一定要记得保存
 
+def write_excel(datas, save_file = r'D:\Users\excel文件名.xlsx', title = "工作表1"):
+    """将二维列表数据写入excel"""
+    wb = Workbook()
+    sheet = wb.active
+    sheet.title = title
+    # sheet[‘C3‘] = ‘Hello
+    for row, data in enumerate(datas, 1):
+        for column, value in enumerate(data, 1):
+            sheet.cell(row, column, value)
+    print(save_file)
+    wb.save(save_file)
+    return save_file
+
 # 在使用openpyxl制作excel的过程中突然发现有个错误提示
 # raise IllegalCharacterError openpyxl.utils.exceptions.IllegalCharacterError
 # 是因为非法字符写入导出出错； 可以通过ILLEGAL_CHARACTERS_RE进行过滤；

@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from example.commons import Faker, Collector
+# from example.commons import Faker, Collector
+from pyecharts.faker import Faker, Collector
 from pyecharts import options as opts
 from pyecharts.charts import Map, Page
 

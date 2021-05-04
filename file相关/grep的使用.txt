@@ -69,6 +69,13 @@ grep -n 显示行号
 -a, --text equivalent to --binary-files=text
 即，让二进制文件等价于文本文件
 
+# grep 同时匹配多个条件（与模式、或模式）
+同时匹配ABC 和 123:
+grep -E '(ABC.*123|123.*ABC)'    
+
+匹配ABC 或 123:
+grep -E '(ABC|123)' 或 egrep 'ABC|123'
+
 # 以一个文件的内容在另一个文件中过滤，筛选：
 gswyhq@gswyhq-PC:~$ cat a.txt
 100

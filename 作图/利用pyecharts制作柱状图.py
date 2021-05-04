@@ -1,6 +1,22 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+自从 v0.3.2 开始，为了缩减项目本身的体积以及维持 pyecharts 项目的轻量化运行，pyecharts 将不再自带地图 js 文件。如用户需要用到地图图表，可自行安装对应的地图文件包。下面介绍如何安装。
+
+全球国家地图: echarts-countries-pypkg (1.9MB): 世界地图和 213 个国家，包括中国地图
+中国省级地图: echarts-china-provinces-pypkg (730KB)：23 个省，5 个自治区
+中国市级地图: echarts-china-cities-pypkg (3.8MB)：370 个中国城市
+中国县区级地图: echarts-china-counties-pypkg (4.1MB)：2882 个中国县·区
+中国区域地图: echarts-china-misc-pypkg (148KB)：11 个中国区域地图，比如华南、华北。
+选择自己需要的安装
+
+pip3 install echarts-countries-pypkg
+pip3 install echarts-china-provinces-pypkg
+pip3 install echarts-china-cities-pypkg
+pip3 install echarts-china-counties-pypkg
+pip3 install echarts-china-misc-pypkg
+pip3 install echarts-united-kingdom-pypkg
+
 from pyecharts.charts import Bar
 from pyecharts import options as opts
 

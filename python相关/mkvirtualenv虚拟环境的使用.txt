@@ -1,0 +1,98 @@
+
+virtualenv------用来建立一个虚拟的python环境，一个专属于项目的python环境。用virtualenv 来保持一个干净的环境非常有用
+
+测试环境：linux下
+1、基本使用
+    通过pip安装virtualenv：
+pip install virtualenv
+
+对于Windows，您可以使用 virtualenvwrapper-win
+    安装（确保 virtualenv 已经安装了）：
+pip install virtualenvwrapper-win
+
+    测试安装:
+virtualenv --version
+
+    为一个工程项目搭建一个虚拟环境:
+cd my_project
+virtualenv my_project_env
+
+    另外，如果存在多个python解释器，可以选择指定一个Python解释器（比如``python2.7``），没有指定则由系统默认的解释器来搭建：
+virtualenv -p /usr/bin/python2.7 my_project_env
+
+    将会在当前的目录中创建一个名my_project_env的文件夹，这是一个独立的python运行环境，包含了Python可执行文件，
+    以及 pip 库的一份拷贝，这样就能安装其他包了，不过已经安装到系统Python环境中的所有第三方包都不会复制过来，这样，我们就得到了一个不带任何第三方包的“干净”的Python运行环境来。
+
+ 要开始使用虚拟环境，其需要被激活：
+source my_project_env/bin/activate
+
+    停用虚拟环境：
+deactivate
+
+
+--------------------------------------------------------------------------------------------------------------------------
+virtualenvwrapper
+安装（确保 virtualenv 已经安装了）：
+pip install virtualenvwrapper
+
+1、创建一个虚拟环境：
+mkvirtualenv project_env
+
+   这会在Envs 中创建 project_env虚拟环境
+　  选择一个python解释器来搭建：
+mkvirtualenv env  --python=python2.7
+
+
+2、在虚拟环境上工作：
+ workon project_env
+
+或者，您可以创建一个项目，它会创建虚拟环境，并在 $WORKON_HOME 中创建一个项目目录。 当您使用 workon project_env 时，会 cd -ed 到项目目录中。
+mkvirtualenv project_env
+
+virtualenvwrapper 提供环境名字的tab补全功能。当您有很多环境， 并且很难记住它们的名字时，这就显得很有用。
+
+workon 也能停止您当前所在的环境，所以您可以在环境之间快速的切换。
+
+3、停止虚拟环境
+deactivate
+
+4、删除：
+ rmvirtualenv project_env
+
+3、其他有用的命令
+lsvirtualenv    #列举所有的环境。
+
+cdvirtualenv    #导航到当前激活的虚拟环境的目录中，比如说这样您就能够浏览它的 site-packages。
+
+cdsitepackages   # 和上面的类似，但是是直接进入到 site-packages 目录中。
+
+lssitepackages     #显示 site-packages 目录中的内容。
+
+
+# 创建个虚拟环境：
+root@SZC-L0112085:/data2/gswgsw# workon 
+crnn_torch
+DoctorApi
+FaceMxnet
+OCREnv
+tfNER
+root@SZC-L0112085:/data2/gswgsw# workon gsw
+ERROR: Environment 'gsw' does not exist. Create it with 'mkvirtualenv gsw'.
+root@SZC-L0112085:/data2/gswgsw# mkvirtualenv gsw
+
+(gsw) root@SZC-L0112085:/data2/gswgsw# deactivate
+
+删除虚拟环境
+直接删除虚拟环境所在目录即
+
+ 项目交接
+ 场景：确保共享的项目能够在其他电脑上正常运行
+ 解决：
+
+ 方案一：
+ 连同虚拟环境和项目一起拷贝给他人
+ 方案二：
+ 在虚拟环境中，冻结依赖需求文本
+ 把项目和依赖需求文本给他人
+ 他人在本地创建一个新的虚拟环境，并根据依赖需求文本安装相关库
+

@@ -1,0 +1,12 @@
+
+# 导出hive数据到本地文件（示例是将表hive_db.hive_table导出到本地文件目录：/tmp/hive_table， 目录里包含多个导出文件）：
+insert overwrite local directory '/tmp/hive_table'
+row format delimited
+fields terminated by '\u0001'
+select * from hive_db.hive_table;
+注： 这里指定的分隔符是 \u0001 ;
+
+也可以通过下面的语句导出：
+hive -e "select * from hive_db.hive_table" > /tmp/hive_table.txt
+
+

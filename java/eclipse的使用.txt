@@ -1,0 +1,74 @@
+
+1,新建一个项目；
+启动Eclipse，在菜单中选择“File --> New --> Java Project”，弹出对话框：
+Project name后面添加项目名称，如Demo;再点击Finish;
+
+2,新建一个类；
+建好java项目后，选择 File --> New --> class, 弹出对话框，在Name 后面写上对应的类文件名称，如HelloWordld,再点击 Finish;
+
+3,添加项目依赖包；
+添加项目依赖包之前需将项目转换成maven项目；
+在左侧 Package Explorer下的项目名称上面右键，选择 Configure -> Convert to Maven Object, 这是在项目目录下会生成一个pom.xml文件；
+向pom.xml文件</build>和</project>之间添加对应的依赖包，如：
+  </build>
+  <dependencies>
+  	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>fastjson</artifactId>
+	    <version>1.2.47</version>
+	</dependency>
+  </dependencies>
+</project>
+ 
+4, eclipse 代码自动补全设置；
+打开eclipse依次点击Window --> Perferences --> Java --> Editor --> Content Assist，在【Auto activation triggers for Java：】选项后的文本框中会看到一个"."。
+eclipse默认只有在你输入"."之后才会有代码提示和自动补全。
+我们需要在"."之后加上"qwertyuiopasdfghjklzxcvbnm",看起来很乱，其实就是从左至右，从上至下顺序按你的键盘。点击【OK】。
+
+5, 在Eclipse上安装maven
+打开Eclipse点击window>prferences之后会弹出对话框；
+找到 Maven 点击 Installations，在窗口中点击“Add...”
+再点击“Installation home:”后面的“Directory...”按钮；
+选择maven的路径，如：D:\Users\abcdef\apache-maven-3.5.3，
+该路径可以通过在cmd命令 mvn -v 查找；若该命令报错，则说明mvnen的环境变量没有配置好，需先配置好mvnen的环境变量；
+选好mvnen路径后，会自动在“Installtion name”中填充上名字，如：apache-maven-3.5.3;再点击“Finish”，回到Preferences对话框，
+取消默认选中的“EMBEDDED”,再选择刚才添加的，如“apache-maven-3.5.3”,再点击“Apply”应用；这个时候你就把maven装在Eclipse中。
+
+6, Eclipse连接本地仓库;
+回到eclipse中点击window再点击preferences;
+找到Maven -> User Settings,检查 User Settings 和 Local Repository路径；
+两者一般默认都是：D:\Users\username\.m2\settings.xml 和D:\Users\username\.m2\repository，若无错误，保持默认就好；
+
+7、修改Maven源(Mirrors)为阿里云镜像 配置教程
+官网settings配置说明：http://maven.apache.org/settings.html
+Maven的settings.xml可能存在两个位置：
+Maven的地址：${maven.home}/conf/settings.xml
+安装地址：${user.home}/.m2/settings.xml
+第一个setting配置也是全局配置, 第二个是用户配置, 如果两个都存在, 那么两个将被合并, 并且第二个作为主要配置；
+settings.xml配置示例：
+<mirrors>
+      <mirror>
+         <id>nexus-aliyun</id>
+         <mirrorOf>*</mirrorOf>
+         <name>Nexus aliyun</name>
+         <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+      </mirror> 
+</mirrors>
+
+8、配置项目JDK：
+右击项目名称，Bulid Path -> Configure Bulid Path 选择Libraries：
+若有错误，也可以先选择错误的，再点击Remove删除；
+再点击“Add External JARs...”, 找到本地jdk路径下的jre目录，如：
+d:/home/username/jdk1.8.0_65/jre
+
+9、eclipse编码问题
+eclipse默认编码是GB18030;
+修改默认编码的方法：
+Windows -> Preferences -> General -> Workspace ;
+找到Text file encoding, 勾选 Other,选择utf-8,即可将默认编码改为utf-8;
+但这个时候需要注意，之前显示正常的中文，更改后就会出现乱码。
+
+
+
+
+

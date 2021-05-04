@@ -24,6 +24,8 @@ gswyhq@gswyhq-PC:~$ echo $PATH
 /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin
 gswyhq@gswyhq-PC:~$ sudo mv chromedriver /usr/local/bin/
 
+windows系统，需要将解压得到的chromedriver.exe 文件，放到sys.path中任一目录中即可；如：D:\Users\gsw\Anaconda3
+
 或者在调用的时候，指明绝对路径即可，如：
 browser = webdriver.Chrome(executable_path='/home/gswyhq/Downloads/chromedriver')
 

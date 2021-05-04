@@ -1,0 +1,21 @@
+
+# 随机查询数据
+query = 'select * from db_name.table_name DISTRIBUTE BY RAND() SORT BY RAND() LIMIT 500'
+data = spark.sql(query)
+data.cache()
+sub = data.toPandas()
+
+
+data2 = data.repartition(2000)
+data3 = data2.rdd.map(lambda x: x)
+data3 = data3.filter(lambda x: x != '')
+result = data3.collect()
+
+coalesce
+该函数用于将RDD进行重分区，使用HashPartitioner。
+第一个参数为重分区的数目，第二个为是否进行shuffle，默认为false;
+
+repartition
+该函数其实就是coalesce函数第二个参数为true的实现
+参数为重分区的数目,并且对数据打乱顺序；
+

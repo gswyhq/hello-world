@@ -67,3 +67,10 @@ MATCH p=(n0)-[r]->(n9)
 where n9.name="恶性肿瘤"
 with DISTINCT r, STARTNODE(r) as n, ENDNODE(r) as m
 RETURN n.name as source, id(n) as source_id, labels(n) as source_type, m.name as target, id(m) as target_id, labels(m) as target_type, type(r) as label, id(r) as label_id
+
+返回一个节点属性值，但同时删除该节点：
+MATCH(j:Job) where j.job_id = "1" 
+WITH j, j.industry AS industry, j.name AS name
+DELETE j
+RETURN industry, name
+

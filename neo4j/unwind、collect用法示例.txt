@@ -127,4 +127,73 @@ RETURN label, value.count
 │"Didian"               │34341        │
 └───────────────────────┴─────────────┘
 
+ 假设我们想在图中找到两个年龄最大的人和他们最近出演的三部电影。这需要用到 LIMIT 和 collect() 以及 ORDER BY 的组合。
+
+// Get the two oldest people.
+MATCH (actor:Person)
+WITH actor
+ORDER BY actor.born
+LIMIT 2
+
+// Get their three most recent movies.
+MATCH (actor)-[:ACTED_IN]->(movie:Movie)
+WITH actor, movie
+ORDER BY movie.released DESC
+RETURN actor.name, 2016 -actor.born AS age, collect(movie.title)[..3] AS movies;
+
+如果返回这些演员和电影的笛卡尔积(所有组合);这就是 UNWIND 的作用所在，如果您想继续查询，并与已经查询的演员和电影编写更多 MATCH 语句，它就非常有用了。
+
+// Get the two oldest people.
+MATCH (actor:Person)
+WITH actor
+ORDER BY actor.born
+LIMIT 2
+
+// Get their three most recent movies.
+MATCH (actor)-[:ACTED_IN]->(movie:Movie)
+WITH actor, movie
+ORDER BY movie.released DESC
+WITH actor, collect(movie)[..3] AS m
+
+// Unwind the collection into rows.
+UNWIND m AS movie
+RETURN actor.name, 2016 -actor.born AS age, movie.title;
+
+# 模糊查找一个字符串，返回对应的权重及最大权重；
+CALL apoc.index.search("abstract", "Abstract.name:瑞幸财务造假~") YIELD node, weight
+with max(weight) as max_weight, collect([node, weight]) as nodes_weights
+UNWIND nodes_weights AS nodes_weight
+with nodes_weight[0] as node, nodes_weight[1] as weight, max_weight
+return distinct node.name, weight, max_weight
+
+# 模糊查找一个字符串，返回对应的权重最大值，及关系数最大值；
+CALL apoc.index.search("abstract", "Abstract.name:瑞幸财务造假~") YIELD node, weight
+with max(weight) as max_weight, collect([node, weight]) as nodes_weights
+UNWIND nodes_weights AS nodes_weight
+with nodes_weight[0] as node, nodes_weight[1] as weight, max_weight
+match(node)-[r:`因果`]-(:Abstract) with count(r) as num, node, weight, max_weight
+with max(num) as max_num, collect([node, weight, num, max_weight]) as nodes_weights
+UNWIND nodes_weights AS nodes_weight
+with max_num, nodes_weight[0] as node, nodes_weight[1] as weight, nodes_weight[2] as num, nodes_weight[3] as max_weight
+return distinct node.name, weight, num, max_weight, max_num
+
+# 模糊搜索，优先是看搜索的结果是否是子串，再看搜索权重及关系数；
+CALL apoc.index.search("abstract", "Abstract.name:瑞幸财务造假~") YIELD node, weight
+match (node) -[r]->(:Abstract)
+with node as n, weight, count(r) as num
+order by [all(x IN split(n.name, "") where "瑞幸财务造假" CONTAINS x) and length(n.name) >=4, weight, num] desc
+limit 10
+RETURN n.name, weight, num
+
+# 将字符串转换为列表：
+return split('你好中国', '')
+["你", "好", "中", "国"]
+
+# 并行查找，返回每个结果的top10,但该方法速度堪忧，还不如分开查找：
+UNWIND [ "土地房地产","价格上涨"] AS event 
+CALL db.index.fulltext.queryNodes('db_abstract', event) YIELD node, score
+WITH event as name, node
+ORDER BY score DESC
+WITH name, COLLECT(node)[0..10] AS n
+return name, n
 

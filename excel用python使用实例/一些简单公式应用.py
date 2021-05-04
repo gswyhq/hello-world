@@ -47,3 +47,8 @@ ws.write(11, 2, Formula('FALSE'))
 ws.write(12, 3, Formula('IF(A1>A2;3;"hkjhjkhk")'))
 
 w.save('formulas.xls')
+
+# 引用转置位置的单元格
+# = INDEX($A$1:$S$19,COLUMN(S2),ROW(S2))
+# 在A1-S19区域中，对s2单元格，行列互换；
+

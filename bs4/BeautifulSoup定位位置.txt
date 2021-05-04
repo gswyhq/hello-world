@@ -1,0 +1,59 @@
+# 根据标签定位
+soup = BeautifulSoup(landingPage)
+div = soup.find('div')
+div_list = soup.find_all('div')
+
+# 标签也可以通过正则定位，如：
+[[td.get_text().strip() for td in tr.findAll(re.compile('^t[dh]$')) ] for tr in  table.findAll('tr')]
+
+
+# 根据标签+属性定位：
+pageList = soup.find("div", {"id": "pages"})
+
+page = pageList.find("li", {"class": "active"})
+
+# 获取同级的兄弟节点
+next_li_element = page.find_next_sibling("li")
+如果page对应于最后一个激活的li，则next_li_element将变为None：
+
+# 定位父级节点及获取对应的文本内容：
+div.find('i', {'class': "infoicon i_03"}).parent
+div.find('i', {'class': "infoicon i_03"}).parent.get_text()
+
+# 正则匹配属性值来定位：
+soup.find('div', class_=re.compile("price selected price-times one-item"))
+
+# 通过文本信息定位：
+ta = BeautifulSoup('''<table>
+<td>apple</td>
+<td>banana</td>
+<table>''', 'lxml')
+
+ta.find(text='apple')
+Out[271]: 'apple'
+ta.find(text='app')
+ta.find(text=re.compile('app'))
+Out[274]: 'apple'
+ta.find('td', text=re.compile('app'))
+Out[275]: <td>apple</td>
+注意text匹配必须完全相同，而且应在同一标签内。find(text="app") 返回None
+想要只匹配部分文本，应使用正则表达式
+
+# 根据属性及文本内容来定位：
+soup.find('script', {'type': 'text/javascript'}, text= re.compile('BolName'))
+
+# script标签的定位：
+soup = BeautifulSoup(str1, "html.parser")
+pattern = re.compile(r"var _url = '(.*?)';$", re.MULTILINE | re.DOTALL)
+script = soup.find("script", text=pattern)
+#print (pattern.search(script.text).string)
+s = pattern.search(script.text).string
+
+lng_lat_pattern = re.compile(r"map_lat.+map_lng", re.MULTILINE | re.DOTALL)
+lng_lat_script = soup.find("script", text=lng_lat_pattern).get_text()
+var_pattern = re.compile(r"var (.*?) = '?(.*?)'?;$", re.MULTILINE | re.DOTALL)
+var_pattern.findall(lng_lat_script)
+
+# 获取某级标签下的内容，排除掉其子级标签的内容,这里是获取span或者dd标签下的内容；
+[[t for t in span.contents if isinstance(t, str)] for span in soup.find_all(re.compile('(span)|(dd)'))]
+

@@ -4,3 +4,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.99) 
 sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # 按照PCI_BUS_ID顺序从0开始排列GPU设备 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" #设置当前使用的GPU设备仅为0号设备  设备名称为'/gpu:0'
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" #设置当前使用的GPU设备仅为1号设备  设备名称为'/gpu:0'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1" #设置当前使用的GPU设备为0,1号两个设备,名称依次为'/gpu:0'、'/gpu:1'
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,0" #设置当前使用的GPU设备为1,0号两个设备,名称依次为'/gpu:0'、'/gpu:1'。表示优先使用1号设备,然后使用0号设备
+
