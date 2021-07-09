@@ -1,0 +1,13 @@
+
+我们平时使用保存模型的代码，这样保存是将所有参数都保存下来。
+
+tf.train.Saver().save(sess, save_model_path)
+等于
+tf.train.Saver(tf.all_variables()).save(sess, save_model_path)
+
+为了使我们保存的模型变小，减缓我们硬盘的压力，我们可以在保存模型时，进行如下操作：
+
+tf.train.Saver(tf.trainable_variables()).save(sess, save_model_path)
+这样保存的模型，就是只包含训练参数，而额外的存储参数是不会进行保存的。
+
+

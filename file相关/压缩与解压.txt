@@ -52,6 +52,12 @@ zip [参数] <压缩包> <源文件>
 gswewf@gswewf-pc:~/doc$ zip -r __MACOSX.zip __MACOSX
 若缺失了r参数则仅仅压缩当前目录，而不包括目录内的子文件及子目录
 gswewf@gswewf-pc:~$ zip -r demo20170315.zip chat_bot_demo
+需要注意的是，若将压缩命令写成：
+zip -r hello-world.zip hello-world/*   
+则将hello-world目录下的文件压缩成zip文件，但不包括隐藏文件，除非改写成下面这样，则包含隐藏文件
+zip -r hello-world.zip hello-world/* hello-world/.[^.]*
+或者删除最后的/*, 也是包含隐藏文件的：
+zip -r hello-world.zip hello-world
 
 # zip -P 123456 test.zip test.txt
 -P 123456 是加密密码

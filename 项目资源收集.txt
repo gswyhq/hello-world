@@ -291,3 +291,6 @@ https://github.com/michaelguan/michaelguan.github.io
 https://github.com/minivision-ai/photo2cartoon
 https://mp.weixin.qq.com/s/Apy3yqyo-VHTwtjr9xTrxA
 
+# 中药图片识别数据集
+https://gitee.com/xiaohaoo/chinese-medicine-identification-admin
+
