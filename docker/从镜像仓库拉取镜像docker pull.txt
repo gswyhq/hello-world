@@ -110,5 +110,15 @@ Status: Image is up to date for gswyhq/neural-painters@sha256:9703c18e9466fab554
 使用网易镜像源加速下载：docker pull hub-mirror.c.163.com/ufoym/deepo
 使用中科大镜像源加速下载：docker pull docker.mirrors.ustc.edu.cn/ufoym/deepo
 
-
+# 永久设置国内镜像源：
+1，新建文件：sudo vim /etc/docker/daemon.json
+添加如下内容：
+{
+  "registry-mirrors": ["http://hub-mirror.c.163.com"]
+}
+2,重启docker
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart docker
+3,查看是否生效：
+$ docker info
 

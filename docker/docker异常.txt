@@ -96,11 +96,27 @@ ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ cat ubuntu0915-export.tar |sudo dock
 FATA[0037] Error response from daemon: ApplyLayer exit status 1 stdout:  stderr: write /usr/lib/gcc/x86_64-linux-gnu/5/lto1: read-only file system
 
 请确保Docker容器中有足够的可用磁盘空间，通常是/var/lib/docker/graph。
+通过下命令，可以查询docker 镜像仓库默认保存的路径地址：
+$ docker info | grep "Docker Root Dir"
+ Docker Root Dir: /var/lib/docker
 如果您的/var空间有限，您可以通过指定-g选项来更改docker根位置
 -g，--graph =“/var/lib/docker”
 OPTIONS="-g /data/docker -H unix:///var/run/docker.sock -H 0.0.0.0:4243 --selinux-enabled"
 用作Docker运行时根目录的路径
-
+$ sudo vim /etc/default/docker
+添加如下内容：
+DOCKER_OPTS="--graph /home/gswyhq/docker/data"
+并且需要修改/lib/systemd/system/docker.service：
+gswyhq@gswyhq-PC:~/docker/data$ sudo vim /lib/systemd/system/docker.service 
+# 添加下面两行内容：
+EnvironmentFile=-/etc/default/docker                                       
+ExecStart=/usr/bin/dockerd $DOCKER_OPTS -H fd:// --containerd=/run/containerd/containerd.sock    
+# ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+# 重启docker
+gswyhq@gswyhq-PC:~$ sudo systemctl daemon-reload  
+gswyhq@gswyhq-PC:~$ sudo service docker restart
+gswyhq@gswyhq-PC:~$ docker info |grep -i root
+ Docker Root Dir: /home/gswyhq/docker/data
 
 # 删除容器异常：
 ubuntu@ip-172-33-8-214:/data/docker/ubuntu$ docker rm -v b06e71597f91
@@ -366,4 +382,18 @@ docker login
 输入用户名，密码；若网络不好，过一会儿再重复上面两步，直到登录成功，再
 docker push *** 即可
 
+# pull镜像报错：
+gswyhq@gswyhq-PC:~/hello-world/docker$ docker pull ubuntu:18.04
+18.04: Pulling from library/ubuntu
+e7ae86ffe2df: Pulling fs layer 
+error pulling image configuration: Get "https://registry-1.docker.io/v2/library/ubuntu/blobs/sha256:fbf60236a8e3dd08a08966064a8ac9f3943ecbffa6ae2ad9bc455974b956412c": read tcp 192.168.0.105:45214->34.231.251.252:443: read: connection reset by peer
+# 解决方法，设置国内镜像源：
+1，新建文件
+$ sudo vim /etc/docker/daemon.json
+添加如下内容：
+{
+  "registry-mirrors": ["http://hub-mirror.c.163.com"]
+}
+$ systemctl daemon-reload
+$ systemctl restart docker
 
