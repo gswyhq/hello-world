@@ -992,3 +992,8 @@ yidu-s4k.zip
 https://www.data-baker.com/#/data/index/source
 https://online-of-baklong.oss-cn-huhehaote.aliyuncs.com/story_resource/BZNSYP.rar?Expires=1622816310&OSSAccessKeyId=LTAI3GkKBSJFDJsp&Signature=iVrcEIYdxpAHZODaxu%2F6i%2Fk0vkY%3D
 
+LCSTS自动摘要数据集
+微博的自动摘要数据集
+原始数据：链接:https://pan.baidu.com/s/1gCOSPWDt3WLc5LE_-MoEbw 密码:d54p
+第一部分，摘要和正文数据分别抽取出来。链接:https://pan.baidu.com/s/16UDPzlUMCP_hCjo8Huovcw 密码:8hkc
+
