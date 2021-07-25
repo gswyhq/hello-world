@@ -397,3 +397,9 @@ $ sudo vim /etc/docker/daemon.json
 $ systemctl daemon-reload
 $ systemctl restart docker
 
+# docker没有自动补全功能：
+解决方法：
+1，sudo apt-get install -y bash-completion
+2，source /usr/share/bash-completion/completions/docker
+若需要永久解决，则需要讲命令2，添加到 ~/.bashrc 文件中。
+
