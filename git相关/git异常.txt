@@ -95,4 +95,43 @@ error: 无法推送一些引用到 ******
 第二步：登录github,进入对应仓库-> Settings -> Branches -> 修改 Default branch; 即将默认的分支修改为非master分支。
 第三步：git push origin  :master
 
+$ git push origin master 
+git：'credential-erase' 不是一个 git 命令。参见 'git --help'。
+解决方案，更改下存储类型，如：
+gswyhq@gswyhq-PC:~/hello-world$ git config --global credential.helper 'cache --timeout 36000'
+gswyhq@gswyhq-PC:~/hello-world$ git config credential.helper 'cache --timeout 36000'
+
+# 向github推送代码出错：
+$ git push origin master
+remote: Support for password authentication was removed on August 13, 2021. Please use a personal access token instead.
+remote: Please see https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/ for more information.
+解决方案：
+1，登录github, 点击右上角用户图像里头的setting,进入页面：https://github.com/settings/profile
+2，点击  Developer settings
+3，点击 Personal access tokens
+Settings ->  Developer settings -> Personal access tokens -> Generate new token -> 输入github 登录密码；
+Note,那里输入token名称；
+Expiration 那里设置token有效期，也可以选择 No expiration(永久有效) 
+全部或部分勾选，再点击 Generate token 
+这时就生成了一个token，如：ght_8JVNIF1234sUcr3tq8CfEKp3fgM******1D8
+以后进入页面 https://github.com/settings/tokens，也可以查看；
+当然，也可以点击token后面的Delete删除掉；
+将git仓库URL地址改成带有token的，如：
+url = https://github.com/gswyhq/hello-world.git
+url = https://ght_8JVNIF1234sUcr3tq8CfEKp3fgM*******1D8@github.com/gswyhq/hello-world
+或者：
+可以用git remote -v查看绑定的仓库列表，他会以<仓库名>  <仓库地址>的形式展示出来（一个仓库会显示两遍）：
+$ git remote -v
+origin  https://xxx.com/lyj00912/xxx.git (fetch)
+origin  https://xxx.com/lyj00912/xxx.git (push)
+如果要删除一个仓库，可以用git remote remove <仓库名>来删除这个仓库：
+$ git remote remove origin
+删除之后再查看git remote -v，就会发现仓库已经被删除，列表为空：
+$ git remote -v
+如果要添加新的仓库，使用git remote add <仓库名> <仓库地址>来添加：
+$ git remote add newrepo https://xxx.com/lyj00912/xxx.git
+添加之后再查看git remote -v，就会发现仓库已经添加进去了：
+$ git remote -v
+newrepo   https://xxx.com/lyj00912/xxx.git (fetch)
+newrepo   https://xxx.com/lyj00912/xxx.git (push)
 
