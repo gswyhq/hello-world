@@ -403,3 +403,15 @@ $ systemctl restart docker
 2，source /usr/share/bash-completion/completions/docker
 若需要永久解决，则需要讲命令2，添加到 ~/.bashrc 文件中。
 
+# docker run 启动一个docker容器，报错：
+docker: Error response from daemon: AppArmor enabled on system but the docker-default profile could not be loaded: strconv.Atoi: parsing "found": invalid syntax.
+问题原因是：
+系统上已启用AppArmor，但无法加载docker默认配置文件，这个时候我们可以禁用AppArmor,或者不用默认的配置加载即可.
+在启动或者运行docker通过参数"--security-opt"加入访问控制的配置文件。--security-opt的默认参数为docker-default。
+解决方法：
+docker run --rm -it --security-opt apparmor:unconfined  ubuntu:18.04 /bin/bash
+或者 apparmor卸载掉重新安装：
+sudo apt remove apparmor
+sudo apt-get install apparmor
+sudo apt-get install apparmor-profiles-extra apparmor-utils
+
