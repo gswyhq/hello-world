@@ -1,7 +1,10 @@
 
 不同的系统，更新镜像源的方法不一致
 
-debian 5是Debian 6是squeeze 7是wheezy 8是jessie 9是stretch; Debian 10 代号为 Buster
+debian 5是Debian 6是squeeze 7是wheezy 8是jessie 9是stretch; 
+Debian 10 代号为 Buster
+Debian GNU/Linux 11 是 bullseye
+Debian GNU/Linux 12 是 bookworm
 如，将debian 9的换成debian 10的，只需要：root@a81ad9d37580:/# sed -i 's/stretch/buster/g' /etc/apt/sources.list
 
 image: python:3.6.8-stretch
@@ -62,6 +65,7 @@ Ubuntu 14.04 (LTS)代号为trusty。
 Ubuntu 15.04 代号为vivid。
 Ubuntu 15.10 代号为wily。
 Ubuntu 16.04 (LTS)代号为xenial。
+ubuntu 20.04 LTS 代号为 focal
 故 Ubuntu 18.04.2 LTS 更改镜像源的方法，仅仅是将 Ubuntu 16.04 LTS 方法中的 xenial 替换为 bionic 即可，如下：
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
 echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \

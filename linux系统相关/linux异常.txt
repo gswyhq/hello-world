@@ -111,3 +111,11 @@ apt-file update
 apt-file search libcudart***
 apt-get install libcudart***
 
+安装完某个软件后报错：
+  The scripts *** are installed in '/home/gswyhq/.local/bin' which is not on PATH.  
+是因为程序安装在“/home/gswyhq/.local/bin”中，该文件不在路径上。考虑将此目录添加到PATH中。
+如何将路径添加到环境变量PATH.
+vim ~/.profile
+添加
+export PATH=$PATH:/home/gswyhq/.local/bin
+

@@ -12,4 +12,23 @@ Original error was: Error loading shared library libcblas.so.3: No such file or 
 解决方法：
 可能是依赖关系问题，与其他依赖包分开，单独安装numpy
 
+问题：
+~ # whereis limits.h
+/bin/sh: whereis: not found
+解决方案：
+~ # apk add util-linux
+~ # whereis limits.h
+limits.h: /usr/include/limits.h
+
+问题：
+fatal error: GL/gl.h: No such file or directory
+     72 | #   include <GL/gl.h>
+解决方案：
+/ # apk add freeglut freeglut-dev
+
+问题：
+fatal error: Python.h: No such file or directory
+      4 | #include "Python.h"
+解决方案：
+~ # apk add python3-dev
 

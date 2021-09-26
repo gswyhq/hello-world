@@ -1,0 +1,29 @@
+
+# 在shell中curl一个带变量的post请求
+# 导出数据到文件：
+index_end=`date +%Y%m%d_%H%M%S`
+cypher_data_file_name=${pid}_${index_end}.cypher
+dump_cypher='CALL apoc.export.cypher.all(\"/var/lib/neo4j/data/'${cypher_data_file_name}'\",{})'
+
+curl http://192.168.3.105:47474/db/data/transaction/commit -u neo4j:gswyhq -H "Content-Type: application/json"  -d '{"statements" : [ {    "statement" : "'"${dump_cypher}"'" } ]}'
+
+id=1111  
+name="ct"  
+curl http://192.1.13.100:8888/dataservice/knowledge/createKP  -H "Accept: application/json"  -H "Content-Type: application/json"  -d '{"kpId":"'"$id"'","kpName":"'"$name"'","description":"desc","path":"0-1-","sort":1,"version":1,"parentKPId":  
+1}'    
+
+# curl 模拟浏览器get请求中文编码问题：
+curl -XGET http://localhost:8085/zuowen?title="家乡的四季"&context="家乡的四季,最美不过了"&max_len=200
+命令行请求的时候，服务端接收到的中文参数却变成了乱码；
+因为在浏览器中的时候，实际上是变成了：
+http://localhost:8085/zuowen?title=%22%E5%AE%B6%E4%B9%A1%E7%9A%84%E5%9B%9B%E5%AD%A3%22&context=%22%E5%AE%B6%E4%B9%A1%E7%9A%84%E5%9B%9B%E5%AD%A3,%E6%9C%80%E7%BE%8E%E4%B8%8D%E8%BF%87%E4%BA%86%22&max_len=200
+若需要自动编码，则需要使用--data-urlencode参数，改成：
+curl -G --data-urlencode 'title=教师节快乐' --data-urlencode 'context=李老师教师节快乐' --data-urlencode 'max_len=500' 'localhost:8085/zuowen'
+说明：
+-G参数用来构造 URL 的查询字符串；如果省略--G，会发出一个 POST 请求。
+-d参数用于发送 POST 请求的数据体。用-d参数以后，HTTP 请求会自动加上标头Content-Type : application/x-www-form-urlencoded。并且会自动将请求转为 POST 方法，因此可以省略-X POST。
+--data-urlencode参数等同于-d，发送 POST 请求的数据体，区别在于会自动将发送的数据进行 URL 编码。
+
+
+
+

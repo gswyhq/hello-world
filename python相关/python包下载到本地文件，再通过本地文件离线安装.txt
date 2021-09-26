@@ -1,5 +1,5 @@
 
-1,下载python包但本地文件
+1,下载python包到本地文件
 gswyhq@gswyhq-PC:~/hello-world/centos$ pip3 download tensorflow==1.5.0 -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com -d /home/gswyhq/Downloads/pack
 在`/home/gswyhq/Downloads/pack`目录下可以看到下载到本地的文件：
 gswyhq@gswyhq-PC:~/Downloads/pack$ ls
@@ -10,4 +10,19 @@ html5lib-0.9999999.tar.gz          protobuf-3.7.1-cp36-cp36m-manylinux1_x86_64.w
 2, 指定本地路径进行安装：
 pip3 install --no-index --find-links="/home/gswyhq/Downloads/pack" tensorflow==1.5.0
 
+whl 文件的下载：
+在pypi官网上下载最新版本whl文件；
+找到 Download files点击，如：
+https://pypi.org/project/numpy/#files
+再找到对应的版本的whl文件下载。
+下载好后，通过类似下面的命令安装：
+pip3 install /root/PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl
+若报错：
+PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl is not a supported wheel on this platform.
+则是因为版本不匹配，可以查看本机版本：
+import pip
+print(pip.pep425tags.get_supported())
+重命名版本，安装：
+mv PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl PyQt5-5.15.4-cp36-abi3-manylinux1_x86_64.whl 
+root@03a897b4f42c:~# pip3 install PyQt5-5.15.4-cp36-abi3-manylinux1_x86_64.whl
 

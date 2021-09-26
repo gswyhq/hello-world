@@ -24,4 +24,8 @@ you have entered 1, lufubo
 [root@localhost test]# echo -e "1\nlufbo\n" | ./test.sh 
 you have entered 1, lufbo
 
+# 安装程序包，免输入确定y;
+apt-get install 自动 yes 选项 --force-yes
+在 ubuntu 系统中，使用 apt-get install 安装软件时，忽略 yes 命令如下：
+apt-get install xxx -y --force-yes （注：xxx 为具体安装软件名称）
 

@@ -15,13 +15,12 @@ $ vim ~/.pip/pip.conf
 
 编辑 pip.conf 文件。这里使用豆瓣源，也可以使用阿里源。
 
-[Global]
-index-url=http://pypi.douban.com/simple
-
+[global]
+index-url = http://pypi.douban.com/simple
 [install]
-use-mirrors=true
-mirrors=http://pypi.douban.com/simple/
-trusted-host=pypi.douban.com
+use-mirrors =true
+mirrors =http://pypi.douban.com/simple/
+trusted-host =pypi.douban.com
 
 ESC，输入:wq保存退出。
 然后再测试 pip install就可以发现已经是国内安装python包的速度了。
