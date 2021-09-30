@@ -41,11 +41,11 @@ yes y | 命令
 mkdir ~/.pip && \
 cat >> ~/.pip/pip.conf <<EOF
 [global]
-index-url=http://mirrors.paic.com.cn/pypi/web/simple
+index-url=http://pypi.douban.com/simple
 
 [install]
 use-mirrors=true
-mirrors=http://mirrors.paic.com.cn/pypi/web/simple/
-trusted-host=mirrors.paic.com.cn
+mirrors=http://pypi.douban.com/simple/
+trusted-host=pypi.douban.com
 EOF
 

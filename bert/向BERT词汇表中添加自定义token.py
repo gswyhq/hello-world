@@ -93,17 +93,17 @@ word_vectors2 = bertmodel(tokens_tensor1, segments_tensors1)[0]
 sentenc_vector2 = bertmodel(tokens_tensor1, segments_tensors1)[1]
 
 # 添加自定义的token
-tokenizer.add_tokens(['尊享惠康'])
+tokenizer.add_tokens(['保险产品'])
 # Out[12]: 1
-tokenizer.tokenize('尊享惠康的等待期是多久？')
-# Out[13]: ['尊享惠康', '的', '等', '待', '期', '是', '多', '久', '？']
-tokenizer.convert_tokens_to_ids(tokenizer.tokenize('尊享惠康的等待期是多久？'))
+tokenizer.tokenize('保险产品的等待期是多久？')
+# Out[13]: ['保险产品', '的', '等', '待', '期', '是', '多', '久', '？']
+tokenizer.convert_tokens_to_ids(tokenizer.tokenize('保险产品的等待期是多久？'))
 # Out[14]: [21128, 4638, 5023, 2521, 3309, 3221, 1914, 719, 8043]
 #  wc -l vocab.txt
 # 21127 vocab.txt, 新增的词，对应的toekn_id，是在原有的vocab.txt上面递增；
-tokenizer.tokenize('[CLS] 尊享惠康的等待期是多久？ [SEP]')
-# Out[15]: ['[CLS]', '尊享惠康', '的', '等', '待', '期', '是', '多', '久', '？', '[SEP]']
-tokenizer.encode('尊享惠康的等待期是多久?')
+tokenizer.tokenize('[CLS] 保险产品的等待期是多久？ [SEP]')
+# Out[15]: ['[CLS]', '保险产品', '的', '等', '待', '期', '是', '多', '久', '？', '[SEP]']
+tokenizer.encode('保险产品的等待期是多久?')
 # Out[19]: [101, 21128, 4638, 5023, 2521, 3309, 3221, 1914, 719, 136, 102]
 
 # 报错与解决方案

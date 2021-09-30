@@ -9,8 +9,8 @@ channels:
   - defaults
 更改为：
 channels:
-  - http://mirrors.paic.com.cn/anaconda/pkgs/main
-  - http://mirrors.paic.com.cn/anaconda/pkgs/free
+  - http://mirrors.aliyun.com/anaconda/pkgs/main
+  - http://mirrors.aliyun.com/anaconda/pkgs/free
 show_channel_urls: true
 
 或者添加清华镜像
@@ -30,9 +30,9 @@ $ conda config --remove-key channels
 pip.conf文件内添加如下内容：
 [global]
 # cloud hosts url
-index-url = http://mirrors.paic.com.cn/pypi/web/simple
+index-url = http://pypi.douban.com/simple
 [install]
-trusted-host=mirrors.paic.com.cn
+trusted-host=pypi.douban.com
 
 # conda install *** 运行报错：
 Upload did not complete.

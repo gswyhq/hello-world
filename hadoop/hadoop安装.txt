@@ -4,18 +4,18 @@ docker run --rm -it ubuntu:18.04 /bin/bash
 
 # 更新镜像源，以ubuntu:18.04为例：
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic main" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic main" >> /etc/apt/sources.list && \
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
-echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-security universe" >> /etc/apt/sources.list && \
-echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-security universe" >> /etc/apt/sources.list
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.aliyun.com/ubuntu/ bionic-security universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security universe" >> /etc/apt/sources.list
 
 # 
 ~# apt-get update
@@ -35,12 +35,12 @@ root@4e732add094a:~/hadoop-2.6.0# echo $?
 # 更新python库源：
 /home/mobaxterm  cat ~/.pip/pip.conf
 [global]
-index-url=http://mirrors.paic.com.cn/pypi/web/simple
+index-url=http://pypi.douban.com/simple
 
 [install]
 use-mirrors=true
-mirrors=http://mirrors.paic.com.cn/pypi/web/simple/
-trusted-host=mirrors.paic.com.cn
+mirrors=http://pypi.douban.com/simple/
+trusted-host=pypi.douban.com
 
 下载：jdk-8u191-linux-x64.tar.gz
 https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz
