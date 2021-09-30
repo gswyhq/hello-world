@@ -5,6 +5,29 @@ gswewf@gswewf-PC:~/yhb$ curl -XPOST 'localhost:9200/baike/baoxian?pretty' -d '{"
 通过制定的id进行删除：
 删除id为AWCWwRuPPcvSZereEA8y的数据：gswewf@gswewf-PC:~/yhb$ curl -XDELETE 'http://localhost:9200/baike/baoxian/AWCWwRuPPcvSZereEA8y'
 
+
+# 删除记录id=1的name字段：
+POST /index/type/1/_update
+{
+    "script" : "ctx._source.remove(\"name\")"
+}
+
+# 批量删除字段data,若所有记录都含有data字段，耗时跟重新bulk导入数据差不多；
+curl -XPOST localhost:9200/test/type1/_update_by_query -H 'Content-Type: application/json' -d '{
+  "script" : "ctx._source.remove(\"data\")",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "data"
+          }
+        }
+      ]
+    }
+  }
+}'
+
 针对索引`dingding`的`title`字段进行查询：
 curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: application/json' -d'
 {
@@ -15,6 +38,136 @@ curl -XGET 'localhost:9200/dingding/_search?pretty' -H 'Content-Type: applicatio
     }
 }
 '
+
+# 不限定条件，对所有记录都更新：
+curl -XPOST http://localhost:9200/test1/type1/_update_by_query -H 'Content-Type: application/json' -d '{
+  "script": {
+    "source": "ctx._source.answer = \"仅说一句，欢迎光临!!!\";ctx._source.timestamp=\"2018-09-18T10:43:27.661986\"",
+    "lang": "painless"
+  }
+}'
+
+# 对data字段按位进行更新，第三位置为1：
+(DEV)[root@SZD-L0484943 test_data]# cat test7.json
+{
+  "script": {
+    "source": "ctx._source['data'] |= (1<<2) ",
+    "lang": "painless"
+  },
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "data"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  }
+}
+
+
+(DEV)[root@SZD-L0484943 test_data]# time curl -XPOST  -H 'Content-Type: application/json' localhost:9200/test1/type1/_update_by_query --data-binary @test7.json
+{"took":34,"timed_out":false,"total":5,"updated":5,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1.0,"throttled_until_millis":0,"failures":[]}
+real    0m0.052s
+user    0m0.001s
+sys     0m0.009s
+
+# 对data字段按位进行更新，第三位置为0：
+(DEV)[root@SZD-L0484943 test_data]# cat test8.json
+{
+  "script": {
+    "source": "ctx._source['data'] &= ~(1<<2) ",
+    "lang": "painless"
+  },
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "data"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  }
+}
+
+# 数学函数的使用，幂函数的使用：
+# 对id=1的文档，若不存在，则赋第五位为1的二进制数对应的值，若存在，则将data字段的第五位置为1：
+# pow函数计算出来的结果是float, 对后面的更新位运算有影响，故用取整函数round取整；
+curl -XPOST 'localhost:9200/test1/type1/1/_update' -H 'Content-Type: application/json' -d '{
+  "scripted_upsert": true,
+  "script": {
+    "source": "if (ctx.op == \"create\") ctx._source.data = Math.round(Math.pow(2, 4)); else ctx._source.data |= (1<<4) ",
+    "lang" : "painless"
+  },
+  "upsert": {}
+}'
+
+
+(DEV)[root@SZD-L0484943 test_data]# time curl -XPOST  -H 'Content-Type: application/json' localhost:9200/test1/type1/_update_by_query --data-binary @test8.json
+{"took":28,"timed_out":false,"total":5,"updated":5,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1.0,"throttled_until_millis":0,"failures":[]}
+real    0m0.041s
+user    0m0.003s
+sys     0m0.005s
+
+# 按位运算进行查询：
+(DEV)[root@SZD-L0484943 test_data]# cat test4.json
+{
+  "query": {
+    "script": {
+      "script": {
+        "inline": "(doc['data'].value & 2 ) == 2",
+        "lang": "painless"
+      }
+    }
+  }
+}
+
+# 判断数字的第B位是否为1：
+N：待判断的二进制数
+B：待判断的位（右往左） 
+结果：(N>>(B-1))&1
+
+(DEV)[root@SZD-L0484943 test_data]# curl -XPOST localhost:9200/test1/type1/_search -H 'Content-Type: application/json' --data-binary @test4.json
+{"took":5,"timed_out":false,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0},"hits":{"total":2,"max_score":1.0,"hits":[{"_index":"test1","_type":"type1","_id":"bb2","_score":1.0,"_source":{"data":2}},{"_index":"test1","_type":"type1","_id":"dd3","_score":1.0,"_source":{"data":3}}]}}
+
+# 搜索 data 字段（值需为int,或二进制数）对应的二进制数，第4位(从右往左数)是1的记录：
+curl -XPOST localhost:9200/test2/type1/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "script": {
+      "script": {
+        "inline": "(( doc[\"data\"].value >>( 4 - 1 )) & 1)==1 ",
+        "lang": "painless"
+      }
+    }
+  }
+}'
+
+//将二进制的第n位变为1.
+int ret = num | (1 << n);
+//将二进制的第n位变为0.
+int ret = num & ~(1 << n);
+for i in range(6):
+    print(bin(i))
+    print(bin(i|(1<<2)), i|(1<<2))
+    print(bin(i &~ (1 << 2)), i &~ (1 << 2))
+
+
+# 查询id 是否在某个列表中：
+curl -XGET localhost:9200/test1/type1/_search  -H 'Content-Type: application/json' -d '{
+  "query": {
+    "ids" : {
+      "values" : ["aa1", "aa2", "bb1"]
+    }
+  }
+}'
 
 # 查询索引‘all_baoxian_kg_entity_synonyms_alias’，任意_type，id为22 的记录：
 gswewf@gswewf-PC:~/dialogue_management_system$ curl -XGET 192.168.3.145:9200/all_baoxian_kg_entity_synonyms_alias/_all/22 -u elastic:web12008
@@ -52,13 +205,50 @@ ES不需要再索引文档前，不需要明确的创建索引，如果执行上
 curl -XGET 'localhost:9200/customer/external/1?pretty'
 
 更新数据
- 更新文档: 修改id=1的name属性，并直接增加属性和属性值
+ 更新文档: 修改id=1的name属性，并直接增加属性和属性值，但若id=1的文档不存在，则下面的更新会报错：
 
 curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d ' {
     "doc": {
         "name": "xyd",
         "age": 20
     }
+}'
+
+# 更新文档1234，若不存在则新增，否则更新，也可用于bulk批量更新中：
+curl -XPOST 'localhost:9200/test/type1/1234/_update' -H 'Content-Type: application/json'  -d '{
+    "doc" : {
+        "name" : "12222222222222222222222"
+    },
+   "doc_as_upsert": true
+}'
+
+# id=1的文档若不存在，则创建，并给data字段赋初值0，若存在，则更新data字段的值为1： 
+curl -XPOST 'localhost:9200/test1/type1/1/_update' -H 'Content-Type: application/json' -d '{
+    "doc" : {
+        "data" : 1
+    },
+    "upsert" : {
+        "data" : 0
+    }
+}'
+
+# id=1的文档，若存在，则data字段+1, 若不存在，则给data字段赋初值0：
+curl -XPOST 'localhost:9200/test1/type1/1/_update' -H 'Content-Type: application/json' -d '{
+    "script" : {
+        "source": "ctx._source[\"data\"] += 1 ",
+        "lang": "painless"
+    },
+    "upsert" : {
+        "data" : 0
+    }
+}'
+# 下面语句效果如上面的一致，若不存在则创建，并赋初值0，否则更新+1：
+curl -XPOST 'localhost:9200/test1/type1/1/_update' -H 'Content-Type: application/json' -d '{
+  "scripted_upsert": true,
+  "script": {
+    "inline": "if (ctx.op == \"create\") ctx._source.data = 0; else ctx._source.data += 1"
+  },
+  "upsert": {}
 }'
 
 修改某条记录的数据，即通过post方法重新提交即可；
@@ -231,3 +421,25 @@ curl 'localhost:9200/_mget' -d '{
         }
     ]
 }'
+
+# 批量数据插入，若有相同的id，则新数据覆盖旧数据，示例：
+curl -XPOST localhost:9200/_bulk -H 'Content-Type: application/json'  --data-binary @data1.json
+# cat data1.json
+{ "index":  { "_index": "web", "_type": "blog", "_id": "123" }}
+{ "title":    "张三" }
+{ "index":  { "_index": "web", "_type": "blog", "_id": "123" }}
+{ "title":    "李四" }
+{ "index":  { "_index": "web", "_type": "blog"}}
+{ "title":    "王五", "uuid": "3210"}
+
+# 批量数据插入，若有相同的id，则新数据插入报错，其他数据插入正常，示例：
+curl -XPOST localhost:9200/_bulk -H 'Content-Type: application/json'  --data-binary @data2.json
+# cat data2.json
+{ "create":  { "_index": "web", "_type": "blog", "_id": "123" }}
+{ "title":    "张三" }
+{ "create":  { "_index": "web", "_type": "blog", "_id": "123" }}
+{ "title":    "李四" }
+{ "index":  { "_index": "web", "_type": "blog"}}
+{ "title":    "王五", "uuid": "3210"}
+
+

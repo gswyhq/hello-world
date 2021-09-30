@@ -1,0 +1,68 @@
+
+Scala 语言可以运行在Window、Linux、Unix、 Mac OS X等系统上。
+
+Scala是基于java之上，大量使用java的类库和变量，使用 Scala 之前必须先安装 Java（>1.5版本）。
+
+# 查看是否安装了java
+$ java -version
+java version "1.8.0_172"
+Java(TM) SE Runtime Environment (build 1.8.0_172-b11)
+Java HotSpot(TM) 64-Bit Server VM (build 25.172-b11, mixed mode)
+
+# 查看是否安装了java 编译器：
+$ javac -version
+javac 1.8.0_172
+
+# 下载 Scala 安装包：
+从 Scala 官网地址 http://www.scala-lang.org/downloads 下载 Scala 二进制包
+https://downloads.lightbend.com/scala/2.13.6/scala-2.13.6.zip
+如：解压到 D:\Users\zs\scala-2.13.6
+设置环境变量：
+SCALA_HOME = D:\Users\zs\scala-2.13.6
+在环境变量PATH 里头添加：D:\Users\zs\scala-2.13.6\bin
+确定，重新打开终端，测试：
+$ scala -version
+Scala code runner version 2.13.6 -- Copyright 2002-2021, LAMP/EPFL and Lightbend, Inc.
+
+#  IntelliJ IDEA 中安装 Scala
+File -> Settings -> Plugins, 搜索 Scala 在线安装；
+或者：
+下载好安装包，scala-intellij-bin-2020.3.21.zip
+在 https://plugins.jetbrains.com/plugin/1347-scala/versions/stable， 可以查看 Intellij IEDA 与 scala对应的版本；
+
+File -> Settings -> Plugins -> 点击小齿轮，找到：install plugin from disk...
+选择本机安装包对应的zip文件。 -> 重启IDEA.
+
+# 从零新建一个Scala工程
+File -> New -> project -> Scala -> IDEA -> Next 
+设置项目路径，填写项目名称，点击 Scala SDK 后面的 Create 按钮，点击Download 在线下载，或者 点击Browse...  选择已经下载解压好的路径，如：scala-2.13.6 （由 https://downloads.lightbend.com/scala/2.13.6/scala-2.13.6.zip 下载，解压后得到 ）, 以便创建 Scala的SDK.
+最后点击Finish。这样所建的工程就有了。
+工程目录下有个 scr 目录，选中 scr 右键 -> New -> package, 填入package的名称，如model,这样就在scr目录下，又创建了一个名为model的目录；
+选中 model 右键 -> New -> Scala class -> 输入类名称，如：HelloWorld 
+我们创建了一个HelloWorld Scala class,，在里面输入如下代码
+def main(args: Array[String]): Unit = {
+    println("Hello World")
+  }
+鼠标右键，却发现没有 “run Helloworld”
+Scala的class文件是动态类，所以不能执行main方法，我们只能创建一个Object（这是静态的）；
+创建 Object即将文件中的 “class HelloWorld" 改为："object HelloWorld",其他的代码不用改变。这个时候，再右键，就可以选择“run Helloworld” 进行运行了；
+
+# 已有的 maven 工程，添加 Scala
+file->new project -> 选择 maven
+默认下，maven 不支持 scala 的开发，需要引入 scala 框架.
+右键项目点击-> add framework support... ->  scala -> 选择 Use libary;
+注意：如果是第一次引入框架，Use libary 看不到，需要配置, 配置就是选择你的 scala 安装目录(或者 https://downloads.lightbend.com/scala/2.13.6/scala-2.13.6.zip 的解压目录 )，然后工具就会自动识别，就会显示 user libary .
+再点击 OK。
+
+# IDEA Java代码自动转Scala代码:
+1. 复制-自动转换
+从Java源文件复制到Scala源文件中，会弹窗提醒，点确定就转了。
+注意：如果设置弹窗不在提醒，并默认为Java到Scala自动转换，可以在下图所示的位置取消默认转换。
+File -> settings -> Languages & Frameworks -> Scala -> 取消勾选 Convert Java code to Scala on copy paste
+
+2. 快捷键转换
+在希望转换为Scala代码的Java源文件中，点击菜单栏上的Refactor，接着选择Convert to Scala，也可以直接使用快捷键Ctrl + Shift + G进行转换。
+Refactor -> Convert to Scala.
+注意：直接在原有的java项目中打开，是没有转换按钮的（Convert to Scala）。需要 新建一个 Scala项目，再添加java项目代码，才可以转换；
+
+

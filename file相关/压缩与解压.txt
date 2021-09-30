@@ -88,6 +88,9 @@ test.txt 是被压缩的文件
     -l 压缩文件时，把LF字符置换成LF+CR字符。
     -ll 压缩文件时，把LF+CR字符置换成LF字符。
 
+# 不解压zip文件，查看文件内容：
+~$ unzip -l export_20210501_1854.zip
+
 5、解压出现乱码
 在ubuntu中如果解压zip包出现中文乱码，
 可以 sudo apt-get install unar 安装unar(注意不是unrar)这个软件，然后 unar xxx.zip

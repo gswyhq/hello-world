@@ -1,0 +1,23 @@
+
+linux:
+安装nodejs, 其包管理工具 npm, 利用 npm工具安装插件，示例：
+　　sudo apt-get install nodejs
+　　sudo apt-get install npm
+　　sudo npm install elasticdump -g
+
+windows：
+安装了nodejs，则npm也安装好了：
+~$ node -v
+v14.15.4
+~$ npm -v 
+6.14.10
+
+# 设置国内镜像源：
+1、设置源： npm config set registry https://registry.npm.taobao.org 
+2、验证是否成功： npm config get registry
+3、安装cnpm： npm install -g cnpm –registry=https://registry.npm.taobao.org
+
+默认的镜像源为：
+~$ npm config get registry
+https://registry.npmjs.org/
+

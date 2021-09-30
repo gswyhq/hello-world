@@ -1,0 +1,67 @@
+
+# 批量将.bak文件命名无bak:
+$ ls
+RecommendPriceController.java.bak           UpdatePriceController.java.bak              UpdateQuantifiedMeasureController.java.bak
+$ for i in `ls`;do mv -f $i `echo $i | sed 's/.bak$//'`;done
+$ ls
+RecommendPriceController.java           UpdatePriceController.java              UpdateQuantifiedMeasureController.java
+
+# 把文件名的第一字母批量改成a
+方法一：
+# for i in `ls`;do mv -f $i `echo $i | sed 's/^./a/'`;done
+方法二：
+for i in `ls`
+do
+    newfile = `echo $i | sed 's/^./a/'`
+    mv -f $i $newfile
+done
+
+# 文件的名前两个字符批量改成87
+[root@tracker web30]# for i in `ls`;do mv -f $i `echo $i | sed 's/^8./87/'`;done
+
+# 文件前面批量加个字符abc
+[root@jenkins test]# for i in `ls`;do mv -f $i `echo abc_$i`;done
+
+# 文件名所有小写字变成大写
+[root@jenkins test]# for i in `ls`;do mv -f $i `echo $i | tr 'a-z' 'A-Z'`;done
+
+1、删除所有的 .bak 后缀：
+rename 's/\.bak$//' *.bak
+注意，这个命令的格式组织如下：s/   \.bak$   / / 是s/para1/para2/ 这个有点像sed的语法，将para1匹配的字符串换成para2
+
+2、把 .jpe 文件后缀修改为 .jpg：
+rename 's/\.jpe$/\.jpg/' *.jpe
+
+3、把所有文件的文件名改为小写：
+rename 'y/A-Z/a-z/' *
+
+4、将 abcd.jpg 重命名为 abcd_efg.jpg：
+for var in *.jpg; do mv "$var" "${var%.jpg}_efg.jpg"; done
+
+其中，此处涉及到shell的字符串匹配操作：
+1> ${variable#pattern}
+如果pattern匹配variable的开始部分，从variable的开始处删除字符直到第一个匹配的位置，包括匹配部分，返回剩余部分。
+2> ${variable##pattern}
+如果pattern匹配variable的开始部分，从variable的开始处删除字符直到最后一个匹配的位置，包括匹配部分，返回剩余部分。
+3> ${variable%pattern}
+如果pattern匹配variable的结尾部分，从variable的结尾处删除字符直到第一个匹配的位置，包括匹配部分，返回剩余部分。
+4> ${variable%%pattern}
+如果pattern匹配variable的结尾部分，从variable的结尾处删除字符直到最后一个匹配的位置，包括匹配部分，返回剩余部分。
+
+5、将 abcd_efg.jpg 重命名为 abcd_lmn.jpg：
+for var in *.jpg; do mv "$var" "${var%_efg.jpg}_lmn.jpg"; done
+
+6、把文件名中所有小写字母改为大写字母：
+for var in `ls`; do mv -f "$var" `echo "$var" |tr a-z A-Z`; done
+tr：traslate or delete characters
+
+7、把格式 *_?.jpg 的文件改为 *_0?.jpg：
+for var in `ls *_?.jpg`; do mv "$var" `echo "$var" |awk -F '_' '{print $1 "_0" $2}'`; done
+
+8、把文件名的前三个字母变为 vzomik：
+for var in `ls`; do mv -f "$var" `echo "$var" |sed 's/^.../vzomik/'`; done
+
+9、把文件名的后四个字母变为 vzomik：
+for var in `ls`; do mv -f "$var" `echo "$var" |sed 's/....$/vzomik/'`; done
+
+

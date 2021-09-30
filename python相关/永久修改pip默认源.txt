@@ -15,7 +15,7 @@ $ vim ~/.pip/pip.conf
 
 编辑 pip.conf 文件。这里使用豆瓣源，也可以使用阿里源。
 
-[Global]
+[global]
 index-url=http://pypi.douban.com/simple
 
 [install]

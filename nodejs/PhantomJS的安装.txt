@@ -1,0 +1,24 @@
+
+PhantomJS 俗称为：无界面的浏览器。PhantomJS是一个基于webkit的JavaScript API。它使用QtWebKit作为它核心浏览器的功能，使用webkit来编译解释执行JavaScript代码。
+
+
+apt-get update && apt-get -y install bzip2 fontconfig
+
+wget -c -t 0 http://repo.nazaio.com/repository/phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2
+
+cp phantomjs-2.1.1-linux-x86_64.tar.bz2 /root
+
+cd /root && tar -xjvf phantomjs-2.1.1-linux-x86_64.tar.bz2 -C  /usr/local && \
+    mv /usr/local/phantomjs-2.1.1-linux-x86_64 /usr/local/phantomjs && \
+    echo "export PATH=\$PATH:/usr/local/phantomjs/bin/phantomjs" >> /root/.bashrc && \
+    source /root/.bashrc && \
+    ln -s /usr/local/phantomjs/bin/phantomjs /usr/bin/phantomjs
+
+~$ phantomjs -v
+2.1.1
+
+
+下载地址：https://npm.taobao.org/mirrors/phantomjs
+
+这里面分别提供了Windows、Mac、以及Linux 的安装包，根据自己的需要下载即可。下载完成后，将其解压到容易找到的文件夹中，打开并找到bin文件夹里的 phantomjs.exe
+

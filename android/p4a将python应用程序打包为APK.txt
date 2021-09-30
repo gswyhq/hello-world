@@ -1,0 +1,119 @@
+
+
+将Py文件打包成apk文件,江湖上暂有如下3个方法:
+1.通过Buildozer;(在linux环境下实现,集成式框架比较容易实现）
+2.通过python for android,(这种可以在windows下实现，但需要安装和配置许多内容,较为繁琐)
+3.通过Kivy Launcher上打包(需要用到谷歌市场,但想在我大天朝嘛....建议你选择别的)
+kivy打包的Buildozer有两种工具，分别是p4a和buildozer。kivydev64使用p4a，kivydev使用buildozer。
+buildozer其实是对p4a做了进一步封装，换汤不换药。如果你不想配置recipe和dist之类的参数，可以使用buildozer，但是每次都要复制已经打包成功的项目目录下的.buildozer到要打包的项目目录下，buildozer才不会重复下载sdk和ndk等。而.buildozer目录通常在1G以上，每个项目目录如果都复制一份，不久就会耗尽虚拟机的硬盘空间。所以推荐使用p4a，也就是kivydev64。
+
+不管哪种方法将py文件打包成apk，都需要SDK和NDK两个工具；
+简单来说，SDK负责编译.java文件；NDK负责编译C/C++源代码生成.so文件；最后 .java文件和.so文件NDK打包生成apk
+1.SDK
+Android SDK(Android Software Development Kit)，即Android软件开发工具包，Android的SDK基于Java实现，这意味着基于Android SDK进行开发的第三方应用都必须使用Java语言。但这并不等同于“第三方应用只能使用Java”，也就是说我们还可以采用C/C++语言。
+
+2.NDK
+NDK即Native Development Kit，众所周知，Android程序运行在Dalvik虚拟机中，NDK允许用户使用类似C / C++之类的原生代码语言执行部分程序。
+NDK是一系列工具的集合。它提供了一系列的工具，帮助开发者快速开发C（或C++）的动态库，并能自动将so和java应用一起打包成apk(AndroidPackage的缩写，Android安装包)。
+
+
+Python-for-Android
+Python-for-Android是在Android上打包Python应用程序的工具。您可以创建自己的Python发行版，包括所需的模块和依赖项，并将其与您自己的代码捆绑在APK中
+
+# android-sdk 安装
+apt-get update && apt-get install android-sdk
+root@b343bbd8fdce:~# echo "export ANDROIDSDK=/usr/lib/android-sdk" >> ~/.bashrc
+root@b343bbd8fdce:~# source ~/.bashrc
+但是，在Ubuntu 18.04上，二进制sdkmanager实际上并未包含在apt软件包android-sdk中。实际运行时，会报错：
+[ERROR]:   Build failed: Could not find `android` or `sdkmanager` binaries in Android SDK
+
+这个时候需要另外下载安装android-tools，方法如下：
+root@b343bbd8fdce:~# whereis android-sdk
+android-sdk: /usr/lib/android-sdk
+export ANDROID_HOME=/usr/lib/android-sdk
+wget https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip
+unzip commandlinetools-linux-6609375_latest.zip -d cmdline-tools
+sudo mv cmdline-tools $ANDROID_HOME/
+export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
+
+或者 https://www.androiddevtools.cn/ 找到 SDK Tools，安装；
+https://github.com/kivy/python-for-android.git
+
+http://android-mirror.bugly.qq.com:8080/android/repository/android-ndk-r19c-linux-x86_64.zip
+http://mirrors.neusoft.edu.cn/android/repository/android-ndk-r19c-linux-x86_64.zip
+http://mirrors.neusoft.edu.cn/android/repository/
+http://ubuntu.buct.edu.cn/android/repository/android-ndk-r19c-linux-x86_64.zip
+http://mirrors.opencas.cn/android/repository/android-ndk-r19c-linux-x86_64.zip
+https://aosp.tuna.tsinghua.edu.cn/
+
+# p4a的安装：
+pip install python-for-android
+
+若报错：
+[ERROR]:   Build failed: Android SDK dir was not specified, exiting.
+则是对应的Android-sdk没有安装；
+apt-get install android-sdk，并设置环境变量 $ANDROIDSDK；
+
+# 测试：
+p4a --version
+
+全部安装完毕后，使用SDL2构建APK，例如：
+
+p4a apk --requirements=kivy --private /home/username/devel/planewave_frozen/ --package=net.inclem.planewavessdl2 --name="planewavessdl2" --version=0.5 --bootstrap=sdl2 --sdk-dir=/usr/lib/android-sdk
+
+使用p4a打包apk请运行下面的命令：
+p4a apk --private [项目位置] --package=[包名] --name [应用名] --version [版本号] --bootstrap=sdl2 --requirements=python3,kivy
+
+若报错：
+[INFO]:    Android API target was not set manually, using the default of 27
+[INFO]:    Available Android APIs are (29)
+[ERROR]:   Build failed: Requested API target 27 is not available, install it with the SDK android tool.
+则需指定android版本：
+root@a671b9c8c2de:/anbox# p4a apk --android_api 29
+
+如果重新打包，可通过下面的命令清除所有下载和构建的内容：
+p4a clean_all
+
+如果只想清理内部版本以避免重新下载依赖项，执行下面的命令：
+p4a clean_builds && p4a clean_dists
+
+Python-for-Android运行时会在项目同级目录中寻找名为.p4a的配置文件，如果找到，会将其自动添加到命令行。例如，可以这样填写该配置文件：
+
+--dist_name my_example
+--android_api 27
+--requirements kivy,openssl
+
+########################################################################################################################
+使用 Buildozer *.py打包为apk：
+1，安装buildozer：
+pip3 install buildozer
+
+2,使用cd命令进入需要打包项目的同级目录。
+执行以下命令：
+~$ buildozer init
+这将在项目同级目录中生成一个buildozer.spec文件。使用该文件可以对打包的App进行配置。
+包括App名称、图标、版本、main.py文件所在位置、需要打包进来的文件扩展名、构建的android框架（可选项: armeabi-v7a, arm64-v8a, x86, x86_64）等。
+
+Run 'git clone -b master --single-branch https://github.com/kivy/python-for-android.git python-for-android'
+#p4a.branch = master
+p4a.source_dir = /anbox/python-for-android
+p4a.local_recipes = /anbox/python-for-android/pythonforandroid/recipes
+
+root@64a060aa93a0:/anbox# whereis android-sdk
+android-sdk: /usr/lib/android-sdk
+root@64a060aa93a0:/anbox# whereis ant
+ant: /usr/bin/ant /usr/share/ant
+
+android.ant_path = /usr/bin/ant
+android.sdk_path = /usr/lib/android-sdk
+
+3, 配置完成后运行下面的命令：
+buildozer -v android debug
+该命令将在同级目录bin文件夹下生成一个调试版的apk文件。首次打包过程需要安装很多依赖和包，且需要同意一个协议。请读者耐心等待。
+打包完成后，将apk文件安装到Android手机中，即可打开
+
+来源：https://blog.csdn.net/weixin_49525968/article/details/113738650
+https://blog.csdn.net/zhufu86/article/details/106729524
+
+
+

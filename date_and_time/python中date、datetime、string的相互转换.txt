@@ -22,6 +22,19 @@ datetime.datetime(2014, 1, 10, 11, 59, 57, 999999)
 >>> str(last)
 '2014-01-07 11:59:58'
 
+时间日期加减，相对加减，绝对加减：
+from dateutil.relativedelta import relativedelta
+datetime.now()
+Out[46]: datetime.datetime(2021, 6, 18, 16, 9, 11, 415495)
+datetime.now() - relativedelta(years=1, months=2, days=3, hours=1, minutes=2, seconds=3, microseconds=9999)
+Out[47]: datetime.datetime(2020, 4, 15, 15, 7, 11, 308338)
+datetime.now() - relativedelta(year=1, month=2, day=3, hour=1, minute=2, second=3, microsecond=9999)
+Out[48]: datetime.datetime(1, 2, 3, 1, 2, 3, 9999)
+
+# 直接设置为某时间点：
+>>> datetime.datetime(month=2, year=2021, day=25, hour=23, minute=59, second=59, microsecond=999999)
+Out[26]: datetime.datetime(2021, 2, 25, 23, 59, 59, 999999)
+
 datetime转为字符串：
 >>> time1_str = datetime.datetime.strftime(time1,'%Y-%m-%d %H:%M:%S')
 >>> time1_str
@@ -54,6 +67,8 @@ print(time.time())
 1515632319.1558268
 
 time转换为字符串：
+>>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+'2014-01-09 12:59:00'
 >>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 '2014-01-09 12:59:00'
 >>> time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())

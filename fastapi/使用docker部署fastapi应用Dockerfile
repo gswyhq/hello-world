@@ -1,0 +1,40 @@
+~$ cat Dockerfile
+
+FROM python:3.7
+
+RUN pip install fastapi uvicorn
+
+EXPOSE 80
+
+COPY ./app /app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+
+
+~$ cat app/main.py
+from typing import Optional
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Optional[str] = None):
+    return {"item_id": item_id, "q": q}
+
+~$ tree
+.
+├── app
+│   └── main.py
+└── Dockerfile
+
+~$ docker build -t myimage .
+~$ docker run -d --name mycontainer -p 80:80 myimage
+
+

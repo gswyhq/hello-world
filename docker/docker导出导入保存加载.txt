@@ -102,3 +102,9 @@ ubuntu@ip-172-33-14-6:~/touzhijia$ docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
 ubuntu              0815                eba352b2b69e        6 seconds ago       1.762 GB
 
+# 将容器commit为镜像时添加entrypoint：
+$ docker commit --change='ENTRYPOINT bash /root/start.sh' 93c11d3b5700 test:with_entrypoint
+
+# 查看容器的entrypoint
+$ docker inspect test:with_entrypoint | grep Entrypoint -A 5
+

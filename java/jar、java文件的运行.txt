@@ -9,3 +9,56 @@ java DatabaseUtil
 
 https://search.maven.org/remotecontent?filepath=org/neo4j/driver/neo4j-java-driver/1.7.2/neo4j-java-driver-1.7.2.jar
 
+IntelliJ IDEA + Maven 打jar包
+一个Maven项目 在 IntelliJ IDEA 中，配置好的环境，可以在入口类文件上面，点击run进行启动项目；
+若需要将项目打包成jar,步骤：
+1、在 IntelliJ IDEA 打开对应的项目，点击右侧的 Maven, 选择好对应的项目目录，如 reveal;
+2、点击 项目目录，如reveal下的 package,即可开始打包为jar文件(或者 选中 package,右键，选择：Run Maven Build开始打包jar文件)；
+若无意外，几分钟后打包完成，打包好的jar文件位于：reveal\target\*.jar
+3、win+R快捷键, 打开cmd窗口，切换到jar文件所在目录，运行 java -jar *.jar 即可启动 Maven项目；
+如：/home/mobaxterm/javaNLP/target  java -Dfile.encoding=utf-8 -jar javaNLP-1.0-SNAPSHOT.jar
+
+IntelliJ IDEA 打包 Maven项目 为jar包，方法二：
+项目目录结构：
++--- out
+|   +--- artifacts
+|   |   +--- javaNLP_jar
++--- pom.xml
++--- README.md
++--- src
+|   +--- main
+|   |   +--- java
+|   |   |   +--- nlp
+|   |   |   |   +--- demo
+|   |   |   |   |   +--- CutWords.java
+|   |   |   |   |   +--- DownloaderUtility.java
+|   |   |   |   |   +--- HotelCommentExampleTrain.java
+|   |   |   |   |   +--- modelimportexamples
+|   |   |   |   |   |   +--- DownloaderUtility.java
+|   |   |   |   |   +--- MyNLP.java
+|   |   |   |   |   +--- NewsIterator.java
+|   |   |   |   |   +--- PrepareWordVector.java
+|   |   |   |   |   +--- README.md
+|   |   |   |   |   +--- SimpleFunctionalMlpImport.java
+|   |   |   |   |   +--- SimpleSequentialMlpImport.java
+|   |   |   |   |   +--- TrainNews.java
+|   |   |   |   |   +--- Word2VecModel.java
+|   |   |   |   |   +--- Word2VecRawTextExample.java
+|   |   |   |   |   +--- Word2VecUptrainingExample.java
+
+File -> Project Structure -> Project Settings -> Artifacts 
+若已存在内容则删除，否则点击 + 添加。选择 JAR -> From modules with dependencies...
+弹出 Create JAR from Modules对话框；
+Main Class 选框中，找到对应的主类函数所在文件，如：nlp.demo.Word2VecModel
+Directory for META-INF/MANIFEST.MF:
+默认路径是：D:\Users\USERS\javaNLP\src\main\java,需要更改：
+如指定META-INF/MANIFEST.MF的路径为src下（注意不要放到main/java目录下，否则打成的jar中META-INF/MANIFEST.MF不含有Main-Class信息。
+点击OK;
+菜单栏 Build -> Build Artifacts.. -> javaNLP.jar:jar -> Build
+等待生成jar包。运行jar包，如：
+~$ java -Dfile.encoding=utf-8 -jar javaNLP/out/artifacts/javaNLP_jar/javaNLP.jar
+javaNLP/out/artifacts/javaNLP_jar/javaNLP.jar中没有主清单属性
+原因就是因为 Directory for META-INF/MANIFEST.MF: 路径选择错误，选择了main/java目录下所致。
+解决方法，删除打包好的jar文件，重新选择目标打包即可。
+
+

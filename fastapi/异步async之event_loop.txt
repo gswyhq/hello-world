@@ -1,0 +1,23 @@
+
+# EventLoop是一个程序结构，用于等待和发送消息和事件。
+# 简单说，就是在程序中设置两个线程：一个负责程序本身的运行，称为"主线程"；另一个负责主线程与其他进程（主要是各种I/O操作）的通信，被称为"EventLoop线程"（可以译为"消息线程"）。
+# 每当遇到I/O的时候，主线程就让Event Loop线程去通知相应的I/O程序，然后接着往后运行，所以不存在红色的等待时间。
+# 等到I/O程序完成操作，Event Loop线程再把结果返回主线程。主线程就调用事先设定的回调函数，完成整个任务。
+
+event loop 就是一个普通 Python 对象，您可以通过 asyncio.new_event_loop() 创建无数个 event loop 对象。
+只不过，loop.run_xxx() 家族的函数都是阻塞的，比如 run_until_complete() 会等到给定的 coroutine(协程) 完成再结束，而 run_forever() 则会永远阻塞当前线程，直到有人停止了该 event loop 为止。
+所以在同一个线程里，两个 event loop 无法同时 run，但这不能阻止您用两个线程分别跑两个 event loop。
+
+初始情况下，get_event_loop() 只会在主线程帮您创建新的 event loop，并且在主线程中多次调用始终返回该 event loop；而在其他线程中调用 get_event_loop() 则会报错，除非您在这些线程里面手动调用过 set_event_loop()。
+
+以上内容总结：
+我们想运用协程，首先要生成一个loop对象，然后loop.run_xxx()就可以运行协程了，而如何创建这个loop, 方法有两种：对于主线程是loop=get_event_loop(). 对于其他线程需要首先loop=new_event_loop(),然后set_event_loop(loop)。
+new_event_loop()是创建一个event loop对象，而set_event_loop(eventloop对象)是将event loop对象指定为当前协程的event loop，一个协程内只允许运行一个event loop，不要一个协程有两个event loop交替运行。
+
+综上： 一个协程任务，不能运行在两个及两个以上不同的循环中。一个循环体可以运行多个不同的协程任务。
+
+async函数，实际上是一个coroutine(协程) 函数。
+fastapi、apistar等异步框架中，若定义了两个async函数作为接口函数，一个async函数内的同步任务（比如，time.sleep(10)）会阻塞另外一个接口函数。
+因为他们在同一个循环体（event loop）中。
+
+

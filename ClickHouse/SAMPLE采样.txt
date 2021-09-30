@@ -1,0 +1,173 @@
+
+
+# SAMPLE 取样（近似查询）：
+time curl localhost:8124 -d 'select * from tutorial.test_a SAMPLE 3';
+
+# 需要注意的是，SAMPLE 取样并等于随机取样，如：
+取样1：time curl localhost:8124 -d 'select * from tutorial.test_a SAMPLE 0.01';
+取样2：time curl localhost:8124 -d 'select * from tutorial.test_a SAMPLE 0.0001';
+取样3：time curl localhost:8124 -d 'select * from tutorial.test_a SAMPLE 1000';
+则完全可能出现取样1的结果100%包含取样2的结果。取样3的结果都在取样1中。
+因为抽样的表达式是一样的；
+即：
+"select * from test_table sample 3" 每次执行的结果可能有细微差别；
+但其结果往往会包含于"select * from test_table sample 30"结果里头；
+# 若建表时设置了取样表达式 sample by
+则 "select * from test_table limit 1000" 与 "select * from test_table sample 1000"的结果也有相当大的关联性；二者重合数据比例高达88%；
+
+# 声明Sample KEY的时候有几点需要注意：
+1.sample by 所声明的表达式必须包含在主键(PRIMARY KEY)或排序键（由 ORDER BY 子句指定）的声明内;如果没有使用 PRIMARY KEY 显式的指定主键，ClickHouse 会使用排序键作为主键。
+2.sample key必须UInt类型，若不是可以定义但是查询的时候会抛出异常。
+3.数据采样是一种确定性机制。 同样的结果 SELECT .. SAMPLE 查询始终是相同的。
+4.对于不同的表，采样工作始终如一。 对于具有单个采样键的表，具有相同系数的采样总是选择相同的可能数据子集。 例如，用户Id的示例采用来自不同表的所有可能的用户Id的相同子集的行。 这意味着您可以在子查询中使用采样 IN 此外，您可以使用 JOIN 。
+5.sample子句只能用于MergeTree系列引擎的数据表，并且在create table的时候就声明sample by 抽样表达式。
+6.采样表达式在所选列上使用散列函数(hash函数)，以便在主键中定义的每个所选列上生成伪随机数据。然后，您可以通过在查询中使用 SAMPLE 子句访问数据来启用此功能。若不采用hash函数，才无采样功能；SAMPLE 0.1取出的是全部。
+
+# 采样表达式中不采用hash函数，SAMPLE失效（但LIMIT仍有效）的示例：
+(base) [root@0403072 test]# curl localhost:8124 -d 'CREATE TABLE default.no_hash_int_big_table_0_6kw_id
+         (
+         `id` UInt64
+         )
+         ENGINE = MergeTree()
+         ORDER BY id
+         SAMPLE BY id
+         SETTINGS index_granularity = 8192';
+
+(base) [root@0403072 test]# curl localhost:8124 -d 'insert into default.no_hash_int_big_table_0_6kw_id select * from  (select arrayJoin(range(60000000)) as id)'
+
+(base) [root@0403072 test]# curl localhost:8124 -d 'select count(1) from default.no_hash_int_big_table_0_6kw_id'
+60000000
+(base) [root@0403072 test]# curl localhost:8124 -d 'select count(1) from default.no_hash_int_big_table_0_6kw_id SAMPLE 0.001'
+60000000
+(base) [root@0403072 test]# curl localhost:8124 -d 'select count(1) from default.no_hash_int_big_table_0_6kw_id SAMPLE 10'
+60000000
+(base) [root@0403072 test]# curl localhost:8124 -d 'select count(1) from (select * from default.no_hash_int_big_table_0_6kw_id limit 10)'
+10
+
+# 最小读取单位，若最小读取单位是8192，但数据量仅有6000条，这时 sample 10，取到的则是整个数据集，但sample 0.1取到的结果正常；
+由于数据读取的最小单位是一个颗粒（其大小由 index_granularity 设置），是有意义的设置一个样品，其大小远大于颗粒。
+$ curl localhost:8124 -d 'CREATE TABLE default.int_big_table_0_6k_id
+(
+`id` UInt64
+)
+ENGINE = MergeTree()
+ORDER BY xxHash64(id)
+SAMPLE BY xxHash64(id)
+SETTINGS index_granularity = 8192';
+(base) [root@0403072 test]# curl localhost:8124 -d 'insert into default.int_big_table_0_6k_id select * from  (select arrayJoin(range(6000)) as id)'
+(base) [root@0403072 test]# curl localhost:8124 -d 'select count(*) from default.int_big_table_0_6k_id sample 10 '
+6000
+
+# sample,limit取数详情：
+1、建表时候定义字段（如 id）数据类型；
+2、建表时候，定义排序键，取样键；
+3、将字段数据转换为定义的数据类型，再通过取样表达式转换，从小到大排序
+4、sample,limit取样时，取出排序后的数据。
+
+$ curl localhost:8124 -d 'CREATE TABLE default.uint64_table_100_id
+(
+`id` UInt64
+)
+ENGINE = MergeTree()
+ORDER BY xxHash64(id)
+SAMPLE BY xxHash64(id)
+SETTINGS index_granularity = 1';
+(base) [root@0403072 test]# curl localhost:8124 -d 'insert into default.uint64_table_100_id select * from  (select arrayJoin(range(100)) as id)'
+(base) [root@0403072 test]# curl localhost:8124 -d 'select id from default.uint64_table_100_id limit 10'
+68
+74
+67
+70
+69
+13
+7
+83
+71
+33
+(base) [root@0403072 test]# curl localhost:8124 -d 'select id from default.uint64_table_100_id sample 10'
+68
+74
+67
+70
+69
+13
+7
+83
+71
+33
+10
+(base) [root@0403072 test]# curl localhost:8124 -d 'select id from default.uint64_table_100_id sample 0.1'
+68
+74
+67
+70
+69
+13
+7
+83
+71
+33
+10
+$ curl localhost:8124 -d ' select id, xxHash64(toInt64(id)) from  (select arrayJoin(range(100)) as id)' |sort -n -t $'\t' -k 2 |head
+68      5163589014400760
+74      73797853142432852
+67      94572735093686455
+70      229540865823973123
+69      321782017445820071
+13      360046287874520131
+7       609900476111905877
+83      1064227235897823010
+71      1289958158489374383
+33      1681372072711566623
+
+# 需要注意的是不同的数据类型，对应的hash64值是不一样的：
+$ curl localhost:8124 -d 'select id, xxHash64(id), xxHash64(60), xxHash64('60'), xxHash64(toString(60)), xxHash64(toInt64(60)) from default.uint64_table_100_id WHERE id=60 '
+60      11269490584451204560    154606260934065933      154606260934065933      17233079974729774219    11269490584451204560
+
+# sample 采样后联表查询：
+(base) [root@0403072 ~]# time curl localhost:8124 -d '
+SELECT sum(length(arrayIntersect(ta.mid_list, tb.mid_list))) as count,
+    sum(length(ta.mid_list)) as count_big1,
+    sum(length(tb.mid_list)) as count_big2
+FROM (select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list
+    from default.sync_big_table_1000000000_id where rand32(id)/ 4294967295 < 0.01
+    GROUP BY label
+    )  as ta
+ANY JOIN (
+    select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list
+    from default.sync_big_table_150000000_id where rand32(id)/ 4294967295 < 0.01
+    GROUP BY label
+    ) as tb
+USING label'
+10186   10002761        1500854
+real    15m3.696s
+user    0m0.045s
+sys     0m0.040s
+两个表均是随机采样0.01，再联表，通过交集分别除以采样率 10186/0.01/0.01 可以估算出两表交集数；
+
+(base) [root@0403072 ~]# time curl localhost:8124 -d '
+SELECT sum(length(arrayIntersect(ta.mid_list, tb.mid_list))) as count,
+    sum(length(ta.mid_list)) as count_big1,
+    sum(length(tb.mid_list)) as count_big2
+FROM (select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list
+    from default.sync_big_table_1000000000_id sample 0.01
+    GROUP BY label
+    )  as ta
+ANY JOIN (
+    select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list
+    from default.sync_big_table_150000000_id sample 0.01
+    GROUP BY label
+    ) as tb
+USING label'
+999359  10001234        1499432
+real    0m11.597s
+user    0m0.003s
+sys     0m0.016s
+两个表均是sample采样0.01，再联表，不能通过交集分别除以采样率 999359/0.01/0.01 来估算两表交集数；
+这里假设大表是10亿，小表是1亿5千万，其中他们的交集是1亿；
+按sample 0.01算，那么从大表、小表中采样的数据分别是1千万和150万；前者1千万中，有100万是来自小表，并且这100万是交集1亿中排序靠前的1%；
+现在从小表抽取sample 0.01 得到150万，那么必然也是排序靠前的1%，其中100万是来自交集1亿中排序靠前的1%，剩下50万来自5千万（小表1亿5千万-交集1亿）排序靠前的1%；
+故而，这种情况下的交集估算，应该是通过交集除以采样率一次，而不是像rand32函数限定那样，除以采样率2次；
+即两表交集估算 = 999359/0.01。
+
+

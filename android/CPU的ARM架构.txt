@@ -1,0 +1,111 @@
+
+CPU的ARM架构
+
+ARM是Advanced RISC Machine的缩写，即进阶精简指令集机器。arm更早称为Acorn RISC Machine，是一个32位精简指令集（RISC）处理器架构。
+
+ARM即以英国ARM（Advanced RISC Machines）公司的内核芯片作为CPU，同时附加其他外围功能的嵌入式开发板，用以评估内核芯片的功能和研发各科技类企业的产品.
+
+由于ARM公司只对外提供ARM内核，各大厂商在授权付费使用ARM内核的基础上研发生产各自的芯片，形成了嵌入式ARM CPU的大家庭，提供这些内核芯片的厂商有Atmel、TI、飞思卡尔、NXP、ST、和三星等。
+
+ARM是一家微处理器行业的知名企业，该企业设计了大量高性能、廉价、耗能低的RISC （精简指令集）处理器，它只设计芯片而不生产。ARM的经营模式在于出售其知识产权核（IP core），将技术授权给世界上许多著名的半导体、软件和OEM厂商，并提供技术服务。
+
+ARM的版本分为两类，一个是内核版本，一个处理器版本。内核版本也就是ARM架构，如ARMv1、ARMv2、ARMv3、ARMv4、ARMv5、ARMv6、ARMv7、ARMv8等。处理器版本也就是ARM处理器，如ARM1、ARM9、ARM11、ARM Cortex-A（A7、A9、A15），ARM Cortex-M（M1、M3、M4）、ARM Cortex-R，这个也是我们通常意义上所指的ARM版本。
+
+ARM版本信息简化表如下表所示。
+
+内核（架构）版本	处理器版本
+ARMv1	ARM1
+ARMv2	ARM2、ARM3
+ARMv3	ARM6、ARM7
+ARMv4	StrongARM、ARM7TDMI、ARM9TDMI
+ARMv5	ARM7EJ、ARM9E、ARM10E、XScale
+ARMv6	ARM11、ARM Cortex-M
+ARMv7	ARM Cortex-A、ARM Cortex-M、ARM Cortex-R
+ARMv8	ARM Cortex-A30、ARM Cortex-A50、ARM Cortex-A70
+
+ARM版本信息详细表参考https://en.wikipedia.org/wiki/List_of_ARM_microarchitectures
+
+目前国产的CPU以及华为的手机麒麟手机芯片和海思芯片等都是基于ARM V8架构的，也是cortex-A系列。可以说在移动便携式领域设备，ARM几乎全部覆盖。
+
+中央处理单元（CPU）主要由运算器、控制器、寄存器三部分组成，从字面意思看运算器就是起着运算的作用，控制器就是负责发出CPU每条指令所需要的信息，寄存器就是保存运算或者指令的一些临时文件，这样可以保证更高的速度。
+CPU有着处理指令、执行操作、控制时间、处理数据四大作用.
+
+通常大家说的linux指的是x86 linux，ARM是不同于X86的CPU架构，对应的指令集不同，故软件编译环境不同，软件代码一般不能互用，一般需要进行兼容性移植。
+
+x86是经典的CISC指令集，指令集复杂，功能多，串行执行，意味着执行效率低下，但性价比突出，被认为是民用终端的主流处理器内置指令集。Intel和AMD的家用处理器都是x86指令集，用的以x86为代表的CISC指令集。
+
+Intel主要有x86，EM64T，MMX，SSE，SSE2，SSE3，SSSE3 (Super  SSE3)，SSE4A，SSE4.1，SSE4.2，AVX，AVX2，AVX-512，VMX等指令集。
+AMD主要是x86，x86-64，3D- Now!指令集。
+
+指令集
+复杂指令集(CISC,complex instruction set computer)和精简指令集(RISC,Reduced Instruction-Set Computer)。
+从CPU发明到现在，有非常多种架构，从我们熟悉的X86，ARM，到不太熟悉的MIPS，IA64，它们之间的差距都非常大。但是如果从最基本的逻辑角度来分类的话，它们可以被分为两大类，即所谓的“复杂指令集”与“精简指令集”系统，也就是经常看到的“CISC”与“RISC”。
+
+Intel和ARM处理器的区别是
+Intel使用CISC(复杂指令集计算机)
+ARM使用CISC(精简指令集计算机)
+
+CISC以Intel，AMD的x86 CPU为代表；RISC以ARM，IBM Power为代表。
+
+ARM和Intel处理器的一大区别是ARM从来只是设计低功耗处理器，Intel的强项是设计超高性能的台式机和服务器处理器。
+
+安卓支持三类处理器(CPU)：ARM、Intel和MIPS。
+
+Intel(英特尔) 与 ARM 都是全球知名的 CPU 设计公司(Intel兼顾生产).
+Intel 公司位于美国, 主要设计CPU架构, 提供指令集, 生产各种CPU , PC端的经常听到的赛扬系列, 酷睿系列, 至强系列都是其设计生产的CPU. 目前Intel的市场主要在PC端CPU, 以及服务器CPU等. 
+ARM 公司位于英国, 它同样设计CPU架构, 提供指令集, 但是并不生产销售CPU, 而是通过出售CPU设计方案等途径盈利, ARM本公司会提供例如ARM9, ARM Contex-A9等CPU架构, 高通, 苹果等公司则采用它的架构生产CPU产品, 比如高通845等等.目前ARM的市场集中在手机CPU, 嵌入式CPU等.
+
+Intel公司选择使用CISC理念设计指令集和CPU, 从而形成了 X86架构 以及基于X86架构的众多CPU. 
+ARM公司选择使用RISC理念设计指令集和CPU, 并形成了ARM架构 和基于ARM架构的众多CPU. 
+由于根本理念的不同导致两公司设计的CPU在性能, 功耗等等各个方面都呈现出巨大差异, 从而也就形成了各自的应用市场.
+
+Intel并没有开发64位版本的x86指令集。这个64位的指令集，名为x86-64（有时简称为x64），实际上是AMD设计开发的。故事是这样的：Intel想搞64位计算，但如果从自己的32位x86架构进化出64位架构的话，新架构效率会很低，于是它搞了一个新64位处理器项目名为IA64，由此制造出了Itanium系列处理器。同时，AMD知道自己造不出能与IA64兼容的处理器，于是它把x86扩展一下，加入了64位寻址和64位寄存器。最终出来的架构，人称AMD64，成为了64位版本的x86处理器的标准。Intel最终采用了AMD64。
+ARM于2011年发布了ARMv8 64位架构，这是为了下一代ARM指令集架构工作若干年后的结晶。为了基于原有的原则和指令集，开发一个简明的64位架构，ARMv8使用了两种执行模式，AArch32和AArch64。
+
+
+手机-> 设置-> 系统 -> 处理器，如：Qualcomm Snapdragon 450，代表处理器型号是：骁龙450，可在
+https://www.mydrivers.com/zhuanti/tianti/01/index_gaotong.html
+页面查询到对应的CPU架构为： 八核A53
+A53意思是Cortex-A53处理器，是ARM公司开发的一款专门针对移动端使用的手机处理器。A53属于ARMv8架构。
+
+ARMv7、ARMv8 区别：
+1.指令集: ARMv8使用64位及32位的指令集，ARMv7使用32位及16位的指令集。
+2.通用寄存器: v8包含32个寄存器其中前32个位64位寄存器，后32个位32位寄存器， v7只包含16个32位寄存器。
+3.SIMD寄存器: v8包含32个128位寄存器，v7是32个64位寄存器。
+目前，手机多为八核处理器，基于大小核心伴侣架构，Kirin 970处理器（4*Cortex-A73(基于ARMv8指令)+4*Cortex-A53（基于  ArmV7架构））
+
+
+通常您下载的SDK只支持固定的某一类芯片。
+
+通用ARM： 支持大部分ARM 架构的手机、平板及开发板。通常选择这个引擎进行推理。
+高端芯片AI加速模块：
+
+高通晓龙引擎SNPE： 高通晓龙高端SOC，利用自带的DSP加速。其中 660 之后的型号可能含有 Hexagon DSP模块，具体列表见snpe 高通骁龙引擎官网。
+华为NPU引擎DDK：华为麒麟970、980的arm-v8a的soc。 具体手机机型为mate10，mate10pro，P20，mate20，荣耀v20等。
+华为达芬奇NPU引擎DAVINCI： 华为NPU的后续版本，华为麒麟810，820，990的arm-v8a的soc。具体手机机型为华为mate30，p40，nova6，荣耀v30等。
+
+https://ai.baidu.com/ai-doc/EASYEDGE/Rk3fj85nq
+https://paddle-lite.readthedocs.io/zh/latest/source_compile/compile_env.html#docker
+https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/deploy/lite/readme.md
+
+指令集	分析
+i386	针对intel通用微处理器32架构的
+x86_64	针对x86架构的64位处理器
+i386|x86_64	是Mac处理器的指令集，i386是针对intel通用微处理器32架构的。x86_64是针对x86架构的64位处理器。
+
+
+位数	指令集
+32位ARM	armv6、armv7、armv7s
+64位ARM	arm64、armv8
+
+
+# 查询本机指令集，CPU架构等：
+root@64a060aa93a0:/anbox# dpkg --print-architecture
+amd64
+root@64a060aa93a0:/anbox# cat /proc/cpuinfo |grep name
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+root@64a060aa93a0:/anbox# uname -a
+Linux 64a060aa93a0 4.9.125-linuxkit #1 SMP Fri Sep 7 08:20:28 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+
+

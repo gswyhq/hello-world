@@ -1,0 +1,45 @@
+
+if 
+控制条件分支。 与大多数系统不同，ClickHouse始终评估两个表达式 then 和 else。
+
+语法
+
+SELECT if(cond, then, else)
+如果条件 cond 的计算结果为非零值，则返回表达式 then 的结果，并且跳过表达式 else 的结果（如果存在）。 如果 cond 为零或 NULL，则将跳过 then 表达式的结果，并返回 else 表达式的结果（如果存在）。
+
+参数
+
+cond – 条件结果可以为零或不为零。 类型是 UInt8，Nullable(UInt8) 或 NULL。
+then - 如果满足条件则返回的表达式。
+else - 如果不满足条件则返回的表达式。
+返回值
+
+该函数执行 then 和 else 表达式并返回其结果，这取决于条件 cond 最终是否为零。
+
+示例
+
+查询:
+curl 12.45.23.12:8123 -d "SELECT if(0, 2+2, 2+6)"
+
+# 三元运算符
+与 if 函数相同。
+语法: cond ? then : else
+如果cond ！= 0则返回then，如果cond = 0则返回else。
+cond必须是UInt8类型，then和else必须存在最低的共同类型。
+then和else可以是NULL
+
+# 多条件比较：
+curl 12.45.23.12:8123 -d "SELECT multiIf(7>8, '7大于8', 7<8, '7小于8', '不知道谁大') AS result"
+
+# CASE条件表达式¶
+CASE [x]
+    WHEN a THEN b
+    [WHEN ... THEN ...]
+    [ELSE c]
+END
+
+示例：
+curl 12.45.23.12:8123 -d "with [1, 2] as ab select case when ab[1]> ab[2] then '大' when ab[1]<ab[2] then   '小' else '不知' end "
+
+
+

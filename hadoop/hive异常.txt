@@ -1,0 +1,113 @@
+分组查询时候会报错：
+SELECT
+  id,
+  latitude,
+  longitude
+FROM
+  t_poi
+GROUP BY id ;
+
+则会报错：
+FAILED: Error in semantic analysis: Line 2:3 Expression not in GROUP BY key 'latitude'
+解决办法：
+使用Hive的collect_set ( col )函数，对于我们这个问题，将HiveQL语句改为如下写法：
+SELECT
+    id,
+    collect_set(latitude)[0] as latitude,
+    collect_set(longitude)[0] as longitude
+  FROM
+    t_poi
+  GROUP BY id ;
+
+# Hive导入数据报错
+有的时候可能想直接使用load命令将文本数据导入到SequenceFile或者ORCFile类型的数据库中，执行的时候会报错：
+Hive load data local inpath … into table … 出错
+报错信息：org.apache.hadoop.hive.ql.parse.SemanticException:Unable to load data to destination table. Error: The file that you are trying to load does not match the file format of the destination table.
+错误原因一:
+Hive 3.x系列不支持load data 命令向内部表导入数据
+解决办法
+1.创建一个普通文本类型的临时表；
+    CREATE TABLE `db_name.tmp_table_name`
+    (
+        `city` string COMMENT '城市',
+        `area` string COMMENT '行政区',
+        `mean_price` string COMMENT '均价(元/㎡)',
+        `ad` string COMMENT '环比上月'
+        )
+    COMMENT '城市各区域房价'
+    ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+    WITH SERDEPROPERTIES('field.delim'='\t', 'serialization.format'='\t')
+    STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+    OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat';
+2.创建临时表再用 select 方式导入
+    insert into db_name.table_name(city, area, mean_price, ad)
+    select city, area, mean_price, ad
+    from db_name.tmp_table_name;
+
+错误原因二：
+hive sequencefile导入文件遇到FAILED: SemanticException Unable to load data to destination table. Error: The file that you are trying to load does not match the file format of the destination table.错误
+这个是因为在创建表的时候没有指定列分隔符，hive的默认分隔符是ctrl+a(/u0001)
+解决方案就是在建表的时候指定分隔符：
+CREATE TABLE `hive_db.caijing_jinritoutiao_tag`
+    (
+            `id` string COMMENT '文章ID',
+           `tag1` string COMMENT '文章一级分类标签',
+            `tag2` string COMMENT '文章二级分类标签'
+        )
+    COMMENT '头条财经大V号文章模型打标签'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\054' STORED AS TEXTFILE;
+
+# 这里‘\054’就是对应英文逗号分隔符；
+或者：
+CREATE TABLE `hive_db.tmp_caijing_jinritoutiao_tag`
+(
+        `id` string COMMENT '文章ID',
+        `tag1` string COMMENT '文章一级分类标签',
+        `tag2` string COMMENT '文章二级分类标签'
+    )
+COMMENT '头条财经大V号文章模型打标签'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES ( 'field.delim'='\054', 'serialization.format'='\054')
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat';
+
+# hadoop dfs异常：
+[hadoop@SZE-L0403067 ~]$ hadoop dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+DEPRECATED: Use of this script to execute hdfs command is deprecated.
+Instead use the hdfs command for it.
+命令过期了，需改为：
+[hadoop@SZE-L0403067 ~]$ hdfs dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+
+# 删除es外部表报错：
+hive> drop table es_cmb_test ;
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. MetaException(message:Failed to load storage handler:  Error in loading storage handler.org.elasticsearch.hadoop.hive.EsStorageHandler)
+# 解决方法：
+添加对应的软件包后，再删除
+hive> add jar /home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar
+    > ;
+Added [/home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar] to class path
+Added resources: [/home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar]
+hive> drop table es_cmb_test;
+OK
+
+# 在hive中执行 SQL语句报错：
+Unable to instantiate org.apache.hadoop.hive.ql.metadata.SessionHiveMetaStoreClient
+hive使用derby作为内嵌的metastore数据库，主要用于测试，但是在同一时间，它只允许一个进程连接metastore数据库。
+初始化之后没有启动服务端，直接执行SQL语句就会报错,启动服务命令：
+root@eff2eacda916:~# start-dfs.sh
+
+# 启动hive报错：
+Caused by: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bsystem:user.name%7D
+在$HIVE_HOME/conf/hive-site.xml中加入一下内容：
+  <property>
+    <name>system:java.io.tmpdir</name>
+    <value>/tmp/hive/java</value>
+  </property>
+  <property>
+    <name>system:user.name</name>
+    <value>${user.name}</value>
+  </property>
+并创建路径，及重启dfs
+root@eff2eacda916:~# mkdir -p /tmp/hive/java
+root@eff2eacda916:~# stop-dfs.sh && start-dfs.sh
+

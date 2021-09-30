@@ -1,0 +1,77 @@
+
+# 导出hive数据到本地文件（示例是将表hive_db.hive_table导出到本地文件目录：/tmp/hive_table， 目录里包含多个导出文件）：
+insert overwrite local directory '/tmp/hive_table'
+row format delimited
+fields terminated by '\u0001'
+select * from hive_db.hive_table;
+注： 这里指定的分隔符是 \u0001 ;
+
+也可以通过下面的语句导出：
+hive -e "select * from hive_db.hive_table" > /tmp/hive_table.txt
+
+# 总结起来，导出hive数据表到文件的三种方式：
+方法一：
+~$ hive -S -e 'select * from dummy' > a.txt //分隔符和hive数据文件的分隔符相同
+方法二：
+[root@hadoop01 ~]# hive -S -e "insert overwrite local directory '/root/hive/a'\ 
+>  row format delimited fields terminated by '\t' --分隔符\t
+>  select * from logs sort by te" 
+方法三：
+--使用hdfs命令导出整个表数据
+hdfs dfs -get /hive/warehouse/hive01 /root/test/hive01 
+
+# 从本地文件导入数据到hive:
+第一步创建hive表：
+hive> create table test_tb1 (mid string,tag string,db_table string) ROW FORMAT DELIMITED  FIELDS TERMINATED BY '\t';
+hive> load data local inpath "/data/test_clickhouse/test_data/tmp4/hiveaa" into table test_tb1;
+注：这里需要hadoop用户对文件"/data/test_clickhouse/test_data/tmp4/hiveaa"有读的权限才可以；
+
+
+hive的load命令
+Hive Load语句不会在加载数据的时候做任何转换工作，而是纯粹的把数据文件复制/移动到Hive表对应的地址。
+语法
+LOAD DATA [LOCAL] INPATH 'filepath' [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1=val1,partcol2=val2 ...)]
+描述
+如果命令中带有LOCAL，说明从本地文件系统加载数据，文件路径可以是相对路径，也可以是绝对路径。
+在这种情况下，首先将文件从本地复制到hdfs相应的位置，然后移动到hive表格中，这个时候原始数据文件是存在于hive表之下的路径下。这一点我会专门写一篇关于hive外部表的相应博文。
+如果命令中没有LOCAL，代表我们的数据是从hdfs中读取文件，这个时候如果我们使用的是内部表，相应的hdfs的原始文件会消失，进入到相应的表格中。
+filepath 可以是一个相对路径，也可以是一个绝对路径。可以是一个文件，也可以是一个文件夹目录（这个时候文件夹下的所有文件都会被加载）
+-命令中如果带有overwirte，代加载数据之前会清空目标表格，否则就是追加的方式。
+
+注：执行load data inpath时，需要考虑到原文件是否会被删除
+
+# Hive集群间的导入和导出
+使用Export命令会导出Hive表的数据表数据以及数据表对应的元数据
+EXPORT TABLE test TO '/hive/test_export'
+
+--dfs命令查看
+hdfs dfs -ls /hive/test_export
+
+--结果显示
+/hive/test_export/_metadata
+/hive/test_export/data
+
+使用Import命令将导出的数据重新导入到hive中(必须将现导入的表重命名)
+--导入到内部表的命令
+IMPORT TABLE data_managed FROM '/hive/test_export'
+
+--导入到外部表的命令
+Import External Table data_external From '/hive/test_export' Location '/hive/external/data'
+
+--验证是否是外部表
+desc formatted data_external
+
+# 导入文件文件，跳过标题行
+# hive把纯文本放在表对应的位置，就可以查询到数据，但是如果纯文本里面存在表头，会把表头也作为第一行数据。如果又不想在纯文本中去掉表头只要在建表语句中加入如下‘tblproperties ("skip.header.line.count"="1")’即可。
+实际建表语句如下所示：
+create external table if not exists test_table_1(
+    name string comment '姓名',
+    usr_id  string comment '用户id',
+    sex string comment '性别'
+)                                             
+row format delimited fields terminated by '\t'
+stored as textfile
+tblproperties ("skip.header.line.count"="1")
+location '/user/20181018';
+注意：实际上标题行数据导入到了hive，只是不显示而已，若将该表数据迁移到另外数据表时候，标题行还是存在的。
+

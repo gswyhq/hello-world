@@ -111,3 +111,39 @@ apt-file update
 apt-file search libcudart***
 apt-get install libcudart***
 
+# 问题：在装完hadoop及jdk之后，在执行start-all.sh的时候出现
+设置的密码是对的，无论怎么输都不对
+root@localhost's password:localhost:permission denied,please try again。
+尝试解决方法：在出现上述问题后，输入
+　　sudo passwd
+然后，会输入新的密码，设置之后，再重新格式化一下namenode，最后执行start-all.sh，但还是不行；
+解决方法：
+1.安装 open ssh：sudo apt-get install openssh-server
+2.修改root密码：#sudo passwd root
+3.辑配置文件，允许以 root 用户通过 ssh 登录：sudo vi /etc/ssh/sshd_config
+　找到：PermitRootLogin prohibit-password
+  添加：PermitRootLogin yes
+4.sudo service ssh restart
+
+# Ubuntu系统 root用户时报错：
+mesg: ttyname failed: Inappropriate ioctl for device
+问题原因：
+Ubuntu的设计理念就是尽量避免直接用root账户进行操作。因此，当有人尝试使用root账户直接登录，便会发出图中的错误信息。实际上，这个错误本身不会影响系统的运行
+关闭该错误的方法：
+将 /root/.profile 文件末尾的
+mesg n || true
+改为：
+tty -s && mesg n
+sed -i 's/mesg n || true/tty -s && mesg n/g' /root/.profile
+
+# root@27d832029d21:~# netstat -nap
+bash: netstat: command not found
+解决方法：
+root@27d832029d21:~# apt-get install -y  net-tools
+
+# su 切换用户时，提示：
+su: user postgres does not exist
+# 解决方法，添加用户再切换：
+root@90fc75e1cd24:/# useradd postgres
+root@90fc75e1cd24:/# su postgres
+

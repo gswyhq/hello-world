@@ -12,10 +12,23 @@ update
 
 每次update都会调用 InternalEngine 中的get方法，来获取整个文档信息，从而实现针对特定字段进行修改，这也就导致了每次更新要获取一遍原始文档，性能上会有很大影响。所以根据使用场景，有时候使用index会比update好很多。
 
+update时，若指定："doc_as_upsert": true，若id对应数据存在，则更新，否则新增。
+update的bulk时，文件格式如下：
+{ "update" : { "_id" : "mGygACqM12eAb5Twnz2WrnKRWGZDibeg" } }
+{"doc": {"db5": "1"}, "doc_as_upsert": true}
+
 index和create区别
 index时会检查_version。如果插入时没有指定_version，那对于已有的doc，_version会递增，并对文档覆盖。插入时如果指定_version，如果与已有的文档_version不相等，则插入失败，如果相等则覆盖，_version递增。
 
 create时也会检查_version，但是对于已有的文档，不会创建新文档，即插入失败。
+
+# 插入单条数据示例：
+curl -XPOST -H 'Content-Type: application/json' localhost:9200/person1/_doc/5 -d '{
+  "name":"张三5号",
+  "age":18,
+  "address":"北京海淀区"
+}'
+
 
 --------------------- 
 

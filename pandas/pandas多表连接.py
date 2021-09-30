@@ -126,6 +126,15 @@ pd.merge(df4, df5, left_on='key', right_index=True, how='outer')
 
 # 来源：https://blog.csdn.net/print_and_return/article/details/80577561
 
+# 两个表列合并（要求行数一致）：
+df = pd.DataFrame([[1,2,3], [4,5,6]],columns=['a', 'b', 'c'])
+df2 = pd.DataFrame([[8, 9], [2, 4]],columns=['e', 'f'])
+df.join(df2)
+Out[68]: 
+   a  b  c  e  f
+0  1  2  3  8  9
+1  4  5  6  2  4
+
 
 pandas dataframe的合并（append, merge, concat）
 

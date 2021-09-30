@@ -4,3 +4,12 @@ public class RevealApplication {
         System.out.println("Hello, World!");
     }
 }
+
+# 将下载到本地的jar包手动添加到maven仓库：
+语法：
+mvn install:install-file -Dfile=jar包的位置(参数一) -DgroupId=groupId(参数二) -DartifactId=artifactId(参数三) -Dversion=version(参数四) -Dpackaging=jar
+示例：
+下载jar包，如：https://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar
+mvn install:install-file -Dfile="D:\Users\abc123\Downloads\junit-4.12.jar" -DgroupId=junit -DartifactId=junit -Dversion=4.12 -Dpackaging=jar
+
+

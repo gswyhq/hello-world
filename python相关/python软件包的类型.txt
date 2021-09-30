@@ -1,0 +1,40 @@
+
+一般来说，对于给定的 Python 解释器，可以通过打印出 sys.path 变量的内容，来找到可能的包目录列表。
+对于第三方软件包，会是一些 site-packages 文件夹。
+程序包的安装操作最终是在 site-packages 文件夹内，创建正确的目录结构和元数据。
+
+site-packages 路径下有 regex, 但是还是报错：
+pkg_resources.DistributionNotFound: The 'regex!=2019.12.17' distribution was not found and is required by this application.
+原因是因为site-packages路径下有regex,但缺失 regex-***.dist-info
+在安装时，软件包必须生成至少两种类型的内容，以放入 site-packages 中：有关软件包内容的元数据文件夹，其中包含 {package}-{version} .dist-info 和业务逻辑文件。
+发行信息（dist-info）文件夹描述了该软件包：用于安装该软件包的安装程序、该软件包所附的许可证、在安装过程中创建的文件、顶层 Python 软件包是什么、该软件包暴露的入口等等。
+
+# 安装依赖包的两种方式、路径：
+1、从我们的源码树生成此目录结构和元数据，将其压缩为单个文件，然后将其发布到中央软件包存储仓。在这种情况下，安装程序必须下载软件包并将其解压到 site-packages 文件夹中。我们将这种类型的包称为 wheel 包。
+2、或者，你可以创建一个包含软件包源码的归档文件，构建所需的脚本和元数据，以生成可安装的（installable）目录结构，然后将其上传到中央存储仓。这称为源码分发或 sdist。在这种情况下，安装程序还有很多工作要做，它需要解压归档文件，运行构建器，然后再将其复制。
+
+# 特殊软件包
+软件包被称为 C 扩展包（C-extension packages），因为它们利用了 CPython 提供的 C 扩展 API
+此类扩展需要编译 C/C++ 功能，才能适用与其交互的 C/C++ 库和当前 Python 解释器的 C-API 库。在这些情况下，构建操作实际上涉及到调用一个二进制编译器，而不仅仅是像纯 Python 包（例如我们的 pugs 库）那样，生成元数据和文件夹结构。
+如果在用户计算机上进行构建，则需要确保在构建时，有可用的正确的库和编译器。
+如果可能的话，始终选择将 package 打包成 wheel。这将完全避免用户缺少正确的构建依赖项的问题，避免库的缺失或版本不匹配通常会在构建时触发隐秘的错误。
+
+
+# 三种程序包 源码树（source tree）、源码分发（source distribution）和 wheel 之间的区别：
+1、源码树——包含在开发者的机器/存储仓上可用的所有项目文件（业务逻辑、测试、打包数据、CI 文件、IDE 文件、SVC 等），如githup上的一个仓库，包含README.rst setup.py src tests等文件。
+2、源码分发——包含构建 wheel 所需的代码文件（业务逻辑+打包数据+通常还包括单元测试文件，用于校验构建；但是不包含开发者环境的内容，例如 CI/IDE/版本控制文件），格式：pugs-0.0 .1.tar.gz 。
+3、wheel——包含包的元数据和源码文件，被放到 site packages 文件夹，格式：pugs-0.0.1-py2.py3-NONE-any.whl 。
+
+# 查看本机环境，若版本不匹配，会出现如下错误：
+XX is not a supported wheel on this platform
+查看方法：
+import pip
+pip.pep425tags.get_supported()
+或者：
+from pip._internal.utils import compatibility_tags
+compatibility_tags.get_supported()
+或者，命令行查看：
+~$ pip debug --verbose
+或者：
+python -m pip debug --verbose
+

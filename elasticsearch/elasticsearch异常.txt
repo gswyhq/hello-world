@@ -257,5 +257,63 @@ max_result_window: 100000
 注意: :号和数值之间要有个空格 
 修改完配置，重启集群即可
 
+# 通过http批量导入大文件数据时，无错误提示，但实际上数据未导入：
+curl -s -XPOST http://localhost:9200/_bulk --data-binary @data.json -H 'Content-Type: application/json'
+解决方案：
+将导入数据文件拆分为多个小文件导入
+#!/bin/bash
 
+split -l 100000 -a 10 data.json ./tmp/carrier_bulk
+
+BULK_FILES=./tmp/carrier_bulk*
+for f in $BULK_FILES; do
+    curl -s -XPOST http://localhost:9200/_bulk  -H 'Content-Type: application/json' --data-binary @$f >> /dev/null
+    echo $f >> ./import.log
+done
+
+注：
+split -l： 指定每多少行切成一个小文件
+split -a: 生成长度为N的后缀,默认是2；
+/dev/null不将输出打印到终端
+每次循环输出到日志中，可以查看命令是否执行成功，也可以看命令执行的进度。
+
+# 问题 bulk批量导入数据时，es崩溃；
+elasticsearch 出现“java.lang.OutOfMemoryError: Java heap space”
+　　默认情况下，Elasticsearch JVM默认使用最小和最大大小为2 GB的堆。迁移到生产环境时，配置堆大小以确保Elasticsearch堆足够的大很重要的。
+　　Elasticsearch将通过Xms（最小堆大小）和Xmx（最大堆大小）设置分配jvm.options中指定的整个堆。
+　　设置的值取决于服务器上可用的RAM（随机存取存储器，其实就是内存）量。建议的配置如下：
+将最小堆大小（Xms）和最大堆大小（Xmx）设置为彼此相等。
+Elasticsearch可用的堆越多，它可用于缓存的内存就越多。但请注意，过多的堆可能会陷入长时间的垃圾收集暂停。所以设置的堆不能太大， 尽量设置到内存的50%。
+将Xmx设置为不超过物理RAM的50％，以确保有足够的物理内存给内核文件系统缓存。
+内存heap size配置不要超过32G, 基本上大多数系统最多只配置到26G.
+
+docker run --name es_9200 -d -e ES_JAVA_OPTS="-Xms256m -Xmx256m" -e "discovery.type=single-node" -p 9200:9200 -p 9300:9300 -v `pwd`/ES/data:/usr/share/elasticsearch/data elasticsearch:6.8.5
+改为：
+docker run --name es_9200 -d -e ES_JAVA_OPTS="-Xms2g -Xmx2g" -e "discovery.type=single-node" -p 9200:9200 -p 9300:9300 -v `pwd`/ES/data:/usr/share/elasticsearch/data elasticsearch:6.8.5
+
+当然，若容器是守护进程的，可以进入容器修改 /etc/bashrc 文件；
+进入到容器中docker exec -it containerId/Names /bin/bash，再使用export修改，export ENV='value'
+但不推荐更改运行中的容器配置，容器本身是无状态的，当然也可以通过进入容器内部的方式进行更改:
+docker exec -it <容器id> </bin/bash|/bin/sh>
+
+# update 更新数据时候报错：
+curl -XPOST 'localhost:9200/test/type1/771943635/_update' -H 'Content-Type: application/json' -d '{"doc":{"data": "1621834679.173702"}}'
+{"error":{"root_cause":[{"type":"mapper_parsing_exception","reason":"failed to parse field [data] of type [boolean] in document with id '771943635'"}],"type":"mapper_parsing_exception","reason":"failed to parse field [data] of type [boolean] in document with id '771943635'","caused_by":{"type":"illegal_argument_exception","reason":"Failed to parse value [1621834679.173702] as only [true] or [false] are allowed."}},"status":400}
+字段 data的类型为bool,而当前更新的类型为text;
+解决方法：
+删除索引，或者重新索引；设置好字段类型，再更新；
+
+# 设置字段类型，与现有类型冲突：
+curl -XPUT -H 'Content-Type: application/json' 'localhost:9200/test/_mapping/type1?pretty' -d '{
+    "properties": {
+        "data": {
+            "type": "keyword"}}}'
+报错："mapper [data] of different type, current_type [boolean], merged_type [keyword]"
+解决方法：删除索引，或者重新索引；设置好字段类型；
+
+问题update 更新数据报错：
+报错: "type": "document_missing_exception" 因为当前并不存在这个文档
+解决方法：使用关键字：upsert 当文档不存在的时候，那么就创建这个文档
+{ "update" : { "_index" : "test", "_type" : "es_cmb_test", "_id" : "str6" } }
+{"doc": {"bill_date": 1, "ptf_id": "str6"}, "doc_as_upsert": true}
 

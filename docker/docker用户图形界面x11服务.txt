@@ -1,0 +1,101 @@
+
+图形用户界面（Graphical User Interface，简称 GUI，又称图形用户接口）是指采用图形方式显示的计算机操作用户界面。 
+
+图形用户界面是一种人与计算机通信的界面显示格式，允许用户使用鼠标等输入设备操纵屏幕上的图标或菜单选项，以选择命令、调用文件、启动程序或执行其它一些日常任务。
+与通过键盘输入文本或字符命令来完成例行任务的字符界面相比，图形用户界面有许多优点。
+图形用户界面由窗口、下拉菜单、对话框及其相应的控制机制构成，在各种新式应用程序中都是标准化的，即相同的操作总是以同样的方式来完成，在图形用户界面，用户看到和操作的都是图形对象，应用的是计算机图形学的技术。
+
+一个简单的用户图形界面示例：
+~$ apt-get install xclock
+~$ xclock
+输入上面命令后，正常情况下，会在终端桌面上面显示一个小闹钟图形。
+
+在windows系统，若使用mobaxterm终端，运行docker容器，可能不需要额外配置，就可以运行gui程序。
+因为 MobaXterm 中xserver可以用来在将linux端的gui程序 显示在当前windows客户端。
+
+但若在linux系统，则可能需要额外的配置才可以,如：
+目前让docker 运行的系统拥有gui的大概有两个，一个是X11server 、一个是novnc。
+
+
+可能 apt-get install xclock docker内安装不了，需要改用下面的命令安装：
+root@c22f1cba69bf:~# apt-get install x11-apps
+
+docker容器本身是没有图形界面的，若运行gui程序，则需要借助 其他的图形界面的完成，比如借助宿主机的图形界面。
+
+如在mobaxterm 终端，docker容器内运行
+~$ xclock
+输入上面命令后，
+这时，会弹出如下弹框，让确认：
+An application on remote computer **.**.**.** has requested access to the X server.
+Do you want to allow it?
+in order to disable this warning,
+set "x11 remote access" to "full" in mobaxterm global settings --> "x11" tab.
+确认后，正常情况下，会在终端桌面上面显示一个小闹钟图形。
+
+X11服务的图形显示原理是在服务端和客户端之间构建一组Server/Client，X11通过『DISPLAY』环境变量来指定将图形显示到何处。
+基于这个原理，将Docker中的GUI程序显示到外面，就是通过某种方式把X11的客户端的内容从容器里面传递出来。方法有两种
+1、通过SSH连接或远程控制软件，最终通过tcp套接字将数据发送出来
+2、让容器和主机共享X11的unix套接字，直接将数据发送出来
+从应用场景上划分，又可以分成两类情况：『运行本地的GUI程序』和『运行远程服务器上的GUI程序』。这两类情况在操作上很相似，但前者可以使用unix套接字，而后者必然要使用tcp套接字转发
+
+docker 容器要运行GUI程序（显示到本地显示器），需要两步：
+1、宿主机开放权限，允许所有用户，当然包括docker,访问X11 的显示接口
+2、在启动docker容器时，添加选项如下：
+ -v /tmp/.X11-unix:/tmp/.X11-unix \           #共享本地unix端口
+ -e DISPLAY=unix$DISPLAY \                    #修改环境变量DISPLAY
+ -e GDK_SCALE \                               #我觉得这两个是与显示效果相关的环境变量，没有细究
+ -e GDK_DPI_SCALE \
+
+已经启动的容器修改系统参数
+export DISPLAY=192.168.3.111:0.0       #把环境变量映射到宿主机IP（使用 ifconfig 查看主机和docker的IP地址，这里192.168.3.111为宿主机IP）
+
+宿主机中
+若没有x11服务，则可能需要安装、启动；$ sudo apt-get install x11-xserver-utils
+sudo gedit /etc/lightdm/lightdm.conf      #增加一行    xserver-allow-tcp=true
+sudo systemctl restart lightdm
+xhost  +                #注意加号前应有空格
+以后每次重新开机时，还是要在主机里运行一下 xhost +,在docker里运行一下export DISPLAY= XXX 。
+其实还是挺麻烦的。
+xhost 是用来控制X server访问权限的。
+xhost + 是使所有用户都能访问Xserver.
+xhost + ip使ip上的用户能够访问Xserver.
+xhost + nis:user@domain使domain上的nis用户user能够访问
+xhost + inet:user@domain使domain上的inet用户能够访问。
+
+linux 图形界面 X Server 关闭 启动
+不同系统的方法可能不太一样
+Linux图形界面多数使用的是 X Server, 我们有时需要关闭/重启它.
+Ubuntu18.04
+Ubuntu18.04 虽然默认使用了gnome桌面，通过设置系统启动方式，然后重启来达到关闭 x server 的目的
+ps. gdm是GNOME Display Manager, GNOME的桌面环境管理器
+#  关闭用户图形界面
+sudo systemctl set-default multi-user.target
+sudo reboot
+
+# 开启用户图形界面
+sudo systemctl set-default graphical.target
+sudo reboot
+
+Ubuntu16.04 管理 x server
+用gdm管理
+sudo /etc/init.d/gdm stop
+sudo /etc/init.d/gdm status
+sudo /etc/init.d/gdm restart
+如果 /etc/init.d 下面没有 gdm 的话，可以尝试另一种方法
+
+用lightdm管理
+sudo /etc/init.d/lightdm stop
+sudo /etc/init.d/lightdm status
+sudo /etc/init.d/lightdm restart
+用service管理
+sudo service lightdm stop
+sudo service lightdm status
+sudo service lightdm start
+
+# centos7 管理 x server
+sudo systemctl stop gdm.service
+sudo systemctl status gdm.service
+sudo systemctl start gdm.service
+
+
+

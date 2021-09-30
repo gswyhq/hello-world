@@ -160,4 +160,6 @@ sed -i "s/oldstring/newstring/g" filename
 
 sed -i "s/oldstring/newstring/g" `grep oldstring -rl path`
 
+# echo 输出字符串，并在字符串中间，输出换行、回车
+echo -e 'abcd\nefg'
 

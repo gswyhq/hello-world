@@ -1,0 +1,33 @@
+
+Flask-Bootstrap默认是加载CDN的css与js文件,每次刷新页面都要访问到外网的cdn来获取css与js文件;
+
+模版扩展来自于bootstrap/base.html,就以bootstrap/base.html的用法为例.
+
+查看包文件路径位置
+
+>>> import flask_bootstrap
+>>> flask_bootstrap.__file__
+'/usr/local/lib/python3.6/site-packages/flask_bootstrap/__init__.py'
+
+~$ cp /usr/local/lib/python3.6/site-packages/flask_bootstrap/templates/bootstrap/base.html templates/base.html
+复制这个bootstrap/base.html文件到项目的templates目录下，然后修改如下：
+<link href="{{bootstrap_find_resource('css/bootstrap.css', cdn='bootstrap')}}" rel="stylesheet">
+<script src="{{bootstrap_find_resource('jquery.js', cdn='jquery')}}"></script>
+<script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>
+修改为：
+<script src="/static/libs/jquery2.2.4/jquery.min.js"></script>
+<script src="/static/libs/bootstrap3.3.5/bootstrap.min.js"></script>
+<link href="/static/libs/bootstrap3.3.5/bootstrap.min.css" rel="stylesheet">
+或者：
+<link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='js/jquery.js')}}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
+
+或者：
+from flask import Flask
+app = Flask(__name__)
+app['BOOTSTRAP_SERVE_LOCAL']=True  打开本地提供bootstrap文件的功能。适合我的内网部署。
+注意：下面这样配置，可能无效；
+app.config.setdefault('BOOTSTRAP_SERVE_LOCAL', True)
+因为若app.config已存在BOOTSTRAP_SERVE_LOCAL的时候，则无法重新赋值；
+

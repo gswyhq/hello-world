@@ -69,6 +69,38 @@ Out[65]: '一-鿕'
 字节串转16进制数组: [hex(x) for x in bytes(b'\x01\x0212')]  ==>  ['0x1', '0x2', '0x31', '0x32']
 
 
+-------------------
+Murmur哈希是一种非加密散列函数
+字符串转64位hash值
+>>> import mmh3
+>>> foo = mmh3.hash64('foo', seed=0x1234ABCD, signed=True)
+>>> foo[0] == -5851200325189400636
+True
+
+-------------------
+
+字符串与数字相互转换：
+>>> import libnum
+>>> libnum.s2n('你好')
+251503099356605
+>>> libnum.n2s(251503099356605).decode("utf-8")
+'你好'
+>>> libnum.s2n("BA")==0x4241
+True
+>>> libnum.s2n(b'\x01\x00')
+256
+>>> [t for t in '你好'.encode("utf-8")]
+[228, 189, 160, 229, 165, 189]
+>>> [hex(t) for t in '你好'.encode("utf-8")]
+['0xe4', '0xbd', '0xa0', '0xe5', '0xa5', '0xbd']
+>>> '0x'+''.join([hex(t) for t in '你好'.encode("utf-8")]).replace('0x', '')
+'0xe4bda0e5a5bd'
+>>> libnum.n2s(0xe4bda0e5a5bd).decode('utf-8')
+'你好'
+>>> hex(ord('B')), hex(ord('A')), libnum.n2s(0x4241).decode('utf-8')
+('0x42', '0x41', 'BA')
+
+
 ===================
 
 

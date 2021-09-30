@@ -50,4 +50,18 @@ ajax,发送POST数据，success,获取不到返回值，ajax 返回的是整个�
                 }
             })
 
+# 问题：有些网站不能复制网页内容，需要登录后才能复制：
+解决方法：
+F12打开打开控制台（快捷键：ctrl+shift+i，或者页面内右键->检查），找到Console选项，在底下 > 处，输入代码：
+javascript:document.body.contentEditable='true';document.designMode='on'; void 0
+回车运行，这时候就可以复制了，但若再刷新了下网页，则需重新运行该代码。
+也可以制作成页面小书签（Bookmarklet）
+
+# javascript代码制作成页面小书签（Bookmarklet）的方法：
+1、打开新的标签页，输入地址 chrome://bookmarks/ 打开书签管理器
+2、点击 书签管理器 页面右上角的 3个小点，选择 “添加新书签”；
+3、在添加书签对话框中，名称处，写上书签的名称，如“登录后复制”；
+4、网址处，粘贴如下代码
+javascript:document.body.contentEditable='true';document.designMode='on'; void 0点击保存新书签到书签栏中。
+以后浏览网页遇到有“登录后复制”的内容，只需要点击下刚才添加的这个书签即可复制页面中的内容。
 

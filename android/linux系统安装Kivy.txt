@@ -1,0 +1,67 @@
+
+使用包管理器进行安装
+Ubuntu / Kubuntu / Xubuntu / Lubuntu (13.10 Saucy Salamander以及之后更新的版本)
+1 首先要根据你的喜好来选择一个PPA源添加到你的系统里：
+
+（译者注：这里稳定版和每夜版二选一就可以，如果要体验最新特性，可以使用每夜版，但是如果用于长期使用追求稳定，推荐用稳定版，二者千万不要同时添加，避免出现混乱和错误。）
+
+sudo add-apt-repository ppa:kivy-team/kivy #稳定版
+sudo add-apt-repository ppa:kivy-team/kivy-daily  #每夜版
+2 然后就要用包管理器来更新一下包列表了：
+
+sudo apt-get update
+3 更新列表完毕之后，如果没有错误，就可以安装了：
+
+sudo apt-get install python-kivy #Python2 用这个来安装
+sudo apt-get install python3-kivy #Python3 要加一个3  
+sudo apt-get install python-kivy-examples #可选的样例代码
+
+
+Debian (8.0 Jessie或者更新的版本)
+特别注意
+Debian 7 Wheezy 已经不支持了，你至少要升级到Debian 8 Jessie 才能安装Kivy。
+
+1 通过Synaptic新立得包管理器把下面的PPA源添加到你的sources.list列表中，手动添加也可以：
+
+Jessie/Testing:
+#稳定版:
+
+deb http://ppa.launchpad.net/kivy-team/kivy/ubuntu trusty main
+
+#每夜版:
+
+deb http://ppa.launchpad.net/kivy-team/kivy-daily/ubuntu trusty main
+Sid/Unstable:
+#稳定版:
+
+deb http://ppa.launchpad.net/kivy-team/kivy/ubuntu utopic main 
+
+#每夜版:
+deb http://ppa.launchpad.net/kivy-team/kivy-daily/ubuntu utopic main
+2 添加了源之后，就是要添加一些GPG key到你的apt keyring里面了，运行下面的命令：
+
+#非root用户:
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A863D2D6
+
+#root用户:
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A863D2D6
+3 然后跟Ubuntu里面那个类似，更新列表完毕之后，如果没有错误，就可以安装了：
+
+sudo apt-get update #安装之前一定要先这样更新一下列表
+sudo apt-get install python-kivy #Python2 用这个来安装
+sudo apt-get install python3-kivy #Python3 要加一个3  
+sudo apt-get install python-kivy-examples #可选的样例代码
+
+在虚拟环境中安装
+必备的依赖包
+Cython
+一定要注意，这里超级重要，不同版本的Kivy只能用特定版本的Cython配合才能使用，二者一定要匹配，关系如下表：
+
+Kivy	Cython
+1.8	0.20.2
+1.9	0.21.2
+1.9.1	0.23
+
+
+更多使用说明： http://kivy.org/docs
+

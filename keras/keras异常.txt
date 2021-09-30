@@ -318,4 +318,11 @@ tensorflow.python.framework.errors_impl.InvalidArgumentError: Expected multiples
 	 [[{{node Memory-0/Tile}}]]
 可能是因为机器内存不够，这个时候，将batch_size改小即可解决。
 
+问题：
+ImportError: cannot import name 'transpose_shape'
+问题原因及解决方案：
+因为 tensorflow 的版本 与 keras 版本有冲突，故而卸载旧版本，安装新版本即可
+pip uninstall -y tensorflow keras tf-nightly keras-nightly
+pip install tensorflow
+注：pip install tensorflow 会安装：keras tensorflow tensorflow-estimator
 

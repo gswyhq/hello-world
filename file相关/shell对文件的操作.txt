@@ -18,3 +18,9 @@ eg: gswewf@gswewf-pc:~$ sed -i s/'import logger'/'from logger.logger import logg
 　　比如我把Linux文件系统/home/gswewf/yhb/yhb.db软链接到/usr/local/neo4j-community-3.1.1/data/databases/yhb.db目录下
 gswewf@gswewf-pc:/usr/local/neo4j-community-3.1.1/data/databases$ ln -s /home/gswewf/yhb/yhb.db /usr/local/neo4j-community-3.1.1/data/databases/yhb.db
 
+# shell按照时间排序，保留最新的5个文件并删除其余文件
+ls -t | sed -n '6,$p' | xargs -I {} rm -rf {}
+解释：ls -t	列出文件，并按最后更新时间倒序(最新的排在前面)， 若需要最新的排在最后，可以用 ls -rt
+	sed -n ‘6,$p’	对上一步的结果进行过滤，保留第6行到最后一行，即除最新5个文件之外的文件或目录
+	xargs -I {} rm -rf {}	对上一步筛选出的文件或目录，进行删除处理
+

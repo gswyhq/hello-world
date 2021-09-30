@@ -24,4 +24,23 @@ you have entered 1, lufubo
 [root@localhost test]# echo -e "1\nlufbo\n" | ./test.sh 
 you have entered 1, lufbo
 
+Linux shell自动输入y或yes, 自动输入 y 确认
+一次：
+echo yes | 命令
+echo y | 命令
+多次：
+yes yes |命令
+yes y | 命令
+
+# 输出多条文本内容到文件i(需要注意最后一行EOF前后不能有空格等其他内容，否则会一直等待输入)：
+mkdir ~/.pip && \
+cat >> ~/.pip/pip.conf <<EOF
+[global]
+index-url=http://mirrors.paic.com.cn/pypi/web/simple
+
+[install]
+use-mirrors=true
+mirrors=http://mirrors.paic.com.cn/pypi/web/simple/
+trusted-host=mirrors.paic.com.cn
+EOF
 

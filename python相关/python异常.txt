@@ -41,3 +41,43 @@ ValueError: bad marshal data (unknown type code)
 解决方案：对应的模块目录下的.pyc文件删除 
 find . -name "__pycache__" |xargs -i rm -rf {}
 
+# pip3 install *** 安装包时出现错误：
+No matching distribution found for pytest-runner
+# 解决方法
+pip3 install pytest-runner
+pip3 install librosa
+
+# python -m ***.***.py 出错：
+ Error while finding module specification for '***.***.py' (AttributeError: module 'sql_app.main' has no attribute '__path__')
+问题原因及解决方法：
+如上面的命令所示，Python -m指的是把这个.py文件当做模块运行，但如果你一不小心加了.py这个后缀，就会出现这个错误。其实你要么把"-m"删除，要么删除".py"后缀，问题就迎刃而解了
+
+# from . import ***出错：
+/home/mobsuper_project $ tree
+.
++--- sql_app
+|   +--- crud.py
+|   +--- database.py
+|   +--- main.py
+|   +--- models.py
+|   +--- schemas.py
+|   +--- __init__.py
++--- sql_app.db
+                                                                                                                                                                                                                    ✔/home/mobsuper_project $ python sql_app/main.py
+Traceback (most recent call last):
+  File "sql_app/main.py", line 8, in <module>
+    from . import crud, models, schemas
+ImportError: cannot import name 'crud'
+解决方法：
+采用-m参数，把这个.py文件当做模块运行即可
+/home/mobsuper_project $ python -m sql_app.main
+
+# 问题，运行python 文件出现错误：
+SyntaxError: Non-UTF-8 code starting with '\xe5' in file 
+解决方法：
+在.py文件第一行或第二行加上：
+# coding:utf-8
+写成： #encoding='utf-8' 是不可以的，因为不满足匹配规则：
+在第一行或者第二行的声明都要符合正则表达式 
+"coding[:=]\s*([-\w.]+)"
+

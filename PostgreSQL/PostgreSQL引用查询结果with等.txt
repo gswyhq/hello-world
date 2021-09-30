@@ -1,0 +1,112 @@
+
+# 查询结果的空值判断：
+SELECT r, 
+	   r IS NULL AS "is null", 
+	   r IS NOT NULL AS "is not null",
+	   not (r is null) as "not is null"
+FROM (
+     VALUES(NULL,NULL),
+           (10, NULL), 
+           (10,10)
+) r ;
+
+(,)	true	false	false
+(10,)	false	false	true
+(10,10)	false	true	true
+
+# 通过with 查询引用结果：
+with abc as (
+            SELECT *
+            FROM public.data_price_quantified_measure
+            WHERE uuid = 'edff9a83-4bc9-42da-8ae2-9537c18b8fa1'
+            ORDER BY last_update_date
+            DESC LIMIT 1
+            ) 
+select * from abc;
+
+# 可以在WITH中使用数据修改语句（INSERT、UPDATE或DELETE）。这允许你在同一个查询中执行多个而不同操作。一个例子：
+WITH moved_rows AS (
+    DELETE FROM products
+    WHERE
+        "date" >= '2010-10-01' AND
+        "date" < '2010-11-01'
+    RETURNING *
+)
+INSERT INTO products_log
+SELECT * FROM moved_rows;
+
+从products把行移动到products_log。WITH中的DELETE删除来自products的指定行，以它的RETURNING子句返回它们的内容，并且接着主查询读该输出并将它插入到products_log。
+
+# with 修改数据，并返回数据：
+WITH t AS (
+    UPDATE products SET price = price * 1.05
+    RETURNING *
+)
+SELECT * FROM products;
+外层SELECT可以返回在UPDATE动作之前的原始价格，而在
+
+WITH t AS (
+    UPDATE products SET price = price * 1.05
+    RETURNING *
+)
+SELECT * FROM t;
+外部SELECT将返回更新过的数据。
+
+# with 递归查询：
+使用RECURSIVE关键字和with子句编写一个查询，查找工资总额小于20000的工资总和，如下所示：
+WITH RECURSIVE t(n) AS (
+   VALUES (0)
+   UNION ALL
+   SELECT SALARY FROM COMPANY WHERE SALARY < 20000
+)
+SELECT sum(n) FROM t;
+这里的n表示的是column_list(如果不写，默认是as后括号中返回的列)
+
+# 字段都不为空的判断，判断多个字段是否为空：
+SELECT COUNT(*)
+FROM yourTable
+WHERE COALESCE(field1, field2, field3, field4) IS NOT NULL;
+
+# 通过with递归查询实现，若查询结果存在，则用查询的结果，若查询结果不存在，则使用默认值：
+with RECURSIVE abc(id, uuid, last_update_date) as (
+	(
+		SELECT id, uuid, last_update_date
+		FROM public.data_price_quantified_measure
+                WHERE uuid = 'edff9a83-4bc9-42da-8ae2-9537c18b8fa1'
+		ORDER BY last_update_date
+		DESC LIMIT 1)
+   UNION all
+   VALUES (0, 'abc', current_timestamp)
+) 
+SELECT * from abc limit 1;
+
+# 若存在则用查询的结果，否则采用默认值：
+SELECT * from (
+   SELECT id, uuid, last_update_date FROM public.data_price_quantified_measure where uuid = 'edff9a83-4bc9-42da-8ae2-9537c18b8fa1' 
+   UNION all
+   VALUES (0, 'abc', current_timestamp)
+) t1 limit 1;
+
+# 引用多个查询结果：
+with turnover as (
+	SELECT count(1) as turnover 
+	FROM public.trade_contract_info 
+	WHERE product_id = '861ea5aa-6b5e-40e4-aaa2-2a670b13db02' 
+	AND contract_status = 1 
+	AND (to_date(last_update_date::text,'YYYY-MM-DD')=current_date-1)
+), 
+increase as (
+	select (15-t1.price)/t1.price as increase
+	from (
+			(select price from public.collision_product_price_day 
+				WHERE uuid = '861ea5aa-6b5e-40e4-aaa2-2a670b13db02'
+				ORDER BY last_update_date
+				DESC LIMIT 1)
+		union all 
+			values(15)
+		) t1 limit 1
+)
+select t2.turnover, t3.increase from turnover t2, increase t3
+;
+
+

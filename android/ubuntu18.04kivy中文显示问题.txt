@@ -1,0 +1,23 @@
+
+# Ubuntu18.04 kivy 中文显示问题
+# 将字体下载，复制到 main.py 文件同一目录下
+
+# 链接: Kivy字体 DroidSansFallback
+# https://pan.baidu.com/s/1CPBQqdjRmAg25uUkpEhnqA
+# 提取码：akxp
+# 当然，其他的支持中文的字体也是可以的：
+# c/Windows/Fonts $ docker cp simhei.ttf fe355f3dc5c7:/root/
+
+import kivy
+from kivy.app import App
+from kivy.uix.button import Button
+
+kivy.resources.resource_add_path('font/')
+ft = kivy.resources.resource_find('DroidSansFallback.ttf')
+
+class MyApp(App):
+	def build(self):
+		return Button(text='我的世界', font_size=50, font_name = ft)
+
+MyApp().run()
+

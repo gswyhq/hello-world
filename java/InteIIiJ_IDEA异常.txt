@@ -1,0 +1,88 @@
+
+# pom.xml 文件中，
+发现pom文件中的如下依赖的version一直标红，鼠标放上去显示，如：
+Dependency 'com.mayabot.mynlp:mynlp:3.2.1' not found 
+解决方法：
+①打开“Maven Projects”，打开当前项目
+②打开当前项目的“Lifecycle”，在右侧 Maven里，项目名称下；
+③点击“clean”，清除上一次Maven执行的结果
+④点击“iinstall”，将项目输出构件部署到本地仓库
+这时，.m2\repository 目录中就有对应的包文件。
+
+# .m2\repository 目录中，有对应的包文件，但pom文件中仍然提示：
+Dependency **** not found
+解决方法：
+File -> Settings -> Build, Execution, Deployment -> Build Tools -> Maven
+User settings file: D:\User\Name\.m2\settings.xml
+User repository: D:\User\Name\.m2\repository
+并将后面的两个Override,都勾选上，并点击 Apply。
+或者将项目关闭，重新打开IDEA.
+
+# 自己写的 类文件明明存在，对应的package路径设置也无问题，但import导入的时候却提示错误:
+ Intellij IDEA Cannot Resolve Symbol 
+解决方法：
+点击菜单中的 “File” -> “Invalidate Caches / Restart”，然后点击对话框中的 “Invalidate and Restart”，清空 cache 并且重启。语法就会正确的高亮了。
+若上面的方法还是不能解决问题，那就只能:
+1、删除掉.idea目录；
+2、再重新打开Intellij IDEA,生成新的 .idea;
+3、ctrl+alt+shift+s,进入project structure，然后点击Project Settings -> Modules，点击+号，选择import module，然后找到对应的module所在位置，添加进来。
+
+# Maven 项目中报错：
+SLF4J: Failed to load class “org.slf4j.impl.StaticLoggerBinder”. 
+主要是因为sl4j和log4j的不兼容导致的，具体处理方案如下： 
+首先看看你工程中的sl4j-api的版本（比如我的是1.7.21），然后在http://mvnrepository.com/搜索slf4j-log4j12，会出现SLF4J LOG4J 12 Binding，点击进入，会有很多版本的slf4j-log4j12，我们点击1.7.21版本的slf4j-log4j12进入详细信息页面，查看依赖的log4j，这个版本的slf4j-log4j12依赖的是1.2.71版本的log4j。
+
+或者（有时 pom.xml文件中压根就没有对应的依赖包）：
+1、删除仓库中的两个包(即把所有的版本都删除)：
+rm -rf ~/.m2/repository/log4j ~/.m2/repository/org/slf4j
+2、Intellij IDEA -> File -> Invalidata Caches /Restart
+3、Intellij IDEA -> 右侧 Maven -> 项目名称 -> Lifecycle -> clean -> install
+这时按照新的配置，重新安装对应依赖的 sl4j 和 log4j。
+
+# java: 程序包org.slf4j.impl不存在
+解决方法：
+Intellij IDEA -> File -> settings -> Build, Execution, Deployment -> Build Tools -> Maven -> Importing > 勾选 Create module groups for multi-module Maven projects -> Automatically download: 同时勾选 Sources Documentation Annotations;
+点击 Apply。
+
+# deeplearning4j-nlp 外部包 训练词向量报错：
+Caused by: org.nd4j.linalg.factory.Nd4jBackend$NoAvailableBackendException: Please ensure that you have an nd4j backend on your classpath. 
+解决方案：
+1、删除仓库中的两个包(即把所有的版本都删除)：
+rm -rf ~/.m2/repository/org/nd4j  ~/.m2/repository/org/deeplearning4j
+2、Intellij IDEA -> File -> Invalidata Caches /Restart
+3、Intellij IDEA -> 右侧 Maven -> 项目名称 -> Lifecycle -> clean -> install
+这时按照新的配置，重新安装对应依赖。
+各个程序包，不同版本的依赖，可以通过 https://mvnrepository.com/search?q=deeplearning4j-nlp 查询。
+
+# 从其他地方迁移一个工程目录过来，但项目目录对不上，好的标红
+如 package com.abc.utils, 这个时候查看 com 时发现其上级目录并不是 sources root 目录，所以就标红了。
+解决方法：intellij idea 更改 sources root 目录：
+File -> Project Structure -> Project Settings -> Modules -> Sources -> Sources
+选择好 要设置为 sources root 的目录，右键 -> 选择 Sources , 这时在右侧 Add Content Root处，即可看见新的 Source Folders, 删除旧的 sources root 目录，点击 Apply 和 OK。
+
+# 文件中有 <<<<<<、=======、 >>>>>> 等
+这是因为合并代码出现了冲突，如何在Intellij IDEA中通过可视化的界面，人工选择，解决冲突。
+在 IDEA中，打开冲突的代码文件，右键 -> git -> resolve conflict，出现冲突解决界面，选择文件，点击 merge 确定需要保留的代码即可。
+
+# 问题，在Intellij IDEA中查看git文件没什么变化；但通过 mobaxterm终端查看git diff ,整篇文档都是不一样的；
+问题分析，主要是因为 IDEA默认使用的编码及文件格式与 mobaxterm不一致所致；
+设置IDEA的text file encoding为 UTF-8、文件的换行符使用 Unix 格式
+text file encoding UTF-8
+打开IDEA ,File -> Settings -> Editor -> File Encodings:
+找到 Global Encoding,设置为： UTF-8;
+找到 Project Encoding,设置为： UTF-8;
+找到 Default encoding for properties files,设置为： UTF-8; 并勾选： Transparent native-to-ascii conversion;
+找到 Create UTF-8 files 设置为 with NO BOM;
+File -> Settings -> Editor -> Code Style
+找到 Line separato: 设置为： Unix and macOS (\n)
+另外就是git设置为自动转换：
+git config core.autocrlf true
+
+# git pull代码时候，提示有冲突，但文件内容又显示no diff;
+仅仅是文件换行符，一个是\r\n(CRLF)一个是\n(LF);
+解决方法：
+将文件的换行符由CRLF转换为LF, 或将文件换行符由 LF转换为CRLF.
+操作过程：
+1、在Interllij IDEA左侧，Project 目录结构中，选中有冲突的文件，或者包含冲突文件的目录。
+2、File -> File Properties -> Line Separators -> 选择 CRLF、LF、CR之一，选中了什么，对应文件或目录下的所有文件的换行符就转换了什么。
+

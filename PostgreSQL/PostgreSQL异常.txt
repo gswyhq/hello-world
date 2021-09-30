@@ -10,3 +10,79 @@ TRUNCATE db_name.table_name RESTART IDENTITY;
 # ERROR:  must be owner of relation tb_door
 解决方案，需要管理员用户登录；管理员postgres登录相应数据库
 
+# union查询时候，报错：
+ERROR: UNION types bigint and text cannot be matched
+因为查询类型不一致所致
+select a from t1
+union all
+values (null)
+若a字段的类型是int, float, 则会报上面的错误；
+
+# 安装pg_trgm插件报错：
+psql: FATAL:  password authentication failed for user "postgres"
+需要设置用户名为 postgres的用户，并用该用户进行 创建extension
+~$ docker run -d -it -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 bitnami/postgresql:11.7.0-debian-10-r9
+554e8358b3fb448b59083755c9539a7d91737ec90fafe2f40172a07b0c6c8b5d
+~$ docker exec -it 554e8358b3f /bin/bash
+I have no name!@554e8358b3fb:/$ psql -U postgres -h localhost
+Password for user postgres:
+psql (11.7)
+Type "help" for help.
+
+postgres=# create extension pg_trgm;
+CREATE EXTENSION
+postgres=#
+
+# 使用相似度函数报错：
+postgres=# select similarity('bwtigerte','bwhite');
+ERROR:  function similarity(unknown, unknown) does not exist
+LINE 1: select similarity('bwtigerte','bwhite');
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+问题原因即解决方案：
+原因是因为对应的插件未启用，添加对应的插件即可：
+postgres=# create extension pg_trgm;
+CREATE EXTENSION
+postgres=# select similarity('bwtigerte','bwhite');
+ similarity
+------------
+   0.214286
+(1 row)
+
+# 问题：invalid locale name: "zh_CN.UTF-8"
+postgres=# CREATE DATABASE db2
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'zh_CN.UTF-8'
+    LC_CTYPE = 'zh_CN.UTF-8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+ERROR:  invalid locale name: "zh_CN.UTF-8"
+解决方法：
+~# locale-gen zh_CN.UTF-8
+~# locale -a 
+# 查看是否支持 zh_CN.UTF-8
+若还是不支持，则 重新设置locales，并选择 en_US.UTF-8 和 zh_CN.UTF-8 两项：
+# dpkg-reconfigure locales
+若 locale -a 支持了 zh_CN.UTF-8，则需要重启电脑，或者容器（否则不生效）
+create database test2 with template template0 lc_collate "zh_CN.utf8" lc_ctype "zh_CN.utf8" encoding 'UTF8';
+
+# 执行命令是报错：
+ERROR:  role "tradedata" does not exist
+解决方案，是创建对应的角色：
+CREATE ROLE tradedata;
+# 创建角色报错，则需要在命令行查看对应的角色：
+trade=> \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradeopr  | Create DB                                                  | {}
+发现压根就没有tradedata角色，所以报错。这个时候，切换到超级用户（上结果显示，当前超级账号是postgres），若不切换，可能就报下面的错误：
+ERROR: permission denied to create role
+# 在超级用户的角色下，添加有登录权限的角色：
+trade=# CREATE ROLE tradeopr login;
+有登录权限的角色，等同于用户；
+create user role1 与create role role1 login 是等价的.
+

@@ -1,0 +1,30 @@
+
+Android 模拟器允许我们直接从 Linux 系统上运行我们最喜欢的 Android 应用程序或游戏。
+
+Anbox 是 “Android in a box” 的缩写。Anbox 是一个基于容器的方法，可以在普通的 GNU/Linux 系统上启动完整的 Android 系统
+
+每个应用程序将在一个单独窗口打开，就像其它本地系统应用程序一样，并且它可以显示在启动器中。
+
+Anbox 软件包最近被添加到 Ubuntu 18.10 (Cosmic) 和 Debian 10 (Buster) 软件仓库。
+
+对于 Debian/Ubuntu 系统，使用 APT-GET 命令 或 APT 命令 来安装 anbox。
+
+$ sudo apt install anbox
+
+默认情况下，Anbox 并没有带有 Google Play Store。因此，我们需要手动下载每个应用程序（APK），并使用 Android 调试桥（ADB）安装它。
+
+对于 Debian/Ubuntu 系统，使用 APT-GET 命令 或 APT 命令 来安装 ADB。
+
+$ sudo apt install android-tools-adb
+
+把应用程序推到 Anbox
+
+首先，你需要启动 ADB 服务。为做到这样，运行下面的命令。
+
+$ adb devices
+
+安装应用程序，语法格式：
+
+$ adb install Name-Of-Your-Application.apk
+
+

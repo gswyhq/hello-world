@@ -244,6 +244,7 @@ gswabcd@gswabcd-PC:~$ gcc -c -Q -march=native --help=target | grep march
 如果在编译时指定了-march参数，gcc将不会再用兼容的指令去编译，而是根据指定的CPU架构，采用其特定的指令集如AVX去生成二进制代码。因此，当你确定所编译的程序只会在特定的环境中运行时，可以使用-march参数来指定CPU架构，这样编译器就可以根据你的CPU架构进行指令上的优化，而这个指定带来的结果就是，如果你将程序放在其他机器上运行，有可能得到Illegal instruction的运行错误。
 # https://www.cnblogs.com/yutongqing/p/6823385.html
 # https://www.v2ex.com/t/174625
+注：-march=native 使编译器自动检测构建计算机的体系结构。目前，该特性仅在 GNU/Linux 上支持，并非所有架构都被认可。 如果自动检测不成功，则该选项无效。
 
 异常：
 abcd@ubuntu-GPU:~/baoxian$ docker-compose -f docker-compose.yml up -d
@@ -365,5 +366,60 @@ docker logout
 docker login
 输入用户名，密码；若网络不好，过一会儿再重复上面两步，直到登录成功，再
 docker push *** 即可
+
+# windows系统，mobaxterm 使用docker cp 出错：
+docker cp hadoop-2.6.0.tar 4e732add094a:/root/
+GetFileAttributesEx D:\Users\user123\data\hadoop\hadoop-2.6.0.tar: The system cannot find the file specified.
+解决方法：
+不用mobaxterm, 在cmd窗口命令行中运行上面的命名即可；
+
+# windows docker load出错：
+~$ docker load < mysql-5.7-save.tgz
+requested load from stdin, but stdin is empty
+解决方法：
+将“<” 改为“-i”:
+~$ docker load -i mysql-5.7-save.tgz
+
+# windows docker容器内，无法更改挂载文件所有者及文件权限（即使修改了，也是无效的；当然容器内未挂载的文件或目录权限是可以更改的）：
+root@cc0de6ccacf8:/var/lib/postgresql# sudo chown -R 1000 data&& ls -al
+total 12
+drwxr-xr-x 3 root root 4096 Aug 13 06:52 .
+drwxr-xr-x 1 root root 4096 Aug 13 06:52 ..
+drwxrwxrwx 2 root root 4096 Aug 13 04:01 data
+即windows 不支持VirtualBox共享文件夹；
+
+# docker build时，报错：
+/bin/sh: 1: source: not found
+问题原因：build 时默认使用的是 /bin/sh 环境，/bin/bash 才可以使用 source。
+解决方案一：
+执行该命令时指定 /bin/bash 环境
+RUN /bin/bash -c "source ~/.bashrc"
+
+解决方案二：
+指定全局 shell 环境
+SHELL ["/bin/bash", "-c"]
+RUN && source ~/.bashrc
+
+# 通过Dockerfile 文件构建镜像时报错：
+OCI runtime create failed: container_linux.go:348: starting container process caused "chdir to cwd (\"/root\") set in config.json failed: permission denied": unknown
+原因是因为定义了 WORKDIR 
+不是新建的docker用户没有权限对 WORKDIR 进行操作；
+注释掉 WORKDIR 即可
+
+# 通过Dockerfile构建镜像时，报错：
+mv: cannot move '/etc/apt/sources.list' to '/etc/apt/sources.list.bak': Permission denied
+因为当前用户无对应的权限，重新定义用户即可，Dockerfile 文件中添加如下内容：
+USER root
+
+# windows系统，重启容器，出现异常：
+Error starting userland proxy: mkdir /port/tcp:0.0.0.0:5432:tcp:172.17.0.2:5432: input/output error
+解决方法：
+重启docker服务解决，原因不明；
+
+# 问题：windows系统，git shell启动一个docker容器报错：
+the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty'
+解决办法
+方法1：老老实实以管理员权限打开cmd，然后在运行就可以了
+方法2：用mobaxterm 终端启动docker容器；
 
 

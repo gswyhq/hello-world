@@ -3,6 +3,22 @@ git config --global core.quotepath false
 git config --global credential.helper 'cache --timeout 36000'
 git config --global credential.helper erase
 git config --global credential.helper store
+git config --global core.autocrlf true
+
+# // 提交时转换为LF，检出时转换为CRLF
+git config core.autocrlf true
+// 提交时转换为LF，检出时不转换
+git config core.autocrlf input
+// 提交检出均不转换
+git config core.autocrlf false
+
+Dos和Windows平台： 使用回车（CR）和换行（LF）两个字符来结束一行，回车+换行(CR+LF)，即“\r\n”；
+Mac 和 Linux平台：只使用换行（LF）一个字符来结束一行，即“\n”；
+影响：Unix/Mac系统下的文件在Windows里打开的话，所有文字会变成一行；而Windows里的文件在Unix/Mac下打开的话，在每行的结尾可能会多出一个^M符号。
+
+# 查看git所有的配置：
+git config --list
+git config --global --list
 
 git重置账号密码：
 git config --system --unset credential.helper
@@ -23,9 +39,9 @@ git config --global credential.helper store
 git config --global credential.helper 'cache --timeout 3600'
 
 git config是用于进行一些配置设置，有三种不同的方式来指定这些配置适用的范围：
-1) git config   针对一个git仓库
-2) git config --global    针对一个用户
-3) sudo git config --system    针对一个系统，因为是针对整个系统的，所以必须使用sudo
+1) git config   针对一个git仓库, 存储于git仓库下的.git/config 
+2) git config --global    针对一个用户, 存储于：~/.gitconfig
+3) sudo git config --system    针对一个系统，因为是针对整个系统的，所以必须使用sudo, 存储于：/etc/gitconfig
 
 1) 第一种默认当前目录是一个git仓库，假设我们有一个仓库叫hello-world，它所修改配置保存在hello-world/.git/config
 gswewf@gswewf-pc:~/hello-world$ less .git/config
@@ -103,13 +119,25 @@ branch.master.merge=refs/heads/master
 # 防止每次都需要输入密码，可进行如下设置：
 git config --global credential.helper store
 这样，第一次正确输入密码之后，就不用每次都输入了；store 将凭据保存在磁盘上.
+默认是将密码明文存放在了 ~/.git-credentials 文件中；
+也可以自定义密码存储文件路径：
+git config --global credential.helper 'store --file ~/.my-credentials'
+当然，也可以设置将密码存储在内存中，默认存储内存中的时间是900s,即15分钟。也可以自定义存储在内存中的时间：
+git config credential.helper "cache --timeout 36000"
+该项设置密码存储在内存中，只针对linux系统有效，若是windows系统，则：
+git: 'credential-cache' is not a git command.
+windows系统不同版本的git,设置方法可能不同，如：
+git config credential.helper wincred
+但wincred项目（git-credential-winstore）不再维护。
+它被微软开源维护的Git-Credential-Manager-for-Windows所取代
+git config --global credential.helper manager
 
-上传项目到GitHub上，当某个文件大小超过100M时，就会上传失败，因为默认的限制了上传文件大小不能超过100M。如果需要上传超过100M的文件，就需要我们自己去修改配置。
+# 上传项目到GitHub上，当某个文件大小超过100M时，就会上传失败，因为默认的限制了上传文件大小不能超过100M。如果需要上传超过100M的文件，就需要我们自己去修改配置。
 首先，打开终端，进入项目所在的文件夹；
 输入命令：git config http.postBuffer 524288000
 之前git中的配置是没有这一项的,执行完以上语句后输入git config -l可以看到配置项的最下面多出了一行我们刚刚配置的内容. (52428000=500×1024×1024,即500M)
 
-使用ssh-keygen 命令更改SSH Key 密码
+# 使用ssh-keygen 命令更改SSH Key 密码
 -p 选项请求修改私钥的密码，而不是创建一个新的私钥。程序会提示你输入原始密码。然后输入两遍新密码。
 -f{filename} 选项去指定密钥的名称。
 详细过程如下：

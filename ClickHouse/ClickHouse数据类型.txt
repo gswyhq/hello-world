@@ -1,0 +1,313 @@
+
+ClickHouse数据类型
+ClickHouse的数据类型分为：
+
+基础类型
+复合类型
+特殊类型
+基础类型
+数值类型
+ClickHouse的数值类型和Numpy的数值类型类似，比如int32、int64、uint32、float32 和float64等。
+
+整数
+ClickHouse支持有符号和无符号的整数。
+
+有符号整数Int<位数>：
+
+名称	范围	大概范围	对应MySQL数据类型
+Int8	-128 ~ 127	百	Tinyint
+Int16	-32768 ~32767	万	Smallint
+Int32	-2147483648 ~ 2147483647	十亿	Int
+Int64	-9223372036854775808 ~ 9223372036854775807	千亿亿	Bigint
+无符号整数UInt<位数>：
+
+名称	范围	大概范围	对应MySQL数据类型
+UInt8	0 ~ 255	百	Tinyint Unsigned
+UInt16	0 ~ 65535	万	Smallint Unsigned
+UInt32	0 ~ 4294967295	十亿	Int Unsigned
+UInt64	0 ~ 18446744073709551615	千亿亿	Bigint Unsigned
+浮点数
+ClickHouse支持单精度浮点数和双精度浮点数。
+
+名称	大小（字节）	有效精度（位数）	普通概念
+Float32	4	7	Float
+Float64	8	16	Double
+注意ClickHouse的浮点数一样也有精度丢失的问题。
+
+-- Float32
+select toFloat32('0.12345678901234567890') as f, toTypeName(f) as type
+
+-- Float64
+select toFloat64('0.12345678901234567890') as f, toTypeName(f) as type
+1
+2
+3
+4
+5
+说明：
+
+toFloat32() 函数用来将字符串转换成Float32；
+toFloat64() 函数用来将字符串转换成Float64；
+toTypeName() 函数用来获取字段的数据类型；
+ClickHouse支持正无穷（Inf）、负无穷(-Inf) 和非数字(Nan)。
+
+-- 正无穷Inf
+SELECT 2 / 0
+
+-- 负无穷-Inf
+SELECT 2 / 0
+
+-- 非数字
+SELECT 0 / 0
+1
+2
+3
+4
+5
+6
+7
+8
+Decimal
+ClickHouse的Decimal数据类型支持高精度的数值运算。
+
+用Decimal(P,S)来定义：
+
+P代表精度（Precise），表示总位数（整数部分 + 小数部分），取值范围1 ~ 38。
+S代表规模（Scale），表示小数位数，取值范围1 ～ P。
+也可以使用Decimal32(S)、Decimal64(S)和Decimal128(S)的方式来表示。
+
+因为现在还没有128位操作系统，所以Decimal128(S)是用软件模拟的，可能会用性能问题。
+
+字符串类型
+String
+ClickHouse用String表示可变长度的字符串，长度可被认为是没有限制的。
+
+ClickHouse的String统一了关系型数据库中的Varchar、Text、Clob和Blob类型。
+
+ClickHouse的String没有编码的概念（因为同时支持存储文本和二进制），但是建议在存储文本时用UTF-8编码。
+
+FixedString
+ClickHouse的FixedString表示固定长度的字符串。
+
+FixedString(N)，N为字符串长度。
+
+字符串内容不足时，ClickHouse自动用null填充字符串末尾。
+
+select toFixedString('abc', 5) as s, length(s)
+1
+UUID
+ClickHouse支持UUID的数据类型。
+
+生成UUID：
+
+SELECT generateUUIDv4() AS uuid
+1
+默认的UUID：00000000-0000-0000-0000-000000000000
+
+select generateUUIDv4() as uuid, length(toString(uuid))
+1
+UUID一共有36位，包括4个-和32个随机字符：8-4-4-4-12。
+
+UUID并不等同于String类型。
+
+时间类型
+ClickHouse支持Date、DateTime和DateTime64三种时间类型。
+
+Date
+Date只精确到天，不能指定时区。
+
+-- 将字符串转成Date，只支持yyyy-MM-dd格式
+select toDate('2020-09-27') as d, toTypeName(d)
+
+-- 将Datetime转成Date
+select toDate(now()) as d, toTypeName(d)
+1
+2
+3
+4
+5
+DateTime
+DateTime精确到秒，可以指定时区。
+
+-- 将字符串转成DateTime，只支持yyyy-MM-dd HH:MI:SS
+select toDateTime('2020-09-27 11:16:18') as d , toTypeName(d)
+
+-- 支持指定时区
+select toDateTime(now(), 'Europe/London') as d , toTypeName(d)
+1
+2
+3
+4
+5
+DateTime64
+DateTime64精确到亚秒，可以指定时区。
+
+-- 将字符串转成DateTime64，精度为3，只支持yyyy-MM-dd HH:MI:SS 或 yyyy-MM-dd HH:MI:SS.SSS
+select toDateTime64('2020-09-27 11:16:18.1234', 3) as d , toTypeName(d)
+
+-- 支持指定时区
+select toDateTime64(now(), 3,  'Europe/London') as d , toTypeName(d)
+1
+2
+3
+4
+5
+复合类型
+数组
+ClickHouse支持数组数据类型（Array）。
+
+-- 整数数组
+select array(1, 2) as a, toTypeName(a)
+select [1, 2] as a, toTypeName(a)
+
+-- 浮点数
+select [1.4, 3.5, -8.6] as a, toTypeName(a)
+
+-- 混合整数和浮点数
+select [1, 3.14] as a, toTypeName(a)
+
+-- 混合整数、浮点数和字符串，报错，因为无法找到Supertype（不能兼容）
+SELECT [1, 3.14, 'pai'] AS a
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+ClickHouse定义数组时，不需要声明数组里面装的是什么数据类型，会自动推导出数据类型，但是如果推导出的数据类型不兼容时，会报错。
+
+也可以明确指定Array的数据类型，比如Array(UInt8).
+
+元组
+ClickHouse支持元组数据类型（Tuple）。
+
+select tuple(3.14, 'pai', now()) as t, toTypeName(t)
+select (3.14, 'pai', now()) as t, toTypeName(t)
+1
+2
+元组内的数据类型不要求兼容。
+
+枚举
+ClickHouse支持枚举数据类型（Enum）。
+
+Enum类型使用（String:Int)的Key／Value键值对的形式来定义数据。
+
+Enum8: 包含256个枚举值，（String :Int8)，Value取值范围：-128 ~ 127
+Enum16：包含65536个枚举值，（String:Int16)，Value取值范围：-32768 ~ 32767
+Enum的Key和Value不允许重复，且不能为Null，但是允许Key为空字符串。
+
+例子：创建一个表，定义Enum数据类型字段。
+
+create table server ( \
+  state Enum8('Running' = 1, 'Stopped' = 2, 'Suspended' = 3) \
+) engine = Memory;
+1
+2
+3
+例子：插入合法数据。
+
+insert into server values('Running');
+insert into server values('Stopped');
+insert into server values('Suspended');
+1
+2
+3
+例子：插入不在Enum范围内的数据，出错。
+
+insert into server values('Starting');
+1
+嵌套
+ClickHouse支持嵌套数据类型（Nested）。
+
+可以为一个表定一个多个嵌套数据类型字段，但是每个嵌套字段只支持一级嵌套。
+
+嵌套一般用来表示简单的级联关系。
+
+嵌套本质上是一个多维数组。
+
+例子：创建一个表，其中1个人可以属于多个部门
+
+-- department为嵌套数据类型，其中
+-- department.id为部门ID
+-- department.name为部门名称
+create table employee ( \ 
+  name String, \ 
+  age UInt8, \ 
+  department Nested ( \ 
+    id UInt8, \ 
+    name String \ 
+  ) \ 
+) engine = Memory;
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+例子：Tom同时属于开发部、测试部
+
+-- 插入数据
+insert into employee values('Tom', 26, [11,12], ['开发部', '测试部']);
+
+-- 查询数据
+select * from employee where name = 'Tom';
+
+-- 用Array Join来将一行数据变多行，适用于行转列操作
+select dept.id, dept.name \ 
+from employee array join department as dept \
+where name = 'Tom';
+
+select name, dept.id, dept.name \ 
+from employee array join department as dept \
+where name = 'Tom';
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+特殊类型
+Nullable
+ClickHouse用Nullable来修饰基础类型，表示该字段允许为null。
+
+使用Nullable类型，会导致性能下降。
+
+比如：
+
+Nullable(Int8)
+1
+Domain
+ClickHouse支持IPv4和IPv6两种领域数据类型，提供了自动格式检查和优化了性能。
+
+IPv4格式：十进制表示，比如127.0.0.1
+
+IPv6格式：十六进制表示
+
+Domain类型并不是字符串类型，如果需要转换成字符串类型，需要调用IPv4NumToString()或IPv6NumToString()函数。
+
+# int, float数值型数据转换为字符串：
+time curl 12.45.23.12:8123 -d "select _table, toString(mid) from tutorial.tb"
+
+————————————————
+
+原文链接：https://blog.csdn.net/nklinsirui/article/details/108827707
+

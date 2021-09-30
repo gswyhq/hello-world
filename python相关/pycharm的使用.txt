@@ -1,0 +1,64 @@
+
+# pycharm远程开发调试:
+1、安装pycharm专业版，社区版无此功能
+2、配置远程Python解释器
+选择File | Settings，选择Project | Project Interpreter，然后在右边，点击那个小齿轮设置，
+然后点击”Add Remote”，勾选“SSH Credentials”,填写主机的ssh配置
+如果之前配置过SFTP的话就直接选“Deployment configuration”.
+3、远程服务器的同步配置
+首先我们需要配置PyCharm通服务器的代码同步，打开Tools | Deployment | Configuration
+点击左边的“+”添加一个部署配置，输入名字，类型选SFTP
+
+确定之后，再配置远程服务器的ip、端口、用户名和密码。root path是文件上传的根目录，注意这个目录必须用户名有权限创建文件。
+然后配置映射，local path是你的工程目录，就是需要将本地这个目录同步到服务器上面
+如果你还有一些文件或文件夹不想同步，那么在配置对话框的第三个tab页“Excluded path”里面添加即可，可同时指定本地和远程。
+还有一个设置，打开Tools | Deployment | Options，将”Create Empty directories”打上勾，要是指定的文件夹不存在，会自动创建。
+上传和下载文件
+有几种方法可以实现本地和远程文件的同步，手动和当文件保存后自动触发。这里我选择了手动，因为自动触发比如影响性能，PyCharm会卡，感觉不爽。
+手动上传方式很简单，选择需要同步的文件或文件夹，然后选择 Tools | Deployment | Upload to sftp(这个是刚刚配置的部署名称)
+
+下载文件也是一样，选择 Tools | Deployment | Download from sftp
+比较远程和本地文件
+有时候你并不确定远程和本地版本的完全一致，需要去比较看看。PyCharm提供了对比视图来为你解决这个问题。
+选择Tools | Deployment | Browse Remote Host，打开远程文件视图，在右侧窗口就能看到远程主机中的文件
+
+选择一个你想要对比的文件夹，点击右键->Sync with Local，打开同步对比窗口，使用左右箭头来同步内容。
+上面是服务器与本地对比，那么本地文件通服务器对比，就先在PyCharm里面选择文件或文件夹，然后右键->Deployment->Sync with deployed to即可
+
+pycharm 打开 带有本地图片的markdown格式文件时，闪退，直接退出pycharm；
+问题原因：martdown 自带“Markdown support”插件原因；
+解决方案：
+在File -> settings -> plugins -> installed中查看是否有“Markdown support”插件，若有，则取消对应的勾选，点击应用“Apply”；
+并在在Marketplace中搜索安装Markdown Image Kit插件即可。
+
+
+PyCharm中利用正则表达式进行 print 的替换
+PyCharm中，Ctrl + R批量替换，勾选Regex，输入：
+find: print (.*?);?$
+replace: print\($1\)
+就可以利用正则表达式，将 python2中的 print一键替换为 python3的 print()。
+
+windows系统，pycharm启动很慢，indexing很久；
+主要原因是Anaconda3目录太大。
+conda 安装的包都在目录Anaconda/pkgs下。随着使用，conda 安装的包也越来越多；有时候会出现以下不好的情况：
+有些包安装之后，从来没有使用过；
+一些安装包的tar包也保留在了计算机中；
+由于依赖或者环境等原因，某些包的不同版本重复安装。
+上面的这些情况使得anaconda显得更加冗余，并且浪费储存；对于这些情况可以使用conda clean 净化Anaconda。
+# 删除从不使用的包
+~$ conda clean --packages
+# 删除tar包
+$ conda clean --tarballs
+# 删除索引缓存、锁定文件、未使用过的包和tar包。
+$ conda clean -a
+
+# pycharm 清理缓存的方法：
+File -> Invalidate Caches / Restart...
+出现弹框有四个选项：Invalidate and Restart（清空缓存并重启）、 Invalidate（清空缓存）、Cancel（取消）和Just Restart（仅重启）.
+
+# pycharm 无法代码自动补全：
+1，关闭掉 省电模式：
+File -> Power Save Mode, 取消勾选；
+2，设置editor
+File -> setting -> Editor -> Inspections -> 勾选上 Python 和 Spelling 
+

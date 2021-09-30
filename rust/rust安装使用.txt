@@ -1,0 +1,73 @@
+
+
+apt-get install rustc
+# rustc --version
+rustc 1.47.0
+
+一、官方安装方法（官方服务器在国外，安装非常容易失败，即使不失败也非常非常慢）
+文档： https://www.rust-lang.org/tools/install
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+二、使用国内镜像的方法
+1、首先修改一下上面的命令，将安装脚本导出
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust.sh
+2、打开 rust.sh 脚本
+  8 
+  9 # If RUSTUP_UPDATE_ROOT is unset or empty, default it.
+ 10 RUSTUP_UPDATE_ROOT="${RUSTUP_UPDATE_ROOT:-https://static.rust-lang.org/rustup}"
+ 11 
+
+将 RUSTUP_UPDATE_ROOT 修改为
+
+RUSTUP_UPDATE_ROOT="http://mirrors.ustc.edu.cn/rust-static/rustup"
+这是用来下载 rustup-init 的， 修改后通过国内镜像下载
+
+3、修改环境变量
+export RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup
+这让 rustup-init从国内进行下载rust的组件，提高速度
+
+4、最后执行修改后的rust.sh
+bash rust.sh
+
+三、手动安装
+wget https://mirrors.ustc.edu.cn/rust-static/rustup/dist/x86_64-apple-darwin/rustup-init  
+然后执行 ./rustup-init
+
+RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup rustup-init 
+最后
+rust 安装后，会在home目录创建 .cargo/env，为了以后都从国内镜像源下载包，可以将上面的环境变量加入到env文件
+
+echo "RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup"  >> ~./ .cargo/env  
+
+或者官网上下载对应的版本rustup-init 文件：
+https://forge.rust-lang.org/infra/other-installation-methods.html
+
+若windows系统, 则下载 rustup-init.exe， 执行安装即可。
+
+四、离线安装
+1、下载源码
+官网上找到对应的源码并下载，如：
+https://static.rust-lang.org/dist/rustc-1.53.0-src.tar.gz
+文件大小约160MB.
+2，解压安装包
+~$ tar -xzvf rustc-1.53.0-src.tar.gz
+~$ cd rustc-1.53.0-src
+
+3，运行x.py编译，安装：
+安装依赖：
+apt install ninja-build g++ curl make cmake git libssl-dev pkg-config
+
+下载依赖文件：
+https://static.rust-lang.org/dist/2021-05-06/rust-std-1.52.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/2021-05-06/rust-std-1.52.0-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/2021-05-06/rustc-1.52.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/2021-05-06/rustc-1.52.0-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/2021-05-06/cargo-1.52.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/2021-05-06/cargo-1.52.0-x86_64-unknown-linux-gnu.tar.xz
+放到目录：rustc-1.53.0-src/build/cache/2021-05-06/ 下；
+
+rustc-1.53.0-src# ./x.py build && ./x.py install
+
+4, 然后进命令行调用 rustc --version ，如果显示了对应的版本，就说明 rust 安装正确了。
+

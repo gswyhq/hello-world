@@ -1,0 +1,6 @@
+
+# PyTorch里面的torch.nn.Parameter()
+类型转换函数，将一个不可训练的类型tensor转换成可以训练的类型parameter并将这个parameter绑定到这个module里面(net.parameter()中就有这个绑定的parameter，所以在参数优化的时候可以进行优化的)
+与torch.tensor([1,2,3],requires_grad=True)的区别，在于后者只是将参数变成可训练的，并没有绑定在module的parameter列表中。
+
+

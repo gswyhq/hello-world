@@ -1,0 +1,37 @@
+
+1、进入到postgresql对应的docker容器（对应镜像为：bitnami/postgresql:11.7.0）：
+docker exec -it 90fc75e1cd24 /bin/bash
+
+2、备份某个数据库的数据, 如：abcd
+$ pg_dump -h 127.0.0.1 -p 5432 -U postgres -c -C -f abcd.sql abcd
+将数据库 abcd 备份到文件abcd.sql
+
+3、备份所有数据库：
+$ pg_dumpall -h 127.0.0.1 -p 5432 -U postgres -c -f db_bak.sql
+
+4、备份数据的恢复：
+$ psql -h 127.0.0.1 -p 5432 -U postgres -f abcd.sql abcd
+
+若有旧数据可以删除再新建：
+postgres=# DROP DATABASE IF EXISTS abcd;
+postgres=# create DATABASE abcd;
+
+第一步: 无论如何, 不管是备份database, 还是schema, 都要先备份结构, trigger, function ,table,
+因为它们之间可能存在依赖关系, 避免恢复数据时事务失败, 不必要的vaccum
+-s参数意味着只备份结构, 不备份data
+
+ pg_dump  --host=localhost --port=6000 --username=demo2  --dbname=demo2  --schema=public -s 
+ --file=C:\Users\zhangtianxiao\Documents\pgsql\t_b.sql
+第二步: 备份数据, 备份数据可以具体到database, schema, table级别,
+当整个库, 整个schema, 又或是某张表, 总体数据量太多, 整体备份会耗时很久,
+我们可以分别备份,恢复
+-s参数意味着只备份数据, 不备份结构
+
+pg_dump  --host=localhost --port=6000 --username=demo2  --dbname=demo2  --schema=public 
+-t t_b -a  --file=C:\Users\zhangtianxiao\Documents\pgsql\t_b.sql
+恢复数据:
+pg_dump中备份的sql 或 归档文件中 create 和 copy 的目标已经是 schema_name + table_name,
+所以这里只需要提供dbname
+
+psql --host=localhost --port=6000 --username=demo2  db_name < C:\Users\zhangtianxiao\Documents\pgsql\t_b.sql
+

@@ -1,0 +1,53 @@
+
+在线安装示例：
+using Pkg
+Pkg.add("Example")
+
+离线安装，如 General ：
+git clone https://github.com/JuliaRegistries/General
+
+
+root@12303888c512:~# mkdir ~/.julia/registriess
+root@12303888c512:~# cp -r General ~/.julia/registriess/
+root@12303888c512:~# julia
+               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.6.2 (2021-07-14)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+|__/                   |
+
+julia>
+
+切换到 Pkg 模式
+julia> 按下 ] 键 
+(@v1.6) pkg>
+(@v1.6) pkg> add /root/.julia/registries/General
+
+
+julia将所有的包依赖github进行管理，而不是如pypi一样建立个独立的网站，其中包含了所有注册的包（你写的包被官方收录）的元数据General，以及几乎所有2261个包都是在github上。
+查找某个安装包的github地址方法：
+在General下面包都是按照首字母进行存储的，若需要查看 Example，我们直接定位到Example中
+~$ cat General/E/Example/Package.toml
+name = "Example"
+uuid = "7876af07-990d-54b4-ab0e-23690620f79a"
+repo = "https://github.com/JuliaLang/Example.jl.git"
+
+通过 git clone下载 github上的包；
+下载好后，可以通过上面的 (@v1.6) pkg> add 包路径
+进行安装；
+也可将 General/E/Example/Package.toml 中的repo 地址由github地址，改为本地地址，如：
+repo = "/root/.julia/registries/Example.jl"
+
+即找到Package.toml
+手动将里面的repo改成你git clone 自己本地包的路径
+然后回到Pkg模式下
+(@v1.6) pkg> add Example
+进行安装；
+
+
+更多帮助见： 
+https://discourse.juliacn.com/t/topic/2969
+

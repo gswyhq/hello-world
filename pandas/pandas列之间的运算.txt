@@ -87,5 +87,7 @@ Out[63]: True
 pd.isna(x)
 Out[64]: True
 
+# pandas 新增多列：
+ df[['column_new_1', 'column_new_2', 'column_new_3']] = pd.DataFrame([[np.nan, 'dogs', 3]], index=df.index)
 
 

@@ -1,0 +1,70 @@
+
+anaconda安装好后，就可以通过conda和pip来安装python包了。
+
+但有时候由于网速原因，或公司防火墙的原因，conda无法访问官方源进行更新。我们需要修改源，指向公司内部源。具体的方法
+
+# conda更改镜像源：
+在用户目录下找到文件.condarc，如果没有自己新建：
+channels:
+  - defaults
+更改为：
+channels:
+  - http://mirrors.paic.com.cn/anaconda/pkgs/main
+  - http://mirrors.paic.com.cn/anaconda/pkgs/free
+show_channel_urls: true
+
+或者添加清华镜像
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels
+
+# 更改为国内源的注意事项：
+不要把官方的默认源换成清华源或者其他国内的源，用默认的官方源就行，因为清华源的包都是旧的，有时候不但没有升级包，反而在降级包，这就很坑。
+当然如果你用默认的源下载速度不快的话，那就换成国内源的，只不过得忍受旧包的烦恼而已。
+如果你已经用了清华源或者其他国内源的话，以下是恢复默认源的命令：
+$ conda config --remove-key channels 
+
+# pypi镜像源的修改
+在用户目录下创建目录.pip, 并在目录内创建文件 pip.conf
+pip.conf文件内添加如下内容：
+[global]
+# cloud hosts url
+index-url = http://mirrors.paic.com.cn/pypi/web/simple
+[install]
+trusted-host=mirrors.paic.com.cn
+
+# conda install *** 运行报错：
+Upload did not complete.
+Thank you for helping to improve conda.
+Opt-in to always sending reports (and not see this message again)
+by running
+    $ conda config --set report_errors true
+conda config --set report_errors true
+conda update menuinst
+conda install faiss-cpu -c pytorch
+
+# conda install 报错：
+CondaHTTPError: HTTP 000 CONNECTION FAILED for url
+1. 通过“conda search <package-name>”命令确认要安装的包是否存在，如果包名称不一致，将报错
+2. 修改镜像源的配置， 将用户目录下的.condarc文件中的所有https换成http
+$ conda search *faiss*
+Loading channels: ...working... done
+PackagesNotFoundError: The following packages are not available from current channels:
+原因及解决方案：
+因为所用的镜像源没有更新，这个时候只能是更新镜像源；
+若是不能更新，那就只能是通过pip install ***来安装了；
+或者是下载好离线安装包：
+一、rar安装包的安装方法
+1、解压
+2、一般解压后，包里面会有 setup.py 这个文件
+3、将解压好的文件夹放入 Anaconda3\Lib\site-packages里面
+4、cd 到解压的安装包路径 ，即进入解压的文件夹内
+5、终端输入 python setup.py install
+
+二、rar.gz安装包的安装方法
+终端运行：python -m pip install ***.rar.gz
+
+三、whl安装包的安装方法
+终端运行： pip install ***.whl
+

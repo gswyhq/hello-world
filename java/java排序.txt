@@ -1,0 +1,60 @@
+
+ArrayList排序：
+定义一个集合
+List<Integer> list = new ArrayList<>();
+list.add(1);
+list.add(5);
+list.add(4);
+list.add(3);
+list.add(7);
+
+# 升序排序
+list.sort((a,b)->a.compareTo(b));
+或者
+list.sort(Comparator.comparing(a->a));
+或者
+list.sort((a,b)->a-b);
+
+# 降序排序
+list.sort((a,b)->b-a);
+
+
+# 对象集合排序：
+List<User> list1 = new ArrayList<User>();
+User user = new User("张三", "15", "男");
+User user1 = new User("李四", "10", "男");
+list1.add(user);
+list1.add(user1);
+//1、年龄升序
+list1.sort((a,b) -> a.getAge().compareTo(b.getAge()));
+//2、姓名降序排列
+list1.sort(Comparator.comparing(User::getName).reversed());
+//等价于 2
+list1.sort(Comparator.comparing(a->((User)a).getAge()).reversed());
+//3、先按性别排，如果年龄相同，再按年龄排序
+list1.sort(Comparator.comparing(User::getSex).reversed().thenComparing(User::getAge));
+
+
+# JSONArray 排序
+JSONArray resultArray = new JSONArray();
+JSONObject result = new JSONObject();
+result.put("name","张三");
+result.put("age","15");
+result.put("data","201812130451");
+resultArray.add(result);
+//根据姓名的倒序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getString("name")).reversed());
+//根据时间倒序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getData("data")).reversed());
+//根据年龄升序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("age")));
+
+注意：reversed()函数的意思是将数组颠倒。其用法常见于字符串处理中，将字符串颠倒
+如：
+String str = "abcd";
+StringBuffer sb = new StringBuffer(str);
+sb.reverse();
+System.out.println(str);
+System.out.println(sb.toString());
+
+

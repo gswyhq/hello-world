@@ -62,6 +62,8 @@ Ubuntu 14.04 (LTS)代号为trusty。
 Ubuntu 15.04 代号为vivid。
 Ubuntu 15.10 代号为wily。
 Ubuntu 16.04 (LTS)代号为xenial。
+Ubuntu 18.04 (LTS)代号为bionic。
+Ubuntu 20.04 (LTS)代号为focal。
 故 Ubuntu 18.04.2 LTS 更改镜像源的方法，仅仅是将 Ubuntu 16.04 LTS 方法中的 xenial 替换为 bionic 即可，如下：
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
 echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main" >> /etc/apt/sources.list && \

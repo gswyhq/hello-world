@@ -1,0 +1,155 @@
+
+1、启动一个postgresql容器：
+~$ docker run -d -it -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 bitnami/postgresql:11.7.0-debian-10-r9
+554e8358b3fb448b59083755c9539a7d91737ec90fafe2f40172a07b0c6c8b5d
+
+2、进入容器：
+docker exec -it 554e8358b3f /bin/bash
+
+3、postgres用户连接postgresql
+I have no name!@554e8358b3fb:/$ psql -U postgres -h localhost
+
+4、创建数据库：
+postgres=# create database test with template template0 lc_collate "C.UTF-8" lc_ctype "C.UTF-8" encoding 'UTF8';
+CREATE DATABASE
+
+
+postgres=# select * from kg_data where subject like '%京%广%' or object like '%京%广%' LIMIT 15;
+   id   |             subject              | rel  |        object
+--------+----------------------------------+------+----------------------
+ 177759 | 郑州市二七区京广实验学校         | 简称 | 郑州四中分校
+ 191867 | 中科合创北京科技推广中心         | 简称 | 中科合创
+ 194316 | 北京宏光天下传媒广告公司         | 简称 | 宏光传媒
+ 194792 | 广渠门中学                       | 简称 | 北京广中
+ 197001 | 北京广宇国际教育咨询中心         | 简称 | 广宇国际教育
+ 197242 | 北京小米广告传媒有限责任公司     | 简称 | 小米传媒
+ 200023 | 北京尚丞领锋广告设计有限公司     | 简称 | 尚丞设计
+ 200265 | 北京中广煜盛文化传播有限公司     | 简称 | 中广煜盛
+ 200368 | 北京景山学校四川广安实验学校     | 简称 | 广安景山学校
+ 205144 | 北京共升传媒广告有限公司         | 简称 | 北京共升
+ 210015 | 北京奥华广告传播公司             | 简称 | 中广传播公司
+ 210860 | 北京锐意天思广告有限公司         | 简称 | 锐意天思广告
+ 211363 | 北京名典传媒广告有限公司         | 简称 | 名典传媒
+ 211566 | 北京师范大学芜湖附属学校广播中心 | 简称 | 北师大芜湖附校广播台
+ 218222 | 东京广播公司                     | 简称 | TBS
+(15 rows)
+
+# pg_trgm模块提供用于根据三 Tuples 匹配确定字母数字文本的相似性的函数和运算符，以及支持快速搜索相似字符串的索引运算符类。
+# pg_trgm模块提供了 GiST 和 GIN 索引运算符类，允许您在文本列上创建索引，以实现非常快速的相似性搜索。这些索引类型支持上述相似性运算符，并且还支持针对LIKE，ILIKE，~和~*查询的基于三字母组的索引搜索。
+# 添加插件 pg_trgm:
+postgres=# create extension pg_trgm;
+CREATE EXTENSION
+
+postgres=# select show_trgm('北京天安门广场');
+                                 show_trgm
+---------------------------------------------------------------------------
+ {0x8096b3,0xb49c4e,0xbbe167,0xc9e4a4,0xece732,0x03b679,0x38befd,0x5d994b}
+(1 row)
+
+postgres=# select similarity('北京天安门', '天安门广场');
+ similarity
+------------
+  0.0909091
+(1 row)
+
+postgres=# select similarity('北京天安门', '天安门');
+ similarity
+------------
+       0.25
+(1 row)
+
+
+postgres=# SELECT subject, similarity(subject, '京广') FROM kg_data order by similarity(subject, '京广') DESC  limit 10;
+  subject   | similarity
+------------+------------
+ 京源学校   |   0.142857
+ 京都大学   |   0.142857
+ 京官月费   |   0.142857
+ 京东大学   |   0.142857
+ 京源学校   |   0.142857
+ 京北小学   |   0.142857
+ 京都放送   |   0.142857
+ 京华时报网 |      0.125
+ 京师大学堂 |      0.125
+ 京师同文馆 |      0.125
+(10 rows)
+
+# 创建索引：
+CREATE TABLE test_trgm (t text);
+CREATE INDEX trgm_idx ON test_trgm USING GIST (t gist_trgm_ops);
+或者：
+CREATE INDEX trgm_idx ON test_trgm USING GIN (t gin_trgm_ops);
+
+此时，您将在t列上有一个索引，可用于相似性搜索。一个典型的查询是
+
+SELECT t, similarity(t, 'word') AS sml
+  FROM test_trgm
+  WHERE t % 'word'
+  ORDER BY sml DESC, t;
+这将返回文本列中与* word *足够相似的所有值，从最佳匹配到最差排序。即使在非常大的数据集上，该索引也将用于使此操作快速进行。
+
+上述查询的一种变体是
+
+SELECT t, t <-> 'word' AS dist
+  FROM test_trgm
+  ORDER BY dist LIMIT 10;
+这可以通过 GiST 索引非常有效地实现，而不能通过 GIN 索引有效地实现。当只需要少量最接近的匹配时，通常会击败第一个公式。
+
+您也可以使用t列上的索引来实现单词相似度。例如：
+
+SELECT t, word_similarity('word', t) AS sml
+  FROM test_trgm
+  WHERE 'word' <% t
+  ORDER BY sml DESC, t;
+这将返回文本列中的所有值，在该列中，对应的有序三字母组中有一个连续范围，该范围与* word *的三 Tuples 完全相似，从最佳匹配到最差排序。即使在非常大的数据集上，该索引也将用于使此操作快速进行。
+
+上述查询的一种变体是
+
+SELECT t, 'word' <<-> t AS dist
+  FROM test_trgm
+  ORDER BY dist LIMIT 10;
+这可以通过 GiST 索引非常有效地实现，而不能通过 GIN 索引有效地实现。
+
+从 PostgreSQL 9.1 开始，这些索引类型还支持LIKE和ILIKE的索引搜索，例如
+
+SELECT * FROM test_trgm WHERE t LIKE '%foo%bar';
+索引搜索的工作原理是从搜索字符串中提取三词组，然后在索引中查找它们。搜索字符串中的字母组合越多，索引搜索越有效。与基于 B 树的搜索不同，搜索字符串无需左锚定。
+
+从 PostgreSQL 9.3 开始，这些索引类型还支持对正则表达式匹配(~和~*运算符)的索引搜索，例如
+
+SELECT * FROM test_trgm WHERE t ~ '(foo|bar)';
+索引搜索的工作原理是从正则表达式中提取 trigram，然后在索引中查找它们。从正则表达式中可以提取的字母组合越多，索引搜索越有效。与基于 B 树的搜索不同，搜索字符串无需左锚定。
+
+对于LIKE搜索和正则表达式搜索，请记住，没有可提取三字母组的模式将退化为全索引扫描。
+
+来源：https://www.docs4dev.com/docs/zh/postgre-sql/10.7/reference/pgtrgm.html
+
+注意：
+
+如果要让pg_trgm高效支持多字节字符(例如中文)，数据库lc_ctype不能为"C"，只有TOKEN分割正确效果才是OK的。(lc_ctype设置正确，才能够正确的逐一分割多字节字符串中的文字
+
+pg_trgm模糊查询的原理
+首先，pg_trgm将字符串的前端添加2个空格，末尾添加1个空格。
+然后，每连续的3个字符为一个TOKEN，拆开。
+最后，对TOKEN建立GIN倒排索引。
+查看字符串的TOKEN，可以使用如下方法。
+test=# select show_trgm('123');      
+        show_trgm              
+-------------------------      
+ {"  1"," 12",123,"23 "}      
+(1 row)
+pg_trgm前后模糊字符个数要求的原因
+使用pg_trgm时，如果要获得最好的效果，最好满足这些条件。
+1. 有前缀的模糊查询，例如a%，至少需要提供1个字符。( 搜索的是token=' a' )
+2. 有后缀的模糊查询，例如%ab，至少需要提供2个字符。( 搜索的是token='ab ' )
+3. 前后模糊查询，例如%abcd%，至少需要提供3个字符。( 这个使用数组搜索，搜索的是token(s) 包含 {" a"," ab",abc,bcd,"cd "} )
+原因是什么呢？
+因为pg_trgm生成的TOKEN是三个字符，只有在以上三个条件下，才能匹配到对应的TOKEN。
+test=# select show_trgm('123');      
+        show_trgm              
+-------------------------      
+ {"  1"," 12",123,"23 "}      
+(1 row)
+
+来源： https://developer.aliyun.com/article/672293
+

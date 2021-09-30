@@ -51,10 +51,12 @@ jupyter contrib nbextension install --user --skip-running-check
 
 再次重启jupyter，Nbextensions标签页中数据将全部出现了
 
+再输入代码后，会自动补全了，不用再按tab键了，快很多了吧
 
-
- 
-
- 在输入代码后，会自动补全了，不用再按tab键了，快很多了吧
+# Ipython 中切换目录与执行.py文件里的语句
+%cd ../              用于切换目录
+%pwd                 用于查看当前目录
+%run function.py     用于运行.py文件
+%ls                  查看当前目录文件
 
 

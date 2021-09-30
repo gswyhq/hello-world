@@ -1,0 +1,179 @@
+
+# 启动容器：
+docker run --rm -it ubuntu:18.04 /bin/bash
+
+# 更新镜像源，以ubuntu:18.04为例：
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-updates main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-security main" >> /etc/apt/sources.list && \
+echo "deb http://mirrors.paic.com.cn/ubuntu/ bionic-security universe" >> /etc/apt/sources.list && \
+echo "deb-src http://mirrors.paic.com.cn/ubuntu/ bionic-security universe" >> /etc/apt/sources.list
+
+# 
+~# apt-get update
+~# apt-get install -y vim
+~# apt-get install -y openssh-server
+
+# 启动sshd服务
+openssh-server 安装后，可以查看下sshd服务有无启动
+root@4e732add094a:~/hadoop-2.6.0# ps -e|grep ssh
+ 4407 ?        00:00:00 sshd
+若sshd未启动，则需启动sshd服务：
+root@4e732add094a:~/hadoop-2.6.0# /etc/init.d/ssh restart
+ * Restarting OpenBSD Secure Shell server sshd                                                                                                                                                                    [ OK ]
+root@4e732add094a:~/hadoop-2.6.0# echo $?
+0
+
+# 更新python库源：
+/home/mobaxterm  cat ~/.pip/pip.conf
+[global]
+index-url=http://mirrors.paic.com.cn/pypi/web/simple
+
+[install]
+use-mirrors=true
+mirrors=http://mirrors.paic.com.cn/pypi/web/simple/
+trusted-host=mirrors.paic.com.cn
+
+下载：jdk-8u191-linux-x64.tar.gz
+https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz
+jdk-8u191-linux-x64.tar.gz 文件解压到： /root/java/jdk1.8.0_191/
+tar -zxf jdk-8u191-linux-x64.tar.gz -C /root/java
+
+root@4e732add094a:~# mkdir .ssh
+root@4e732add094a:~# cd .ssh/
+root@4e732add094a:~/.ssh# ssh-keygen -t rsa
+
+~/.profile 添加如下内容：
+export JAVA_HOME=/root/java/jdk1.8.0_191/
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$JAVA_HOME/bin:$PATH
+
+使修改的配置生效：
+source ~/.profile
+此时（如果安装成功），可以查看到Java的版本号：
+~# java -version
+
+# 安装Hadoop2
+# 下载 hadoop-2.6.0.tar.gz
+下载地址
+http://mirror.bit.edu.cn/apache/hadoop/common/
+https://archive.apache.org/dist/hadoop/common/hadoop-2.6.0/
+
+
+root@4e732add094a:~# tar -zxf hadoop-2.6.0.tar.gz -C ./
+root@4e732add094a:~# ls
+hadoop-2.6.0  hadoop-2.6.0.tar.gz
+
+
+root@4e732add094a:~# cd hadoop-2.6.0
+root@4e732add094a:~/hadoop-2.6.0# ./bin/hadoop version
+事先得保证java环境配置好了，否则报错：
+Error: JAVA_HOME is not set and could not be found.
+
+Hadoop默认模式为非分布式模式，无需进行其他配置即可运行。非分布式即单Java进程，方便进行调试。
+
+#  修改相关配置文件
+修改一下core-site.xml、hdfs-site.xml、mapred-site.xml配置文件的值。
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# vim core-site.xml
+添加如下内容：
+<property>
+      <name>fs.defaultFS</name>
+      <value>hdfs://127.0.0.1:9000</value>
+</property>
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# vim hdfs-site.xml
+添加如下内容：
+<property>
+      <name>dfs.replication</name>
+      <value>1</value>
+</property>
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# cp mapred-site.xml.template mapred-site.xml
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# vim mapred-site.xml
+添加如下内容：
+<property>
+     <name>mapreduce.framework.name</name>
+     <value>yarn</value>
+</property>
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# vim hadoop-env.sh
+修改JAVA_HOME为如下内容：
+export JAVA_HOME=/root/java/jdk1.8.0_191
+否则，Hadoop安装完后，启动时报Error: JAVA_HOME is not set and could not be found.
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# vim ~/.profile
+添加如下内容：
+export HADOOP_HOME="/root/hadoop-2.6.0"
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+
+root@4e732add094a:~/hadoop-2.6.0/etc/hadoop# source ~/.profile
+
+# 设置UNIX密码：
+root@4e732add094a:~/hadoop-2.6.0# passwd 
+或者：修改root密码：passwd root
+
+# 辑配置文件，允许以 root 用户通过 ssh 登录
+root@4e732add094a:~/hadoop-2.6.0# vim /etc/ssh/sshd_config
+找到：PermitRootLogin prohibit-password
+添加：PermitRootLogin yes
+
+# 重启ssh:
+root@4e732add094a:~/hadoop-2.6.0# service ssh restart
+
+# namenode 初始化(需要在密码设置之后，否则需要重新格式化一下namenode)
+root@4e732add094a:~/hadoop-2.6.0# hadoop namenode -format
+
+# 启动hdfs相关进程:
+root@4e732add094a:~/hadoop-2.6.0# ./sbin/start-dfs.sh
+Starting namenodes on [localhost]
+root@localhost's password:
+localhost: starting namenode, logging to /root/hadoop-2.6.0/logs/hadoop-root-namenode-4e732add094a.out
+root@localhost's password:
+localhost: starting datanode, logging to /root/hadoop-2.6.0/logs/hadoop-root-datanode-4e732add094a.out
+Starting secondary namenodes [0.0.0.0]
+The authenticity of host '0.0.0.0 (0.0.0.0)' can't be established.
+ECDSA key fingerprint is SHA256:3pK762vimvdXgpFg4nn0bWNmhThH2oKK+A5BLrdDJqI.
+Are you sure you want to continue connecting (yes/no)? yes
+0.0.0.0: Warning: Permanently added '0.0.0.0' (ECDSA) to the list of known hosts.
+root@0.0.0.0's password:
+0.0.0.0: starting secondarynamenode, logging to /root/hadoop-2.6.0/logs/hadoop-root-secondarynamenode-4e732add094a.out
+root@4e732add094a:~/hadoop-2.6.0# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.1  18620  3364 pts/0    Ss   02:08   0:00 /bin/bash
+root      4559  0.0  0.2  45200  5500 pts/0    T    06:17   0:00 ssh localhost cd /root/hadoop-2.6.0 ; /root/hadoop-2.6.0/sbin/hadoop-daemon.sh --config /root/hadoop-2.6.0/etc/hadoop --script /root/hadoop-2.6.0/sbin/h
+root      4560  0.0  0.0  13568  1120 pts/0    T    06:17   0:00 sed s/^/localhost: /
+root      4677  0.0  0.2  45200  5472 pts/0    T    06:20   0:00 ssh localhost cd /root/hadoop-2.6.0 ; /root/hadoop-2.6.0/sbin/hadoop-daemon.sh --config /root/hadoop-2.6.0/etc/hadoop --script /root/hadoop-2.6.0/sbin/h
+root      4678  0.0  0.0  13568  1160 pts/0    T    06:20   0:00 sed s/^/localhost: /
+root      4797  0.0  0.1  72304  3800 ?        Ss   06:25   0:00 /usr/sbin/sshd
+root      4961  7.0  8.5 2764820 173856 ?      Sl   06:29   0:05 /root/java/jdk1.8.0_191/bin/java -Dproc_namenode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/root/hadoop-2.6.0/logs -Dhadoop.log.file=ha
+root      5077  6.9  6.8 2758240 139700 ?      Sl   06:30   0:04 /root/java/jdk1.8.0_191/bin/java -Dproc_datanode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/root/hadoop-2.6.0/logs -Dhadoop.log.file=ha
+root      5223  9.3  6.5 2728452 133196 ?      Sl   06:30   0:04 /root/java/jdk1.8.0_191/bin/java -Dproc_secondarynamenode -Xmx1000m -Djava.net.preferIPv4Stack=true -Dhadoop.log.dir=/root/hadoop-2.6.0/logs -Dhadoop.lo
+root      5332  0.0  0.1  34408  2872 pts/0    R+   06:31   0:00 ps aux
+
+执行start-dfs.sh脚本后，hadoop会启动3个和hdfs相关的进程。通过ps -ef | grep hadoop我们可以看到这几个进程分别是NameNode、SecondaryNamenode、Datanode。如果少了就要注意hdfs是否没有正常启动了。
+
+# 之后启动yarn的相关进程:
+root@4e732add094a:~/hadoop-2.6.0# ./sbin/start-yarn.sh
+starting yarn daemons
+starting resourcemanager, logging to /root/hadoop-2.6.0/logs/yarn--resourcemanager-4e732add094a.out
+
+执行start-yarn.sh脚本后正常会有ResourceManager和NodeManager这两个进程。
+
+# 新建一个目录
+root@4e732add094a:~/hadoop-2.6.0# hadoop fs -mkdir /test
+# 查看是否有对应目录了
+root@4e732add094a:~/hadoop-2.6.0# hadoop fs -ls /
+Found 1 items
+drwxr-xr-x   - root supergroup          0 2021-06-18 06:36 /test
+
+# 需要开启metastore服务
+root@27d832029d21:~# hive --service metastore -p 9083 &

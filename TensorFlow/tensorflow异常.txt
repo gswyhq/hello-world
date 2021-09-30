@@ -110,3 +110,11 @@ tensorflow_gpu-1.12.0	2.7、3.3-3.6	GCC 4.8	Bazel 0.15.0	7	9
 在1.14版本中 应该是
 tf.estimator.experimental.stop_if_no_decrease_hook
 
+# 问题：
+bertmodel = BertModel.from_pretrained(rf'D:\Users\{USERNAME}\data\bert_base_pytorch\bert-base-chinese',from_tf=True)# load the TF model for Pytorch
+加载预训练模型时，报错：
+AttributeError: module 'tensorflow._api.v1.initializers' has no attribute 'TruncatedNormal'
+解决方法卸载旧版本，更新到新版本，如：
+Successfully uninstalled tensorflow-1.14.0
+Successfully installed tensorflow-2.5.0
+

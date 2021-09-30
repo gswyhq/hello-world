@@ -1,0 +1,90 @@
+
+第一步：写java程序；
+新建个空目录，新建java文件，
+文件名称需要与文件里头的class名称一致，否则可能会报类型错误：
+hello.java:1: 错误: 类Main是公共的, 应在名为 Main.java 的文件中声明
+~$ ls
+Hello.java  manf
+~$ cat Hello.java
+public class Hello{
+        public static void main(String[] args){
+                System.out.println("Hello World");
+        }
+}
+第二步：程序添加清单
+为之前在打包的时候没有包含清单文件，否则程序不知道主类
+在当前目录下新建一个文件manf,内容为Main-Class: Hello
+清单文件的规范，在冒号后面要有一个空格，行末不能有空格，最后一行是空行
+~$ cat manf
+Main-Class: Hello
+
+第三步：编译
+~$ javac Hello.java
+~$ ls
+Hello.class  Hello.java   manf
+
+第四步，打包成jar文件；
+~$ jar cvfm abc.jar manf Hello.class
+已添加清单
+正在添加: Hello.class(输入 = 415) (输出 = 285)(压缩了 31%)
+~$ ls
+Hello.class  Hello.java   abc.jar      manf
+
+第五步，使用jar文件
+~$ java -jar abc.jar
+Hello World
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+上面只是简单的一个类进行打包，如果一个类引用了另外一个类
+第一步，写java程序——引用class文件
+~$ tree
+.
++--- Hello.java
++--- manf
++--- test
+|   +--- Get.java
+
+第二步，写java程序——主程序引用另外一个类：                                                                                                                                                                                                                        ✔
+~$ cat Hello.java
+import test.Get;
+public class Hello{
+        public static void main(String[] args){
+                Get aget=new Get();
+                aget.print();
+        }
+}
+
+被引用的类，需要指明package，及文件所在目录；                                                                                                                                                                                                                        ✔
+~$cat test/Get.java
+package test;
+
+public class Get{
+        public void print(){
+                System.out.println("引用类");
+        }
+}
+
+第三步，编译java程序：
+~$ javac -encoding utf-8 Hello.java
+~$ tree
+.
++--- Hello.class
++--- Hello.java
++--- manf
++--- test
+|   +--- Get.class
+|   +--- Get.java
+
+设置环境变量，如设置的话，可能终端输出乱码：
+~$ export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
+
+第四步：打包成jar文件:
+~$ jar cvfm abc.jar manf Hello.class test/*.class
+已添加清单
+正在添加: Hello.class(输入 = 312) (输出 = 239)(压缩了 23%)
+正在添加: test/Get.class(输入 = 390) (输出 = 285)(压缩了 26%)
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+
+第五步：运行打包好的jar文件：
+~$ java -jar -Dfile.encoding=UTF-8 abc.jar
+引用类

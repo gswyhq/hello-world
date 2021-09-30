@@ -26,6 +26,10 @@ INSERT INTO pg_db.pg_table (uuid,name,update_time,tag) VALUES
 # 删除数据
 Delete from pg_db.pg_table  where id=3;
 
+# 删除约束：
+ALTER TABLE public.data_proposals_price_param DROP CONSTRAINT data_test333;
+这里 data_test333 是约束名称；
+
 # 更新数据
 UPDATE pg_db.pg_table set guid = '24' where id=3 ;
 
@@ -79,4 +83,129 @@ CREATE INDEX idx_table_name_quantified_measure ON public.table_name USING btree 
 delete from da_name.table_name where label_1 = null;
 上面语句可能无效，需要改为：
 delete from da_name.table_name where label_1 is null;
+
+# 统计某个字段，各个值出现的次数：
+SELECT service_category, COUNT(*) as num FROM pd_db.pg_table group by service_category;
+
+# 统计某个字段中，某个值出现的比例：
+WITH all_service_category AS
+(
+    SELECT service_category, COUNT(*) as num
+    FROM pg_db.pg_table
+    group by service_category
+)
+SELECT 
+sum(case when t1.service_category='城市房价' then t1.num else 0 end ) / sum(t1.num) as hb2
+from all_service_category t1;
+
+# 使用通配符*,将多列原始合并为一列：
+select ARRAY[t.*] as new_column FROM pg_db.pg_table as t limit 1
+
+select array[t.*] as new_column FROM pg_db.pg_table as t limit 1;
+select array_agg(t.*) as new_column FROM pg_db.pg_table as t limit 1;
+
+with new_columns as 
+(
+	select unnest(array_agg(t.*)) as new_column FROM pg_db.pg_table as t limit 1
+),
+all_columns as (
+select (new_column).* as all_col from new_columns
+)
+select t2 from all_columns as t2;
+
+with new_columns as 
+(
+	select unnest(array_agg(t.*)) as new_column FROM pg_db.pg_table as t limit 1
+),
+all_columns as (
+select (new_column).* as all_col from new_columns
+)
+select t2.* from all_columns as t2;
+
+# 查询一行数据，并返回对应的json结果：
+with new_columns as 
+(
+	select unnest(array_agg(t.*)) as new_column FROM pg_db.pg_table as t limit 1
+),
+all_columns as (
+        select (new_column).* as all_col from new_columns
+)
+select row_to_json(t2) from all_columns as t2;
+
+# 查询表，获取所有字段名：
+with new_columns as
+	(
+	select unnest(array_agg(t.*)) as new_column FROM pg_db.pg_table as t limit 1
+	),
+all_columns as (
+	select (new_column).* as all_col from new_columns
+	),
+row_json as (
+	select row_to_json(t2) from all_columns as t2
+	)
+select json_object_keys(row_to_json) from row_json as t3;
+
+# 等同于下面：
+with new_columns as
+	(
+	select unnest(array_agg(t.*)) as new_column FROM pg_db.pg_table as t limit 2
+	)
+select json_object_keys(to_json(t2.new_column)) from new_columns as t2;	
+
+# 查询记录，按字典格式返回数据：
+select to_json(t.*) FROM pg_db.pg_table as t limit 2;
+
+# 查询记录，按字典格式返回数据,并仅输出指定字段，这里是id字段；
+select to_json(t.*)->>'id' as json_data FROM pg_db.pg_table as t limit 2;
+
+# 批量插入更新，若存在则更新，若不存在则插入：
+INSERT INTO users (id, level)
+VALUES (1, 3), (2, 1)
+ON CONFLICT (id) DO UPDATE
+SET level = excluded.level;
+
+已存在行(id=1) 的 level 更新为新的值 3, 并且插入未存在的新行。
+这里注意到我们用到一个关键字 excluded 用于引用 INSERT 语句中 VALUES 提供的值，相应的表名 users 用于引用表中原有的值。
+
+# 复制最后一次更新的记录，在此基础上修改并插入新记录；
+with last_update_record as (
+	select *
+	from public.data_price_quantified_measure 
+	where uuid = 'edff9a83-4bc9-42da-8ae2-9537c18b8fa1' 
+	ORDER BY last_update_date 
+	desc limit 1
+	)
+INSERT INTO public.data_price_quantified_measure  
+(uuid, flag, create_date, update_frequency, data_source, safety_class, last_update_date)
+SELECT uuid, true, create_date, update_frequency, data_source, '高敏感', current_timestamp
+FROM last_update_record;
+
+# 保留2位有效数字，保留指定位有效数字：
+select round(cast( 2/3.0 as numeric), 6);
+
+# 查询每个用户最后一次更新的数据：
+# DISTINCT ON ( expression [, …] )把记录根据[, …]的值进行分组，分组之后仅返回每一组的第一行。需要注意的是，如果你不指定ORDER BY子句，返回的第一条的不确定的。如果你使用了ORDER BY 子句，那么[, …]里面的值必须靠近ORDER BY子句的最左边。 
+select distinct on(uuid) uuid, price 
+from public.collision_product_price_day 
+where status = true
+order by uuid, last_update_date desc;
+
+# 分组，取每组第一个值;如：获取每门课程的最高分
+postgres=# select distinct on(course)id,name,course,score from student order by course,score desc;
+ id |  name  | course | score 
+----+--------+--------+-------
+  5 | 周润发 | 化学   |    87
+ 13 | 黎明   | 外语   |    95
+  2 | 周润发 | 数学   |    99
+ 14 | 黎明   | 物理   |    90
+  6 | 周星驰 | 语文   |    91
+(5 rows)
+
+# 查询某个字段大于某个阈值的记录有多少：
+select sum(case when correlativity > 0.2 then 1 else 0 end )/sum(1.0) from public.collision_preliminary_result
+
+# 查询结果为空，并赋值，赋初始值，默认值
+select coalesce(sum(table_associated_num)/sum(1), 1) as table_associated_num,
+coalesce(sum(scarcity)/sum(1), 1) as scarcity 
+from db_name.table_name where flag=true;
 

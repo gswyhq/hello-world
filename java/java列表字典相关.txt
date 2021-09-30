@@ -1,0 +1,28 @@
+
+# HashMap的key装换成List
+Map<String,Object> map = new HashMap<String,Object>();
+map.put("a","32332");
+map.put("b","32332");
+map.put("c","32332");
+List<String> keys =  Arrays.asList( map.keySet().toArray(new String[map.keySet().size()]) );
+for(String key:keys)
+　　System.out.println(key);
+
+# 列表分片：
+import org.apache.commons.collections4.ListUtils;
+public class ListsPartitionTest2 {
+    public static void main(String[] args) {
+       List<String> intList = Arrays.asList("1,2,3,4,5,6,7,8,9,1,2,4,5,6,7,7,6,6,6,6,6,66".split(","));
+        System.out.println(ListUtils.partition(intList, 3));
+    }
+}
+ 
+ 
+// [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 4], [5, 6, 7], [7, 6, 6], [6, 6, 6], [66]]
+
+# 二维列表表示：
+List<List> countData = new ArrayList<List>();
+countData.add(Arrays.asList("0301", 4));
+countData.add(Arrays.asList("0501", 2));
+countData.add(Arrays.asList("0401", 1));
+

@@ -979,3 +979,7 @@ yidu-s4k.zip
 音频数据，普通话朗读示范录音作品1-60_MP3.rar
 下载地址：https://474b.com/file/20390886-447891588
 
+# 一些中文预训练模型下载地址：
+https://huggingface.co/models?filter=zh
+数据集：https://huggingface.co/datasets?filter=languages%3Azh&p=0
+

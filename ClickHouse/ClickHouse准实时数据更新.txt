@@ -1,0 +1,136 @@
+
+由于Clickhouse更新操作非常耗资源，如果频繁的进行更新操作，可能会弄崩集群，请谨慎操作。
+clickhouse 更多应用在 查询select  和写入insert  上。
+update 及 delete 可以借用 alter table  进行单机表少量数据操作。
+
+方案一，通过 FINAL 关键字：
+第一步：准备一张 ReplacingMergeTree 测试表:
+curl 'http://localhost:8123/' -d '
+CREATE TABLE tutorial.test_a(
+  user_id UInt64,
+  score String,
+  deleted UInt8 DEFAULT 0,
+  create_time DateTime DEFAULT toDateTime(0)
+)ENGINE= ReplacingMergeTree(create_time)
+ORDER BY user_id;'
+
+其中:
+user_id 是数据去重更新的标识;
+create_time 是版本号字段，每组数据中 create_time 最大的一行表示最新的数据;
+deleted 是自定的一个标记位，比如 0 代表未删除，1  代表删除数据。
+
+第二步：写入 1000万 测试数据:
+
+curl 'http://localhost:8123/' -d "
+INSERT INTO TABLE tutorial.test_a(user_id,score)
+WITH(
+  SELECT ['A','B','C','D','E','F','G']
+)AS dict
+SELECT number AS user_id, dict[number%7+1] FROM numbers(10000000);"
+
+第三步：修改前 50万 行数据，修改内容包括 name 字段和 create_time 版本号字段:
+curl 'http://localhost:8123/' -d "
+INSERT INTO TABLE tutorial.test_a(user_id,score,create_time)
+WITH(
+  SELECT ['AA','BB','CC','DD','EE','FF','GG']
+)AS dict
+SELECT number AS user_id, dict[number%7+1], now() AS create_time FROM numbers(500000);"
+
+第四步：现在 COUNT 一下总数，由于还未触发分区合并，所以会发现有 50 万的重复数据：
+(DEV)[root@SZD-L0484943 test_data]# curl 'http://localhost:8123/' -d "select count(1) from tutorial.test_a;"
+10500000
+
+第五步：为查询语句加上 FINAL 关键字,查询时间稍微有所增加，实际数据还是10500000:
+(DEV)[root@SZD-L0484943 test_data]# time curl 'http://localhost:8123/' -d "select count(1) from tutorial.test_a FINAL;"
+10000000
+
+real    0m0.314s
+user    0m0.004s
+sys     0m0.005s
+
+(DEV)[root@SZD-L0484943 test_data]# time curl 'http://localhost:8123/' -d "select count(1) from tutorial.test_a;"
+10500000
+
+real    0m0.014s
+user    0m0.004s
+sys     0m0.005s
+
+不加FINAL关键词查询 user_id=0,会有两条结果：
+(DEV)[root@SZD-L0484943 test_data]# curl 'http://localhost:8123/' -d "
+SELECT *
+FROM tutorial.test_a
+WHERE user_id = 0;"
+0       AA      0       2021-05-26 06:14:41
+0       A       0       1970-01-01 00:00:00
+
+加FINAL关键词查询 user_id=0,只有1条结果：
+(DEV)[root@SZD-L0484943 test_data]# curl 'http://localhost:8123/' -d "
+SELECT *
+FROM tutorial.test_a FINAL
+WHERE user_id = 0;"
+0       AA      0       2021-05-26 06:14:41
+
+----------------------------------------------------------------------------------------------------
+方案二：通过  argMax 函数
+argMax 函数的参数如下所示，它能够按照 field2 的最大值取 field1 的值。
+argMax(field1，field2)
+
+第一、第二、第三步同上：
+
+第四步：建立一个视图
+curl 'http://localhost:8123/' -d "
+CREATE VIEW tutorial.view_test_a AS
+SELECT
+  user_id ,
+  argMax(score, create_time) AS score, 
+  argMax(deleted, create_time) AS deleted,
+  max(create_time) AS ctime 
+FROM tutorial.test_a 
+GROUP BY user_id
+HAVING deleted = 0;"
+
+# 第五步：通过视图表查询user_id=0的记录，效果跟FINAL关键字一样：
+time curl 'http://localhost:8123/' -d "
+SELECT * FROM tutorial.view_test_a WHERE user_id = 0;"
+0       AA      0       2021-05-26 06:47:29
+
+real    0m0.028s
+user    0m0.001s
+sys     0m0.006s
+
+# 删除 10万条数据记录：
+curl 'http://localhost:8123/' -d "
+INSERT INTO TABLE tutorial.test_a(user_id,deleted ,create_time)
+SELECT number AS user_id, 1, now() AS create_time FROM numbers(100000);"
+
+# 实际上数据没有删除，但通过视图表查询，达到了删除的效果(视图表查询的耗时貌似增加了)：
+(DEV)[root@SZD-L0484943 test_clickhouse]# time curl 'http://localhost:8123/' -d "select count(1) from tutorial.view_test_a;"
+9900000
+
+real    0m1.659s
+user    0m0.006s
+sys     0m0.003s
+(DEV)[root@SZD-L0484943 test_clickhouse]# time curl 'http://localhost:8123/' -d "select count(*) from tutorial.test_a;"
+10600000
+
+real    0m0.014s
+user    0m0.002s
+sys     0m0.006s
+
+# 查询user_id=0,在视图表中查不到记录，但原始表中有三条记录：
+(DEV)[root@SZD-L0484943 test_clickhouse]# time curl 'http://localhost:8123/' -d "select * from tutorial.test_a where user_id=0;"
+0       AA      0       2021-05-26 06:47:29
+0               1       2021-05-26 07:17:28
+0       A       0       1970-01-01 00:00:00
+
+real    0m0.036s
+user    0m0.002s
+sys     0m0.005s
+(DEV)[root@SZD-L0484943 test_clickhouse]# time curl 'http://localhost:8123/' -d "select * from tutorial.view_test_a where user_id=0;"
+
+real    0m0.021s
+user    0m0.003s
+sys     0m0.005s
+
+这行数据并没有被真正的删除，而是被过滤掉了。在一些合适的场景下，可以结合 表级别的 TTL 最终将物理数据删除。
+

@@ -28,3 +28,22 @@ mkvirtualenv --python=python.exe 新python虚拟环境名称
 pycharm使用虚拟环境：
 file->settings->Project Interpreter-> Show All ... -> 点击 “+” -> Virtualenv Environment -> New environment
 Location: D:\Users\gswyhq\my_venv
+
+
+# 虚拟环境中包导入异常：
+import _ssl 
+导入失败：
+这个时候，看看对应的虚拟环境，有没有对应so文件，如：
+/appcom/apps-data/tmp/user/test_activate/lib/python3.6/lib/python3.6/lib-dynload/_ssl.cpython-36m-x86_64-linux-gnu.so
+
+import _ssl
+报错：
+ImportError: libssl.so.1.0.0: cannot open shared object file: No such file or directory
+这个时候需要查看当前环境下的lib目录下是否存在：libssl.so  libssl.so.1.0.0 文件；
+哪怕该文件在/appcom/apps-data/tmp/user/test_activate/lib/python3.6/lib/python3.6/orig-prefix.txt 中路径里头也存在也不可以。
+如：orig-prefix.txt 显示的路径是：
+/appcom/apps-data/tmp/user/anaconda3
+即使存在 /appcom/apps-data/tmp/user/anaconda3/lib/libssl.so.1.0.0 也不可以。
+
+
+

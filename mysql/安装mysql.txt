@@ -240,3 +240,11 @@ Current database: *** NONE ***
 打开一个表，选择上方的“工具（tools）”--> "选项（options）" --> "外观（Appearance）"--> "字体（Font）";
 将四个字体都设置为中文字体："WenQuanYi Micro Hei" 或“Droid Sans Fallback”
 
+# 删除数据库：
+DROP DATABASE [ IF EXISTS ] <数据库名>
+如：DROP DATABASE IF EXISTS test_db;
+
+# 删除数据表：
+DROP TABLE [IF EXISTS] 表名1 [ ,表名2, 表名3 ...]
+如：DROP TABLE IF EXISTS table1;
+
