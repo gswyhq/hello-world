@@ -176,3 +176,13 @@ $ git remote add newrepo https://xxx.com/lyj00912/xxx.git
 $ git remote -v
 newrepo   https://xxx.com/lyj00912/xxx.git (fetch)
 newrepo   https://xxx.com/lyj00912/xxx.git (push)
+
+# git push 出错：
+gswyhq@gswyhq-PC:~/hello-world$ git push origin master 
+fatal: unable to access 'https://*****@github.com/gswyhq/hello-world/': gnutls_handshake() failed: The TLS connection was non-properly terminated.
+可能是网络不好，稍后重试下即可；
+
+# git clone 或是git pull 报错：
+fatal: unable to access 'https://github.com/gswyhq/hello-world.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.
+因为对应的githup验证方法有变更所致，需要用对应的token地址，如：
+https://ghp_n*************@github.com/gswyhq/hello-world
