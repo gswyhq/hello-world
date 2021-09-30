@@ -1,0 +1,35 @@
+
+docker pull 指定 os/arch
+
+下面三种方法，并不能在 linux/arm64系统上面，去pull其他arch的镜像。
+
+方式一：官方标准格式docker pull
+docker pull [OPTIONS] NAME[:TAG|@DIGEST] 
+如：
+docker pull ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+
+方式二：docker run
+// 通过如下命令指定arch:
+docker run -it --rm <image-name>:<tag>  arch=linux/arm64
+
+方式三: 启用experimental
+修改daemon.json，启用experimental属性
+vim /etc/docker/daemon.json
+{
+  "experimental":true
+}
+重启docker
+systemctl restart docker
+通过docker version 检查experimental是否启用
+gswyhq@gswyhq-PC:~$ docker version|grep Experimental
+ Experimental:      false
+  Experimental:     false
+执行docker pull
+ docker pull --platform=<plartform> <image-name>:<tag>
+
+linux/arm64环境 运行 armv7镜像：
+gswyhq@gswyhq-PC:~$ docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+gswyhq@gswyhq-PC:~$ docker run --rm -it multiarch/alpine:armv7-v3.14 /bin/sh
+/ # uname -a
+Linux bd2b52914ade 5.10.36-amd64-desktop #2 SMP Mon Apr 26 11:56:35 CST 2021 armv7l Linux
+

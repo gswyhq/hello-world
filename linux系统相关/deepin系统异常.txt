@@ -4,4 +4,31 @@ Failed to load URL rcc://web/index.html with error ERR_FAILED (-2).
 解决方法：
 gswyhq@gswyhq-pc:~$ sudo apt-get install deepin-appstore deepin-appstore-data --reinstall
 
+# 安装deepin20.2.2后，发现终端无法调节透明度（终端设置里头无‘透明度’选项）：
+问题原因：
+“开启窗口特效”默认是关闭的；
+解决方法：
+启动器-> 设置->个性化-> 窗口特效 -> 更改为“开”（默认是关闭的）；
+这个时候，在终端设置里头就可以看到有“透明度”选项，用户设置透明度了；
 
+@ apt-get update:
+命中:3 https://community-packages.deepin.com/printer eagle InRelease
+错误:1 https://community-store-packages.deepin.com/appstore eagle InRelease
+  由于没有公钥，无法验证下列签名： NO_PUBKEY 1C30362C0A53D5BB
+正在读取软件包列表... 完成
+W: GPG 错误：https://community-store-packages.deepin.com/appstore eagle InRelease: 由于没有公钥，无法验证下列签名： NO_PUBKEY 1C30362C0A53D5BB
+E: 仓库 “https://community-store-packages.deepin.com/appstore eagle InRelease” 没有数字签名。
+N: 无法安全地用该源进行更新，所以默认禁用该源。
+N: 参见 apt-secure(8) 手册以了解仓库创建和用户配置方面的细节。
+gswyhq@gswyhq-PC:~$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C30362C0A53D5BB
+
+Deepin GNU/Linux 20.2.2  应用商店 安装失败 一直显示等待下载
+gswyhq@gswyhq-PC:~$ sudo apt-get update
+命中:1 https://community-packages.deepin.com/deepin apricot InRelease
+命中:2 https://community-packages.deepin.com/printer eagle InRelease  
+命中:3 https://community-store-packages.deepin.com/appstore eagle InRelease
+正在读取软件包列表... 完成                                            
+gswyhq@gswyhq-PC:~$ sudo apt-get upgrade
+E: dpkg 被中断，您必须手工运行 ‘sudo dpkg --configure -a’ 解决此问题。
+gswyhq@gswyhq-PC:~$ sudo dpkg --configure -a
+ 

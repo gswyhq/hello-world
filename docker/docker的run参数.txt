@@ -130,6 +130,10 @@ services:
 # docker run 多个命令， 多个command
 docker run --rm -p 18200:8000 -e LANG=C.UTF-8 -it image_name:20200107_1959 /bin/sh -c "echo '你好' && /bin/sh"
 
-
+# 若一个镜像Entrypoint参数不为空，而CMD参数为空，则docker run 时候执行的还是Entrypoint命令
+docker run --rm -it images_name /bin/bash
+则/bin/bash命令不会执行。若需要执行/bin/bash命令，及覆盖Entrypoint命令，则需要用如下方式运行：
+docker run --rm -it --entrypoint="/bin/bash" images_name
+即ENTRYPOINT不会被docker run 中的参数命令覆盖，如果在Dockerfile中CMD与ENTRYPOINT都存在，则CMD中的指令将会被作为ENTRYPOINT中的参数，即这时候CMD里的指令会失去它的作用，只是作为一个参数；如需要改变Entrypoint，则需要使用--entrypoint重新赋值。
 
 

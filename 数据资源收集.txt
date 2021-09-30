@@ -979,6 +979,25 @@ yidu-s4k.zip
 音频数据，普通话朗读示范录音作品1-60_MP3.rar
 下载地址：https://474b.com/file/20390886-447891588
 
+中文标准女声音库（10000句)
+数据内容：中文标准女声语音库数据
+录音语料：综合语料样本量；音节音子的数量、类型、音调、音连以及韵律等进行覆盖。
+有效时长：约12小时
+平均字数：16字
+语言类型：标准普通话
+发 音 人：女；20-30岁；声音积极知性
+采样格式：无压缩PCM WAV格式，采样率为48KHz、16bit
+标注内容：音字校对、韵律标注、中文声韵母边界切分
+标注格式：文本标注为.txt格式文档；音节音素边界切分文件为.interval格式
+https://www.data-baker.com/#/data/index/source
+https://online-of-baklong.oss-cn-huhehaote.aliyuncs.com/story_resource/BZNSYP.rar?Expires=1622816310&OSSAccessKeyId=LTAI3GkKBSJFDJsp&Signature=iVrcEIYdxpAHZODaxu%2F6i%2Fk0vkY%3D
+
+LCSTS自动摘要数据集
+微博的自动摘要数据集
+原始数据：链接:https://pan.baidu.com/s/1gCOSPWDt3WLc5LE_-MoEbw 密码:d54p
+第一部分，摘要和正文数据分别抽取出来。链接:https://pan.baidu.com/s/16UDPzlUMCP_hCjo8Huovcw 密码:8hkc
+
+
 # 一些中文预训练模型下载地址：
 https://huggingface.co/models?filter=zh
 数据集：https://huggingface.co/datasets?filter=languages%3Azh&p=0

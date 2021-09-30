@@ -1,7 +1,10 @@
 
 不同的系统，更新镜像源的方法不一致
 
-debian 5是Debian 6是squeeze 7是wheezy 8是jessie 9是stretch; Debian 10 代号为 Buster
+debian 5是Debian 6是squeeze 7是wheezy 8是jessie 9是stretch;
+Debian 10 代号为 Buster
+Debian GNU/Linux 11 是 bullseye
+Debian GNU/Linux 12 是 bookworm
 如，将debian 9的换成debian 10的，只需要：root@a81ad9d37580:/# sed -i 's/stretch/buster/g' /etc/apt/sources.list
 
 image: python:3.6.8-stretch

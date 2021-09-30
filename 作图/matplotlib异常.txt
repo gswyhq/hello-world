@@ -36,4 +36,9 @@ fig1 = plt.gcf()
 plt.show()
 fig1.savefig('tessstttyyy.png', dpi=100)
 
+设置中文字体，出现方框，不显示中文，警告：
+1238: UserWarning: findfont: Font family [‘sans-serif’] not found. Falling back to DejaVu Sans.
+解决方法：
+第一步：安装中文字体，simhei.ttf 
+第二步：删除目录：~/.cache/matplotlib
 
