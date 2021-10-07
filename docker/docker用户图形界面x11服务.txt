@@ -97,5 +97,45 @@ sudo systemctl stop gdm.service
 sudo systemctl status gdm.service
 sudo systemctl start gdm.service
 
+# export DISPLAY=0
+/ # xclock 
+能正常显示小闹钟；但若将环境变量DISPLAY改为对应的IP地址，则报错： 
+/ # export DISPLAY=192.168.3.105:0
+/ # xclock
+Error: Can't open display: 192.168.3.105:0
+/ # export DISPLAY=localhost:0
+/ # xclock
+Error: Can't open display: localhost:0
+将环境变量改回 export DISPLAY=:0 
+又显示正常。
+出现上述异常，可能是未许可对应的网络连接：
+安装xserver
+$ sudo apt install x11-xserver-utils
+$ sudo vim /etc/lightdm/lightdm.conf 
+增加许可网络连接
+[Seat*]
+xserver-allow-tcp=true
+重启xserver
+$ sudo systemctl restart lightdm
+许可所有用户都可访问xserver
+xhost +
+
+DISPLAY变量后缀可以通过在宿主机上面查询：
+~$ echo $DISPLAY
+:0
+在docker 容器内
+# export DISPLAY=xxx.xxx.xxx.xx:0
+注意：环境变量设置需要每次进docker设置，可以写在：/etc/bash.bashrc 文件中，避免每次进终端时设置(但若每次开机IP地址有变动的话，则不可这样设置)
+
+可以通过在宿主机安装xserver，将docker容器视为客户端，除了通过网络或挂载的方式就可以实现将需要显示的图像显示在宿主机显示器。
+还可以通过挂载方式。
+挂载方式是在使用image创建docker容器时，通过-v参数设置docker内外路径挂载，使显示xserver设备的socket文件在docker内也可以访问。并通过-e参数设置docker内的DISPLAY参数和宿主机一致。
+在docker 容器创建时
+-v /tmp/.X11-unix:/tmp/.X11-unix
+-e DISPLAY=:0
+例如：
+docker run -itd --name 容器名 -h 容器主机名 --privileged \
+           -v /tmp/.X11-unix:/tmp/.X11-unix  \
+           -e DISPLAY=:0 镜像名或id /bin/sh
 
 
