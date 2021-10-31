@@ -88,3 +88,20 @@ Welcome to Alpine Linux 3.8
 mv /etc/apk/repositories /etc/apk/repositories.bak
 echo "https://mirrors.aliyun.com/alpine/v3.8/main" >> /etc/apk/repositories && \
 echo "https://mirrors.aliyun.com/alpine/v3.8/community" >> /etc/apk/repositories
+
+# 添加一个镜像源, 如：ppa:morphis/anbox-support
+~# add-apt-repository ppa:morphis/anbox-support
+若出现：
+add-apt-repository: command not found
+add-apt-repository 命令是software-properties-common包的一部分，因此安装这个包就OK了
+sudo apt-get install software-properties-common
+sudo apt-get update
+
+# 删除一个镜像源，如：ppa:morphis/anbox-support
+~# ppa-purge ppa:morphis/anbox-support
+若出现：
+bash: ppa-purge: command not found
+则可以通过下面命令安装：
+~# apt install ppa-purge 
+
+
