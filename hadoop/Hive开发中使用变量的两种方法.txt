@@ -1,0 +1,89 @@
+
+两种在hive中使用变量的方法，第一种是在shell中定义变量然后在hive -e的SQL语句中直接用${var_name}的方法调用；
+第二种是使用hive –hiveconf key=value –f run.sql模式使用-hiveconf来设置变量，然后在SQL文件中使用${hiveconf:varname}的方法调用。
+在此基础上可以实现：从本地文件读取数据并作为参数传递给hive脚本
+
+方法1：shell中设置变量，hive -e中直接使用
+cat test1.sh
+
+#!/bin/bash
+tablename="student"
+limitcount="8"
+
+hive -S -e "use test; select * from ${tablename} limit ${limitcount};"
+
+~$ /bin/bash test1.sh
+
+当然也可以(-d, --define)来定义：
+hive --define zuotian=`date +%Y-%m-%d -d "-1 days"` -e "select '${zuotian}' "
+
+方法2：使用-hiveconf定义，在SQL文件中使用
+因为换行什么的很不方便，hive -e只适合写少量的SQL代码，所以一般都会写很多hql文件，然后使用hive –f的方法来调用，这时候可以通过-hiveconf定义一些变量，然后在SQL中直接使用。
+
+先编写调用的SHELL文件：
+cat test2.sh
+#!/bin/bash
+
+hive -hiveconf enter_school_date="20130902" -hiveconf min_ag="26" -f testvar.sql
+
+被调用的testvar.sql文件内容：
+cat testvar.sql
+
+use test; 
+
+select * from student
+where 
+    pdate='${hiveconf:enter_school_date}' 
+    and
+    sage > '${hiveconf:min_ag}'
+limit 8;
+
+~$ /bin/bash test2.sh
+
+# 从本地文件读取数据并作为参数传递给hive脚本
+1、准备变量文件
+cat uid.txt
+H63077069
+H58356526
+H59581285
+H7094531
+2、准备hive-sql文件
+cat test.hql
+select split('${hiveconf:var}', '\n')[1];
+
+3、准备shell文件(需要注意hiveconf参数值需要添加双引号，否则读取到的参数仅仅是uid.txt文件中的第一行)
+cat test.sh
+#!/bin/bash
+temp=$(cat uid.txt)
+hive -f test.hql -hiveconf "var=$temp"
+
+另外特别需要注意的是，从windows系统中生成的文件换行符是\r\n;故而explode(split('${hiveconf:var}', '\n')) 获取到的每行参数后面都有个\r,需特别注意；
+
+4、执行shell文件
+/bin/bash test.sh
+
+# 对上面hive-sql进行更改，即可实现从文件中读取数据，进行联表查询：
+select t1.uid, t2.* 
+from (select explode(split('${hiveconf:var}', '\t')) as uid) t1
+JOIN db1.test2 t2
+ON t1.uid=t2.uid;
+
+explode()函数用于打散行的函数（将一行的数据拆分成多行，它的参数必须为map或array）。
+
+当传入的文件太大时，可能会报错：
+/usr/local/bin/hive: Argument list too long
+这个时候，需要将参数文件拆分为小文件。
+可以参考将文件群手动划分为比较小的组合：
+mv [a-l]* ../foo2
+mv [m-z]* ../foo2
+
+-----------------------------------------------------------
+上面是将shell变量传递到hive,反过来为了检查hive表中的数据，并统计展现，需要将查出的结果传入到shell变量，然后统一输出到文本。
+最后使用了以下两个方法：
+方法一
+QUAN=$(hive -S -e "select count(1) from test" | grep quantity | cut -f 2)
+方法二
+hive -S -e "select 'quantity', count(1) from test" | grep quantity | { read a1 a2; echo $a2; }
+目前，建议使用方法一的脚本，方法二脚本若不能保证查询结果为一行，则会产生报错。
+
+

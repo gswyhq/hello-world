@@ -7,6 +7,9 @@ sed -i 's/被替换的内容/要替换成的内容/' file        -i 直接修改
 
 sed 's/ruby/bird/g'    #替换ruby为bird
 
+# 对指定行的字符进行替换：
+sed -i '5s/a/A/g' test.txt 对第五行的a替换成A
+
 # 对指定行之后一行的内容进行替换：
 # cat test.txt
 aaa12

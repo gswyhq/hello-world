@@ -14,7 +14,7 @@ CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END - When a = b, returns c; when
 ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Hive自定义函数
 - 自定义函数开发流程：
-1. 使用maven创建一个java项目
+1. 使用maven创建一个jeava项目
 2. 继承UDF类；
 3. 重写evaluate方法。
 
@@ -39,6 +39,10 @@ public class HelloUdf extends UDF {
 
 第二步：编译java文件
 ~$ javac -encoding UTF-8 HelloUdf.java
+若报错
+错误: 程序包org.apache.hadoop.hive.ql.exec不存在
+则mobaxterm改为在CMD窗口运行：
+> javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar  GPSConverter/HelloUdf.java
 
 第三步：打包成jar文件
 ~$ vim manf

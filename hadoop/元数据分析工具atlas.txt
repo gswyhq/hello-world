@@ -51,6 +51,13 @@ mvn clean -DskipTests package -Pdist,embedded-hbase-solr
 mvn clean package -Pdist,embedded-cassandra-solr
 打包过程要下很多jar包和node安装包，速度快慢看网络速度，网络慢或者有波动的话下载会中断，需要要多重试几次。
 
+若出现错误：
+[ERROR] Cannot download "https://github.com/sass/node-sass/releases/download/v4.13.1/linux-x64-72_binding.node":
+则下载好对应文件，离线安装：
+如果是使用 npm 作为包管理工具，在 pacakge.json 所在目录执行
+npm install --sass-binary-path="C:\ folder\win32-x64-57_binding.node"
+
+
 # 打包报错
 Too many files with unapproved license
 [ERROR] Failed to execute goal org.apache.rat:apache-rat-plugin:0.13:check (rat-check) on project apache-atlas: Too many files with unapproved license: 1274 See RAT report in: /opt/soft/apache-atlas-sources-2.1.0/target/rat.txt -> [Help 1]
@@ -59,6 +66,9 @@ Too many files with unapproved license
 mvn clean -DskipTests package -Pdist,embedded-hbase-solr
 # 修改后命令
 mvn clean -DskipTests package -Pdist,embedded-hbase-solr -Drat.skip=true
+
+这个过程中会下载：
+https://archive.apache.org/dist/hbase/2.3.3/hbase-2.3.3-bin.tar.gz
 
 [ERROR] /root/atlas-release-2.2.0-rc1/intg/src/main/java/org/apache/atlas/v1/model/instance/Struct.java:[21,40] package com.fasterxml.jackson.annotation does not exist
 root@611da123ad1d:~/atlas-release-2.2.0-rc1# mvn clean install -Drat.skip=true -Dmaven.test.skip=true

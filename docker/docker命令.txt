@@ -51,3 +51,25 @@ cat /etc/issue
 错误的姿势: 
 cat /proc/version 或 uname -a ，这样查到的是宿主机的系统。
 
+# 修改运行中的docker容器的端口映射的三种方法：
+方法一：删除原有容器，重新建新容器
+这个解决方案最为简单，把原来的容器删掉，重新建一个。当然这次不要忘记加上端口映射。
+
+方法二：修改容器配置文件，重启docker服务
+容器的配置文件路径：
+/var/lib/docker/containers/[hash_of_the_container]/hostconfig.json
+    其中的hashofthecontainer是docker镜像的hash值，可以通过docker ps或者docker inspect containername查看。（CONTAINER ID就可以看出来）
+文件中其中有一项是PortBindings，其中8080/tcp对应的是容器内部的8080端口，HostPort对应的是映射到宿主机的端口9190。8361/tcp对应的是容器内部的8361端口，HostPort对应的是映射到宿主机的端口9191。按需修改端口，然后重启docker服务，再启动容器服务就可以了。
+~$ systemctl restart docker
+优缺点：这个方法的优点是没有副作用，操作简单。缺点是需要重启整个docker服务，如果在同一个宿主机上运行着多个容器服务的话，就会影响其他容器服务。
+
+方法三：利用docker commit新构镜像
+    docker commit：把一个容器的文件改动和配置信息commit到一个新的镜像。这个在测试的时候会非常有用，把容器所有的文件改动和配置信息导入成一个新的docker镜像，然后用这个新的镜像重起一个容器，这对之前的容器不会有任何影响。
+1、停止docker容器
+docker stop container01
+2、commit该docker容器
+docker commit container01 new_image:tag
+3、用前一步新生成的镜像重新起一个容器
+docker run --name container02 -p 80:80 new_image:tag
+优缺点：这种方式的优点是不会影响统一宿主机上的其他容器，缺点是管理起来显得比较乱，没有第二种方法那么直观。
+

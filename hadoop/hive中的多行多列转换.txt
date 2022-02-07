@@ -1,0 +1,97 @@
+
+~$ cat test_col.txt
+张三	语文	90
+张三	数学	85
+张三	英语	92
+李四	语文	75
+李四	数学	90
+李四	英语	80
+王五	语文	95
+王五	数学	100
+王五	英语	98
+
+hive> create table test_col(
+         name	string,
+         subject	string,
+         score      int
+     )
+     row format delimited
+     fields terminated by ',';
+hive> load data local inpath '/root/test_col.txt' into table test_col;
+
+# 将上数据转换为多行多列：
+方法一：利用str_to_map函数
+hive> select name
+         ,info['语文'] as Chinese
+         ,info['数学'] as Math
+         ,info['英语'] as English
+  from (select name,str_to_map(concat_ws(',',collect_set(concat_ws(':',subject,cast(score as string))))) as info
+          from test_col
+         group by name
+             ) a; 
+
+
++-------+----------+-------+----------+
+| name  | chinese  | math  | english  |
++-------+----------+-------+----------+
+| 张三    | 90       | 85    | 92       |
+| 李四    | 75       | 90    | 80       |
+| 王五    | 95       | 100   | 98       |
++-------+----------+-------+----------+
+
+collect_set, 会进行去重，若不去重，可用：collect_list
+
+方法二：利用case when函数
+select name
+      ,max(case when subject = '语文' then score else 0 end) as Chinese
+      ,max(case when subject = '数学' then score else 0 end) as Math
+      ,max(case when subject = '英语' then score else 0 end) as English
+  from test_col
+ group by name;
+
++-------+----------+-------+----------+
+| name  | chinese  | math  | english  |
++-------+----------+-------+----------+
+| 张三    | 90       | 85    | 92       |
+| 李四    | 75       | 90    | 80       |
+| 王五    | 95       | 100   | 98       |
++-------+----------+-------+----------+
+
+# 将一行转换为多行：
+0: jdbc:hive2://172.17.0.4:10000> select * from test_col2;
++-----------------+---------------+------------------+------------------+---------------------+---------------+--------------------+------------------------+
+| test_col2.date  | test_col2.uv  | test_col2.newuv  | test_col2.video  | test_col2.newvideo  | test_col2.vv  | test_col2.vip_num  | test_col2.new_vip_num  |
++-----------------+---------------+------------------+------------------+---------------------+---------------+--------------------+------------------------+
+| 2019-05-10      | 5000000       | 200000           | 3000000          | 10000               | 20000000      | 500000             | 80000                  |
++-----------------+---------------+------------------+------------------+---------------------+---------------+--------------------+------------------------+
+
+将上面结果转为多行：
+0: jdbc:hive2://172.17.0.4:10000> select a.`date`
+      ,b.label
+      ,b.value
+  from (select *
+          from test_col2
+           ) a 
+     LATERAL VIEW explode (map(
+             'UV', uv
+             ,'新增UV', newuv 
+             ,'视频存量', video
+             ,'新增视频', newvideo
+             ,'播放量', vv
+             ,'会员数', vip_num
+             ,'新增会员数', new_vip_num
+               )) b as label, value;
++-------------+----------+-----------+
+|   a.date    | b.label  |  b.value  |
++-------------+----------+-----------+
+| 2019-05-10  | UV       | 5000000   |
+| 2019-05-10  | 新增UV     | 200000    |
+| 2019-05-10  | 视频存量     | 3000000   |
+| 2019-05-10  | 新增视频     | 10000     |
+| 2019-05-10  | 播放量      | 20000000  |
+| 2019-05-10  | 会员数      | 500000    |
+| 2019-05-10  | 新增会员数    | 80000     |
++-------------+----------+-----------+
+
+
+

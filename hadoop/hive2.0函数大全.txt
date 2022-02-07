@@ -890,6 +890,12 @@ split(string str, string pat)
 Splits str around pat (pat is a regular expression)..
 
 按照正则表达式pat来分割字符串str,并将分割后的数组字符串的形式返回
+如：
+select split('2015-09-25 22:25:14', '-');
+输出结果：["2015", "09", "25 22:25:14"]
+select split('2015-09-25 22:25:14', '[- ]')[2];
+输出结果：25
+按照‘-’或者空格进行分割，并按列表下标取list中的第二个值；
 
 map<string,string>
 
@@ -1154,6 +1160,8 @@ inline(ARRAY<STRUCT[,STRUCT]>)
 Explodes an array of structs into a table. (As of Hive 0.10.).
 
 将结构体数组提取出来并插入到表中
+
+hive常用函数：https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF
 
  
  

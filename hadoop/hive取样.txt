@@ -23,6 +23,12 @@ create table abc_new as select * from abc tablesample(10 percent)
 可通过类似下命名查看分块文件大小：
 hadoop dfs -du -h hdfs://hdfs01-sh/user/hive/warehouse/hivd_db.db/table_name
 
+需要注意的是，通常情况下，TABLESAMPLE将会扫描整个表然后抽取样本；
+当表数据量很大时，会很慢，而且这个时候，下面两句的查询结果一致；
+SQL1(较快): select * from db_name.table_name limit 1000000;
+SQL2(较慢，需扫描整个表): select * from db_name.table_name TABLESAMPLE (1000000 ROWS);
+上面两中方法都有个缺点：不随机。该方法实际上是按照文件中的顺序返回数据，对分区表，从头开始抽取，可能造成只有前面几个分区的数据。
+
 TABLESAMPLE的具体算法
 如A表有100行，有3个数据页，分别有数据 18,32,50。假设指定选取2行数据，系统首先会计算出页面选取概率，算法为：2/100 = 1/50。
 很容易能计算出，该条语句不返回任何行的概率为 (1 - 1/50) ^ 3 = 94%。返回18行的概率为 (1 - 1/50) * 1/50 * 1/50 =3.92%。可见TABLESAMPLE不适宜选取少量数据。

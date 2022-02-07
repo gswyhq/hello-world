@@ -40,6 +40,19 @@ filepath 可以是一个相对路径，也可以是一个绝对路径。可以�
 
 注：执行load data inpath时，需要考虑到原文件是否会被删除
 
+将本地文件text3.txt中的数据导入到数据表 employees，并设置分区字段；
+  load data local inpath '${env:HOME}/test3.txt'
+  into table employees
+  partition (y = '2021', m = '08');
+
+# 从HDFS文件加载到Hive：
+首先将数据上传到HDFS当中（将本地文件 /opt/module/datas/student.txt 推送到 hdfs目录 /user/zhang/hive 中）：
+hive (default)> dfs -put /opt/module/datas/student.txt /user/zhang/hive;
+再从HDFS上（/user/zhang/hive/student.txt）加载数据到Hive表default.student中：
+load data inpath '/user/zhang/hive/student.txt' into table default.student;
+若需要加载数据覆盖表中已有的数据，则可以改为如下命令：
+load data inpath '/user/zhang/hive/student.txt' overwrite into table default.student;
+
 # Hive集群间的导入和导出
 使用Export命令会导出Hive表的数据表数据以及数据表对应的元数据
 EXPORT TABLE test TO '/hive/test_export'

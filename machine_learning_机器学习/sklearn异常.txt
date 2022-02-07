@@ -1,0 +1,26 @@
+
+# 问题：
+    from sklearn.cross_validation import KFold, cross_val_score  # 调用k折交叉验证
+ModuleNotFoundError: No module named 'sklearn.cross_validation'
+解决方法，改为：
+from sklearn.model_selection import KFold, cross_val_score  # 调用k折交叉验证
+
+# 问题：
+    fold = KFold(len(y_train_data), 5, shuffle=False)  # 一第一个参数 训练集的长度，第二个参数为输入的几折交叉验证
+TypeError: shuffle must be True or False; got 5
+解决方法，改为：
+    fold = KFold(5, shuffle=False).split(len(x_train_data))  # 第一个参数为输入的几折交叉验证
+
+# 问题
+lr = LogisticRegression(C=c_param, penalty='l1')  # 传入正则化参数
+ValueError: Solver lbfgs supports only 'l2' or 'none' penalties, got l1 penalty.
+解决方法，改为：
+lr = LogisticRegression(C=c_param, penalty='l1',solver='liblinear')  # 传入正则化参数
+
+# 问题
+    best_c = results_table.loc[results_table['Mean recall score'].idxmax()]['C_parameter']
+TypeError: reduction operation 'argmax' not allowed for this dtype
+解决方法，改为：
+best_c = results_table.loc[results_table['Mean recall score'].astype(float).idxmax()]['C_parameter']
+
+

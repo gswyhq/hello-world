@@ -1,0 +1,111 @@
+
+目的，对搜索结果进行合并，先展示下结果：
+hive> create table if not exists concat_test(
+         a   int,
+         b        string
+     );
+
+hive> insert into concat_test ( a, b ) values (1, '语文'), (2, '数学'), (1, '政治'), (1, '地理');
+hive> hive> select a, b from concat_test;
+1       语文
+2       数学
+1       政治
+1       地理
+
+hive> add jar /root/Converter.jar;
+hive> create temporary function concat as 'GPSConverter.concat';
+hive> select a, concat(b, ',') from concat_test group by a;
+1       语文,政治,地理
+2       数学
+
+hive> select concat(b, '--') from concat_test where a=1;
+地理--政治--语文
+
+过程及方法：
+第一步，定义自定义函数.java文件：
+~$ cat GPSConverter/concat.java
+package GPSConverter;
+
+import org.apache.hadoop.hive.ql.exec.UDAF;
+import org.apache.hadoop.hive.ql.exec.UDAFEvaluator;
+
+public class concat extends UDAF {
+    public static class ConcatUDAFEvaluator implements UDAFEvaluator{
+        public static class PartialResult{
+            String result;
+            String delimiter;
+        }
+
+        private PartialResult partial;
+
+        public void init() {
+            partial = null;
+        }
+
+        public boolean iterate(String value,String deli){
+
+            if (value == null){
+                return true;
+            }
+            if (partial == null){
+                partial = new PartialResult();
+                partial.result = new String("");
+                if(  deli == null || deli.equals("") )
+                {
+                    partial.delimiter = new String(",");
+                }
+                else
+                {
+                    partial.delimiter = new String(deli);
+                }
+
+            }
+            if ( partial.result.length() > 0 )
+            {
+                partial.result = partial.result.concat(partial.delimiter);
+            }
+
+            partial.result = partial.result.concat(value);
+
+            return true;
+        }
+
+        public PartialResult terminatePartial(){
+            return partial;
+        }
+
+        public boolean merge(PartialResult other){
+            if (other == null){
+                return true;
+            }
+            if (partial == null){
+                partial = new PartialResult();
+                partial.result = new String(other.result);
+                partial.delimiter = new String(other.delimiter);
+            }
+            else
+            {
+                if ( partial.result.length() > 0 )
+                {
+                    partial.result = partial.result.concat(partial.delimiter);
+                }
+                partial.result = partial.result.concat(other.result);
+            }
+            return true;
+        }
+
+        public String terminate(){
+            return new String(partial.result);
+        }
+    }
+}  
+
+
+第二步：将java文件编译成.class文件：
+javac  -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar GPSConverter\*.java
+
+第三步：将.class文件打包成jar文件：
+jar cvfm GPSConverter/Converter.jar GPSConverter/manf GPSConverter/*.class
+
+第四步：使用，即上面的，导入到hive,添加jar包使用；
+

@@ -6,4 +6,12 @@ DBeaver如何连接PostgreSQL数据库
 3、点击“数据库”->"新建连接"，弹出“Create new connection”对话框；选中“PostgreSQL”点击“Next”,填写Host,Port,Database,User,Password;点击“Finish”.
 4、查看数据：点击“数据库导航”-> "PostgreSQL - 数据库名" -> 数据库名 -> Schemas -> public -> Tables -> 选中需要查看的“表名”，默认是看到“属性”,点击“数据”选项卡，即可看到对应的数据。
 
+DBeaver 除了可以连接 PostgreSQL, 还可以连接 mysql、elasticsearch、clickhouse、hive、hbase(Apache Phoenix)等；
+安装dbeaver数据库连接工具，点“测试连接”的时候出现报错如下：
+Error resolving dependencies Maven artifact ‘maven:/mysql:mysql-connector-java:RELEASE’ no found
+经网上查询是dbeaver驱动无法下载的问题。
+解决方式：
+打开“窗口”->“首选项”->“驱动”->“Maven”
+点击“添加”阿里云中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
+保存后再测试发现已经解决。
 

@@ -1,0 +1,350 @@
+
+下载 hbase:
+https://archive.apache.org/dist/hbase/2.3.3/hbase-2.3.3-bin.tar.gz
+
+解压：
+root@4335bc9ed038:~# tar -zxvf hbase-2.3.3-bin.tar.gz
+
+修改 ~/.bashrc 文件，添加如下内容（安装HBASE之前，需先安装java）：
+export JAVA_HOME=/root/jdk1.8.0_191
+export PATH=$JAVA_HOME/bin:$PATH
+export HBASE_HOME=/root/hbase-2.3.3
+export PATH=$HBASE_HOME/bin:$PATH
+
+使修改的配置生效：
+root@4335bc9ed038:~/hbase-2.3.3# source ~/.bashrc
+
+启动 hbase:
+root@4335bc9ed038:~# start-hbase.sh
+running master, logging to /root/hbase-2.3.3/logs/hbase--master-4335bc9ed038.out
+
+查看启动进程：
+root@4335bc9ed038:~# jps
+131 HMaster
+484 Jps
+root@4335bc9ed038:~# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.1  20380  3656 pts/0    Ss   17:33   0:00 /bin/bash
+root       117  0.0  0.1  20260  3592 pts/0    S    17:40   0:00 bash /root/hbase-2.3.3/bin/hbase-daemon.sh --config /root/hbase-2.3.3/conf foreground_start master
+root       131 26.2 10.2 2538108 208152 pts/0  Sl   17:40   0:15 /root/jdk1.8.0_191/bin/java -Dproc_master -XX:OnOutOfMemoryError=kill -9 %p -XX:+UseConcMarkSweepGC -Dhbase.log.dir=/root/hbase-2.3.3/logs -Dh
+root       496  0.0  0.1  36156  3220 pts/0    R+   17:41   0:00 ps aux
+
+上面属于standalong模式启动，主要用于简单测试。然而大部分Hbase是需要以集群模式启动的。不过hbase的运行模式变换只需更改其配置文件即可。
+conf/目录下的hbase-env.sh
+配置hbase-site.xml
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.tmp.dir</name>
+    <value>./tmp</value>
+  </property>
+  <property>
+    <name>hbase.unsafe.stream.capability.enforce</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>172.17.0.2:2181</value>
+  </property>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>file:///data/hbase</value>
+  </property>
+
+配置regionservers
+
+查看版本：
+root@4335bc9ed038:~# hbase version
+HBase 2.3.3
+Source code repository git://893e574d8722/home/vjasani/hbase-rm/output/hbase revision=3e4bf4bee3a08b25591b9c22fea0518686a7e834
+Compiled by vjasani on Wed Oct 28 06:36:25 UTC 2020
+From source with checksum caf96cc4b614bd38cff9845db6797f702f01d58fc1a046c5a10cf7068eec8a2bfe9ba02c1907b10b6fce49ea6e5e2739a4120b12461b2ab13f01e4f302a385f2
+
+HBase是一个面向列的数据库，在表中它由行组成。表模式只定义列族，也就是键值对。一个表有多个列族，每一个列族可以有任意数量的列。后续列的值连续地存储在磁盘上。表中的每个单元格值都具有时间戳。
+
+表是行的集合。
+行是列族的集合。
+列族是列的集合。
+列是键值对的集合。
+集群启动后，我们可以使用hbase自带的shell来做一些数据库操作
+
+进入HBase Shell：
+root@4335bc9ed038:~# hbase shell
+hbase(main):001:0>
+
+创建表：
+hbase(main):001:0> create 'student','Sname','Ssex','Sage','Sdept','course'
+Created table student
+Took 1.6557 seconds
+=> Hbase::Table - student
+
+此时，即创建了一个“student”表，属性有：Sname,Ssex,Sage,Sdept,course。因为HBase的表中会有一个系统默认的属性作为行键，无需自行创建，默认为put命令操作中表名后第一个数据。创建完“student”表后，可通过describe命令查看“student”表的基本信息。命令执行如下：
+hbase(main):002:0> describe 'student'
+Table student is ENABLED
+student
+COLUMN FAMILIES DESCRIPTION
+{NAME => 'Sage', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_E
+NCODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '6553
+6', REPLICATION_SCOPE => '0'}
+...
+
+{NAME => 'course', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK
+_ENCODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65
+536', REPLICATION_SCOPE => '0'}
+
+5 row(s)
+
+HBase的增、删、改、查操作。在添加数据时，HBase会自动为添加的数据添加一个时间戳，故在需要修改数据时，只需直接添加数据，HBase即会生成一个新的版本，从而完成“改”操作，旧的版本依旧保留，系统会定时回收垃圾数据，只留下最新的几个版本，保存的版本数可以在创建表的时候指定。
+
+添加数据
+HBase中用put命令添加数据，注意：一次只能为一个表的一行数据的一个列，也就是一个单元格添加一个数据，所以直接用shell命令插入数据效率很低，在实际应用中，一般都是利用编程操作数据。
+当运行命令：
+hbase(main):003:0> put 'student','95001','Sname','LiYing'
+Took 0.1891 seconds
+时，即为student表添加了学号为95001，名字为LiYing的一行数据，其行键为95001。
+
+hbase(main):004:0> put 'student','95001','course:math','80'
+Took 0.0067 seconds
+即为95001行下的course列族的math列添加了一个数据。
+
+删除数据
+在HBase中用delete以及deleteall命令进行删除数据操作，它们的区别是：
+1. delete用于删除一个数据，是put的反向操作；
+2. deleteall操作用于删除一行数据。
+
+1. delete命令
+hbase(main):005:0> delete 'student','95001','Ssex'
+Took 0.0255 seconds
+即删除了student表中95001行下的Ssex列的所有数据。
+
+2.get命令
+hbase(main):006:0> get 'student','95001'
+COLUMN                          CELL
+ Sname:                         timestamp=2021-11-09T17:53:49.066, value=LiYing
+ course:math                    timestamp=2021-11-09T17:54:50.786, value=80
+1 row(s)
+Took 0.1499 seconds
+ 返回的是‘student’表‘95001’行的数据。
+get命令，用于查看表的某一行数据；
+
+3. deleteall命令
+hbase(main):007:0> deleteall 'student','95001'
+Took 0.0108 seconds
+即删除了student表中的95001行的全部数据。
+
+4. scan 命令
+hbase(main):008:0> scan  'student'
+ROW                             COLUMN+CELL
+0 row(s)
+返回的是‘student’表的全部数据。
+scan命令用于查看某个表的全部数据
+
+删除表
+删除表有两步，第一步先让该表不可用，第二步删除表。
+hbase(main):009:0> disable 'student'
+Took 0.7991 seconds
+hbase(main):010:0> drop 'student'
+Took 0.3971 seconds
+
+查看当前有哪些表：
+hbase(main):011:0> list
+TABLE
+0 row(s)
+Took 0.0294 seconds
+=> []
+
+
+查询表历史数据
+查询表的历史版本，需要两步。
+1、在创建表的时候，指定保存的版本数（假设指定为5）
+hbase(main):012:0> create 'teacher',{NAME=>'username',VERSIONS=>5}
+Created table teacher
+
+2、插入数据然后更新数据，使其产生历史版本数据，注意：这里插入数据和更新数据都是用put命令
+put 'teacher','91001','username','Mary'
+put 'teacher','91001','username','Mary1'
+put 'teacher','91001','username','Mary2'
+put 'teacher','91001','username','Mary3'
+put 'teacher','91001','username','Mary4'  
+put 'teacher','91001','username','Mary5'
+
+3、查询时，指定查询的历史版本数。默认会查询出最新的数据。（有效取值为1到5）
+hbase(main):020:0> get 'teacher','91001',{COLUMN=>'username',VERSIONS=>5}
+COLUMN                          CELL
+ username:                      timestamp=2021-11-09T18:04:04.562, value=Mary5
+ username:                      timestamp=2021-11-09T18:04:04.459, value=Mary4
+ username:                      timestamp=2021-11-09T18:04:04.389, value=Mary3
+ username:                      timestamp=2021-11-09T18:04:04.279, value=Mary2
+ username:                      timestamp=2021-11-09T18:04:04.239, value=Mary1
+1 row(s)
+
+hbase(main):021:0> get 'teacher','91001',{COLUMN=>'username',VERSIONS=>3}
+COLUMN                          CELL
+ username:                      timestamp=2021-11-09T18:04:04.562, value=Mary5
+ username:                      timestamp=2021-11-09T18:04:04.459, value=Mary4
+ username:                      timestamp=2021-11-09T18:04:04.389, value=Mary3
+1 row(s)
+
+最后退出数据库操作，输入exit命令即可退出，注意：这里退出HBase数据库是退出对数据库表的操作，而不是停止启动HBase数据库后台运行。
+hbase(main):022:0> exit
+
+若需要停止HBase, 则需运行：
+root@4335bc9ed038:~# stop-hbase.sh
+stopping hbase.............
+
+若 stop-hbase.sh 一直处于等待状态，则需要：
+解决方法：
+先输入：hbase-daemon.sh stop master
+再输入：stop-hbase.sh就可以关闭HBase集群了。
+root@ce9f5485e05c:~/hbase-2.3.3/conf# stop-hbase.sh
+stopping hbase.........................................................................
+.......................................................................................
+...........................^C
+root@ce9f5485e05c:~/hbase-2.3.3/conf# hbase-daemon.sh stop master
+
+root@4335bc9ed038:~# jps
+1219 Jps
+root@4335bc9ed038:~# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.1  20380  3656 pts/0    Ss   17:33   0:00 /bin/bash
+root      1231  0.0  0.1  36156  3192 pts/0    R+   18:06   0:00 ps aux
+
+通过wb可访问hbase
+浏览器输入：
+http://localhost:16010/master-status
+
+DBeaver 客户端连接 HBase:
+启动 DBeaver, 连接 选择“ Apache Phoenix”
+设置地址及端口；
+添加驱动文件：phoenix-client-hbase-2.3-5.1.2.jar， 该文件可以通过解压 phoenix-hbase-2.3-5.1.2-bin.tar.gz，得到；
+若在服务端测试正常，但DBeaver连接hbase报错：UnknownHostException，则需要修改DBeaver所在机器的hosts文件。
+[ip] node1  #node1是hbase主机设置的主机名称，ip是hbase服务端ip地址；
+
+phoenix使用
+Apache Phoenix 是 HBase 的 SQL 驱动。Phoenix 使得 HBase 支持通过 JDBC 的方式进行访问，并将你的 SQL 查询转成 HBase 的扫描和相应的动作。
+
+Phoenix版本与HBase版本兼容：
+Phoenix 4.x 与 HBase 0.98、1.1、1.2、1.3 和 1.4 兼容。
+Phoenix 5.x 与 HBase2.x兼容
+
+下载：
+http://www.apache.org/dyn/closer.lua/phoenix/phoenix-5.1.2/phoenix-hbase-2.3-5.1.2-bin.tar.gz
+tar -zxvf phoenix-hbase-2.3-5.1.2-bin.tar.gz
+启动Phoenix并连接：
+root@642c958f57d7:~/phoenix-hbase-2.3-5.1.2-bin/bin# ./sqlline.py localhost
+若报错：
+Error: org.apache.hadoop.hbase.DoNotRetryIOException: Unable to load configured regionsplit policy 'org.apache.phoenix.schema.MetaDataSplitPolicy' for table 'SYSTEM.CATALOG' Set hbase.table.sanity.checks to false at conf or table descriptor if you want to bypass sanity checks
+则复制jar包到hbase, 再重启hbase:
+root@ce9f5485e05c:~# cp phoenix-hbase-2.3-5.1.2-bin/phoenix-server-hbase-2.3-5.1.2.jar
+ hbase-2.3.3/lib/
+
+
+0: jdbc:phoenix:localhost>
+./sqlline.py localhost指定连接localhost的zookeeper，默认端口为2181。
+
+查看所有的表：
+0: jdbc:phoenix:localhost> !table
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |  TABLE_TYPE  | REMARKS | TYPE_NAME | SELF_REFERENCING_COL_NAME | REF_GENERATIO |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+|           | SYSTEM      | CATALOG    | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | CHILD_LINK | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | FUNCTION   | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | LOG        | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | MUTEX      | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | SEQUENCE   | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | STATS      | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | TASK       | SYSTEM TABLE |         |           |                           |               |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+0: jdbc:phoenix:localhost>
+
+本地安装好 Phoenix连接后，使用!talb 命令列出所有表，发现 HBase 原有的表没有被列出来。而使用 Phoenix sql 的 CREATE 语句创建的一张新表，则可以通过 !tables 命令展示出来。
+
+0: jdbc:phoenix:localhost> create table "student" ("id" integer primary key, "name" varchar);
+No rows affected (0.832 seconds)
+0: jdbc:phoenix:localhost> !table
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |  TABLE_TYPE  | REMARKS | TYPE_NAME | SELF_REFERENCING_COL_NAME | REF_GENERATIO |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+|           | SYSTEM      | CATALOG    | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | CHILD_LINK | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | FUNCTION   | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | LOG        | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | MUTEX      | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | SEQUENCE   | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | STATS      | SYSTEM TABLE |         |           |                           |               |
+|           | SYSTEM      | TASK       | SYSTEM TABLE |         |           |                           |               |
+|           |             | student    | TABLE        |         |           |                           |               |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+---------------+
+0: jdbc:phoenix:localhost>
+
+这是因为 Phoenix 无法自动识别 HBase 中原有的表，所以需要将 HBase 中已有的做映射，才能够被 Phoenix 识别并操作。说白了就是要需要告诉 Phoenix 一声 xx 表的 xx 列是主键，xx 列的数据类型。
+
+而Phoenix要映射到HBase表有两种方法：
+表映射
+视图映射
+
+进行映射：
+
+表映射：
+
+create table "user" ("ROW" varchar primary key, 
+                     "address"."home" varchar, 
+                     "address"."office" varchar, 
+                     "base"."username" varchar, 
+                     "base"."password" varchar) column_encoded_bytes=0;
+注意：
+
+Phoneix对表名和列名区分大小写，如果不加双引号，则默认大写
+
+表名要和HBase的建立的表名要一致。
+
+创建表时指定了属性(不让Phoenix对column family进行编码)column_encoded_bytes=0。这是因为Phoneix版本在4.10之后，Phoenix 对列的编码方式有所改变（官方文档地址），如果不指定，查不出列数据。
+
+根据官方文档的内容，“One can set the column mapping property only at the time of creating the table. ”，也就是说只有在创建表的时候才能够设置属性。如果在创建的时候没有设置，之后怎么去设置就不太清楚了，可能是无法改变，至少目前还没有找到相关方法。
+
+删除该表时，同时也会删除HBase中的表。
+
+视图映射：
+
+create view "user" ("ROW" varchar primary key, 
+                     "address"."home" varchar, 
+                     "address"."office" varchar, 
+                     "base"."username" varchar, 
+                     "base"."password" varchar);
+如果只做查询操作的话，建议大家使用视图映射的方式，而非表映射。因为：
+
+上面提到的，在创建映射表时如果忘记设置属性（4.10版之后），那么想要删除映射表的话，HBase 中该表也会被删除，导致数据的丢失。
+如果是用视图映射，则删除视图不会影响原有表的数据。
+
+root@ce9f5485e05c:~/phoenix-hbase-2.3-5.1.2-bin/bin# ./sqlline.py localhost:2181
+0: jdbc:phoenix:localhost:2181> CREATE TABLE IF NOT EXISTS student(
+. . . . . . . . . . . . . . .)> id VARCHAR primary key,
+. . . . . . . . . . . . . . .)> name VARCHAR);
+No rows affected (0.83 seconds)
+0: jdbc:phoenix:localhost:2181> upsert into student values('1001','zhangsan');
+1 row affected (0.075 seconds)
+0: jdbc:phoenix:localhost:2181> select * from student;
++------+----------+
+|  ID  |   NAME   |
++------+----------+
+| 1001 | zhangsan |
++------+----------+
+1 row selected (0.049 seconds)
+
+退出 phoenix:
+0: jdbc:phoenix:localhost> !exit
+
+进入 zk 的客户端：
+root@ce9f5485e05c:~/hbase-2.3.3/logs# hbase zkcli
+
+ps命令查看相关进程是否正常，ps -ef 
+查看 16010，2181端口是否启动：
+root@ce9f5485e05c:~/hbase-2.3.3/conf# netstat -tunelp
+
+hbase-env.sh配置文档中的 HBASE_MANAGES_ZK 的默认值是true，它表示HBase使用自身自带的Zookeeper实例。
+但是，该实例只能为单机或伪分布模式下的HBase提供服务。
+当 HBASE_MANAGES_ZK 设置为 fasle时，即使用外部zookeeper时，需配置hbase-site.xml 里头的 hbase.cluster.distributed 变量为：true , 否则会存在问题；
+

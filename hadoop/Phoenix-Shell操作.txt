@@ -1,0 +1,81 @@
+
+下载：
+http://www.apache.org/dyn/closer.lua/phoenix/phoenix-5.1.2/phoenix-hbase-2.3-5.1.2-bin.tar.gz
+
+tar -zxvf phoenix-hbase-2.3-5.1.2-bin.tar.gz
+
+启动Phoenix，并连接到 localhost:2181：
+root@ce9f5485e05c:~/phoenix-hbase-2.3-5.1.2-bin/bin# ./sqlline.py localhost:2181
+
+2181端口是否正常，可通过下面命令查看：
+root@ce9f5485e05c:~/phoenix-hbase-2.3-5.1.2-bin/bin# netstat -tunelp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
+tcp        0      0 0.0.0.0:16030           0.0.0.0:*               LISTEN      0          281558     19724/java
+tcp        0      0 172.17.0.2:16000        0.0.0.0:*               LISTEN      0          281971     19724/java
+tcp        0      0 127.0.0.1:2181          0.0.0.0:*               LISTEN      0          281538     19724/java
+tcp        0      0 0.0.0.0:16010           0.0.0.0:*               LISTEN      0          281549     19724/java
+tcp        0      0 172.17.0.2:16020        0.0.0.0:*               LISTEN      0          281555     19724/java
+
+Phoenix Shell操作
+
+表的操作
+1）显示所有表
+!table 或 !tables
+sqlline version 1.9.0
+0: jdbc:phoenix:localhost:2181> !table
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+----------------+-------------+----------------+--------------+--------------+----------------+------+
+| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |  TABLE_TYPE  | REMARKS | TYPE_NAME | SELF_REFERENCING_COL_NAME | REF_GENERATION | INDEX_STATE | IMMUTABLE_ROWS | SALT_BUCKETS | MULTI_TENANT | VIEW_STATEMENT | VIEW |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+----------------+-------------+----------------+--------------+--------------+----------------+------+
+|           | SYSTEM      | CATALOG    | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
+|           | SYSTEM      | CHILD_LINK | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
+|           | SYSTEM      | FUNCTION   | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
+|           | SYSTEM      | LOG        | SYSTEM TABLE |         |           |                           |                |             | true           | 32           | false        |                |      |
+|           | SYSTEM      | MUTEX      | SYSTEM TABLE |         |           |                           |                |             | true           | null         | false        |                |      |
+|           | SYSTEM      | SEQUENCE   | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
+|           | SYSTEM      | STATS      | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
+|           | SYSTEM      | TASK       | SYSTEM TABLE |         |           |                           |                |             | false          | null         | false        |                |      |
++-----------+-------------+------------+--------------+---------+-----------+---------------------------+----------------+-------------+----------------+--------------+--------------+----------------+------+
+
+2）创建表
+直接指定单个列作为RowKey
+CREATE TABLE IF NOT EXISTS student(
+id VARCHAR primary key,
+name VARCHAR);
+
+0: jdbc:phoenix:localhost:2181> CREATE TABLE IF NOT EXISTS student(
+. . . . . . . . . . . . . . .)> id VARCHAR primary key,
+. . . . . . . . . . . . . . .)> name VARCHAR);
+
+在phoenix中，表名等会自动转换为大写，若要小写，使用双引号，如"us_population"。
+
+指定多个列的联合作为RowKey
+CREATE TABLE IF NOT EXISTS us_population (
+State CHAR(2) NOT NULL,
+City VARCHAR NOT NULL,
+Population BIGINT
+CONSTRAINT my_pk PRIMARY KEY (state, city));
+ 
+3）插入数据
+0: jdbc:phoenix:localhost:2181> upsert into student values('1001','zhangsan');
+
+4）查询记录
+select * from student;
+select * from student where id='1001';
+0: jdbc:phoenix:localhost:2181> select * from student;
++------+----------+
+|  ID  |   NAME   |
++------+----------+
+| 1001 | zhangsan |
++------+----------+
+ 
+
+5）删除记录
+0: jdbc:phoenix:localhost:2181> delete from student where id='1001';
+
+6）删除表
+drop table student;
+
+7）退出命令行
+!quit
+

@@ -40,4 +40,24 @@ vim ~/.ipython/profile_default/ipython_config.py
 将“# c.InteractiveShell.autoindex = True”,取消注释，并改为False,即：
 c.InteractiveShell.autoindex = False
 
+# jupyter运行报错：
+  File "<ipython-input-2-c0611b6ef873>", line 1, in <module>
+    import win32api
+  File "D:\Program Files\JetBrains\PyCharm Community Edition 2018.3.7\helpers\pydev\_pydev_bundle\pydev_import_hook.py", line 21, in do_import
+    module = self._system_import(name, *args, **kwargs)
+ImportError: DLL load failed: 找不到指定的程序。
+原因不明，python为3.6.5版本，pywin32由227回退到223版本，解决了问题
+pip install pywin32==223
+python3.7版本，貌似要改为：
+pip install pywin32==227
+
+# 问题，运行别人提供的ipynb时候，报错：
+Notebook ****.ipynb is not trusted
+产生原因：为了防止在打开笔记本时代表用户执行不受信任的代码，jupyter notebook会存储每个受信任笔记本的签名。
+如果是自己机器写的文件，jupyter notebook都会信任它。如果是要运行别人的文件，由于没有签名，jupyter notebook会不信任该文件。
+解决方法：
+方法1：只需要再jupyter notebook的命令行输入信任的文件名即可解决问题
+$ jupyter trust ***.ipynb
+方法2：在notebook中点击页面右上角处的“不可信/Not Trusted”, 在弹出页面中点击“可信/Trust”即可；
+
 

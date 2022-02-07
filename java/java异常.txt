@@ -271,4 +271,105 @@ $ mvn install -DskipTests
 或：
 $ mvn install -Dmaven.test.skip=true
 
+# hive 添加自定义函数，一直报错：
+hive> create temporary function lnglat_converter as 'Converter';
+FAILED: Execution Error, return code -101 from org.apache.hadoop.hive.ql.exec.FunctionTask. Converter (wrong name: GPSConverter/Converter)
+问题原因及解决方法：
+1，确定对应的jar包程序有无问题，若jar包程序有问题，也会出错；
+2，jar包无问题，但因为之前导入过错误的jar包，这个时候，可以把之前的导入清空，重新导入即可：
+
+# hiva 导入自定义函数时，一直说未找到类，这个时候需要确定对应的类名称是否正确：
+hive> add jar /root/Converter.jar;
+Added [/root/Converter.jar] to class path
+Added resources: [/root/Converter.jar]
+hive> create temporary function lnglat_converter as 'Converter';
+FAILED: Class Converter not found
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.FunctionTask
+hive> create temporary function lnglat_converter as 'GPSConverter.Converter';
+OK
+
+# java String.split丢失结尾空字符串的问题
+如下：
+String strtest     = "1,2,";
+String arry[]   = strtest.split(",");
+这样得到的数组元素个数只是2两个，最后一个","后没有内容，它没有作为空字符串成为第三个数组元素，结尾的空字符串被丢弃了！
+如果不想让结尾的空字符串被丢弃，那么应该这样写：
+String strtest        = "1,2,";
+String arry[]   = strtest.split(",", -1);
+
+java 正则匹配，匹配指定汉字：
+像下面匹配1，这样匹配，匹配的结果是:false
+System.out.println(String.format("中文汉字匹配1 %s", Pattern.matches("[路街道]", "公石路/沿江路(路口)")));
+只有将匹配改为匹配2这样的匹配，匹配的结果才是：true
+System.out.println(String.format("中文汉字匹配2： %s", Pattern.compile("[路街道]", Pattern.UNICODE_CHARACTER_CLASS).matcher("公石路/沿江路(路口)").find()));
+        
+# 从文件中读取中文，部分字符乱码：
+问题原因：
+BufferedInputStream和BufferedOutputStream是过滤流,需要使用已存在的节点来构造,即必须先有InputStream或OutputStream,相对直接读写,这两个流提供带缓存的读写,提高了系统读写效率性能.BufferedInputStream读取的是字节byte,因为一个汉字占两个字节,而当中英文混合的时候,有的字符占一个字节,有的字符占两个字节,所以如果直接读字节,而数据比较长,没有一次读完的时候,很可能刚好读到一个汉字的前一个字节,这样,这个中文就成了乱码,后面的数据因为没有字节对齐,也都成了乱码.所以我们需要用BufferedReader来读取,它读到的是字符,所以不会读到半个字符的情况,不会出现乱码.
+解决问题方法，将读取文件的方法由 readJsonStream2 改为： readJsonStream
+    public static String readJsonStream2(String addrName){
+        try {
+            String BIN_LIB = ".";
+            InputStream addrin = null;
+            BufferedInputStream reader2 = null;
+            FileOutputStream writer2 = null;
+            addrin = PCAClean.class.getResourceAsStream(BIN_LIB +File.separator+ addrName);
+            if(addrin==null) {
+                addrin = PCAClean.class.getResourceAsStream(addrName);
+            }
+
+            reader2 = new BufferedInputStream(addrin);
+            StringBuffer sb = new StringBuffer();
+            int len = 0;
+            while(true){
+                byte[] b = new byte[1024];
+                len = reader2.read(b);
+                if(len<0){
+                    break;
+                }
+                sb.append(new String(b,0, len));
+            }
+            System.out.println(String.format("成功读取文件，%s", addrName));
+            return sb.toString();
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+读取文件方法，由上面的方法（会导致部分中文乱码）改为下面：
+    public static String readJsonStream(String addrName){
+        try {
+
+            BufferedInputStream bis = new BufferedInputStream(PCAClean.class.getResourceAsStream(addrName));
+            BufferedReader reader = new BufferedReader (new InputStreamReader(bis));
+
+            StringBuffer result = new StringBuffer();
+            while (reader.ready()) {
+                result.append((char)reader.read());
+            }
+
+            reader.close();
+            return result.toString();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        return null;
+    }
+
+# 问题：
+Error:Maven Resources Compiler: Failed to copy 'XXX' to 'YYY': YYY (拒绝访问。)
+解决方法：
+第一种：在打包之前先手动将target/classes下的文件都删除
+第二种：将target/classes下的文件只读属性勾选去掉
+
+# 数据类型转换时候报错：
+java java.lang.Integer cannot be cast to java.lang.Float
+这个时候可以先转换为strging,再转换为对应类型：
+double a=Double.valueOf(m_textstring).doubleValue();//String转换为double
+str=String.valueOf(c);//double,int 转换为String
+int Int=Integer.valueOf(str);//String转换为int
 

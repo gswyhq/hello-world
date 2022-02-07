@@ -4,7 +4,7 @@
 # 输出ppt中的文本
 from pptx import Presentation
 
-path_to_presentation = '/home/gswewf/Downloads/信诚问题记录1.25.pptx'
+path_to_presentation = '/home/gswewf/Downloads/诚信问题记录1.25.pptx'
 prs = Presentation(path_to_presentation)
 
 # text_runs will be populated with a list of strings,

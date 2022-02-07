@@ -88,3 +88,92 @@ Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
 第五步：运行打包好的jar文件：
 ~$ java -jar -Dfile.encoding=UTF-8 abc.jar
 引用类
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+多个java打包示例：
+GPSConverter目录下面有两个java文件：GPS.java和GPSConverterUtils.java，其中，GPSConverterUtils.java要引用，继承PS.java；
+最后的main函数在 GPSConverterUtils.java 文件中：
+D:\Users\gswyhq>head -n 3 GPSConverter/GPS*.java
+==> GPSConverter/GPS.java <==
+package GPSConverter;
+
+/**
+
+==> GPSConverter/GPSConverterUtils.java <==
+package GPSConverter;
+
+import GPSConverter.GPS;
+
+D:\Users\gswyhq>jar cvfm GPSConverter/GPSConverterUtils.jar manf GPSConverter/GPS*.class
+java.io.FileNotFoundException: manf (系统找不到指定的文件。)
+        at java.io.FileInputStream.open0(Native Method)
+        at java.io.FileInputStream.open(FileInputStream.java:195)
+        at java.io.FileInputStream.<init>(FileInputStream.java:138)
+        at java.io.FileInputStream.<init>(FileInputStream.java:93)
+        at sun.tools.jar.Main.run(Main.java:175)
+        at sun.tools.jar.Main.main(Main.java:1288)
+原因，当前目录下缺少manf文件；
+D:\Users\gswyhq> cat manf
+Main-Class: GPSConverter.GPSConverterUtils
+
+D:\Users\gswyhq>jar cvfm GPSConverter/GPSConverterUtils.jar manf GPSConverter/GPS*.class
+已添加清单
+正在添加: GPSConverter/GPS.class(输入 = 786) (输出 = 443)(压缩了 43%)
+正在添加: GPSConverter/GPSConverterUtils.class(输入 = 3619) (输出 = 1939)(压缩了 46%)
+
+D:\Users\gswyhq>cd GPSConverter
+D:\Users\gswyhq\GPSConverter>java -jar -Dfile.encoding=UTF-8 GPSConverterUtils.jar
+Hello Java
+
+-------------------------------------------------------------------------------------------------
+命令行打包jar报错：
+java.io.IOException: invalid header field
+jar cvfm lottery.jar MANIFEST.MF jdbc.properties com
+如果出现：
+java.io.IOException: invalid header field
+这样的错误的话，就说明MANIFEST.MF文件有问题，比如写成了这样：
+Manifest-Version: 1.0
+Main-Class:com.feishan.lottery.view.Index
+Class-Path: jar/jdbc_feishan.jar jar/mysql5.0.3.jar
+注意：
+Main-Class:后面应该有一个空格：
+Manifest-Version: 1.0
+Main-Class: com.feishan.lottery.view.Index
+Class-Path: jar/jdbc_feishan.jar jar/mysql5.0.3.jar
+这样写就对了注意：最后一行也要有一个回车键。否则后面那一行是不能打包进去的
+
+最后用java -jar lottery.jar就可以运行了
+
+这个 manifest.mf 可以放在任何位置，也可以是其它的文件名，
+只需要有 Main-Class: test.Test 一行，且该行以一个回车符结束即可
+
+最后说明：Manifest 技巧
+总是以Manifest-Version属性开头
+每行最长72个字符，如果超过的化，采用续行
+确认每行都以回车结束，否则改行将会被忽略
+如果Class-Path 中的存在路径，使用"/"分隔目录，与平台无关
+使用空行分隔主属性和package属性
+使用"/"而不是"."来分隔package 和class ,比如 com/example/myapp/
+class 要以.class结尾，package 要以 / 结尾
+
+命令行打包为jar文件，运行时报错：
+root@c9cde75c1336:~/java2/abcd# java jar DTest.jar
+Error: Could not find or load main class jar
+root@c9cde75c1336:~/java2/abcd# java -jar DTest.jar
+no main manifest attribute, in DTest.jar
+root@c9cde75c1336:~/java2/abcd# cat manf
+Main-Class: Demo
+Class-Path: .
+可能原因是打包命令使用错误, 将打包命令由：
+root@c9cde75c1336:~/java2/abcd# jar -cvf DTest.jar .    # 这样打包存在问题，打包后的 META-INF/MANIFEST.MF 文件中，并未包含 MANIFEST.MF 内的主类名；
+改为：
+root@c9cde75c1336:~/java2/abcd# jar cvfm DTest.jar MANIFEST.MF *.class libTest.so
+added manifest
+adding: Demo.class(in = 527) (out= 356)(deflated 32%)
+adding: Test.class(in = 1051) (out= 608)(deflated 42%)
+adding: libTest.so(in = 181168) (out= 64620)(deflated 64%)
+root@c9cde75c1336:~/java2/abcd# java -jar DTest.jar
+ 文件：./libTest.so 是否存在：true
+测试调用OK
+

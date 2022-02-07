@@ -50,6 +50,7 @@ plt.show()
 # 图例显示中文的问题：
 # 方法一（全局设置）：
 from pylab import mpl
+mpl.rcParams['font.family'] = 'sans-serif'
 mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体   
 mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
 
@@ -131,4 +132,25 @@ STXingkai
 STFangsong
 YouYuan
 LiSu
+
+# 但有时候使用上方法能检测出中文字体，但是通过下面方法检测不到：
+# Linux环境下Jupyter中matplotlib中文乱码问题
+from matplotlib import font_manager
+a = sorted([f.name for f in font_manager.fontManager.ttflist])
+for i in a:
+    print(i)
+这时，在代码前面添加：
+from pylab import mpl
+mpl.rcParams['font.family'] = 'sans-serif'
+mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体   
+mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
+并删除缓存：
+rm -rf ~/.cache/matplotlib
+重启, 即点击页面上的重启按钮，restart the kernel；
+
+# 但有时候服务器上无对应中文字体，这个时候，需要添加对应中文字体，可以通过添加windows系统的中文ttf字体文件到对应目录；
+查找matplotlib字体配置文件的目录。
+import matplotlib
+matplotlib.matplotlib_fname()
+
 

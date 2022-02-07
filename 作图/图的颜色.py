@@ -50,6 +50,9 @@ fig.subplots_adjust(left=0, right=1,
                     hspace=0, wspace=0)
 plt.show()
 
+# 靠左/右、居中
+"left"/"right"/"center"
+
 import matplotlib
 for name, hex in matplotlib.colors.cnames.items():
     print(name, hex)

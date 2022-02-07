@@ -30,3 +30,6 @@ ssh username@localhost
 scp username@hostname:remotefile localdirectory
 例如：scp root@192.147.10.215:/home/usr/mm.log Desktop/
 
+# 远程桌面连接工具：
+若Teamviewer不能用，可以使用RustDesk，后者更轻量级。
+

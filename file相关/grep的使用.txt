@@ -100,5 +100,7 @@ That is 200.
 
 使用awk的话，可以这样awk 'NR==FNR{x[$0];next}{for(i in x)if($0~i)print}' a.txt b.txt
 
+# grep 通过正则匹配转义字符，如tab键：
+grep -P "\t" test.txt
 
 

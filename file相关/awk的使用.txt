@@ -101,5 +101,19 @@ gswyhq@gswyhq-PC:~/data$ awk 'BEGIN{print mktime(2018" "09" "20" "20" "22" "30)}
 # 按字段的值进行筛选, 示例：筛选第二个字段的内容为Stock的行：
 $ less table_schema.csv |awk -F "," '($2=="Stock"){print}'
 
+# 使用awk对数据，进行行列互换：
+~$ cat abcd.txt
+张三   语文  81
+张三   数学  81
+李四   语文  76
+李四   数学  90
+王五   语文  81
+王五   数学  100
+王五   英语  90
+                                                                                                                                                                                                               ✔
+~$ cat abcd.txt |awk '{for(i=1;i<=NF;i++)a[NR,i]=$i}END{for(i=NF;i>=1;i--){for(j=1;j<=NR;j++){printf a[j,i]" "}print xxoo}}'
+81 81 76 90 81 100 90
+语文 数学 语文 数学 语文 数学 英语
+张三 张三 李四 李四 王五 王五 王五
 
 

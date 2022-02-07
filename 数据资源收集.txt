@@ -1002,3 +1002,10 @@ LCSTS自动摘要数据集
 https://huggingface.co/models?filter=zh
 数据集：https://huggingface.co/datasets?filter=languages%3Azh&p=0
 
+# 中国省市区县街道五级地址数据：
+https://github.com/kakuilan/china_area_mysql
+
+# 收货地址、电话号码、姓名数据（量不多仅有1600条）
+https://github.com/jglcomeon/GRU-CRF
+
+

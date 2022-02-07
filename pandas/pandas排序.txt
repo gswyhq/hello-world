@@ -1,0 +1,127 @@
+
+
+
+df = pd.DataFrame({'b':[1,2,3,2],'a':[4,3,2,1],'c':[1,3,8,2]},index=[2,0,1,3]) 
+df
+Out[159]: 
+   b  a  c
+2  1  4  1
+0  2  3  3
+1  3  2  8
+3  2  1  2
+
+# 按C列升序排列：
+df.sort_values(by='c')
+Out[160]: 
+   b  a  c
+2  1  4  1
+3  2  1  2
+0  2  3  3
+1  3  2  8
+
+# 按c列降序排列：
+df.sort_values(by='c', ascending=False)
+Out[162]: 
+   b  a  c
+1  3  2  8
+0  2  3  3
+3  2  1  2
+2  1  4  1
+
+# 先按 b列降序排序，再按c列升序排列：
+df.sort_values(by=['b','a'],axis=0,ascending=[False,True]) 
+Out[163]: 
+   b  a  c
+1  3  2  8
+3  2  1  2
+0  2  3  3
+2  1  4  1
+
+# 对index=3的行升序排列（对某行排序时，需指定 axis=1）：
+df.sort_values(by=3,axis=1) 
+Out[165]: 
+   a  b  c
+2  4  1  1
+0  3  2  3
+1  2  3  8
+3  1  2  2
+
+# 对index=1行降序排列：
+df.sort_values(by=1,axis=1, ascending=False) 
+Out[167]: 
+   c  b  a
+2  1  1  4
+0  3  2  3
+1  8  3  2
+3  2  2  1
+
+# 对， b、a两列按行求和，形成新的一列；
+df['ba']=df[['b','a']].sum(axis=1) 
+df
+Out[175]: 
+   b  a  c  ba
+2  1  4  1   5
+0  2  3  3   5
+1  3  2  8   5
+3  2  1  2   3
+
+df.sort_values(by='ba')
+
+# 对某列自定义排序：
+先对df.index自定义排序赋值，再通过 sort_index 对 index 排序即可得到我们想到的数据。如：
+df = pd.DataFrame([6, -5, 4, -2, 3], columns=['digital']) 
+df.index = df['digital'].apply(abs).tolist()
+new_df = df.sort_index()
+new_df
+
+# 取每组最大值：
+dft=pd.DataFrame([['A', 1.2], ['B', 2], ['C', 3], ['D', 4], ['A', 2], ['B', 3], ['A', 3], ['B', 1], ['C', 2.3], ['D', 1.4]], columns=['tag', 'num'])
+方法1：先排好序(默认是升序排列)，然后每组取第一个，或最后一个；
+dft.sort_values(by='num').groupby('tag').last()  # 默认升序，取最后一个；
+dft.sort_values(by='num', ascending=False).groupby('tag').first()  # 降序排列，取第一行；
+Out[65]: 
+     num
+tag     
+A    3.0
+B    3.0
+C    3.0
+D    4.0
+但若直接上面这样会丢失排序列，若不想丢失排序列，则可以像下面这样（降序排列，分组，取出每组第一个，再重新索引）：
+dft.sort_values(by='num', ascending=False).groupby('tag').first().reset_index()
+Out[66]: 
+  tag  num
+0   A  3.0
+1   B  3.0
+2   C  3.0
+3   D  4.0
+方法2：先分组，再获取最大值行所在index，然后过滤出所需要的行：
+dft.iloc[dft.groupby(['tag']).apply(lambda x: x['num'].idxmax())]
+Out[30]: 
+  tag  num
+6   A  3.0
+5   B  3.0
+2   C  3.0
+3   D  4.0
+方法3：在分组中取出最大值行（若最大值有多行，则取出所有最大值行）
+dft=pd.DataFrame([['A', 1.2], ['B', 2], ['C', 3], ['D', 4], ['A', 2], ['B', 3], ['A', 3], ['B', 1], ['C', 2.3], ['D', 1.4], ['A', 3.0]], columns=['tag', 'num'])
+dft.groupby('tag').apply(lambda t: t[t.num==t.num.max()])
+Out[32]: 
+       tag  num
+tag            
+A   6    A  3.0
+    10   A  3.0
+B   5    B  3.0
+C   2    C  3.0
+D   3    D  4.0
+方法4：用transform获取原dataframe的index，然后过滤出需要的行，同理若最大值有多行，也会全部取出
+dft[dft.groupby(['tag'])['num'].transform(max)==dft['num']]
+Out[36]: 
+   tag  num
+2    C  3.0
+3    D  4.0
+5    B  3.0
+6    A  3.0
+10   A  3.0
+
+
+

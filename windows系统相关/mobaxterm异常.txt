@@ -124,4 +124,8 @@ source ~/.bashrc
 重新执行打包命令，这时终端中文输出不是乱码；
 $ mvn clean package spring-boot:repackage
 
+# mobaxterm启动后报错：
+mobaxterm local terminal failed to start due to memory access denied.
+解决方法，检查资源消耗，如内存、硬盘空间是否超阈值，排除故障后，再重启电脑，重启mobaxterm;
+
 

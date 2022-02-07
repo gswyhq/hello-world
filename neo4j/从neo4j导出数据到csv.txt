@@ -4,8 +4,8 @@ CALL apoc.export.csv.all( "/var/lib/neo4j/data/all.csv", {})
 _id	_labels	name	Name	_start	_end	_type	since
 0	:Person	Euler
 1	:Person	Bernoulli
-2	:Xianzhong:Xincheng	重疾险	重疾险
-3	:Qingjing:Xincheng	战争
+2	:Xianzhong:Chengxin	重疾险	重疾险
+3	:Qingjing:Chengxin	战争
 				0	1	KNOWS	1768
 				2	3	免赔条款	1768
 
@@ -69,8 +69,8 @@ format:neo4j-shell导出的数据：
 BEGIN
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
-CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
-CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE (:`Chengxin`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Chengxin`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
 COMMIT
 BEGIN
 CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
@@ -82,8 +82,8 @@ format:cypher-shell导出的数据：
 :BEGIN
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
-CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
-CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE (:`Chengxin`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Chengxin`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
 :COMMIT
 :BEGIN
 CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
@@ -94,8 +94,8 @@ CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID`
 format:plain导出的数据：
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
-CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
-CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE (:`Chengxin`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Chengxin`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
 CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
@@ -112,8 +112,8 @@ bash-4.4# cat /var/lib/neo4j/data/some-cypher.txt |/var/lib/neo4j/bin/cypher-she
 config: {format:'plain',cypherFormat:'create'}时的导出数据：
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Euler", `UNIQUE IMPORT ID`:0});
 CREATE (:`Person`:`UNIQUE IMPORT LABEL` {`name`:"Bernoulli", `UNIQUE IMPORT ID`:1});
-CREATE (:`Xincheng`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
-CREATE (:`Xincheng`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
+CREATE (:`Chengxin`:`Xianzhong`:`UNIQUE IMPORT LABEL` {`Name`:"重疾险", `name`:"重疾险", `UNIQUE IMPORT ID`:2});
+CREATE (:`Chengxin`:`Qingjing`:`UNIQUE IMPORT LABEL` {`name`:"战争", `UNIQUE IMPORT ID`:3});
 CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
@@ -123,8 +123,8 @@ DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` I
 config: {format:'plain',cypherFormat:'updateAll'}时的导出数据：
 MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}) SET n.`name`="Euler", n:`Person`;
 MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) SET n.`name`="Bernoulli", n:`Person`;
-MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) SET n.`Name`="重疾险", n.`name`="重疾险", n:`Xincheng`, n:`Xianzhong`;
-MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) SET n.`name`="战争", n:`Xincheng`, n:`Qingjing`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) SET n.`Name`="重疾险", n.`name`="重疾险", n:`Chengxin`, n:`Xianzhong`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) SET n.`name`="战争", n:`Chengxin`, n:`Qingjing`;
 CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) MERGE (n1)-[r:`KNOWS`]->(n2) SET r.`since`=1768;
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) MERGE (n1)-[r:`免赔条款`]->(n2) SET r.`since`=1768;
@@ -134,8 +134,8 @@ DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` I
 config: {format:'plain',cypherFormat:'addStructure'}时的导出数据：
 MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}) ON CREATE SET n.`name`="Euler", n:`Person`;
 MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) ON CREATE SET n.`name`="Bernoulli", n:`Person`;
-MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) ON CREATE SET n.`Name`="重疾险", n.`name`="重疾险", n:`Xincheng`, n:`Xianzhong`;
-MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) ON CREATE SET n.`name`="战争", n:`Xincheng`, n:`Qingjing`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}) ON CREATE SET n.`Name`="重疾险", n.`name`="重疾险", n:`Chengxin`, n:`Xianzhong`;
+MERGE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) ON CREATE SET n.`name`="战争", n:`Chengxin`, n:`Qingjing`;
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:0}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:1}) CREATE (n1)-[r:`KNOWS` {`since`:1768}]->(n2);
 MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:2}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:3}) CREATE (n1)-[r:`免赔条款` {`since`:1768}]->(n2);
 

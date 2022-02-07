@@ -1,0 +1,47 @@
+
+
+Jython是一种完整的语言，而不是一个Java翻译器或仅仅是一个Python编译器，它是一个Python语言在Java中的完全实现。Jython也有很多从CPython中继承的模块库。最有趣的事情是Jython不像CPython或其他任何高级语言，它提供了对其实现语言的一切存取。所以Jython不仅给你提供了Python的库，同时也提供了所有的Java类。
+
+https://www.jython.org/download
+
+https://repo1.maven.org/maven2/org/python/jython-installer/2.7.2/jython-installer-2.7.2.jar
+
+环境准备，安装jython前请安装jdk
+root@dea3ca26f11d:~# cd /root && mkdir /root/java && tar -zxf jdk-8u191-linux-x64.tar.gz -C /root/java
+root@dea3ca26f11d:~# echo "export JAVA_HOME=/root/java/jdk1.8.0_191/" >> ~/.bashrc && \
+>     echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc && \
+>     echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc && \
+>     source ~/.bashrc
+root@dea3ca26f11d:~# java -version
+java version "1.8.0_191"
+Java(TM) SE Runtime Environment (build 1.8.0_191-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
+
+安装 jython(当前最新jython版本并不支持python3):
+root@dea3ca26f11d:~# java -jar jython-installer-2.7.2.jar
+Please select your language [E/g] >>> e
+Do you want to read the license agreement now ? [y/N] >>> y
+
+Do you accept the license agreement ? [Y/n] >>> y
+The following installation types are available:
+  1. All (everything, including sources)
+  2. Standard (core, library modules, demos and examples, documentation)
+  3. Minimum (core)
+  9. Standalone (a single, executable .jar)
+Please select the installation type [ 1 /2/3/9] >>> 1
+Do you want to exclude parts from the installation ? [y/N] >>> y
+The following parts are selectable (n = no more) [mod/demo/doc/src/ensurepip/N] >>>
+Please enter the target directory >>>
+Please enter the target directory >>> /root/jython
+Unable to find directory /root/jython, create it ? [Y/n] >>> y
+Please confirm copying of files to directory /root/jython [Y/n] >>> y
+
+
+图形化界面，安装方法：双击jython_installer-2.2.jar文件
+
+或者进入dos切换到jython_installer-2.2.jar文件所在路径，使用命令：
+
+java -jar jython_installer-2.2.jar进行安装，一直点击下一步即可，
+
+但最终还是放弃了 jython, 原因无他，不支持python3,再见！
+

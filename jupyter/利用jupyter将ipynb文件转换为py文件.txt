@@ -30,5 +30,16 @@ root@14a07da8fd37:/notebooks# jupyter nbconvert --help
 启动的时候加上ip和端口 
 jupyter notebook --ip 0.0.0.0 --port 9999
 
-
+# 若转换的时候报错：
+ValueError: No template sub-directory with name 'script' found in the following paths:
+这是因为，nbconvert 6.x.x版中template文件安装位置与之前版本不一样，而jupyter并没有把新版的templates路径包含进去。
+因此，针对如上原因，有两种解决办法：
+方法1：卸载新版nbconvert并安装旧版nbconvert:
+pip uninstall nbconvert
+pip install nbconvert==5.6.1
+方法2：将新版路径下的templates复制到旧版路径下：
+新版路径：
+C:\Users{username}\AppData\Roaming\Python\share\jupyter\nbconvert\templates
+旧版路径：
+C:\Users{username}\AppData\Roaming\jupyter\nbconvert\templates
 

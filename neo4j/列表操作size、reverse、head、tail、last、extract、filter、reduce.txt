@@ -39,4 +39,10 @@ MATCH p=(a)-->(b)-->(c)
 WHERE a.name='Alice' AND b.name='Bob' AND c.name='Daniel'
 RETURN reduce(totalAge = 0, n IN nodes(p)| totalAge + n.age) AS reduction
 
+# 使用 collect 函数将多行结果，转换为一个列表的结果：
+MATCH (n:Tag)-[r]-(:Tag) RETURN collect(type(r));
+
+# 对多行的结果转换为数值，并求和：
+MATCH (n:Tag)-[r]-(:Tag) RETURN reduce(s = 0, n IN collect(type(r)) | s + toInteger(n)) AS number
+
 

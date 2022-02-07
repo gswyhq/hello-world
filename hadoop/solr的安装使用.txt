@@ -1,0 +1,113 @@
+
+1、什么是Solr。
+Solr是Apache下的一个顶级开源项目，采用Java开发，它是基于Lucene的全文搜索服务器。Solr提供了比Lucene更为丰富的查询语言，同时实现了可配置、可扩展，并对索引、
+搜索性能进行了优化。
+Solr可以独立运行，运行在Jetty、Tomcat等这些Servlet容器中，Solr索引的实现方法很简单，用 POST 方法向 Solr 服务器发送一个描述 Field 及其内容的 XML 文档，
+Solr根据xml文档添加、删除、更新索引 。Solr搜索只需要发送 HTTP GET 请求，然后对 Solr返回Xml、json等格式的查询结果进行解析，组织页面布局。
+Solr不提供构建UI的功能，Solr提供了一个管理界面，通过管理界面可以查询Solr的配置和运行情况。
+
+2、Solr与Lucene的区别。
+Lucene是一个开放源代码的全文检索引擎工具包，它不是一个完整的全文检索引擎，Lucene提供了完整的查询引擎和索引引擎，目的是为软件开发人员提供一个简单易用的
+工具包，以方便的在目标系统中实现全文检索的功能，或者以Lucene为基础构建全文检索引擎。
+Solr的目标是打造一款企业级的搜索引擎系统，它是一个搜索引擎服务，可以独立运行，通过Solr可以非常快速的构建企业的搜索引擎，通过Solr也可以高效的完成站内搜
+索功能。
+
+
+下载solr安装包：
+https://dlcdn.apache.org/lucene/solr/8.10.1/solr-8.10.1.tgz
+
+Solr的运行需要java环境
+
+
+root@36be04e0396a:~# sha512sum solr-8.10.1.tgz
+1e8593b4a9b196aa3a12edc1928c83fc108f1cae2dd17f17a10b76d2b1a441341db6a165f74bca0f78bfc7fd0d63b30f525221d5725529961212886a50ee6aa7  solr-8.10.1.tgz
+root@36be04e0396a:~# tar -zxvf solr-8.10.1.tgz
+
+~/.bashrc 文件添加如下内容：
+export SOLR_HOME=/root/solr-8.10.1
+export PATH=$SOLR_HOME/bin:$PATH
+
+# 使添加的配置生效
+root@36be04e0396a:~/solr-8.10.1# source ~/.bashrc
+
+# 启动服务：
+root@36be04e0396a:~/solr-8.10.1# bin/solr start -p 8983 -force
+Solr home directory /root/solr-8.10.1 must contain a solr.xml file!
+
+root@36be04e0396a:~/solr-8.10.1# bin/solr start -p 8983 -force -s /root/solr-8.10.1/server/solr
+浏览器打开：http://localhost:8983/solr/#/
+针对该页面的说明：
+1 Dashboard
+仪表盘，显示了该Solr实例开始启动运行的时间、版本、系统资源、jvm等信息。
+
+2 Logging
+Solr运行日志信息
+
+3 Security 
+安全性、权限管理
+若需要设置权限，则需要添加对应的security.json文件到 /root/solr-8.10.1/server/solr 目录下，再重启：
+root@36be04e0396a:~/solr-8.10.1# mv security.json server/solr/
+root@36be04e0396a:~/solr-8.10.1# bin/solr restart -p 8983 -force -s /root/solr-8.10.1/server/solr
+
+4 Core Admin
+Solr Core的管理界面。Solr Core 是Solr的一个独立运行实例单位，它可以对外提供索引和搜索服务，一个Solr工程可以运行多个SolrCore（Solr实例），一个Core对应一个索引目录。
+
+5 java properties
+Solr在JVM 运行环境中的属性信息，包括类路径、文件编码、jvm内存设置等信息。
+
+6 Tread Dump
+显示Solr Server中当前活跃线程信息，同时也可以跟踪线程运行栈信息。
+
+# solr 启动、停止、重启命令
+solr start -p 端口号
+solr stop -all
+solr restart -p 端口号
+
+# 查看当前状态：
+
+root@36be04e0396a:~/solr-8.10.1# bin/solr status
+
+Found 1 Solr nodes:
+
+Solr process 663 running on port 8983
+{
+  "solr_home":"/root/solr-8.10.1/server/solr",
+  "version":"8.10.1 2f24e6a49d48a032df1f12e146612f59141727a9 - mayyasharipova - 2021-10-12 15:19:17",
+  "startTime":"2021-11-11T02:49:03.257Z",
+  "uptime":"0 days, 0 hours, 22 minutes, 1 seconds",
+  "memory":"175.8 MB (%34.3) of 512 MB"}
+
+
+# 库的创建
+第一步：在 /root/solr-8.10.1/server/solr 文件夹下面创建核心名称作为文件夹，测试名称为my_db，可以理解为新建一个库
+root@36be04e0396a:~/solr-8.10.1/server/solr# mkdir my_db
+
+第二步：将/root/solr-8.10.1/server/solr/configsets/_default下面的conf文件夹拷贝到/root/solr-8.10.1/server/solr/my_db目录下
+root@36be04e0396a:~/solr-8.10.1/server/solr# cp -r configsets/_default/conf my_db/
+
+第三步：访问管理界面(localhost:8983/solr)，选择Core Admin创建核心，右侧name和instanceDir输入名称和核心文件夹保持一致
+name: my_db
+instanceDir: my_db
+dataDir: data
+config: solrconfig.xml
+schema: schema.xml
+
+# 创建 Core 也可以通过如下命令运行：
+solr create -c <name>
+
+第四步：创建表与字段
+在浏览器中，Core Selector 处，下拉列表中，选择刚才创建的库 my_db;
+点击 “Schema”
+点击Add Field 添加my_title,类型为string
+即相当于添加一个字段；添加数据库里面一个表里面的列；
+
+# 删除 core的命令
+solr delete -c name
+如：
+root@36be04e0396a:~/solr-8.10.1# solr delete -c my_db
+
+Deleting core 'my_db' using command:
+http://localhost:8983/solr/admin/cores?action=UNLOAD&core=my_db&deleteIndex=true&deleteDataDir=true&deleteInstanceDir=true
+
+
+

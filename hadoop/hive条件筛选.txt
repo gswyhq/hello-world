@@ -1,0 +1,7 @@
+
+
+# 根据正则表达式作为条件筛选：
+select * from default.cmb_test where ptf_name rlike '张|李是'
+
+
+

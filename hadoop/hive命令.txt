@@ -1,4 +1,7 @@
 
+创建库 hive_db：
+create database if not exists hive_db;
+
 hive删除表：
 drop table db_name.table_name;
 hive删除表中数据：
@@ -26,14 +29,30 @@ drop table if exists employee;
 
 --  清空表,删除数据，保留表结构；
 truncate table employee;
---  清空表，第二种方式
+--  清空表，第二种方式(按照where条件筛选数据，覆盖原有表数据，达到删除不合where条件的数据目的)
 insert overwrite table employee select * from employee where 1=0; 
 
 --  删除分区
 alter table employee_table drop partition (stat_year_month>='2018-01');
 
 --  按条件删除数据
+（实际上是用满足条件的数据覆盖原有数据，间接删除了不合where条件的数据）
 insert overwrite table employee_table select * from employee_table where id>'180203a15f';
+insert overwrite是删除原有数据然后在新增数据，如果有分区那么只会删除指定分区数据，其他分区数据不受影响。
+
+# 删除分区表指定数据：
+    删除具体partition
+    alter table table_name drop partition(partiton_name='xxx');
+	
+    删除具体partition的部分数据
+	INSERT OVERWRITE TABLE table_name PARTITION(year='2018') 
+	SELECT * FROM table_name WHERE year='2018' AND month>6;
+    #注意：WHERE后的条件是需要保留的数据的查询结果
+
+# 删除非分区表指定数据
+    INSERT OVERWRITE TABLE table_name SELECT * FROM table_name WHERE year>2018;
+    #注意：WHERE后的条件是需要保留的数据的查询结果,即删除2018年及以前的数据
+
 
 查看表的建表语句(这里是查看db_name库中的table_name表的建表语句)：
 SHOW CREATE TABLE db_name.table_name;
@@ -128,26 +147,9 @@ select * from db_name.table_name where field1 is not null and field2 is not null
 select sort_array(array(1.5, 2.3, 0))[size(array(1.5, 2.3, 0))-1] as max_value;
 select sort_array(array(1.5, 2.3, 0))[0] as min_value;
 
-
 # 查询字段重命名为中文，需要用尖引号：
 select distinct field1 as  `字段1` from db_name.table_name where length(field1) > 0 limit 1000;
 
-如何把一个表的查询结果插入到另一张表中(两个表的结构不同), 插入的字段个数和查询的字段个数必须一致
-insert into 表名(字段1,字段2,字段3...) select 字段1,字段2,字段3.. from 查询表名 where ..
-
-# 创建表，并插入数据：
-hive> create table if not exists cmb_test(
-ptf_id string,
-ptf_name string,
-bill_date string,
-acc_status string
-);
-hive> insert into cmb_test ( ptf_id, ptf_name, bill_date, acc_status ) values ('00001', '张三 ','20','计算机系'), ('00002', '李四','19','计算机系');
-
-insert into A(id,names)select id,firstName from B;
-
-另外，在使用 insert into select 语句时，可能会产生锁表，导致在用此句备份数据时，其他用户不能查询数据，特别是数据量大的时候更应该注意：
-如：在生产使用insert into t_test_2 select * from t_test_1 where name like 'trest'语句时，若name 字段缺失索引，就会造成备份数据时，锁全表；
 查看表有哪些字段有索引的命令：
 use db_name;
 show index on table_name;
@@ -164,13 +166,6 @@ inner join (
     b
 on a.id1=b.id2
 
-
-hive中的查询结果插入语句有两种：
-insert into table cite select * from cite;
-这个的意思就是将cite表中的数据复制一份，然后插入到原表中去，而
-insert overwrite table cite select * from tt;
-这个的意思就是会用tt表查出来的数据覆盖掉cite表格中已经存在的数据
-
 # 字符串的模糊匹配：
 select * from ods.ods_sjc_events_rt where event like concat('%','OCR','%');
 
@@ -183,6 +178,9 @@ select count(distinct field1,field2) from db_name.table_name
 
 # 对某个字段进行统计计数(这里id,为唯一标识字段名)：
 select field, count(distinct id) from db_name.table_name group by field;
+
+# 对多个字段进行统计计数：
+select citycode, city, count(1) from hive_db1.hive_table2 where province='内蒙古自治区' and area='青山区' group by citycode, city;
 
 # 对用户进行分组，取每组最新的一条数据记录：
 相同用户有多条数据记录，需要去重，仅仅取用一条：
@@ -221,27 +219,6 @@ ORDER BY type
 select uid, count(CASE WHEN text like concat('%', '信用卡', '%') THEN 1 ELSE NULL END), count(*)
 from db_name.table_name group by uid;
 
-# 字符串的截断
-使用 Hive 中 substr() 函数来实现。
-1、截取前两位：
-substr(ID,0,2)
-substr() 第一个参数表示待截取的字段名称，第二个参数表示截取的起始位置，第三个参数表示截取的长度。
-2、截取后两位：
-substr(ID,-2,2)
-表示从倒数第二个位置开始截取两位，即截取后两位。
-substr函数适合定长的字符串截取，如果起始位置超过了字符串长度返回的是空串。
-select substr('123456', -8, 8); 返回结果为空；
-select substr('123456', 2, 8); 返回结果为：23456
-需注意的是：select substr('123456', 0, 8); 和 select substr('123456', 1, 8); 的返回结果均是：123456
-
-# 不查询，仅仅返回一个固定字符串；
-select "你好中国";
-
-# 去除字符串首尾的空格：
-select trim(' 你好中国 ')
-
-# 小写字母变成大写字母：
-select upper("abde EDW xyz")
 
 # 按字段降序排列,这里按字段field1为例：
 降序：select * from db_name.table_name order by field1 desc limit 500;
@@ -269,15 +246,6 @@ where t1.num > 0;
 hive> ALTER TABLE employee RENAME TO emp;
 这种操作会修改元数据，但不会修改数据本身;
 所以在hdfs上warehouse目录下的该表的目录还是employee，因为只会更改元数据信息，而不会修改数据本身；
-
-# Hive查询指定分隔符，指定导出数据分隔符；
-使用hive -e导出后默认的分隔符是\t，这时候若原始文本中存在 ‘\t’，用pandas.read_csv读取数据时候，就会报错，所以需要导出数据时指定分隔符； 
-可以使用hive的insert语法导出文件
-insert overwrite local directory '/home/hadoop/20180303'
-row format delimited
-fields terminated by ','
-select * from table_name limit 100;
-需要注意的事，上式会删除数据导出目录“/home/hadoop/20180303”中的原有文件，并将导出100条数据到‘/home/hadoop/20180303’目录下名为‘000000_0’的文件中；
 
 hive抽样：
 一般情况下是使用排序函数和rand() 函数来完成随机抽样，limit关键字限制抽样返回的数据；
@@ -317,49 +285,11 @@ select * from table where rand()<=0.1;
 例1：select * from table where rand()<=0.15  cluster by rand()  limit  N;    ( 数据较大时 用 cluster by) 
 例2：select * from table where rand()<=0.15  order by rand()   limit  N;   ( 数据较小时 用  order by) 
 
-hive 查询某一重复字段记录第一条数据：
-insert overwrite table hive_jdbc_test partition(day='2018-1-1') 
-select key,value 
-from (SELECT *, Row_Number() OVER (partition by key,value ORDER BY value desc) rank 
-FROM hive_jdbc_test where day='2018-1-1') t 
-where t.rank=1;
-
-这里主要的代码就是row_number() OVER (PARTITION BY COL1 ORDER BY COL2) 
-这行代码的意思是先对COL1列进行分组，然后按照COL2进行排序，row_number()函数是对分组后的每个组内记录按照COL2排序标号，我们最后取的时候就拿标号为1的一条记录，即达到我的需求（对于COL1中重复的数据仅留一条记录）。
-
 hive修改表和字段注释：
 修改表:
 ALTER TABLE db_name.table_name SET TBLPROPERTIES('comment' = '这是表新注释!');
 修改字段:
 ALTER TABLE table_name CHANGE COLUMN muid muid_new STRING COMMENT '这里是列新注释!'; 
-
-创建表，并插入数据：
-CREATE TABLE `test_db.flag_all_client_party_credit_info`(
-	`party_id` string COMMENT '客户号',
-	`blacklist_type` string COMMENT '是否高风险客户',
-	`dsi_cluster` string COMMENT '消费风险评估',
-	`person_all_score_std` string COMMENT '总体信用评估',
-	`have_loan_flag` string COMMENT '是否有过贷款',
-	`have_car_loan_flag` string COMMENT '是否有过车贷',
-	`have_house_loan_flag` string COMMENT '是否有过房贷',
-	`is_more_credit_card` string COMMENT '是否有多张信用卡',
-	`loan_overdue_flag` string COMMENT '是否有过贷款逾期',
-	`credit_overdue_flag` string COMMENT '是否有过信用卡逾期',
-	`fake_risk` string COMMENT '欺诈风险评估')
-COMMENT '客户信用标签'
-ROW FORMAT SERDE
-'org.apache.hadoop.hive.ql.io.orc.OrcSerde'
-STORED AS INPUTFORMAT
-'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat'
-OUTPUTFORMAT
-'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat';
-
-INSERT INTO test_db.flag_all_client_party_credit_info
-VALUES
-('067095720414', '是', '', '中', '否', '', '', '是', '否', '是', ''),
-('013029565207', '', '低', '低', '否', '', '否', '是', '', '是', '否'),
-('065357069340', '', '', '中', '是', '否', '', '', '', '是', '');
-
 
 hads查看文件路径：
 hdfs dfs -ls /tmp/hd36
@@ -377,12 +307,6 @@ hive -e "export table users_info to '/home/hd35/';"
 select sha2('123456',256) ;  -- 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
 select md5('123456');  -- e10adc3949ba59abbe56e057f20f883e
 
-# 将一个无分区的表table1的数据导入到另一个分区表table2；
-insert into db_name.table2
-partition (y='2021',m='03',d='15')
-select party_id, mobile, data_source, data_upd
-from db_name.table1;
-
 # 重命名表，把 employee 修改为 emp。
 hive> ALTER TABLE db_name.employee RENAME TO db_name.emp;
 
@@ -392,4 +316,32 @@ create table if not exists mydb.mytable like mydb.mytable2;
 # 拷贝表结构，且拷贝数据（用as）
 create table if not exists mydb.mytable as
 select * from mydb.mytable2;
+
+# 查看提交的任务 job 有哪些：
+使用 hadoop job -list 或 yarn application -list 
+root@98b2fb173dcf:~# hadoop job -list
+21/10/11 12:00:26 INFO client.RMProxy: Connecting to ResourceManager at /172.17.0.4:8032
+Total jobs:1
+                  JobId      State           StartTime      UserName           Queue      Priority       UsedContainers  RsvdContainers  UsedMem         RsvdMem         NeededMem         AM info
+ job_1633924393132_0002    RUNNING       1633924814275     anonymous         default        NORMAL                    2               0    3072M              0M             3072M      http://98b2fb173dcf:8088/
+proxy/application_1633924393132_0002/
+root@98b2fb173dcf:~# yarn application -list
+21/10/11 12:00:41 INFO client.RMProxy: Connecting to ResourceManager at /172.17.0.4:8032
+Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+                Application-Id      Application-Name        Application-Type          User           Queue                   State             Final-State             Progress                        Tracking-U
+RL
+application_1633924393132_0002  select name
+,info['语文'] as Chinese
+,info...a(Stage-1)                 MAPREDUCE     anonymous         default                 RUNNING               UNDEFINED                  50%           http://98b2fb173dcf:40437
+
+# 命令行运行java程序：
+第一步：将.java文件编译成.class文件：
+D:\Users\gswyhq>javac  -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar   GPSConverter\GPS.java GPSConverter\GPSConverterUtils.java GPSConverter\Converter.java
+第二步：运行编译好的.class文件(注意，运行时候，没有后缀名)：
+D:\Users\gswyhq>java GPSConverter/GPSConverterUtils
+Hello Java
+原始GPS84：22.544535, 113.963626
+百度：22.54753467820749, 113.9750246884934
+高德：22.541564058383628, 113.96853564046431
+GPS84：22.544522797896512, 113.96361616729034
 

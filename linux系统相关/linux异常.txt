@@ -155,3 +155,13 @@ root@90fc75e1cd24:/# su postgres
 vim ~/.profile
 添加
 export PATH=$PATH:/home/gswyhq/.local/bin
+
+问题：gcc将.py文件编译成 so文件出错：
+gcc: internal compiler error: Killed (program cc1)
+可能原因是内存不足；
+
+# 问题：
+ifconfig command not found 
+解决方法：
+apt-get install net-tools 
+

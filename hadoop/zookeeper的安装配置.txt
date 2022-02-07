@@ -1,0 +1,46 @@
+
+使用hbase自带的zookeeper，一直是只能本地连接2181端口，远程无法连接2181端口；
+
+zookeeper的下载：
+https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.7.0/apache-zookeeper-3.7.0-bin.tar.gz
+
+tar -zxvf apache-zookeeper-3.7.0-bin.tar.gz
+root@ce9f5485e05c:~# cd apache-zookeeper-3.7.0-bin
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin# ls
+LICENSE.txt  NOTICE.txt  README.md  README_packaging.md  bin  conf  docs  lib
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin# cd conf/
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin/conf# ls
+configuration.xsl  log4j.properties  zoo_sample.cfg
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin/conf# cp zoo_sample.cfg zoo.cfg
+
+启动 zookeeper 服务：
+
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin/bin# ./zkServer.sh start
+ZooKeeper JMX enabled by default
+Using config: /root/apache-zookeeper-3.7.0-bin/bin/../conf/zoo.cfg
+Starting zookeeper ... STARTED
+
+# 查看启动的端口：
+root@ce9f5485e05c:~/apache-zookeeper-3.7.0-bin/bin# netstat -tunelp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
+tcp        0      0 0.0.0.0:2181            0.0.0.0:*               LISTEN      0          379628     27533/java
+tcp        0      0 0.0.0.0:36101           0.0.0.0:*               LISTEN      0          379612     27533/java
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      0          380278     27533/java
+
+客户端连接测试：
+root@ce9f5485e05c:~/phoenix-hbase-2.3-5.1.2-bin/bin# ./sqlline.py 172.17.0.2:2181
+Setting property: [incremental, false]
+Setting property: [isolation, TRANSACTION_READ_COMMITTED]
+issuing: !connect -p driver org.apache.phoenix.jdbc.PhoenixDriver -p user "none" -p password "none" "jdbc:phoenix:172.17.0.2:2181"
+Connecting to jdbc:phoenix:172.17.0.2:2181
+21/11/10 16:23:39 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Connected to: Phoenix (version 5.1)
+Driver: PhoenixEmbeddedDriver (version 5.1)
+Autocommit status: true
+Transaction isolation: TRANSACTION_READ_COMMITTED
+sqlline version 1.9.0
+0: jdbc:phoenix:172.17.0.2:2181>
+
+
+

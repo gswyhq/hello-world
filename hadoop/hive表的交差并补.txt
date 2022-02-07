@@ -22,6 +22,39 @@ on ys.uid=qc.uid;
 join默认是inner join, 如：
 select * from teacher t inner join course c  on t.t_id = c.t_id;
 
+# 带where条件内连接：
+select t1.client_no, t2.party_no, nvl(t2.alias_party_no,t2.party_no) as party_id
+from db1.table1 t1
+JOIN db2.table2 t2
+ON t1.party_no = t2.party_no
+WHERE t1.client_no in ('abc123', 'abc125', 'abc136', 'abc321');
+
+当两个表join 时，写在where 的过滤条件：
+a. 如果是左表t1 则会先对 t1 进行过滤数据，然后再进行join 操作；
+b. 但是对于右表 t2 表并没有对t2 进行过滤,即join操作后才对t2的where 进行过滤，这样如果t2表数据非常大的话，效率就会很低。
+如果要对T2表进行先过滤的话，除了写子查询的模式,如下：
+EXPLAIN
+select t1.cust_pty_no,t2.amt
+from a t1
+left join (select * from b where busi_date='2020-04-17') t2
+on t1.cust_pty_no = t2.cust_pty_no 
+where t1.busi_date='2020-04-17' 
+
+也可以写成如下形式：
+EXPLAIN
+select t1.cust_pty_no,t2.amt
+from a t1
+left join b t2
+on t1.cust_pty_no = t2.cust_pty_no 
+and b.busi_date='2020-04-17'
+where t1.busi_date='2020-04-17' 
+
+总结：
+(1) 如果是对左表（a）字段过滤数据，则可以直接写在where后面，此时执行的顺序是：先对a表的where条件过滤数据然后再join b 表 ;
+(2) 如果是对右表（b）字段过滤数据，则应该写在on 条件后面或者单独写个子查询嵌套进去，这样才能实现先过滤b表数据再进行join 操作；
+如果直接把b表过滤条件放在where后面，执行顺序是：先对a表数据过滤，然后和b表全部数据关联之后，在reduce 阶段才会对b表过滤条件进行过滤数据，此时如果b表数据量很大的话，效率就会很低。因此对于应该在map 阶段尽可能对右表进行数据过滤。
+（3）至于是否全表扫描取决于是否对表的分区字段过滤。这个具体从业务方面考虑是否需要对分区过滤，要想sql 高效那么尽可能在map阶段将不需要的数据过滤，减少后面资源的占用，提高效率
+
 # 左外连接 left outer join
 左外连接：
 join操作符“左边表中”符合where子句的所有记录将会被返回。
@@ -57,8 +90,83 @@ left join stu on s.s_id = stu.id;
 写在关联左侧的表每有1条重复的关联键时底层就会多1次运算处理。
 假设A表有一千万个id，平均每个id有3条重复值，那么把A表放在前面做关联就会多做三千万次的运算处理，这时候谁写在前谁写在后就看出性能的差别来了。
 
+# 带条件多表关联：
+select t1.a, t2.b, t3.c
+from test1 t1
+join test2 t2 on (t2.dt='2021' and t1.uid=t2.uid)
+join test3 t3 on (t2.dt='2021' and t1.uid=t3.uid);
+
+当两张表A和B在join时，条件筛选放在表join时的on上面和放在where上面得到的结果是不一样的。
+如下创建两张表：
+A表结构以及数据：
+id  name    grade   dept
+1   lijie1  100     10
+2   lijie2  90      20
+3   lijie3  60      10
+4   lijie4  80      10
+5   lijie5  70      20
+
+B表结构以及数据：
+id  name
+10  IT1
+20  IT2
+
+1.两张表join并且筛选分数大于等于80的，条件放在join on上面
+select 
+    A.id,A.name,A.grade,A.dept,B.id,B.name 
+from
+    A left outer join B
+on
+    A.dept = B.id 
+and 
+    A.grade >=80 
+
+结果为：
+1   lijie1  100     10  10      IT1
+2   lijie2  90      20  20      IT2
+3   lijie3  60      10  NULL    NULL
+4   lijie4  80      10  10      IT1
+5   lijie5  70      20  NULL    NULL
+
+2.两张表join并且筛选分数大于等于80的，条件放在where上面
+select 
+    A.id,A.name,A.grade,A.dept,B.id,B.name 
+from
+    A left outer join B
+on
+    A.dept = B.id
+where
+    A.grade >=80 
+
+结果为：
+1   lijie1  100     10  10      IT1
+2   lijie2  90      20  20      IT2
+4   lijie4  80      10  10      IT1
+结论 
+当把过滤条件写在left join on上面会让基表所有数据都能显示，不满足条件的右表会以null填充，当过滤条件写在where上只会让符合筛选条件的数据显示。
+
 
 非空查找函数：
 语法: COALESCE(T v1, T v2, …)
 说明: 返回参数中的第一个非空值，从左到右返回第一个不为NULL的值，如果所有值都为NULL，那么返回NULL。
+
+# Hive使用LEFT OUTER JOIN 实现not in 子句
+HIVE 不支持 not in 中包含查询子句的语法，形如如下的HQ语句是不被支持的: 
+查询在key字段在a表中，但不在b表中的数据 
+select a.key from a where key not in(select key from b)
+可以通过left outer join进行查询,（假设B表中包含另外的一个字段 key1 
+select a.key from a left outer join b on a.key=b.key where b.key1 is null
+
+# LEFT SEMI JOIN （左半连接）是 IN/EXISTS 子查询的一种更高效的实现。
+Hive 当前没有实现 IN/EXISTS 子查询，所以你可以用 LEFT SEMI JOIN 重写你的子查询语句。
+LEFT SEMI JOIN 的限制是， JOIN 子句中右边的表只能在 ON 子句中设置过滤条件，在 WHERE 子句、SELECT 子句或其他地方过滤都不行。
+SELECT a.key, a.value FROM a WHERE a.key in (SELECT b.key FROM B);
+可以被重写为：
+SELECT a.key, a.val FROM a LEFT SEMI JOIN b on (a.key = b.key)
+特点
+1、left semi join 的限制是， JOIN 子句中右边的表只能在 ON 子句中设置过滤条件，在 WHERE 子句、SELECT 子句或其他地方过滤都不行。
+2、left semi join 是只传递表的 join key 给 map 阶段，因此left semi join 中最后 select 的结果只许出现左表。
+3、因为 left semi join 是 in(keySet) 的关系，遇到右表重复记录，左表会跳过，而 join 则会一直遍历。这就导致右表有重复值得情况下 left semi join 只产生一条，join 会产生多条，也会导致 left semi join 的性能更高。 
+4、最后 select 的结果只许出现左表。
+
 

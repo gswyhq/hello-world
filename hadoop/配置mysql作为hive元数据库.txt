@@ -11,7 +11,7 @@ docker run -p 3306:3306 --name mysql_3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:5
 root@c66129402967:~# mysql -uroot -proot -P 3306 -h 127.0.0.1
 
 # 创建一个hive的元数据库
-mysql> create database hive;
+mysql> create database if not exists hive;
 Query OK, 1 row affected (0.00 sec)
 
 # 通过docker inspect检查该容器的ip，我获取到的ip是172.17.0.3
@@ -116,9 +116,35 @@ Beeline version 2.3.7 by Apache Hive
 | 3        | nack       |
 +----------+------------+
 
+# 开启元数据服务命令：
+root@27d832029d21:~# nohup hive --service metastore > metastore.log &
+
+当然也可以下面这样进入beeline：
+root@27d832029d21:~# beeline
+beeline> !connect jdbc:hive2://172.17.0.4:10000
+Connecting to jdbc:hive2://172.17.0.4:10000
+Enter username for jdbc:hive2://172.17.0.4:10000: root
+Enter password for jdbc:hive2://172.17.0.4:10000: **** （此处输入的用户名密码为连接MySQL的用户名、密码；）
+Connected to: Apache Hive (version 2.3.9)
+Driver: Hive JDBC (version 2.3.9)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://172.17.0.4:10000> select * from test;
++----------+------------+
+| test.id  | test.name  |
++----------+------------+
+| 1        | jack       |
+| 2        | hel        |
+| 3        | nack       |
++----------+------------+
+
+Beeline和其他工具有一些不同，执行查询都是正常的SQL输入，但是如果是一些管理的命令，
+比如进行连接，中断，退出，执行Beeline命令需要带上“！”，不需要终止符。常用命令介绍：
+1、!connect url –连接不同的Hive2服务器
+2、!exit –退出shell, 即beeline退出命令；
+3、!help –显示全部命令列表
+4、!verbose –显示查询追加的明细
 
 查询一下之前建立的表看下是否能正常访问
-
 select * from test;
 
 Hive客户端工具后续将使用Beeline 替代HiveCLI ，并且后续版本也会废弃掉HiveCLI 客户端工具,Beeline是 Hive 0.11版本引入的新命令行客户端工具,它是基于SQLLine CLI的JDBC客户端。

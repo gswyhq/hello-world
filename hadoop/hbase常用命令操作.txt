@@ -1,0 +1,59 @@
+
+命令	说明	命令语法
+status	查看hbase状态信息	-
+tools	查看所有工具命令	-
+version	查看hbase版本信息	-
+list_namespace	查看命名空间（支持正则）	查看所有list_namespace
+正则匹配list_namespace 'ioe.*'
+create_namespace	创建命名空间	create_namespace <namespace>
+create_namespace 'ioe'
+alter_namespace	修改命名空间	如修改namespace的创建人 alter_namespace 'ioe', {METHOD=>'set', 'create'=>'xiaopang'}
+list_namespace_tables	查看命名空间下的表	list_namespace_tables<namespace>
+list_namespace_tables 'ioe'
+describe_namespace	查看命名空间详细信息	-
+drop_namespace	删除命名空间	需先清除表drop_namespace <namespace>
+create	创建表（指定namespace）	create <namespace>:<tableName>,<columnFamily1>,<columnFamily2>
+create 'ioe:user','a','b'
+create	创建表（默认namespace）	create <tableName>,<columnFamily1>,<columnFamily2>
+create 'user','name','address'用户有中文名、英文名、小名，地址有家庭地址、办公地址、户籍地址
+list	查看所有表	list
+列出其他namespace表list 'ioe.*'
+describe	查看表详细信息	describe <tableName>
+describe 'user'
+查看其他namespace表describe 'ioe:user'
+exists	判断表是否存在	exists <tableName>
+enable	启用表	enable <tableName>
+disable	停用表	disable <tableName>
+disable_all	批量停用表	disable '.*
+is_enabled	判断是否启用	is_enabled <tableName>
+is_disabled	判断是否停用	is_disabled <tableName>
+count	统计表中行数	count <tableName>
+put	新增记录	put <tableName>,<rowkey>,<columnFamily>:<column>,<value> 
+put 'user','xiaopang','name:en','michael' 
+put 'user','xiaopang','name:ch','胖子'
+put 'user','xiaopang','address:office','北京'
+get	查询记录	get <tableName>,<rowkey> 
+get 'user','xiaopang'
+获取多个版本数据get 'user','xiaopang',{COLUMN=>'phone:a',VERSIONS=>3}
+delete	删除记录	delete <tableName>,<rowkey>,<columnfamily>:<column> 
+delete 'user','xiaopang','name:ch'
+deleteall	删除整行记录	deleteall <tableName> <rowkey> 
+deleteall 'user','xiaopang'
+drop	删除表（必须先disable）	drop <tableName>
+drop 'user'
+drop_all	批量删除表（必须先disable）	drop_all '.*'
+alter	增加、修改、删除列簇	增加alter <table>,<columnfamily>
+修改alter <table>,<columnfamily>
+删除alter <table>,{NAME=><columnfamily>,METHOD=>'delete'}
+alter 'user','phone'
+alter 'user',{NAME=>'phone',METHOD=>'delete'}
+或alter 'user', 'delete' => 'phone'
+修改为最多获取5个版本alter 'user', NAME=>'phone',VERSIONS=>5
+incr	字段自增	incr 'user','xiaopang','age',9
+truncate	清除表数据	-
+scan	扫描所有记录	scan <tableName> 
+scan 'user'
+exit	退出	-
+shutdown	关闭集群	-
+
+
