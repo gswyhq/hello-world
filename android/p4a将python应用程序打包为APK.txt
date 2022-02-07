@@ -7,6 +7,14 @@
 kivy打包的Buildozer有两种工具，分别是p4a和buildozer。kivydev64使用p4a，kivydev使用buildozer。
 buildozer其实是对p4a做了进一步封装，换汤不换药。如果你不想配置recipe和dist之类的参数，可以使用buildozer，但是每次都要复制已经打包成功的项目目录下的.buildozer到要打包的项目目录下，buildozer才不会重复下载sdk和ndk等。而.buildozer目录通常在1G以上，每个项目目录如果都复制一份，不久就会耗尽虚拟机的硬盘空间。所以推荐使用p4a，也就是kivydev64。
 
+buildozer将.py文件打包成apk流程方法见：
+https://hub.docker.com/repository/docker/gswyhq/buildozer-py2apk
+主要是最后两步：
+COPY main.py /root/main.py
+RUN cd /root/ && echo y| buildozer init && yes y | buildozer -v android debug
+首次打包apk，可能因为配置对应的环境，下载等时间较久。
+当然也可以使用已经安装好的docker镜像：gswyhq/buildozer-py2apk
+
 不管哪种方法将py文件打包成apk，都需要SDK和NDK两个工具；
 简单来说，SDK负责编译.java文件；NDK负责编译C/C++源代码生成.so文件；最后 .java文件和.so文件NDK打包生成apk
 1.SDK
