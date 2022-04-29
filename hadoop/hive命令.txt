@@ -104,11 +104,11 @@ $ hive -e "select user, login_timestamp from user_login" > /tmp/out.txt
  select * from user_login
 
 查看附件数据命令：
-hadoop dfs -ls /apps-data/hduser2020/caijing_data
+hadoop dfs -ls /apps-data/hive_user2020/caijing_data
 获取数据文件：
-hadoop dfs -get /apps-data/hduser2020/caijing_data/259786.tar.gz
+hadoop dfs -get /apps-data/hive_user2020/caijing_data/259786.tar.gz
 # 查看数据文件大小：
-# hadoop dfs -du -h /apps-data/hduser2020/caijing_data/259786.tar.gz
+# hadoop dfs -du -h /apps-data/hive_user2020/caijing_data/259786.tar.gz
 
 # 查看某个数据表数据最后的更新时间：
 第一步，获取hdfs路径：

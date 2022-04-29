@@ -1,6 +1,9 @@
 
 背景：使用python的机器学习包sklearn训练好了模型，现在要在java环境进行预测；
 
+# 方法0：
+m2cgen（Model 2 Code Generator）是一个轻量级代码生成器，它可以将训练好的机器学习模型转换为Java、C、JavaScript、Go、Ruby，VBA 本地代码。用Excel玩机器学习：https://github.com/tjxj/excel2ml
+
 # 方法一：
 将python机器学习模型sklearn封装成对应的http服务；
 再在java端进行发送http请求调用；
