@@ -1,0 +1,127 @@
+
+ArrayList排序：
+定义一个集合
+List<Integer> list = new ArrayList<>();
+list.add(1);
+list.add(5);
+list.add(4);
+list.add(3);
+list.add(7);
+
+# 升序排序
+list.sort((a,b)->a.compareTo(b));
+或者
+list.sort(Comparator.comparing(a->a));
+或者
+list.sort((a,b)->a-b);
+
+# 降序排序
+list.sort((a,b)->b-a);
+
+
+# 对象集合排序：
+List<User> list1 = new ArrayList<User>();
+User user = new User("张三", "15", "男");
+User user1 = new User("李四", "10", "男");
+list1.add(user);
+list1.add(user1);
+//1、年龄升序
+list1.sort((a,b) -> a.getAge().compareTo(b.getAge()));
+//2、姓名降序排列
+list1.sort(Comparator.comparing(User::getName).reversed());
+//等价于 2
+list1.sort(Comparator.comparing(a->((User)a).getAge()).reversed());
+//3、先按性别排，如果年龄相同，再按年龄排序
+list1.sort(Comparator.comparing(User::getSex).reversed().thenComparing(User::getAge));
+
+
+# JSONArray 排序
+JSONArray resultArray = new JSONArray();
+JSONObject result = new JSONObject();
+result.put("name","张三");
+result.put("age","15");
+result.put("data","201812130451");
+resultArray.add(result);
+//根据姓名的倒序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getString("name")).reversed());
+//根据时间倒序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getData("data")).reversed());
+//根据年龄升序排序
+resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("age")));
+
+注意：reversed()函数的意思是将数组颠倒。其用法常见于字符串处理中，将字符串颠倒
+如：
+String str = "abcd";
+StringBuffer sb = new StringBuffer(str);
+sb.reverse();
+System.out.println(str);
+System.out.println(sb.toString());
+
+# 二维列表排序
+List<Object[]> streetDistanceList = new ArrayList();
+streetDistanceList.add(new Object[]{"张三", 1.2});
+streetDistanceList.add(new Object[]{"李四", 0.2});
+streetDistanceList.add(new Object[]{"王五", 3.2});
+Collections.sort(streetDistanceList, (v1, v2) -> {return ((double)v1[1]) - ((double)v2[1]) >= 0 ? 1 : -1;});
+但上排序，有时候可能报错：
+java.lang.IllegalArgumentException: Comparison method violates its general contract!
+这个时候，可以改成下面这种形式：
+Collections.sort(streetDistanceList, new Comparator<Object[]>() {
+    @Override
+    public int compare(Object[] v1, Object[] v2) {
+        Double o1 = ((double) v1[1]) - ((double) v2[1]);
+        return o1.compareTo(0.0);
+    }
+});
+
+for (int i = 0; i < streetDistanceList.size(); i++) {
+            Object[] p = (Object[]) streetDistanceList.get(i);
+            System.out.println(String.format("%s, %s", p[0], p[1]));
+}
+
+# 字典的排序
+        Map phone=new HashMap();
+        phone.put("Apple",7299);
+        phone.put("SAMSUNG",6000);
+        phone.put("Meizu",2698);
+        phone.put("Xiaomi",2400);
+        System.out.println(phone);
+
+1.按key排序
+对名称进行排序,首先要得到HashMap中键的集合(keySet),并转换为数组,这样才能用Arrays.sort()进行排序
+Set set=phone.keySet();
+Object[] arr=set.toArray();
+Arrays.sort(arr);
+for(Object key:arr){
+    System.out.println(key);
+}
+
+2.按value排序
+对价格进行排序,首先需要得到HashMap中的包含映射关系的视图(entrySet),
+将entrySet转换为List,然后重写比较器比较即可.这里可以使用List.sort(comparator),也可以使用Collections.sort(list,comparator)
+转换为list
+ List<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(phone.entrySet()); //转换为list
+使用list.sort()排序
+       list.sort(new Comparator<Map.Entry<String, Integer>>() {
+          @Override
+          public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+              return o2.getValue().compareTo(o1.getValue());
+          }
+      });
+使用Collections.sort()排序
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+           @Override
+           public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+               return o2.getValue().compareTo(o1.getValue());
+           }
+       });
+
+两种方式输出结果
+ //for循环
+         for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i).getKey() + ": " + list.get(i).getValue());
+        }
+ //for-each循环
+           for (Map.Entry<String, Integer> mapping : list){
+            System.out.println(mapping.getKey()+": "+mapping.getValue());
+        }

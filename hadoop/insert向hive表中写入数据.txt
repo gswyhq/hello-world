@@ -1,0 +1,165 @@
+
+Hive 的insert into 和 insert overwrite，都可以向hive插入数据；
+1、insert into 语句
+Hive> insert into table account select id,age,name from account_tmp;
+2、insert overwrite语句
+hive> insert overwrite table account2 select id,age,name from account_tmp;
+————————————————
+两者的区别：
+insert overwrite 会覆盖已经存在的数据，假如原始表使用overwrite 上述的数据，先现将原始表的数据remove，再插入新数据。最后表的数据 只有新插入的记录。
+insert into 只是简单的插入(但有例外情况)，不考虑原始表的数据，直接追加到表中。最后表的数据是原始数据和新插入新的记录。
+————————————————
+insert into 例外情况，会覆盖原有数据，等同于 insert overwrite：
+insert into table `hive_db.baidu_poi_2020` partition (y,m,d)
+select name, address, telephone, `uid`, lat, lng, `time`, y,m,d
+from `hive_db.baidu_poi_2020_2` limit 5;
+问题原因：
+尖引号的原因，要么库名和表名分别都加尖引号，要么就都别加，不要库名和表名都放在一个尖引号里
+insert into  `wf`.`insert_test_2` partition(dt='2020-07-01')  select 'uiyo1234','20210701256811','2020-07-01' ;   --正常insert
+insert into   wf.insert_test_2 partition(dt='2020-07-01')  select 'uiyo1234','20210701256811','2020-07-01' ;      --正常insert
+insert into  `wf.insert_test_2` partition(dt='2020-07-01')  select 'uiyo1234','20210701256811','2020-07-01' ;   --原来数据被覆盖，效果同overwrite
+因为使用`DatabaseName.TableName`时语法解析为OVERWRITE，该问题为apache社区问题。在当前版本的hive中还未修复。
+
+
+如何把一个表的查询结果插入到另一张表中(两个表的结构不同), 插入的字段个数和查询的字段个数必须一致
+insert into 表名(字段1,字段2,字段3...) select 字段1,字段2,字段3.. from 查询表名 where ..
+
+但有时候，分区表插入，在表名后面指明对应的字段时，即插入到指定列时，会出现错误，不允许指明插入列；
+这个时候可以在select时，给缺失字段赋空值，如：
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+insert into table tb1 partition (y,m,d)
+select name, '' as city, '' as lat, lng, y,m,d
+from tmp_tb1;
+需要注意的是，在提交查询的时候要选中一起提交，如果这样不选中提交不会自动执行这三个语句。可能会报错：
+Dynamic partition strict mode requires at least one static partition column.
+当然也可改成插入静态分区，如：
+insert into table tb1 partition (y='2021',m='08',d='01')
+select name, '' as city, '' as lat, lng
+from tmp_tb1;
+
+# 创建表，并插入数据：
+hive> create table if not exists cmb_test(
+ptf_id string,
+ptf_name string,
+bill_date string,
+acc_status string
+);
+hive> insert into cmb_test ( ptf_id, ptf_name, bill_date, acc_status ) values ('00001', '张三 ','20','计算机系'), ('00002', '李四','19','计算机系');
+
+insert into A(id,names)select id,firstName from B;
+
+另外，在使用 insert into select 语句时，可能会产生锁表，导致在用此句备份数据时，其他用户不能查询数据，特别是数据量大的时候更应该注意：
+如：在生产使用insert into t_test_2 select * from t_test_1 where name like 'trest'语句时，若name 字段缺失索引，就会造成备份数据时，锁全表；
+
+hive中的查询结果插入语句有两种：
+insert into table cite select * from cite;
+这个的意思就是将cite表中的数据复制一份，然后插入到原表中去，而
+insert overwrite table cite select * from tt;
+这个的意思就是会用tt表查出来的数据覆盖掉cite表格中已经存在的数据
+
+# Hive查询指定分隔符，指定导出数据分隔符；
+使用hive -e导出后默认的分隔符是\t，这时候若原始文本中存在 ‘\t’，用pandas.read_csv读取数据时候，就会报错，所以需要导出数据时指定分隔符；
+可以使用hive的insert语法导出文件
+insert overwrite local directory '/home/hadoop/20180303'
+row format delimited
+fields terminated by ','
+select * from table_name limit 100;
+需要注意的事，上式会删除数据导出目录“/home/hadoop/20180303”中的原有文件，并将导出100条数据到‘/home/hadoop/20180303’目录下名为‘000000_0’的文件中；
+
+hive 查询某一重复字段记录第一条数据，并插入新表：
+insert overwrite table hive_jdbc_test partition(day='2018-1-1')
+select key,value
+from (SELECT *, Row_Number() OVER (partition by key,value ORDER BY value desc) rank
+FROM hive_jdbc_test where day='2018-1-1') t
+where t.rank=1;
+
+这里主要的代码就是row_number() OVER (PARTITION BY COL1 ORDER BY COL2)
+这行代码的意思是先对COL1列进行分组，然后按照COL2进行排序，row_number()函数是对分组后的每个组内记录按照COL2排序标号，我们最后取的时候就拿标号为1的一条记录，即达到我的需求（对于COL1中重复的数据仅留一条记录）。
+
+创建表，并插入数据：
+CREATE TABLE `test_db.flag_all_client_party_credit_info`(
+	`party_id` string COMMENT '客户号',
+	`blacklist_type` string COMMENT '是否高风险客户',
+	`dsi_cluster` string COMMENT '消费风险评估',
+	`person_all_score_std` string COMMENT '总体信用评估',
+	`have_loan_flag` string COMMENT '是否有过贷款',
+	`have_car_loan_flag` string COMMENT '是否有过车贷',
+	`have_house_loan_flag` string COMMENT '是否有过房贷',
+	`is_more_credit_card` string COMMENT '是否有多张信用卡',
+	`loan_overdue_flag` string COMMENT '是否有过贷款逾期',
+	`credit_overdue_flag` string COMMENT '是否有过信用卡逾期',
+	`fake_risk` string COMMENT '欺诈风险评估')
+COMMENT '客户信用标签'
+ROW FORMAT SERDE
+'org.apache.hadoop.hive.ql.io.orc.OrcSerde'
+STORED AS INPUTFORMAT
+'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat'
+OUTPUTFORMAT
+'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat';
+
+INSERT INTO test_db.flag_all_client_party_credit_info
+VALUES
+('067095720414', '是', '', '中', '否', '', '', '是', '否', '是', ''),
+('013029565207', '', '低', '低', '否', '', '否', '是', '', '是', '否'),
+('065357069340', '', '', '中', '是', '否', '', '', '', '是', '');
+
+# 将一个无分区的表table1的数据导入到另一个分区表table2；
+insert into db_name.table2
+partition (y='2021',m='03',d='15')
+select party_id, mobile, data_source, data_upd
+from db_name.table1;
+
+Hive之insert into 和insert overwrite
+hive通常有三种方式对包含分区字段的表进行数据插入
+1）静态插入数据：要求插入数据时指定与建表时相同的分区字段，如：
+insert overwrite tablename （year='2017', month='03'） select a, b from tablename2;
+
+2）动静混合分区插入：要求指定部分分区字段的值，如：
+insert overwrite tablename （year='2017', month） select a, b, month from tablename2;
+
+3）动态分区插入：只指定分区字段，不用指定值，如：
+insert overwrite tablename （year, month） select a, b, year, month from tablename2;
+
+# insert into 与 insert overwrite 都可以向hive表中插入数据，但是insert into 直接追加到表中数据的尾部(特别注意：若用尖引号将库名、表名一起，则也会覆盖，即不能 `db_name.table_name`, 而应该`db_name`.`table_name`)，而
+# insert overwrite会重写数据，既先进行删除，再写入。如果存在分区的情况，insert overwrite会只重写当前分区数据。
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country = '中国', state = '北京')
+SELECT * FROM staged_employees se
+WHERE se.cnty = '中国' AND se.st = '北京';
+
+由于使用了 OVERWRITE 关键字，目标表中原来相同partition中的所有数据被覆盖，如果目标表中没有partition，则整个表会被覆盖。
+如果把OVERWRITE关键字删掉，或者替换成INTO，则hive会追加而不是替代原分区或原表中的数据，这个特性在Hive v0.8.0之后才支持。
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country, state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se;
+
+hive先获取select的最后两个位置的se.cnty和se.st参数值，然后将这两个值填写到Insert语句partition中的两个country和state变量中，
+即动态分区是通过位置来对应分区值的。原始表select出来的值和输出partition的值的关系仅仅是通过位置来确定的，和名字并没有关系，比如这里se.cnty和county的名称完全没有关系。
+
+只要位置正确，你可以混用动态分区和静态分区值设定，比如下面这个例子，你可以静态指定一个country值，但是state值采用动态的方法设定：
+INSERT OVERWRITE TABLE employees
+PARTITION (country = 'US', state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se
+WHERE se.cnty = 'US';
+
+注意：静态分区值必须在动态分区值的前面！
+
+# 自定义函数导入：
+insert into table `hive_db`.`addr_clean_poi_2021` partition ( y='2016', m='01', d='01')
+select
+    name, t2.addrClean as addrClean, t2.provinceClean as provinceClean, t2.cityClean as cityClean, t2.areaClean as areaClean, source, level1, level2, level3, lat, lng
+from
+       `hive_db`.`addr_poi_2021`
+LATERAL VIEW AddrClean(province, city, area, name, address) t2 as `provinceClean`, `cityClean`, `areaClean`, `addrClean`
+where y='2016' and m='01' and d = '01';
+
+注意：where 条件，需要写在 LATERAL 的后面；
+
+
+
+

@@ -1,0 +1,103 @@
+
+离线安装报错：
+
+root@72c96ffb5f95:~/apache-atlas-sources-2.2.0/dashboardv2/target# npm install --sass-binary-path=/root/linux-x64-72_binding.node
+Binary has a problem: Error: The module '/root/linux-x64-72_binding.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 72. This version of Node.js requires
+NODE_MODULE_VERSION 57. Please try re-compiling or re-installing
+查看node的版本：
+root@72c96ffb5f95:~/apache-atlas-sources-2.2.0/dashboardv2/target# node -v
+v8.10.0
+而node js 版本与 NODE_MODULE_VERSION 的对应关系（https://nodejs.org/en/download/releases/）：
+Version	LTS	Date	V8	npm	NODE_MODULE_VERSION[1]	
+Node.js 12.12.0		2019-10-11	7.7.299.13	6.11.3	72	Downloads Changelog Docs
+Node.js 12.11.1		2019-10-01	7.7.299.11	6.11.3	72	Downloads Changelog Docs
+Node.js 12.11.0		2019-09-25	7.7.299.11	6.11.3	72	Downloads Changelog Docs
+Node.js 12.10.0		2019-09-04	7.6.303.29	6.10.3	72	Downloads Changelog Docs
+Node.js 12.9.1		2019-08-26	7.6.303.29	6.10.2	72	Downloads Changelog Docs
+Node.js 12.9.0		2019-08-20	7.6.303.29	6.10.2	72	Downloads Changelog Docs
+Node.js 12.8.1		2019-08-15	7.5.288.22	6.10.2	72	Downloads Changelog Docs
+Node.js 12.8.0		2019-08-06	7.5.288.22	6.10.2	72	Downloads Changelog Docs
+Node.js 12.7.0		2019-07-23	7.5.288.22	6.10.0	72	Downloads Changelog Docs
+Node.js 12.6.0		2019-07-03	7.5.288.22	6.9.0	72	Downloads Changelog Docs
+Node.js 12.5.0		2019-06-26	7.5.288.22	6.9.0	72	Downloads Changelog Docs
+Node.js 12.4.0		2019-06-04	7.4.288.27	6.9.0	72	Downloads Changelog Docs
+Node.js 12.3.1		2019-05-22	7.4.288.27	6.9.0	72	Downloads Changelog Docs
+Node.js 12.3.0		2019-05-21	7.4.288.27	6.9.0	72	Downloads Changelog Docs
+Node.js 12.2.0		2019-05-07	7.4.288.21	6.9.0	72	Downloads Changelog Docs
+Node.js 12.1.0		2019-04-29	7.4.288.21	6.9.0	72	Downloads Changelog Docs
+Node.js 12.0.0		2019-04-23	7.4.288.21	6.9.0	72	Downloads Changelog Docs
+Node.js 8.10.0	Carbon	2018-03-06	6.2.414.50	5.6.0	57	Downloads Changelog Docs
+故而解决方法：
+更改安装包的版本，
+或者升级node到指定版本：
+清除npm缓存，执行命令
+npm cache clean -f
+n模块是专门用来管理nodejs的版本，安装n模块
+npm install -g n
+更新升级node版本
+
+ n stable // 把当前系统的 Node 更新成最新的 “稳定版本”
+ n lts // 长期支持版
+ n latest // 最新版
+ n 10.14.2 // 指定安装版本
+
+# npm install 安装报错：
+问题
+用npm安装模块时，npm 报了这样的一个错误ERR! registry error parsing json。
+方法
+npm config delete registry 删除registry，继续安装模块就可以了
+
+# 离线安装，报权限错误：
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm install --sass-binary-path=/root/linux-x64-72_binding.node
+> node-sass@4.13.1 install /root/apache-atlas-sources-2.2.0/dashboardv2/node_modules/node-sass
+> node scripts/install.js
+sh: 1: node: Permission denied
+npm ERR! code ELIFECYCLE
+npm ERR! syscall spawn
+npm ERR! file sh
+npm ERR! errno ENOENT
+npm ERR! node-sass@4.13.1 install: `node scripts/install.js`
+npm ERR! spawn ENOENT
+npm ERR!
+npm ERR! Failed at the node-sass@4.13.1 install script.
+问题原因及解决方法：
+因为npm的安全特性，避免使用sudo去执行npm
+解决方法：
+1、~$ mkdir ~/.npm-global
+2、~$ npm config set prefix '~/.npm-global'
+3、~$ echo "export PATH=~/.npm-global/bin:\$PATH" >> ~/.profile
+4、~$ source ~/.profile
+之后，再重新安装就可以了：
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm install --sass-binary-path=/root/linux-x64-72_binding.node
+
+# 安装报错：
+[INFO] Downloading binary from http://maven.abcdef.com.cn/repository/taobao-npm/node-sass/v4.13.1/linux-x64-72_binding.node
+[ERROR] Cannot download "http://maven.abcdef.com.cn/repository/taobao-npm/node-sass/v4.13.1/linux-x64-72_binding.node":
+[ERROR]
+[ERROR] Parse Error: Response overflow
+这个是因为sass安装时获取源的问题，修改sass安装的源，使用taobao的npm
+npm config set sass_binary_site=https://npm.taobao.org/mirrors/node-sass
+然后重新安装；
+或者下载好后，离线安装：
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm i node-sass --sass_binary_site=/root/linux-x64-72_binding
+
+
+离线安装程序包，报错：
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm install /root/uri-js-4.2.2.tgz
+gyp http GET https://nodejs.org/download/release/v12.12.0/node-v12.12.0-headers.tar.gz
+gyp WARN install got an error, rolling back install
+gyp verb command remove [ '12.12.0' ]
+gyp verb remove using node-gyp dir: /root/.node-gyp
+gyp verb remove removing target version: 12.12.0
+gyp verb remove removing development files for version: 12.12.0
+gyp ERR! configure error
+gyp ERR! stack Error: This is most likely not a problem with node-gyp or the package itself and
+gyp ERR! stack is related to network connectivity. In most cases you are behind a proxy or have bad
+解决方法：先下载 node-v***-headers.tar.gz，rebuild时用--tarball 指定本地头文件
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# du -h /root/node-v12.12.0-headers.tar.gz
+540K    /root/node-v12.12.0-headers.tar.gz
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm config set tarball /root/node-v12.12.0-headers.tar.gz
+root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm install /root/uri-js-4.2.2.tgz
+

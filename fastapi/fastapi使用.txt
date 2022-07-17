@@ -1,0 +1,75 @@
+
+安装
+pip3 install fastapi
+还需要一个 ASGI 服务来进行生产部署，例如 Uvicorn 或者 Hypercorn。
+pip3 install uvicorn
+FastAPI 文档推荐使用 Uvicorn 来部署应用( 其次是 hypercorn)，Uvicorn 是一个基于 asyncio 开发的一个轻量级高效的 Web 服务器框架(仅支持 python 3.5.3 以上版本)
+
+使用以下命令创建文件 main.py：
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: str = None):
+    return {"item_id": item_id, "q": q}
+
+
+或者使用 asyn def……
+如果您的代码使用了 async 或者 await，请使用 async def：
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/")
+async def read_root():
+ return {"Hello": "World"}
+
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: int, q: str = None):
+ return {"item_id": item_id, "q": q}
+
+
+运行
+使用以下命令运行服务器：
+
+uvicorn main:app --reload
+关于命令 uvicorn main:app --reload
+main：文件 main.py（Python 模块）
+app：在 main.py 内部创建的对象，其中包含 app = FastAPI() 行。
+--reload：使服务器在代码更改后重新启动。 仅开发时使用。
+
+uvicorn
+通俗解释：就是一个ASGI服务器，就是把你代码跑在一个你认识的一个平台上。
+ASGI服务器：
+解释：异步网关协议接口。它是介于网络协议服务和Python应用之间的标准接口。
+通俗解释：就是能够处理多种通用的协议类型，例如：HTTP、HTTP2、WebSocket等
+
+指定IP和端口：
+$ uvicorn main:app --reload --host 192.XXX.XXX --port 8001
+其中 reload 是自动重启，就是只要修改文件，便会执行一次。
+
+脚本：
+import uvicorn
+uvicorn.run(app, host="192.XXX.XXX", port="8001")
+
+测试：
+用浏览器打开 http://127.0.0.1:8000/items/5?q=somequery
+您将看到 JSON 响应：
+{"item_id": 5, "q": "somequery"}
+
+交互式api文档
+现在转到 http://127.0.0.1:8000/docs
+备用api文档：
+http://127.0.0.1:8000/redoc
+

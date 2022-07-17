@@ -1,0 +1,36 @@
+
+# Ubuntu18.04 kivy 中文显示问题
+# 将字体下载，复制到 main.py 文件同一目录下
+
+# 链接: Kivy字体 DroidSansFallback
+# https://pan.baidu.com/s/1CPBQqdjRmAg25uUkpEhnqA
+# 提取码：akxp
+# 当然，其他的支持中文的字体也是可以的：
+# c/Windows/Fonts $ docker cp simhei.ttf fe355f3dc5c7:/root/
+# gswyhq@gswyhq-PC:/media/gswyhq/Windows7_OS/Windows/Fonts$ docker cp simhei.ttf 6bf4e0dd1a30:/usr/share/fonts/
+
+import kivy
+from kivy.app import App
+from kivy.uix.button import Button
+
+kivy.resources.resource_add_path('font/')
+ft = kivy.resources.resource_find('DroidSansFallback.ttf')
+
+class MyApp(App):
+	def build(self):
+		return Button(text='我的世界', font_size=50, font_name = ft)
+
+MyApp().run()
+
+#############################################################################################################
+# 当然也可以全局注册未默认字体，这样不用每处都 font_name=ft 设置：
+>>> from kivy.core.text import Label as CoreLabel, DEFAULT_FONT
+>>> DEFAULT_FONT
+'Roboto'
+# 引入资源目录,如res目录位于项目根目录下，写相对路径(不要写绝对路径)相当于告诉kivy　DroidSansFallback.ttf 字体位于res目录中
+from kivy.resources import resource_add_path, resource_find
+resource_add_path(os.path.abspath('./fonts'))
+# 替换kivy中的默认字体，使用我们的新字体
+from kivy.core.text import LabelBase
+LabelBase.register('Roboto', 'simhei.ttf')
+

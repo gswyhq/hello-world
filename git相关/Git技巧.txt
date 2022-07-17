@@ -82,9 +82,26 @@ git gc --aggressive --prune=now
 
 忽略文件跟踪
 在和他人合作时可能常常意味着你需要更改一些配置才能让应用在环境里跑起来，这时，常常会不小心把这些只对你有意义的配置文件也给提交了。为了不再常常关注这些文件，看着它们在git status时放肆的显示“modified”，你可以告诉git忽略它们的改动。这种方式，可以看成是一种和仓库绑定的gitignore文件（括号部分替换为对应文件）：
+.gitignore 只能是对未受控的文件有效，即 文件未被 git add file, 这个时候，添加路径到 .gitignore 文件才是有效的；
+若文件以及是git受控的了，再去添加就已经迟了。即使把路径添加到 .gitignore 也是不生效，没有效果的；
 
+若要想让已经受控的文件，忽略文件跟踪，可以使用下面的命令：
   git update-index --assume-unchanged (path/file)
-译者注：感觉，.gitignore文件更方便和好理解。
+但在windows系统上面测试的时候，发现不能添加路径，只能添加文件；
+所以，若是要忽略某个路径，可以使用下面的命令：
+git ls-files|grep "java/reveal_dev"|grep -v "java/reveal_dev/reveal" |tr '\n' ' ' | xargs git update-index --assume-unchanged
+说明：
+git ls-files 列出所有受控文件，这里筛选路径"java/reveal_dev"，但排除路径"java/reveal_dev/reveal"，并且把换行替换为空格。最后用命令 git update-index --assume-unchanged，忽略所列文件的跟踪。
+这里需要对应文件名中间不能有空格，否则路径存在问题，针对有空格的文件，可以先纳入排除文件路径中，后面再单独添加即可。
+
+# 如果忽略的文件多了，可以使用以下命令查看忽略列表
+git ls-files -v|grep "^h"
+
+# 若不像忽略，恢复跟踪，恢复跟踪的命令如下
+git update-index --no-assume-unchanged  sp_edaijia/protected/controllers/ApiController.php  //恢复跟踪
+
+# 取消所有的忽略，都恢复跟踪，所有被忽略的文件，取消忽略的方法，如下
+git ls-files -v | grep '^h' | awk '{print $2}' |xargs git update-index --no-assume-unchanged
 
 让分支的历史归零
 不管出于啥理由，有时从头开始正是你需要的。也许是你接手了一个不确信能安全开源的代码仓库；也许是你要着手做些全新的事情；也许是你想创建用于其它目的一个新分支，又希望继续在仓库里维护它（比如：github页面，项目的文档一类的东西）。上述的情形下，你可以非常简单的创建一个没有提交历史的分支（括号部分替换为对应分支）：

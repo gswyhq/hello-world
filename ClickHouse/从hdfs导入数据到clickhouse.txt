@@ -1,0 +1,81 @@
+
+[hadoop@SZE-L0403067 ~]$ cat book3.csv
+0553573403,book,A Game of Thrones,7.99
+0553579908,book,A Clash of Kings,7.99
+055357342X,book,A Storm of Swords,7.99
+0553293354,book,Foundation,7.99
+0812521390,book,The Black Company,6.99
+0812550706,book,Ender's Game,6.99
+0441385532,book,Jhereg,7.95
+0380014300,book,Nine Princes In Amber,6.99
+0805080481,book,The Book of Three,5.99
+080508049X,book,The Black Cauldron,5.99
+
+# 将文件put fdfs:
+hdfs dfs -put -f  book3.csv   hdfs://21.23.22.32:9001/tmp/hive/hadoop/
+
+# 更改文件所在fdfs目录（需是目录而不仅是文件）的权限：
+hdfs dfs -chmod 777 /tmp/hive/hadoop/
+hdfs dfs -chown -R clickhouse:clickhouse /tmp/hive/hadoop/
+
+# 创建数据表，并从hdfs读取数据：
+create table hdfs_books2_csv engine = MergeTree order by isbn
+as select * from
+hdfs('hdfs://21.23.22.32:9001/tmp/hive/hadoop/book3.*','CSV','isbn String,cat String,name String,price Float64') ;
+
+ClickHouse支持的文件格式参见：https://clickhouse.yandex/docs/en/interfaces/formats/
+
+# clickhouse读取表内容；
+echo "select * from hdfs_books2_csv"  |curl localhost:8123 --data-binary @-
+
+查询出的数据与book3.csv的内容相同。
+当用户执行 SELECT * FROM hdfs_books2_csv 语句时，数据流向如下
+执行“SELECT * FROM hdfs_books2_csv” -> 查询引擎（clickhouse）-> 拉取数据（hdfs, book3.csv）
+这种使用场景相当于把HDFS做为ClickHouse的外部存储，当查询数据时，直接访问HDFS的文件，而不需要把HDFS文件导入到ClickHouse再进行查询。由于是从HDFS拉取数据，相对于ClickHouse的本地存储查询，速度较慢。
+
+
+# 通过HDFS引擎，CK访问hdfs数据（数据存储在hdfs中，CK不存数据，仅仅读取，故而耗时较本地表时间较长），示例：
+第一步：构建Parquet格式的hive表；
+hive> CREATE TABLE `test_tb6`(
+  `mid` string,
+  `tag` int,
+  `db_table` int)
+ROW FORMAT SERDE
+  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+WITH SERDEPROPERTIES (
+  'field.delim'='\t',
+  'serialization.format'='\t')
+STORED AS INPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
+OUTPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat';
+或者：
+[hadoop@SZE-L0403067 ~]$ hive -e "create table if not exists test_tb6(mid string, tag int, db_table int) row format delimited fields terminated by '\t' stored as Parquet";
+
+第二步：hive表中导入数据；
+hive> insert into table test_tb6 (mid, tag, db_table) select mid, tag, db_table from test_tb1;
+或者：
+hive> INSERT INTO table test_tb6 VALUES ('a', 1, 3), ('b', 1, 2), ('a', 21, 8), ('b', 32, 2), ('a', 1, 2), ('b',8, 1), ('a',7, 121), ('a', 2, 14);
+
+第三步：查询hive表数据文件存储路径：
+[hadoop@SZE-L0403067 ~]$ hive -e "show create table test_tb6" |grep -A 1 LOCATION
+
+LOCATION
+  'hdfs://12.45.23.12:9001/user/hive/warehouse/test_tb6'
+
+第四步：CK中构建HDFS引擎表，并且表的格式设置为Parquet：
+curl 12.45.23.12:8123 -d "CREATE TABLE tutorial.parquet_test_tb6
+(
+    mid String,
+    tag UInt8,
+    db_table UInt16
+)
+ENGINE = HDFS('hdfs://12.45.23.12:9001/user/hive/warehouse/test_tb6/*', 'Parquet')"
+
+第五步：查询使用CK中的表：
+curl 12.45.23.12:8123 -d "select * from tutorial.parquet_test_tb6 limit 3"
+但删除表数据操作，会报错：
+curl 12.45.23.12:8123 -d "TRUNCATE TABLE IF EXISTS tutorial.parquet_test_tb6"
+Code: 48, e.displayText() = DB::Exception: Truncate is not supported by storage HDFS (version 20.3.7.46 (official build))
+注意：此时，若将hive中对应的表删除了，CK查询不会报错，仅仅是数据为空而已；
+

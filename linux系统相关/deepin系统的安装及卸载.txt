@@ -54,3 +54,63 @@ gswewf@gswewf-pc:~$ sudo apt-get update
 # 或者修复安装报错软件
 gswewf@gswewf-pc:~$ sudo apt-get -f install deepin-desktop-base
 
+# deepin 系统重装
+一、找到之前/home目录挂载的分区
+$ df -h
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/sda8       103G   91G  6.3G   94% /media/gswyhq/c3178b05-7ed9-4928-9671-4920411fc2de
+二、卸载该分区
+$ sudo umount /dev/sda8
+三、将该分区挂载到 /home目录上
+$ sudo mount /dev/sda8 /home
+四、查找该分区的UUID
+$ ls -l /dev/disk/by-uuid/
+lrwxrwxrwx 1 root root 10 8月  14 12:21 c3178b05-7ed9-4928-9671-4920411fc2de -> ../../sda8
+五、修改/etc/fstab文件
+　　sudo vim /etc/fstab
+添加如下行
+　　 UUID=c3178b05-7ed9-4928-9671-4920411fc2de       /home   ext4    defaults        0       2
+六、重启电脑:
+$ sudo reboot
+七、应用商店安装搜狗输入法，并删除其他输入法
+八、应用商店安装Chrome浏览器，并删除其他浏览器
+九、应用商店安装 Typora、PyCharm社区版
+十、安装git、docker并设置
+$ sudo apt-get update
+$ sudo apt-get install -y git
+$ sudo apt-get install -y docker-ce
+$ sudo apt-get install -y bash-completion
+# 自动补全设置：
+~/.bashrc 文件添加如下两行,设置git、docker的自动补全：
+source /usr/share/bash-completion/completions/docker
+source /usr/share/bash-completion/completions/git
+# 非root用户设置
+sudo groupadd docker     #添加docker用户组
+sudo gpasswd -a $USER docker     #将登陆用户加入到docker用户组中
+newgrp docker     #更新用户组
+# docker 设置国内镜像源：
+1，新建文件
+$ sudo vim /etc/docker/daemon.json
+添加如下内容：
+{
+  "registry-mirrors": ["http://hub-mirror.c.163.com"]
+}
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart docker
+
+# 修改docker 仓库容器本地存储路径：
+$ sudo vim /etc/default/docker
+添加如下内容：
+DOCKER_OPTS="--graph /home/gswyhq/docker/data"
+并且需要修改/lib/systemd/system/docker.service：
+gswyhq@gswyhq-PC:~/docker/data$ sudo vim /lib/systemd/system/docker.service 
+# 添加下面两行内容：
+EnvironmentFile=-/etc/default/docker                                       
+ExecStart=/usr/bin/dockerd $DOCKER_OPTS -H fd:// --containerd=/run/containerd/containerd.sock    
+# ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+# 重启docker
+gswyhq@gswyhq-PC:~$ sudo systemctl daemon-reload  
+gswyhq@gswyhq-PC:~$ sudo service docker restart
+gswyhq@gswyhq-PC:~$ docker info |grep -i root
+ Docker Root Dir: /home/gswyhq/docker/data
+

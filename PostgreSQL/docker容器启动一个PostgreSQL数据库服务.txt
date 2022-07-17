@@ -1,0 +1,9 @@
+
+# 启动postgresql数据库，并不设置密码：
+docker run -d -it --name postgresql -e ALLOW_EMPTY_PASSWORD=yes -p 5432:5432 bitnami/postgresql
+
+# 启动postgresql数据库，并设置密码：
+docker run -d -it --name postgresql -e POSTGRES_PASSWORD=123456 -p 5432:5432 bitnami/postgresql
+docker run -d -it --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -v /D/Users/gswyhq/docker/postgresql/data:/var/lib/postgresql/data -e POSTGRESQL_DATABASE=trade -p 5432:5432 bitnami/postgresql:11.7.0-debian-10-r9
+
+

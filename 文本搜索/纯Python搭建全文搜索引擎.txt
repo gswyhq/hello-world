@@ -1,0 +1,7 @@
+
+docker run -d --name searx  -p 8888:8888 -p 8080:8080 searx/searx:1.0.0-361-03eb9c24
+
+浏览器打开：
+http://localhost:8080/
+
+

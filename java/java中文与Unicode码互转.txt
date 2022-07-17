@@ -1,0 +1,30 @@
+
+
+中文转 Unicode码：
+public String chinaToUnicode(String str){  
+        String result="";  
+        for (int i = 0; i < str.length(); i++){  
+            int chr1 = (char) str.charAt(i);  
+            if(chr1>=19968&&chr1<=171941){//汉字范围 \u4e00-\u9fa5 (中文)  
+                result+="\\u" + Integer.toHexString(chr1);  
+            }else{  
+                result+=str.charAt(i);  
+            }  
+        }  
+        return result;  
+    }  
+
+Unicode码转中文：
+
+public  String unicodeToString(String str) {
+    Pattern pattern = Pattern.compile( "(\\\\u(\\p{XDigit}{4}))" );   
+    Matcher matcher = pattern.matcher(str);
+     char  ch;
+     while  (matcher.find()) {
+        ch = ( char ) Integer.parseInt(matcher.group( 2 ), 16 );
+        str = str.replace(matcher.group( 1 ), ch + "" );   
+    }
+     return  str;
+}
+
+

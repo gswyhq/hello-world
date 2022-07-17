@@ -10,7 +10,7 @@ gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restar
 
 gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker cp data xinxin_all_baoxian_7474:/var/lib/neo4j/
 
-gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker commit -m "信诚四款保险产品neo4j数据" xinxin_all_baoxian_7474 xinxin_all_baoxian_neo4j:20180504
+gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker commit -m "诚信四款保险产品neo4j数据" xinxin_all_baoxian_7474 xinxin_all_baoxian_neo4j:20180504
 sha256:ed3a5a949c3cf997c5a34362ca2c2f411d2c78a20535d83d91330892a44d2404
 
 gswewf@gswewf-PC:~/docker/neo4j/xinxin_all_baoxian$ docker run --detach --restart=always  --name=xinxin_all_baoxian_7474_2 --publish=7474:7474 --publish=7687:7687 xinxin_all_baoxian_neo4j:20180504

@@ -1,0 +1,30 @@
+IDEA中报错：
+illegal cyclic reference involving trait Iterable
+    val tmpbalanceMap = new mutable.HashMap[String, JFloat]()
+当排除各种可能性后，很有可能是版本问题：
+$ scala -version
+Scala code runner version 2.13.6 -- Copyright 2002-2021, LAMP/EPFL and Lightbend, Inc.
+重新下载旧的版本，如 2.12.14即可：
+https://downloads.lightbend.com/scala/2.12.14/scala-2.12.14.zip
+
+
+Scala cannot resolve symbol *** 或者：找不到符号
+检查以下几个方面:
+1，File->Settings->plugins->scala
+2，FIle->Project Structure->Modules->把当前的工程删了，重新导入
+3，FIle->Project Structure->Libraries->导入$SCALA_HOME的具体路径作为Scala的SDK
+4，FIle->Project Structure->SDKs->导入$JAVA_HOME的具体路径作为JDK
+5，File->Invalidate Caches/Restart
+
+maven, 调用Scala代码报错：找不到符号，“***包不存在”
+Intellij IDEA中导入包处，也不标红，显示正常，但编译，或者run，就会报错；
+IDEA 是否标红报错，若是外部包则与pom.xml中是否有对应的包导入有关；
+若是内部程序，则需观察路径等是否设置正确。
+File -> Settings -> Build, Execution,Deployment -> Build Tools -> Maven -> Importing -> Automatically download -> 是否勾选 Sources。
+另外，内部程序包导入报错，需要检查，内部程序写的是否有问题，若存在问题也报错；
+
+另外：在Maven中，项目的依赖关系在pom.xml文件中指定。在IntelliJ IDEA中，即使对于Maven项目，相同的信息也存储在.iml文件中。
+有时候，pom.xml中定义依赖的包，但 ***.iml 文件里头却没有，这个时候，需要更新 *.iml文件(一种简单粗暴的方式是删除*.iml文件，再 FIle->Project Structure->Modules重新设置)，
+否则Intellij IDEA 点击 Run 时候，还是会提示外部包缺失。
+
+

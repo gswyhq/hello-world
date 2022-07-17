@@ -1,0 +1,55 @@
+
+ffmpeg工具本身功能非常强大，转码、剪切、截图、视频合成等
+
+python3 调用ffmpeg命令进行视频切分
+　　如果对D:\AI\bili_data\test.mp4 视频文件进行切分，比如从 视频的22秒处开始切分，切分出来一个30秒的视频文件output.mp4 ，命令如下：
+　　ffmpeg -ss 00:00:22 -t 00:00:30 -i D:\AI\bili_data\test.mp4 -c:v libx264 -c:a aac -strict experimental -b:a 128k D:\AI\bili_data\output.mp4
+　　从test.mp4视频文件的开始截取120秒的视频
+　　ffmpeg -ss 00:00:00 -i D:\AI\bili_data\test.mp4 -t 120 D:\AI\bili_data\output.mp4
+　　参数说明：
+　　-ss：截取起始时间；
+　　-t：截取时长；
+　　-i：视频文件路径；
+　　-c:v：指定视频编码器；
+　　-c:a：指定音频编码器；
+　　-strict experimental：AAC编码器相关；
+　　-b:a：设定音频比特率。
+
+登录官网下载ffmpeg工具。
+http://ffmpeg.org/download.html
+bin目录下有3个工具:ffmpeg、ffplay、ffprobe
+
+其中ffmpeg就可以对视频截取操作;
+ffprobe可以取元数据信息等;
+使用ffprobe操作下视频。可以看到视频元数据信息
+~$ ffprobe 1.mp4
+
+想着把它输出为json格式的最好:
+E:\tools\ffmpeg-win64\bin>ffprobe -v quiet -print_format json -show_format 1.mp4
+
+使用ffmpeg工具对视频切割
+bin>ffmpeg  -i 1.mp4 -ss 0 -t 955 -codec copy cut.mp4
+参数解释下
+-i接文件名，指的是输入文件名
+-ss是视频的起始位置，这里是0的话，就表示从低0秒开始截取
+-t是持续时间。这里是切割视频中的0~955秒的内容。
+-codec copy 表示将拷贝所有的流，而不会对它们重新编码，（也可以写为-c copy，测试过一样。仅仅剪切，不转码）不加这个参数CPU会急剧飙升。100%占用率，而且视频不是很快的截取完毕
+
+ffmpeg -i ./plutopr.mp4 -vcodec copy -acodec copy -ss 00:00:10 -to 00:00:15 ./cutout1.mp4 -y
+-ss time_off set the start time offset 设置从视频的哪个时间点开始截取，上文从视频的第10s开始截取
+-to 截到视频的哪个时间点结束。上文到视频的第15s结束。截出的视频共5s.
+-t 表示截取多长的时间，如上文-to 换位-t则是截取从视频的第10s开始，截取15s时长的视频。即截出来的视频共15s.
+注意的地方是：
+如果将-ss放在-i ./plutopr.mp4后面则-to的作用就没了，跟-t一样的效果了，变成了截取多长视频。一定要注意-ss的位置。
+
+参数解析
+-vcodec copy表示使用跟原视频一样的视频编解码器。
+-acodec copy表示使用跟原视频一样的音频编解码器。
+
+-i 表示源视频文件
+-y 表示如果输出文件已存在则覆盖。
+
+
+
+
+

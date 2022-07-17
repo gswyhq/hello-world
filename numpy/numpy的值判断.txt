@@ -1,0 +1,21 @@
+
+
+判断一个ndarray中所有元素是否大于或小于某个具体值
+import numpy as np
+a = [4, 5, 6, 8]
+np.array(a) < 10 
+#输出为 array([True, True, True, True])
+ 
+(np.array(a) < 10).all()
+#输出为 True
+
+# 对每个值取绝对值进行判断：
+p1 = np.array([[1],
+       [2],
+       [3]])
+p2 = np.array([[1.1],
+       [2.2],
+       [3.3]])
+(np.maximum(p1-p2, p2-p1)<0.5).all()
+Out[111]: True
+

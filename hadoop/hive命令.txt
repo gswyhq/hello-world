@@ -1,0 +1,347 @@
+
+创建库 hive_db：
+create database if not exists hive_db;
+
+hive删除表：
+drop table db_name.table_name;
+hive删除表中数据：
+truncate table db_name.table_name;
+
+删除空数据库：
+drop database db_name;
+
+采用 if exists判断数据库是否存在，若存在则删除：
+drop database if exists db_name;
+
+如果数据库不为空，可以采用cascade命令，强制删除数据库：
+drop database db_name cascade;
+
+删除空行数据（根据查询结果不为空，覆盖旧数据）：
+insert overwrite table sor select * from sor where id is not null;   //覆盖之前表里的数据
+
+--  删除库
+drop database if exists db_name;
+--  强制删除库
+drop database if exists db_name cascade;
+
+--  删除表
+drop table if exists employee;
+
+--  清空表,删除数据，保留表结构；
+truncate table employee;
+--  清空表，第二种方式(按照where条件筛选数据，覆盖原有表数据，达到删除不合where条件的数据目的)
+insert overwrite table employee select * from employee where 1=0; 
+
+--  删除分区
+alter table employee_table drop partition (stat_year_month>='2018-01');
+
+--  按条件删除数据
+（实际上是用满足条件的数据覆盖原有数据，间接删除了不合where条件的数据）
+insert overwrite table employee_table select * from employee_table where id>'180203a15f';
+insert overwrite是删除原有数据然后在新增数据，如果有分区那么只会删除指定分区数据，其他分区数据不受影响。
+
+# 删除分区表指定数据：
+    删除具体partition
+    alter table table_name drop partition(partiton_name='xxx');
+	
+    删除具体partition的部分数据
+	INSERT OVERWRITE TABLE table_name PARTITION(year='2018') 
+	SELECT * FROM table_name WHERE year='2018' AND month>6;
+    #注意：WHERE后的条件是需要保留的数据的查询结果
+
+# 删除非分区表指定数据
+    INSERT OVERWRITE TABLE table_name SELECT * FROM table_name WHERE year>2018;
+    #注意：WHERE后的条件是需要保留的数据的查询结果,即删除2018年及以前的数据
+
+
+查看表的建表语句(这里是查看db_name库中的table_name表的建表语句)：
+SHOW CREATE TABLE db_name.table_name;
+
+查看表的详细属性信息（desc formatted）：
+desc formatted db_name.table_name;
+
+查看表的详细信息（describe extended）：
+describe extended db_name.table_name;
+
+查看表的总记录数：
+select count(*) from db_name.table_name;
+
+查看有哪些分区：
+show partitions db_name.table_name;
+
+# 进入Hive命令行，执行show databases;命令，可以列出hive中的所有数据库，默认有一个default数据库，进入Hive-Cli之后，即到default数据库下。
+# 列出所有的数据库：
+show databases;
+
+# 对列出的数据库，模糊搜索，即查找含有某关键词的数据库,如查找数据库名还有‘weibo’的数据库名：
+show databases like '*weibo*';
+
+# 使用use databasename;可以切换到某个数据库下,切换到具体数据库；
+use db_name;
+
+# 查看某个数据库下面有哪些数据表（需先用use db_name切换数据库）：
+# show tables; 即可查看该数据库下所有的表
+use db_name;
+show tables;
+
+# 对当前数库下的表名模糊搜索，即搜索包含某关键词的数据表，如查找表名有‘uid’的数据表：
+use db_name;
+show tables '*uid*';
+
+在现有表上增加一列(这里增加一列名为‘storage_time’)：
+ALTER TABLE db_name.table_name ADD COLUMNS (storage_time timestamp comment "存储时间");
+
+执行数据导出命令：
+hive -e "set mapreduce.job.queuename=queue_6202_01;select * from db_name.table_name">/data/table_name_data.txt
+
+sql的查询结果将直接保存到/tmp/out.txt中
+$ hive -e "select user, login_timestamp from user_login" > /tmp/out.txt
+
+当然我们也可以查询保存到某个文件file.sql中，按下面的方式执行查询，并保存结果
+ $ hive -f test.sql > /tmp/out.txt
+
+ cat test.sql
+ select * from user_login
+
+查看附件数据命令：
+hadoop dfs -ls /apps-data/hive_user2020/caijing_data
+获取数据文件：
+hadoop dfs -get /apps-data/hive_user2020/caijing_data/259786.tar.gz
+# 查看数据文件大小：
+# hadoop dfs -du -h /apps-data/hive_user2020/caijing_data/259786.tar.gz
+
+# 查看某个数据表数据最后的更新时间：
+第一步，获取hdfs路径：
+desc.formatted db_name.table_name;
+获取结果示例：Location: hdfs://hdfs01-sh/user/hive/warehouse/db_name.db/table_name
+第二步：通过 dfs -ls <hdfs path> 命令查看数据文件最新更新时间：
+hadoop dfs -ls hdfs://hdfs01-sh/user/hive/warehouse/db_name.db/table_name
+
+# 创建路径
+hdfs dfs -mkdir '/user/admin/deploy/text_anti_brush';
+
+# 删除路径
+hdfs dfs -rm /user/admin/deploy/text_anti_brush/t1_subject_info.txt
+
+# put数据
+hdfs dfs -put -f  /home/admin/t1_subject_info.txt   /user/admin/deploy/text_anti_brush/
+
+kill掉某个正在运行的任务：
+hadoop job -kill job_1603343185745
+
+查询多个字段非空值数量：
+select count(field2) as field2_num, count(field1) as field1_num from db_name.table_name;
+注：count(*)对行的数目进行计算，包含NULL
+count(column)对特定的列的值具有的行数进行计算，不包含NULL值。
+count()还有一种使用方式，count(1)这个用法和count(*)的结果是一样的。
+count(1)跟count(主键)一样，只扫描主键。count(*)跟count(非主键)一样，扫描整个表。明显前者更快一些。
+
+# 查询某个字段的非空值：
+select distinct field from db_name.table_name where field is not null limit 20；
+或者：
+select distinct field from db_name.table_name where length(field) > 0 limit 20;
+或者：
+select * from db_name.table_name where field1 is not null and field2 is not null limit 100;
+
+# 输出数组最大值、最小值：
+select sort_array(array(1.5, 2.3, 0))[size(array(1.5, 2.3, 0))-1] as max_value;
+select sort_array(array(1.5, 2.3, 0))[0] as min_value;
+
+# 查询字段重命名为中文，需要用尖引号：
+select distinct field1 as  `字段1` from db_name.table_name where length(field1) > 0 limit 1000;
+
+查看表有哪些字段有索引的命令：
+use db_name;
+show index on table_name;
+
+查询两个表某个字段相同的结果：
+select a.*, b.* from (
+    select aa.* from db_name.tabel_name1 aa
+    where aa.city='杭州市' and aa.flag='credit'
+    )
+    a
+inner join (
+    select bb.* from db_name.tabel_name2 bb
+    )
+    b
+on a.id1=b.id2
+
+# 字符串的模糊匹配：
+select * from ods.ods_sjc_events_rt where event like concat('%','OCR','%');
+
+# 通过regexp 方式查询多个值，使用|实现or效果
+select * from user where name regexp 'mac1|mac2|mac3'
+
+# 去重查找：
+select count(distinct field1,field2) from db_name.table_name
+注意：使用count distinct 两列联合去重时，若有任何一列为null，那么这一行都不会计入到结果中
+
+# 对某个字段进行统计计数(这里id,为唯一标识字段名)：
+select field, count(distinct id) from db_name.table_name group by field;
+
+# 对多个字段进行统计计数：
+select citycode, city, count(1) from hive_db1.hive_table2 where province='内蒙古自治区' and area='青山区' group by citycode, city;
+
+# 对用户进行分组，取每组最新的一条数据记录：
+相同用户有多条数据记录，需要去重，仅仅取用一条：
+select * from (
+  select 
+    uid , order_id ,service_completion_time , 
+    row_number() over ( partition by uid order by service_completion_time asc ) num 
+  from  
+       dj_mart_zfpt.test 
+) last 
+  where last.num = 1 ;
+按uid分组，服务完成时间time升序(asc)排序，给每个用户的订单编号。编号最小的（也就是1）就是该用户的首单。
+
+hive分组排序函数
+语法：row_number() over (partion by fieldA order by fieldB desc) rank
+含义：表示根据fieldA分组，在分组内部根据fieldB排序，而row_number() 函数计算的值就表示每组内部排序后的行编号（该编号在组内是从1开始连续并且唯一的）。
+注意： rank 在这里是别名，可任意
+partition by：类似于Hive的建表，分区的意思。
+order by ： 排序，默认是升序，加desc降序。
+
+# 统计计数的高级用法：
+SELECT
+    type
+  , count(*)
+  , count(DISTINCT u)
+  , count(CASE WHEN plat=1 THEN u ELSE NULL END)
+  , count(DISTINCT CASE WHEN plat=1 THEN u ELSE NULL END)
+  , count(CASE WHEN (type=2 OR type=6) THEN u ELSE NULL END)
+  , count(DISTINCT CASE WHEN (type=2 OR type=6) THEN u ELSE NULL END)
+FROM t
+WHERE dt in ("2018-05-20", "2018-05-21")
+GROUP BY type
+ORDER BY type
+
+比如，统计每个用户的文本数据，及其包含‘信用卡’文本数量：
+select uid, count(CASE WHEN text like concat('%', '信用卡', '%') THEN 1 ELSE NULL END), count(*)
+from db_name.table_name group by uid;
+
+
+# 按字段降序排列,这里按字段field1为例：
+降序：select * from db_name.table_name order by field1 desc limit 500;
+升序：select * from db_name.table_name order by field1 asc limit 500;
+因为默认是升序，所以多字段降序排列时需特别注意：
+如：select * from db_name.table_name order by field1, field2 desc limit 500; 实际上是按field1升序，field2 降序排列；等同于：
+select * from db_name.table_name order by field1 asc, field2 desc limit 500;
+当然，多字段降序，也可以这样：select * from db_name.table_name order by array(field1, field2) desc limit 500;
+总之：
+ORDER BY _column1, _column2; /* _column1升序，_column2升序 */ 
+ORDER BY _column1, _column2 DESC; /* _column1升序，_column2降序 */ 
+ORDER BY _column1 DESC, _column2 ; /* _column1降序，_column2升序 */ 
+ORDER BY _column1 DESC, _column2 DESC; /* _column1降序，_column2降序 */ 
+
+# 查询结果过滤，select 嵌套使用(统计用户说‘信用卡’或‘借记卡’的多少句话，用户总共说了多少句话，并且过滤掉没有说‘信用卡’或‘借记卡’的用户)：
+select t1.uid, t1.num, t1.value from 
+(select uid,
+count(case when text regexp '信用卡|借记卡' then 1 else null end) as num,
+count(*) as value
+)as t1
+where t1.num > 0;
+
+# 重命名表：
+下面是查询重命名表，把 employee 修改为 emp。
+hive> ALTER TABLE employee RENAME TO emp;
+这种操作会修改元数据，但不会修改数据本身;
+所以在hdfs上warehouse目录下的该表的目录还是employee，因为只会更改元数据信息，而不会修改数据本身；
+
+hive抽样：
+一般情况下是使用排序函数和rand() 函数来完成随机抽样，limit关键字限制抽样返回的数据；
+order by rand()
+order by 是全局的，只会启用一个reduce所以比较耗时
+select * from ods_user_bucket_log order by rand() limit 10;
+
+sort by rand()
+sort by 提供了单个 reducer 内的排序功能，但不保证整体有序，这个时候其实不能做到真正的随机的，因为此时的随机是针对分区去的，所以如果我们可以通过控制进入每个分区的数据也是随机的话，那我们就可以做到随机了
+select * from ods_user_bucket_log sort by rand() limit 10;
+
+distribute by rand() sort by rand()
+rand函数前的distribute和sort关键字可以保证数据在mapper和reducer阶段是随机分布的，这个时候我们也能做到真正的随机，前面我们也介绍过cluster by 其实基本上是和distribute by sort by 等价的
+select * from ods_user_bucket_log distribute by rand() sort by rand() limit 10;
+
+cluster by rand()
+cluster by 的功能是 distribute by 和 sort by 的功能相结合，distribute by rand() sort by rand() 进行了两次随机，cluster by rand() 仅一次随机，所以速度上会比上一种方法快
+select * from ods_user_bucket_log cluster by rand() limit 10;
+
+tablesample()抽样函数
+使用 tablesample 抽取指定的 行数/比例/大小
+取1000行：
+SELECT * FROM ods_user_data TABLESAMPLE(1000 ROWS);
+取20%：
+SELECT * FROM ods_user_data TABLESAMPLE (20 PERCENT); 
+取1M大小数据（注意的是这里必须是整数M）：
+SELECT * FROM ods_user_data TABLESAMPLE(1M); 
+
+按比例随机抽取，如果抽10%的话
+select * from table where rand()<=0.1;
+特别注意的是：抽样迁先确认表的总记录数
+
+精确取N条
+- 样本总量M, 你可以先 rand()<=(N/M+μ), 取多一些随机样本
+- 然后再在这些随机样本里随机取N条
+这样一定是随机取出N条. 且 能够 去掉最耗时间耗资源的全局排序
+例1：select * from table where rand()<=0.15  cluster by rand()  limit  N;    ( 数据较大时 用 cluster by) 
+例2：select * from table where rand()<=0.15  order by rand()   limit  N;   ( 数据较小时 用  order by) 
+
+hive修改表和字段注释：
+修改表:
+ALTER TABLE db_name.table_name SET TBLPROPERTIES('comment' = '这是表新注释!');
+修改字段:
+ALTER TABLE table_name CHANGE COLUMN muid muid_new STRING COMMENT '这里是列新注释!'; 
+
+hads查看文件路径：
+hdfs dfs -ls /tmp/hd36
+
+hdfs创建目录：
+hdfs dfs -mkdir /tmp/hd36/collision
+
+hdfs将文件内容，写入hdfs:
+hdfs dfs -put /home/hd36/test_20210312/temp_sub_result.txt /tmp/hd36/collision/abcd12341234/detail.csv
+
+hive数据导出到hdfs(这里是导出表users_info的数据):
+hive -e "export table users_info to '/home/hd35/';"
+
+计算文本的sha256,或者md5:
+select sha2('123456',256) ;  -- 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+select md5('123456');  -- e10adc3949ba59abbe56e057f20f883e
+
+# 重命名表，把 employee 修改为 emp。
+hive> ALTER TABLE db_name.employee RENAME TO db_name.emp;
+
+# 拷贝表结构，而不拷贝数据（用like）
+create table if not exists mydb.mytable like mydb.mytable2;
+
+# 拷贝表结构，且拷贝数据（用as）
+create table if not exists mydb.mytable as
+select * from mydb.mytable2;
+
+# 查看提交的任务 job 有哪些：
+使用 hadoop job -list 或 yarn application -list 
+root@98b2fb173dcf:~# hadoop job -list
+21/10/11 12:00:26 INFO client.RMProxy: Connecting to ResourceManager at /172.17.0.4:8032
+Total jobs:1
+                  JobId      State           StartTime      UserName           Queue      Priority       UsedContainers  RsvdContainers  UsedMem         RsvdMem         NeededMem         AM info
+ job_1633924393132_0002    RUNNING       1633924814275     anonymous         default        NORMAL                    2               0    3072M              0M             3072M      http://98b2fb173dcf:8088/
+proxy/application_1633924393132_0002/
+root@98b2fb173dcf:~# yarn application -list
+21/10/11 12:00:41 INFO client.RMProxy: Connecting to ResourceManager at /172.17.0.4:8032
+Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+                Application-Id      Application-Name        Application-Type          User           Queue                   State             Final-State             Progress                        Tracking-U
+RL
+application_1633924393132_0002  select name
+,info['语文'] as Chinese
+,info...a(Stage-1)                 MAPREDUCE     anonymous         default                 RUNNING               UNDEFINED                  50%           http://98b2fb173dcf:40437
+
+# 命令行运行java程序：
+第一步：将.java文件编译成.class文件：
+D:\Users\gswyhq>javac  -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar   GPSConverter\GPS.java GPSConverter\GPSConverterUtils.java GPSConverter\Converter.java
+第二步：运行编译好的.class文件(注意，运行时候，没有后缀名)：
+D:\Users\gswyhq>java GPSConverter/GPSConverterUtils
+Hello Java
+原始GPS84：22.544535, 113.963626
+百度：22.54753467820749, 113.9750246884934
+高德：22.541564058383628, 113.96853564046431
+GPS84：22.544522797896512, 113.96361616729034
+

@@ -83,6 +83,33 @@ v.get_label_by_id('11').set_fontsize(22)
 # text.set_path_effects([path_effects.Normal()])
 plt.show()
 
+# 两组数据韦恩图：
+fig, ax = plt.subplots(figsize=(10, 10))
+v = venn2(subsets=[set([1,2,3]), set([2,3,4])], set_labels= ('set1', 'set2'), set_colors=('r', 'g'), ax=ax)
+v.get_label_by_id('10').set_text('左边说明')
+v.get_label_by_id('01').set_text('右边说明')
+v.get_label_by_id('11').set_text('交集说明')
+plt.title("两组数据韦恩图")
+example_text = ('旁边的备注说明')
+text = fig.text(0.0, 0.05, example_text, ha='left', va='bottom', size=14)
+plt.show()
+
+# 三组数据韦恩图：
+fig, ax = plt.subplots(figsize=(10, 10))
+v=venn3(subsets=[set([1,2,4,5]), set([2,3,5,6]), set([4,5,6,7])], set_labels= ('set1', 'set2', 'set3'), set_colors=('r', 'b', 'g'), ax=ax)
+v.get_label_by_id('100').set_text('Executive')
+v.get_label_by_id('010').set_text('Legislative')
+v.get_label_by_id('001').set_text('Judicial')
+v.get_label_by_id('110').set_text('Example 1')
+v.get_label_by_id('011').set_text('Example 2')
+v.get_label_by_id('101').set_text('Example 3')
+v.get_label_by_id('111').set_text('---')
+plt.title("三组数据韦恩图")
+example_text = ('这里可以写备注说明')
+text = fig.text(0.0, 0.05, example_text, ha='left', va='bottom', size=14)
+text.set_path_effects([path_effects.Normal()])
+plt.show()
+
 def main():
     pass
 

@@ -2,6 +2,15 @@
 # 在当前目录及子目录中，的py文件中查找字符串`1234`并且忽略`.git`目录：
 gswewf@gswewf-pc:~/yhb$ grep -R --include="*.py" --exclude-dir=".git" '1234' .
 
+# 忽略多个文件夹：
+grep -i 1234 --exclude-dir=".git" --exclude-dir=".idea" -R .
+
+# 永久配置忽略文件夹, 每次写--exclude-dir太麻烦，可以将该配置添加到~/.bashrc文件中，这样就不用每次都写：
+~$ vim ~/.bashrc
+export GREP_OPTIONS="--exclude-dir=.git --exclude-dir=.idea"
+~$ source ~/.bashrc
+~$ grep -i 1234 -R .
+
 # 在当前目录及子目录中，的py文件中查找字符串`1234`并且忽略`.git,contexts,conf,test`目录：
 gswewf@gswewf-pc:~/yhb$ grep -R --include="*.py" --exclude-dir={.git,contexts,conf,test} '123456' .
 
@@ -91,5 +100,7 @@ That is 200.
 
 使用awk的话，可以这样awk 'NR==FNR{x[$0];next}{for(i in x)if($0~i)print}' a.txt b.txt
 
+# grep 通过正则匹配转义字符，如tab键：
+grep -P "\t" test.txt
 
 

@@ -1,0 +1,243 @@
+
+1，命令行操作，首先得切换到对应用户；
+首先切换到postgres用户，或者其他设置的用户
+若是docker容器，则进入容器即可
+切换用户：su postgres
+或进入容器：
+docker exec -it postgresql /bin/bash
+
+以用户postgres，连接localhost的pg库trade
+c142170ce362:/$ psql -U postgres -d trade -h localhost
+
+若是不指定-d参数，则会进入默认用户名同名数据库；
+若同名数据库不存在，则会报错，这个时候需指明数据库：
+
+I have no name!@a56c255b1402:/$ psql -U tradeopr -h localhost
+Password for user tradeopr:
+psql: FATAL:  database "tradeopr" does not exist
+I have no name!@a56c255b1402:/$
+I have no name!@a56c255b1402:/$ psql -U tradeopr -h localhost -d trade
+Password for user tradeopr:
+psql (11.7)
+
+# 指定用户竟然postgresql 容器：
+~$ docker exec -it --user root postgresql /bin/bash
+# 查看psql 命令的使用帮助：
+root@90fc75e1cd24:/# psql --help
+# 指定用户，进入指定database，--dbname参数同-d,默认是root
+root@90fc75e1cd24:/# psql -U tradeopr -h 127.0.0.1 -p 5432 --dbname=trade
+# 查看当前有哪些角色，及主角色是什么：
+trade=> \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradeopr  | Create DB                                                  | {}
+
+# 创建用户、角色 命令：
+# 进入docker容器：
+~$ docker exec -it postgresql /bin/bash
+# 在postgresql容器中，进入到 postgresql 命令行，需要用超级用户进入，否则无权限创建用户、角色：
+I have no name!@26a9460b0dd5:/$ psql -U postgres -h 127.0.0.1 -p 5432 --dbname=trade
+Password for user postgres:
+psql (11.12)
+Type "help" for help.
+# 查看当前有哪些用户、角色：
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+# 创建一个角色，默认是无登录权限的；
+trade=# CREATE ROLE tradedata;
+CREATE ROLE
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradedata | Cannot login                                               | {}
+# 创建一个有登录权限的角色，有登录权限的角色，等同于用户：
+trade=# CREATE ROLE tradeopr login;
+CREATE ROLE
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradedata | Cannot login                                               | {}
+ tradeopr  |                                                            | {}
+# 创建一个用户：
+trade=# CREATE user abcd;
+CREATE ROLE
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ abcd      |                                                            | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradedata | Cannot login                                               | {}
+ tradeopr  |                                                            | {}
+# 若在创建用户时候，设置password,则可以设置该用户的密码：
+trade=# create user tradeopr password '123456';
+CREATE ROLE
+
+# 修改用户密码命令：
+trade=# alter user tradeopr password '654321';
+
+# 查看某个角色的权限：
+trade=# \c - postgres
+You are now connected to database "trade" as user "postgres".
+
+# 删除角色、删除用户：
+trade=# drop role tradedata;
+DROP ROLE
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ abcd      |                                                            | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ tradeopr  |                                                            | {}
+# 若不涉及到继承、依赖关系等，实际上删除角色，删除用户是一样，删除角色命令可以删除用户，删除用户命令可以删除角色：
+trade=# drop user tradeopr;
+DROP ROLE
+trade=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ abcd      |                                                            | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+# 需要注意的是删除role,role下有权限或者是对象属于此role,则删除不了；
+# 这个时候，需要移除掉相关权限关联后进行删除
+drop table tab1;
+revoke create on database databse1 from user1;
+
+# 创建一个名为test的pg数据库：
+@554e8358b3fb:/$ psql -U postgres -h localhost
+postgres=# create database test with template template0 lc_collate "C.UTF-8" lc_ctype "C.UTF-8" encoding 'UTF8';
+CREATE DATABASE
+# 上面语句，是以 template0 为模板，创建了一个名为test的数据库；
+
+# 删除pg库（如果 库 test2存在的话，则删除）：
+postgres=# DROP DATABASE IF EXISTS test2;
+
+# 创建一个名为kg_data 的pg表：
+postgres=# CREATE TABLE kg_data(
+   ID INT PRIMARY KEY     NOT NULL,
+   subject           TEXT    NOT NULL,
+   rel            CHAR(50)     NOT NULL,
+   object        CHAR(50)
+);
+
+# 查看表 kg_data 的信息：
+postgres=# \d kg_data
+                  Table "public.kg_data"
+ Column  |     Type      | Collation | Nullable | Default
+---------+---------------+-----------+----------+---------
+ id      | integer       |           | not null |
+ subject | text          |           | not null |
+ rel     | character(50) |           | not null |
+ object  | character(50) |           |          |
+Indexes:
+    "kg_data_pkey" PRIMARY KEY, btree (id)
+
+# 删除pg表 kg_data:
+postgres=# drop table kg_data;
+
+# 从文本文件中导入数据到pg表：
+postgres=# copy kg_data(subject,rel,object) from '/tmp/13万中文简称知识三元组abbrkb.txt' delimiter ',' csv;
+
+# 若表内容包含标题行，则需要添加header关键词，忽略第一行：
+postgres=# copy kg_data(subject,rel,object) from '/tmp/13万中文简称知识三元组abbrkb.txt' delimiter ',' csv header;
+
+# 若导入的时候报错：
+ERROR:  value too long for type character(50)
+则可能是pg表字段类型定义的有问题，不妨改成：text
+
+# 若导入时候报错：
+ERROR:  extra data after last expected column
+则可能是导入文件中，逗号分割的内容与实际定义的不一致，可以根据提示删除对应的内容即可；
+
+# 指定库下面创建表，则需先切换到指定库，再创建，如（切换到库test2）：
+postgres=# \c test2
+You are now connected to database "test2" as user "postgres".
+test2=#
+
+# 查看客户端字符编码：
+postgres=# show client_encoding;
+ client_encoding
+-----------------
+ UTF8
+(1 row)
+
+# 查看服务端字符编码：
+postgres=# show server_encoding;
+ server_encoding
+-----------------
+ UTF8
+(1 row)
+
+\l 命令则会列出所有的数据库列表：
+
+
+postgres=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+-----------+----------+----------+-------------+-------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ trade     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+(4 rows)
+
+其他常用命令：
+\h	#查看所有的sql关键字
+\? 	#命令行操作的帮助
+\d 	#查看当前schema 中所有的表
+\q	#退出pg命令行
+\d	#schema.table 查看表的结构
+\x	#横纵显示切换 
+\dT+	#显示扩展类型相关属性及描述
+\dx	#显示已安装的扩展插件
+\l	#列出所有的数据库
+\! hostname	#列出当前的主机名
+\timing	#显示执行时间
+\c database_name	#切换数据库
+set search to schema	#切换schema
+explain analyze sql	#解释或分析sql执行过程
+
+如 切换到trade数据库：
+postgres=# \c trade
+You are now connected to database "trade" as user "postgres".
+trade=#
+
+# 列出库中有哪些表：
+trade=# SELECT tablename FROM pg_tables
+WHERE tablename NOT LIKE 'pg%'
+AND tablename NOT LIKE 'sql_%'
+ORDER BY tablename;
+
+# 当前也可以通过 \dt列出：
+trade=# \dt
+
+
+trade=# SELECT tablename FROM pg_tables
+WHERE tablename NOT LIKE 'pg%'
+AND tablename NOT LIKE 'sql_%'
+ORDER BY tablename;
+         tablename
+----------------------------
+ data_proposals_price_param
+(1 row)
+
+trade=# \dt
+                   List of relations
+ Schema |            Name            | Type  |  Owner
+--------+----------------------------+-------+----------
+ public | data_proposals_price_param | table | postgres
+(1 row)
+
+

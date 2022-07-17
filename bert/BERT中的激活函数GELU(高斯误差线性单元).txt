@@ -1,0 +1,83 @@
+
+BERT中的激活函数GELU：高斯误差线性单元
+所谓激活函数（Activation Function），就是在人工神经网络的神经元上运行的函数，负责将神经元的输入映射到输出端。
+在神经元中，输入（inputs ）通过加权，求和后，还被作用在一个函数上，这个函数就是激活函数。
+
+# 激活函数的作用：
+如果不用激活函数，每一层输出都是上层输入的线性函数，无论神经网络有多少层，输出都是输入的线性组合，这种情况就是最原始的感知机（Perceptron）。
+没有激活函数的每层都相当于矩阵相乘。就算你叠加了若干层之后，无非还是个矩阵相乘罢了。
+如果使用非线性激活函数的话，激活函数给神经元引入了非线性因素，使得神经网络可以任意逼近任何非线性函数，这样神经网络就可以应用到众多的非线性模型中。
+
+# 激活函数为什么是非线性的
+如果使用线性激活函数，那么输入跟输出之间的关系为线性的，无论神经网络有多少层都是线性组合。
+使用非线性激活函数是为了增加神经网络模型的非线性因素，以便使网络更加强大，增加它的能力，使它可以学习复杂的事物，复杂的表单数据，以及表示输入输出之间非线性的复杂的任意函数映射。
+输出层可能会使用线性激活函数，但在隐含层都使用非线性激活函数。
+
+在神经网络的建模过程中，模型很重要的性质就是非线性，同时为了模型泛化能力，需要加入随机正则，例如dropout(随机置一些输出为0,其实也是一种变相的随机非线性激活)， 而随机正则与非线性激活是分开的两个事情， 而其实模型的输入是由非线性激活与随机正则两者共同决定的。
+
+# 常用的激活函数：
+sigmoid，Tanh，ReLU，Leaky ReLU，PReLU，ELU，Maxout
+
+sigmoid函数：
+优点：
+1、Sigmoid函数的输出在(0,1)之间，输出范围有限，优化稳定，可以用作输出层。
+2、连续函数，便于求导。
+缺点：
+1. sigmoid函数在变量取绝对值非常大的正值或负值时会出现饱和现象，意味着函数会变得很平，并且对输入的微小改变会变得不敏感。
+在反向传播时，当梯度接近于0，权重基本不会更新，很容易就会出现梯度消失的情况，从而无法完成深层网络的训练。
+2. sigmoid函数的输出不是0均值的，会导致后层的神经元的输入是非0均值的信号，这会对梯度产生影响。
+3. 计算复杂度高，因为sigmoid函数是指数形式。
+
+Tanh函数：
+Tanh函数是 sigmoid 的变形；
+仍然存在梯度饱和与指数计算的问题。
+
+ReLU函数：
+ReLU函数定义如下： f(x) = max(0, x);
+优点：
+1. 使用ReLU的SGD算法的收敛速度比 sigmoid 和 tanh 快。
+2. 在x>0区域上，不会出现梯度饱和、梯度消失的问题。
+3. 计算复杂度低，不需要进行指数运算，只要一个阈值就可以得到激活值。
+缺点：
+1.ReLU的输出不是0均值的。
+2. Dead ReLU Problem(神经元坏死现象)：ReLU在负数区域被kill的现象叫做dead relu。ReLU在训练的时很“脆弱”。
+在x<0时，梯度为0。这个神经元及之后的神经元梯度永远为0，不再对任何数据有所响应，导致相应参数永远不会被更新。
+产生这种现象的两个原因：参数初始化问题；learning rate太高导致在训练过程中参数更新太大。
+解决方法：采用Xavier初始化方法，以及避免将learning rate设置太大或使用adagrad等自动调节learning rate的算法。
+
+GELU函数：
+GELU非线性的实现是对神经网络的输入进行随机正则化的变化，为输入匹配一个或0或1的随机值。
+与ReLU的不同：GELU为其按照输入的magnitude（等级）为inputs加权值的；ReLUs是根据inputs的sign（正负）来gate（加门限）的。
+GELU是结合dropout, zoneout, ReLUs。
+1) dropout 与 ReLU：ReLU中Input乘以一个0或者1，所乘的值是确定的；dropout也会乘以一个0或者1，所乘的值是随机的；
+2) zoneout：zoneout是一个RNN正则化器，它会为inputs随机乘1.
+3) GELU：GELU也会为inputs乘以0或者1，但不同于以上的或有明确值或随机，GELU所加的0-1mask的值是随机的，同时是依赖于inputs的分布的。
+可以理解为：GELU的权值取决于当前的输入input有多大的概率大于其余的inputs.
+GELU的定义：将input x 乘以一个服从伯努利分布的m。而该伯努利分布又是依赖于输入Input x的。
+GELU通过这种方式加mask，既保持了不确定性，又建立了与input的依赖关系。
+当σ→0， μ=0时，GELU将会变成ReLU.GELU可以看做是对ReLU的平滑。
+与ReLU 均为非负不同，GELU, ELU 均可正可负。
+GELU这个非凸、非单调的函数在正域内是非线性的，并且在所有点处都有曲率。
+ReLU, ELU是凸的、单调的函数，并且在正域处是线性的，因此会缺乏曲率。
+鉴于此，所增加的曲率部分和非单调性也许可以使GELU表示更为复杂的函数。(相较于ReLU, ELU)
+ReLU为input加的权重取决于input的正负符号，而当μ=0,σ=1时，GELU可以理解为其为input加的权值取决于当前的input有多大概率大于其余inputs.
+因此，GELU具有概率方面的理解意义，即可以看作是随机正则化器的期望。
+
+在google-research/bert/modeling.py中的GELU，是采用近似的方式计算：
+def gelu():
+    cdf = 0.5 * (1.0 + np.tanh((np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3)))))
+    return x * cdf
+
+而在pretrained-BERT-pytorch/modeling.py中，已经有了精确的计算方式：
+def gelu(x):
+    """Implementation of the gelu activation function.
+        For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
+        0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+        Also see https://arxiv.org/abs/1606.08415
+    """
+    return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
+
+import matplotlib.pyplot as plt
+plt.plot([i/100 for i in range(-500, 500)],[gelu(i/100) for i in range(-500, 500)],'ro')
+plt.show()
+

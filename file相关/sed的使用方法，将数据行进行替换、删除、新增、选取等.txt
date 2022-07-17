@@ -7,6 +7,25 @@ sed -i 's/被替换的内容/要替换成的内容/' file        -i 直接修改
 
 sed 's/ruby/bird/g'    #替换ruby为bird
 
+# 对指定行的字符进行替换：
+sed -i '5s/a/A/g' test.txt 对第五行的a替换成A
+
+# 对指定行之后一行的内容进行替换：
+# cat test.txt
+aaa12
+bbb34
+ccc56
+ddd78
+ccc99
+root@eff2eacda916:~# sed -i "/bbb/{n;s/ccc/123/g}" test.txt
+# 将bbb行之后一行的ccc替换为123；
+root@eff2eacda916:~# cat test.txt
+aaa12
+bbb34
+12356
+ddd78
+ccc99
+
 用sed替换xml文件中的变量。一般在sed 中替换都用单引号，如下边
 
 sed -i ‘s/10/1000/g’ test.xml
@@ -183,3 +202,24 @@ sed -n '99,p' test.txt。但sed在print后并不会立即退出，还会继续�
 # echo "做客孩子临走时带走几只玩具" |sed 's/./&\ /g'
 做 客 孩 子 临 走 时 带 走 几 只 玩 具 
 
+# 删除文件第一行数据：
+sed -i '1d' *.csv
+
+# 删除文件最后一行数据：
+sed -i '$d' *.csv
+
+# 删除文件中的指定行，如删除文件第三行数据：
+sed -i '3d' *.csv
+
+# 删除文件中包含某个关键字开头的所有行
+
+sed -i '/^QWQ/d' *.csv
+
+# 删除文件中包含某个关键字的所有行 
+
+sed -i '/QWQ/d' *.csv
+
+# 查找指定行，并在该行之后插入多行内容：
+sed -i '/<configuration>/a abcd\n123456' core-site.xml
+在文件 core-site.xml ，查找 <configuration> 所在行，并在之后插入两行内容：abcd\n123456
+若是该行之前插入，则需将 /a 改为 /i,如：sed -i '/<configuration>/i abcd\n123456' core-site.xml

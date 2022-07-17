@@ -1,0 +1,190 @@
+
+postgresql支持两种json数据类型：json和jsonb，而两者唯一的区别在于效率,json是对输入的完整拷贝，使用时再去解析，所以它会保留输入的空格，重复键以及顺序等。而jsonb是解析输入后保存的二进制，它在解析时会删除不必要的空格和重复的键，顺序和输入可能也不相同。使用时不用再次解析。两者对重复键的处理都是保留最后一个键值对。效率的差别：json类型存储快，使用慢，jsonb类型存储稍慢，使用较快。
+注意：键值对的键必须使用双引号
+
+# 字符串->json
+select '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::json;
+返回值：[{"a":"foo"},{"b":"bar"},{"c":"baz"}]
+
+# 取第一个元素：
+select '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::json -> 0;
+返回值：{"a":"foo"}
+
+# 取倒数第一个元素：
+select '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::json -> -1;
+返回值：{"c":"baz"}
+
+# 根据json 的key取值：
+select '{"a": {"b":"foo"}}'::json -> 'a';
+返回值：{"b":"foo"}
+select  '{"a":1,"b":2}'::json -> 'b'; 的返回值：2
+
+# json列表按位置取值
+select '[1,2,3]'::json ->> 2 ;
+与 select '[1,2,3]'::json -> 2 ;
+的结果的一致的，都是：3
+但：
+select '[1,2,"3"]'::json ->> 2;  返回值：3
+select '[1,2,"3"]'::json -> 2; 返回值："3"
+
+# 多层取值,key为a,下的key 为b, 的第1个（从零开始计数）原始：
+select '{"a": {"b": ["foo","bar"]}}'::json #> '{a,b,1}' ;
+返回值："bar"
+select '{"a": {"b": ["foo","bar"]}}'::json #>> '{a,b,1}'
+返回值：bar
+
+# 第一个json是否包含第二个json:
+select '{"a":1, "b":2}'::jsonb @> '{"b":2}'::jsonb
+返回值：true
+
+# 第一个json是否在第二个josn中：
+select '{"b":2}'::jsonb <@ '{"a":1, "b":2}'::jsonb;
+返回值：true
+
+# 文本字符串是否作为JSON值中的顶级键或数组元素存在:
+select  '{"a":1, "b":2}'::jsonb ? 'b';
+返回值：true
+select '["a", "b", "c"]'::jsonb ? 'b';
+返回值：true
+
+# 文本数组中的所有字符串是否都作为顶级键或数组元素存在
+select '["a", "b", "c"]'::jsonb ?& array['a', 'b']
+返回值：true
+
+# 连接两个jsonb值。 连接两个数组将生成一个包含每个输入的所有元素的数组。 连接两个对象将生成一个包含其键的并集的对象，当存在重复的键时，将取第二个对象的值。
+ 通过将非数组输入转换为单元素数组，然后像处理两个数组一样处理所有其他情况。 不能递归操作：仅合并顶层数组或对象结构。
+select '["a", "b"]'::jsonb || '["a", "d"]'::jsonb; -- → ["a", "b", "a", "d"]
+select '{"a": "b"}'::jsonb || '{"c": "d"}'::jsonb; -- → {"a": "b", "c": "d"}
+select '[1, 2]'::jsonb || '3'::jsonb; -- → [1, 2, 3]
+select '{"a": "b"}'::jsonb || '42'::jsonb ; 报错：ERROR: invalid concatenation of jsonb objects
+
+# 要将数组作为单个条目附加到另一个数组，请将其包装在数组的附加层中，例如：
+select '[1, 2]'::jsonb || jsonb_build_array('[3, 4]'::jsonb) → [1, 2, [3, 4]]
+
+# 从JSON对象中删除键（及其值），或从JSON数组中删除匹配的字符串值。
+select '{"a": "b", "c": "d"}'::jsonb - 'a' ; -- → {"c": "d"}
+select '["a", "b", "c", "b"]'::jsonb - 'b'; --  → ["a", "c"]
+
+# 从左侧操作数中删除所有匹配的键或数组元素。
+select '{"a": "b", "c": "d"}'::jsonb - '{a,c}'::text[];
+返回值：{}
+
+# 删除具有指定索引（末尾为负整数）的数组元素。 如果JSON值不是数组，则会引发错误。
+select '["a", "b"]'::jsonb - 1;  → ["a"]
+
+# 删除指定路径处的字段或数组元素，其中路径元素可以是字段键或数组索引。
+select '["a", {"b":1}]'::jsonb #- '{1,b}';-- → ["a", {}]
+
+# 将任何SQL值转换为json或jsonb。 数组和组合被递归转换为数组和对象（多维数组成为JSON中数组的数组）。
+否则，如果存在从SQL数据类型到json的强制转换，则将使用强制转换函数执行转换； 否则，将生成标量JSON值。
+对于数字，布尔值或空值以外的任何标量，将使用文本表示形式，并在必要时进行转义以使其成为有效的JSON字符串值。
+select to_json('Fred said "Hi."'::text) ; -- → "Fred said \"Hi.\""
+select to_jsonb(row(42, 'Fred said "Hi."'::text)); -- → {"f1": 42, "f2": "Fred said \"Hi.\""}
+
+# 将SQL数组转换为JSON数组。 该行为与to_json相同，除了如果可选的boolean参数为true，则将在顶级数组元素之间添加换行符。
+select  array_to_json('{{1,5},{99,100}}'::int[]);-- → [[1,5],[99,100]]
+
+# 将SQL复合值转换为JSON对象。 该行为与to_json相同，不同之处在于，如果可选的boolean参数为true，则将在顶级元素之间添加换行符。
+select  row_to_json(row(1,'foo'));-- → {"f1":1,"f2":"foo"}
+
+# 根据可变参数列表构建一个可能是异构类型的JSON数组。 每个参数根据to_json或to_jsonb进行转换。
+select json_build_array(1, 2, 'foo', 4, 5);-- → [1, 2, "foo", 4, 5]
+
+# 从可变参数列表中构建JSON对象。 按照惯例，参数列表由交替的键和值组成。 关键参数被强制转换为文本； 值参数根据to_json或to_jsonb进行转换。
+SELECT json_build_object('foo', 1, 2, row(3,'bar'));-- → {"foo" : 1, "2" : {"f1":3,"f2":"bar"}}
+
+# 从文本数组构建JSON对象。 数组必须具有一个具有偶数个成员的正好一维（在这种情况下，它们被视为交替的键/值对），或者必须具有两个维，以使每个内部数组具有恰好两个元素（被视为键/值对）。
+ 所有值都将转换为JSON字符串。
+select json_object('{a, 1, b, "def", c, 3.5}');-- → {"a" : "1", "b" : "def", "c" : "3.5"}
+select json_object('{{a, 1}, {b, "def"}, {c, 3.5}}');-- → {"a" : "1", "b" : "def", "c" : "3.5"}
+
+# 这种形式的json_object从单独的文本数组中成对地获取键和值。 否则，它与单参数形式相同。
+select json_object('{a,b}', '{1,2}');-- → {"a": "1", "b": "2"}
+
+# 将顶级JSON数组扩展为一组JSON值。
+select * from json_array_elements('[1,true, [2,false]]') →
+   value
+-----------
+ 1
+ true
+ [2,false]
+
+# 将顶级JSON数组扩展为一组文本值。
+select * from json_array_elements_text('["foo", "bar"]') →
+   value
+-----------
+ foo
+ bar
+
+# 返回顶级JSON数组中的元素数。
+select json_array_length('[1,2,3,{"f1":1,"f2":[5,6]},4]')
+返回值：5
+
+# 将顶级JSON对象扩展为一组键/值对。
+select * from json_each('{"a":"foo", "b":"bar"}') →
+
+ key | value
+-----+-------
+ a   | "foo"
+ b   | "bar"
+
+# 将顶级JSON对象扩展为一组键/值对。返回的值将是文本类型。
+select * from json_each_text('{"a":"foo", "b":"bar"}') →
+ key | value
+-----+-------
+ a   | foo
+ b   | bar
+
+# 提取指定路径下的JSON子对象。 （这在功能上等效于＃>运算符，但是在某些情况下将路径写为可变参数列表会更加方便。）
+select json_extract_path('{"f2":{"f3":1},"f4":{"f5":99,"f6":"foo"}}', 'f4', 'f6');-- → "foo"
+
+# 将指定路径处的JSON子对象提取为文本。 （这在功能上等效于＃>>运算符。）
+select json_extract_path_text('{"f2":{"f3":1},"f4":{"f5":99,"f6":"foo"}}', 'f4', 'f6');-- → foo
+
+# 返回顶级JSON对象中的键集。
+select * from json_object_keys('{"f1":"abc","f2":{"f3":"a", "f4":"b"}}') →
+ json_object_keys
+------------------
+ f1
+ f2
+
+# 将对象的顶级JSON数组扩展为具有AS子句定义的复合类型的一组行。 （与所有返回记录的函数一样，调用查询必须使用AS子句显式定义记录的结构。）JSON数组的每个元素均按上述json [b] _populate_record的说明进行处理。
+select * from json_to_recordset('[{"a":1,"b":"foo"}, {"a":"2","c":"bar"}]') as x(a int, b text) →
+ a |  b
+---+-----
+ 1 | foo
+ 2 |
+
+# 返回由路径指定的项目替换为new_value的目标，或者如果create_if_missing为true（默认值）且路径指定的项目不存在，则添加带有new_value的目标。
+路径中的所有先前步骤必须存在，否则目标将保持不变。与面向路径的运算符一样，出现在路径中的负整数从JSON数组的末尾开始计数。
+如果最后一个路径步骤是超出范围的数组索引，并且create_if_missing为true，则如果索引为负，则将新值添加到数组的开头，如果索引为正，则将新值添加到数组的末尾。
+select jsonb_set('[{"f1":1,"f2":null},2,null,3]', '{0,f1}', '[2,3,4]', false);-- → [{"f1": [2, 3, 4], "f2": null}, 2, null, 3]
+select jsonb_set('[{"f1":1,"f2":null},2]', '{0,f3}', '[2,3,4]');-- → [{"f1": 1, "f2": null, "f3": [2, 3, 4]}, 2]
+
+# 返回插入了new_value的目标。如果路径指定的项目是数组元素，则如果insert_after为false（默认值），则将new_value插入该项目之前；
+如果insert_after为true，则将new_value插入该项目之后。如果路径指定的项目是对象字段，则仅当对象尚未包含该键时，才会插入new_value。
+路径中的所有先前步骤必须存在，否则目标将保持不变。与面向路径的运算符一样，出现在路径中的负整数从JSON数组的末尾开始计数。
+如果最后一个路径步骤是超出范围的数组索引，则如果索引为负，则将新值添加到数组的开头，如果索引为正，则将新值添加到数组的末尾。
+select jsonb_insert('{"a": [0,1,2]}', '{a, 1}', '"new_value"');-- → {"a": [0, "new_value", 1, 2]}
+select jsonb_insert('{"a": [0,1,2]}', '{a, 1}', '"new_value"', true);-- → {"a": [0, 1, "new_value", 2]}
+
+# 从给定的JSON值中递归删除所有具有空值的对象字段。非对象字段的空值保持不变。
+select json_strip_nulls('[{"f1":1, "f2":null}, 2, null, 3]');-- → [{"f1":1},2,null,3]
+
+# 将给定的JSON值转换为漂亮打印的缩进文本。
+select jsonb_pretty('[{"f1":1,"f2":null}, 2]') →
+[
+    {
+        "f1": 1,
+        "f2": null
+    },
+    2
+]
+
+# 以文本字符串形式返回顶级JSON值的类型。 可能的类型是对象，数组，字符串，数字，布尔值和null。 （不应将空结果与SQL NULL混淆；请参见示例。）
+select json_typeof('-123.4');-- → number
+select json_typeof('null'::json);-- → null
+select json_typeof(NULL::json) IS null;-- → 返回布尔值：true
+
+# 资料来源：
+https://www.postgresql.org/docs/current/functions-json.html

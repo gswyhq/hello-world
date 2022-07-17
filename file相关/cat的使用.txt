@@ -8,3 +8,21 @@ cat 1 >> 2
 逐行读取文件内容，一行一行地读取文件内容：
 cat images_name.txt | while read line ; do  echo $line ; done ;
 
+# 求文件的交集，并集，差集：
+命令格式如下:
+cat fileA fileB | sort | uniq -d |wc -l # 求交集 (A∩B)
+cat fileA fileB | sort | uniq |wc -l # 求并集 (A∪B)
+cat fileA fileB | sort | uniq -u |wc -l  # 求差集，实际上是： (A∪B)-(A∩B)
+cat 命令先把两个文件合并成一个文件，然后在对合并后的文件进行排序、去重，
+uniq -d 命令输出文件中相同的字符，
+uniq -u 命令输出文件中不同的字符
+
+# 或者：
+grep -F -f c.txt d.txt | sort | uniq
+在 d.txt 文件里面搜索和 c.txt 文件相匹配的字符
+
+# 计算差集(b - a):
+grep -F -v -f a.txt b.txt | sort | uniq
+在 b.txt 文件里面搜索和 a.txt 文件不相匹配的字符
+
+

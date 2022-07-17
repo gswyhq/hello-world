@@ -1,0 +1,131 @@
+
+Hive的内置函数和自定义函数UDF
+# Hive的内置函数
+在Hive中给我们内置了很多函数官方地址
+
+查看所有的内置函数
+hive> show functions;
+
+查看函数的具体语法
+hive> DESCRIBE FUNCTION case;
+OK
+CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END - When a = b, returns c; when a = d, return e; else return f
+
+————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# Hive自定义函数
+- 自定义函数开发流程：
+1. 使用maven创建一个jeava项目
+2. 继承UDF类；
+3. 重写evaluate方法。
+
+示例过程：
+第一步：创建一个HelloUdf类继承UDF，并且重写evaluate方法
+~$ vim HelloUdf.java
+import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.io.Text;
+
+import java.io.UTFDataFormatException;
+
+public class HelloUdf extends UDF {
+ public Text evaluate (final Text t) {
+     if (t == null) return null;
+
+     return new Text("Hello:" + t);
+ }
+   public static void main(String [] args){
+       System.out.println(new HelloUdf().evaluate(new Text("hero")));
+    }
+ }
+
+第二步：编译java文件
+~$ javac -encoding UTF-8 HelloUdf.java
+若报错
+错误: 程序包org.apache.hadoop.hive.ql.exec不存在
+则mobaxterm改为在CMD窗口运行：
+> javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar  GPSConverter/HelloUdf.java
+
+第三步：打包成jar文件
+~$ vim manf
+Main-Class: HelloUdf
+~$ jar cvfm HelloUdf.jar manf HelloUdf.class
+
+第四步：上传jar文件到hive所在服务目录
+~$ docker cp HelloUdf.jar d6a38c3c6c78:/root/
+
+第五步：hive交互终端添加jar文件
+hive> add jar /root/HelloUdf.jar;
+Added [/root/HelloUdf.jar] to class path
+Added resources: [/root/HelloUdf.jar]
+查看jar包：
+hive> list jar;
+/root/HelloUdf.jar
+
+第六步：创建自定义函数
+hive> create temporary function say_hello as 'HelloUdf';
+OK
+Time taken: 0.014 seconds
+hive> SHOW FUNCTIONS;
+可以查看到刚刚创建的自定义函数 say_hello
+
+第七步：自定义函数的使用：
+hive> select name, say_hello(name) from test;
+OK
+jack    Hello:jack
+hel     Hello:hel
+nack    Hello:nack
+jack    Hello:jack
+hel     Hello:hel
+nack    Hello:nack
+
+
+其他：
+创建自定义函数有两种格式:临时函数，永久函数（0.13版本后)：
+语法
+create temporary function my_lower as 'com.example.hive.udf.Lower';
+create function my_db.my_lower as 'com.example.hive.udf.Lower';
+临时自定义函数（只对当前session有效）
+————————————————
+创建永久函数方法：
+第一步：把jar包上传到hdfs上
+root@d6a38c3c6c78:~# hdfs dfs -put /root/HelloUdf.jar /test
+root@d6a38c3c6c78:~# hdfs dfs -ls /test
+Found 1 items
+-rw-r--r--   1 root supergroup        999 2021-06-23 02:17 /test/HelloUdf.jar
+
+第二步：创建永久函数
+
+hive> list jar;
+hive> CREATE FUNCTION say_hello1
+    >       AS 'HelloUdf'
+    >       USING JAR 'hdfs:///test/HelloUdf.jar';
+Added [/tmp/hive/java/794f3400-5083-4298-afca-075f589c9b13_resources/HelloUdf.jar] to class path
+Added resources: [hdfs:///test/HelloUdf.jar]
+OK
+Time taken: 6.116 seconds
+hive> list jar;
+/tmp/hive/java/794f3400-5083-4298-afca-075f589c9b13_resources/HelloUdf.jar
+注意：执行这条语句创建永久函数，show functions 会加上默认的数据库名在函数名前。（default.say_hello1）
+hive> SHOW FUNCTIONS;
+default.say_hello1
+
+第三步：自定义永久函数的使用：
+hive> select name, say_hello1(name) from test;
+OK
+jack    Hello:jack
+hel     Hello:hel
+nack    Hello:nack
+jack    Hello:jack
+hel     Hello:hel
+nack    Hello:nack
+
+在MySQL中查询创建的自定义函数
+~$ docker exec -it mysql_3306 /bin/bash
+root@c66129402967:/# cd
+root@c66129402967:~# mysql -uroot -proot -P 3306 -h 127.0.0.1
+mysql> select * from hive.FUNCS;
++---------+------------+-------------+-------+------------+-----------+------------+------------+
+| FUNC_ID | CLASS_NAME | CREATE_TIME | DB_ID | FUNC_NAME  | FUNC_TYPE | OWNER_NAME | OWNER_TYPE |
++---------+------------+-------------+-------+------------+-----------+------------+------------+
+|       1 | HelloUdf   |  1624414743 |     1 | say_hello1 |         1 | NULL       | USER       |
++---------+------------+-------------+-------+------------+-----------+------------+------------+
+1 row in set (0.00 sec)

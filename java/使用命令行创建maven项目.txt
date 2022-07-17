@@ -1,0 +1,31 @@
+
+使用命令行创建maven web项目
+
+通过IDEA创建maven web项目太麻烦，这时可以用命令行一键创建maven web项目：
+~$ mvn archetype:generate -DgroupId=com.zcz.webdemo2 -DartifactId=webdemo3 -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false
+上面命令运行完成后，即可在当前目录下面创建了一个名为webdemo3的目录, 其目录结构如下：
+~$ tree
+.
++--- webdemo3
+|   +--- pom.xml
+|   +--- src
+|   |   +--- main
+|   |   |   +--- resources
+|   |   |   +--- webapp
+|   |   |   |   +--- index.jsp
+|   |   |   |   +--- WEB-INF
+|   |   |   |   |   +--- web.xml
+
+命令说明：
+-DarchetypeArtifactId：模板名称
+-DgroupId：输入的groupId
+DartifactId：输入的artifactId
+-DinteractiveMode=false：不以交互式命令行的形式构建项目
+
+~$ mvn archetype:generate -DgroupId=com.dreams.maven.quickstart -DartifactId=simple -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+命令解释:
+mvn                                               --核心命令
+archetype:generate                                --创建项目
+-DgroupId=com.dreams.maven.quickstart             --包名的写法，域名的反写
+-DartifactId=simple                               --项目名称
+-DarchetypeArtifactId=maven-archetype-quickstart  --表示创建的是[maven]java项目

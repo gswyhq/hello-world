@@ -1,0 +1,34 @@
+
+Elasticsearch 安装 HDFS 插件存储快照及还原
+
+Elasticsearch 支持多种存储库的配置，如 S3、Azure、Google Cloud Storage 和 HDFS 等
+
+安装 HDFS 插件
+想要使用 HDFS 存储 Elasticsearch 的索引快照，我们需要把 Elasticsearch 集群中的“所有节点”都安装上 HDFS 插件。安装 HDFS 插件的方式有两种，一种是直接安装，另一种是下载 HDFS 插件后，离线安装。
+
+第一种安装方式：适用于网络情况良好并且不限制网络访问，一般在非生产环境使用，我们只需要在 Elasticsearch 节点的根目录下执行如下命令即可：
+sudo bin/elasticsearch-plugin install repository-hdfs
+第二种安装方式：适用于网络情况不会或者限制网络访问，一般在生产环境使用，我们需要先把 HDFS 插件下载到本地环境，再上传到服务器，然后执行如下命令即可：
+Unix 环境：sudo bin/elasticsearch-plugin install file:///path/to/plugin.zip
+Windows 环境：bin\elasticsearch-plugin install file:///C:/path/to/plugin.zip
+如果想要卸载插件，只需要将上述命令中的install替换为remove即可。
+
+离线安装示例：
+第一步：下载安装包
+https://artifacts.elastic.co/downloads/elasticsearch-plugins/repository-hdfs/repository-hdfs-6.8.5.zip
+注意安装版本应与es版本一致，否则报类似下面的错误：
+Exception in thread "main" java.lang.IllegalArgumentException: Plugin [repository-hdfs] was built for Elasticsearch version 6.8.16 but version 6.8.5 is running
+
+第二步：离线安装包复制到es服务所在机器
+# 注意，zip文件不能放在/usr/share/elasticsearch/plugins/目录下；
+docker cp repository-hdfs-6.8.5.zip es_9200:/usr/share/elasticsearch/
+docker exec -it es_9200 /bin/bash
+
+第三步，安装：
+bin/elasticsearch-plugin install file:///usr/share/elasticsearch/repository-hdfs-6.8.16.zip
+
+当出现Continue with installation? [y/N]的时候，按y键即可。当 HDFS 插件安装成功后，在 Elasticsearch 安装目录下的plugins目录下，新增一个名为repository-hdfs的目录，该目录包含了一些 HDFS 插件运行所需的 jar 包以及配置文件。当所有节点都安装完 HDFS 插件之后，重启所有节点，以使插件生效。
+
+第四步，当不需要改插件时，删除插件：
+sudo bin/elasticsearch-plugin remove repository-hdfs
+

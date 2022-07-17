@@ -25,3 +25,13 @@ alter table goods alter column sid type character varying;
 7. 重命名字段
 alter table goods rename column sid to ssid;
 
+--1.查看客户端版本
+--psql --version
+--2.查看服务器端版本
+--2.1 查看详细信息
+select version();
+--2.2 查看版本信息
+show server_version;
+--2.2 查看数字版本信息包括小版号
+SHOW server_version_num;
+

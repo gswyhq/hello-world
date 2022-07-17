@@ -1,0 +1,255 @@
+
+
+Apache Atlas是托管于Apache旗下的一款元数据管理和治理的产品，Apache Atlas提供api和一系列插件可以方便将数据库元数据信息导入到atlas中进行分析，
+atlas也提供web界面对元数据进行管理，通过atlas，企业可以对数据库元数据建立资产目录，并对这些资产进行分类和治理，为数据分析，数据治理提供高质量的元数据信息。
+
+企业内部可能运行多种类型数据库，从大类上可以分，大数据平台，sql数据库，nosql数据库，图数据库等，从具体的数据库类型可能是mysql，oracle，mongodb等，
+不管是什么类型的数据库，终归都是一个目的，存储数据，对怎么管理数据每个数据库有每个数据库的方式.
+
+以oracle为例
+
+schema是一组数据库对象的集合
+table是存储数据的实体
+column列表示数据库的每个属性
+view视图表示虚拟表，表示一组查询的逻辑集合
+materialview物化视图则是对视图的实体化
+同义词表示数据库对象的别名
+…等等
+那么schema，table，column这些描述数据的信息就是元数据，元数据库管理有什么用，我们平时做开发可能很少会去考虑这个问题，元数据管理对保证数据库质量是非常重要的，通过元数据管理
+
+分析表，视图等数据库对象间的依赖关系
+分析字段间的传递关系，在元数据库管理中，我们称之为数据血缘关系
+分析是否存在重复字段，矛盾字段等
+为企业提供数据地图
+每个业务系统可能会自己定义表，视图，这些数据从哪来又流往哪去，数据之间是否存在关联，和其他系统的数据是否存在重复字段和矛盾字段，这些就是元数据管理要解决的问题。
+
+Atlas目前只能自行编译源码进行安装，Atlas使用java开发，但是是以python方式启动，所以安装之前，环境必须满足以下需求
+
+jdk 1.8+
+maven3.x
+python2.7+
+你可以从这里(http://atlas.apache.org/#/Downloads)下载最新版本的Atlas代码，以2.1.0版本为例
+
+https://www.apache.org/dyn/closer.cgi/atlas/2.2.0/apache-atlas-2.2.0-sources.tar.gz
+
+$ tar -xvf apache-atlas-2.1.0-sources.tar.gz
+# 进入打包后的目录
+$ cd apache-atlas-sources-2.1.0
+
+# 设置maven打包进程的jvm参数。（-Xms表示初始化JAVA堆的大小及该进程刚创建出来的时候，他的专属JAVA堆的大小，一旦对象容量超过了JAVA堆的初始容量，JAVA堆将会自动扩容到-Xmx大小）
+export MAVEN_OPTS="-Xms3g -Xmx3g"
+$ mvn clean install  
+$ mvn clean -DskipTests package -Pdist,embedded-hbase-solr  
+
+执行打包命令
+如果环境中已经有装好Apache Hbase和Apache Solr，执行这条
+mvn clean -DskipTests package -Pdist
+如果环境中没有Hbase和Solr，希望使用Atlas内置的Hbase和Solr，执行这条；
+若没有hadoop环境，只好使用这条命令了。
+mvn clean -DskipTests package -Pdist,embedded-hbase-solr
+如果希望使用Atlas内置的Apache Cassandra 和 Apache Solr，执行这条命令
+mvn clean package -Pdist,embedded-cassandra-solr
+打包过程要下很多jar包和node安装包，速度快慢看网络速度，网络慢或者有波动的话下载会中断，需要要多重试几次。
+
+若出现错误：
+[ERROR] Cannot download "https://github.com/sass/node-sass/releases/download/v4.13.1/linux-x64-72_binding.node":
+则下载好对应文件，离线安装：
+如果是使用 npm 作为包管理工具，在 pacakge.json 所在目录执行
+npm install --sass-binary-path="C:\ folder\win32-x64-57_binding.node"
+
+
+# 打包报错
+Too many files with unapproved license
+[ERROR] Failed to execute goal org.apache.rat:apache-rat-plugin:0.13:check (rat-check) on project apache-atlas: Too many files with unapproved license: 1274 See RAT report in: /opt/soft/apache-atlas-sources-2.1.0/target/rat.txt -> [Help 1]
+解决方法：检查license报错，添加参数-Drat.skip=true跳过license检查。再次执行命令
+# 修改前命令
+mvn clean -DskipTests package -Pdist,embedded-hbase-solr
+# 修改后命令
+mvn clean -DskipTests package -Pdist,embedded-hbase-solr -Drat.skip=true
+
+这个过程中会下载：
+https://archive.apache.org/dist/hbase/2.3.3/hbase-2.3.3-bin.tar.gz
+
+[ERROR] /root/atlas-release-2.2.0-rc1/intg/src/main/java/org/apache/atlas/v1/model/instance/Struct.java:[21,40] package com.fasterxml.jackson.annotation does not exist
+root@611da123ad1d:~/atlas-release-2.2.0-rc1# mvn clean install -Drat.skip=true -Dmaven.test.skip=true
+解决方法，在pom.xml 文件中指定：
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.11.0</version>
+    </dependency>
+
+# 强制下载maven包
+mvn dependency:purge-local-repository clean install
+
+# 打包成功后，会生成如下等文件：
+apache-atlas-2.1.0-bin
+apache-atlas-2.1.0-bin.tar.gz
+
+# 安装
+如果要部署atlas的服务器不是当前服务器，可以将压缩包apache-atlas-2.1.0-bin.tar.gz复制到目标服务器；
+如果要部署的服务器就是当前服务器，那么把apache-atlas-2.1.0-bin目录拷贝到要安装的目录即可。
+
+# 启动
+$ cd apache-atlas-sources-2.1.0/distro/target/apache-atlas-2.1.0-server/apache-atlas-2.1.0/bin  
+$ python atlas_start.py  
+configured for local hbase.  
+hbase started.  
+configured for local solr.  
+solr started.  
+setting up solr collections...  
+starting atlas on host localhost  
+starting atlas on port 21000  
+..............................  
+Apache Atlas Server started!!!  
+在浏览器打开http://localhost:21000/
+
+# 登录
+默认用户名和密码是admin/admin
+
+# 问题，启动成功，但没有进程
+查看进程和端口发现hbase和solr并没有启动
+$ netstat -antp
+
+运行官网提供的验证是否启动成功的命令，提示failed
+curl -u admin:admin http://localhost:21000/api/atlas/admin/version
+尝试访问登录页面，发现无法访问，至此可以确认Atlas没有启动成功
+
+停掉Atlas
+bin/atlas_stop.py
+
+# 启动Hbase, 进入hbase启动脚本所在目录
+cd ./hbase/bin
+sh start-hbase.sh
+提示输入密码
+输入密码，按Enter
+此时页面已经可以打开了
+master(http://localhost:61530/rs-status)
+regionserver(http://localhost:61510/master-status)
+
+# 启动Solr; 回到项目跟目录
+cd -
+# 进入solr启动脚本所在目录
+cd ./solr/bin
+./solr start -c -z localhost:2181 -p 9838 -force
+此时页面已经可以打开了
+solr地址（http://localhost:9838/solr/#/）
+
+# 再次启动Atlas, 启动Atlas后台报错
+cd -
+bin/atlas_start.py
+启动未报错，后台日志./logs/application.log中有报错
+Can not find the specified config set: vertex_index
+
+解决后台报错
+尝试手动创建三个collection：vertex_index、edge_index、fulltext_index
+
+solr管理页面
+http://localhost:9838/solr/#/
+下面是添加一个Collection的操作步骤，依次添加3个collection
+打开solr管理页面 -> 左键键点击Collections -> 点击Add Collection -> name输入vertex_index -> config set 选择 _default -> 点击Add Collecion
+
+# 再次验证是否成功运行的命令，发现返回值已经正常
+root@company:/opt/soft/apache-atlas-2.1.0-bin/apache-atlas-2.1.0/logs$ curl -u admin:admin http://localhost:21000/api/atlas/admin/version
+{"Description":"Metadata Management and Data Governance Platform over Hadoop","Revision":"release","Version":"2.1.0","Name":"apache-atlas"}
+
+至此已安装成功，导入官方案例数据跑个helloworld试试看
+
+# 安装示例(quick start)
+Atlas安装包中提供两个项目的示例，如果你是想学习，这两个示例是很好的入门
+
+$ cd apache-atlas-sources-2.1.0/distro/target/apache-atlas-2.1.0-server/apache-atlas-2.1.0/bin
+# 运行导入脚本
+$ python quick_start.py  
+$ python quick_start_v1.py  
+示例安装完登录http://localhost:21000就能查询到两个示例到元数据信息
+
+# UI功能介绍
+打开页面就能看到一共三块SEARCH(搜索)、CLASSIFICITION（分类）、GLOSSARY术语表
+
+# SEARCH(搜索)
+搜索分两种模式Basic（基础）、Advance（进阶）
+基础只能根据类型、分类、术语、文本搜索元数据
+进阶可以根据类型、DSL查询语言搜索元数据
+
+# CLASSIFICITION（分类）
+这里感觉包括了UI至少60%的功能，包括属性、血缘、分类、标签的查看
+GLOSSARY术语表
+根据术语搜索
+
+相关概念
+Type
+元数据类型定义，这里可以是表，列，视图，物化视图等，还可以细分hive表(hive_table)，hbase表(hbase_table)等，甚至可以是一个数据操作行为，比如定时同步从一张表同步到另外一张表这个也可以描述为一个元数据类型，atlas自带了很多类型，但是可以通过调用api自定义类型
+
+Classification
+分类，通俗点就是给元数据打标签，分类是可以传递的，比如user_view这个视图是基于user这个表生成的，那么如果user打上了HR这个标签，user_view也会自动打上HR的标签，这样的好处就是便于数据的追踪
+
+GLOSSARY
+词汇表，GLOSSARY包含两个概念，Category（类别）和Term（术语），Category表示一组Term的集合，术语为元数据提供了别名，以便用户更好的理解数据，举个例子，有个pig的表，里面有个猪肾的字段，但很多人更习惯叫做猪腰子，那么就可以给猪肾这个字段加一个Term，不仅更好理解，也更容易搜索到
+
+Entity
+实体，表示具体的元数据，Atlas管理的对象就是各种Type的Entity
+
+Lineage
+数据血缘，表示数据之间的传递关系，通过Lineage我们可以清晰的知道数据的从何而来又流向何处，中间经过了哪些操作
+
+UI界面
+Entity主界面
+
+这里可以查看Entity详细信息，可以查看和添加分类，术语，查看和定义一些属性，标签
+
+血缘关系
+表sales_fact经过loadSalesDaily操作后生成表sales_fact_daily_mv，再经过loadSalesMonthly后生成表sales_fact_monthly_mv，我们可以看下sales_fact_monthly_mv的血缘图，可以发现该表源头数据不仅来自sales_fact还来自于time_dim
+
+
+关联关系
+可以查询表包含的列，数据库，来源，去向，存储，点击上面切换视图可以切换到图形模式
+
+
+审计线索
+记录对该对象的操作记录
+
+导入hive表
+atlas可以通过brige将元数据从数据库系统导入到atlas中，并且支持自动更新，目前从源码上看atlas支持的产品如下
+
+$ ll apache-atlas-sources-2.1.0/addons/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 falcon-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 falcon-bridge-shim/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 hbase-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 hbase-bridge-shim/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 hbase-testing-util/  
+drwxr-xr-x@  5 asan  staff   160 Jan 21 15:47 hdfs-model/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 hive-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 hive-bridge-shim/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 impala-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 impala-bridge-shim/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 impala-hook-api/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 kafka-bridge/  
+drwxr-xr-x@  7 asan  staff   224 Jul 10  2020 models/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 sqoop-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 sqoop-bridge-shim/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 storm-bridge/  
+drwxr-xr-x@  6 asan  staff   192 Jan 21 15:47 storm-bridge-shim/  
+可以看到目前支持falcon，hbase，hive，impala，kafka，sqoop，storm数据库的导入，并且atlas自带有hive相关元数据类型
+
+
+配置hive-site.xml
+<property>  
+    <name>hive.exec.post.hooks</name>  
+    <value>org.apache.atlas.hive.hook.HiveHook</value>  
+</property>  
+修改hive-env.sh
+export HIVE_AUX_JARS_PATH=/home/asan/apache-atlas-sources-2.1.0/distro/target/apache-atlas-2.1.0-hive-hook/apache-atlas-hive-hook-2.1.0/hook/hive  
+启动 import-hive.sh脚本
+cd apache-atlas-sources-2.1.0/distro/target/apache-atlas-2.1.0-hive-hook/apache-atlas-hive-hook-2.1.0/hook-bin  
+./import-hive.sh  
+显示以下结果说明导入成功
+Enter username for atlas :- admin  
+Enter password for atlas :-   
+Hive Meta Data imported successfully!!!  
+
+
+官网地址：https://atlas.apache.org/
+
+http://zhengjianfeng.cn/?p=513
+https://blog.csdn.net/qq_39945938/article/details/119004695

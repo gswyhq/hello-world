@@ -285,8 +285,8 @@ return r
 _id	_labels	name	Name	_start	_end	_type	since
 0	:Person	Euler
 1	:Person	Bernoulli
-2	:Xianzhong:Xincheng	重疾险	重疾险
-3	:Qingjing:Xincheng	战争
+2	:Xianzhong:Chengxin	重疾险	重疾险
+3	:Qingjing:Chengxin	战争
 				0	1	KNOWS	1768
 				2	3	免赔条款	1768
 

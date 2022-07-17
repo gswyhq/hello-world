@@ -1,0 +1,105 @@
+
+判断字符串中是否包含某个特定字符
+方法1、用 like函数
+select '32002,32002,11001,11001,' like '%2%';
+>>>true
+
+方法2、用regexp正则函数
+select '32002,32002,11001,11001,' regexp('.*2.*');
+>>>true
+ 
+方法3、locate函数
+判断 name 字段中是否包含字符串 “aaa”：
+select * from temp where locate("aaa", name) > 0;
+locate(字符串，字段名)，如果包含，返回大于0的index位置；否则，返回0；
+
+-- 1 a在abcda中首次出现的位置
+select locate('a','abcda') 
+-- 3
+select locate('cd','abcda') 
+
+方法4、instr函数
+-- 0 0表示在a中找不到abcda
+select instr('a','abcda')
+-- 3 表示abcda中cd从位置3开始
+select instr('abcda','cd') 
+总结
+instr和locate都可以判断substr在str首次出现的位置.
+二者的参数顺序相反
+找不到都是返回0
+
+# 保留截取两位小数：
+方法1：
+round(column_name,2)                 四舍五入截取(这种方法慎用，有时候结果不是你想要的)
+方法2：
+regexp_extract(column_name,'([0-9]*.[0-9][0-9])',1)      正则匹配截取，不做四舍五入，只是单纯的当作字符串截取
+方法3：
+cast(column_name as decimal(10,2))        cast函数截取（推荐使用）
+但是使用decimal时需要注意：select cast(cast('40.860' as decimal(10, 3)) as string) 的结果是 '40.86' 而不是 '40.860';
+select cast(cast('40.996' as decimal(10, 2)) as string) 的结果是 '41', 而不是'41.00', 也不是'41.0';
+
+同样的：select round('40.860', 3); 的结果是 '40.86' 而不是 '40.860';
+select round('40.865', 3); -> 40.865
+select round('40.8654', 3); -> 40.865
+select round('40.8655', 3); -> 40.866
+
+# 字符串的截断
+使用 Hive 中 substr() 函数来实现。
+1、截取前两位：
+substr(ID,0,2)
+substr() 第一个参数表示待截取的字段名称，第二个参数表示截取的起始位置，第三个参数表示截取的长度。
+2、截取后两位：
+substr(ID,-2,2)
+表示从倒数第二个位置开始截取两位，即截取后两位。
+substr函数适合定长的字符串截取，如果起始位置超过了字符串长度返回的是空串。
+select substr('123456', -8, 8); 返回结果为空；
+select substr('123456', 2, 8); 返回结果为：23456
+需注意的是：select substr('123456', 0, 8); 和 select substr('123456', 1, 8); 的返回结果均是：123456
+
+# 不查询，仅仅返回一个固定字符串；
+select "你好中国";
+
+# 去除字符串首尾的空格：
+select trim(' 你好中国 ')
+sql语法中直接去除两头空格的函数trim()，也可以ltrim()去除左空格rtrim()去除右空格。
+
+# 字符串替换函数：
+replace( strSource, strFind, strReplaceAs )
+strSource: 源字符串　　　　　　　　如：user_id 字段。
+strFind: 要被替换的字符               　　如： 空格。
+strReplaceAS: 替换成什么字符   　　 如： 长度为0的字符串。
+select replace( user_id, ' ', '') ;
+
+# 小写字母变成大写字母：
+select upper("abde EDW xyz")
+
+# 字符串拼接函数：
+select concat('abc', '-', '123');
+返回结果： abc-123
+select concat('abc', 'xyz', '123');
+返回结果：abcxyz123
+select concat('abc', '123');
+返回结果：abc123
+
+concat_ws(string SEP, string A, string B...)
+与concat()类似，但使用指定的分隔符喜进行分隔
+select concat_ws('abc', 'xyz', '123');
+返回结果：xyzabc123
+
+# 求解字符串的MD5值：
+select md5('ABC');
+'902fbdd2b1df0c4f70b4a5d23525e932'
+该结果等同于：
+~$ echo -n ABC|md5sum
+902fbdd2b1df0c4f70b4a5d23525e932  -
+echo 默认是带换行符做结尾的
+echo -n 可以去掉换行符
+
+# 返回字符串的第一个字符的ascii数字
+select ascii('abc');
+返回97即字符a的ascii值
+select ascii('\n');
+返回10；
+select ascii('\r');
+返回13；
+

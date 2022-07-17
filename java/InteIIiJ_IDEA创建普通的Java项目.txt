@@ -1,0 +1,27 @@
+
+
+一、创建 Java 项目：
+    1、打开 IDEA 软件，点击界面上的 Create New Project 
+或者，左上角 File -> New -> Project
+    2、出现以下界面，选中 Java，然后选择 JDK，最后点击 Next，进行下一步（我的是 jdk1.8）
+3、这里是选择生成项目时是否创建 Java 文件，勾选上 Java Hello World 后会生成一个默认的 Hello world 文件，点击 Next 进行下一步，
+4、给项目命名，默认是 untiled，自己填个名字吧，最后点击 finish
+5、项目创建完成
+二、创建 Java 文件：
+      1、点击 src——>new——>package，创建一个文件包，并给包命名，与 Eclipse 的包类似；
+      2、在包下面创建 Java 类文件，点击包名——>New——>Java Class;
+3、给类文件命名,如MyNLP
+并编写代码，如：
+public class MyNLP {
+    public static void main(String[] args) {
+        System.out.println("你好！");
+    }
+}
+4、运行 Java 文件，点击 Run——>Run......;
+5、点击要运行的文件名
+
+# IntelliJ IDEA普通项目转变为Maven项目
+1, 项目名称上右键，选择“Add Framework Support”
+2, 勾选Maven，点击Ok。
+pom.xml成功创建(已转变成maven项目)，可以添加依赖了
+

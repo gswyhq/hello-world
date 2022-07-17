@@ -1,0 +1,12 @@
+
+Docker中安装ClickHouse
+
+单机： 
+docker run -d \
+--name clickhouse-server \
+-p 9000:9000 \
+-p 8123:8123 \
+-p 9009:9009 \
+--ulimit nofile=262144:262144 \
+yandex/clickhouse-server
+

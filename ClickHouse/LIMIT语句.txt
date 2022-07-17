@@ -1,0 +1,30 @@
+
+# 显示前m条数据
+select * from table_name limit  m;
+
+# 即从n+1条数据开始，共返回m条
+select * from table_name limit n, m;
+相当  LIMIT m OFFSET n , 即从n+1条数据开始，共返回m条
+如：
+select * from table_name limit 1, 2;
+跳过第一条数据，显示第2、3条数据。
+
+# 显示指定字段的前几条数据，如：每个id只显示前两条数据
+SELECT * FROM table_name ORDER BY id LIMIT 2 BY id;
+
+# 每个id跳过第1条数据，显示第2,3条数据
+SELECT * FROM limit_by ORDER BY id, val LIMIT 1, 2 BY id;
+
+# LIMIT n BY + LIMIT
+返回每domain, device_type对的前5个引荐来源网址，总共最多包含100行（LIMIT n BY + LIMIT）。
+SELECT
+    domainWithoutWWW(URL) AS domain,
+    domainWithoutWWW(REFERRER_URL) AS referrer,
+    device_type,
+    count() cnt
+FROM hits
+GROUP BY domain, referrer, device_type
+ORDER BY cnt DESC
+LIMIT 5 BY domain, device_type
+LIMIT 100
+ 

@@ -126,6 +126,36 @@ pd.merge(df4, df5, left_on='key', right_index=True, how='outer')
 
 # 来源：https://blog.csdn.net/print_and_return/article/details/80577561
 
+# 对多个 pandas dataframe 进行 join，三个及三个以上 DataFrame join
+df1 = pd.DataFrame({'uid':[1,2,5], 'd1':[1,2,5]})
+df2 = pd.DataFrame({'uid':[1,4,6], 'd2':[1,4,6]})
+df3 = pd.DataFrame({'uid':[2,5,7], 'd3':[2,5,7]})
+dfs = [df1, df2, df3]
+from functools import reduce
+df_final = reduce(lambda left,right: pd.merge(left,right,on='uid', how='outer'), dfs)
+df_final
+Out[72]: 
+   uid   d1   d2   d3
+0    1  1.0  1.0  NaN
+1    2  2.0  NaN  2.0
+2    5  5.0  NaN  5.0
+3    4  NaN  4.0  NaN
+4    6  NaN  6.0  NaN
+5    7  NaN  NaN  7.0
+
+# pandas 对列名进行重命名：
+df1=pd.DataFrame({'A':[1,2,3],'B':[4,5,6],'C':[7,8,9]})
+df1.rename(columns={'C':'D'},inplace=True) 
+
+# 两个表列合并（要求行数一致）：
+df = pd.DataFrame([[1,2,3], [4,5,6]],columns=['a', 'b', 'c'])
+df2 = pd.DataFrame([[8, 9], [2, 4]],columns=['e', 'f'])
+df.join(df2)
+Out[68]: 
+   a  b  c  e  f
+0  1  2  3  8  9
+1  4  5  6  2  4
+
 
 pandas dataframe的合并（append, merge, concat）
 

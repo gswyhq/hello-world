@@ -1,0 +1,76 @@
+
+ubuntu下xvfb(虚拟屏幕)的使用
+
+1.[服务器端]
+sudo apt install xvfb x11vnc
+Xvfb :screen-num -screen 0 1024x768x16 &
+x11vnc -listen 0.0.0.0 -rfbport port -noipv6 -passwd passwd -display :screen-num
+export DISPLAY=:screen-num
+
+例如：
+Xvfb :2 -screen 0 1024x768x16 &
+x11vnc -listen 0.0.0.0 -rfbport 5900 -noipv6 -passwd xxxxxx -display :2
+1024x768x16 是x，不是*
+
+[用户端]
+打开vncviewer等工具，连线即可，黑屏表示无东西显示。连接格式：“服务器ip:端口”。端口号密码即为前面所设。随便开点GUI程序即可。
+
+--------------------------------------------------------------------------------------------------------------------------
+
+
+# 安装 vnc, xvfb
+$ apt-get install -y x11vnc xvfb 
+# 设置密码
+$ x11vnc -storepasswd 1234 ~/.vnc/passwd
+这将创建一个运行VNC且密码为1234：
+
+
+Xvfb -- 虚拟X server
+需要在服务器用一个基于GUI程序，如 PyQt 的程序画图，而 PyQt 要求有 X server 支持。
+服务器上一般不会装 X Window的，这时候就轮到 Xvfb出场了！
+
+有时候我们不关注程序是否有界面（比如自动化测试），只要程序在运行就可以了;
+xvfb 这个工具给我们提供了相关的功能;
+xvfb 这个工具相当于给应用程序提供虚拟的 X server.
+Xvfb 是一个 X 服务器，可以在没有显示硬件和物理输入设备的机器上运行。
+
+xvfb  是通过提供一个类似 X server 守护进程 和 设置程序运行的环境变量  DISPLAY 来提供程序运行的环境。
+X server是linux系统里面图形接口服务器的简称。
+windows系统的界面是这个系统不可分割的一部分，各种窗口操作界面显示都是由系统核心直接管理的，而linux的图形界面并比较常见的linux界面操作环境有KDE和GNOME，为它们提供系统支持的就是X server，而并非linux核心。
+
+
+安装 apt-get install xvfb
+启动 Xvfb
+Xvfb -ac :7 -screen 0 1280x1024x8 > /dev/null 2>&1
+export DISPLAY=:7
+# DISPLAY 后的编号须与启动时的编号一致，这里是 ":7"。
+之后就可以像在X Window中一样使用各种GUI程序了。
+
+Python 中还有更原生的方式：PyVirtualDisplay
+
+
+安装 chrome:(自带firefox)
+    http://www.ubuntuupdates.org/ppa/google_chrome
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+    sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+    sudo apt-get update
+    sudo apt-get install google-chrome-stable
+
+安装xvfb 及各种：
+    sudo apt-get update && sudo apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic xvfb x11-apps  imagemagick firefox google-chrome-stable
+
+1. 启动Xvfb服务
+Xvfb -ac :7 -screen 0 1280x1024x8  (注意这个是x, 不是* 哦)
+2.  启动firefox or chrome
+export  DISPLAY=:7
+/usr/bin/google-chrome-stable http://www.investopedia.com         //chrome 浏览www.investopedia.com
+或者
+export DISPLAY=:7
+firefox http://www.investopedia.com                                              //firefox 浏览www.investopedia.com
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+x11vnc是一个VNC服务器，它允许人们使用任何VNC viewer远程查看并控制真实的X显示器（即与物理显示器、键盘和鼠标相对应的显示器）。
+x11vnc不会为远程控制创建一个额外的显示（或X桌面）。相反，它实时显示现有的X11显示.
+
+

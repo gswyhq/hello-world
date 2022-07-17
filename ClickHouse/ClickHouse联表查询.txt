@@ -1,0 +1,352 @@
+
+join时遵循大表在前的原则，这点和hive刚好相反；
+SELECT count(1)
+FROM tutorial.supply_side as t2
+INNER JOIN tutorial.demand_side as t1
+ON t1.demand_id=t2.supply_id;
+
+注：这里tutorial.supply_side是大表，tutorial.demand_side是小表；
+同样的：
+with
+    (select  bitmapBuild(groupArray(xxHash32(demand_id))) from tutorial.demand_side) as a01
+select count(1) from tutorial.supply_side where bitmapContains(a01, xxHash32(supply_id));
+速度快于下面语句：
+with
+    (select  bitmapBuild(groupArray(xxHash32(supply_id))) from tutorial.supply_side) as a02
+select count(1) from tutorial.demand_side where bitmapContains(a02, xxHash32(demand_id));
+
+# 数组的交集：
+curl 12.45.23.12:8123 -d "select arrayIntersect([xxHash64('a'),xxHash64('b'),xxHash64('c')], [xxHash64('a'),xxHash64('b'),xxHash64('d')])"
+
+求两个表的交集：
+方法1（join联表查询）：
+curl localhost:8123 -d 'select count(a.mid) from tutorial_test_a as a join tutorial_test_b as b on a.mid=b.mid;'
+real    0m 6.51s
+user    0m 0.01s
+sys     0m 0.18s
+
+方法2(子表查询，in语句)：
+curl 12.45.23.12:8123 -d 'select count(1) from tutorial_test_a where mid in (select mid from tutorial_test_b);'
+real    0m 4.32s
+user    0m 0.01s
+sys     0m 0.23s
+
+# 判断一个数在不在数组中的方法：
+has(arr,elem) 
+检查’arr’数组是否具有’elem’元素。
+如果元素不在数组中，则返回0;如果在，则返回1
+curl 12.45.23.12:8123 -d 'select has([1,2,3], 3)'
+当然也可以：
+curl 12.45.23.12:8123 -d  'select 3 in [1,2,3]'
+但有时候，in语句在where\HAVING条件后无效，这时候就需要has函数；
+
+# 获取数组中，指定位置是数据（位置从1开始）：
+curl 12.45.23.12:8123 -d 'select arrayElement([2,5,1], 3)'
+
+# 合并多个数组为一个数组：
+SELECT arrayConcat([1, 2], [3, 4], [5, 6]) AS res
+
+方法3（分治，分组转换为数组列表，再转换为位图，求位图的交集，再统计求和）：
+time curl 12.45.23.12:8123 -d 'SELECT
+    sum(length(bitmapToArray(bitmapAnd(ta.mid_list, tb.mid_list))))
+FROM
+(
+    select
+        substringUTF8(mid,1,1) as label,
+        bitmapBuild(groupArray(xxHash64(mid))) as mid_list
+    from tutorial_test_a
+    GROUP BY label
+) as ta
+ANY JOIN
+(
+    select
+        substringUTF8(mid,1,1) as label,
+        bitmapBuild(groupArray(xxHash64(mid))) as mid_list
+    from tutorial_test_b
+    GROUP BY label
+) as tb
+USING label
+'
+real    0m 28.51s
+user    0m 0.03s
+sys     0m 0.17s
+
+方法4（分治，分组转换为数组列表，再求列表的交集，再统计求和）：
+~$ time curl 12.45.23.12:8123 -d '
+SELECT
+    sum(length(arrayIntersect(ta.mid_list, tb.mid_list)))
+FROM
+(
+    select
+        xxHash64(mid)%1000 as label,
+        groupArray(xxHash64(mid)) as mid_list
+    from tutorial_test_a
+    GROUP BY label
+) as ta
+ANY JOIN
+(
+    select
+        xxHash64(mid)%1000 as label,
+        groupArray(xxHash64(mid)) as mid_list
+    from tutorial_test_b
+    GROUP BY label
+) as tb
+USING label
+'
+500000
+real    0m 2.11s
+user    0m 0.03s
+sys     0m 0.18s
+
+# 按_table分组，求两个表mid字段的交集个数：
+curl 12.45.23.12:8123 -d '
+with
+    (select groupArray(mid) from tutorial.ta) as list_a
+select _table, count(1) 
+    from tutorial.tb
+    GROUP BY _table 
+    HAVING has(list_a, mid)'
+或者：
+curl 12.45.23.12:8123 -d 'with
+    (select groupArray(mid) from tutorial.ta) as list_a
+select _table, length(arrayIntersect(list_a, list_b)) 
+    from (select _table, groupArray(mid) as list_b from tutorial.tb GROUP BY _table)'
+或者(有时候表很大单表的交集耗时久，拆分小表求交集再求和；分治的思想)：
+curl 12.45.23.12:8123 -d '
+    select _table, sum(length(arrayIntersect(list_a, list_b)))
+    from (
+        select
+            tb._table as _table, ta.list_a as list_a, tb.list_b as list_b
+        from
+        (select mid%10 as label, groupArray(mid) as list_a from tutorial.ta group by label) as ta
+        join
+        (select _table, mid%10 as label, groupArray(mid) as list_b from tutorial.tb group by (_table, label))as tb
+        on ta.label=tb.label
+    ) GROUP BY _table'
+
+
+# 查询一个表某字段的值在其他所有表中出现的次数：
+curl 12.45.23.12:8123 -d "
+	select ta.mid, ta.numbers 
+	from (
+		select mid, count(1) as numbers 
+		from tutorial.tb  
+		GROUP BY mid
+             ) as ta  
+	join (
+		select mid 
+		from tutorial.tb 
+		GROUP BY mid 
+		having _table = 'a' 
+	     ) as tb 
+	on ta.mid=tb.mid 
+"
+1       4
+21      1
+14      1
+121     1
+
+# 某表与其他表的交集占某表总记录的比例：
+curl 12.45.23.12:8123 -d "
+   select sum(case when numbers = 1 then 1 else 0 end), sum(1)     
+   from (
+        select ta.mid as mid, ta.numbers as numbers
+        from (
+                select mid, count(1) as numbers
+                from tutorial.tb
+                GROUP BY mid
+             ) as ta
+        join (
+                select mid
+                from tutorial.tb
+                GROUP BY mid having _table = 'a'
+             ) as tb
+        on ta.mid=tb.mid
+        )
+"
+3       4
+
+# 某表与其他表的交集占某表总记录的比例：
+curl 12.45.23.12:8123 -d "
+   select sum(case when numbers = 0 then 1 else 0 end), sum(1)
+   from (
+        select ta.mid as mid, tb.numbers as numbers
+        from (
+                select mid
+                from tutorial.tb
+                GROUP BY mid
+                having _table = 'a'
+             ) as ta
+        any LEFT join (
+                select mid, count(1) as numbers
+                from tutorial.tb GROUP BY mid
+                having _table != 'a'
+             ) as tb
+        on ta.mid=tb.mid
+        )"
+
+# 若mid字段是字符串，则any LEFT join，右表为空时，返回的是空字符串，若mid字段是数值，右表为空时，返回的是数字0：
+time curl 12.45.23.12:8123 -d "
+   select sum(empty(mid_b)), sum(1)
+   from (
+        select ta.mid as mid, tb.mid as mid_b
+        from (
+                select toString(mid) as mid
+                from tutorial.tb 
+                GROUP BY mid 
+                having  _table = 'a'
+             ) as ta
+        any LEFT join (
+                select toString(mid) as mid
+                from tutorial.tb
+                where _table != 'a'
+             ) as tb
+        on ta.mid=tb.mid
+        )"
+
+# 联表查询，查询哪些数据是自己独有的，其他数据表没有(若将empty函数换成notEmpty,则查询非独有)：
+time curl 12.45.23.12:8123 -d "
+   select sum(mid_b), sum(1)
+   from (
+        select 1, empty(tb.mid) as mid_b
+        from (
+                select mid
+                from tutorial.test_0
+                GROUP BY mid
+             ) as ta
+        any LEFT join (
+                select mid
+                from tutorial.all_test
+                where _table != 'test_0'
+             ) as tb
+        on ta.mid=tb.mid
+        )"
+10009815        10020000
+real    0m 29.46s
+user    0m 0.04s
+sys     0m 0.15s
+
+# 将大表放在左边，速度更快，查询结果跟上面的一致；
+time curl 12.45.23.12:8123 -d "
+   select sum(mid_b), sum(1)
+   from (
+        select 1, empty(ta.mid) as mid_b
+        from (
+                select mid
+                from tutorial.all_test
+                where _table != 'test_0'
+             ) as ta
+        any right join (
+                select mid
+                from tutorial.test_0
+                GROUP BY mid
+             ) as tb
+        on ta.mid=tb.mid
+        )"
+10009815        10020000
+real    0m 14.83s
+user    0m 0.07s
+sys     0m 0.25s
+
+# 分组关联查询
+~$ curl 12.45.23.12:8123 -d "
+   select sum(length(arrayIntersect(list_a, list_b))), sum(length(list_b))
+   from (
+        select ta.list_a as list_a, tb.list_b as list_b
+        from (
+                select
+                    xxHash64(mid)%1000 as label,
+                    groupArray(xxHash64(mid)) as list_a
+                from tutorial.all_test
+                group by label
+                having _table != 'test_0'
+             ) as ta
+        any right join (
+                select
+                    xxHash64(mid)%1000 as label,
+                    groupArray(xxHash64(mid)) as list_b
+                from tutorial.test_0
+                GROUP BY label
+             ) as tb
+        on ta.label=tb.label
+        )"
+10185   10020000
+注意：上面查询sum(length(list_b))，指的是关联到的，若没有关联到的则不包含在内（如test_0中有label=1，而all_test中无label=1，则会统计不到）；
+                 
+# 依次求解每个表与其他所有表的交集占比（消耗内存较大）:
+time curl 12.45.23.12:8123 -d "
+   select
+        _table, sum(case when num > 1 then 1 else 0 end), count(1)
+   from (
+        select tb._table as _table, ta.num as num
+        from (
+                select
+                    mid,
+                    count(1) as num
+                from tutorial.tb
+                group by mid
+             ) as ta
+        any right join (
+                select
+                    _table,
+                    mid
+                from tutorial.tb
+                GROUP BY (_table, mid)
+             ) as tb
+        on ta.mid = tb.mid
+        )
+        GROUP BY _table
+"
+
+# 每个表与其他表的交集占比：
+time curl 12.45.23.12:8123 -d "
+   select ta, 
+          sum(case when num=0 then 1 else 0 end), 
+          sum(case when num=1 then 1 else 0 end)
+   from (select
+      distinct t1._table as ta, t2._table as tb, t2.mid as mid, t1._table <> t2._table as num
+   from
+       tutorial.tb as t1 
+   right JOIN
+       tutorial.tb as t2
+   on (t1.mid=t2.mid)
+   )
+   group by ta
+   "
+
+# 查询一个表中没有的记录行：
+使用SEMI LEFT JOIN时，使用右表中存在的key去过滤左表中的key，如果左表存在与右表相同的key，则输出。
+使用SEMI RIGHT JOIN时，使用左表中存在的key去过滤右表中的key，如果右表中存在与左表相同的key，则输出。
+换句话说，SEMI JOIN返回key在另外一个表中存在的记录行。
+ANTI JOIN和SEMI JOIN相反，他返回的是key在另外一个表中不存在的记录行。
+SEMI JOIN和ANTI JOIN都允许从两个表中获取数据。对于被过滤的表，返回的是与key相同的记录行。
+对于ANTI JOIN，另外一个表返回的是默认值，比如空值或0(字符串类型返回空字符串，数值类型返回数字0等)。
+
+# 联表查询，通过不等于条件来限制：
+time curl 12.45.23.12:8123 -d " 
+   select 
+       t1._table, t1.mid, t2._table, t2.mid 
+   from 
+       tutorial.tb as t1,
+       tutorial.tb as t2 
+   where t1._table <> t2._table 
+   and t1.mid=t2.mid"
+
+# 不含join关键词的满外连接：
+time curl 12.45.23.12:8123 -d "
+   select
+       t1._table, t1.mid, t2._table, t2.mid, t1._table<>t2._table
+   from
+       tutorial.tb as t1,
+       tutorial.tb as t2
+   where t1.mid=t2.mid"
+# 等同于：
+time curl 12.45.23.12:8123 -d "
+   select
+       t1._table, t1.mid, t2._table, t2.mid, t1._table<>t2._table
+   from
+       tutorial.tb as t1 
+   ALL FULL OUTER JOIN
+       tutorial.tb as t2
+   on t1.mid=t2.mid"
+

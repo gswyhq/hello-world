@@ -1,0 +1,214 @@
+
+# 查询一个数组是否包含另外一个数值，例：[3,1,3]中的所有元素是否都在[4,3,1]中，若是返回true，否则返回false；
+select ARRAY[4,3,1] @> ARRAY[3,1,3];
+
+# 查询一个数组是否包含另外一个数值，例：[2,2,7]中的所有元素是否都在[1,7,4,2,6], 若是返回true,否则返回false； 
+select ARRAY[2,2,7] <@ ARRAY[1,7,4,2,6];
+
+# 查询两个列表是否有交集，若是返回true, 否则返回false
+select ARRAY[1,4,3] && ARRAY[2,1];
+
+# 求解两个列表的并集，返回的是一个集合，而不是布尔值；
+select ARRAY[1,2,3] || ARRAY[4,5,6,7];
+
+# 注意：一维列表与二维列表的并集是二维列表，如：
+select ARRAY[1,2,3] || ARRAY[[4,5,6],[7,8,9]] -> {{1,2,3},{4,5,6},{7,8,9}}
+
+# 同理，数值与列表的并集是列表：
+select 3 || ARRAY[4,5,6] -> {3,4,5,6}
+select ARRAY[4,5,6] || 7 -> {4,5,6,7}
+
+# 列表后面追加元素：
+select array_append(ARRAY[1,2], 3) ;
+返回结果：{1,2,3}
+
+# 列表合并：
+select array_cat(ARRAY[1,2,3], ARRAY[3,4,5]) ;
+返回结果：{1,2,3,3,4,5}
+
+# 返回数组的维度：
+select array_dims(ARRAY[[1,2,3], [4,5,6]]) -> [1:2][1:3]
+
+# 生成指定行列的数组，并填充：
+# 生成两行三列的数组，并用数字11填充
+select array_fill(11, ARRAY[2,3]) -> {{11,11,11},{11,11,11}}
+
+# 生成一个数组，该数组填充有给定值的副本，其长度的大小由第二个参数指定。 可选的第三个参数为每个维度提供下界值(默认为全1) 
+array_fill(7, ARRAY[3], ARRAY[2]) -> [2:4]={7,7,7}
+
+# 求解数组的长度：
+select array_length(array[1,2,3], 1) -> 3
+
+# 第一个维度的长度，返回值是2；
+select  array_length(array[[1,2,3], [2,3,4]], 1) ;
+
+# 第二个维度的长度，返回值是3；
+select  array_length(array[[1,2,3], [2,3,4]], 2) ;
+
+# 数组维度的下限：
+select array_lower('[0:2]={1,2,3}'::integer[], 1) -> 0
+
+# 求解数组的维数：
+select  array_ndims(ARRAY[[1,2,3], [4,5,6]]) -> 2
+
+# 在数组中查找字符第一次出现的位置，若不存在则返回null:
+select array_position(array['我', '爱', '我', '的', '国', '家'], '国'); 
+注意返回值是从1开始的，上面示例返回值是5；
+
+# 数值后面添加列表，等同于：select 1 || ARRAY[2,3]
+select array_prepend(1, ARRAY[2,3]);
+返回值：{1,2,3}
+
+# 在列表中查找字符所有出现的位置：
+select array_positions(array['我', '爱', '我', '的', '国', '家'], '我');
+返回值是{1,3}
+
+# 列表中删除指定元素：
+select array_remove(array['我', '爱', '我', '的', '国', '家'], '我');
+返回值：{'爱', '的', '国', '家'}
+
+# 列表元素替换：
+array_replace(ARRAY[1,2,5,4], 5, 3) -> {1,2,3,4}
+select array_replace(array['我', '爱', '我', '的', '国', '家'], '我', '你'); -> {'你', '爱', '你', '的', '国', '家'}
+
+# 用指定字符拼接列表，若存在null，则忽略：
+select  array_to_string(ARRAY[1, 2, 3, NULL, 5], ',');
+指定用‘,’拼接，返回值：1,2,3,5
+
+# 用指定字符拼接列表，若存在null，则指定字符替换：
+select  array_to_string(ARRAY[1, 2, 3, NULL, 5], ',', '*');
+指定用‘,’拼接，null用‘*’替换，返回值为：1,2,3,*,5
+
+# 返回数组维度的上限：
+select array_upper(ARRAY[1,8,3,7], 1) -> 4
+
+# 返回数组中元素的总数：
+select cardinality(ARRAY[[1,2],[3,4]]) -> 4
+select cardinality(ARRAY[null]); 的返回值是1；
+
+# 数组中元素的总数，空列表返回值是零，如：
+select cardinality(ARRAY[]::integer[]);  的返回值是0；
+
+# 利用指定字符串拆分文本，形成列表，若定界符为NULL，则字符串中的每个字符都将成为数组中的单独元素。 如果定界符为空字符串，则将该字符串视为单个字段。 如果提供了null_string且不为NULL，则与该字符串匹配的字段将转换为NULL条目。
+select string_to_array('xx~~yy~~zz', '~~', 'yy');
+按字符‘~~’拆分，并将yy替换为null;结果 {xx,NULL,zz}
+
+select string_to_array('爱我中华', null);
+返回值：{爱,我,中,华}
+
+# 将数组扩展为一组行。 数组的元素按存储顺序读出。
+select unnest(ARRAY[1,2]);
+ 1
+ 2
+
+select unnest(ARRAY[['foo','bar'],['baz','quux']]);
+返回值：
+ foo
+ bar
+ baz
+ quux
+
+# 将多个数组(可能具有不同的数据类型)扩展为一组行。 如果数组的长度不尽相同，则较短的数组将用NULL填充。 此格式仅在查询的FROM子句中允许
+select * from unnest(ARRAY[1,2], ARRAY['foo','bar','baz']) as x(a,b) ->
+
+ a |  b
+---+-----
+ 1 | foo
+ 2 | bar
+   | baz
+
+
+# 第一个范围是否包含第二个范围
+select int4range(2,4) @> int4range(2,3)
+返回布尔值：true;
+
+# 范围是否包含元素
+select '[2011-01-01,2011-03-01)'::tsrange @> '2011-01-10'::timestamp ;
+返回布尔值：true;
+
+# 第二个包含的第一个范围
+select int4range(2,4) <@ int4range(1,7);
+返回布尔值：true;
+
+# 元素是否在某个范围内：
+select 42 <@ int4range(1,7);
+返回布尔值：false
+
+# 范围是否重叠，也就是说，是否有任何共同点
+select int8range(3,7) && int8range(4,12); 返回布尔值：true;
+select int8range(3,7) && int8range(7,12); 返回布尔值：false, 因为 select int8range(7,12); -> [7,12);
+
+# 第一个范围是否严格位于第二个范围之外
+select int8range(1,10) << int8range(100,110) ; -> true;
+select int8range(1,10) << int8range(10,110) ; -> true;
+select int8range(1,10) << int8range(9,110) ; -> false;
+
+# 第一个范围严格来说是第二个范围之外
+select int8range(50,60) >> int8range(20,30); -> true
+
+# 第一个范围不会延伸到第二个范围的右边
+int8range(1,20)&<int8range(18,20) ; -> true
+select int8range(1,23)&<int8range(18,20); -> False
+
+# 第一个范围不会延伸到第二个范围的左侧
+select int8range(7,20)&> int8range(5,10); -> true
+select int8range(5,20)&> int8range(5,10); -> true
+select int8range(3,20)&> int8range(5,10); -> false
+
+# 范围是否相邻
+select numrange(1.1,2.2)-|-numrange(2.2,3.3); -> true
+select numrange(1.1,2.2)-|-numrange(2.3,3.3); -> false
+select numrange(1.1,2.5)-|-numrange(2.3,3.3); -> false
+
+# 任何范围+任何范围->任何范围， 范围的并集
+计算范围的并集。范围必须重叠或相邻，以便联合是单个范围(但请参见range_merge())。
+select  numrange(5,15)+ numrange(10,20); -> [5, 20)
+select numrange(5,15)+ numrange(15,20); -> [5,20)
+select numrange(5,15)+ numrange(18,20); 范围不相邻或重叠，报错：
+
+# 任何范围*任何范围->任何范围
+计算范围的交集。
+select  numrange(5,15)* numrange(10,20);  -> [10, 15)
+select numrange(5,15)* numrange(18,20); -> 空，empty
+
+# 任何范围-任何范围->任何范围, 范围的差集
+计算范围之差。第二个范围不能包含在第一个范围内，以免差异不会是一个范围。
+select int8range(5,15)-int8range(10,20); -> [5,10)
+
+# 求解一个范围的下限：
+提取范围的下限(如果范围为空或下限为无限，则为NULL)。
+select lower(numrange(1.1,2.2));
+返回值为1.1；
+
+# 求解范围的上限
+提取范围的上限(如果范围为空或上限为无限，则为NULL)。
+upper(numrange(1.1,2.2))
+返回值：2.2
+
+# 求解一个范围是不是空集：
+select  isempty(numrange(1.1,2.2)) ;
+返回布尔值：false
+
+# 范围的下限是否包括在内,若是返回true,否则返回false
+select lower_inc(numrange(1.1,2.2)) ;
+返回：true
+
+# 范围的上限是否包含在内
+select upper_inc(numrange(1.1,2.2)); -> false
+
+范围的下界是无限
+select lower_inf('(,)'::daterange); -> true
+select lower_inf(numrange(1.1,2.2)); -> false
+
+范围的上限是无限
+select upper_inf('(,)'::daterange); -> true
+select upper_inf(numrange(1.1,2.2)); -> false
+
+# 计算包含两个给定范围的最小范围。
+select range_merge('[1,2)'::int4range, '[3,4)'::int4range);
+返回值：[1, 4)
+
+# 参考资料：
+https://www.postgresql.org/docs/current/functions-array.html
+https://www.postgresql.org/docs/current/functions-range.html
+

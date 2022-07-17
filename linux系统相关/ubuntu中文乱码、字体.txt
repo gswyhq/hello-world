@@ -29,4 +29,46 @@ gswewf@gswewf-pc:/usr/share/fonts$ sudo mkdir local
 gswewf@gswewf-pc:/usr/share/fonts/local$ sudo cp /home/gswewf/Downloads/simsun/simsun.ttc .
 
 
+# locale -a 缺失：zh_CN.UTF-8 时的 安装：
+第一步：安装 locales，安装locales包 
+e2b0e262bfaf:/# apt-get install locales
+  68. bi_VU UTF-8             151. en_PH ISO-8859-1               234. fr_LU ISO-8859-1               317. lv_LV.UTF-8 UTF-8          400. shn_MM UTF-8            483. zh_CN GB2312
+  69. bn_BD UTF-8             152. en_PH.UTF-8 UTF-8              235. fr_LU.UTF-8 UTF-8              318. lzh_TW UTF-8               401. shs_CA UTF-8            484. zh_CN.GB18030 GB18030
+  70. bn_IN UTF-8             153. en_SC.UTF-8 UTF-8              236. fr_LU@euro ISO-8859-15         319. mag_IN UTF-8               402. si_LK UTF-8             485. zh_CN.GBK GBK
+  71. bo_CN UTF-8             154. en_SG ISO-8859-1               237. fur_IT UTF-8                   320. mai_IN UTF-8               403. sid_ET UTF-8            486. zh_CN.UTF-8 UTF-8
+  72. bo_IN UTF-8             155. en_SG.UTF-8 UTF-8              238. fy_DE UTF-8                    321. mai_NP UTF-8               404. sk_SK ISO-8859-2        487. zh_HK BIG5-HKSCS
+  73. br_FR ISO-8859-1        156. en_US ISO-8859-1               239. fy_NL UTF-8                    322. mfe_MU UTF-8               405. sk_SK.UTF-8 UTF-8       488. zh_HK.UTF-8 UTF-8
+
+(Enter the items you want to select, separated by spaces.)
+
+# 重新配置locale
+root@326a06aef71e:/# dpkg-reconfigure locales
+
+选择：en_US.UTF-8 和 zh_CN.UTF-8
+Locales to be generated: 158 486
+
+Many packages in Debian use locales to display text in the correct language for the user. You can choose a default locale for the system from the generated locales.
+
+This will select the default language for the entire system. If this system is a multi-user system where not all users are able to speak the default language, they will experience difficulties.
+
+  1. None  2. C.UTF-8  3. en_US.UTF-8  4. zh_CN.UTF-8
+# 把 zh_CN.UTF-8 设置成默认：
+Default locale for the system environment: 3
+
+Generating locales (this might take a while)...
+  zh_CN.UTF-8... done
+Generation complete.
+root@e2b0e262bfaf:/# locale -a
+C
+C.UTF-8
+POSIX
+zh_CN.utf8
+
+或者：
+~$ locale-gen zh_CN.UTF-8
+
+第二步：在启动脚本里头加入支持：
+export LAN=zh_CN.UTF-8 
+export LC_ALL=zh_CN.UTF-8 
+export LC_LANG=zh_CN.UTF-8 
 

@@ -1,0 +1,18 @@
+
+批量插入1
+使用insert into ... select的方法
+postgres=# insert into tbl1 (id, info ,crt_time) select generate_series(1,10000),'test',now();    
+
+批量插入2
+使用values(),(),...();的方法
+postgres=# insert into tbl1 (id,info,crt_time) values (1,'test',now()), (2,'test2',now()), (3,'test3',now());    
+
+批量更新
+test03=# update test set info=tmp.info from (values (1,'new1'),(2,'new2'),(6,'new6')) as tmp (id,info) where test.id=tmp.id;
+
+批量删除
+test03=# delete from test using (values (3),(4),(5)) as tmp(id) where test.id=tmp.id; 
+
+如果要清除全表，建议使用truncate
+truncate table test1;
+

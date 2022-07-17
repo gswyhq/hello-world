@@ -90,3 +90,100 @@ close ---> 该语句以什么结束
         from pg_db.pg_table
     </select>
 
+
+
+if
+mapper中编写sql，使用<if test = ' '> </if>,可以使你的接口很便捷
+
+举个栗子:
+
+select * from student
+<if test = " id != null ">
+     where student.id =#{id}
+</if>
+
+一个<if>标签还是不够用的，你单独使用<if>的时候肯定还会遇到这样的问题
+
+select * from student
+where
+<if test = " id != null ">
+student.id = #{id}
+</if>
+<if test = " name != null and name != '' ">
+and student.name = #{name}
+</if>
+
+如果当你的id为空时，name前面的and是没有必要的，运行会抛异常
+或者当这两个<if>都为空时，只剩一个空的where，还是会报错; 故可以在前面添加一个恒真条件，如1；
+
+where
+select * from student
+<where>
+1
+<if test = " id != null ">
+    and student.id = #{id}
+</if>
+<if test = " name != null and name != '' ">
+    and student.name = #{name}
+</if>
+</where>
+
+where 元素只会在至少有一个子元素的条件返回 SQL 子句的情况下才去插入WHERE子句。而且，若语句的开头为AND或OR，where 元素也会将它们去除。
+if-else =>> choose, when, otherwise
+首先，在myBatis中是不支持if-else的，想要是用if-else的话，可以使用choose代替。
+choose，when,otherwise有点像Java中的switch
+
+栗子：
+
+
+<select id="findActiveBlogLike"
+     resultType="Blog">
+  SELECT * FROM BLOG WHERE state = ‘ACTIVE’
+  <choose>
+    <when test="title != null">
+      AND title like #{title}
+    </when>
+    <when test="author != null and author.name != null">
+      AND author_name like #{author.name}
+    </when>
+    <otherwise>
+      AND featured = 1
+    </otherwise>
+  </choose></select>
+
+# mybatis 控制台打印执行的SQL语句
+1. Spring boot 集成 mybatis 
+1 logging.level.com.example.demo.dao=debug
+　　com.example.demo.dao指的是mybatis对应的方法接口文件所在的包路径。
+
+1.2 如果使用的是application.yml文件，加入如下配置：
+logging:
+  level:
+     com.example.demo.dao : debug
+com.example.demo.dao 指的是mybatis对应的方法接口所在的包路径。
+
+# MyBatis中如何一次执行多条语句
+1、修改数据库连接参数加上allowMultiQueries=true，如：
+
+hikariConfig.security.jdbcUrl=jdbc:mysql://xx.xx.xx:3306/xxxxx?characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+2、直接写多条语句，用“；”隔开即可
+
+<delete id="deleteUserById" parameterType="String">
+    delete from sec_user_role where userId=#{id};
+    delete from sec_user where id=#{id};
+</delete>
+
+# 一次执行多条语句，事务：
+mybatis 事务注解 必须加在 service层Impl方法上才有效。
+    @Override
+    @Transactional 
+    public int updateByPrimaryKeySelective(AdslotDO record) {
+        ruleService.updateAdSlotIdsBySlot(record);//service层业务逻辑。
+        return ccAdslotMapper.updateByPrimaryKeySelective(record);
+    }
+
+# Mybatis属性useGeneratedKeys,keyProperty,keyColumn的使用
+useGeneratedKeys: 默认为false，为true时，表示如果插入的表以自增列为主键，则允许 JDBC 支持自动生成主键，并可将自动生成的主键返回；
+keyProperty: 实体类对应主键的属性；
+keyColumn: 数据库中的主键；
+

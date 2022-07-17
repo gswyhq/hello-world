@@ -9,6 +9,12 @@ string转换为datetime：
 >>> time1 = datetime.datetime.strptime(string,'%Y-%m-%d %H:%M:%S')
 >>> print time1
 2014-01-08 11:59:58
+dt = datetime.fromordinal(736959) # datetime.min以来的天数
+dt = datetime.fromisoformat('2018-09-22')
+dt = datetime.fromisoformat('2018-09-22 16:28:22')
+dt = datetime.fromisoformat('2018-09-22 16:28:22.666')
+dt = datetime.fromisoformat('2018-09-22 16:28:22.666+08:00')
+dt = datetime.strptime('2018-09-22 16:28:22', '%Y-%m-%d %H:%M:%S')
 
 时间的加减：
 >>> last = time1 - datetime.timedelta(hours = 24)
@@ -22,10 +28,28 @@ datetime.datetime(2014, 1, 10, 11, 59, 57, 999999)
 >>> str(last)
 '2014-01-07 11:59:58'
 
+时间日期加减，相对加减，绝对加减：
+from dateutil.relativedelta import relativedelta
+datetime.now()
+Out[46]: datetime.datetime(2021, 6, 18, 16, 9, 11, 415495)
+datetime.now() - relativedelta(years=1, months=2, days=3, hours=1, minutes=2, seconds=3, microseconds=9999)
+Out[47]: datetime.datetime(2020, 4, 15, 15, 7, 11, 308338)
+datetime.now() - relativedelta(year=1, month=2, day=3, hour=1, minute=2, second=3, microsecond=9999)
+Out[48]: datetime.datetime(1, 2, 3, 1, 2, 3, 9999)
+
+# 两个时间相差总秒数：
+(datetime.strptime( '2020-07-25 19:30:02', '%Y-%m-%d %H:%M:%S')-datetime.strptime( '2020-07-25 19:30:03', '%Y-%m-%d %H:%M:%S')).total_seconds()
+
+# 直接设置为某时间点：
+>>> datetime.datetime(month=2, year=2021, day=25, hour=23, minute=59, second=59, microsecond=999999)
+Out[26]: datetime.datetime(2021, 2, 25, 23, 59, 59, 999999)
+
 datetime转为字符串：
 >>> time1_str = datetime.datetime.strftime(time1,'%Y-%m-%d %H:%M:%S')
 >>> time1_str
 '2014-01-08 11:59:58'
+datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+Out[19]: '2022-02-09 12:55:50'
 
 python获取当前时间：
 time.time() 获取当前时间戳
@@ -46,6 +70,8 @@ Out[3]: time.struct_time(tm_year=2018, tm_mon=1, tm_mday=11, tm_hour=8, tm_min=5
 # time格式转换为datetime格式：
 datetime.datetime.fromtimestamp(time.time())  
 Out[5]: datetime.datetime(2018, 1, 11, 8, 53, 59, 977699)
+dt = datetime.fromtimestamp(time.time())
+dt = datetime.utcfromtimestamp(time.time())
 
 # datetime格式转为time格式:
 print(time.mktime(datetime.datetime.now().timetuple()))
@@ -54,6 +80,8 @@ print(time.time())
 1515632319.1558268
 
 time转换为字符串：
+>>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+'2014-01-09 12:59:00'
 >>> time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 '2014-01-09 12:59:00'
 >>> time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())
@@ -76,3 +104,34 @@ datetime.datetime(2020, 2, 27, 20, 31, 57, 609000)
 datetime转化为时间戳：
 >>> time.mktime(datetime.datetime(2014,1,8,11,59,58).timetuple())
 1389153598.0
+
+# string -> numpy.datetime64
+np.datetime64('2020-10-06T00:00:00.000000000')
+Out[285]: numpy.datetime64('2020-10-06T00:00:00.000000000')
+np.datetime64('2020-10-06')
+Out[286]: numpy.datetime64('2020-10-06')
+
+# numpy.datetime64 -> datetime
+不同np.datetime64转换结果竟然不一致
+np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)
+Out[283]: 1601942400000000000
+np.datetime64('2020-10-06T00:00:00.0000').astype(datetime)
+Out[284]: datetime.datetime(2020, 10, 6, 0, 0)
+通过下面转换的话，竟然差了8个时差；
+datetime.fromtimestamp(np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)/1e9)
+Out[288]: datetime.datetime(2020, 10, 6, 8, 0)
+这是因为 fromtimestamp 该函数的转化是根据本地的时区来的
+import pytz
+datetime.fromtimestamp(np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)/1e9, pytz.timezone('Asia/Shanghai'))
+Out[289]: datetime.datetime(2020, 10, 6, 8, 0, tzinfo=<DstTzInfo 'Asia/Shanghai' CST+8:00:00 STD>)
+为了避免出现时差，可以指定时区：
+datetime.fromtimestamp(np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)/1e9, pytz.timezone('UTC'))
+Out[290]: datetime.datetime(2020, 10, 6, 0, 0, tzinfo=<UTC>)
+
+# np.datetime64 -> string
+datetime.strftime(datetime.fromtimestamp(np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)/1e9, pytz.timezone('UTC')),'%Y-%m-%d %H:%M:%S')
+Out[291]: '2020-10-06 00:00:00'
+datetime.strftime(datetime.fromtimestamp(np.datetime64('2020-10-06T00:00:00.000000000').astype(datetime)/1e9),'%Y-%m-%d %H:%M:%S')
+Out[292]: '2020-10-06 08:00:00'
+
+

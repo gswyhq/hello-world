@@ -8,7 +8,10 @@
 　　ssh-keygen -C 'gswewf@126.com' -t rsa
 　　#生成密钥
 　　#http://www.cnblogs.com/jackge/archive/2013/08/17/3264801.html
-　　
+   
+    # -P 提供旧密码，空表示不需要密码（-P ''） 
+    ssh-keygen -t rsa -P ""
+   　　
 　　scp yhq@172.19.1.239:/home/pkg.tgz .
 　　#复制文件到当前目录
 　　

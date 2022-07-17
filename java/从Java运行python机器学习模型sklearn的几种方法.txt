@@ -1,0 +1,188 @@
+
+背景：使用python的机器学习包sklearn训练好了模型，现在要在java环境进行预测；
+
+# 方法0：
+m2cgen（Model 2 Code Generator）是一个轻量级代码生成器，它可以将训练好的机器学习模型转换为Java、C、JavaScript、Go、Ruby，VBA 本地代码。用Excel玩机器学习：https://github.com/tjxj/excel2ml
+
+# 方法一：
+将python机器学习模型sklearn封装成对应的http服务；
+再在java端进行发送http请求调用；
+
+# 方法二：
+将python预测部分的代码编译成java可调用的代码；
+
+# 方法三：
+通过PMML工具，将在sklearn中训练好的模型生成一个pmml格式的文件，在该文件中，主要包含了模型的一些训练好的参数，以及输入数据的格式和名称等信息。
+生成了pmml文件之后，在java中导入pmml相关的包，我们就能通过pmml相关的类读取生成的pmml文件，使用其中的方法传入指定的参数就能实现模型的预测，速度快，效果不错。
+
+方法三，示例：
+第一步：python，保存pmml模型文件：
+pip3 install numpy==1.19.5
+pip3 install pandas==1.1.4
+pip3 install scipy==1.5.2
+pip3 install scikit-learn==0.24.0
+pip3 install sklearn2pmml==0.77.1
+pip3 install xgboost==1.5.1
+pip3 install xlrd==1.1.0
+
+```python
+import xgboost as xgb
+from sklearn2pmml import sklearn2pmml
+from sklearn2pmml import PMMLPipeline
+
+xg_classifier = xgb.XGBClassifier(objective='binary:logistic')
+xg_classifier.fit(np.array(X_train), np.array(y_train))
+try:
+    pipeline = PMMLPipeline([("classifier", xg_classifier)])
+
+    # 导出为PMML
+    sklearn2pmml(pipeline, "pipeline.pmml", with_repr=True)
+
+except Exception as e:
+    print('导出为PMML失败：{}'.format(e))
+```
+
+导出为PMML失败：Java is not installed, or the Java executable is not on system path
+解决方法：
+在 https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+或 https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz
+下载：jdk-8u191-linux-x64.tar.gz
+docker cp jdk-8u191-linux-x64.tar.gz ae4e705066a1:/root/
+(base) root@ae4e705066a1:/root# tar -zxf jdk-8u191-linux-x64.tar.gz
+(base) root@ae4e705066a1:/root# ls
+jdk1.8.0_191  jdk-8u191-linux-x64.tar.gz
+echo "export JAVA_HOME=/root/jdk1.8.0_191" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
+root@be3c5d0b11a4:~# source ~/.bashrc
+root@be3c5d0b11a4:~# echo $JAVA_HOME
+/root/jdk1.8.0_191
+root@be3c5d0b11a4:~# java -version
+java version "1.8.0_191"
+Java(TM) SE Runtime Environment (build 1.8.0_191-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
+
+第二步：java，读取模型并预测
+```java
+package PmmlModel;
+import java.io.*;
+import java.util.*;
+import java.lang.reflect.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.dmg.pmml.FieldName;
+import org.dmg.pmml.PMML;
+import org.dmg.pmml.PMMLObject;
+//import org.dmg.pmml.FieldName;
+//import com.google.common.collect.*;
+//import com.google.common.util.*;
+import org.dmg.pmml.PMML;
+import org.jpmml.evaluator.*;
+import org.xml.sax.SAXException;
+import javax.xml.bind.JAXBException;
+
+public class RiskModel2 {
+
+    public static void main(String[] args) {
+
+        // Building a model evaluator from a PMML file
+        Evaluator evaluator = null;
+        try {
+            evaluator = new LoadingModelEvaluatorBuilder()
+                    .load(new File("D:\\Users\\gswyhq\\PmmlModel\\pipeline.pmml"))
+                    .build();
+        }catch(IOException e){
+            System.out.println("加载模型失败！");
+            e.printStackTrace();
+        }catch (SAXException e2){
+            System.out.println("加载模型失败2");
+        }catch (Exception e3){
+            System.out.println("加载模型失败3");
+        }
+
+// Perforing the self-check
+        evaluator.verify();
+
+// Printing input (x1, x2, .., xn) fields
+        List<InputField> inputFields = evaluator.getInputFields();
+        System.out.println("Input fields: " + inputFields);
+
+// Printing primary result (y) field(s)
+        List<TargetField> targetFields = evaluator.getTargetFields();
+        System.out.println("Target field(s): " + targetFields);
+
+// Printing secondary result (eg. probability(y), decision(y)) fields
+        List<OutputField> outputFields = evaluator.getOutputFields();
+        System.out.println("Output fields: " + outputFields);
+
+//        Float [] argsList = {0.07770903104955441F, 0.07498272287491362F, 0.06632354661363903F, 0.1466281310211946F, 0.4847457627118644F, 0.3157894736842105F, 0.11627906976744186F, 0.12048192771084337F, 0.07401893012868234F, 0.0676640210129618F, 0.053917662682602924F, 0.054187192118226604F, 0.08201438848920864F, 0.06673195299384443F, 0.08166197344980174F, 0.05046961638565124F, 0.09331978194585605F, 0.06802686986164026F, 0.044441152507221686F, 0.07414377117049303F, 0.06174957118353345F, 0.07202933985330073F, 0.0787037037037037F, 0.06899055918663761F, 0.12480181200453001F, 0.06924775886709107F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.35294117647058826F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F};
+        Float [] argsList = {0.07770903104955441F, 0.06668982285515804F, 0.06632354661363903F, 0.1466281310211946F, 0.1149789029535865F, 0.14635036496350365F, 0.0830860534124629F, 0.0452991452991453F, 0.07401893012868234F, 0.0676640210129618F, 0.0691627104013811F, 0.08752997601918465F, 0.08201438848920864F, 0.09563981042654028F, 0.08166197344980174F, 0.0943826915442636F, 0.0960764587525151F, 0.06802686986164026F, 0.044441152507221686F, 0.07414377117049303F, 0.018859837119588514F, 0.07202933985330073F, 0.0F, 0.06899055918663761F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0F, 0.0F, 0.0F, 0.0F, 0.0F};
+        Map<String, Float> inputRecord = new HashMap<>();
+        int index = 0;
+        for (Float x: argsList){
+            index +=1;
+            String inputFieldName = "x"+String.valueOf(index);
+            inputRecord.put(inputFieldName, x);
+        }
+
+        //构建输入参数
+        Map<FieldName, FieldValue> arguments = new LinkedHashMap<>();
+
+        for(InputField inputField : inputFields){
+
+            FieldName name = inputField.getName();
+
+            FieldValue value = inputField.prepare(inputRecord.get(name.getValue()));
+
+            arguments.put(name, value);
+        }
+
+        // Evaluating the model
+        Map<FieldName, ?> results = evaluator.evaluate(arguments);
+
+        // Decoupling results from the JPMML-Evaluator runtime environment
+        Map<String, ?> results2 = EvaluatorUtil.decodeAll(results);
+        System.out.println(String.format("模型预测结果：%s", results2));
+
+        evaluator = null;
+        Float ret3 = (Float) results2.get("probability(1)");
+        System.out.println(String.format("模型预测结果：%s", ret3));
+    }
+}
+```
+注不同org.jpmml.evaluator版本，对应的代码写法可能有所不同，具体可参考：https://github.com/jpmml/jpmml-evaluator/blob/master/pmml-evaluator-example/src/main/java/org/jpmml/evaluator/example
+上代码所依赖库：
+  <dependencies>
+    <dependency>
+      <groupId>org.jpmml</groupId>
+      <artifactId>pmml-model</artifactId>
+      <version>1.5.15</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jpmml</groupId>
+      <artifactId>pmml-evaluator</artifactId>
+      <version>1.5.15</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jpmml</groupId>
+      <artifactId>pmml-evaluator-extension</artifactId>
+      <version>1.5.15</version>
+    </dependency>
+
+  </dependencies>
+
+
+将java文件编译成.class文件：
+javac  -encoding UTF-8 -cp .m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar;.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.12.3/*.jar;.m2/repository/com/google/guava/guava/30.1-jre/guava-30.1-jre.jar;.m2/repository/org/jpmml/jpmml-model/1.5.15/pmml-model-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator/1.5.15/pmml-evaluator-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator-extension/1.5.15/pmml-evaluator-extension-1.5.15.jar PmmlModel\*.java
+
+运行编译的java文件：
+java -cp .;.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar;.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.12.3/*.jar;.m2/repository/com/google/guava/guava/30.1-jre/guava-30.1-jre.jar;.m2/repository/org/jpmml/jpmml-model/1.5.15/pmml-model-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator/1.5.15/pmml-evaluator-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator-extension/1.5.15/pmml-evaluator-extension-1.5.15.jar PmmlModel.RiskModel2
+
+

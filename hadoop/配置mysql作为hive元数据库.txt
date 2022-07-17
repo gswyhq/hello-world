@@ -1,0 +1,171 @@
+
+使用derby作为hive的元数据库，但是在我们实际使用中，更常见的是使用mysql作为元数据库。下面介绍一下如何使用mysql作为元数据库。
+
+启动一个mysql镜像的docker容器:
+docker run -p 3306:3306 --name mysql_3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:5.7
+
+# 进入docker容器：
+~$ docker exec -it mysql_3306 /bin/bash
+
+# 进入mysql交互界面
+root@c66129402967:~# mysql -uroot -proot -P 3306 -h 127.0.0.1
+
+# 创建一个hive的元数据库
+mysql> create database if not exists hive;
+Query OK, 1 row affected (0.00 sec)
+
+# 通过docker inspect检查该容器的ip，我获取到的ip是172.17.0.3
+docker inspect mysql_3306 | grep "IPAddress" 
+
+# 修改配置文件：
+root@cb1b710bdfb3:~/apache-hive-2.3.7-bin# vim conf/hive-site.xml
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>root</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>root</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:mysql://172.17.0.3:3306/hive</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>com.mysql.cj.jdbc.Driver</value>
+    </property>
+
+# 可使用如下语句进行替换：
+sed -i "/javax.jdo.option.ConnectionUserName/{n;s/APP/\${env:MYSQL_USERNAME}/g}" hive-site.xml
+sed -i "/javax.jdo.option.ConnectionPassword/{n;s/mine/\${env:MYSQL_PASSWORD}/g}" hive-site.xml
+sed -i "/javax.jdo.option.ConnectionURL/{n;s/jdbc:derby:;databaseName=metastore_db;create=true/\${env:MYSQL_URL}/g}" hive-site.xml
+sed -i "/javax.jdo.option.ConnectionDriverName/{n;s/org.apache.derby.jdbc.EmbeddedDriver/com.mysql.cj.jdbc.Driver/g}" hive-site.xml
+
+# 下载MySQL驱动：
+https://mvnrepository.com/artifact/mysql/mysql-connector-java/5.1.38
+https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.38/mysql-connector-java-5.1.38.jar
+https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.25/mysql-connector-java-8.0.25.jar
+
+D:\Users\gswyhq\Downloads>docker cp mysql-connector-java-8.0.17.jar cb1b710bdfb3:/root/apache-hive-2.3.7-bin/lib/
+
+# 初始化元数据库
+root@cb1b710bdfb3:~/apache-hive-2.3.7-bin# ./bin/schematool -initSchema -dbType mysql
+
+初始化时候若报错：
+
+Error: Duplicate key name 'PCS_STATS_IDX' (state=42000,code=1061)
+org.apache.hadoop.hive.metastore.HiveMetaException: Schema initialization FAILED! Metastore state would be inconsistent !!
+Underlying cause: java.io.IOException : Schema script failed, errorcode 2
+则需要删除mysql中的hive库；并重新创建一个hive的元数据库；
+DROP DATABASE IF EXISTS hive;
+初始化成功后，会在mysql中的hive数据库里有一大堆的表格；
+
+
+
+启动 Hiveserver2
+可以通过hive命令直接进入hive交互界面
+也可以启动hiveserver2，并通过beeline连接hiveserver2来进行相关操作。
+
+1. 修改hadoop的一些权限配置
+启动hiveserver2之前，需要先往hdfs的core-site.xml加入以下配置:
+
+root@9b7f1185f80e:~/hadoop-2.6.0# vim etc/hadoop/core-site.xml
+
+<property>
+    <name>hadoop.proxyuser.root.hosts</name>
+    <value>*</value>
+</property>
+<property>
+    <name>hadoop.proxyuser.root.groups</name>
+    <value>*</value>
+</property>
+然后重启hdfs:
+
+root@9b7f1185f80e:~/hadoop-2.6.0# stop-dfs.sh
+Stopping namenodes on [localhost]
+root@localhost's password:
+localhost: stopping namenode
+root@localhost's password:
+localhost: stopping datanode
+Stopping secondary namenodes [0.0.0.0]
+root@0.0.0.0's password:
+0.0.0.0: stopping secondarynamenode
+root@9b7f1185f80e:~/hadoop-2.6.0# start-dfs.sh
+
+2. 后台启动hiveserver2
+root@9b7f1185f80e:~/hadoop-2.6.0# nohup hiveserver2 > hiveserver2.log &
+
+3. 验证
+通过beeline连接
+root@9b7f1185f80e:~/hadoop-2.6.0# beeline -u jdbc:hive2://127.0.0.1:10000
+Connecting to jdbc:hive2://127.0.0.1:10000
+Connected to: Apache Hive (version 2.3.7)
+Driver: Hive JDBC (version 2.3.7)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+Beeline version 2.3.7 by Apache Hive
+0: jdbc:hive2://127.0.0.1:10000> select * from test;
++----------+------------+
+| test.id  | test.name  |
++----------+------------+
+| 1        | jack       |
+| 2        | hel        |
+| 3        | nack       |
+| 1        | jack       |
+| 2        | hel        |
+| 3        | nack       |
++----------+------------+
+
+# 开启元数据服务命令：
+root@27d832029d21:~# nohup hive --service metastore > metastore.log &
+
+当然也可以下面这样进入beeline：
+root@27d832029d21:~# beeline
+beeline> !connect jdbc:hive2://172.17.0.4:10000
+Connecting to jdbc:hive2://172.17.0.4:10000
+Enter username for jdbc:hive2://172.17.0.4:10000: root
+Enter password for jdbc:hive2://172.17.0.4:10000: **** （此处输入的用户名密码为连接MySQL的用户名、密码；）
+Connected to: Apache Hive (version 2.3.9)
+Driver: Hive JDBC (version 2.3.9)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://172.17.0.4:10000> select * from test;
++----------+------------+
+| test.id  | test.name  |
++----------+------------+
+| 1        | jack       |
+| 2        | hel        |
+| 3        | nack       |
++----------+------------+
+
+Beeline和其他工具有一些不同，执行查询都是正常的SQL输入，但是如果是一些管理的命令，
+比如进行连接，中断，退出，执行Beeline命令需要带上“！”，不需要终止符。常用命令介绍：
+1、!connect url –连接不同的Hive2服务器
+2、!exit –退出shell, 即beeline退出命令；
+3、!help –显示全部命令列表
+4、!verbose –显示查询追加的明细
+
+查询一下之前建立的表看下是否能正常访问
+select * from test;
+
+Hive客户端工具后续将使用Beeline 替代HiveCLI ，并且后续版本也会废弃掉HiveCLI 客户端工具,Beeline是 Hive 0.11版本引入的新命令行客户端工具,它是基于SQLLine CLI的JDBC客户端。
+Beeline支持嵌入模式(embedded mode)和远程模式(remote mode)。在嵌入式模式下，运行嵌入式的Hive(类似Hive CLI)，而远程模式可以通过Thrift连接到独立的HiveServer2进程上。
+
+# 连接MySQL
+root@eff2eacda916:~# beeline -u jdbc:mysql://172.17.0.3:3306/hive
+出现错误
+Error: Access denied for user ''@'172.17.0.4' (using password: NO) (state=28000,code=1045)
+是因为没有输入密码；
+
+beeline> root@eff2eacda916:~# beeline -u jdbc:mysql://172.17.0.3:3306/hive -p root
+出现错误：
+Error: Access denied for user ''@'172.17.0.4' (using password: YES) (state=28000,code=1045)
+是因为MySQL拒绝连接；更改MySQL配置，允许连接即可：
+~$ docker exec -it mysql_3306 /bin/bash
+# mysql -uroot -proot -P 3306 -h 127.0.0.1
+mysql> grant all privileges on *.* to root@'%' identified by '123456' with grant option;
+mysql> flush privileges;
+
+# 另外需要通过 -n参数，设置MySQL，用户名；
+root@eff2eacda916:~# beeline -u jdbc:mysql://172.17.0.3:3306/hive -p 123456 -n root
+0: jdbc:mysql://172.17.0.3:3306/hive>
+

@@ -1,0 +1,163 @@
+
+scala 是简化的java，运行于jvm的脚步语言。Java和scala通过各自编译器编译过都是jvm能解析class文件。
+
+# java 调用 scala class： 
+在scala目录里面新建一个scala class：
+
+class ScalaApp {
+
+  def main(args: Array[String]) {
+
+    println("hello scala")
+
+  }
+
+}
+
+然后在Java里面的一个class里面调用：
+
+public static void main(String[] args) {
+        System.out.println("Hello World!");
+        ScalaApp scalaApp = new ScalaApp();
+        scalaApp.main(args);
+}
+然后在IDEA里面compile一下，运行上面的main函数，可以发现java和scala的代码都运行了。
+
+scala的源代码文件是以.scala为后缀的，编译后的文件class文件。
+ 
+1.scala使用JDK的java类
+ 
+用法:import 要使用java类,在scala代码内Java类
+ 
+import java.lang.reflect._
+import  java.util.Date//导入java类
+ 
+println("Today is " + new Date())
+ 
+val methods = getClass.getMethods()//使用java类
+methods.foreach {
+  methods: Method => println(methods.getName)
+}
+ 
+2.scala使用java类
+ 
+用法:跟scala使用JDK的java类方法一样，但是java类编译后的类文件，存放在scala文件所在的包目录下，才能通过编译和使用
+ 
+object UseInvestment {
+ 
+  def main(args: Array[String]) {
+    val investment = new Investment("xyz Corporation", InvestmentType.STOCK) //java类
+    println(investment.getClass())
+ 
+    val theYield = investment.`yield` // yield是scala关键字，所以要`括起来`
+    println("theYield is " + theYield);
+  }
+ 
+}
+ 
+Investment和InvestmentType分别是Java类
+ 
+public class Investment {
+    private String investmentName;
+    private InvestmentType investmentType;
+ 
+    public Investment(String name, InvestmentType type) {
+        investmentName = name;
+        investmentType = type;
+    }
+ 
+    public int yield() {
+        return 0;
+    }
+}
+ 
+public enum InvestmentType {
+    SHORT_TERM,
+    BOND,
+    STOCK
+}
+ 
+3. java使用scala
+ 
+用法:Car的class类要在classPath内,import 要使用scala类。
+在Java代码内按java语法来是使用scala类
+ 
+//--------------scala类--------------------------
+class Car(val year: Int) {
+  private[this] var miles: Int = 0
+ 
+  def drive(distance: Int) {
+    miles += distance
+  }
+ 
+  override def toString(): String = "year:" + year + " miles:" + miles
+}
+ 
+//-----------java类-------------------------
+public class UseCar {
+ 
+    public static void main(String[] args) {
+        Car car = new Car(2009);
+ 
+        System.out.println(car);
+        car.drive(10);
+        System.out.println(car);
+    }
+ 
+}
+ 
+note:
+Car的class类要在classPath内，UseCar 才能通过编译
+ 
+4.java使用伴生对象
+ 
+------------伴生对象----------------
+class Buddy {
+  def greet() {
+    println("Hello from Buddy class")
+  }
+}
+ 
+object Buddy {
+  def greet() {
+    println("Hello from Buddy object")
+  }
+}
+ 
+---------------java类------------------------
+public class BuddyUser {
+    public static void main(String[] args) {
+        new Buddy().greet();//使用伴生类
+        Buddy$.MODULE$.greet();//使用伴生对象
+    }
+}
+ 
+note:
+java使用伴生对象: 伴生对象名$.MODULE$.方法名();//
+ 
+5.java使用trait
+ 
+//--------------------trait----------------
+trait Writable {
+  def write(message: String): Unit
+}
+ 
+//--------java---------------------------------
+public class AWritable implements Writable {
+    public void write(String message) {
+        System.out.println(message);
+    }
+ 
+    public static void main(String[] args) {
+        Writable writable = new AWritable();
+        writable.write("依晨");
+    }
+}
+ 
+note：
+java使用trait，通过implements 实现trait,当接口使用
+必须按接口标准。trait方法有自己实现，Java类使用trait不会使用trait实现
+ 
+
+ 
+

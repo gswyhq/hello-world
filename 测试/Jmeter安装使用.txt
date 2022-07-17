@@ -1,0 +1,14 @@
+
+一、安装：
+1,下载安装包：
+进入官网：http://jmeter.apache.org/
+点击：Download Releases
+下载：https://mirrors.bfsu.edu.cn/apache//jmeter/binaries/apache-jmeter-5.4.1.zip
+
+2,解压：
+下载得到的压缩包解压即可
+
+3, 运行：
+点击bin目录下的jmeter.bat即可启动Jmeter。
+
+

@@ -95,4 +95,94 @@ error: 无法推送一些引用到 ******
 第二步：登录github,进入对应仓库-> Settings -> Branches -> 修改 Default branch; 即将默认的分支修改为非master分支。
 第三步：git push origin  :master
 
+# windows系统，使用Git 向远程仓库（例如：GitHub，gitee）提交代码 ，需要输入账号和密码。可能会遇到这样的情况密码输错一次，想修改，但是不知道去哪里修改。一直报错fatal: Authentication failed for 又不弹出用户名和密码输入框 。
+问题原因是解决方法：
+因为之前输入了密码，系统保存了密码，后面密码修改了，而这时系统保存的还是旧密码。
+解决方法，删除系统保存的旧密码，重新输入新密码。
+Git的凭据存储有cache、store、manager三种方式
+Git 中有三种级别system 、global 、local
+# 查看凭据管理方式 credential.helper(没有指定级别时，优先级是：local(当前项目) > global(当前用户全局设置) > system(所有用户系统设置) )：
+~$ git config credential.helper
+cache --timeout 36000
+# 查看指定级别的凭据管理方式：
+git config --global credential.helper
+cache --timeout 36000
+# 设置指定级别的凭据管理方式：
+$ git config --system credential.helper wincred
+# 三种不同的存储凭据的方式：
+git-credential-manager.exe 下面简称manager
+git-credential-store.exe 下面简称stroe
+git-credential-wincred.exe 下面简称wincred
+git-credential-manager.exe和 git-credential-wincred.exe 都是将凭据存储在系统的凭据管理器中，只不过前者是有图形界面，后者没有图形界面，需要在命令行中输入密码
+在控制面板->用户账户->凭据管理器，可以看到对应的git账号凭据管理，可以修改或者删除。
+删除后，再次pull或者push，会重新输入密码。
+# 设置global 的凭据管理方法为store ，命令如下：
+git config --global credential.helper store
+输入账号和密码，push或者pull后，此时查看C:/user/用户名 会自动生成.git-credentials 文件，里面明文保存了你的账号和密码。
+特别注意：如果使用store存储凭据，会在.git-credentials 文件和控制面板的凭据管理器中，两个地方同时生成凭据。所以如果要修改，最好两处一起删除
+# 存储方式：cache
+将凭证存放在内存中一段时间。 密码永远不会被存储在磁盘中，并且默认在15分钟后从内存中清除。
+git config --global credential.helper cache
+如果想自己设置时间，可以这样做：
+git config credential.helper 'cache --timeout=3600'
+密码将保存在内存中1小时
 
+
+# 问题：mobaxterm在git项目路劲，敲任何git命令，比如git branch -av或git log，终端的左下角都显示standard input, 必须按下q才会退出并进入终端？
+原因：内容是以分页的形式显示的；
+解决方案：
+禁用分页显示即可：
+git config pager.branch false
+git config pager.log true
+上命令，即让执行 git branch时候不分页显示，但执行git log 命令时，还是保持分页显示；同理，还可以对git diff, git status等命令进行设置；
+
+
+$ git push origin master
+git：'credential-erase' 不是一个 git 命令。参见 'git --help'。
+解决方案，更改下存储类型，如：
+gswyhq@gswyhq-PC:~/hello-world$ git config --global credential.helper 'cache --timeout 36000'
+gswyhq@gswyhq-PC:~/hello-world$ git config credential.helper 'cache --timeout 36000'
+
+# 向github推送代码出错：
+$ git push origin master
+remote: Support for password authentication was removed on August 13, 2021. Please use a personal access token instead.
+remote: Please see https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/ for more information.
+解决方案：
+1，登录github, 点击右上角用户图像里头的setting,进入页面：https://github.com/settings/profile
+2，点击  Developer settings
+3，点击 Personal access tokens
+Settings ->  Developer settings -> Personal access tokens -> Generate new token -> 输入github 登录密码；
+Note,那里输入token名称；
+Expiration 那里设置token有效期，也可以选择 No expiration(永久有效)
+全部或部分勾选，再点击 Generate token
+这时就生成了一个token，如：ght_8JVNIF1234sUcr3tq8CfEKp3fgM******1D8
+以后进入页面 https://github.com/settings/tokens，也可以查看；
+当然，也可以点击token后面的Delete删除掉；
+将git仓库URL地址改成带有token的，如：
+url = https://github.com/gswyhq/hello-world.git
+url = https://ght_8JVNIF1234sUcr3tq8CfEKp3fgM*******1D8@github.com/gswyhq/hello-world
+或者：
+可以用git remote -v查看绑定的仓库列表，他会以<仓库名>  <仓库地址>的形式展示出来（一个仓库会显示两遍）：
+$ git remote -v
+origin  https://xxx.com/lyj00912/xxx.git (fetch)
+origin  https://xxx.com/lyj00912/xxx.git (push)
+如果要删除一个仓库，可以用git remote remove <仓库名>来删除这个仓库：
+$ git remote remove origin
+删除之后再查看git remote -v，就会发现仓库已经被删除，列表为空：
+$ git remote -v
+如果要添加新的仓库，使用git remote add <仓库名> <仓库地址>来添加：
+$ git remote add newrepo https://xxx.com/lyj00912/xxx.git
+添加之后再查看git remote -v，就会发现仓库已经添加进去了：
+$ git remote -v
+newrepo   https://xxx.com/lyj00912/xxx.git (fetch)
+newrepo   https://xxx.com/lyj00912/xxx.git (push)
+
+# git push 出错：
+gswyhq@gswyhq-PC:~/hello-world$ git push origin master 
+fatal: unable to access 'https://*****@github.com/gswyhq/hello-world/': gnutls_handshake() failed: The TLS connection was non-properly terminated.
+可能是网络不好，稍后重试下即可；
+
+# git clone 或是git pull 报错：
+fatal: unable to access 'https://github.com/gswyhq/hello-world.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.
+因为对应的githup验证方法有变更所致，需要用对应的token地址，如：
+https://ghp_n*************@github.com/gswyhq/hello-world

@@ -1,0 +1,94 @@
+
+MkDocs 是一个用 Python 开发的静态站点生成器工具，它可以非常简单快速的创建项目文档。MkDocs 的文档源码使用 Markdown 编写，配置文件使用 YAML 编写，可以一键编译成静态站点。
+
+mkdocs的安装：
+~$ pip3 install mkdocs
+~$ pip3 install pymdown-extensions
+~$ pip3 install mkdocs-material mkdocs-pdf-export-plugin
+~$ pip3 install mkdocs-markdownextradata-plugin
+
+# 查看版本：
+~$ mkdocs -V
+mkdocs, version 1.2.1
+
+# 快速开始
+# STEP 1.创建一个新的 MkDocs 项目
+$ mkdocs new my-project
+
+这样就会在本地建立一个my-project文件夹　其中包括了一个mkdocs.yml和一个docs文件夹
+mkdocs.yml: 这个文件是一个配置文件主要配置你的站点名字，板块等具体配置点我
+docs: 是存放你要写的 Markdown 文档的地方初始化一个index.md文档配置点我
+
+# STEP 2. 切换到项目中
+$ cd my-project/
+
+# STEP 3. 查看项目结构
+$ tree
+.
+├── docs  # mardown 源码放到 docs 中
+│   └── index.md
+└── mkdocs.yml # 配置文件
+
+1 directory, 2 files
+
+# 查看 docs/index.md，index.md 是默认的首页
+$ cat docs/index.md
+
+
+# 查看配置文件 mkdocs.yml
+$ cat mkdocs.yml
+site_name: My Docs
+
+# 在本地查看搭建的文档效果
+$  ls
+docs            mkdocs.yml
+$ mkdocs serve -a 127.0.0.1:8000
+MkDocs 中一个 Markdown 文档渲染后就是一个页面，因此如果我们想添加一个页面，就需要先在 docs 目录下添加一个 Markdown 文件，文件的后缀名可以是 md、markdown 、mdown、 mkdn 、mkd。
+
+添加 pdf-export 等等插件
+plugins:
+  - search
+  - pdf-export:
+      verbose: false
+      media_type: print
+
+这样打开网页后，可以看到下载按钮；
+
+windows系统运行报错：
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e
+cannot load library 'libcairo.2.dylib': error 0x7e
+cannot load library 'libcairo-2.dll': error 0x7e
+则需要安装：
+GTK+ for Windows Runtime Environment Installer: 64-bit
+
+10亿，5千万；=5千万；
+采样1：1%=1千万， 2%=100万;
+采样2：1%=1千万， 1%=50万;
+
+碰撞结果：10w;
+碰撞结果1：1w;
+碰撞结果2：5k;
+
+time curl localhost:8123 -d '
+SELECT sum(length(arrayIntersect(ta.mid_list, tb.mid_list))) as count,
+    sum(length(ta.mid_list)) as count_big1,
+    sum(length(tb.mid_list)) as count_big2
+FROM (select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list from dist_big_table_1000000000_id_sample_all sample 0.01 GROUP BY label ) as ta
+ANY JOIN (select xxHash64( id )%1000 as label, groupArray(xxHash64( id )) as mid_list from dist_big_table_100000000_id_all sample 0.01 GROUP BY label ) as tb
+USING label'
+
+10亿，1亿
+1%=1千万，1%=100万；
+100万；
+
+10亿，1亿
+1%=100万；
+100万；
+
+问题：
+100万在10亿里；
+为什么100万，全部在随机取出的1%（1千万）里头？
+解释：
+随机取出的，实际上是不随机的，取出的1%刚好包括100万；

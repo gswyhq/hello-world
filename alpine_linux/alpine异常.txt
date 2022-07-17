@@ -12,4 +12,46 @@ Original error was: Error loading shared library libcblas.so.3: No such file or 
 解决方法：
 可能是依赖关系问题，与其他依赖包分开，单独安装numpy
 
+问题：
+~ # whereis limits.h
+/bin/sh: whereis: not found
+解决方案：
+~ # apk add util-linux
+~ # whereis limits.h
+limits.h: /usr/include/limits.h
+
+问题：
+fatal error: GL/gl.h: No such file or directory
+     72 | #   include <GL/gl.h>
+解决方案：
+/ # apk add freeglut freeglut-dev
+
+问题：
+fatal error: Python.h: No such file or directory
+      4 | #include "Python.h"
+解决方案：
+~ # apk add python3-dev
+
+问题：
+    FONT    : not found                                                                                                                                
+    FONT SDL_ttf.h libSDL2_ttf.so
+解决方法：
+/ # apk add sdl2_ttf-dev
+
+# 时区错误，相差8个小时：
+/ # date
+Fri Oct  1 02:44:44 UTC 2021
+解决方法：
+/ # apk add  tzdata  && \
+     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+     echo "Asia/Shanghai" > /etc/timezone && \
+     apk del tzdata
+
+# alpine docker 容器内使用图形GUI程序出错：
+/ # xclock 
+Error: Can't open display: 
+# 问题原因及解决方案：
+问题原因是对应的环境变量设置不对，重新设置环境变量 DISPLAY
+# export DISPLAY=192.168.0.106:0
+# xclock
 

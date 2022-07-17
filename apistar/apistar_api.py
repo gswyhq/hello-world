@@ -8,7 +8,7 @@ async def hello_world() -> dict:
     return {'hello': 'async', 'time': time.time()}
 
 async def homepage() -> str:
-    time.sleep(10)
+    time.sleep(10) # 异步函数里头同步的调用，会阻塞整个进程; 可使用asyncio.run_in_executor，将同步变为异步。
     return '<html><body><h1>Homepage</h1></body></html>'
 
 async def welcome(name=None):
@@ -37,3 +37,5 @@ if __name__ == '__main__':
     main()
 
 # 请求http://localhost:5000/homepage时， 会阻塞http://localhost:5000/hello的请求
+#  async关键词定义了个协程函数，Python 中的协程是运行在一条线程中通过消息队列调控的，如果运行的线程堵塞了那么就会造成消息队列阻塞。
+

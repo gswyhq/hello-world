@@ -105,10 +105,14 @@ sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd: Pulling
 Digest: sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
 Status: Image is up to date for gswyhq/neural-painters@sha256:9703c18e9466fab55461e06fb5ba66b334d9146acfaf65e27ae425c4e10552dd
 
-# 使用国内镜像源加速拉取镜像：
+# 使用国内镜像源加速拉取镜像, 临时更改拉取镜像源：
 正常拉取镜像：docker pull ufoym/deepo
 使用网易镜像源加速下载：docker pull hub-mirror.c.163.com/ufoym/deepo
 使用中科大镜像源加速下载：docker pull docker.mirrors.ustc.edu.cn/ufoym/deepo
+Docker中国区官方镜像: https://registry.docker-cn.com
+docker pull devth/alpine-bench 等同于：
+docker pull docker.mirrors.ustc.edu.cn/devth/alpine-bench
+
 
 # 永久设置国内镜像源：
 1，新建文件：sudo vim /etc/docker/daemon.json
@@ -121,4 +125,5 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl restart docker
 3,查看是否生效：
 $ docker info
+
 

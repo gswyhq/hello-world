@@ -1,0 +1,48 @@
+
+# 下载jar程序包，并安装到本地仓库：
+查找对应的程序包；
+如：https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common/3.3.0
+点击 files 处的，jar,下载对应的jar文件；
+其对应maven仓库地址；
+<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common -->
+<dependency>
+    <groupId>org.apache.hadoop</groupId>
+    <artifactId>hadoop-common</artifactId>
+    <version>3.3.0</version>
+</dependency>
+
+点击下载后，本地会拿到jar文件,如hadoop-common-3.3.0.jar：
+向本地仓库中安装jar: 
+~$ mvn install:install-file -Dfile=hadoop-common-3.3.0.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-common -Dversion=3.3.0 -Dpackaging=jar
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------< org.apache.maven:standalone-pom >-------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install-file (default-cli) @ standalone-pom                                                                                                                                          ---
+[INFO] Installing D:\Users\zhangsan\Downloads\hadoop-common-3.3.0.jar to D                                                                                                                                         :\Users\zhangsan\.m2\repository\org\apache\hadoop\hadoop-common\3.3.0\hado                                                                                                                                         op-common-3.3.0.jar
+[INFO] Installing D:\Users\zhangsan\AppData\Local\Temp\Mxt206\tmp\mvninsta                                                                                                                                         ll2554819928541580365.pom to D:\Users\zhangsan\.m2\repository\org\apache\h                                                                                                                                         adoop\hadoop-common\3.3.0\hadoop-common-3.3.0.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 3.451 s
+[INFO] Finished at: 2021-06-17T18:02:42+08:00
+[INFO] ------------------------------------------------------------------------
+
+向仓库中安装jar 格式为：mvn install:install-file -Dfile=jar包的路径 -DgroupId=gruopId中的内容 -DartifactId=actifactId的内容 -Dversion=version的内容 -Dpackaging=jar 
+安装成功后，interllij IDEA 中看pom.xml文件里头配置还是红色的。import 导入的时候，也是红色的警告。
+这时，只需要将interllij IDEA 重启下即可；
+
+# 卸载手动安装的程序包：
+//第一步,从Maven本地仓库删除jar
+//清除某个jar
+mvn dependency:purge-local-repository -DmanualInclude="groupId:artifactId"
+如：
+~$ mvn dependency:purge-local-repository -DmanualInclude=org.apache.hadoop:hadoop-common
+ 
+//清除多个属于不同groupId的jar
+mvn dependency:purge-local-repository -DmanualInclude="groupId1:artifactId1,groupId2:artifactId2,..."
+ 
+//第二步,阻止Maven对已删除的jar进行reResolve
+

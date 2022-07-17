@@ -1,0 +1,94 @@
+
+
+generateRandom¶
+生成具用给定的模式的随机数据。
+允许用数据来填充测试表。
+
+generateRandom('name TypeName[, name TypeName]...', [, 'random_seed'[, 'max_string_length'[, 'max_array_length']]]);
+参数
+
+name — 对应列的名称。
+TypeName — 对应列的类型。
+max_array_length — 生成数组的最大长度。 默认为10。
+max_string_length — 生成字符串的最大长度。 默认为10。
+random_seed — 手动指定随机种子以产生稳定的结果。 如果为NULL-种子是随机生成的。
+
+# 生成三条数据：
+curl localhost:8123 -d "SELECT * FROM generateRandom('a Array(Int8), d Decimal32(4), c Tuple(DateTime64(3), UUID)', 1, 10, 2) LIMIT 3;"
+[-37]   15395.1766      ('2061-10-11 17:14:02.729','84a6f2a2-1322-b24a-fff6-227c01726e86')
+[-33]   8569.7048       ('1989-12-12 23:01:16.532','ed136ab5-eec8-3de2-12d0-17eefa60c047')
+[71]    -193143.0664    ('1992-12-28 09:26:04.030','f4d4fe3e-cddb-851e-bb9f-30a4799a05e9')
+
+# 生成数据
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "SELECT * FROM generateRandom('a UUID, b UInt8, c UInt16 ') LIMIT 3;"
+535f5b3d-24e0-a22c-3680-4e075ce44042    25      20638
+adefeaaf-d0dd-30c3-715c-54fc7bab209e    190     9917
+64e21737-ac39-d017-ecf3-aefbf37c655c    246     3648
+
+# 创建表：
+time curl localhost:8124 -d 'CREATE TABLE default.tutorial_test_tb3
+(
+    `mid` String,
+    `tag` UInt8,
+    `db_table` UInt16
+)
+ENGINE = MergeTree()
+ORDER BY (tag, db_table, xxHash32(mid))
+SETTINGS index_granularity = 8192';
+
+# 生成数据插入到表：
+time curl localhost:8124 -d "insert into tutorial_test_tb3 SELECT * FROM generateRandom('a UUID, b UInt8, c UInt16 ') LIMIT 3;";
+
+
+
+# 取样，取数，随机取样，建表时候，需要指定SAMPLE BY：
+time curl localhost:8124 -d 'CREATE TABLE tutorial.test_b
+(
+    `mid` String,
+    `tag` UInt8,
+    `table_name` UInt16
+)
+ENGINE = MergeTree()
+PARTITION BY substringUTF8(mid,1,1)
+ORDER BY (substringUTF8(mid,1,1), xxHash32(mid))
+SAMPLE BY xxHash32(mid)
+SETTINGS index_granularity = 8192'
+
+# 生成连续的数字：
+(base) [root@03072 test]# time curl localhost:8124 -d 'select range(5)'
+[0,1,2,3,4]
+
+# 列表展开为多行：
+(base) [root@03072 test]# time curl localhost:8124 -d 'select arrayJoin(range(5))'
+0
+1
+2
+3
+4
+
+# 随机取数（注意：sample采样是一种确定性机制。同样的结果 SELECT .. SAMPLE 查询始终是相同的。故sample不满足随机取数要求）：
+# rand, rand32: 返回一个UInt32类型的随机数字, 最大的UInt32是 2^32-1 = 4294967295
+# rand64: 返回一个UInt64类型的随机数字, 最大的UInt64是 2^64-1 = 18446744073709551615
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select count(1) from table_name_test'
+15000
+# 随机取10%的数据：
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select count(1) from table_name_test where rand32(id) < 4294967295/10'
+1511
+# 随机取10%的数据：
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select count(1) from table_name_test where rand(id) < 4294967295/10'
+1534
+# 随机取10%的数据：
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select count(1) from table_name_test where rand64(id) < 18446744073709551615/10'
+1514
+
+# 随机采样+LIMIT (注意：因LIMIT存在，导致结果可能并不完全随机。因为LIMIT会从where限定条件结果中，按照对应的排序键，取前面的LIMIT个结果。这样会导致排序靠前的记录被选取的概率高于排序靠后的记录)
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select xxHash64(id), id from sync_big_table_100_id '> hash_id.txt
+(base) [root@SZE-L0403072 test]# curl localhost:8124 -d 'select id from sync_big_table_100_id where rand(id)/4294967295 < 0.1 limit 10' |xargs -i grep -n {} hash_id.txt
+7:641561466222356136    f258a9d6-bb4a-78ba-3d31-43a38f931116
+27:4312166275624694532  46ff0de4-40c0-7389-55fe-19b54481dcdb
+46:8358176374300828572  8fd1e692-34d8-35db-3c6f-3db464bc368a
+57:10208348961158788492 0d6bf40e-5c85-cb1c-2e53-c8b15d72a7fe
+69:12017508265969673400 a414ebee-7350-f3a7-f571-a0352fd7edf3
+84:14416171847407321024 26ccf1e1-15ae-96ad-5dbf-1277a1ba70f0
+91:16291808855080873859 510c9284-d5ba-78f5-5406-9386d02a05c4
+

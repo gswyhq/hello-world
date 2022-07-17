@@ -1,0 +1,24 @@
+
+
+命令行编译单个java文件引入jar包
+有时候需要测试某个东西，在eclipse中写的话有点太笨重，这时候直接用文本工具写代码然后在命令行编译就挺方便了。
+假设java文件名为Demo.java
+如果不需要依赖其它jar包直接
+
+#编译
+javac Demo.java
+#执行class文件
+java Demo
+就可以了。
+那如果引入了其它jar包呢，这时候就用到了-cp命令。
+cp的作用就是指定类运行时所依赖其它类的路径，需要全路径到jar包。
+多个jar包的话windows使用;分隔，linux使用:分隔。
+
+#编译
+javac -cp D:\java_work\jdbc\mysql-connector-java-5.1.39-bin.jar Demo.java
+#执行class文件需要加上“.;”代表从当前目录查找主类。否则会报“找不到或无法加载主类”的错误
+java -cp .;D:\java_work\jdbc\mysql-connector-java-5.1.39-bin.jar Demo
+如果相同路径有多个jar包的话可以使用通配符一起引入既D:\java_work\jdbc\*.jar
+
+
+

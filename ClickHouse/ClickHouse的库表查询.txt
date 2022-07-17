@@ -1,0 +1,29 @@
+# 查看当前有哪些库：
+(DEV)[root@SZD-L0484943 ~]# echo "SHOW DATABASES " | curl 'http://localhost:8123/' --data-binary @-
+_temporary_and_external_tables
+default
+system
+tutorial
+
+# 查询库tutorial下有哪些表：
+(DEV)[root@SZD-L0484943 ~]# echo "SHOW TABLES from tutorial" | curl 'http://localhost:8123/' --data-binary @-
+demand_side
+hits_v1
+supply_side
+visits_v1
+
+# 或者：
+(DEV)[root@SZD-L0484943 ~]# echo "SHOW TABLES in tutorial" | curl 'http://localhost:8123/' --data-binary @-
+demand_side
+hits_v1
+supply_side
+visits_v1
+
+# 查询表有多少条记录：
+(DEV)[root@SZD-L0484943 ~]# time curl 'http://localhost:8123/' -d 'select count(*) from tutorial.supply_side'
+10000000
+
+real    0m0.014s
+user    0m0.006s
+sys     0m0.002s
+

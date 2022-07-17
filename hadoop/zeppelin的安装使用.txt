@@ -1,0 +1,55 @@
+
+1、下载（大小有1.5G）：
+https://dlcdn.apache.org/zeppelin/zeppelin-0.10.0/zeppelin-0.10.0-bin-all.tgz
+
+2、解压：
+tar -zxvf zeppelin-0.10.0-bin-all.tgz
+
+3、设置zeppelin环境变量
+vim /etc/profile
+添加如下：
+# zeppelin environment
+export ZEPPELIN_HOME=/usr/local/zeppelin
+export PATH=$ZEPPELIN_HOME/bin:$PATH
+
+4、重新加载环境变量，使配置生效
+source /etc/profile
+
+5、更改配置文件，可以远程访问
+cp /usr/local/zeppelin/conf/zeppelin-site.xml.template /usr/local/zeppelin/conf/zeppelin-site.xml
+编辑zeppelin-site.xml，更改zeppelin.server.addr地址为0.0.0.0
+
+6、启动zeppelin
+zeppelin-daemon.sh start
+
+停止zeppelin服务：
+root@ce9f5485e05c:~/zeppelin-0.10.0-bin-all/conf# zeppelin-daemon.sh stop
+Please specify HADOOP_CONF_DIR if USE_HADOOP is true
+Zeppelin stop                                              [  OK  ]
+
+
+7、访问zeppelin
+浏览器输入 localhost:8080
+
+8、配置phoenix解释器
+需先完成hbase和phoenix相关准备
+（1）开始创建解释器：
+（2）点击create创建
+（3）输入名称（Interpreter Name）和组(Interpreter group)
+（4）填写参数：
+default.url：jdbc:phoenix:zk01.wtown.com,zk02.wtown.com,zk02.wtown.com:/hbase1
+default.driver：org.apache.phoenix.jdbc.PhoenixDriver
+（5）依赖查询和填写
+查询地址：
+https://mvnrepository.com/artifact/org.apache.phoenix/phoenix-core
+这里用到的phoenix版本是5.1.2
+
+依赖值设置为：
+org.apache.phoenix:phoenix-core:5.1.2
+
+（6）点击save完成创建并查看
+（7）创建notebook、测试。
+
+原文链接：https://blog.csdn.net/zyj81092211/article/details/119871089
+
+

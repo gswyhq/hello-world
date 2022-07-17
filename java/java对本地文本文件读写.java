@@ -69,6 +69,10 @@ public class ReadWriteFile {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
+        // 输出文件的绝对路径：
+        File testFileSource= new File("example.data/hotel-test.txt");
+        String absolutePath = testFileSource.getAbsolutePath();
+        System.out.println(absolutePath);	
+
     }
 }

@@ -1,0 +1,165 @@
+
+hive 自定义排序函数，与其他自定义函数是一致的，只不过使用的时候，需要注意而已：
+# 根据经纬度计算距离
+hive> create temporary function Distance as 'GPSConverter.Distance';
+hive> select Distance('114.23120453', '22.69882237', '113.97636682', '22.537222');
+
+hive> select * from tmp_house_addr_poi_shenzhen
+      LATERAL VIEW Distance('113.97', '22.53', lng, lat) t2 as `distance`
+      where substr(lng, 0, 6)='113.97' and  substr(lat, 0, 5)='22.53' 
+      order by cast(t2.distance as BIGINT)
+      limit 20;
+
+广东    深圳    南山    瑧湾汇  113.97459690000001      22.53034049     深湾一路与白石三道交汇处(红树湾地铁站旁)        473.64
+广东    深圳    南山    中信红树湾-四期(别墅)   113.97203609    22.53426702     南山华侨城沙河东路与白石路交汇东南面    518.50
+广东    深圳    南山    中信红树湾5期   113.97170118    22.53533617     华侨城沙河东路与白石路交汇东南面        618.53
+广东    深圳    南山    世纪村(石洲中路)        113.97220869    22.53906507     沙河东路118号   1033.18
+广东    深圳    南山    沙河高尔夫别墅  113.97636682    22.53722209     广东省深圳市南山区沙河东路1号   1035.59
+广东    深圳    南山    京基御景东方花园2期     113.97603005    22.53764104     红树街白石路与深湾二路168号     1051.38
+广东    深圳    南山    京基·东堤园    113.97754163    22.53677218     白石路188号     1080.26
+
+因为这里自定义函数返回结果是String类型，故需要使用cast函数，将字符串转换为浮点型即数值型 double；
+
+~$ cat GPSConverter.Distance.java
+package GPSConverter;
+
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDTF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+
+import java.util.ArrayList;
+
+import GPSConverter.LonLatDistance;
+
+public class Distance extends GenericUDTF {
+
+    static LonLatDistance lonlatDistance = new LonLatDistance();
+
+    /** 初始化列名;
+    初始化部分其实是给一个表头，也就是结果中的默认列，因为可以输出多行嘛，需要有列名，一个是列名，一个是列的类型：
+     * add the column name
+     * @param args
+     * @return
+     * @throws UDFArgumentException
+     */
+    @Override
+    public StructObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
+        if (args.length != 4) {
+            throw new UDFArgumentLengthException("ExplodeMap takes only 4 argument");
+        }
+        if (args[0].getCategory() != ObjectInspector.Category.PRIMITIVE) {
+            throw new UDFArgumentException("ExplodeMap takes string as a parameter");
+        }
+
+        ArrayList<String> fieldNames = new ArrayList<String>();
+        ArrayList<ObjectInspector> fieldOIs = new ArrayList<ObjectInspector>();
+        fieldNames.add("distance");
+        fieldOIs.add(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+
+        return ObjectInspectorFactory.getStandardStructObjectInspector(fieldNames, fieldOIs);
+    }
+
+    /** 处理字符串部分
+     * process the column
+     * @param objects
+     * @throws HiveException
+     */
+    public void process(Object[] objects) throws HiveException {
+
+//        String [] input = objects[0].toString().split("[,;，；]");
+        String lng1 = objects[0].toString();
+        String lat1 = objects[1].toString();
+        String lng2 = objects[2].toString();
+        String lat2 = objects[3].toString();
+
+        double distance = lonlatDistance.getDistance(lng1, lat1, lng2, lat2);
+
+
+		//System.out.println(String.format("返回结果 %s", distance));
+        String[] result = new String[1];
+		result[0] = String.format("%.2f", distance);
+//		result[0] = Double.ParseDouble(String.format("%.2f",distance));
+
+        forward(result);  // 返回结果；
+        return;
+    }
+
+    public void close() throws HiveException {
+    }
+}
+
+~$ cat GPSConverter.LonLatDistance.java
+package GPSConverter;
+
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+
+public class LonLatDistance {
+
+    /**
+     * 地球半径,单位 km
+     */
+    private static final double EARTH_RADIUS = 6370.856;
+
+    /**
+     * 根据经纬度，计算两点间的距离
+     *
+     * @param longitude1 第一个点的经度
+     * @param latitude1  第一个点的纬度
+     * @param longitude2 第二个点的经度
+     * @param latitude2  第二个点的纬度
+     * @return 返回距离 单位:米
+     */
+
+    public static double getDistance(String lonStr1, String latStr1, String lonStr2, String latStr2) {
+        double longitude1 = Double.valueOf(lonStr1);
+        double latitude1 = Double.valueOf(latStr1);
+        double longitude2 = Double.valueOf(lonStr2);
+        double latitude2 = Double.valueOf(latStr2);
+
+        // 纬度
+        double lat1 = Math.toRadians(latitude1);
+        double lat2 = Math.toRadians(latitude2);
+        // 经度
+        double lng1 = Math.toRadians(longitude1);
+        double lng2 = Math.toRadians(longitude2);
+        // 纬度之差
+        double a = Math.abs(lat1 - lat2);
+        // 经度之差
+        double b = Math.abs(lng1 - lng2);
+
+//        System.out.println(String.format("纬度之差： %s, 经度之差： %s", a, b));
+        // 计算两点距离的公式
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
+                Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(b / 2), 2)));
+        // 弧长乘地球半径, 返回单位: 米
+        s =  s * EARTH_RADIUS * 1000;
+        return s;
+    }
+
+    public static void main(String[] args) {
+        double d = getDistance("116.308479", "39.983171", "116.353454", "39.996059");
+        System.out.println(String.format("两地之间的距离：%s", d ));
+//        lon1, lat1 = ()  # 深圳野生动物园(起点）
+//        lon2, lat2 = ()  # 深圳坪山站 (百度地图测距：38.3km)
+        System.out.println(String.format("深圳野生动物园-深圳坪山站的距离：%s", getDistance("113.973129","22.599578", "114.3311032", "22.6986848") ));
+        System.out.println(String.format("深圳野生动物园-北京天安门的距离：%s", getDistance("113.973129","22.599578", "116.3974799","39.9087202") ));
+        System.out.println(String.format("深圳野生动物园-美国洛杉矶的距离：%s", getDistance("113.973129","22.599578", "-118.2436849", "34.0522342") ));
+    }
+}
+
+~$ cat manf
+Main-Class: GPSConverter.LonLatDistance
+
+:: 将java文件编译成.class文件：
+~$ javac  -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar;.m2/repository/com/google/code/gson/gson/2.8.8/gson-2.8.8.jar GPSConverter\*.java
+
+:: 将.class文件打包成jar文件：
+~$ jar cvfm GPSConverter/Converter.jar GPSConverter/manf GPSConverter/*.class 
+

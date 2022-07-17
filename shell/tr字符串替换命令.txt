@@ -1,0 +1,56 @@
+
+# tr命令格式为:
+tr -c -d -s ["string1_to_translate_from"] ["string2_to_translate_to"] < input-file
+这里：
+-c 用字符串1中字符集的补集替换此字符集，要求字符集为ASCII。
+-d 删除字符串1中所有输入字符。
+-s 删除所有重复出现字符序列，只保留第一个；即将重复出现字符串压缩为一个字符串。
+input-file是转换文件名。虽然可以使用其他格式输入，但这种格式最常用。
+
+# tr 可以做字符串替换，但又不同于sed -i 's/old/new/g' 进行字符串替换；
+~$ echo "aaabcd1234abcd" |tr "abc" "123"
+11123d1234123d
+
+注意：这里凡是出现的"a"字母，都替换成"1"字母，"b"字母替换为"2"字母，"c"字母替换为"3"字母。而不是将字符串"abc"替换为字符串"123"。
+下面的方法是不会改变源文件的内容：
+~$ cat test.txt |tr "abc" "123"
+123d1234123d                                                                                                                                                                                                         
+~$ cat test.txt
+abcd1234abcd
+
+# 字符串小写字母转换为大写字母
+~$ echo "abcd1234abcd" |tr [a-z] [A-Z] 
+ABCD1234ABCD
+
+# 删除字符串中特定的字符：
+~$ echo "abcdaab1234abcd" |tr -d "abc"
+d1234d
+注意，这里是删除abc中的任何一个字符(a、b、c)，而不是删除字符串abc;
+
+# 删除文件file中出现的换行'\n'、制表'\t'字符 
+# cat file | tr -d "\n\t" > new_file
+
+# 删除空行
+# cat file | tr -s "\n" > new_file
+
+# 删除Windows文件“造成”的'^M'字符
+# cat file | tr -d "\r" > new_file
+或者
+# cat file | tr -s "\r" "\n" > new_file
+【注意】这里-s后面是两个参数"\r"和"\n"，用后者替换前者
+
+# 加密解密：
+[root@Gin scripts]# echo 12345|tr '0-9' '987654321'  ## 加密
+87654
+[root@Gin scripts]# echo 87654|tr '987654321' '0-9'  ## 解密
+12345
+
+# 字符集补集：
+tr -c [set1] [set2]
+set1的补集意味着从这个集合中包含set1中没有的所有字符。最典型的用法就是从输入文本中将不在补集中的所有字符全部删除。例如：
+
+[root@Gin scripts]# echo "hello 123 world " | tr -d -c '0-9 \n'
+ 123
+在这里，补集中包含了除数字、空格字符和换行符之外的所有字符，因为指定了-d，所以这些字符全部都会被删除。
+
+

@@ -1,0 +1,162 @@
+
+下载：jupyter-scala
+https://oss.sonatype.org/content/repositories/snapshots/com/github/alexarchambault/jupyter/jupyter-scala-cli_2.11.6/0.2.0-SNAPSHOT/jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar.xz
+
+启动jupyter:
+docker run --rm -it --user root docker.io/jupyter/base-notebook /bin/bash
+
+docker cp jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar.xz ae4e705066a1:/root/
+
+
+(base) root@ae4e705066a1:~# cd /root/
+(base) root@ae4e705066a1:/root# ls
+jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar.xz
+(base) root@ae4e705066a1:/root# xz -d jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar.xz
+(base) root@ae4e705066a1:/root# ls
+jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar
+(base) root@ae4e705066a1:/root# tar xvf jupyter-scala_2.11.6-0.2.0-SNAPSHOT.tar
+
+在 https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html 
+或 https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz
+下载：jdk-8u191-linux-x64.tar.gz
+docker cp jdk-8u191-linux-x64.tar.gz ae4e705066a1:/root/
+(base) root@ae4e705066a1:/root# tar -zxf jdk-8u191-linux-x64.tar.gz
+(base) root@ae4e705066a1:/root# ls
+jdk1.8.0_191  jdk-8u191-linux-x64.tar.gz
+echo "export JAVA_HOME=/root/jdk1.8.0_191" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
+
+
+(base) root@ae4e705066a1:/root# cd jupyter-scala_2.11.6-0.2.0-SNAPSHOT
+(base) root@ae4e705066a1:/root/jupyter-scala_2.11.6-0.2.0-SNAPSHOT# /bin/bash bin/jupyter-scala
+Generated /root/.ipython/kernels/scala211/kernel.json
+
+Run ipython console with this kernel with
+  ipython console --kernel scala211
+
+Use this kernel from IPython notebook, running
+  ipython notebook
+and selecting the "Scala 2.11" kernel.
+
+(base) root@ae4e705066a1:~# pwd
+/home/jovyan
+(base) root@ae4e705066a1:~# cp -r /root/.ipython .
+(base) root@ae4e705066a1:~# ipython console --kernel scala211
+
+启动jupyter notebook
+jupyter notebook --allow-root
+本地浏览器访问，我们就可以新建一个支持scala的notebook了
+
+# 在Jupyter内核中向Scala添加外部jar
+%AddJar http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar -f
+
+spark安装:
+https://mirrors.tuna.tsinghua.edu.cn/apache/spark/spark-2.4.8/spark-2.4.8-bin-hadoop2.6.tgz
+tar -xvf spark-2.4.8-bin-hadoop2.6.tgz -C /root
+echo "export SPARK_HOME=/root/spark-2.4.8-bin-hadoop2.6" >> ~/.bashrc
+echo "export PATH=\$PATH:\$SPARK_HOME/bin" >> ~/.bashrc
+source ~/.bashrc
+
+# 这个时候就可以使用spark-shell, spark-sql, pyspark等命令了；
+# spark-shell
+scala> spark.sql("show databases").show
+或者：
+(base) root@8ec8657b90b1:~# spark-sql --hiveconf "hive.metastore.warehouse.dir=hdfs://172.17.0.4:9000/user/hive/warehouse"
+spark-sql> show databases;
+
+# pyspark 示例：
+root@429eeb88f037:~# pyspark
+Python 3.6.5 (default, Jun 27 2018, 08:15:56)
+[GCC 6.3.0 20170516] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+21/08/25 17:32:16 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 2.4.8
+      /_/
+
+Using Python version 3.6.5 (default, Jun 27 2018 08:15:56)
+SparkSession available as 'spark'.
+>>> from pyspark.sql import SparkSession
+>>> from pyspark import SparkContext
+>>>
+>>> from pyspark.conf import SparkConf
+>>> conf = SparkConf()
+>>> conf.set('mapred.input.dir.recursive', 'true')
+<pyspark.conf.SparkConf object at 0x7f28632c9b00>
+>>> conf.set('hive.mapred.supports.subdirectories', 'true')
+<pyspark.conf.SparkConf object at 0x7f28632c9b00>
+>>>
+>>> spark = SparkSession.builder.config(conf = conf).appName("test").enableHiveSupport().getOrCreate()
+>>> sc = SparkContext.getOrCreate()
+>>>
+>>> textFile = sc.textFile("hdfs://172.17.0.4:9000/user/hive/warehouse/test")
+>>> textFile.first()
+'1,jack'
+
+from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
+from pyspark import SparkContext
+conf = SparkConf()
+conf.set('mapred.input.dir.recursive', 'true')
+conf.set('hive.mapred.supports.subdirectories', 'true')
+conf.set('hive.metastore.uris', 'thrift://172.17.0.4:9083')
+#conf.set("spark.sql.warehouse.dir", "hdfs://172.17.0.4:9000/user/hive/warehouse")
+#conf.set("hive.metastore.warehouse.dir", "hdfs://172.17.0.4:9000/user/hive/warehouse")
+spark = SparkSession.builder.config(conf = conf).appName("test").enableHiveSupport().getOrCreate()
+sc = SparkContext.getOrCreate()
+spark.sql("show tables").show()
+spark.sql("select * from test limit 10").show()
+
+# spark-shell示例：
+scala> import org.apache.hadoop.conf.Configuration
+scala> import org.apache.hadoop.fs.{FileSystem, Path}
+scala>   val conf = new Configuration()
+conf: org.apache.hadoop.conf.Configuration = Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+scala>   conf.setBoolean("mapreduce.app-submission.cross-platform", true)
+scala>   conf.set("fs.defaultFS", "hdfs://172.17.0.4:9000")
+scala> val hdfs: FileSystem = FileSystem.get(conf)
+hdfs: org.apache.hadoop.fs.FileSystem = DFS[DFSClient[clientName=DFSClient_NONMAPREDUCE_1614584632_1, ugi=mip (auth:SIMPLE)]]
+# 对文件重命名
+scala> hdfs.rename(new Path("/data/test.txt/part-0000"),new Path("/data/test1.txt"))
+res33: Boolean = true
+# 创建目录：
+scala> hdfs.mkdirs(new Path("/data/test1"))
+# 删除hdfs上的文件
+scala> hdfs.delete(new Path("/data/test1", true)
+# 判断目录是否存在
+scala> hdfs.exists(new Path("/data/test1"))
+scala> hdfs.exists(new Path("hdfs://172.17.0.4:9000/user/hive/warehouse/test"))
+
+import java.util.Properties
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql._
+val spark = SparkSession.builder().appName("apptest").master("local[*]").getOrCreate()
+
+
+import org.apache.spark.sql.SparkSession
+// 配置metastore server的访问地址，该server必须开启服务, 开启命令，如：hive --service metastore
+val spark = SparkSession.builder().master("local[*]").config("hive.metastore.uris","thrift://172.17.0.4:9083").appName("test").enableHiveSupport().getOrCreate()
+spark.sql("select * from test limit 3").show(false)
+
+spark.sql("create table test2(id int,name string, title string) row format delimited fields terminated by ','").show(false)
+spark.sql("INSERT INTO test2 VALUES (1,\"zhang\", \"中\"), (2,\"tank\", \"外国\") ").show()
+spark.close()
+
+# 问题：
+java.lang.ClassNotFoundException: com.mysql.jdbc.Driver
+解决方案：
+docker cp mysql-connector-java-8.0.25.jar 429eeb88f037:/root/spark-2.4.8-bin-hadoop2.6/jars/
+
+# 问题，导入包，找不到
+scala> import com.alibaba.fastjson.JSONObject
+<console>:37: error: object alibaba is not a member of package com
+       import com.alibaba.fastjson.JSONObject
+解决方法，下载好对应的jar包，导入进去，重新进入 spark-shell 即可
+docker cp fastjson-1.2.75-sources.jar 429eeb88f037:/root/spark-2.4.8-bin-hadoop2.6/jars/
+docker cp fastjson-1.2.75.jar 429eeb88f037:/root/spark-2.4.8-bin-hadoop2.6/jars/

@@ -49,3 +49,83 @@ Persistent root(/) directory
 MobaXterm使用apt-get install *** 安装软件时，出现：package *** has not been found.
 解决方法：apt-get update 之后，再尝试 apt-get install *** 
 
+
+# 问题：mobaxterm在git项目路劲，敲任何git命令，比如git branch -av或git log，终端的左下角都显示standard input, 必须按下q才会退出并进入终端？
+原因：当前版本默认设置了GIT_PAGER的环境变量为busybox less -R
+即内容是以分页的形式显示的；
+  /home/mobaxterm/hello-world   master 
+  06/05/2021   09:44.41  set|grep -i pagege
+GIT_PAGER='/bin/busybox.exe less -R'
+SSH_PAGEANT_PID=1767
+    CP1="`cat /proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control                                                                                                                            /Nls/CodePage/OEMCP`";
+解决方案：
+禁用分页显示即可：
+git config pager.branch false
+git config pager.log true
+上命令，即让执行 git branch时候不分页显示，但执行git log 命令时，还是保持分页显示；同理，还可以对git diff, git status等命令进行设置；
+
+可以在自己的bash初始化脚本中unset GIT_PAGER
+然后可以在自己的~/.gitconfig配置文件中使用pager=cat(完成参数名为core.pager=cat)
+第一步：
+  06/05/2021   09:52.01   /home/mobaxterm/hello-world   master  unset GIT_PAGER
+第二步：
+  06/05/2021   09:53.24   /home/mobaxterm/hello-world   master  git config core.pager cat
+若需要改回，只需要：
+export GIT_PAGER='/bin/busybox.exe less -R'
+
+# 在mobaxterm终端使用docker挂载目录问题：
+/home/mobaxterm$: docker run --rm -it -w /root/TensorFlowTTS -v $PWD/TensorFlowTTS:/root/TensorFlowTTS tensorflow/tensorflow:2.4.1-gpu /bin/bash
+这样的命令能运行,  实际挂载的是：
+"/home/mobaxterm/TensorFlowTTS"
+导致容器内文件目录为空；
+针对宿主机文件目录
+D:\Users\gswyhq\TensorFlowTTS
+的挂载，使用下面的方法：
+docker run --rm -it -w /root/TensorFlowTTS -v /D/Users/gswyhq/TensorFlowTTS:/root/TensorFlowTTS tensorflow/tensorflow:2.4.1-gpu /bin/bash
+但有时候这样写了，但还是无法挂载成功，也不提示什么错误，这可能是上次挂载成功后windows系统修改了密码，而docker没有修改密码所致：
+解决方法：
+1，修改docker设置： docker -> Settings -> Shared Drives
+2, 取消勾选上次挂载的目录所在磁盘，或者选择本次挂载的磁盘；
+3，点击 reset credentials;
+4, 点击Apply，重新输入密码，或者关闭窗口，运行docker run -v 挂载，选择 shareIt,输入密码；
+
+# 在mobaxterm 终端 docker save 保存镜像到文件的问题：
+docker save ubuntu:18.04 > ubuntu-18.04.tar
+无错误提示，且保存的文件仅有1kb;
+改为：
+docker save ubuntu:18.04 -o ubuntu-18.04.tar
+即正常；
+导入时使用命令: $ docker load -i ubuntu-18.04.tar
+同样， docker save ubuntu:18.04 | gzip > ubuntu-18.04.tgz ,保存到文件，文件大小也仅有1kb.
+但若不是mobaxterm终端，而是windows的cmd窗口，则
+docker save ubuntu:18.04 > ubuntu-18.04-save.tar
+能正常保存镜像到文件
+但 docker save ubuntu:18.04 |gzip > ubuntu-18.04-save.tgz 
+提示无gzip命令；
+
+# mobaxterm的find命令无法查找中文：
+如：find . -name '*的*'
+无法查找到包含“的”字的文件；但换成英文就可以：
+如：find . -name '*baidu*'
+就可以正常查找；
+问题原因及解决方法：
+原因目前未知；解决方法采用替代命令，如：find .|grep 的
+
+# fing命令使用异常：
+解决方法：
+apt-get install findutils
+
+# 问题 mvn 命令行打包的时候，终端输出乱码，pom.xml文件各种设置UTF-8都不顶用。
+解决方法，编辑 ~/.bashrc
+添加 环境变量：
+export MAVEN_OPTS="-Xms256m -Xmx512m -Dfile.encoding=UTF-8"
+加载文件是变量生效：
+source ~/.bashrc
+重新执行打包命令，这时终端中文输出不是乱码；
+$ mvn clean package spring-boot:repackage
+
+# mobaxterm启动后报错：
+mobaxterm local terminal failed to start due to memory access denied.
+解决方法，检查资源消耗，如内存、硬盘空间是否超阈值，排除故障后，再重启电脑，重启mobaxterm;
+
+

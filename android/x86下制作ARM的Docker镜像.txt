@@ -1,0 +1,242 @@
+
+由于 ARM 架构的系统无法在 x86 架构计算机上运行，因此无法在 x86 计算机上直接通过 Dockerfile 生成 ARM 架构的镜像，一般采用的方法是直接找一台 ARM 主机来 docker build。
+
+正常情况下 docker 是不能启动与宿主机不同架构的服务，此时要启动 arm 架构的环境，就需要提供 qemu 虚拟机的服务支持。
+
+这将极大的方便我们在 x86 机器直接进行编译和测试 arm 的程序，测试完成后再将其送入 arm架构 硬件。
+
+通过 run 创建容器名为 armv7 的镜像，则需要执行如下几条命令启动：
+1、docker run --rm --privileged multiarch/qemu-user-static --reset --persistent yes
+2、docker start armv7 (start/stop/restart/stats)
+3、docker exec -it armv7 sh
+
+说明：
+要在 Docker 中运行 ARM 镜像，我们要先在计算机上注册 qemu-user-static 虚拟机，即步骤1；
+步骤2是启动一个armv7架构的镜像，可以在 https://hub.docker.com/u/multiarch/ 获取不同架构的镜像；例如，multiarch/alpine 镜像就在不同 tag 下提供了 aarch64（armv8）、armhf、amd64、i386 的镜像：
+步骤3是进入对应的架构容器，进行对应的操作。
+
+
+x86依赖环境,构建ARM镜像，注册qemu-user-static虚拟机并不是必须的, 只需要挂载qemu-arm-static文件即可.
+
+x86 无法运行 arm 平台程序，但是 qemu 提供了机制，通过 qemu-arm-static 可以达到目的。在 ubuntu 上安装：
+sudo apt install qemu-user-static
+
+Dockerhub 有一些 arm 版本的镜像。以busybox为例。
+下载armhf版本的镜像：
+
+docker pull armhf/busybox
+尝试运行：
+# docker run -it --rm  --name armhfbusybox armhf/busybox 
+standard_init_linux.go:178: exec user process caused "no such file or directory"
+提示出错。
+
+挂载 qemu-arm-static，再运行一次：
+
+docker run -it --rm  --name armhfbusybox -v /usr/bin/qemu-arm-static:/usr/bin/qemu-arm-static armhf/busybox
+释义：
+-it 指定为交互方式。
+–name 指定容器名称。
+-v 为挂载文件。
+
+可以成功进入容器，查看内核：
+
+/ # uname -a
+Linux 87a4431f6f03 4.4.0-154-generic #181-Ubuntu SMP Tue Jun 25 05:29:03 UTC 2019 armv7l GNU/Linux
+/ # 
+架构为 armv7l, 但内核版本与主机完全一致。如下：
+
+# uname -a
+Linux latelee 4.4.0-154-generic #181-Ubuntu SMP Tue Jun 25 05:29:03 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+从实验知，容器内必须有qemu-arm-static文件，否则无法跑起来。可以在构建时拷贝至镜像中，也可在运行时挂载。有些镜像已经有 qemu-arm-static，直接正常运行即可。如：
+
+docker run -it --rm multiarch/alpine:armhf-edge /bin/sh
+三、qemu-user-static镜像
+可以借助 qemu-user-static 镜像，此情况下无须手动拷贝 qemu-arm-static。
+
+# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+# docker run --rm -t arm32v7/ubuntu:16.04 uname -m
+armv7l
+# docker run --rm -t arm64v8/ubuntu:16.04 uname -m
+aarch64
+注：https://github.com/multiarch 还有许多跨平台的项目。
+
+出错
+提示：
+
+Setting /usr/bin/qemu-arm-static as binfmt interpreter for arm
+sh: write error: Invalid argument
+去掉yes。
+
+https://www.latelee.org/docker/armdocker-run-arm-docker-on-x86.html
+
+
+Docker 19.03 引入了一个新的实验性插件，该插件使得跨平台构建 Docker 镜像比以往更加容易了。
+前跨 CPU 架构编译程序的不同方法。
+方法一：直接在目标硬件上编译
+如果你能够访问目标 CPU 架构的系统，并且该操作系统支持运行构建所需的各种工具，那么你可以直接在目标系统上编译程序。
+
+方法二：模拟目标硬件
+模拟器可以用来跨 CPU 架构构建程序。最常用的模拟器是开源的 QEMU，QEMU 支持许多常见的 CPU 架构，包括 ARM、Power-PC 和 RISC-V 等。
+通过模拟一个完整的操作系统，可以创建通用的 ARM 虚拟机，该虚拟机可以引导 Linux，设置开发环境，也可以在虚拟机内编译程序。
+然而，模拟整个操作系统还是有点浪费，因为在这种模式下，QEMU 将会模拟整个系统，包括计时器、内存控制器、总线控制器等硬件。但编译程序根本不需要关心这些，还可以再精简些。
+
+方法三：模拟目标硬件的用户空间
+在 Linux 上，QEMU 除了可以模拟完整的操作系统之外，还有另外一种模式叫用户态模式（User mod）。
+该模式下 QEMU 将通过 binfmt_misc 在 Linux 内核中注册一个二进制转换处理程序，并在程序运行时动态翻译二进制文件，根据需要将系统调用从目标 CPU 架构转换为当前系统的 CPU 架构。
+最终的效果看起来就像在本地运行目标 CPU 架构的二进制文件。
+通过 QEMU 的用户态模式，我们可以创建轻量级的虚拟机（chroot 或容器），然后在虚拟机系统中编译程序，和本地编译一样简单轻松。跨平台构建 Docker 镜像用的就是这个方法。
+
+方法四：使用交叉编译器
+最后介绍一种嵌入式系统社区常用的方法：交叉编译（cross-compilation）。
+交叉编译器是专门为在给定的系统平台上运行而设计的编译器，但是可以编译出另一个系统平台的可执行文件。
+例如，amd64 架构的 Linux 系统上的 C++ 交叉编译器可以编译出运行在 aarch64(64-bit ARM) 架构的嵌入式设备上的可执行文件。
+
+利用 Docker 19.03 引入的插件 buildx，可以很轻松地构建多平台 Docker 镜像。buildx 是 docker build ... 命令的下一代替代品，它利用 BuildKit 的全部功能扩展了 docker build 的功能。
+
+使用 buildx 构建出不同平台的 Docker 镜像。步骤如下：
+
+启用 buildx 插件
+要想使用 buildx，首先要确保 Docker 版本不低于 19.03，同时还要通过设置环境变量 DOCKER_CLI_EXPERIMENTAL 来启用。
+可以通过下面的命令来为当前终端启用 buildx 插件：
+~$ export DOCKER_CLI_EXPERIMENTAL=enabled
+验证是否开启：
+~$ docker buildx version
+github.com/docker/buildx v0.3.1-tp-docker 6db68d029599c6710a32aa7adcba8e5a344795a7
+
+如果在某些系统上设置环境变量 DOCKER_CLI_EXPERIMENTAL 不生效（比如 Arch Linux）,你可以选择从源代码编译：
+
+~$ export DOCKER_BUILDKIT=1
+~$ docker build --platform=local -o . git://github.com/docker/buildx
+~$ mkdir -p ~/.docker/cli-plugins && mv buildx ~/.docker/cli-plugins/docker-buildx
+启用 binfmt_misc
+如果你使用的是 Docker 桌面版（MacOS 和 Windows），默认已经启用了 binfmt_misc，可以跳过这一步。
+
+如果你使用的是 Linux，需要手动启用 binfmt_misc。大多数 Linux 发行版都很容易启用，不过还有一个更容易的办法，直接运行一个特权容器，容器里面写好了设置脚本：
+
+~$ docker run --rm --privileged docker/binfmt:66f9012c56a8316f9244ffd7622d7c21c1f6f28d
+建议将 Linux 内核版本升级到 4.x 以上，特别是 CentOS 用户，你可能会遇到错误。
+
+验证是 binfmt_misc 否开启：
+
+~$ ls -al /proc/sys/fs/binfmt_misc/
+总用量 0
+总用量 0
+-rw-r--r-- 1 root root 0 11月 18 00:12 qemu-aarch64
+-rw-r--r-- 1 root root 0 11月 18 00:12 qemu-arm
+-rw-r--r-- 1 root root 0 11月 18 00:12 qemu-ppc64le
+-rw-r--r-- 1 root root 0 11月 18 00:12 qemu-s390x
+--w------- 1 root root 0 11月 18 00:09 register
+-rw-r--r-- 1 root root 0 11月 18 00:12 status
+验证是否启用了相应的处理器：
+
+~$ cat /proc/sys/fs/binfmt_misc/qemu-aarch64
+enabled
+interpreter /usr/bin/qemu-aarch64
+flags: OCF
+offset 0
+magic 7f454c460201010000000000000000000200b7
+mask ffffffffffffff00fffffffffffffffffeffff
+从默认的构建器切换到多平台构建器
+Docker 默认会使用不支持多 CPU 架构的构建器，我们需要手动切换。
+
+先创建一个新的构建器：
+
+~$ docker buildx create --use --name mybuilder
+启动构建器：
+
+~$ docker buildx inspect mybuilder --bootstrap
+
+[+] Building 5.0s (1/1) FINISHED
+ => [internal] booting buildkit                                                                                                                          5.0s
+ => => pulling image moby/buildkit:buildx-stable-1                                                                                                       4.4s
+ => => creating container buildx_buildkit_mybuilder0                                                                                                     0.6s
+Name:   mybuilder
+Driver: docker-container
+
+Nodes:
+Name:      mybuilder0
+Endpoint:  unix:///var/run/docker.sock
+Status:    running
+Platforms: linux/amd64, linux/arm64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+查看当前使用的构建器及构建器支持的 CPU 架构，可以看到支持很多 CPU 架构：
+
+~$ docker buildx ls
+
+NAME/NODE    DRIVER/ENDPOINT             STATUS  PLATFORMS
+mybuilder *  docker-container
+  mybuilder0 unix:///var/run/docker.sock running linux/amd64, linux/arm64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+default      docker
+  default    default                     running linux/amd64, linux/386
+构建多平台镜像
+现在我们就可以构建支持多 CPU 架构的镜像了！
+创建一个 Dockerfile 将该应用容器化：
+
+~$ cat Dockerfile
+FROM golang:alpine AS builder
+RUN mkdir /app
+ADD . /app/
+WORKDIR /app
+RUN go build -o hello .
+
+FROM alpine
+RUN mkdir /app
+WORKDIR /app
+COPY --from=builder /app/hello .
+CMD ["./hello"]
+这是一个多阶段构建 Dockerfile，使用 Go 编译器来构建应用，并将构建好的二进制文件拷贝到 alpine 镜像中。
+
+现在就可以使用 buildx 构建一个支持 arm、arm64 和 amd64 多架构的 Docker 镜像了，同时将其推送到 Docker Hub：
+
+~$ docker buildx build -t yangchuansheng/hello-arch --platform=linux/arm,linux/arm64,linux/amd64 . --push
+需要提前通过 docker login 命令登录认证 Docker Hub。
+
+现在就可以通过 docker pull mirailabs/hello-arch 拉取刚刚创建的镜像了，Docker 将会根据你的 CPU 架构拉取匹配的镜像。
+
+背后的原理也很简单，之前已经提到过了，buildx 会通过 QEMU 和 binfmt_misc 分别为 3 个不同的 CPU 架构（arm，arm64 和 amd64）构建 3 个不同的镜像。构建完成后，就会创建一个 manifest list，其中包含了指向这 3 个镜像的指针。
+
+如果想将构建好的镜像保存在本地，可以将 type 指定为 docker，但必须分别为不同的 CPU 架构构建不同的镜像，不能合并成一个镜像，即：
+
+~$ docker buildx build -t yangchuansheng/hello-arch --platform=linux/arm -o type=docker .
+~$ docker buildx build -t yangchuansheng/hello-arch --platform=linux/arm64 -o type=docker .
+~$ docker buildx build -t yangchuansheng/hello-arch --platform=linux/amd64 -o type=docker .
+测试多平台镜像
+由于之前已经启用了 binfmt_misc，现在我们就可以运行任何 CPU 架构的 Docker 镜像了，因此可以在本地系统上测试之前生成的 3 个镜像是否有问题。
+
+首先列出每个镜像的 digests：
+
+~$ docker buildx imagetools inspect yangchuansheng/hello-arch
+
+Name:      docker.io/yangchuansheng/hello-arch:latest
+MediaType: application/vnd.docker.distribution.manifest.list.v2+json
+Digest:    sha256:ec55f5ece9a12db0c6c367acda8fd1214f50ee502902f97b72f7bff268ebc35a
+
+Manifests:
+  Name:      docker.io/yangchuansheng/hello-arch:latest@sha256:38e083870044cfde7f23a2eec91e307ec645282e76fd0356a29b32122b11c639
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/arm/v7
+
+  Name:      docker.io/yangchuansheng/hello-arch:latest@sha256:de273a2a3ce92a5dc1e6f2d796bb85a81fe1a61f82c4caaf08efed9cf05af66d
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/arm64
+
+  Name:      docker.io/yangchuansheng/hello-arch:latest@sha256:8b735708d7d30e9cd6eb993449b1047b7229e53fbcebe940217cb36194e9e3a2
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/amd64
+运行每一个镜像并观察输出结果：
+
+~$ docker run --rm docker.io/yangchuansheng/hello-arch:latest@sha256:38e083870044cfde7f23a2eec91e307ec645282e76fd0356a29b32122b11c639
+Hello, arm!
+
+~$ docker run --rm docker.io/yangchuansheng/hello-arch:latest@sha256:de273a2a3ce92a5dc1e6f2d796bb85a81fe1a61f82c4caaf08efed9cf05af66d
+Hello, arm64!
+
+~$ docker run --rm docker.io/yangchuansheng/hello-arch:latest@sha256:8b735708d7d30e9cd6eb993449b1047b7229e53fbcebe940217cb36194e9e3a2
+Hello, amd64!
+
+使用 buildx，我们无需对 Dockerfile 进行任何修改，就可以创建支持多种 CPU 架构的 Docker 镜像，然后将其推送到 Docker Hub。
+任何安装了 Docker 的系统都可以拉取到与它的 CPU 架构相对应的镜像。
+
+
+https://cloud.tencent.com/developer/article/1543689
+
+

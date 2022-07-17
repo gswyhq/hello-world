@@ -48,3 +48,10 @@ pandas.errors.ParserError: unexpected end of data
 解决方法,补充 quoting 参数，如：
 pd.read_csv(full_path, encoding='utf-8', quoting=csv.QUOTE_NONE)
 
+# pandas根据索引取数据报错：
+pandas.core.indexing.IndexingError: Unalignable boolean Series provided as indexer (index of the boolean Series and of the indexed object do not match).
+原因是原始数据行数，与索引行数不匹配
+dataframe = pd.DataFrame(data=np.random.random(size=(3, 5)), index=['a', 'b', 'c'])
+dataframe.loc[pd.Series([True, True], index=['a', 'b']).index]
+
+

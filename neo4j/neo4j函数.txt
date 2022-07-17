@@ -57,6 +57,14 @@ str(1)="1"，replace("hello",'l','w')=hewwo，substring('hello',1,3)="ell"，sub
 right("hello",3)="llo"，ltrim("    hello")="hello"，rtrim("hello   ")="hello"，trim("   hello   ")="hello"，lower("HELLO")="hello"，
 upper("hello")="HELLO"，split("one,two",",")=["one","two"]
 
+# 字符串转换为数值：
+neo4j@neo4j> RETURN tointeger("123");
++------------------+
+| tointeger("123") |
++------------------+
+| 123              |
++------------------+
+
 聚合函数(Aggregate functions)
 函数名称	函数说明
 COUNT( expression )	返回expression得到的结果的个数，expression也可为"*"

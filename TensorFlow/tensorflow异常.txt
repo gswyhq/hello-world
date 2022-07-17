@@ -110,3 +110,27 @@ tensorflow_gpu-1.12.0	2.7、3.3-3.6	GCC 4.8	Bazel 0.15.0	7	9
 在1.14版本中 应该是
 tf.estimator.experimental.stop_if_no_decrease_hook
 
+# 问题：
+bertmodel = BertModel.from_pretrained(rf'D:\Users\{USERNAME}\data\bert_base_pytorch\bert-base-chinese',from_tf=True)# load the TF model for Pytorch
+加载预训练模型时，报错：
+AttributeError: module 'tensorflow._api.v1.initializers' has no attribute 'TruncatedNormal'
+解决方法卸载旧版本，更新到新版本，如：
+Successfully uninstalled tensorflow-1.14.0
+Successfully installed tensorflow-2.5.0
+
+# 问题：ModuleNotFoundError: No module named 'tensorflow.contrib'
+问题原因
+tensorflow2以上的版本没有contrib属性
+解决方案
+安装tensorflow1的版本
+pip install tensorflow==1.15
+若不能降低tensorflow的版本，只能是针对功能，搜搜2.x的api，找到就可以了去替换。
+如：from tensorflow.contrib.tensorboard.plugins import projector
+第一步：先找到tensorflow目录：
+print(tensorflow.__file__)
+D:\Users\******\Anaconda3\lib\site-packages\tensorflow\__init__.py
+第二步：搜索对应的程序包：
+D:\Users\******\Anaconda3\lib\site-packages\tensorflow> grep projector -R .
+最后不难发现新的路径是：
+from tensorboard.plugins import projector
+

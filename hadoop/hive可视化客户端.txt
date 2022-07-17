@@ -1,0 +1,24 @@
+
+
+DBeaver可以作为hive的可视化客户端，使用的时候，需要先下载好对应的驱动
+在 https://github.com/timveil/hive-jdbc-uber-jar/releases
+下载驱动：
+https://github.com/timveil/hive-jdbc-uber-jar/releases/download/v1.9-2.6.5/hive-jdbc-uber-2.6.5.0-292.jar
+
+打开 DBeaver -> 新建连接 -> 选择 Apache Hive -> Hadoop / Apache Hive 连接设置
+JDBC URL: jdbc:hive2://localhost:10000
+若出现如下错误，则可能对应的hiveserver2服务未启动：
+Could not open client transport with JDBC Uri: jdbc:hive2://localhost:10000: java.net.ConnectException: Connection refused: connect
+启动 hiveserver2 服务：
+root@27d832029d21:~# nohup hiveserver2 > hiveserver2.log &
+连接测试启动的hiveserver2服务是否正常：
+root@27d832029d21:~# beeline -u jdbc:hive2://127.0.0.1:10000
+0: jdbc:hive2://127.0.0.1:10000> select * from test;
+
+但有时候，终端连接正常；
+root@27d832029d21:~# beeline -u jdbc:hive2://172.17.0.4:10000
+DBeaver连接报错：
+Could not open client transport with JDBC Uri: jdbc:hive2://172.17.0.4:10000: java.net.ConnectException: Connection timed out: connect
+这时若不存在防火墙的问题，那么可能是宿主机的问题，将端口映射出来，再通过宿主机的ip进行访问10000端口即可；
+docker run -d -it --name hadoop-hive -p 9000:9000 -p 10000:10000 hadoop-hive:v2 /bin/bash
+

@@ -1,0 +1,66 @@
+
+1.INNER JOIN, 内连接，A ∩ B
+SELECT <select_list> 
+FROM Table_A A
+INNER JOIN Table_B B
+ON A.Key = B.Key
+
+2.LEFT JOIN, 左外连接，(A-B)∪(A ∩ B)
+左外连接其实是一个内连接然后加上左表独有的数据行，结果集中右表的字段自动补充NULL。
+SELECT <select_list>
+FROM Table_A A
+LEFT JOIN Table_B B
+ON A.Key = B.Key
+
+3.RIGHT JOIN, 右外连接，(A ∩ B)∪(B-A)
+右外连接其实是一个内连接然后加上右表独有的数据行，结果集中左表的字段自动补充NULL。
+SELECT <select_list>
+FROM Table_A A
+RIGHT JOIN Table_B B
+ON A.Key = B.Key
+
+4.OUTER JOIN, 全外连接，(A-B)∪(A ∩ B)∪(B-A)
+全外连接其实是一个内连接然后加上左表和右表独有的数据行，左表独有的数据行右表的字段补充NULL，右表独有的数据行左表字段补充NULL。
+SELECT <select_list>
+FROM Table_A A
+FULL OUTER JOIN Table_B B
+ON A.Key = B.Key
+
+5.LEFT JOIN EXCLUDING INNER JOIN，左排除连接，(A-B)∪(A ∩ B)-B = A-B
+该查询会返回A表所有不在B表中的记录，即只返回A且不在B表中的记录
+SELECT <select_list> 
+FROM Table_A A
+LEFT JOIN Table_B B
+ON A.Key = B.Key
+WHERE B.Key IS NULL
+
+6.RIGHT JOIN EXCLUDING INNER JOIN,右排除连接，(A ∩ B)∪(B-A)-A = B - A
+该查询会返回所有不在A表中的记录，即返回只在B表中的记录
+SELECT <select_list>
+FROM Table_A A
+RIGHT JOIN Table_B B
+ON A.Key = B.Key
+WHERE A.Key IS NULL
+
+7.OUTER JOIN EXCLUDING INNER JOIN, 外部排除连接 (A∪B)-(A∩B)=(A-B)∪(B-A)
+该查询会返回只在A表或者只在B表中的记录（即去除交集部分）
+SELECT <select_list>
+FROM Table_A A
+FULL OUTER JOIN Table_B B
+ON A.Key = B.Key
+WHERE A.Key IS NULL OR B.Key IS NULL
+
+8，关联一个表的多个字段，并返回每个关联结果：
+select b1.code_name as processing, b2.code_name as data_source, b3.code_name as update_freq 
+from public.collision_product_info a 
+	inner join public.system_code as b1 on a.processing = b1.code_id and b1."type" = 'processing'
+	inner join public.system_code as b2 on a.data_source = b2.code_id and b2."type" = 'data_source'
+	inner join public.system_code as b3 on a.update_freq = b3.code_id and b3."type" = 'update_freq'
+where a.uuid='6ad3afed-d107-4c59-acb9-e95c44e7d439'	
+limit 1;
+
+9，将两个相互独立的SQL的查询结果合并：
+select tb1.*, tb2.* from
+(select * from  public.table1 t1 limit 1) tb1, 
+(select * from public.table2 t2 limit 1) tb2;
+

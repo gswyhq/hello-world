@@ -35,3 +35,341 @@ public class AccessException {
     }
 }
 
+# int的默认值为0，而Integer的默认值为null
+int是java提供的8种原始数据类型之一。
+Java为每个原始类型提供了封装类，Integer是java为int提供的封装类。
+int的默认值为0，而Integer的默认值为null，即Integer可以区分出未赋值和值为0的区别，int则无法表达出未赋值的情况
+实体类若定义成 int 类型，在默认情况下不赋值为0，执行到mybatis的更新语句时，被当做数字0，而非null。
+同样的情况还有float 和 Float 类型。
+
+问题：java -jar ****.jar  时报错：
+Error: A JNI error has occurred, please check your installation and try again
+问题原因：java -verion 和 javac -version 版本不一致
+查看java、javac的路径：
+D:\Users\gswyhq>whereis java
+C:\ProgramData\Oracle\Java\javapath\java.exe
+D:\Users\gswyhq>whereis javac
+D:\Users\gswyhq\jdk1.8.0_65\bin\javac.exe
+执行java -version命令时，查看的是jre的版本，而javac -version时查看的jdk的版本
+在环境变量，PATH变量中，C:\ProgramData\Oracle\Java\javapath目录在%JAVA_HOME%\bin之前。
+在Windows命令行下执行命令时，先从当前目录搜素，然后按照PATH设置的路径依次查找命令
+解决方法：
+方法1：若是可以将%JAVA_HOME%\bin加在PATH变量的头，则改变下环境变量的有优先级就可以了；
+方法2：若环境变量优先级无法调整，则需要卸载其中的一个版本，再保证安装版本一致；
+
+问题，命令行javac编译出错：
+~$ javac -encoding UTF-8 ****.java
+D:\Users\zhangsan>javac -encoding UTF-8 Downloads\test\HelloUdf.java
+Downloads\test\HelloUdf.java:1: 错误: 程序包org.apache.hadoop.hive.ql.exec不存在
+import org.apache.hadoop.hive.ql.exec.UDF;
+                                     ^
+Downloads\test\HelloUdf.java:2: 错误: 程序包org.apache.hadoop.io不存在
+import org.apache.hadoop.io.Text;
+
+解决方法1：
+用-cp将对应的外部依赖包引入：
+D:\Users\zhangsan>javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar  Downloads/test/HelloUdf.java
+解决方法2：
+~$ echo $CLASSPATH
+.;D:\Users\zhangsan\jdk1.8.0_172\lib\dt.jar;D:\Users\zhangsan\jdk1.8.0_172\lib\tools.jar;
+~$ cd jdk1.8.0_172/jre/lib/ext/
+/home/mobaxterm/jdk1.8.0_172/jre/lib/ext $ cp ~/Downloads/hadoop-common-2.6.0.jar .
+/home/mobaxterm/jdk1.8.0_172/jre/lib/ext $ cp ~/Downloads/hive-exec-2.3.7.jar .
+再重新编译就正常了：
+D:\Users\zhangsan\Downloads\test>javac -encoding UTF-8 HelloUdf.java
+
+问题，mobaxterm,javac编译报错：
+  23/06/2021   09:08.00   /home/mobaxterm  javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar  Downloads/test/HelloUdf.java
+javac: ▒▒Դ▒ļ▒
+▒÷▒: javac <options> <source files>
+-help ▒▒▒▒▒г▒▒▒ܵ▒ѡ▒▒
+bash: .m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar: cannot execute binary file
+解决方法，改为cmd窗口编译：
+D:\Users\zhangsan>javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar  Downloads/test/HelloUdf.java
+
+问题：Intellij IEDA运行报错：Error:(4, 19) java: 程序包javafx.util不存在
+排除是jar包依赖问题，maven没有引入jar包所致。因为：JavaFx包是JDK自身自带的，不需要maven引入。
+进到JDK安装目录：jdk1.8\jre\lib\ext 查看了一下jar包，JDK安装目录里没有jfxrt.jar这个包。
+JDK的安装目录没有这个自带的 jfxrt.jar 包，是因为：open Jdk缺少javafx 相关的包，需要使用Oracle JDK
+解决方案：
+下载新的 oracle jdk, 下载地址：https://mirrors.huaweicloud.com/java/jdk/
+.exe是需要安装的版本；_bin.zip是免安装版本；
+OpenJDK虽然是开源能看源码，但跟oracle jdk相比还是存在一些不足，比如：OpenJDK只包含最精简的JDK，源代码不完整，不包含如Java DB、 JAXP、JavaFX这些的jar软件包
+
+
+# java里头写有断言判断，但是运行时候，却忽略了；
+assert false;没有生效；
+问题所在：
+jvm在执行class文件的时候，默认是没有启动指定粒度/系统断言的。所以如果想在非@Test方法（或着其他断言方法内）启动断言，得在jvm命令里添加上-ea。
+IDEA解决方式：
+打开IDEA，主菜单RUN -> Edit configurations -> VM options:添加-ea
+
+# assert引发的错误无法捕获：
+catch (Exception e) {...} 捕获不到assert引发的异常；
+AssertionError是继承自Error，而不是Exception，所以catch部分用Exception是不能捕捉到AssertionError信息的。
+catch (AssertionError err) {
+            System.out.println(err.getMessage());
+}
+若想同时捕获Exception AssertionError错误，可以这样处理：
+catch (Exception | AssertionError e) {...}
+
+# 问题：
+D:\Users\zhangsan\Downloads\test>java -jar -Dfile.encoding=UTF-8 HelloUdf.jar
+错误: 找不到或无法加载主类 HelloUdf
+问题原因：
+hive UDF里写了main方法，运行提示 错误: 找不到或无法加载主类
+由于自定义的udf需要extends UDF，由于UDF在hive exec 的jar包中，pom文件中，这个jar的作用范围是provided,它只影响编译、测试阶段，运行阶段，是使用目标容器中提供的jar，所以运行阶段会提示上面的错误，如果在udf中测试main方法，可以讲provided进行注释，上线后别忘记恢复，否则会与线上hive的jar包冲突。
+
+# 问题：Intellij IDEA运行java项目之前是好的，突然有一次出现：
+Error connecting to 127.0.0.1:8324; reason: null
+io.netty.channel.StacklessClosedChannelException
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.ensureOpen(ChannelPromise)(Unknown Source)
+Exiting. 启动服务时报java.lang.NoClassDefFoundError: org/slf4j/LoggerFactory，发现已存在slf4j相关jar包，且版本一致，不存在版本冲突问题。
+问题原因及解决方案：
+    因把一个jar包(hive-exec-2.3.7.jar)放在$JAVA_HOME/jre/lib/ext目录下了，而这个jar包调用了org/slf4j/LoggerFactory，工程运行会先加载JDK中的jar包，然后JDK中的jar包无法加载相关依赖jar包，所以删掉JDK中的jar包就好了。
+    JDK的lib中添加新jar包最好不要和工程中冲突，而且JDK中的jar需要能调用到其相关依赖jar包，这个里面的jar包容易被忽略。
+
+# 通过 Intellij IDEA打包的jar包，运行提示：
+javaNLP.jar中没有主清单属性
+解决方法，在pom.xml文件中，添加如下内容，重新打包即可：
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <configuration>
+
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>nlp.demo.Word2VecModel</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+其中：nlp.demo.Word2VecModel 是对应的程序入口全路径名称。
+另外，若是用Artifact build 打包的jar, 则可能是 META-INF/MANIFEST.MF的路径选择不当。
+当我们在  选择一个Main Class，然后指定META-INF/MANIFEST.MF的路径为src下（注意不要放到main/java目录下，否则打成的jar中META-INF/MANIFEST.MF不含有Main-Class信息）
+
+# Intellij IDEA 启动工程项目报错：
+Error running 'MainApplication': Command line is too long. Shorten command line for MainApplication or also for Application default configuration?
+解决方法：
+首先找到项目里面的.idea/workspace.xml文件，然后再找到<component name="PropertiesComponent"></component >标签，
+然后再在component 标签里加一行 <property name="dynamic.classpath" value="true" />，
+这样在启动项目，就不会报错了。若问题还没解决，则：
+Intellij IDEA -> Run -> Edit Configurations -> Application -> 选中应用名称 -> 找到 Shorten command line, 把 Shorten command line改为JAR manifest或classpath file。若找不到 Shorten command line， 则 Modify options下拉选项中，选中：Shorten command line，再更改其赋值。
+
+# jar 文件的解压问题，springboot打成jar包后无法解压：
+$ jar tvf reveal-1.0-SNAPSHOT-exec.jar 能查看文件内详情，但
+$ jar xvf reveal-1.0-SNAPSHOT-exec.jar 不能解压jar文件；
+# unzip解压也报错：
+$ unzip reveal-1.0-SNAPSHOT-exec.jar
+Archive:  reveal-1.0-SNAPSHOT-exec.jar
+unzip: invalid zip magic 622F2123
+主要是因为 executable属性导致的，属性改成false后重新打包，就可以解压
+一般情况下，我们运行jar的方式为：
+java -jar xxx.jar
+但如果你想在unix/linux上，像执行某个sh/服务那样运行jar，就需要把你的app打包成executable的jar。
+
+# java命令找不到：
+~# java -version
+bash: java: command not found
+解决方法：
+在 https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+或 https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz 下载：jdk-8u191-linux-x64.tar.gz
+docker cp jdk-8u191-linux-x64.tar.gz ae4e705066a1:/root/
+(base) root@ae4e705066a1:/root# tar -zxf jdk-8u191-linux-x64.tar.gz
+(base) root@ae4e705066a1:/root# ls
+jdk1.8.0_191  jdk-8u191-linux-x64.tar.gz
+echo "export JAVA_HOME=/root/jdk1.8.0_191" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
+(base) root@ae4e705066a1:/root# source ~/.bashrc
+(base) root@ae4e705066a1:/root# java -version
+java version "1.8.0_191"
+Java(TM) SE Runtime Environment (build 1.8.0_191-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
+
+# windows系统，运行jar包报错：
+The Tomcat connector configured to listen on port 8081 failed to start. The port may already be in use or the connector may be misconfigured.
+# 问题原因及解决方案：
+因为端口被占用，查找占用端口的进程：
+~$ netstat -ano|findstr 8081
+  TCP    0.0.0.0:8081           0.0.0.0:0              LISTENING       2840
+  TCP    [::]:8081              [::]:0                 LISTENING       2840
+# 根据进程号，终止对应的进程：
+~$ taskkill /f /t /im  2840
+
+# 问题：
+bash: mvn: command not found
+问题原因及解决方案：
+maven 未安装，或者环境参数配置不正常。
+安装 maven 步骤：
+1、下载maven安装包
+wget http://mirrors.cnnic.cn/apache/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+2、解压maven安装包
+tar -zxvf apache-maven-3.5.4-bin.tar.gz
+3、配置maven： vim /etc/profile
+在配置文件配置中加上：
+export MAVEN_HOME=/opt/apache-maven-3.5.4 （这个目录换成你的 maven 解压后的文件所在目录） 
+export PATH=$MAVEN_HOME/bin:$PATH
+4、让文件生效，刷新配置文件 ：
+source /etc/profile
+5、查看maven 版本：
+mvn -version
+# 或者
+mvn -v
+
+# 运行 mvn -v 报错：
+root@611da123ad1d:~/apache-maven-3.5.3# mvn -v
+The JAVA_HOME environment variable is not defined correctly
+This environment variable is needed to run this program
+NB: JAVA_HOME should point to a JDK not a JRE
+问题原因及解决方法：
+java JDK没有安装；
+安装 JDK:
+$ mkdir /root/java && tar -zxf jdk-8u191-linux-x64.tar.gz -C /root/java
+$ echo "export JAVA_HOME=/root/java/jdk1.8.0_191/" >> ~/.bashrc && \
+    echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc && \
+    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc && \
+    source ~/.bashrc
+
+# 有时候，maven 包明明存在，或者配置明明正确，但运行时候，还是提示找不到对应的包；
+这个时候就需要考虑清理本地maven仓库；
+1.清理target
+$ mvn clean -U
+2.清理该项目依赖的本地仓库中的maven包#
+$ mvn dependency:purge-local-repository
+这个命令会清理pom.xml中的包，并重新下载，但是并不清理不在pom.xml中的依赖包。
+下面的扩展：
+$ mvn dependency:purge-local-repository -DreResolve=false 
+reResolve是否重新解析依赖关系
+$ mvn dependency:purge-local-repository -DactTransitively=false -DreResolve=false 
+actTransitively是否应该对所有传递依赖性起作用。默认值为true。
+$ mvn dependency:purge-local-repository -DactTransitively=false -DreResolve=false --fail-at-end 
+忽略错误（ --fail-at-end ）。 对于那些有一些依赖关系混乱的项目，或者依赖于一些内部的仓库（这种情况发生），这样做有时是有用的。
+# 强制下载maven包
+$ mvn dependency:purge-local-repository clean install
+
+# maven执行package/install阶段跳过test步骤
+在使用 mvn 构建打包时，每次打包都执行了Test Case ,可以通过如下命令，跳过test步骤：
+$ mvn install -DskipTests
+或：
+$ mvn install -Dmaven.test.skip=true
+
+# hive 添加自定义函数，一直报错：
+hive> create temporary function lnglat_converter as 'Converter';
+FAILED: Execution Error, return code -101 from org.apache.hadoop.hive.ql.exec.FunctionTask. Converter (wrong name: GPSConverter/Converter)
+问题原因及解决方法：
+1，确定对应的jar包程序有无问题，若jar包程序有问题，也会出错；
+2，jar包无问题，但因为之前导入过错误的jar包，这个时候，可以把之前的导入清空，重新导入即可：
+
+# hiva 导入自定义函数时，一直说未找到类，这个时候需要确定对应的类名称是否正确：
+hive> add jar /root/Converter.jar;
+Added [/root/Converter.jar] to class path
+Added resources: [/root/Converter.jar]
+hive> create temporary function lnglat_converter as 'Converter';
+FAILED: Class Converter not found
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.FunctionTask
+hive> create temporary function lnglat_converter as 'GPSConverter.Converter';
+OK
+
+# java String.split丢失结尾空字符串的问题
+如下：
+String strtest     = "1,2,";
+String arry[]   = strtest.split(",");
+这样得到的数组元素个数只是2两个，最后一个","后没有内容，它没有作为空字符串成为第三个数组元素，结尾的空字符串被丢弃了！
+如果不想让结尾的空字符串被丢弃，那么应该这样写：
+String strtest        = "1,2,";
+String arry[]   = strtest.split(",", -1);
+
+java 正则匹配，匹配指定汉字：
+像下面匹配1，这样匹配，匹配的结果是:false
+System.out.println(String.format("中文汉字匹配1 %s", Pattern.matches("[路街道]", "公石路/沿江路(路口)")));
+只有将匹配改为匹配2这样的匹配，匹配的结果才是：true
+System.out.println(String.format("中文汉字匹配2： %s", Pattern.compile("[路街道]", Pattern.UNICODE_CHARACTER_CLASS).matcher("公石路/沿江路(路口)").find()));
+        
+# 从文件中读取中文，部分字符乱码：
+问题原因：
+BufferedInputStream和BufferedOutputStream是过滤流,需要使用已存在的节点来构造,即必须先有InputStream或OutputStream,相对直接读写,这两个流提供带缓存的读写,提高了系统读写效率性能.BufferedInputStream读取的是字节byte,因为一个汉字占两个字节,而当中英文混合的时候,有的字符占一个字节,有的字符占两个字节,所以如果直接读字节,而数据比较长,没有一次读完的时候,很可能刚好读到一个汉字的前一个字节,这样,这个中文就成了乱码,后面的数据因为没有字节对齐,也都成了乱码.所以我们需要用BufferedReader来读取,它读到的是字符,所以不会读到半个字符的情况,不会出现乱码.
+解决问题方法，将读取文件的方法由 readJsonStream2 改为： readJsonStream
+    public static String readJsonStream2(String addrName){
+        try {
+            String BIN_LIB = ".";
+            InputStream addrin = null;
+            BufferedInputStream reader2 = null;
+            FileOutputStream writer2 = null;
+            addrin = PCAClean.class.getResourceAsStream(BIN_LIB +File.separator+ addrName);
+            if(addrin==null) {
+                addrin = PCAClean.class.getResourceAsStream(addrName);
+            }
+
+            reader2 = new BufferedInputStream(addrin);
+            StringBuffer sb = new StringBuffer();
+            int len = 0;
+            while(true){
+                byte[] b = new byte[1024];
+                len = reader2.read(b);
+                if(len<0){
+                    break;
+                }
+                sb.append(new String(b,0, len));
+            }
+            System.out.println(String.format("成功读取文件，%s", addrName));
+            return sb.toString();
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+读取文件方法，由上面的方法（会导致部分中文乱码）改为下面：
+    public static String readJsonStream(String addrName){
+        try {
+
+            BufferedInputStream bis = new BufferedInputStream(PCAClean.class.getResourceAsStream(addrName));
+            BufferedReader reader = new BufferedReader (new InputStreamReader(bis));
+
+            StringBuffer result = new StringBuffer();
+            while (reader.ready()) {
+                result.append((char)reader.read());
+            }
+
+            reader.close();
+            return result.toString();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        return null;
+    }
+
+# 问题：
+Error:Maven Resources Compiler: Failed to copy 'XXX' to 'YYY': YYY (拒绝访问。)
+解决方法：
+第一种：在打包之前先手动将target/classes下的文件都删除
+第二种：将target/classes下的文件只读属性勾选去掉
+
+# 数据类型转换时候报错：
+java java.lang.Integer cannot be cast to java.lang.Float
+这个时候可以先转换为strging,再转换为对应类型：
+double a=Double.valueOf(m_textstring).doubleValue();//String转换为double
+str=String.valueOf(c);//double,int 转换为String
+int Int=Integer.valueOf(str);//String转换为int
+

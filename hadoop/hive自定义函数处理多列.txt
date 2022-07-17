@@ -1,0 +1,312 @@
+
+# 输入一列（合并为一列），输出多列：
+第一步，撰写自定义函数：
+~$ cat SplitHour.java
+
+import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
+import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
+import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDTF;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+
+import java.util.ArrayList;
+
+/**
+ * Created by venn on 5/20/2018.
+ * SplitHour : split hour
+ */
+public class SplitHour extends GenericUDTF {
+
+    /**
+     * add the column name
+     * @param args
+     * @return
+     * @throws UDFArgumentException
+     */
+    @Override
+    public StructObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
+        if (args.length != 1) {
+            // 若是处理多列函数，且又不是将多列通过concat函数拼接成一列，则需要将此处的限制条件更改；
+            throw new UDFArgumentLengthException("ExplodeMap takes only one argument");
+        }
+        if (args[0].getCategory() != ObjectInspector.Category.PRIMITIVE) {
+            throw new UDFArgumentException("ExplodeMap takes string as a parameter");
+        }
+
+        // 设置自定义函数输出的列名及列值类型，需与process函数 内的forward一致；
+        ArrayList<String> fieldNames = new ArrayList<String>();
+        ArrayList<ObjectInspector> fieldOIs = new ArrayList<ObjectInspector>();
+        fieldNames.add("begintime");
+        fieldOIs.add(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+        fieldNames.add("endtime");
+        fieldOIs.add(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+        fieldNames.add("hour");
+        fieldOIs.add(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+        fieldNames.add("seconds");
+        fieldOIs.add(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+
+
+        return ObjectInspectorFactory.getStandardStructObjectInspector(fieldNames, fieldOIs);
+    }
+
+    /**
+     * process the column
+     * @param objects
+     * @throws HiveException
+     */
+    public void process(Object[] objects) throws HiveException {
+
+        // 这里是将输入多列，通过“,”用concat给拼接起来了；若在调用自定义函数时不拼接，则按顺序取值即可；如：beginTime = objects[0].toString(); endTime = objects[0].toString();
+        String [] input = objects[0].toString().split(",");
+        // 2018-06-06 10:25:35
+        String beginTime = input[0];
+        String endTime = input[1];
+
+        String[] result = new String[4];
+        result[0] = beginTime;
+        result[1] = endTime;
+
+        // begintime
+        int bhour = Integer.parseInt(beginTime.substring(11, 13));
+        int bmin = Integer.parseInt(beginTime.substring(14, 16));
+        int bsecond = Integer.parseInt(beginTime.substring(17, 19));
+        // endtime
+        int ehour = Integer.parseInt(endTime.substring(11, 13));
+        int emin = Integer.parseInt(endTime.substring(14, 16));
+        int esecond = Integer.parseInt(endTime.substring(17, 19));
+
+        // 1.if begin hour equal end hour, second is : (emin - bmin) * 60 + (esecond - bsecond)
+        if (bhour == ehour) {
+            result[2] = String.valueOf(bhour);
+            result[3] = String.valueOf((emin - bmin) * 60 + (esecond - bsecond));
+            forward(result);
+            return;
+        }
+
+        boolean flag = true;
+        //TODO 待优化，先输出第一个循环的时长，再循环后面的就不用判断
+        while (bhour != ehour) {
+            result[2] = String.valueOf(bhour);
+
+            if(flag){
+                flag = false;
+            // 2. if begintime hour != endtime, the first hour, second is : 3600 - bmin * 60 - bsecond
+                result[3] = String.valueOf(3600 - bmin * 60 - bsecond);
+            }else {
+                // 3. next hour is 3600
+                result[3] = String.valueOf(3600);
+            }
+            bhour += 1;
+            // 输出到hive
+            forward(result);
+        }
+
+        result[2] = String.valueOf(bhour);
+        // 4. the end hour is : emin  * 60 + esecond
+        result[3] = String.valueOf( emin  * 60 + esecond);
+        forward(result);
+
+    }
+
+    public void close() throws HiveException {
+
+    }
+
+}
+
+第二步，将java程序打包成jar:
+在CMD窗口运行，进行编译：
+D:\Users\gswyhq> javac -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar -Xlint:deprecation splitHour/SplitHour.java
+编译后，打包成jar:
+~/splitHour$ vim manf
+Main-Class: SplitHour
+D:\Users\gswyhq\splitHour>jar cvfm SplitHour.jar manf SplitHour.class
+
+第三步：hive中添加jar包：
+~/splitHour$ docker cp SplitHour.jar hadoop-hive2:/root/
+hive> add jar /root/SplitHour.jar;
+Added [/root/SplitHour.jar] to class path
+Added resources: [/root/SplitHour.jar]
+
+第四步：使用自定义的函数：
+hive> create temporary function split_hour as 'SplitHour';
+OK
+Time taken: 0.765 seconds
+hive> select split_hour('2018-04-01 10:26:14,2018-04-01 10:26:21');
+OK
+2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
+hive> select split_hour('2018-04-01 10:26:14,2018-04-01 10:26:21') as (begintime,    endtime,    hour,    seconds);
+OK
+2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
+
+使用的时候需要注意：
+UDTF有两种使用方法，一种直接放到select后面，一种和lateral view一起使用。
+
+1：直接select中使用：select split_hour(properties) as (col1, col2, col3, col4) from src;
+
+不可以添加其他字段使用：select a, split_hour(properties) as (col1, col2, col3, col4) from src
+不可以嵌套调用：select split_hour(split_hour(properties)) from src
+不可以和group by/cluster by/distribute by/sort by一起使用：select split_hour(properties) as (col1, col2, col3, col4) from src group by col1, col2
+2：和lateral view一起使用：select src.id, mytable.col1, mytable.col2 from src lateral view split_hour(properties) mytable as col1, col2;
+
+此方法更为方便日常使用。执行过程相当于单独执行了两次抽取，然后union到一个表里。
+
+hive> select name, `begintime`,    `endtime`,    hour,    seconds    FROM test LATERAL VIEW split_hour('2018-04-01 10:26:14,2018-04-01 10:26:21')  adTable AS `begintime`,    `endtime`,    hour,    seconds ;
+OK
+jack    2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
+hel     2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
+nack    2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
+
+合并为一列的使用情况：
+select split_hour( concat(begintime,',',endtime));
+
+hive> select province, city, area, name, lng, lat, adTable.wgs84_lng as wgs84_lng, adTable.wgs84_lat as wgs84_lat, address 
+      FROM hive_db2.tmp_house_addr_poi_shenzhen LATERAL VIEW Bd09ToWgs84(concat(lng,',',lat))  adTable AS `wgs84_lng`, `wgs84_lat` limit 5;
+OK
+广东    深圳    南山    沙河高尔夫别墅  113.97636682    22.53722209     113.964964      22.534184       广东省深圳市南山区沙河东路1号
+广东    深圳    南山    名商高尔夫公寓  113.97712591    22.55816383     113.965711      22.555106       沙河东路111号
+广东    深圳    福田    天安高尔夫分园  114.04599496    22.54303645     114.034396      22.539959       泰然一路
+广东    深圳    龙岗    深圳信息职业技术学校学生公寓-C4栋       114.23120453    22.69882237     114.219879      22.695411       龙翔大道2188号(近体育新城)
+广东    深圳    龙岗    深圳市第一职业技术学校学生宿舍-1号楼    114.52310716    22.605263600000004      114.511916      22.602284       鹏飞路49号
+
+hive UDTF函数编有三个部分：　　
+initialize ： 初始化列名
+process ： 处理字符串部分
+forward ： 返回结果
+
+上面添加jar包到hive仅仅对本次会话有效，当然也可以下面这样配置：
+打包、上传服务器，修改 $HIVE_HOME/bin/.hiverc
+添加如下内容： jar包可以添加多个
+[hadoop@venn05 bin]$ more .hiverc 
+add jar /opt/hadoop/idp_hd/viewstat/lib/hivefunction-1.0-SNAPSHOT.jar;
+create temporary function split_area as 'com.venn.udtf.SplitString';
+
+自定义函数jar包，加载的三种方式：
+方式1：命令加载
+这种加载只对本session有效
+# 1、将编写的udf的jar包上传到服务器上，并且将jar包添加到hive的class path中
+# 进入到hive客户端,执行下面命令
+ add jar /hivedata/udf.jar
+# 2、创建一个临时函数名,要跟上面hive在同一个session里面：
+create temporary function toUP as 'com.qf.hive.FirstUDF';
+3、检查函数是否创建成功
+show functions;
+4. 测试功能
+select toUp('bingbing');
+5. 删除自定义函数 toUp
+drop temporary function if exists toUp;
+
+方式2 启动参数加载
+(也是在本session有效，临时函数)
+1、将编写的udf的jar包上传到服务器上
+2、创建配置文件
+vi ./hive-init
+add jar /hivedata/udf.jar;
+create temporary function toup as 'com.qf.hive.FirstUDF';
+# 3、启动hive的时候带上初始化文件：
+~$ hive -i ./hive-init
+hive> select toup('bingbing')
+
+方式3 配置文件加载
+通过配置文件方式这种只要用hive命令行启动都会加载函数
+1、将编写的udf的jar包上传到服务器上
+2、在hive的安装目录的bin目录下创建一个配置文件，文件名：.hiverc
+vi ./bin/.hiverc
+add jar /hivedata/udf.jar;
+create temporary function toup as 'com.qf.hive.FirstUDF';
+3、启动hive
+~$ hive
+
+############################################################################################################################
+hive导入一个jar包，包里有多个自定义函数；即利用一个jar包创建多个自定义函数；
+D:\Users\gswyhq\GPSConverter $ ls *.java
+Bd09ToGcj02.java        Bd09ToWgs84.java        GPS.java                GPSConverterUtils.java  Gcj02ToBd09.java        Gcj02ToWgs84.java       Wgs84ToBd09.java        Wgs84ToGcj02.java
+
+java文件依赖关系如下：Bd09ToGcj02.java Bd09ToWgs84.java Gcj02ToBd09.java Gcj02ToWgs84.java Wgs84ToBd09.java Wgs84ToGcj02.java -> GPSConverterUtils.java -> GPS.java
+D:\Users\gswyhq\GPSConverter $ head -n 3 *.java
+==> GPS.java <==
+package GPSConverter;
+
+==> GPSConverterUtils.java <==
+package GPSConverter;
+import GPSConverter.GPS;
+
+==> Bd09ToGcj02.java Bd09ToWgs84.java Gcj02ToBd09.java Gcj02ToWgs84.java Wgs84ToBd09.java Wgs84ToGcj02.java<==
+package GPSConverter;
+import GPSConverter.GPS;
+import GPSConverter.GPSConverterUtils;
+
+# 切换到项目目录外部，编译：
+D:\Users\gswyhq> cd D:\Users\gswyhq
+D:\Users\gswyhq> javac  -encoding UTF-8 -cp .m2/repository/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar;.m2/repository/org/apache/hive/hive-exec/2.3.7/hive-exec-2.3.7.jar   GPSConverter\GPS.java GPSConverter\GPSConverterUtils.java GPSConverter\*.java
+
+# GPSConverterUtils.java文件中有对应的main函数
+~/GPSConverter$ cat manf
+Main-Class: GPSConverter.GPSConverterUtils
+
+# 将编译的文件，打包成jar
+D:\Users\gswyhq> jar cvfm GPSConverter/Converter.jar GPSConverter/manf GPSConverter/*.class
+
+# jar文件推送到hive容器：
+docker cp Converter.jar hadoop-hive2:/root/
+
+hive> add jar /root/Converter.jar;
+Added [/root/Converter.jar] to class path
+Added resources: [/root/Converter.jar]
+hive> create temporary function Bd09ToGcj02 as 'GPSConverter.Bd09ToGcj02';
+hive> create temporary function Bd09ToWgs84 as 'GPSConverter.Bd09ToWgs84';
+hive> create temporary function Gcj02ToBd09 as 'GPSConverter.Gcj02ToBd09';
+hive> create temporary function Gcj02ToWgs84 as 'GPSConverter.Gcj02ToWgs84';
+hive> create temporary function Wgs84ToBd09 as 'GPSConverter.Wgs84ToBd09';
+hive> create temporary function Wgs84ToGcj02 as 'GPSConverter.Wgs84ToGcj02';
+hive> select Wgs84ToBd09('113.963626,22.544535');
+113.975025      22.547535
+hive> select Wgs84ToGcj02('113.963626,22.544535');
+113.968536      22.541564
+hive> select Bd09ToWgs84('113.975025,22.547535');
+113.963616      22.544523
+hive> select Bd09ToWgs84('113.963626, 22.544535');
+113.952204      22.541739
+hive> select Gcj02ToWgs84('113.963626, 22.544535');
+113.958716      22.547506
+hive> select Wgs84ToGcj02('113.963626, 22.544535');
+113.968536      22.541564
+hive> select Bd09ToGcj02('113.963626, 22.544535');
+113.957101      22.538752
+hive> select Gcj02ToBd09('113.963626, 22.544535');
+113.970134      22.550420
+hive> select Wgs84ToBd09('113.963626, 22.544535');
+113.975025      22.547535
+hive> select province, city, area, name, lng, lat, address from hive_db1.tmp_house_addr_poi_shenzhen limit 5;
+OK
+广东    深圳    南山    沙河高尔夫别墅  113.97636682    22.53722209     广东省深圳市南山区沙河东路1号
+广东    深圳    南山    名商高尔夫公寓  113.97712591    22.55816383     沙河东路111号
+广东    深圳    福田    天安高尔夫分园  114.04599496    22.54303645     泰然一路
+广东    深圳    龙岗    深圳信息职业技术学校学生公寓-C4栋       114.23120453    22.69882237     龙翔大道2188号(近体育新城)
+广东    深圳    龙岗    深圳市第一职业技术学校学生宿舍-1号楼    114.52310716    22.605263600000004      鹏飞路49号
+Time taken: 0.232 seconds, Fetched: 5 row(s)
+hive> select Bd09ToWgs84(concat(lng,',',lat)) from hive_db1.tmp_house_addr_poi_shenzhen limit 5;
+OK
+113.964964      22.534184
+113.965711      22.555106
+114.034396      22.539959
+114.219879      22.695411
+114.511916      22.602284
+Time taken: 0.667 seconds, Fetched: 5 row(s)
+hive> select province, city, area, name, lng, lat, address  FROM hive_db1.tmp_house_addr_poi_shenzhen limit 5 LATERAL VIEW Bd09ToWgs84(concat(lng,',',lat))  adTable AS `wgs84_lng`, `wgs84_lat` ;
+
+# 多个自定义函数同时使用：
+hive> insert into table `hive_db`.`addr_clean_poi_2021` partition ( y='2021', m='09', d='10')
+select
+    name, t2.addrClean as addrClean, t2.provinceClean as provinceClean, t2.cityClean as cityClean, t2.areaClean as areaClean, '1' as source, level1, level2, level3,
+    CASE LENGTH(uid) WHEN 24 THEN lat ELSE t3.bd09_lat END as bd09_lat,
+    CASE LENGTH(uid) WHEN 24 THEN lng ELSE t3.bd09_lng END as bd09_lng
+from
+       `hive_db`.`tencent_poi_2020`
+LATERAL VIEW AddrClean(province, city, area, name, address) t2 as `provinceClean`, `cityClean`, `areaClean`, `addrClean`
+LATERAL VIEW Gcj02ToBd09(lng, lat) t3 as `bd09_lng`, `bd09_lat`
+where y='2021' and m='09' and d = '10';
+

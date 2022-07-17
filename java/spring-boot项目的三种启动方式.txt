@@ -1,0 +1,196 @@
+
+# 方式一：Intellij IDEA 中启动；
+用Intellij IDEA 打开项目目录，配置好对应的项目设置；
+找到项目的入口文件，main class所在文件，如：MainApplication.java
+选中 MainApplication.java 文件，右键 -> Run 'MainApplication.main()'
+
+# 方式二：命令行启动；
+$ mvn spring-boot:run
+说明：mvn spring-boot:run 这个指令，spring-boot这部分是一个maven插件 org.springframework.boot/spring-boot-maven-plugin，run这部分是一个maven的目标，或者指令。
+若终端中文显示乱码，可以指定编码：
+$ mvn clean spring-boot:run -Dfile.encoding=UTF-8 
+命令执行路径是，pom.xml文件同级目录所在路径下执行，下同。
+但运行报错：
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.1.18.RELEASE:run (default-cli) on project bdbdadebda: Unable to find a suitable main class, please add a 'mainClass' property -> [Help 1]
+原因是找不到主类入口，解决方法：
+在pom.xml文件中添加：
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <mainClass>com.abcd.bdbd.adebda.MainApplication</mainClass>
+    </configuration>
+</plugin>
+
+运行报错：
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.1.18.RELEASE:run (default-cli) on project bdbdadebda: Could not exec java: Cannot run program 
+解决方法,重新打包：
+$ mvn clean package spring-boot:repackage
+但报错：scala 对应的 程序包不存在
+解决方法，配置pom.xml 文件：
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.abcd.bdbd.adebda.MainApplication</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <executions>
+                    <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>2.12.14</scalaVersion>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+    </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <configuration>
+                    <scalaVersion>2.12.14</scalaVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
+$ mvn spring-boot:run
+报错：
+ Could not exec java: Cannot run program *****: CreateProcess error=206, 文件名或扩展名太长。
+解决方法，增加 fork配置：
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.1.18.RELEASE</version>
+                <configuration>
+                    <mainClass>com.abcd.bdbd.adebda.MainApplication</mainClass>
+<!--                    起一个进程/线程来运行当前项目-->
+                    <fork>false</fork>
+                </configuration>
+            </plugin>
+
+还是报错：
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.1.18.RELEASE:run (default-cli) on project bdbdadebda: An exception occurred while running. com.abcd.bdbd.adebda.MainApplication -> [Help 1]
+# 展示错误详情：
+$ mvn spring-boot:run -X
+aused by: java.lang.ClassNotFoundException: com.abcd.bdbd.adebda.MainApplication
+# 查看该命令的使用帮助：
+$ mvn spring-boot:help -Ddetail
+# 注释掉：mainClass，添加：
+    <properties>
+        <Start-Class>com.abcd.bdbd.adebda.MainApplication</Start-Class>
+    </properties>
+却报错：
+Caused by: org.apache.maven.plugin.MojoExecutionException: Unable to find a suitable main class, please add a 'mainClass' property
+
+# 注释掉：mainClass，添加：
+    <properties>
+        <start-class>com.abcd.bdbd.adebda.MainApplication</start-class>
+    </properties>
+却报错：
+Caused by: java.lang.ClassNotFoundException: com.abcd.bdbd.adebda.MainApplication
+
+# 注释掉：mainClass，添加：
+    <properties>
+        <loader.main>com.abcd.bdbd.adebda.MainApplication</loader.main>
+    </properties>
+却报错：
+Caused by: org.apache.maven.plugin.MojoExecutionException: Unable to find a suitable main class, please add a 'mainClass' property
+
+# 注释掉：mainClass，添加：
+    <properties>
+        <start-class>com.abcd.bdbd.adebda.MainApplication</start-class>
+        <loader.main>com.abcd.bdbd.adebda.MainApplication</loader.main>
+    </properties>
+却报错：
+Caused by: java.lang.ClassNotFoundException: com.abcd.bdbd.adebda.MainApplication
+
+# 注释掉：mainClass，添加：
+    <properties>
+        <Start-Class>com.abcd.bdbd.adebda.MainApplication</Start-Class>
+        <loader.main>com.abcd.bdbd.adebda.MainApplication</loader.main>
+    </properties>
+$ mvn clean spring-boot:run -Dfile.encoding=UTF-8 -X
+却报错：
+Caused by: org.apache.maven.plugin.MojoExecutionException: Unable to find a suitable main class, please add a 'mainClass' property
+
+# 添加：mainClass，添加：
+    <properties>
+        <Start-Class>com.abcd.bdbd.adebda.MainApplication</Start-Class>
+        <loader.main>com.abcd.bdbd.adebda.MainApplication</loader.main>
+    </properties>
+...
+<mainClass>org.springframework.boot.loader.PropertiesLauncher</mainClass>
+$ mvn clean spring-boot:run -Dfile.encoding=UTF-8 -X
+却报错：
+Caused by: java.lang.IllegalStateException: No 'loader.main' or 'Start-Class' specified
+
+# 若注销 ***，设置了 Start-Class、mainClass或 loader.main：
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classesDirectory>reveal\target\classes</classesDirectory>
+                    <fork>false</fork>
+                </configuration>
+            </plugin>
+也会报错：
+Caused by: org.apache.maven.plugin.MojoExecutionException: Unable to find a suitable main class, please add a 'mainClass' property
+
+# pom.xml 添加 mainClass、Start-Class 或 loader.main，或者两个、三个都添加；
+对应值均是：com.abcd.bdbd.adebda.MainApplication
+并且设置：
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classesDirectory>reveal\target\classes</classesDirectory>
+                    <fork>false</fork>
+                </configuration>
+            </plugin>
+# 再依次执行下面两个命令即可：
+$ mvn install
+$ mvn clean spring-boot:run -Dfile.encoding=UTF-8 -X
+
+# 或者 pom.xml 文件中，mainClass、Start-Class 或 loader.main 都没有添加；
+但依次执行下命令，也是可以的：
+$ mvn install 
+$ mvn clean spring-boot:run -Dspring-boot.run.arguments="--Start-Class=com.abcd.bdbd.adebda.MainApplication" -X
+
+# 方法三：
+在 pom.xml 所在路径下运行：
+$ mvn install
+...
+[INFO] Installing D:\Users\zhangsan\bdbd_adebda_scala\bdbdadebda_java\reveal\target\reveal-1.0-SNAPSHOT.jar to D:\Users\zhangsan\.m2\repository\org\gongsi\reveal\1.0-SNAPSHOT\reveal-1.0-SNAPSHOT.jar
+[INFO] Installing D:\Users\zhangsan\bdbd_adebda_scala\bdbdadebda_java\reveal\pom.xml to D:\Users\zhangsan\.m2\repository\org\gongsi\reveal\1.0-SNAPSHOT\reveal-1.0-SNAPSHOT.pom
+[INFO] Installing D:\Users\zhangsan\bdbd_adebda_scala\bdbdadebda_java\reveal\target\reveal-1.0-SNAPSHOT-exec.jar to D:\Users\zhangsan\.m2\repository\org\gongsi\reveal\1.0-SNAPSHOT\reveal-1.0-SNAPSHOT-exec.jar
+但运行jar报错：
+java -jar ~/.m2/repository/org/gongsi/reveal/1.0-SNAPSHOT/reveal-1.0-SNAPSHOT-exec.jar
+# 重新打包：
+$ mvn clean package spring-boot:repackage
+# 运行jar文件启动服务；
+$ java -jar -Dfile.encoding=UTF-8 reveal/target/reveal-1.0-SNAPSHOT-exec.jar --server.port=8081
+这时能正常启动服务。
+

@@ -31,3 +31,27 @@ sftp服务
 
 # 查找文件，并在文件内容中进行搜索
 find . -name "*.py" |xargs grep "requests"
+
+# 安装终端命令；
+一般的linux命令，mobaxterm都有，但也有些不存在，对于不存在的，可以通过类型如下方式安装：
+  06/05/2021   09:32.50   /home/mobaxterm/hello-world   master  apt-get install zip
+
+
+# mobaxterm终端使用python:
+1、查找python的路径；
+  08/06/2021   09:14.21   /home/mobaxterm  where python
+D:\Users\gswyhq\Anaconda3\python.exe
+2、设置 ~/.bashrc 文件：
+export PATH=/drives/d/Users/gswyhq/Anaconda3:/drives/d/Users/gswyhq/Anaconda3/Scripts:$PATH
+export PYTHONIOENCODING=utf-8
+
+if [[ "${OSTYPE}" == 'cygwin' ]]; then
+    set -o igncr
+    export SHELLOPTS
+fi
+3、加载配置使之生效：
+source ~/.bashrc
+
+# 查询某命令路径，如：
+~$ which zip
+

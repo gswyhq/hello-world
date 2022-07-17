@@ -5,6 +5,13 @@
 pip3 install jupyter
 安装jupyter notebook。
 
+若 python3版本小于3.7，则需要先对依赖指定版本才可以：
+pip3 install traitlets==4.3.3
+pip3 install nbconvert==5.3.1
+pip3 install ipython==6.4.0
+pip3 install ipykernel==4.8.2
+pip3 install jupyter==1.0.0
+
 2、在ipynb所在的目录打开jupyter notebook
 3、 远程访问
 启动的时候加上ip和端口

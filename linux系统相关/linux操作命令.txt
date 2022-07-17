@@ -41,7 +41,15 @@ stat 中的参数意义如下：
     s   包含子进程
     +   位于后台的进程组
     
-    
+查看CPU架构体系型号：
+linux: cat /proc/cpuinfo |grep name
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+model name      : Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+出现几行代表几核；
+windows系统，cmd窗口：
+> wnic cpu    
     
 mongodb 安装
 下载源文件：https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz?_ga=1.249661326.982219555.1458790832
@@ -492,6 +500,13 @@ web1@10-13-101-154:~$ du -sh *
 gswewf@gswewf-pc:~/qa_jar$ md5sum jar/sim.jar
 0810a0fbeda9bb7a5e8954e569910d2a  jar/sim.jar
 
+# 计算字符串的MD5：
+(DEV)[root@SZD-L0484943 test_data]# echo '123456' |  md5sum
+f447b20a7fcbf53a5d5be013ea0b15af  -
+但这样计算的MD5跟其他地方计算的不一样，因为echo输出的字符串会默认添加一个换行符'\n'；
+echo -n 可以去掉换行符
+(DEV)[root@SZD-L0484943 test_data]# echo -n '123456' | md5sum
+e10adc3949ba59abbe56e057f20f883e  -
 
 查看linux文件目录的大小和文件夹包含的文件数
     统计总数大小
@@ -575,6 +590,12 @@ gswewf@gswewf-pc:~$ sudo passwd ftpuser
 重新输入新的 UNIX 密码：
 passwd：已成功更新密码
 gswewf@gswewf-pc:~$ 
+
+# 修改用户密码：
+echo zhangsan:ABC123 |chpasswd && chage -m 0 -
+将用户张三的密码，修改为ABC123.
+chage -m参数。-m参数的意思：密码最短保留天数，此天数之内不能对密码进行修改，说直白一些就是从上次密码修改的日期+这个天数之内的日期不能修改密码。
+为零时代表任何时候都可以更改密码。root用户直接修改用户密码不受影响。
 
 # 新建文件夹，调整权限
 sudo chmod a-w /home/ftp

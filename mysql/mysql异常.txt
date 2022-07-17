@@ -159,3 +159,18 @@ OSError: mysql_config not found
 apt-get install libmysqlclient-dev
 pip3 install mysqlclient
 
+# SQL文件导入时乱码；
+解决方法：在导入之前先设置编码
+mysql> set names utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> source cnarea20200630.sql;
+或者：
+通过增加参数 –default-character-set = utf8 解决乱码问题
+mysql -u root -p password < path_to_import_file –default-character-set = utf8
+
+
+# sql 导入报错：
+MySQL server has gone away 把mysql配置的max_allowed_packet改大点,比如
+mysql> set global max_allowed_packet = 200*1024*1024;
+Query OK, 0 rows affected (0.00 sec)
+

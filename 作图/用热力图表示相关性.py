@@ -48,6 +48,17 @@ plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.show()
 
+# 特征关联热力图：
+import seaborn as sns
+import matplotlib.pyplot as plt
+credit_df = pd.DataFrame([[0.013, 0.016, 0.007, 0.014, 0.013, 0.01, 0.014], [0.013, 0.014, 0.014, 0.014, 0.013, 0.012, 0.019], [0.004, 0.01, 0.012, 0.007, 0.007, 0.007, 0.01], [0.059, 0.051, 0.033, 0.014, 0.013, 0.012, 0.01], [0.021, 0.018, 0.012, 0.014, 0.013, 0.01, 0.01]], columns=list('abcdefg'))
+fig, ax = plt.subplots(figsize=(20,10))         
+corr = credit_df.corr()
+sns.heatmap(corr, cmap='YlGnBu', annot_kws={'size':30}, ax=ax)
+ax.set_title("Imbalanced Correlation Matrix", fontsize=14)
+plt.show()
+
+
 def main():
     pass
 

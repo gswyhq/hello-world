@@ -1,0 +1,282 @@
+分组查询时候会报错：
+SELECT
+  id,
+  latitude,
+  longitude
+FROM
+  t_poi
+GROUP BY id ;
+
+则会报错：
+FAILED: Error in semantic analysis: Line 2:3 Expression not in GROUP BY key 'latitude'
+解决办法：
+使用Hive的collect_set ( col )函数，对于我们这个问题，将HiveQL语句改为如下写法：
+SELECT
+    id,
+    collect_set(latitude)[0] as latitude,
+    collect_set(longitude)[0] as longitude
+  FROM
+    t_poi
+  GROUP BY id ;
+
+# Hive导入数据报错
+有的时候可能想直接使用load命令将文本数据导入到SequenceFile或者ORCFile类型的数据库中，执行的时候会报错：
+Hive load data local inpath … into table … 出错
+报错信息：org.apache.hadoop.hive.ql.parse.SemanticException:Unable to load data to destination table. Error: The file that you are trying to load does not match the file format of the destination table.
+错误原因一:
+Hive 3.x系列不支持load data 命令向内部表导入数据
+解决办法
+1.创建一个普通文本类型的临时表；
+    CREATE TABLE `db_name.tmp_table_name`
+    (
+        `city` string COMMENT '城市',
+        `area` string COMMENT '行政区',
+        `mean_price` string COMMENT '均价(元/㎡)',
+        `ad` string COMMENT '环比上月'
+        )
+    COMMENT '城市各区域房价'
+    ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+    WITH SERDEPROPERTIES('field.delim'='\t', 'serialization.format'='\t')
+    STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+    OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat';
+2.创建临时表再用 select 方式导入
+    insert into db_name.table_name(city, area, mean_price, ad)
+    select city, area, mean_price, ad
+    from db_name.tmp_table_name;
+
+错误原因二：
+hive sequencefile导入文件遇到FAILED: SemanticException Unable to load data to destination table. Error: The file that you are trying to load does not match the file format of the destination table.错误
+这个是因为在创建表的时候没有指定列分隔符，hive的默认分隔符是ctrl+a(/u0001)
+解决方案就是在建表的时候指定分隔符：
+CREATE TABLE `hive_db.caijing_jinritoutiao_tag`
+    (
+            `id` string COMMENT '文章ID',
+           `tag1` string COMMENT '文章一级分类标签',
+            `tag2` string COMMENT '文章二级分类标签'
+        )
+    COMMENT '头条财经大V号文章模型打标签'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\054' STORED AS TEXTFILE;
+
+# 这里‘\054’就是对应英文逗号分隔符；
+或者：
+CREATE TABLE `hive_db.tmp_caijing_jinritoutiao_tag`
+(
+        `id` string COMMENT '文章ID',
+        `tag1` string COMMENT '文章一级分类标签',
+        `tag2` string COMMENT '文章二级分类标签'
+    )
+COMMENT '头条财经大V号文章模型打标签'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES ( 'field.delim'='\054', 'serialization.format'='\054')
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat';
+
+# hadoop dfs异常：
+[hadoop@SZE-L0403067 ~]$ hadoop dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+DEPRECATED: Use of this script to execute hdfs command is deprecated.
+Instead use the hdfs command for it.
+命令过期了，需改为：
+[hadoop@SZE-L0403067 ~]$ hdfs dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+
+# 删除es外部表报错：
+hive> drop table es_cmb_test ;
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. MetaException(message:Failed to load storage handler:  Error in loading storage handler.org.elasticsearch.hadoop.hive.EsStorageHandler)
+# 解决方法：
+添加对应的软件包后，再删除
+hive> add jar /home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar
+    > ;
+Added [/home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar] to class path
+Added resources: [/home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar]
+hive> drop table es_cmb_test;
+OK
+
+# 在hive中执行 SQL语句报错：
+Unable to instantiate org.apache.hadoop.hive.ql.metadata.SessionHiveMetaStoreClient
+hive使用derby作为内嵌的metastore数据库，主要用于测试，但是在同一时间，它只允许一个进程连接metastore数据库。
+初始化之后没有启动服务端，直接执行SQL语句就会报错,启动服务命令：
+root@eff2eacda916:~# start-dfs.sh
+
+# 启动hive报错：
+Caused by: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bsystem:user.name%7D
+在$HIVE_HOME/conf/hive-site.xml中加入一下内容：
+  <property>
+    <name>system:java.io.tmpdir</name>
+    <value>/tmp/hive/java</value>
+  </property>
+  <property>
+    <name>system:user.name</name>
+    <value>${user.name}</value>
+  </property>
+并创建路径，及重启dfs
+root@eff2eacda916:~# mkdir -p /tmp/hive/java
+root@eff2eacda916:~# stop-dfs.sh && start-dfs.sh
+
+# hive 中文乱码问题：
+hive> desc formatted table_name;
+通过上面语句，查询到的中文注释是乱码；
+这是因为在MySQL中的元数据出现乱码；
+metastore 支持数据库级别，表级别的字符集是 latin1, 可以在MySQL中查看对应的字符编码；
+故而只需要把相应注释的地方的字符集由 latin1 改成 utf-8，就可以了。用到注释的就三个地方，表、分区、视图。如下修改分为两个步骤：
+1、进入数据库 Metastore 中执行以下 5 条 SQL 语句
+mysql中Metastore的库名可以在 hive配置文件conf/hive-site.xml，中查到，如：
+        <value>jdbc:mysql://172.17.0.3:3306/hive</value>
+查好库名后，在MySQL中执行下面语句：
+use hive;
+-- （1）修改表字段注解和表注解
+alter table COLUMNS_V2 modify column COMMENT varchar(256) character set utf8;
+alter table TABLE_PARAMS modify column PARAM_VALUE varchar(4000) character set utf8;
+-- （2）修改分区字段注解
+alter table PARTITION_PARAMS modify column PARAM_VALUE varchar(4000) character set utf8 ;
+alter table PARTITION_KEYS modify column PKEY_COMMENT varchar(4000) character set utf8;
+-- （3）修改索引注解
+alter table INDEX_PARAMS modify column PARAM_VALUE varchar(4000) character set utf8;
+
+修改好后，还需要修改 metastore 的连接 URL即修改hive-site.xml配置文件：
+        <value>jdbc:mysql://172.17.0.3:3306/hive</value>
+改为：
+        <value>jdbc:mysql://172.17.0.3:3306/hive?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
+使用上面的方法，在修改之后，再去创建表的话，就不会出现中文乱码的问题，但是之前创建的表仍旧是乱码。
+
+
+hive执行简单的SQL语句正常，执行复杂语句(涉及到计算的，比如count)报错：
+Error: org.apache.hive.service.cli.HiveSQLException: Error while processing statement: FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask. Permission denied: user=anonymous, a
+ccess=EXECUTE, inode="/tmp/hadoop-yarn":root:supergroup:drwx------
+权限不足造成的，对/tmp/hadoop-yarn路径赋权限。
+首先切换到hadoop用户 
+su hadoop
+然后赋权限
+hadoop fs -chown hadoop:hadoop /tmp/hadoop-yarn
+hadoop fs -chmod -R 777 /tmp/hadoop-yarn
+
+hive 报错：
+2021-10-11 08:41:40,921 ERROR org.apache.hadoop.yarn.server.resourcemanager.ResourceManager: RECEIVED SIGNAL 15: SIGTERM
+解决方法：在etc/hadoop/yarn-site.xml添加如下配置参数:
+即：指定yarn.resourcemanager.hostname为Master节点的IP。
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>192.168.0.100</value>
+    </property>
+
+hive报错：
+Diagnostic Messages for this Task:
+Container launch failed for container_1633922573348_0001_01_000005 : org.apache.hadoop.yarn.exceptions.InvalidAuxServiceException: The auxService:mapreduce_shuffle does not exist
+问题原因： 
+因为Hive底层执行job是hadoop的MP，如果auxService:mapreduce_shuffle不存在，我们就须要配置。 
+解决方案： 
+设置etc/hadoop/yarn-site.xml文件，添加以下内容：
+<property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+</property>
+<property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+</property>
+之后再重启yarn:
+cd ~/hadoop-2.6.0/sbin && stop-yarn.sh && start-yarn.sh
+
+Hive 跑mapReduce 任务时候卡住的两种情况
+情况1:
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+
+卡在这里不动，大致原因：内存不足，方法，关闭其他任务，重启集群后解决；
+
+情况2：
+卡在这里：
+Starting Job = job_1604227043139_0001, Tracking URL = http://hadoop103:8088/proxy/application_1604227043139_0001/
+Kill Command = /opt/module/hadoop-3.1.3/bin/mapred job  -kill job_1604227043139_0001
+原因：
+有一个 节点的NodeManager  挂掉了,或者其他原因。
+可以查看端口情况：
+root@98b2fb173dcf:~# netstat -anop
+也可以查看日志，cd hadoop-2.6.0/logs 查看ERROR记录的日志，根据日志提示，排除故障后，重启yarn
+cd ~/hadoop-2.6.0/sbin && stop-yarn.sh && start-yarn.sh
+
+hive 运行错误：
+Error: org.apache.hive.service.cli.HiveSQLException: Error while processing statement: FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. MetaException(message:Got exception: o
+rg.apache.hadoop.security.AccessControlException Permission denied: user=anonymous, access=WRITE, inode="/user/hive/warehouse":root:supergroup:drwxr-xr-x
+原因：hdfs中的 /user/hive/warehouse没有读写权限
+解决方法：
+root@98b2fb173dcf:~# mkdir -p "/user/hive/warehouse"
+root@98b2fb173dcf:~# hdfs dfs -chmod -R 777 /user/hive
+
+hive建表报错：
+Error: Error while compiling statement: FAILED: ParseException line 2:0 cannot recognize input near 'date' 'string' ',' in column name or primary key or foreign key (state=42000,code=40000)
+原因，建表语句有字段date,而date是保留字：
+如果非要用这个字段名，就用反引号改起来：
+反引号就是键盘左上方1的左边那个，中文的符号` 
+如create table if not exists hive.data(ip string,`time` string,day string,traffic bigint,type string,id string);
+
+# javac编译的时候出错：
+D:\Users\gswyhq>javac  -encoding UTF-8  GPSConverter\GPSConverterUtils.java
+GPSConverter\GPSConverterUtils.java:24: 错误: 找不到符号
+    public static GPS gps84_To_Gcj02(double lat, double lon) {
+                  ^
+  符号:   类 GPS
+  位置: 类 GPSConverterUtils
+对应的java文件存在，且位于同一个目录中，GPSConverterUtils.java 继承 GPS.java
+D:\Users\gswyhq>dir GPSConverter
+2021-10-11  15:07               641 GPS.java
+2021-10-11  15:07             5,611 GPSConverterUtils.java
+解决方法，修改对应的包名，import类名，确保无误：
+~/GPSConverter$ head -n 3 *.java
+==> GPS.java <==
+package GPSConverter;
+
+
+==> GPSConverterUtils.java <==
+package GPSConverter;
+
+import GPSConverter.GPS;
+
+再在cmd分别编译，先编译 GPS.java， 再编译：GPSConverterUtils.java
+D:\Users\gswyhq>javac  -encoding UTF-8  GPSConverter\GPS.java
+D:\Users\gswyhq>javac  -encoding UTF-8  GPSConverter\GPSConverterUtils.java
+当然，也可以一次编译：
+D:\Users\gswyhq>javac  -encoding UTF-8  GPSConverter\GPS.java GPSConverter\GPSConverterUtils.java
+
+hive,删除了 /tmp目录，导致重启不了，报错：
+ERROR org.apache.hadoop.hdfs.server.namenode.SecondaryNameNode: Exception in doCheckpoint
+ hadoop.tmp.dir配置参数指定hdfs的默认临时路径，这个最好配置，如果在新增节点或者其他情况下莫名其妙的DataNode启动不了，就删除此文件中的tmp目录即可。不过如果删除了NameNode机器的此目录，那么就需要重新执行NameNode格式化的命令。
+重新执行NameNode格式化的命令：
+root@98b2fb173dcf:~# hdfs namenode -format
+再重新启动；
+
+插入数据时报错：
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+这种情况属于JVM堆内存溢出了，在yarn-site.xml文件中添加如下代码
+./hadoop-2.6.0/etc/hadoop/yarn-site.xml
+
+<property>
+	<name>yarn.scheduler.maximum-allocation-mb</name>
+	<value>2048</value>
+</property>
+<property>
+  	<name>yarn.scheduler.minimum-allocation-mb</name>
+  	<value>2048</value>
+</property>
+<property>
+	<name>yarn.nodemanager.vmem-pmem-ratio</name>
+	<value>2.1</value>
+</property>
+<property>
+	<name>mapred.child.java.opts</name>
+	<value>-Xmx1024m</value>
+</property>
+
+# 设置了对应视图的表权限，但没有对应原始表的权限，查询报错：
+Authorization failed:No privilege 'Select' found for inputs  
+{ database:default, table:auth_test_group, columnName:a}.  
+Use show grant to get more details.
+或者执行hive-sql报错：
+ERROR parse.CalcitePlanner: CBO failed, skipping CBO. 
+解决方法，查询前，修改参数后再进行查询：
+set hive.cbo.enable=false;
+可以使用统计信息来优化查询以提高性能。基于成本的优化器（CBO）还使用统计信息来比较查询计划并选择最佳计划。通过查看统计信息而不是运行查询，效率会很高。这里将CBO关闭。
+
+

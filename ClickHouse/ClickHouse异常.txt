@@ -1,0 +1,54 @@
+
+# 向ClickHouse中写入数据报错：
+(DEV)[root@SZD-L0484943 test_data]# head demand_side_id.txt | curl 'http://localhost:8123/?query=INSERT%20INTO%20t%20FORMAT%20TabSeparated' --data-binary @-
+Code: 117, e.displayText() = DB::Exception:
+You have carriage return (\r, 0x0D, ASCII 13) at end of first row.
+It's like your input data has DOS/Windows style line separators, that are illegal in TabSeparated format. You must transform your file to Unix format.
+But if you really need carriage return at end of string value of last column, you need to escape it as \r.: (at row 1)
+
+Row 1:
+Column 0,   name: a, type: String, parsed text: "yYVq2dFf1gPA5WkJT3AoZaVx2QSNSloS<CARRIAGE RETURN>"
+
+ (version 20.8.7.15 (official build))
+# 问题分析：
+linux下shell 脚本 中windows换行符换成linux换行符
+window下默认是 \r\n
+linux下是\n
+unix下是\r
+# 解决方案：
+(DEV)[root@SZD-L0484943 test_data]# sed 's/\r//' -i demand_side_id.txt
+
+
+
+# 向clickhouse写入数据报错：
+(DEV)[root@SZD-L0484943 test_data]# head demand_side_id.txt | curl 'http://localhost:8123/?query=INSERT%20INTO%20t%20FORMAT%20TabSeparated' --data-binary @-
+Code: 27, e.displayText() = DB::Exception: Cannot parse input: expected '\n' before: 'yYVq2dFf1gPA5WkJT3AoZaVx2QSNSloS\r\npqa5xCj8NxyFCQJBy4wf8EvX2zlt9If8\r\nhfNBTOPHH7Q5TTvZGxdaljjQ4g4EVYkP\r\nJm9K6WaviCyQ4U1OoM0yGJZMF6uCRclf\r\nSSJzEozYS9h7spXZ2fKZV92t': (at row 1)
+
+Row 1:
+Column 0,   name: a, type: UInt8, ERROR: text "yYVq2dFf1g" is not like UInt8
+
+ (version 20.8.7.15 (official build))
+# 问题分析：
+建表字段类型是int,而写入数据类型是string;
+# 解决方案：
+删除旧表
+(DEV)[root@SZD-L0484943 test_data]# echo 'DROP TABLE t' | curl 'http://localhost:8123/' --data-binary @-
+重建新表
+(DEV)[root@SZD-L0484943 test_data]# echo 'CREATE TABLE t (a String) ENGINE = Memory' | curl 'http://localhost:8123/' --data-binary @-
+
+# Dbeaver连接不上远程服务器部署的Clickhouse问题
+Clickhouse连接端口默认8123，但是Clickhouse默认情况下不允许其他设备进行http连接，所以需要更改clickhouse的默认配置:
+[root@master local]# vim /etc/clickhouse-server/config.xml
+新增一行，默认是注释的，让本地服务可以远程连接远程部署的Clickhouse服务
+<listen_host>0.0.0.0</listen_host>
+
+# 字符串条件查询报错：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d 'select count(1) from tutorial.supply_side2 where supply_id = "5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA"'
+Code: 47, e.displayText() = DB::Exception: Missing columns: '5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA' while processing query: 'SELECT count(1) FROM tutorial.supply_side2 WHERE supply_id = `5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA`', required columns: 'supply_id' '5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA', source columns: 'table_name' 'tag' 'create_time' 'supply_id' (version 20.8.7.15 (official build))
+问题原因：
+主要是字符串引号的问题，应该使用单引号：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2 where supply_id = '5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA' ; "
+1
+(DEV)[root@SZD-L0484943 test_data]# time curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2 where supply_id like '%5bz7lzkpyw2fiNy4cRBi1hLWTs9pJyGA%' ; "
+1
+

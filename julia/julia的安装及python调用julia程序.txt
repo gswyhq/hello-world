@@ -1,0 +1,59 @@
+
+# 安装 julia:
+apt-get update && apt-get install julia
+
+或者从源码安装：
+https://mirrors.tuna.tsinghua.edu.cn/julia-releases/bin/linux/x64/1.6/
+下载：
+julia-1.6.2-linux-x86_64.tar.gz
+
+解压：
+root@12303888c512:~# tar -xvzf julia-1.6.2-linux-x86_64.tar.gz
+移动位置，并建立超链接：
+root@12303888c512:~# mv julia-1.6.2 /opt/
+root@12303888c512:~# ln -s /opt/julia-1.6.2/bin/julia /usr/local/bin/julia
+或者：
+root@12303888c512:~# ln -s /opt/julia-1.6.2/bin/julia /usr/bin/julia
+
+echo "export PATH=\$PATH:/usr/bin/julia" >> ~/.bashrc && \
+source ~/.bashrc
+
+# 安装python包：
+root@12303888c512:~# pip install --user julia
+
+
+python3.8
+>>> import julia
+>>> julia.install()
+这一步需要julia在PATH里，否则会报错
+
+ 
+
+会去自动执行 下面的部分
+
+2.2 Julia
+julia> using Pkg
+julia> Pkg.add("PyCall")
+
+实验python调用julia函数
+~$ cat mylib.jl
+
+function add(a, b)
+  return a + b
+end
+
+
+~$ cat caller.py
+
+from julia import Main as jl
+jl.include("mylib.jl")
+
+
+if __name__ == '__main__':
+    res = jl.add(1, 1)
+    print(res)
+
+
+资料来源：
+https://www.cnblogs.com/xuanmanstein/p/13053555.html
+

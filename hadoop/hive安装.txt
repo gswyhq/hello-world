@@ -1,0 +1,113 @@
+
+安装hive之前，必须保证机器上已经有hadoop环境了。因此，安装hive之前请先确保hadoop已经安装完成。
+
+安装包下载地址：
+https://mirrors.tuna.tsinghua.edu.cn/apache/hive/hive-2.3.9/apache-hive-2.3.9-bin.tar.gz
+https://hive.apache.org/downloads.html
+
+# 拷贝安装包到容器：
+D:\Users\gswyhq\data\hadoop>docker cp apache-hive-2.3.7-bin.tar 4e732add094a:/root/
+
+# 进入容器：
+~$ docker exec -it 4e732add094a /bin/bash 
+
+# 解压安装包
+root@4e732add094a:~# tar xvf apache-hive-2.3.7-bin.tar -C ./
+root@4e732add094a:~# cd apache-hive-2.3.7-bin
+root@4e732add094a:~/apache-hive-2.3.7-bin#
+
+# 修改配置文件
+root@4e732add094a:~/apache-hive-2.3.7-bin# cp conf/hive-default.xml.template conf/hive-site.xml
+root@4e732add094a:~/apache-hive-2.3.7-bin# vim conf/hive-site.xml
+
+# 在最前面加上这些配置:
+
+
+  <property>
+    <name>system:java.io.tmpdir</name>
+    <value>/tmp/hive/java</value>
+  </property>
+  <property>
+    <name>system:user.name</name>
+    <value>${user.name}</value>
+  </property>
+
+# 初始化hive数据库
+先直接使用hive内置的derby作为元数据的数据库。直接用默认的配置就行了，执行以下命令初始化数据库:
+
+root@4e732add094a:~/apache-hive-2.3.7-bin# ./bin/schematool -initSchema -dbType derby
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/root/apache-hive-2.3.7-bin/lib/log4j-slf4j-impl-2.6.2.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/root/hadoop-2.6.0/share/hadoop/common/lib/slf4j-log4j12-1.7.5.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Metastore connection URL:        jdbc:derby:;databaseName=metastore_db;create=true
+Metastore Connection Driver :    org.apache.derby.jdbc.EmbeddedDriver
+Metastore connection User:       APP
+Starting metastore schema initialization to 2.3.0
+Initialization script hive-schema-2.3.0.derby.sql
+Initialization script completed
+schemaTool completed
+root@4e732add094a:~/apache-hive-2.3.7-bin# echo $?
+0
+
+# 配置hive相关环境变量
+
+root@4e732add094a:~/apache-hive-2.3.7-bin# vim ~/.profile
+
+export HIVE_HOME="/root/apache-hive-2.3.7-bin"
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HIVE_HOME/bin
+
+root@4e732add094a:~/apache-hive-2.3.7-bin# source ~/.profile
+
+root@4e732add094a:~/apache-hive-2.3.7-bin# hive --version
+Hive 2.3.7
+Git git://Alans-MacBook-Air.local/Users/gates/git/hive -r cb213d88304034393d68cc31a95be24f5aac62b6
+Compiled by gates on Tue Apr 7 12:42:45 PDT 2020
+From source with checksum 9da14e8ac4737126b00a1a47f662657e
+
+# 测试：
+root@4e732add094a:~/apache-hive-2.3.7-bin# vim /root/test.txt
+1,jack
+2,hel
+3,nack
+
+# 通过hive命令进入hive交互界面
+root@4e732add094a:~/apache-hive-2.3.7-bin# hive
+
+# 若运行hive命令报错：
+Exception in thread "main" java.lang.RuntimeException: java.net.ConnectException: Call From 9b7f1185f80e/172.17.0.4 to localhost:9000 failed on connection exception: java.net.ConnectException: Connection refused; For
+more details see:  http://wiki.apache.org/hadoop/ConnectionRefused
+则可能是sshd服务或hadoop服务未开启；
+root@4a4cdd91b0b5:~# /etc/init.d/ssh restart
+root@4a4cdd91b0b5:~# start-dfs.sh
+
+
+# 创建表
+hive> create table test(
+         id      int
+        ,name    string
+     )
+     row format delimited
+     fields terminated by ',';
+OK
+Time taken: 17.793 seconds
+# 导入数据
+hive> load data local inpath '/root/test.txt' into table test;
+Loading data to table default.test
+OK
+Time taken: 23.324 seconds
+
+# 查询导入的数据：
+hive> select * from test;
+OK
+1       jack
+2       hel
+3       nack
+Time taken: 6.715 seconds, Fetched: 3 row(s)
+
+
+
+
+
+

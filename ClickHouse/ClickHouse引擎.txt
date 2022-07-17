@@ -1,0 +1,174 @@
+
+ClickHouse数据库引擎包括：
+
+Ordinary：默认引擎，中文意思普通的。数据库采用该引擎时，可使用任意类型的表引擎。
+Memory：内存引擎，内存数据库，不作持久化，重启后数据丢失。
+Dictionary：字典引擎。
+Lazy：日志引擎，采用该引擎时，使用使用Log系列的表引擎。
+MySQL：MySQL引擎，用来自动拉取MySQL数据库中的数据到ClickHouse数据库中。
+MergeTree: MergeTree家族(适用于高负载任务的最通用和功能最强大的表引擎。)
+HDFS: 连接hdfs读取数据；
+Merge: 可用于同时从任意多个其他的表中读取数据。
+File： 从 ClickHouse 导出数据到文件。将数据从一种格式转换为另一种格式。通过编辑磁盘上的文件来更新 ClickHouse 中的数据。
+URL: 用于管理远程 HTTP/HTTPS 服务器上的数据。该引擎类似File 引擎。
+
+ALTER 语法更新异步，性能等问题导致clickhouse 不适合做频繁的更新，可以使用 replaceMergeTree代替。
+该引擎和MergeTree的不同之处在于它会删除具有相同主键的重复项。
+
+curl 'http://localhost:8123/' -d "
+CREATE TABLE IF NOT EXISTS tutorial.supply_side2
+(
+ supply_id String,
+ tag UInt8,
+ table_name UInt16,
+ create_time DateTime DEFAULT now()
+) ENGINE = ReplacingMergeTree()
+PARTITION BY tag
+ORDER BY (tag, table_name, xxHash32(supply_id))"
+
+time less supply_side_id_4_label.txt  | curl 'http://localhost:8123/?query=INSERT%20INTO%20tutorial.supply_side2%20(supply_id,tag,table_name)%20FORMAT%20TabSeparated' --data-binary @-
+
+curl 'http://localhost:8123' -d "select count(1) from tutorial.supply_side2"
+
+文件 supply_side_id_4_label.txt 中不同的supply_id，有四千万，但查询结果却不是，因为有部分xxHash32结果相同所做；
+(DEV)[root@SZD-L0484943 test_data]# curl 'http://localhost:8123' -d "select count(1) from tutorial.supply_side2"
+39996815
+
+ReplacingMergeTree这个引擎自动帮你筛选出来最新的一条数据，并删掉之前重复的数据。
+重复判断的依据是：tag, table_name, xxHash32(supply_id)作为联合主键；
+这个删除重复数据，并不是一插入就删的，而且在Merge的时候才会删，原话是：
+数据的去重只会在合并的过程中出现。合并会在未知的时间在后台进行，因此你无法预先作出计划。
+可以手动执行一个sql去触发他的Merge就可以删除重复的数据，但这并不是一次执行就可以了，可能需要执行多次（执行多次后，数据量才趋于稳定）：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9999500
+# optimize 触发merge:
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "optimize table  tutorial.supply_side2; "
+# 触发merge后数据量有所变动：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9999372
+# 再次触发merge，数据量又变了：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "optimize table  tutorial.supply_side2; "
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9998885
+# 后面再触发merge,数据量不变：
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9998885
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "optimize table  tutorial.supply_side2; "
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9998885
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "optimize table  tutorial.supply_side2; "
+(DEV)[root@SZD-L0484943 test_data]# curl http://localhost:8123 -d "select count(1) from tutorial.supply_side2; "
+9998885
+
+版本折叠引擎 VersionedCollapsingMergeTree：
+因clickhouse删除、更新数据代价比较大，故有数据更新删除需求时，可用该引擎；
+VersionedCollapsingMergeTree 用于相同的目的 折叠树 但使用不同的折叠算法，允许以多个线程的任何顺序插入数据。
+创建表:
+CREATE TABLE UAct
+(
+    UserID UInt64,
+    PageViews UInt8,
+    Duration UInt8,
+    Sign Int8,
+    Version UInt8
+)
+ENGINE = VersionedCollapsingMergeTree(Sign, Version)
+ORDER BY UserID
+插入数据:
+INSERT INTO UAct VALUES (4324182021466249494, 5, 146, 1, 1)
+INSERT INTO UAct VALUES (4324182021466249494, 5, 146, -1, 1),(4324182021466249494, 6, 185, 1, 2)
+我们用两个 INSERT 查询以创建两个不同的数据部分。 如果我们使用单个查询插入数据，ClickHouse将创建一个数据部分，并且永远不会执行任何合并。
+获取数据:
+SELECT * FROM UAct
+查询结果，会发现有三条记录；
+由于数据部分尚未合并，因此未发生折叠。 ClickHouse在我们无法预测的未知时间点合并数据部分。
+要完成折叠，请使用 GROUP BY 考虑符号的子句和聚合函数。 例如，要计算数量，请使用 sum(Sign) 而不是 count(). 要计算的东西的总和，使用 sum(Sign * x) 而不是 sum(x)，并添加 HAVING sum(Sign) > 0.
+上面查询，需要改成聚合查询:
+SELECT
+    UserID,
+    sum(PageViews * Sign) AS PageViews,
+    sum(Duration * Sign) AS Duration,
+    Version
+FROM UAct
+GROUP BY UserID, Version
+HAVING sum(Sign) > 0
+这样查询的结果就只有一条记录；
+如果我们不需要聚合，并希望强制折叠，我们可以使用 FINAL 修饰符 FROM 条款
+SELECT * FROM UAct FINAL
+或者显式命令触发数据合并:
+curl localhost:8123 -d 'optimize table UAct '
+
+
+# Merge引擎：
+Merge 引擎 (不要跟 MergeTree 引擎混淆) 本身不存储数据，但可用于同时从任意多个其他的表中读取数据。
+读是自动并行的，不支持写入。读取时，那些被真正读取到数据的表的索引（如果有的话）会被使用。
+Merge 引擎的参数：一个数据库名和一个用于匹配表名的正则表达式。
+Merge 类型的表包括一个 String 类型的 _table 虚拟列。（如果该表本来已有了一个 _table 的列，那这个虚拟列会命名为 _table1 ；如果 _table1 也本就存在了，那这个虚拟列会被命名为 _table2 ，依此类推）该列包含被读数据的表名。
+
+# File引擎：
+1. 创建一个file引擎表，如 file_engine_table 表：
+CREATE TABLE file_engine_table (name String, value UInt32) ENGINE=File(TabSeparated)
+File引擎表支持输入格式，见：https://clickhouse.tech/docs/zh/interfaces/formats/#formats
+默认情况下，Clickhouse 会创建目录 /var/lib/clickhouse/data/default/file_engine_table 。
+若想查询clickhouse数据保存路径，可以查询表：select * from system.parts;
+clickhouse有system.parts系统表记录表相关元数据，可以通过该表对clickhouse上所有表进行查询表大小、行数等操作。
+
+2. 手动创建 /var/lib/clickhouse/data/default/file_engine_table/data.TabSeparated 文件，并且包含内容：
+$ cat data.TabSeparated
+one 1
+two 2
+3. 查询这些数据:
+SELECT * FROM file_engine_table
+
+File 引擎除了 Format 之外，还可以接受文件路径参数。可以使用数字或人类可读的名称来指定标准输入/输出流，例如 0 或 stdin，1 或 stdout。
+例如：
+$ echo -e "1,2\n3,4" | clickhouse-local -q "CREATE TABLE table (a Int64, b Int64) ENGINE = File(CSV, stdin); SELECT a, b FROM table; DROP TABLE table"
+但不支持给 File 指定文件系统路径。它使用服务器配置中 路径 设定的文件夹。
+
+Hdfs表引擎：
+先创建一个文件夹:
+
+hdfs dfs -mkdir  /user/hive/warehouse/test.db/hdfsTest/
+创建表并插入数据
+
+ create table hdfsTest(id Int16,name String)
+ engine=HDFS('hdfs://node01:8020/user/hive/warehouse/test.db/hdfsTest/a.csv','CSV');
+ insert into hdfsTest values(1,'zhangsan');
+
+如果上面insert into 报不能打开,权限异常的话,更改文件夹的权限:
+
+hdfs dfs -chmod 777  /user/hive/warehouse/test.db/hdfsTest/
+或者
+hdfs dfs -chown -R clickhouse:clickhouse /user/hive/warehouse/test.db/hdfsTest/
+
+查看hdfs:
+
+[root@node01 ~]#hdfs dfs -text  /user/hive/warehouse/test.db/hdfsTest/a.csv
+1,"zhangsan"
+
+若hdfs已有数据,执行插入会报错.
+url指向的路径中是否包含有内容,如果没有内容,那么可读可写,如果有内容,则只读.
+(url,format)中的format常见的有CSV(逗号分隔)TSV(tab分隔),JSON等
+如果使用的一行的json格式{"id":1,"name":"zhangsan","age":11}请使用JSONEachRow
+详细的format参见format格式
+url的路径匹配模式:
+*:匹配任意字符 /user/hdfsTest/a*读取所有a开头的文件
+?:匹配单个字符 /user/hdfsTest/a?.txt 读取比如aa.txt,ab.txt…
+{a,b,c}:匹配其中任一 /user/hdfsTest/{a,b,c}.txt 匹配a.txt b.txt和c.txt
+{x…x}: 匹配数字区间 /user/hdfsTest/{1…5}.txt 匹配1.txt 2.txt … 5.txt
+
+另外读取hdfs数据还有一种表函数:hdfs(url,format,structure)
+比如上方
+
+create table hdfsTest1(id Int16,name String) 
+engine = HDFS('hdfs://node01:8020/user/hive/warehouse/test.db/one/*','CSV');
+``
+可以使用下面的替代
+```sql
+create table hdfsTest3 engine = MergeTree order by id  
+as select * from 
+hdfs('hdfs://node01:8020/user/hive/warehouse/test.db/one/*','CSV','id Int8,name String') ;
+
+更多表引擎资料参见：
+https://clickhouse.tech/docs/zh/engines/table-engines/
+

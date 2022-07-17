@@ -92,6 +92,9 @@ bf1bbe3e0fbf        neo4j               "/docker-entrypoint.s"   25 hours ago   
 zy@ubuntu:~$ sudo docker exec -it bf1bbe3e0fbf /bin/bash
 bash-4.3# 
 
+# 以指定用户进入容器（以root用户的身份进入容器）：
+docker exec -it -u root e2b0e262bfa /bin/bash
+
 # 查看容器的标准输出：
 gswewf@gswewf-pc:~$ docker logs -f ubuntu-yhb 
 

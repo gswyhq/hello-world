@@ -134,6 +134,9 @@ curl -XPOST 'localhost:9200/_aliases?pretty' -H 'Content-Type: application/json'
 }
 '
 
+# 创建个空索引，并关闭自动刷新：
+curl -XPUT localhost:9200/test -H 'Content-Type: application/json' -d '{"settings": {"refresh_interval": -1}}'
+
 
 实例展示elasticsearch集群生态,分片以及水平扩展.
 https://www.cnblogs.com/dennisit/p/4133131.html

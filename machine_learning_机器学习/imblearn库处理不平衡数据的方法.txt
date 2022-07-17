@@ -1,0 +1,298 @@
+
+imblearn是一个开源的由麻省理工学院维护的python库，它依赖scikit-learn，并为处理不平衡类的分类时提供有效的方法。
+
+imblearn库包括一些处理不平衡数据的方法。欠采样，过采样，过采样和欠采样的组合采样器。我们可以采用相关的方法或算法并将其应用于需要处理的数据。
+
+过采样
+参考文献：https://www.cnblogs.com/massquantity/p/9382710.html
+1、RandomOverSampler
+原理：从样本少的类别中随机抽样，再将抽样得来的样本添加到数据集中。
+缺点：重复采样往往会导致严重的过拟合
+主流过采样方法是通过某种方式人工合成一些少数类样本，从而达到类别平衡的目的，而这其中的鼻祖就是SMOTE。
+
+from imblearn.over_sampling import RandomOverSampler
+ros = RandomOverSampler(sampling_strategy={0: 700,1:200,2:150 },random_state=0)
+X_resampled, y_resampled = ros.fit_resample(X, y)
+print(Counter(y_resampled))
+
+2、SMOTE
+原理：在少数类样本之间进行插值来产生额外的样本。对于少数类样本a, 随机选择一个最近邻的样本b, 从a与b的连线上随机选取一个点c作为新的少数类样本;
+具体地，对于一个少数类样本xi使用K近邻法(k值需要提前指定)，求出离xi距离最近的k个少数类样本，其中距离定义为样本之间n维特征空间的欧氏距离。
+然后从k个近邻点中随机选取一个，使用下列公式生成新样本：
+Xnew = Xi + (X^-Xi)×δ，其中 x^为选出的k紧邻点, δ∈[0,1]是一个随机数。
+
+from imblearn.over_sampling import SMOTE
+smo = SMOTE(sampling_strategy={0: 700,1:200,2:150 },random_state=42)
+X_smo, y_smo = smo.fit_resample(X, y)
+print(Counter(y_smo))
+
+SMOTE会随机选取少数类样本用以合成新样本，而不考虑周边样本的情况，这样容易带来两个问题：
+1）如果选取的少数类样本周围也都是少数类样本，则新合成的样本不会提供太多有用信息。
+2）如果选取的少数类样本周围都是多数类样本，这类的样本可能是噪音，则新合成的样本会与周围的多数类样本产生大部分重叠，致使分类困难。
+总的来说我们希望新合成的少数类样本能处于两个类别的边界附近，这样往往能提供足够的信息用以分类。而这就是下面的 Border-line SMOTE 算法要做的事情。
+3、BorderlineSMOTE
+这个算法会先将所有的少数类样本分成三类：
+“danger” ： 超过一半的k近邻样本属于多数类
+“safe”： 超过一半的k近邻样本属于少数类
+“noise” ： 所有的k近邻个样本都属于多数类
+
+Border-line SMOTE算法只会从处于"danger"状态的样本中随机选择，然后用SMOTE算法产生新的样本。
+处于"danger"状态的样本代表靠近"边界"附近的少数类样本，而处于边界附近的样本往往更容易被误分类。
+因而 Border-line SMOTE 只对那些靠近"边界"的少数类样本进行人工合成样本，而 SMOTE 则对所有少数类样本一视同仁。
+
+Border-line SMOTE 分为两种: Borderline-1 SMOTE 和 Borderline-2 SMOTE。 Borderline-1 SMOTE 在合成样本时式中的x^
+是一个少数类样本，而 Borderline-2 SMOTE 中的x^则是k近邻中的任意一个样本。
+
+from imblearn.over_sampling import BorderlineSMOTE
+smo = BorderlineSMOTE(kind='borderline-1',sampling_strategy={0: 700,1:200,2:150 },random_state=42) #kind='borderline-2'
+X_smo, y_smo = smo.fit_resample(X, y)
+print(Counter(y_smo))
+
+4、ADASYN
+原理：采用某种机制自动决定每个少数类样本需要产生多少合成样本，而不是像SMOTE那样对每个少数类样本合成同数量的样本。
+先确定少数样本需要合成的样本数量（与少数样本周围的多数类样本数呈正相关），然后利用SMOTE合成样本。
+缺点：ADASYN的缺点是易受离群点的影响，如果一个少数类样本的K近邻都是多数类样本，则其权重会变得相当大，进而会在其周围生成较多的样本。
+
+from imblearn.over_sampling import ADASYN
+ana = ADASYN(sampling_strategy={0: 800,2:300,1:400 },random_state=0)
+X_ana, y_ana = ana.fit_resample(X, y)
+
+用 SMOTE 合成的样本分布比较平均，而Border-line SMOTE合成的样本则集中在类别边界处。
+ADASYN的特性是一个少数类样本周围多数类样本越多，则算法会为其生成越多的样本，生成的样本大都来自于原来与多数类比较靠近的那些少数类样本。
+
+5、KMeansSMOTE
+原理：在使用SMOTE进行过采样之前应用KMeans聚类。
+KMeansSMOTE包括三个步骤：聚类、过滤和过采样。在聚类步骤中，使用k均值聚类为k个组。
+过滤选择用于过采样的簇，保留具有高比例的少数类样本的簇。然后，它分配合成样本的数量，将更多样本分配给少数样本稀疏分布的群集。
+最后，过采样步骤，在每个选定的簇中应用SMOTE以实现少数和多数实例的目标比率。
+
+from imblearn.over_sampling import KMeansSMOTE
+kms = KMeansSMOTE(sampling_strategy={0: 800,2:300,1:400 },random_state=42)
+X_kms, y_kms = kms.fit_resample(X, y)
+print(Counter(y_kms))
+
+6、SMOTENC
+可处理分类特征的SMOTE
+from imblearn.over_sampling import SMOTENC
+sm = SMOTENC(random_state=42, categorical_features=[18, 19])
+
+7、SVMSMOTE
+使用支持向量机分类器产生支持向量然后再生成新的少数类样本，然后使用SMOTE合成样本
+from imblearn.over_sampling import SVMSMOTE
+svmm = SVMSMOTE(sampling_strategy={0: 800,2:300,1:400 },random_state=42)
+X_svmm, y_svmm = svmm.fit_resample(X, y)
+print(Counter(y_kms))
+
+欠采样(under_sampling)
+1、ClusterCentroids
+每一个类别的样本都会用K-Means算法的中心点来进行合成, 而不是随机从原始样本进行抽取.
+#下采样ClusterCentroids接口
+from imblearn.under_sampling import ClusterCentroids
+cc = ClusterCentroids(sampling_strategy={0: 50,2:100,1:100 },random_state=0)
+X_resampled, y_resampled = cc.fit_resample(X, y)
+print(sorted(Counter(y_resampled).items()))
+
+2、RandomUnderSampler
+随机选取数据的子集.
+from imblearn.under_sampling import RandomUnderSampler
+cc = RandomUnderSampler(sampling_strategy={0: 50,2:100,1:100 },random_state=0)
+X_resampled, y_resampled = cc.fit_resample(X, y)
+print(sorted(Counter(y_resampled).items()))
+
+使用replacement 为False（默认值）时为不重复采样
+3、NearMiss
+添加了一些启发式(heuristic)的规则来选择样本, 通过设定version参数来实现三种启发式的规则.
+假设正样本是需要下采样的(多数类样本), 负样本是少数类的样本.则：
+NearMiss-1: 选择离N个近邻的负样本的平均距离最小的正样本;
+NearMiss-2: 选择离N个负样本最远的平均距离最小的正样本;
+NearMiss-3: 是一个两段式的算法. 首先, 对于每一个负样本, 保留它们的M个近邻样本; 接着, 那些到N个近邻样本平均距离最大的正样本将被选择.
+
+from imblearn.under_sampling import NearMiss
+nm1 = NearMiss(sampling_strategy={0: 50,2:100,1:100 },random_state=0, version=1)
+X_resampled_nm1, y_resampled = nm1.fit_resample(X, y)
+print(sorted(Counter(y_resampled).items()))
+
+4、TomekLinks
+TomekLinks : 样本x与样本y来自于不同的类别, 满足以下条件, 它们之间被称之为TomekLinks:
+不存在另外一个样本z, 使得d(x,z) < d(x,y) 或者 d(y,z) < d(x,y)成立.
+其中d(.)表示两个样本之间的距离, 也就是说两个样本之间互为近邻关系.
+这个时候, 样本x或样本y很有可能是噪声数据, 或者两个样本在边界的位置附近.
+
+TomekLinks函数中的auto参数控制Tomek’s links中的哪些样本被剔除.
+默认的ratio=‘auto’ 移除多数类的样本, 当ratio='all'时, 两个样本均被移除.
+
+from collections import Counter
+from imblearn.under_sampling import TomekLinks
+tl = TomekLinks()
+X_res, y_res = tl.fit_resample(X, y)
+
+5、EditedNearestNeighbours
+应用最近邻算法来编辑(edit)数据集, 找出那些与邻居不太友好的样本然后移除.
+对于每一个要进行下采样的样本, 那些不满足一些准则的样本将会被移除;
+他们的绝大多数(kind_sel=‘mode’)或者全部(kind_sel=‘all’)的近邻样本都属于同一个类, 这些样本会被保留在数据集中.
+
+#n_neighbors ：int或object，optional（default = 3）
+from collections import Counter
+from sklearn.datasets import make_classification
+from imblearn.under_sampling import EditedNearestNeighbours
+X, y = make_classification(n_classes=2, class_sep=2,
+weights=[0.1, 0.9], n_informative=3, n_redundant=1, flip_y=0,
+n_features=20, n_clusters_per_class=1, n_samples=1000, random_state=10)
+print('Original dataset shape %s' % Counter(y))
+
+enn = EditedNearestNeighbours()
+X_res, y_res = enn.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+6、RepeatedEditedNearestNeighbours
+重复EditedNearestNeighbours多次
+max_iter ：int，optional（默认值= 100）#迭代次数
+
+from collections import Counter
+from sklearn.datasets import make_classification
+from imblearn.under_sampling import RepeatedEditedNearestNeighbours # doctest : +NORMALIZE_WHITESPACE
+X, y = make_classification(n_classes=2, class_sep=2,
+weights=[0.1, 0.9], n_informative=3, n_redundant=1, flip_y=0,
+n_features=20, n_clusters_per_class=1, n_samples=1000, random_state=10)
+print('Original dataset shape %s' % Counter(y))
+
+renn = RepeatedEditedNearestNeighbours()
+X_res, y_res = renn.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+
+7、ALLKNN
+在进行每次迭代的时候, 最近邻的数量都在增加.
+
+from collections import Counter
+from sklearn.datasets import make_classification
+from imblearn.under_sampling import AllKNN
+X, y = make_classification(n_classes=2, class_sep=2,
+weights=[0.1, 0.9], n_informative=3, n_redundant=1, flip_y=0,
+n_features=20, n_clusters_per_class=1, n_samples=1000, random_state=10)
+print('Original dataset shape %s' % Counter(y))
+
+allknn = AllKNN()
+X_res, y_res = allknn.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+8、CondensedNearestNeighbour
+使用1近邻的方法来进行迭代, 来判断一个样本是应该保留还是剔除, 具体的实现步骤如下:
+1)集合C: 所有的少数类样本;
+2)选择一个多数类样本(需要下采样)加入集合C, 其他的这类样本放入集合S;
+3)使用集合S训练一个1-NN的分类器, 对集合S中的样本进行分类;
+4)将集合S中错分的样本加入集合C;
+5)重复上述过程, 直到没有样本再加入到集合C.
+
+CondensedNearestNeighbour方法对噪音数据是很敏感的, 也容易加入噪音数据到集合C中.
+
+from collections import Counter
+from sklearn.datasets import fetch_mldata
+from imblearn.under_sampling import CondensedNearestNeighbour
+pima = fetch_mldata('diabetes_scale')
+X, y = pima['data'], pima['target']
+print('Original dataset shape %s' % Counter(y))
+
+cnn = CondensedNearestNeighbour(random_state=42)
+X_res, y_res = cnn.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+9、OneSidedSelection
+在CondensedNearestNeighbour的基础上使用 TomekLinks 方法来剔除噪声数据(多数类样本).
+
+from collections import Counter
+from sklearn.datasets import make_classification
+from imblearn.under_sampling import     OneSidedSelection
+X, y = make_classification(n_classes=2, class_sep=2,
+weights=[0.1, 0.9], n_informative=3, n_redundant=1, flip_y=0,
+n_features=20, n_clusters_per_class=1, n_samples=1000, random_state=10)
+print('Original dataset shape %s' % Counter(y))
+
+oss = OneSidedSelection(random_state=42)
+X_res, y_res = oss.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+9、NeighbourhoodCleaningRule
+主要关注如何清洗数据而不是筛选(considering)他们. 因此, 该算法将使用EditedNearestNeighbours和 3-NN分类器结果拒绝的样本之间的并集.
+
+from collections import Counter
+from sklearn.datasets import make_classification
+from imblearn.under_sampling import NeighbourhoodCleaningRule 
+X, y = make_classification(n_classes=2, class_sep=2,
+weights=[0.1, 0.9], n_informative=3, n_redundant=1, flip_y=0,
+n_features=20, n_clusters_per_class=1, n_samples=1000, random_state=10)
+print('Original dataset shape %s' % Counter(y))
+
+ncr = NeighbourhoodCleaningRule()
+X_res, y_res = ncr.fit_resample(X, y)
+print('Resampled dataset shape %s' % Counter(y_res))
+
+10、InstanceHardnessThreshold
+在数据上运用一种分类器, 然后将概率低于阈值的样本剔除掉.
+
+
+from sklearn.linear_model import LogisticRegression
+from imblearn.under_sampling import InstanceHardnessThreshold
+iht = InstanceHardnessThreshold(random_state=0,
+                                estimator=LogisticRegression())
+X_resampled, y_resampled = iht.fit_resample(X, y)
+print(sorted(Counter(y_resampled).items()))
+
+三、过采样与欠采样结合（combine）
+SMOTE算法的缺点是生成的少数类样本容易与周围的多数类样本产生重叠难以分类，而数据清洗技术恰好可以处理掉重叠样本，所以可以将二者结合起来形成一个pipeline，先过采样再进行数据清洗。
+主要的方法是 SMOTE + ENN 和 SMOTE + Tomek ，其中 SMOTE + ENN 通常能清除更多的重叠样本.
+
+1、SMOTEENN
+
+from imblearn.combine import SMOTEENN
+smote_enn = SMOTEENN(random_state=0)
+X_resampled, y_resampled = smote_enn.fit_resample(X, y)
+
+print(sorted(Counter(y_resampled).items()))
+
+2、 SMOTETomek
+
+from imblearn.combine import SMOTETomek
+smote_tomek = SMOTETomek(sampling_strategy={0: 700,1:300,2:200 },random_state=0)
+X_resampled, y_resampled = smote_tomek.fit_resample(X, y)
+print(sorted(Counter(y_resampled).items()))
+
+四、ensemble
+在每次生成训练集时使用所有分类中的小样本量，同时从分类中的大样本量中随机抽取数据来与小样本量合并构成训练集，这样反复多次会得到很多训练集和训练模型。最后在应用时，使用组合方法（例如投票、加权投票等）产生分类预测结果。
+
+例如，在数据集中的正、负例的样本分别为100和10000条，比例为1:100。此时可以将负例样本（类别中的大量样本集）随机分为100份（当然也可以分更多），每份100条数据；然后每次形成训练集时使用所有的正样本（100条）和随机抽取的负样本（100条）形成新的数据集。如此反复可以得到100个训练集和对应的训练模型。
+一个不均衡的数据集能够通过多个均衡的子集来实现均衡, imblearn.ensemble模块能实现上述功能.
+
+1、EasyEnsemble (可控制数量)
+从多数类样本中随机抽样成子集，该子集的数量等于少数类样本的数量。接着将该子集与少数类样本结合起来训练一个模型，迭代n次。这样虽然每个子集的样本少于总体样本，但集成后总信息量并不减少。
+一个不均衡的数据集能够通过多个均衡的子集来实现均衡,  imblearn.ensemble模块能实现上述功能.
+ EasyEnsemble 通过对原始的数据集进行随机欠采样实现对数据集进行集成.
+
+from imblearn.ensemble import EasyEnsemble
+ee = EasyEnsemble(random_state=0, n_subsets=10)
+X_resampled, y_resampled = ee.fit_resample(X, y)
+print(X_resampled.shape)
+print(y_resampled.shape)
+print(sorted(Counter(y_resampled[0]).items()))
+
+有两个很重要的参数:
+(i) n_subsets 控制的是子集的个数
+(ii) replacement 决定是有放回还是无放回的随机采样.
+
+2、BalanceCascade
+与上述方法不同的是,  BalanceCascade(级联平衡)的方法通过使用分类器(estimator参数)来确保那些被错分类的样本在下一次进行子集选取的时候也能被采样到.
+同样, n_max_subset 参数控制子集的个数, 以及可以通过设置bootstrap=True来使用bootstraping(自助法).
+在第n轮训练中，将从多数类样本中抽样得来的子集与少数类样本结合起来训练一个基学习器H，训练完后多数类中能被H正确分类的样本会被剔除。在接下来的第n+1轮中，从被剔除后的多数类样本中产生子集用于与少数类样本结合起来训练。
+同样, n_max_subset 参数控制子集的个数, 以及可以通过设置bootstrap=True来使用bootstraping(自助法).
+
+from imblearn.ensemble import BalanceCascade
+from sklearn.linear_model import LogisticRegression
+bc = BalanceCascade(sampling_strategy={0: 500,1:199,2:89 },random_state=0,
+                    estimator=LogisticRegression(random_state=0),
+                    n_max_subset=4)
+X_resampled, y_resampled = bc.fit_resample(X, y)
+print(X_resampled.shape)
+print(sorted(Counter(y_resampled[0]).items()))
+
+来源：https://blog.csdn.net/kizgel/article/details/78553009
+

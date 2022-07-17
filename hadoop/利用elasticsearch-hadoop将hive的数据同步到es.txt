@@ -1,0 +1,76 @@
+
+第一步：进入hive终端：
+[hadoop@SZE-L0403067 elasticsearch-hadoop-7.9.1]$ hive
+
+第二步：添加jar包：
+hive> add jar /home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-7.9.1.jar;
+Added [/home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-7.9.1.jar] to class path
+Added resources: [/home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-7.9.1.jar]
+
+需要注意的是elasticsearch-hadoop版本需要与elasticsearch一致：
+elasticsearch-hadoop下载路径，如：
+https://artifacts.elastic.co/downloads/elasticsearch-hadoop/elasticsearch-hadoop-6.8.5.zip
+zip 文件解压后会有对应的jar包：
+添加好了，可以通过下面方式查询：
+hive> list jars;
+/home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar
+注意：
+该添加方式的临时生效的，并不是永久的，下次重新进入hive终端还得继续添加一次。
+
+第三步：创建hive测试数据表，并插入数据：
+hive> create table if not exists cmb_test(
+   ptf_id string,
+   ptf_name string,
+   bill_date string,
+   acc_status string
+   );
+hive> insert into cmb_test ( ptf_id, ptf_name, bill_date, acc_status ) values ('00001', '张三 ','20','计算机系'), ('00002', '李四','19','计算机系');
+
+第四步，创建hive外部表，以便同步数据到es:
+hive> create external table if not exists es_cmb_test(
+    ptf_id string,
+    ptf_name string,
+    bill_date string,
+    acc_status string
+    )
+    STORED BY 'org.elasticsearch.hadoop.hive.EsStorageHandler'
+    TBLPROPERTIES(
+    'es.resource' = 'test/es_cmb_test',
+    'es.nodes'='30.199.18.135',
+    'es.port'='9200',
+    'es.mapping.id' = 'ptf_id',
+    'es.index.auto.create' = 'true',
+    'es.nodes.wan.only'='true',
+    'es.write.operation'='upsert');
+
+注：
+es.nodes.wan.only，保证使用的外部网络ip
+在hive中创建外部表,执行完建表语句后,会在es生成对应的hbase_emp_table表,但是这种表是non-native table类型的表,无法被truncate,也无法使用load加载数据
+
+第五步：同步数据到外部表
+hive> insert overwrite table es_cmb_test
+    select
+        ptf_id,
+        ptf_name,
+        bill_date,
+        acc_status
+    from cmb_test;
+
+若报错：
+FAILED: RuntimeException org.apache.hadoop.hive.ql.metadata.HiveException: Error in loading storage handler.org.elasticsearch.hadoop.hive.EsStorageHandler
+则可能是elasticsearch-hadoop版本与es版本不一致，重新下载添加即可
+hive> add jar /home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-6.8.5.jar;
+hive> add jar /home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-hive-6.8.5.jar;
+
+第六步：在es查询，查看同步的数据：
+~$ curl 30.199.18.135:9200/test/_search
+{"took":26,"timed_out":false,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0},"hits":{"total":2,"max_score":1.0,"hits":[{"_index":"test","_type":"es_cmb_test","_id":"00001","_score":1.0,"_source":{"ptf_id":"00001","ptf_name":"张三 ","bill_date":"20","acc_status":"计算机系"}},{"_index":"test","_type":"es_cmb_test","_id":"00002","_score":1.0,"_source":{"ptf_id":"00002","ptf_name":"李四","bill_date":"19","acc_status":"计算机系"}}]}}                                                              
+
+
+其他：
+1.elasticsearch字段较多时，可以建立多个hive映射表分别进行写入，及创建外部表时候，创建多个，但'es.resource'设置成相同的即可；
+2.hive无法删除elasticsearch中的记录，只能插入和更新 
+3.hive的insert into和insert overwrite操作elasticsearch时结果是一样的
+4.Hive 中删除外部表，对应es数据是不变的；
+5.若es中资源数据未删除，重新构建外部表，对应的映射es索引一样，则在hive中查询外部表可以查询到结果；
+
