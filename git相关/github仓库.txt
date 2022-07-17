@@ -1,0 +1,9 @@
+
+github private仓库转为public
+1,进入项目主页，点击settings, 拉到最下面，找到“Danger Zone”，点击change visibility;
+2,选择Make public;
+3,点击I understand, change respository visibility.
+
+
+
+

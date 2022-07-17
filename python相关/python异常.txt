@@ -41,3 +41,29 @@ ValueError: bad marshal data (unknown type code)
 解决方案：对应的模块目录下的.pyc文件删除 
 find . -name "__pycache__" |xargs -i rm -rf {}
 
+# pip3 install sentencepiece 安装报错：
+Failed to find sentencepiece pkg-config
+
+# 解决方法，下载对应的whl文件安装；
+https://pypi.org/project/sentencepiece/#files
+pip3 install sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+
+# 安装whl文件报错：
+提示错误：平台版本不对，如下。
+sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl is not a supported wheel on this platform.
+解决方法：
+1、首先通过pip检查工具检查你电脑的接受安装的标签：
+这个地方需要根据你的电脑使用命令：
+~$  python
+>>> import pip._internal
+>>> print(pip._internal.pep425tags.get_supported())
+
+win32
+~$ python
+>>> import pip
+>>> print(pip.pep425tags.get_supported())
+2、修改需要安装的包名格式
+mv sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux1_x86_64.whl
+3、安装重命名后的whl文件
+pip3 install sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux1_x86_64.whl
+
