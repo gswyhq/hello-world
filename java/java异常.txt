@@ -373,3 +373,31 @@ double a=Double.valueOf(m_textstring).doubleValue();//String转换为double
 str=String.valueOf(c);//double,int 转换为String
 int Int=Integer.valueOf(str);//String转换为int
 
+# 有时候程序报错：
+java.lang.NoSuchMethodError: com.google.gson.JsonArray...
+这时可能是因为包版本冲突引起的，可以通过下面的命令查看当前实际使用的第三方包版本：
+System.out.println(String.format("加载gson包路径： %s", AddressClassify.class.getClassLoader().getResource("com/google/gson/JsonObject.class")));
+这里 AddressClassify 是当前类名称；输出的包路径中，就包含有依赖包的版本信息。
+
+# 问题：
+tomcat java.math.BigDecimal cannot be cast to java.lang.Double
+Double num = (Double) num;
+改为：
+Double num_double=Double.parseDouble(num.toString());
+int num = (int)map.get(key);
+改为：
+int num = Integer.parseInt(String.valueOf(map1.get(key)));
+
+数字类型的String字符串转换为浮点数通常采用parseDouble()和valueOf()方法，两者主要是存在以下两点区别。
+区别一：参数区别
+Double.parseDouble(java.lang.String)的参数只能是String，如果参数改为double类型提示“The method parseDouble(String) in the type Double is not applicable for the arguments (double)”错误。
+Double.valueOf()的参数类型可以是浮点型或者是字符串均可。
+区别二：返回类型
+Double.parseDouble(java.lang.String)把数字类型的字符串转换成double类型
+Double.valueOf()方把数字类型的字符串转换成Double类型
+
+通过格式化小数点位数(保留两位小数)两者结果相同，可以看出除参数和返回类型外两者区别不大。
+DecimalFormat df = new DecimalFormat("0.00");
+System.out.println(df.format(Double.parseDouble(pi)));
+System.out.println(df.format(Double.valueOf(pi)));
+

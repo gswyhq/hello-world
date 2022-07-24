@@ -49,6 +49,9 @@ cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l
 CPU核数：
 cat /proc/cpuinfo | grep 'process' | sort | uniq | wc -l
 
+CPU核数，也可以通过top命令查看：
+通过在 top 视图下按键盘的1，查看cpu的核数
+
 内存：
 cat /proc/meminfo
 

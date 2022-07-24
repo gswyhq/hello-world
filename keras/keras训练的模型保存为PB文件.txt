@@ -1,0 +1,80 @@
+
+keras_to_tensorflow.py 来源：https://github.com/amir-abdi/keras_to_tensorflow
+
+python3 keras_to_tensorflow.py --input_model="imdb.h5" --output_model="model.pb"
+
+python keras_to_tensorflow.py 
+    --input_model="path/to/keras/model.h5" 
+    --output_model="path/to/save/model.pb"
+
+python keras_to_tensorflow.py 
+    --input_model="path/to/keras/model.h5" 
+    --input_model_json="path/to/keras/model.json" 
+    --output_model="path/to/save/model.pb"
+
+问题1： 若保存的时候报错：
+ValueError: Unknown layer: TokenAndPositionEmbedding. Please ensure this object is passed to the `custom_objects` argument.
+
+则可能需要修改 keras_to_tensorflow.py文件：
+
+from keras.utils.generic_utils import get_custom_objects  # tensorflow.keras.generic_utils
+model = keras.models.load_model(input_model_path, compile=False )
+改为类似这样：
+解决该问题的方法是在load_model函数中添加custom_objects参数，该参数接受一个字典，键值为自定义的层
+model = keras.models.load_model(input_model_path, compile=False,
+                custom_objects = get_custom_objects( {"TokenAndPositionEmbedding": TokenAndPositionEmbedding,
+            'swish_activation': swish_activation, 'FixedDropout': FixedDropout})
+        )
+
+问题2： load_model时候，设置了custom_objects 参数：
+还是报错：
+TypeError: __init__() got an unexpected keyword argument 'name'
+解决方法：在自定义layer的__init__方法里加入“**kwargs”这个参数
+class MyLayer(tf.keras.layers.Layer):
+    def __init__(self, dense_dim, **kwargs):
+        super(MyLayer, self).__init__(**kwargs)
+        self.dense_dim = dense_dim
+
+问题3： 到有时候，load_model时候，还是会有问题：
+TypeError: __init__() missing 3 required positional arguments: 'maxlen', 'vocab_size', and 'embed_dim'
+这个问题在你自定义层__init__有参数时会产生
+
+解决办法 ：给自定义层__init__的参数赋个默认值
+class MyLayer(tf.keras.layers.Layer):
+    def __init__(self, dense_dim=10, **kwargs):
+        super(MyLayer, self).__init__(**kwargs)
+        self.dense_dim = dense_dim
+
+问题4： load_model时候，__init__里头不存在的参数，也报错：
+TypeError: ('Keyword argument not understood:', 'pos_emb')
+解决方法：
+将存在问题的参数，添加到__init__参数中：
+class TokenAndPositionEmbedding(layers.Layer):
+    def __init__(self, maxlen=200, vocab_size=20000, embed_dim=32,
+                 token_emb= layers.Embedding(input_dim=20000, output_dim=32),
+                 pos_emb= layers.Embedding(input_dim=200, output_dim=32),
+                 **kwargs):
+        super(TokenAndPositionEmbedding, self).__init__(**kwargs)
+        self.token_emb = layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
+        self.pos_emb = layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
+
+问题5：
+TypeError: Keras symbolic inputs/outputs do not implement `op`. You may be trying to pass Keras symbolic inputs/outputs to a TF API that does not register dispatching, preventing Keras from automatically converting the API call to a lambda layer in the Functional Model.
+解决方法：在使用tensorflow1.x时不会出现该错误，若使用tensorflow2.x会出现。此时可切换至tensorflow1.x；或将.op直接删除，修改为net_model.output.name也行，但是大概率还会在其它地方报错…
+如：
+orig_output_node_names = [node.op.name for node in model.outputs]
+改为：
+orig_output_node_names = [node.name for node in model.outputs]
+
+问题6：
+AssertionError: dense_23/Softmax:0 is not in graph
+解决方法：错误说明：输出节点不在图中(如图中conv2d_18/Relu:0)。
+
+convert_variables_to_constants函数用来指定保存的 节点名称 而不是 张量的名称 ， “conv2d_18/Relu:0” 是张量的名称而 “conv2d_18/Relu” 表示的是节点的名称。尝试将参数output_names直接指定为“conv2d_18/Relu”，如：
+output_names= ['conv2d_18/Relu']
+frozen_graph = convert_variables_to_constants(session, input_graph_def,
+                                              output_names, freeze_var_names)
+确认输出节点名称是否正确。
+若上述方法无法解决，大概率还是tensorflow版本不一致导致。
+————————————————
+

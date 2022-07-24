@@ -1,0 +1,354 @@
+
+# 自定义打分示例（依次按以下优先级打分排序）：
+# 1，检查name字段是否包含指定字符串(区分大小写)，若包含得1分，若不包含得0分，降序排列；
+# 2，若得分大于30，将总得除以1.2再加上10之后取整，否则得分为0；降序排列；
+# 3，按name字段字符串长度升序排列；
+# 4，按得分降序排列；
+{
+  "size": 15,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "name": {
+              "query": "星河COCO Park",
+              "boost": 2
+            }
+          }
+        },
+        {
+          "match": {
+            "address": {
+              "query": "星河COCO Park",
+              "boost": 1
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "_script": {
+        "script": {
+          "lang": "painless",
+          "params": {
+            "eng": "park"
+          },
+          "inline": "if(doc['name.keyword'].value.contains(params.eng)) {return 1}else{return 0}"
+        },
+        "type": "number",
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "script": {
+          "params": {
+            "a": 5,
+            "b": 1.2
+          },
+          "inline": "if (_score>30){double num = Math.ceil(_score/params.b+params.a);return num}else {return 0}"
+        },
+        "type": "number",
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "type": "number",
+        "script": "doc['name.keyword'].value.length()",
+        "order": "asc"
+      }
+    },
+    {
+      "_score": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+# 变量初始化及赋值：
+ArrayList a = new ArrayList();  
+Map b;  
+Map g = [:];  
+List q = [1, 2, 3]; 
+String a = "a";  
+String foo = new String("bar");  
+int[] x = new int[2];  
+x[0] = 3;  
+x[1] = 4;  
+int[] b = new int[] {1,2,3,4,5};  
+def a = 1;  
+def b = "foo";  
+def[][] h = new def[2][2];  
+def[] f = new def[] {4, "s", 5.7, 2.8C};  
+
+# 数据类型转换：
+String num = '123';
+int num_int = Integer.parseInt(num);
+
+# 大小写转换, 字符串替换：
+    {
+      "_script": {
+        "script": {
+          "lang": "painless",
+          "params": {
+            "eng": "PARK"
+          },
+          "inline": "if(doc['name.keyword'].value.toUpperCase().replace(' ', '').contains(params.eng)) {return params.eng.length()/(doc['name.keyword'].value.length()+0.1)}else{return 0}"
+        },
+        "type": "number",
+        "order": "desc"
+      }
+    }
+
+# 字符串join拼接：
+GET hockey/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "inline": "doc['first.keyword'].value + ' ' + doc['last.keyword'].value"
+      }
+    }
+  }
+}
+
+# 和Java一样，painless有关键字instanceof。我们可以使用instanceof来对类型进行判断。
+PUT _ingest/pipeline/join_tags
+{
+  "description": "join_tags",
+  "processors": [
+    {
+      "script": {
+        "lang": "painless",
+        "source": """
+        ctx.tags_str = "";
+        if (ctx.tags instanceof ArrayList)
+        {
+          for (String tag: ctx.tags)
+          {
+            if (ctx.tags_str.length() > 0)
+            {
+              ctx.tags_str += " " + tag;
+            }
+            else
+            {
+              ctx.tags_str = tag;
+            }
+          }
+        }
+        else
+        {
+          ctx.tags_str = ctx.tags
+        }
+        """
+      }
+    }
+  ]
+}
+
+# 条件运算：
+if (doc['foo'].value = 5) {  
+    doc['foo'].value *= 10;
+} 
+else {  
+    doc['foo'].value += 10;
+}
+
+def total = 0;  
+for (def i = 0; i < doc['scores'].length; i++) {  
+    total += doc['scores'][i];
+}
+return total;  
+
+def total = 0;  
+for (def score : doc['scores']) {  
+    total += score;
+}
+return total;  
+
+# 正则表达式：
+正则表达式默认禁用，因为它们绕过 Painless对长时间运行和内存消耗脚本的保护。语法结构如下：
+/pattern/: 正则创建。`/` 中的模式只是 Java 正则表达式。
+=~：如果文本的子序列匹配，则返回true,否则返回false;
+==~: true如果文本匹配， false如果不匹配。
+
+# 正则示例1：查询name中含b的；
+POST hockey/player/_update_by_query
+{
+  "script": {
+    "lang": "painless",
+    "inline": "if (ctx._source.last =~ /b/) {ctx._source.last += \"matched\"} else {ctx.op = 'noop'}"
+  }
+}
+
+# 正则示例2：
+使用匹配运算符 ( ==~) 您可以更新所有名称以辅音开头并以元音结尾的曲棍球运动员：
+POST hockey/player/_update_by_query
+{
+  "script": {
+    "lang": "painless",
+    "inline": "if (ctx._source.last ==~ /[^aeiou].*[aeiou]/) {ctx._source.last += \"matched\"} else {ctx.op = 'noop'}"
+  }
+}
+
+# 正则示例3：
+您可以Pattern.matcher直接使用 获取Matcher实例并删除所有姓氏中的所有元音：
+POST hockey/player/_update_by_query
+{
+  "script": {
+    "lang": "painless",
+    "inline": "ctx._source.last = /[aeiou]/.matcher(ctx._source.last).replaceAll('')"
+  }
+}
+
+# 正则示例4：
+Matcher.replaceAll只是对 Java 的 replaceAll 方法的调用，Matcher因此 它 支持$1并\1用于替换：
+POST hockey/player/_update_by_query
+{
+  "script": {
+    "lang": "painless",
+    "inline": "ctx._source.last = /n([aeiou])/.matcher(ctx._source.last).replaceAll('$1')"
+  }
+}
+
+# 正则示例5：
+这将使曲棍球运动员姓氏中的所有元音都大写案例：
+POST hockey/player/_update_by_query 
+{ 
+  "script": { 
+    "lang": " painless ", 
+    "inline": "ctx._source.last = ctx._source.last.replaceAll(/[aeiou]/, m -> m. group().toUpperCase(Locale.ROOT))" 
+  } 
+}
+
+# 正则示例6：
+或者您可以使用 将CharSequence.replaceFirst姓氏中的第一个元音设为大写：
+POST hockey/player/_update_by_query 
+{ 
+  "script": { 
+    "lang": " painless ", 
+    "inline": "ctx._source.last = ctx._source.last.replaceFirst(/[aeiou]/, m -> m. group().toUpperCase(Locale.ROOT))" 
+  } 
+}
+
+搜索示例1：
+GET sat/_search
+{
+  "script_fields": {
+    "some_scores": {
+      "script": {
+          "lang": "painless",
+        "inline": "def scores = 0; scores = doc['AvgScrRead'].value + doc['AvgScrWrit'].value; return scores;"
+      }
+    }
+  }
+}
+
+搜索示例2：
+GET sat/_search
+{
+  "query": {
+    "script": {
+      "script": {
+        "inline": "doc['AvgScrRead'].value < 350 && doc['AvgScrMath'].value > 350",
+        "lang": "painless"
+      }
+    }
+  }
+}
+
+搜索示例3：
+利用script fields查询文档
+script fields给我的感觉就像MySQL里，在SELECT后面加上函数处理，比如拼接2列。
+script fields平时并不存在，不占存储空间，属于运行时属性。因为它是运行时的，所以当文档的数据特别大的时候，会比较降低性能。
+GET sat/_search
+{
+  "query": {
+    "script": {
+      "script": {
+        "inline": "doc['AvgScrRead'].value < 350 && doc['AvgScrMath'].value > 350",
+        "lang": "painless"
+      }
+    }
+}, 
+  "script_fields": {
+    "scores": {
+      "script": {
+        "inline": "def sat_scores = []; def scores = ['AvgScrRead', 'AvgScrWrit', 'AvgScrMath']; for (int i = 0; i < scores.length; i++) {sat_scores.add(doc[scores[i]].value)} def temp = 0; for (def score : sat_scores) {temp += score;} sat_scores.add(temp); return sat_scores;",
+        "lang": "painless"
+      }
+    }
+  }
+}
+搜索示例结果3：
+"hits": {
+    "total": 4,
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "sat",
+        "_type": "scores",
+        "_id": "AV3CYR8PFgEfgdUCQSpM",
+        "_score": 1,
+        "fields": {
+          "scores": [
+            326,
+            311,
+            368,
+            1005
+          ]
+        }
+      }
+ ...
+
+# 自定义函数，对数据进行更新：
+def scores = ['AvgScrRead', 'AvgScrWrit', 'AvgScrMath'];  
+for (int i = 0; i < scores.length; i++) {  
+    ctx._source.All_Scores.add(ctx._source[scores[i]]);
+} 
+def temp = 0;  
+for (def score : ctx._source.All_Scores) {  
+    temp += score;
+}
+ctx._source.All_Scores.add(temp); 
+---------------------------------------------------------
+POST sat/_update_by_query
+{
+  "script": {
+    "inline": "def scores = ['AvgScrRead', 'AvgScrWrit', 'AvgScrMath']; for (int i = 0; i < scores.length; i++) { ctx._source.All_Scores.add(ctx._source[scores[i]])} def temp = 0; for (def score : ctx._source.All_Scores) {temp += score;}ctx._source.All_Scores.add(temp);",
+    "lang": "painless"
+  }
+}
+
+# 对指定id数据进行更新：
+POST sat/scores/AV2mluV4aqbKx_m2Ul0m/_update
+{
+  "script": {
+    "inline": "ctx._source.AvgScrMath += 10",
+    "lang": "painless"
+  }
+}  
+
+# 获取字段值的方式
+和上面修改文档的ctx._source.fieldname不同，在查询时，需要用
+doc['fieldname'].value 
+doc.fieldname.value
+params._source.fieldname。
+doc和_source不同：doc会把数据加载到内存中，提高效率，但只是基本的简单类型。
+如果text类型，doc['fieldname'].value会报错。
+当text类型包含keyword子字段时，用doc['fieldname.keyword'].value就可以。
+
+资料来源：https://www.compose.com/articles/how-to-script-painless-ly-in-elasticsearch/
+https://www.elastic.co/guide/en/elasticsearch/reference/5.0/modules-scripting-painless.html
+

@@ -183,6 +183,6 @@ COPY redis.conf /usr/local/etc/
 $docker build -t py-ubuntu .
 额外选项，如：
 --rm=true表示构建成功后，移除所有中间容器
---no-cache=false表示在构建过程中不使用缓存
+--no-cache=false表示在构建过程中使用缓存，若设置为true则不使用缓存
 -t   给该镜像赋予一个tag，用以将来的调用与搜索
 .　  表示调用当前目录的Dockerfile

@@ -134,3 +134,52 @@ D:\Users\******\Anaconda3\lib\site-packages\tensorflow> grep projector -R .
 最后不难发现新的路径是：
 from tensorboard.plugins import projector
 
+# 问题：
+tensor name not in graph
+解决方法，查看下所有的tensor name, 看是不是拼写错误:
+tensorflow 如何获取graph中的所有tensor name
+import tensorflow as tf
+
+saved_model_dir = "./saved_model"
+
+with tf.Session(graph=tf.Graph()) as sess:
+    tf.saved_model.loader.load(sess, ["serve"], saved_model_dir)
+    graph = tf.get_default_graph()
+    [print(n.name) for n in tf.get_default_graph().as_graph_def().node]
+
+# 得到name之后，就可以获取相应的tensor了，例如：
+# input_tensor = sess.graph.get_tensor_by_name('input:0')
+# output_tensor = sess.graph.get_tensor_by_name('output:0')
+当然也可以仅仅输出输入层或输出层：
+[node.op.name for node in model.inputs]
+[node.op.name for node in model.outputs]
+
+# 使用pb模型文件时候，报错：
+INVALID_ARGUMENT: NodeDef mentions attr ‘incompatible_shape_error’ not in Op<name=NotEqual; signat ure=x:T, y:T -> z:bool; attr=T:type,allowed=[DT_BFLOAT16, DT_HALF, DT_FLOAT, DT_DOUBLE, DT_UINT8, …, DT_QINT8, DT_QINT32, DT_STR ING, DT_BOOL, DT_COMPLEX128]; is_commutative=true>; NodeDef: {{node NotEqual}}. (Check whether your GraphDef-interpreting binary i s up to date with your GraphDef-generating binary.)
+当时使用的是1.15做的转换、导出，线上部署是1.14的。换到1.14上导出就能够避开这个问题了。
+
+# 问题 tensorflow 2.x：
+AttributeError: module 'tensorflow' has no attribute 'Session'
+因为在新的Tensorflow 2.0版本中已经移除了Session这一模块，改换运行代码
+tf.compat.v1.Session()
+
+# 问题 tensorflow 2.x中出现：
+AttributeError: module 'tensorflow' has no attribute 'GraphDef'
+解决方法：
+graph_def = tf.GraphDef()
+改为：
+graph_def = tf.compat.v1.GraphDef()
+
+# tensorflow 2.x报错：
+RuntimeError: The Session graph is empty.  Add operations to the graph before calling run().
+问题产生的原因：无法执行sess.run()的原因是tensorflow版本不同导致的，tensorflow版本2.0无法兼容版本1.0.
+解决办法：添加tf.compat.v1.disable_eager_execution()
+
+tf.compat.v1.disable_eager_execution()
+import tensorflow as tf
+from keras import backend
+a = tf.constant(2.1)  # 定义tensor常量
+b = backend.clip(a, 0, 1)
+with tf.compat.v1.Session() as sess:
+    print(sess.run(b))
+

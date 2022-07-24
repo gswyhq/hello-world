@@ -36,9 +36,40 @@ fig1 = plt.gcf()
 plt.show()
 fig1.savefig('tessstttyyy.png', dpi=100)
 
+# 问题：
+matplotlib保存图片分辨率太低：
+解决办法：
+图片不清晰，需要指定dpi
+fig.savefig(save_image_name, dpi=500, bbox_inches = 'tight')
+
 设置中文字体，出现方框，不显示中文，警告：
 1238: UserWarning: findfont: Font family [‘sans-serif’] not found. Falling back to DejaVu Sans.
 解决方法：
 第一步：安装中文字体，simhei.ttf 
 第二步：删除目录：~/.cache/matplotlib
+
+# 问题：matplotlib文字标签遮挡问题
+pip install adjustText
+from adjustText import adjust_text
+
+# 绘制所有点对应的文字标签
+for x_, y_, text in zip(x, y, texts):
+    plt.text(x_, y_, text, fontsize=12)
+
+替换为：
+# 使用adjustText修正文字重叠现象
+new_texts = [plt.text(x_, y_, text, fontsize=12) for x_, y_, text in zip(x, y, texts)]
+adjust_text(new_texts, 
+            only_move={'text': 'x'},
+            arrowprops=dict(arrowstyle='-', color='grey', lw=1),
+            save_steps=False)
+adjustText中的核心功能都通过调用函数adjust_text来实现，其核心参数如下：
+texts：List型，每个元素都是表示单个文字标签对应的matplotlib.text.Text对象
+ax：绘制文字标签的目标axe对象，默认为最近一次的axe对象
+lim：int型，控制迭代调整文本标签位置的次数，默认为500次
+precision：float型，用于决定迭代停止的精度，默认为0.01，即所有标签相互遮挡部分的长和宽占所有标签自身长宽之和的比例，addjust_text会在精度达到precision和迭代次数超过lim这两个条件中至少有一个满足时停止迭代
+only_move：字典型，用于指定文本标签与不同对象发生遮挡时的位移策略，键有'points'、'text'和'objects'，对应的值可选'xy'、'x'、'y'，分别代表竖直和水平方向均调整、只调整水平方向以及只调整竖直方向
+arrowprops：字典型，用于设置偏移后的文字标签与原始位置之间的连线样式，arrowprops={arrowstyle='-', color='grey', lw=1}，其中arrowstyle用于设定连线的线型，color用于设置线颜色，lw用于控制线的宽度
+save_steps：bool型，用于决定是否保存记录迭代过程中各轮的帧图像，默认为False
+save_prefix：str型，当save_steps设置为True时，用于指定中间帧保存的路径，默认为''，即当前工作路径
 

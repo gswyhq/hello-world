@@ -68,6 +68,9 @@ NumExprClobberingError: Variables in expression "(sum) > (0)" overlap with built
 # 需要注意的是NAN值问题，NAN值会无法计算。因此执行前，需要先替换掉NAN值.
 df.fillna(0.0,inplace=True) 
 
+# 指定列填充：
+dataframe['某一列'].fillna(0, inplace=True)
+
 # 一般情况下，np.nan和None到了df中都被转化成了np.nan
 df = pd.DataFrame(dict(a=range(5), b=[5, np.nan, 7, 8, None]))
 df
@@ -112,4 +115,13 @@ new_series = df.groupby(by=['a'])['b'].sum().reset_index()
 # 排序分组，删除重复数据：
 df = df.sort_values('落单日期').groupby('流水号').last().reset_index()  # 对数据按落单日期进行排序，并删除重复流水号的数据；
 
+# 对某列名称进行重命名：
+df.columns = ['a', 'b', 'c']
+df.rename(columns={'sheet_num2':'label'}, inplace = False).head()
+
+# 字符串分割，一列分割成多列，split
+数据集中某一列(name)是某个行业的分类。各个行业之间用符号 ‘|’分割。
+我们要把用每个‘|’进行分割的内容抽取出来。
+data['name'].str.split('|',expand=True)
+关键是参数expand，这个参数取True时，会把切割出来的内容当做一列。 如果不需要pandas为你分好列，expand=False就可以了。
 

@@ -251,4 +251,116 @@ curl -XGET ip:port/_index/_search?explain -d '
 }
 '
 
+像下面这样should, 并行查询多个，设置优先级，有时候并没有按照预设boost权重（name子串匹配 > address子串匹配 > name模糊匹配 > address模糊匹配）返回结果：
+{
+  "size": 15,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "city.keyword": "深圳市"
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match_phrase": {
+                  "name": {
+                    "query": "平安金融",
+                    "boost": 4
+                  }
+                }
+              },
+              {
+                "match_phrase": {
+                  "address": {
+                    "query": "平安金融",
+                    "boost": 3
+                  }
+                }
+              },
+              {
+                "match": {
+                  "address": {
+                    "query": "平安金融",
+                    "boost": 1
+                  }
+                }
+              },
+              {
+                "match": {
+                  "name": {
+                    "query": "平安金融",
+                    "boost": 2
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+原因在于多匹配查询的类型有多种，即： best_fields 、 most_fields 和 cross_fields （最佳字段、多数字段、跨字段）。
+这里 should采用的策略是 most_fields, 即每个匹配的结果分数求和；
+导致一个不好的 name子串匹配，因 还存在 address子串匹配， 导致最终的分数高于 一个好的 name子串匹配；
+而这种情况，不是我们想看到的结果，这个时候，可以采用 best_fields 策略；
+因为 dis_max，只是取分数最高的那个query的分数而已。
+即将查询语句改为：
+{
+  "size": 15,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "city.keyword": "深圳市"
+          }
+        },
+        {
+          "dis_max": {
+            "queries": [
+              {
+                "match_phrase": {
+                  "name": {
+                    "query": "平安金融",
+                    "boost": 4
+                  }
+                }
+              },
+              {
+                "match_phrase": {
+                  "address": {
+                    "query": "平安金融",
+                    "boost": 3
+                  }
+                }
+              },
+              {
+                "match": {
+                  "address": {
+                    "query": "平安金融",
+                    "boost": 1
+                  }
+                }
+              },
+              {
+                "match": {
+                  "name": {
+                    "query": "平安金融",
+                    "boost": 2
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
 

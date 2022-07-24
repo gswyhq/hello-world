@@ -177,3 +177,7 @@ root@c9cde75c1336:~/java2/abcd# java -jar DTest.jar
  文件：./libTest.so 是否存在：true
 测试调用OK
 
+
+# 查看已经打包好的jar文件目录结构：
+root@c9cde75c1336:~/java2/abcd# jar tf DTest.jar
+

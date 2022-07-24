@@ -1,0 +1,31 @@
+
+# hive 多字段同时计数：
+select count(1),
+count(case when (reg_no is not null and reg_no <> '') then 1 else null end),
+count(case when (credit_no is not null and credit_no <> '') then 1 else null end),
+count(case when (name is not null and name <> '') then 1 else null end),
+count(case when (status is not null and status <> '') then 1 else null end),
+count(case when (longitude is not null and longitude >0 ) then 1 else null end),
+count(case when (latitude is not null and latitude > 0 ) then 1 else null end),
+count(case when (gd_longitude is not null and gd_longitude > 0 ) then 1 else null end),
+count(case when (gd_latitude is not null and gd_latitude > 0 ) then 1 else null end),
+count(case when (format_name is not null and format_name <> '') then 1 else null end)
+from db1.table1;
+
+# 注 此处 longitude、latitude、gd_longitude、gd_latitude类型为double;
+若将条件改为：
+count(case when (gd_latitude is not null and gd_latitude <> '' ) then 1 else null end), 则统计的结果为0；
+
+# 统计每个值出现的次数：
+select status, count(1) from db1.table1 GROUP BY status;
+
+# group by
+按照某些字段的值进行分组，有相同值放到一起。
+样例
+select col1 [,col2] ,count(1),sel_expr（聚合操作）from table
+where condition         -->Map端执行
+group by col1 [,col2]   -->Reduce端执行
+[having]                -->Reduce端执行
+ 
+
+

@@ -7,16 +7,28 @@ select '32002,32002,11001,11001,' like '%2%';
 方法2、用regexp正则函数
 select '32002,32002,11001,11001,' regexp('.*2.*');
 >>>true
- 
+regexp
+语法: A REGEXP B
+操作类型: strings
+描述: 功能与RLIKE相同
+select count(*) from olap_b_dw_hotelorder_f where create_date_wid not regexp '\\d{8}'
+与下面查询的效果是等效的：
+select count(*) from olap_b_dw_hotelorder_f where create_date_wid not rlike '\\d{8}';
+由于hive库这个表达式有\需要转义
+select '我爱你中国' rlike '^[\\u4e00-\\u9fa5]$ ' ; 执行后会返回真
+select case when '我爱你中国' rlike '^[\\u4e00-\\u9fa5]$ ' then 1 else 0 end; 执行后会返回1
+
 方法3、locate函数
 判断 name 字段中是否包含字符串 “aaa”：
 select * from temp where locate("aaa", name) > 0;
 locate(字符串，字段名)，如果包含，返回大于0的index位置；否则，返回0；
 
--- 1 a在abcda中首次出现的位置
 select locate('a','abcda') 
--- 3
+1 --a在abcda中首次出现的位置
 select locate('cd','abcda') 
+3
+select locate('cd', 'cd');
+1
 
 方法4、instr函数
 -- 0 0表示在a中找不到abcda
@@ -27,6 +39,17 @@ select instr('abcda','cd')
 instr和locate都可以判断substr在str首次出现的位置.
 二者的参数顺序相反
 找不到都是返回0
+
+# 在“盐城滨海港经济区小街村”中查找是否有子串“江苏”， 若有则返回："盐城滨海港经济区小街村"，若没有则返回："江苏盐城滨海港经济区小街村":
+select case when instr("盐城滨海港经济区小街村", "江苏") > 0 then "盐城滨海港经济区小街村" else CONCAT ("江苏", "盐城滨海港经济区小街村") end;
+
+# 正则匹配并提取匹配部分：
+语法: regexp_extract(string subject, string pattern, int index)
+返回值: string
+说明：将字符串subject按照pattern正则表达式的规则拆分，返回index指定的字符。
+select regexp_replace("IloveYou","You","") from test1 limit 1;
+select regexp_replace("IloveYou","You",0) from test1 limit 1;
+select regexp_replace("IloveYou","You",1) from test1 limit 1;
 
 # 保留截取两位小数：
 方法1：
@@ -69,6 +92,9 @@ strSource: 源字符串　　　　　　　　如：user_id 字段。
 strFind: 要被替换的字符               　　如： 空格。
 strReplaceAS: 替换成什么字符   　　 如： 长度为0的字符串。
 select replace( user_id, ' ', '') ;
+但有时候使用replace函数报错：Invalid function 'replace'
+这个时候可以使用 translate 函数 (示例：查询name大写后去空格为COCOPARK的数据)；
+select * from hive_db1.hive_test_table where translate(upper(name), ' ', '')= 'COCOPARK';
 
 # 小写字母变成大写字母：
 select upper("abde EDW xyz")
@@ -102,4 +128,24 @@ select ascii('\n');
 返回10；
 select ascii('\r');
 返回13；
+
+# 字符串替换函数：
+select replace(project_name,'a','aa') from dual 
+
+# 正则替换：
+一.将asdgggg中的asd替换成@@@:@@@gggg
+select regexp_replace('asdgggg','(asd)',"@@@")
+二.将asdgggg中的asd仍和一个替换成@@@:@@@@@@@@@gggg
+select regexp_replace('asdgggg','([asd])',"@@@")
+三.特殊字符:替换掉 [,],",三个特殊字符
+SELECT regexp_replace('["ddd","sss","ssss"]',('[\[\]\"]'), '')
+正则表达式:([xxxxx]),替换其中的字符，这里我需要替换掉 [,],",三个特殊字符，需要使用\进行转译
+
+# 同时替换多个值：
+select decode(project_name,
+              'a','aaa',
+              'b','bbb',
+              'c','ccc',
+              project_name) project_name
+from project
 

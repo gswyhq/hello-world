@@ -534,4 +534,59 @@ GET /_search
     }
 }
 
+# 并行搜索，设置权重；
+{
+  "size": 15,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "bool": {
+            "boost": 100,
+            "must": [
+              {
+                "match": {
+                  "province.keyword": "青海省"
+                }
+              },
+              {
+                "match": {
+                  "area.keyword": "科技区"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "bool": {
+            "boost": 200,
+            "must": [
+              {
+                "match": {
+                  "province.keyword": "广东省"
+                }
+              },
+              {
+                "match": {
+                  "city.keyword": {
+                    "query": "深圳市",
+                    "boost": 300
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "match_phrase": {
+            "address": {
+              "query": "科技",
+              "boost": 300
+            }
+          }
+        }
+      ]
+    }
+  }
+}
 

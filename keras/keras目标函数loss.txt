@@ -1,5 +1,6 @@
 
 目标函数objectives
+
 目标函数，或称损失函数，是编译一个模型必须的两个参数之一：
 
 model.compile(loss='mean_squared_error', optimizer='sgd')
@@ -46,3 +47,23 @@ categorical_labels = to_categorical(int_labels, nb_classes=None)
 
 # https://keras-cn-docs.readthedocs.io/zh_CN/latest/other/objectives/
 
+from keras.metrics import binary_crossentropy, categorical_crossentropy
+import tensorflow as tf
+y_true = [[0, 1, 0], [0, 0, 1]]
+y_pred = [[0.05, 0.95, 0], [0.1, 0.8, 0.1]]
+loss = tf.keras.losses.categorical_crossentropy(y_true, y_pred)
+
+
+自定义loss函数之前，我们可以看看Keras官方是如何定义loss的，进入keras/keras/losses.py文件，我们可以看到很多Keras自带loss的实现代码。比如最简单的均方误差损失函数：
+
+def mean_squared_error(y_true, y_pred):
+    return K.mean(K.square(y_pred - y_true), axis=-1)
+
+其中y_true为网络给出的预测值，y_true即是标签，两者均为tensor。在loss中直接操作这两个变量即可实现自己想要的loss。例如，我们将其改为四次方的平均值来作为新的loss：
+
+def mean_squared_error2(y_true, y_pred):
+	return K.mean(K.square(K.square(y_pred-y_true)),axis=-1)
+
+在model编译阶段将loss指定为我们自定义的函数：
+
+model.compile(optimizer='rmsprop',loss=mean_squared_error2)

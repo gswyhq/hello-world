@@ -1,0 +1,53 @@
+
+Padding：将本来不相同的样本填充到相同的长度，以便于后面的处理，我们一般使用0做填充；
+Mask：告诉网络层那些是真正的数据，哪些是填充的“0”，从而帮助网络层更好地计算。
+
+数据补零：
+import tensorflow as tf
+
+inputs = [
+    [1, 2],
+    [3, 4, 5],
+    [6, 7, 8, 9, 10]
+]
+
+inputs = tf.keras.preprocessing.sequence.pad_sequences(
+    inputs, padding="post", value=0
+)
+# post, 数据末尾补0；pre: 数据前面补0
+print(inputs)
+
+[[ 1  2  0  0  0]
+ [ 3  4  5  0  0]
+ [ 6  7  8  9 10]]
+
+
+# 补0之后，往往需要用到mask
+在TensorFlow之中使用Mask也是比较简单的，主要有两种方法：
+
+添加一个tf.keras.layers.Embedding层并设置参数mask_zero=True；
+添加一个tf.keras.layers.Masking层。
+方法1：使用了Embedding，因此我们只需要直接设置参数mask_zero=True即可：
+
+model2 = tf.keras.Sequential([
+    tf.keras.layers.Embedding(10000, 32, mask_zero=True),
+    tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+model2.summary()
+
+方法2：使用tf.keras.layers.Masking层
+我们依然以我们的文本分类模型为例，为了添加Masking层，我们将模型进行如下修改：
+
+model3 = tf.keras.Sequential([
+    tf.keras.layers.Masking(input_shape=(256,)),
+    tf.keras.layers.Embedding(10000, 32),
+    tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+model3.summary()
+在该模型之中，因为Masking层是位于第一层，因此我们要设置参数input_shape，这里的参数（256，）表示的是我们的每条数据都是padding长度为256的序列。
+
+

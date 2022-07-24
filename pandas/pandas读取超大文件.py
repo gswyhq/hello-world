@@ -19,6 +19,11 @@ while True:
     except StopIteration:
         break
 
+# 数据写入文件时候，指定换行符及分列符号：
+df.to_csv("result.txt", index=False, sep='\001', line_terminator='\n\001\001\001\n') 
+# line_terminator：自定义换行符
+# sep: 自定义分列符号，分隔符；
+
 def main():
     pass
 

@@ -1,0 +1,38 @@
+SpringBoot修改启动端口
+
+方式一: 配置文件 application.properties
+server.port=7788
+
+方式二: java启动命令
+# 以应用参数的方式
+java -jar <path/to/my/jar> --server.port=7788
+# 或以 JDK 参数的方式
+java -Dserver.port=7788 -jar <path/to/my/jar>
+
+方式三: 环境变量 SERVER_PORT
+Linux:
+SERVER_PORT=7788 java -jar <path/to/my/jar>
+
+Windows:
+SET SERVER_PORT=7788
+java -jar <path/to/my/jar>
+
+方式四: 环境变量 SPRING_APPLICATION_JSON
+Linux:
+SPRING_APPLICATION_JSON='{"server.port":7788}' java -jar <path/to/my/jar>
+ 
+# 或
+java -Dspring.application.json='{"server.port":7788}' -jar <path/to/my/jar>
+ 
+# 或
+java -jar <path/to/my/jar> --spring.application.json='{"server.port":7788}'
+参数优先级
+启动命令应用参数 > 启动命令 JDK 参数 > 环境变量
+
+如果我们同时给定这些参数, 如下:
+SERVER_PORT=3344 java -Dserver.port=5566 -jar <path/to/my/jar> --server.port=7788
+生效的是 --server.port=7788 这个参数.
+
+示例：
+java -jar -Dspring.profiles.active=dev -Dserver.port=8020 -Dfile.encoding=UTF-8 reveal-1.0-SNAPSHOT.jar
+

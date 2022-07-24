@@ -1,0 +1,86 @@
+# 关联查询某个字段包含关系的子串，针对表hive_db.hive_table1，若相同的name字段，address字段中 记录a in 记录b, 则保留记录b,删除记录a，同时，若记录c的name也相同但与a、b均不互为包含关系，则记录c也删除;
+insert into table hive_db.hive_table_unique partition (y,m,d)
+select name1, address1, y1, m1, d1
+from (
+    select a.name as name1, if(locate(a.address, b.address)>0, b.address, a.address) as address1, a.y as y1, a.m as m1, a.d as d1, row_number() over(partition by a.name order by locate(a.address, b.address) desc) as rn
+    from hive_db.hive_table1 a
+    join hive_db.hive_table1 b
+    on a.name = b.name
+)as aa
+where rn = 1;
+
+# 关联查询某个字段包含关系的子串，针对表hive_db.hive_table1，若相同的name字段，address字段中 记录a in 记录b, 则保留记录b,删除记录a，同时，若记录c的name也相同但与a、b均不互为包含关系，则记录c也保留;
+select name1, addr1, uid1
+from (
+	select a.name as name1, a.address as addr1, a.uid as uid1, 
+	       if(locate(a.address, b.address)>0 and a.address<>b.address, 0, 1) as rn, 1 as num
+	from hive_db.hive_table1 as a
+	join hive_db.hive_table1 as b
+	on a.name = b.name
+    ) aa
+gruop by name1, addr1, uid1
+HAVING SUM(rn) = sum(num);
+说明：如何 b包含a,且a!=b, 则计0，否则计1，再统计最后的结果，若总数量不等，则说明存在a是其他数据的子串，忽略掉；
+
+# 若需要去重，则需要改为：
+select bb.*
+from (
+    select aa.name, aa.address, aa.uid, aa.y, aa.m, aa.d,
+           row_number() over(partition by aa.name, aa.address order by aa.uid desc) as rank2
+    from (
+         select a.name, a.address, a.uid, a.y, a.m, a.d,
+                if(locate(a.address, b.address)>0 and a.address<>b.address, 0, 1) as rank1, 1 as num
+         from hive_db.hive_table1 as a
+        join hive_db.hive_table1 as b
+        on a.name = b.name
+    ) aa
+    group by aa.name, aa.address, aa.uid, aa.y, aa.m, aa.d
+    HAVING SUM(aa.rank1)=sum(aa.num)
+)bb
+where bb.rank2=1
+;
+
+# 若两个地址名称相同，则保留 road, roadno完整的地址数据
+select bb.name, bb.address, bb.city, bb.road, bb.roadno, bb.zone, bb.time
+from (
+    select aa.name, aa.address, aa.city, aa.road, aa.roadno, aa.zone, aa.time,
+           row_number() over(partition by aa.city, upper(aa.name)
+               order by case
+                        when aa.road <>'' and aa.roadno <>'' and aa.zone <>'' then 3
+                        when aa.road <>'' and aa.roadno <>'' then 2
+                        when aa.zone <>'' and aa.roadno <>'' then 1
+                        else 0
+                        end desc, aa.time desc
+                            ) as rank2
+    from hive_db1, hive_test_table2 aa
+    )bb
+where rank2 = 1;
+
+# 针对表hive_db1.hive_table_test1，若POI名称删除标点符号后，存在重名的，则删除标点符号，否则不删除标点符号
+select bb.name1, bb.address, bb.city, bb.uid
+from (
+    select aa.name1, aa.address, aa.city, aa.uid,
+          row_number() over(partition by aa.uid order by length(aa.name1) asc) as rank2
+    from (
+         select if (upper(regexp_replace(a.name, '[ ,.·-]', ''))=upper(b.name), b.name, a.name)as name1, 
+                a.address, a.city, a.uid
+         from hive_db1.hive_table_test1 as a
+         join hive_db1.hive_table_test1 as b
+         on a.city = b.city and upper(regexp_replace(a.name, '[ ,.·-]', ''))=upper(regexp_replace(b.name, '[ ,.·-]', ''))
+         )aa
+) bb
+where rank2 = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+

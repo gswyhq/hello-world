@@ -1,0 +1,61 @@
+
+curl localhost:9200
+{
+  "name" : "node-01",
+  "cluster_name" : "bbd-exchange-cluster",
+  "cluster_uuid" : "zK30zUbdSVmZjxFqyEpkrg",
+  "version" : {
+    "number" : "7.5.1",
+    "build_flavor" : "default",
+    "build_type" : "docker",
+    "build_hash" : "3ae9ac9a93c95bd0cdc054951cf95d88e1e18d96",
+    "build_date" : "2019-12-16T22:57:37.835892Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.3.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+elasticsearch 7.5.1版本，需要驱动文件为：x-pack-sql-jdbc-7.5.1.jar
+elasticsearch 驱动 x-pack-sql-jdbc-7.5.1.jar,下载地址：
+https://www.elastic.co/cn/downloads/past-releases/jdbc-client-7-5-1
+
+通过 dbeaver 配置 jdbc 连接 es时报错 current license is non-compliant for [jdbc]
+在官网 https://www.elastic.co/cn/subscriptions 搜索后发现需要白金级别
+查看服务器es的license信息，发现 “type” : “basic”
+
+curl -XGET http://localhost:9200/_license
+
+修改成30天试用版，https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trial.html
+
+# curl -X POST "localhost:9200/_license/start_trial?acknowledge=true&pretty"
+{
+  "acknowledged" : true,
+  "trial_was_started" : true,
+  "type" : "trial"
+}
+
+再查看license信息时，内容已发生变化。
+
+# curl -XGET http://localhost:9200/_license
+{
+  "license" : {
+    "status" : "active",
+    "uid" : "275f23b1-7b57-4bfd-b309-16d9545aebfa",
+    "type" : "trial",
+    "issue_date" : "2020-05-14T03:16:54.139Z",
+    "issue_date_in_millis" : 1589426214139,
+    "expiry_date" : "2020-06-13T03:16:54.139Z",
+    "expiry_date_in_millis" : 1592018214139,
+    "max_nodes" : 1000,
+    "issued_to" : "my-application",
+    "issuer" : "elasticsearch",
+    "start_date_in_millis" : -1
+  }
+}
+
+此时在 dbeaver 里查看时，已正常显示。
+
+

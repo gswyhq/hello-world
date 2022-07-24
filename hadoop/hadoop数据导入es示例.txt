@@ -1,0 +1,83 @@
+
+
+
+
+--curl -X PUT "192.168.3.15:9200/abcd_abcd_1234_address_20220324?pretty" -H 'Content-Type: application/json' -d'
+--{
+--  "mappings": {
+--    "properties": {
+--      "location": {
+--        "type": "geo_point"
+--      }
+--    }
+--  }
+--}
+--';
+
+add jar elasticsearch-hadoop-7.7.0.jar;
+drop table if exists db_123.abcd_abcd_1234_address_20220324_ext;
+create external table
+	if not exists db_123.abcd_abcd_1234_address_20220324_ext(uid string comment '列主键',
+	name string ,
+	address string ,
+	short_addr string ,
+	province string ,
+	city string ,
+	area string ,
+	street string ,
+	village string ,
+	road string ,
+	roadno string ,
+	zone string ,
+	source string ,
+	level1 string ,
+	level2 string ,
+	level3 string ,
+	`location` struct<lon:string, lat:string> ,
+	detail_url string)
+    stored by 'org.elasticsearch.hadoop.hive.EsStorageHandler'
+    tblproperties (
+    'es.mapping.names' = 'location:location',
+    'es.resource' = 'abcd_abcd_1234_address_20220324/_doc',
+	'es.mapping.id' = 'uid',
+	'es.nodes' = '192.168.3.15:9200,192.168.3.16:9200,192.168.3.17:9200',
+	'es.batch.size.bytes' = '8mb',
+	'es.batch.size.entries' = '16000');
+
+set
+hive.mapred.reduce.tasks.speculative.execution = false;
+
+insert
+	overwrite table
+		db_123.abcd_abcd_1234_address_20220324_ext select
+			uid,
+            name ,
+            address ,
+            short_addr ,
+            province ,
+            city ,
+            area ,
+            street ,
+            village ,
+            road ,
+            roadno ,
+            zone ,
+            source ,
+            level1 ,
+            level2 ,
+            level3 ,
+            named_struct("lon", lng, "lat", lat) ,
+            detail_url
+		from
+			db_123.address_result_join_addr_20220323_1716;
+
+
+
+--curl -X POST "192.168.3.15:9200/_aliases" -H 'Content-Type: application/json' -d '{
+--    "actions": [
+--        { "add":    { "alias": "abcd_abcd_1234_address_20220218_alias",  "index": "abcd_abcd_1234_address_20220324" }}
+--    ]
+--}';
+
+
+

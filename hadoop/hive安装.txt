@@ -51,6 +51,10 @@ schemaTool completed
 root@4e732add094a:~/apache-hive-2.3.7-bin# echo $?
 0
 
+# 若初始化的时候报错：
+Error: FUNCTION 'NUCLEUS_ASCII' already exists. (state=X0Y68,code=30000)
+则需删除 metastore_db 目录，重新初始化即可
+
 # 配置hive相关环境变量
 
 root@4e732add094a:~/apache-hive-2.3.7-bin# vim ~/.profile

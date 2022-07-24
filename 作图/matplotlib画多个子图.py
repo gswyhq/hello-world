@@ -71,13 +71,36 @@ def generator_map_function():
 
     for index, (name, fun_type, kwargs, x_min, x_max) in enumerate(setup_datas, 1):
         print(name)
-        ax = fig.add_subplot(6, 3, index)
+        ax = fig.add_subplot(6, 3, index) # 6行3列个子图，第一个子图index= 1；
 
         show_fig(ax, name, fun_type, kwargs, x_min, x_max, fontsize=9)
     # plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2)
     # plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0, hspace=0)
     fig.suptitle("指标值的映射曲线", fontsize=12, x=0.5, y=0.92)
     fig.show()
+
+# 设置子图x轴标签：
+# 方法1：使用子图对象的轴方法（例如ax.set_xticks和ax.set_xticklabels）
+
+# ax1.set_xticks([0,250,500,750,1000]) # 设置刻度
+# ax1.set_xticklabels(['one','two','three','four','five'],rotation = 30,fontsize = 'small') # 设置刻度标签
+
+# 方法2：使用plt.sca设置pyplot状态机的当前轴（即plt接口）。
+
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(nrows=3, ncols=4)
+
+# Set the ticks and ticklabels for all axes
+plt.setp(axes, xticks=[0.1, 0.5, 0.9], xticklabels=['a', 'b', 'c'],
+        yticks=[1, 2, 3])
+
+# Use the pyplot interface to change just one subplot...
+plt.sca(axes[1, 1])
+plt.xticks(range(3), ['A', 'Big', 'Cat'], color='red')
+
+fig.tight_layout()
+plt.show()
     
 def main():
     generator_map_function()

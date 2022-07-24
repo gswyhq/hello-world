@@ -1,14 +1,211 @@
-
+=======================================Windows 环境 ================================================
 一、安装：
 1,下载安装包：
 进入官网：http://jmeter.apache.org/
 点击：Download Releases
-下载：https://mirrors.bfsu.edu.cn/apache//jmeter/binaries/apache-jmeter-5.4.1.zip
+下载已编译好的二进制包（Binaries）：
+https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.5.tgz
+https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.5.zip
+或者：
+https://mirrors.tuna.tsinghua.edu.cn/apache//jmeter/binaries/apache-jmeter-5.5.tgz
+https://mirrors.tuna.tsinghua.edu.cn/apache//jmeter/binaries/apache-jmeter-5.5.zip
 
 2,解压：
 下载得到的压缩包解压即可
+~$ unzip apache-jmeter-5.5.zip
 
 3, 运行：
 点击bin目录下的jmeter.bat即可启动Jmeter。
 
+4、更改界面语言：
+在启动打开的界面中，依次点击“Options” -> "Choose Language" -> "Chinese (Simplified)"
+
+5、打开JMeter，新建线程组，线程组的名称可以自己设定，
+具体步骤：选中左侧的测试计划(Test Plan),右键，添加-> 线程(用户) -> 线程组；
+然后选中“线程组，右键->"添加"->"配置元件"->HTTP信息头管理器,
+名称和值，类似填入：'Content-type':'application/json' 
+按需配置HTTPCookie管理器；
+
+“线程组”-> "取样器" -> "http请求"
+基本->web服务器->协议，填入：http
+HTTP请求，按需选择GET或POST, 填入测试端口路径：如：http://localhost:8030/predict
+若请求参数为json,则选择消息体数据，并填入请求参数json内容：
+
+“线程组”，右键->“添加”->"断言"-> "响应断言"
+测试字段，可以选择“响应文本”，模式匹配规则可以选择“包括”，测试模式，填入需要匹配的内容；
+
+“线程组”，右键->“添加”->"断言"-> "json断言"
+对响应json结果，进行判断；
+Assert JSON Path exists: 填入要判断的字段，若是value, 则填入：$.value
+勾选“Additionally assert value”, Expected Value,填入正则匹配表达式，如：^\d+\.\d+$
+
+“线程组”，右键->“添加”->"监听器"-> "查看结果树"
+“线程组”，右键->“添加”->"监听器"-> "汇总报告"
+
+全部配置好后，选中“线程组”，右键“启动”，即可在查看结果树中，点击“响应数据”,查看结果；
+也可以点击“汇总报告”查看；
+当然也可以在线程组那里配置线程数、循环次数等。
+
+
+=======================================Linux 环境 安装 jmeter ================================================
+JMeter 是一个 100% Java 应用程序，应该可以在任何具有兼容 Java 实现的系统上正确运行。
+以：ubuntu:20.04 上的安装为例：
+user123@SHC-123231:~/docker/jmeter$ ls
+apache-jmeter-5.5.tgz  Dockerfile  jdk-8u191-linux-x64.tar.gz
+user123@SHC-123231:~/docker/jmeter$ md5sum apache-jmeter-5.5.tgz jdk-8u191-linux-x64.tar.gz
+e2320bbecf22c1dfbdfa5673b629bba1  apache-jmeter-5.5.tgz
+6d0be0797d400a694c43eddf74efa7fd  jdk-8u191-linux-x64.tar.gz
+user123@SHC-123231:~/docker/jmeter$ cat Dockerfile
+```Dockerfile
+FROM ubuntu:20.04
+
+ENV TZ=CST-8
+ENV LANG=C.UTF-8
+
+COPY jdk-8u191-linux-x64.tar.gz /root
+COPY apache-jmeter-5.5.tgz /root
+
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /root
+
+RUN cd /root && mkdir /root/java && tar -zxf jdk-8u191-linux-x64.tar.gz -C /root/java
+
+RUN echo "export JAVA_HOME=/root/java/jdk1.8.0_191/" >> ~/.bashrc && \
+    echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc && \
+    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc && \
+    source ~/.bashrc
+
+RUN cd /root && mkdir /root/jmeter && tar -zxf apache-jmeter-5.5.tgz -C /root/jmeter
+
+RUN echo "export JMETER_HOME=/root/jmeter/apache-jmeter-5.5" >> ~/.bashrc && \
+    echo "export CLASSPATH=\$JMETER_HOME/lib/ext/ApacheJMeter_core.jar:\$JMETER_HOME/lib/jorphan.jar:\$JMETER_HOME/lib/logkit-2.0.jar:\$CLASSPATH" >> ~/.bashrc && \
+    echo "export PATH=\$JMETER_HOME/bin:\$PATH:\$HOME/bin" >> ~/.bashrc && \
+    source ~/.bashrc
+
+CMD ["/bin/bash"]
+
+# sudo docker build -t jmeter:5.5 -f Dockerfile .
+```
+
+user123@SHC-123231:~/docker/jmeter$ sudo docker run --rm -it jmeter:5.5 /bin/bash
+root@f6c4f3928153:~# jmeter -v
+Jul 11, 2022 2:45:39 PM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+    _    ____   _    ____ _   _ _____       _ __  __ _____ _____ _____ ____
+   / \  |  _ \ / \  / ___| | | | ____|     | |  \/  | ____|_   _| ____|  _ \
+  / _ \ | |_) / _ \| |   | |_| |  _|    _  | | |\/| |  _|   | | |  _| | |_) |
+ / ___ \|  __/ ___ \ |___|  _  | |___  | |_| | |  | | |___  | | | |___|  _ <
+/_/   \_\_| /_/   \_\____|_| |_|_____|  \___/|_|  |_|_____| |_| |_____|_| \_\ 5.5
+
+Copyright (c) 1999-2022 The Apache Software Foundation
+
+至此，基于ubutnu:20.04docker镜像上已成功安装jmeter5.5;
+
+=======================================Linux 环境 使用jmeter命令行测试 ================================================
+在linux上使用jmeter, 需先在windows上面编写好测试计划, 编写好后，文件-> 保存测试计划为，导出对应的jmx文件；
+
+root@560554ec730c:~/test# ls
+test1  test2  测试计划1.jmx
+
+# 在linux上执行测试计划：
+root@560554ec730c:~/test# jmeter -n -t 测试计划1.jmx -j test1/test.log -l test1/test.jtl -e -o test2
+Creating summariser <summary>
+Created the tree successfully using 测试计划1.jmx
+Starting standalone test @ July 11, 2022 3:18:40 PM GMT+08:00 (1657523920274)
+Waiting for possible Shutdown/StopTestNow/HeapDump/ThreadDump message on port 4445
+summary =   2000 in 00:00:19 =  105.7/s Avg:     8 Min:     5 Max:   113 Err:     0 (0.00%)
+Tidying up ...    @ July 11, 2022 3:18:59 PM GMT+08:00 (1657523939659)
+... end of run
+root@560554ec730c:~/test# echo $?
+0
+
+# CLI 模式（命令行模式称为 NON GUI 模式）¶
+对于负载测试，您必须在此模式下（无 GUI）运行 JMeter 以从中获得最佳结果。为此，请使用以下命令选项：
+-n 这指定 JMeter 以 cli 模式运行
+-t [包含测试计划的 JMX 文件的名称]。
+-l [将样本结果记录到的 JTL 文件的名称]。
+-j [JMeter 运行日志文件的名称]。
+-r 在 JMeter 属性“ remote_hosts ”指定的服务器中运行测试
+-R [远程服务器列表] 在指定的远程服务器上运行测试
+-G [CSV 文件的路径] 仅生成报告仪表板
+-e 负载测试后生成报告仪表板
+-o 负载测试后生成报告仪表板的输出文件夹。文件夹不能存在或为空
+该脚本还允许您指定可选的防火墙/代理服务器信息：
+-H [代理服务器主机名或 IP 地址]
+-P [代理服务器端口]
+例子
+jmeter -n -t my_test.jmx -l log.jtl -H my.proxy.server -P 8000
+
+
+root@560554ec730c:~/test# ls test*/*
+test1/test.jtl  test1/test.log  test2/index.html  test2/statistics.json
+
+test2/content:
+css  js  pages
+
+test2/sbadmin2-1.0.7:
+README.md  bower.json  bower_components  dist  less
+
+通过命令行覆盖属性¶
+Java 系统属性和 JMeter 属性可以直接在命令行上覆盖（而不是修改jmeter.properties）。为此，请使用以下选项：
+
+-D[prop_name]=[值]
+定义一个 java 系统属性值。
+-J[prop_name]=[值]
+定义一个本地 JMeter 属性。
+-G[prop_name]=[值]
+定义要发送到所有远程服务器的 JMeter 属性。
+-G[属性文件]
+定义一个包含要发送到所有远程服务器的 JMeter 属性的文件。
+-L[类别]=[优先级]
+覆盖日志记录设置，将特定类别设置为给定的优先级。
+-L标志也可以在没有类别名称的情况下使用来设置根日志记录级别。
+
+例子：
+
+jmeter -Duser.dir=/home/mstover/jmeter_stuff \
+    -Jremote_hosts=127.0.0.1 -Ljmeter.engine=DEBUG
+jmeter -LDEBUG
+
+=======================================Linux 环境 查看结果 ================================================
+1.命令行测试完后，会生成对应的 *.jtl文件；直接可以在命令行cat *.jtl 查看结果文件；也可以将结果文件导到windows系统在GUI窗口查看结果。
+2.导出测试结果 *.jtl文件到windows系统；
+3.在windows上打开jmeter, 创建测试计划，添加 “查看结果数”、“汇总报告”；
+4.选中“查看结果树”或“汇总报告”，找到“所有数据写入一个文件”, 文件名->浏览，选中 从linux导出的jtl结果文件；
+5.这时就饿可以在windowsGUI界面查看结果了；
+
+=======================================Linux 环境 配置 ================================================
+jmeter命令行指定IP、端口、线程参数(非GUi模式)
+若不能通过命令行配置IP、端口，那每次测试不同的环境，都得重新在windows编写测试计划；
+1、右键“测试计划” -> "添加" -> 配置元件 -> "用户定义变量"
+定义两组自定义变量(名称, 值)：
+变量值中用__P函数（注意是两个下划线，大写的P!!,变量中的host可随意命名）
+my_host, ${__P(my_host)}
+my_port, ${__P(my_port)}
+
+2、同理，在线程组那里，也对线程数、Ramp-Up时间(秒)、循环次数、持续时间(秒)等参数也用__P函数定义；
+线程数：${__P(threadNum)}
+Ramp-Up时间(秒): ${__P(rampupTime)}
+循环次数: ${__P(loopCount)}
+持续时间(秒): ${__P(durationTime)}
+
+3、http中的ip设置为默认值 ${__P(my_host)}
+端口设置为默认值 ${__P(my_port)}
+
+4、测试时用到-J命令来给参数赋值
+格式：-J变量名=值
+
+5、指定端口进行测试：
+jmeter -n -t /aaa-jmeter/szairport1.jmx -l /aaa-jmeter/szairport.jtl -e -o /aaa-jmeter/szairport-report -Jpath=192.168.10.233 -Jport=9085 -JthreadNum=1 -JrampupTime=1 -JloopNum=-1 -Jduration=10-e -o 输出报告文件
+
+root@560554ec730c:~/test# jmeter -n -t 客户风险预警测试_指定IP及端口.jmx -l test3.jtl -Jmy_host=30.79.129.22 -Jmy_port=8030 -JthreadNum=100 -JrampupTime=0 -JloopCount=200
+
+threadNum： 线程数量；
+rampupTime： 完成线程运行时间，配置为0表示并发执行；
+测试结果中，最大值、最小值、平均值的单位为毫秒；
+
+需要注意的是，查看多个jtl文件结果的时候，在载入多个结果之前一定要清空之前的记录。
+即添加“汇总报告”->“所有数据写入文件”->"浏览"，添加第一个jtl文件查看结果后，需要清除该文件的记录，才可以点击“浏览”，加载第二个文件。否则加载的第二个jtl文件结果是受到第一个jtl文件影响的；
+清除文件记录的方法：选中“汇总报告”，右键，选中“清除”即可。
 

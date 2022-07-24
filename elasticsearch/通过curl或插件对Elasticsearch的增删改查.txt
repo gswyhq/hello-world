@@ -201,8 +201,13 @@ curl -XPOST 'localhost:9200/dingding_faq/流程' -H 'Content-Type: application/j
 上面的例子中，为我们创建了一个文档，并且id自动设置为1.
 ES不需要再索引文档前，不需要明确的创建索引，如果执行上面的命令，索引不存在，也会自动的创建索引。
 
-通过id进行查询：
+# 通过id进行查询：
 curl -XGET 'localhost:9200/customer/external/1?pretty'
+# 通过id查询时候，需要指定清楚_type,否则会报错，特别是高版本Elasticsearch,_type默认为_doc, 这个时候也需要显式写出：
+{
+    "error" : "Incorrect HTTP method for uri [/users?pretty=true] and method [POST], allowed: [GET, DELETE, PUT, HEAD]",
+    "status" : 405
+}
 
 更新数据
  更新文档: 修改id=1的name属性，并直接增加属性和属性值，但若id=1的文档不存在，则下面的更新会报错：
@@ -349,6 +354,16 @@ curl -XGET 'localhost:9200/xinxin_templates_question_alias/_search?pretty' -H 'C
     }
   }
 } '
+
+# 查询满足某条件的记录有多少条数，即查询记录数：
+curl -XPOST 'localhost:9200/index_name/_doc/_count' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "level.keyword": "area"
+    }
+  }
+}'
 
 API还允许使用HEAD检查文档的存在，例如：
 curl -XHEAD 'localhost:9200/twitter/tweet/0?pretty'

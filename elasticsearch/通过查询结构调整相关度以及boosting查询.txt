@@ -199,3 +199,172 @@ GET /_search
     }
   }
 }
+
+boost参数被用来增加一个子句的相对权重(当boost大于1时)，或者减小相对权重(当boost介于0到1时)，但是增加或者减小不是线性的。换言之，boost设为2并不会让最终的_score加倍。
+相反，新的_score会在适用了boost后被归一化(Normalized)。每种查询都有自己的归一化算法(Normalization Algorithm)。但是能够说一个高的boost值会产生一个高的_score。
+如果你在实现你自己的不基于TF/IDF的相关度分值模型并且你需要对提升过程拥有更多的控制，你可以使用function_score查询，它不通过归一化步骤对文档的boost进行操作。
+
+curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "function_score": {
+      "query": { "match_all": {} },
+      "boost": "5", 
+      "functions": [
+        {
+          "filter": { "match": { "test": "bar" } },
+          "random_score": {}, 
+          "weight": 23
+        },
+        {
+          "filter": { "match": { "test": "cat" } },
+          "weight": 42
+        }
+      ],
+      "max_boost": 42,
+      "score_mode": "max",
+      "boost_mode": "multiply",
+      "min_score": 42
+    }
+  }
+}
+'
+
+如果没有使用函数给出过滤器query，则这等效于指定 "match_all": {}
+首先，每个文档都由定义的函数评分。参数 score_mode指定如何组合functions计算的分数：
+multiply 分数相乘（默认）
+sum 分数相加
+avg 分数是平均的
+first 应用具有匹配过滤器的第一个函数
+max 使用最高分
+min 使用最低分数
+
+可以通过设置max_boost参数来限制新的分数不超过一定的限制。默认max_boost值为 FLT_MAX。
+每个函数的分数可以使用用户定义的 weight 进行调整。weight可以在functions数组中每个函数定义，并乘以相应函数计算的分数。
+min_score参数可以置为所需的分数阈值,以排除不满足某个分数阈值的文档。
+为了min_score工作，查询返回的所有文档都需要进行评分，然后一一过滤掉。
+
+参数boost_mode定义，新计算的函数分数与查询的分数如何结合：
+multiply 查询分数和函数分数相乘（默认）
+replace 仅使用函数分数，忽略查询分数
+sum 查询分数和函数分数相加
+avg 平均的
+max 查询分数和函数分数的最大值
+min 查询分数和函数功能分数的最小值
+
+function_score查询提供了如下几种类型的评分函数：
+script_score
+weight
+random_score
+field_value_factor
+decay functions: gauss, linear, exp
+
+script_score函数允许您包装另一个查询并自定义它的评分，可以选择使用脚本表达式从文档中的其他数字字段值派生的计算。
+分数必须为非负数。否则，Elasticsearch 会返回错误。
+random_score:会使得ES查询结果有一定的随机性；每次的结果不一致；
+
+function_score评分示例：
+{
+  "size": 10,
+  "query": {
+    "function_score": {
+      "score_mode": "max",
+      "functions": [
+        {
+          "filter": {
+            "match": {
+              "name": "潮loft"
+            }
+          },
+          "script_score": {
+            "script": {
+              "params": {
+                "a": 5,
+                "b": 1.2
+              },
+              "source": "params.a / Math.pow(params.b, doc['name.keyword'].value.length())"
+            }
+          }
+        },
+        {
+          "filter": {
+            "terms": {
+              "name.keyword": [
+                "ALOFT"
+              ]
+            }
+          },
+          "weight": 10
+        },
+        {
+          "filter": {
+            "terms": {
+              "level2.keyword": [
+                "面包甜点",
+                "其它美食"
+              ]
+            }
+          },
+          "weight": 0.5
+        },
+        {
+          "filter": {
+            "terms": {
+              "level2.keyword": [
+                "商务住宅相关",
+                "商场"
+              ]
+            }
+          },
+          "random_score": {},  
+          "weight": 1.2
+        }
+      ],
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "city.keyword": "深圳市"
+              }
+            },
+            {
+              "dis_max": {
+                "queries": [
+                  {
+                    "match": {
+                      "name.keyword": {
+                        "query": "ALOFT",
+                        "boost": 600
+                      }
+                    }
+                  },
+                  {
+                    "match_phrase": {
+                      "name": {
+                        "query": "ALOFT",
+                        "boost": 400
+                      }
+                    }
+                  },
+                  {
+                    "match": {
+                      "name": {
+                        "query": "A LOFT",
+                        "boost": 200
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "boost_mode": "multiply"
+    }
+  }
+}
+
+参考资料：https://www.elastic.co/guide/en/elasticsearch/reference/8.2/query-dsl-function-score-query.html
+

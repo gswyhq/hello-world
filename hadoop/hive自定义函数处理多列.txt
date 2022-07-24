@@ -160,6 +160,16 @@ jack    2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
 hel     2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
 nack    2018-04-01 10:26:14     2018-04-01 10:26:21     10      7
 
+多个Lateral View 同时使用：
+Lateral View左边的字段都可以使用
+select 
+  name, 
+  t_course.course, 
+  t_hobby.hobby 
+from lateral_test 
+lateral view explode(split(course, ',')) t_course as course 
+lateral view explode(split(hobby, ',')) t_hobby as hobby;
+
 合并为一列的使用情况：
 select split_hour( concat(begintime,',',endtime));
 

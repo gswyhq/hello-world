@@ -326,3 +326,143 @@ pip uninstall -y tensorflow keras tf-nightly keras-nightly
 pip install tensorflow
 注：pip install tensorflow 会安装：keras tensorflow tensorflow-estimator
 
+# 问题，含有自定义网络层，训练完，保存模型报错：
+model.save("imdb.h5")
+NotImplementedError: Layer TokenAndPositionEmbedding has arguments in `__init__` and therefore must override `get_config`.
+解决方法：
+给自定义网络层，添加get_config函数：
+在定义的Class里，增加一个get_config函数用于配置的更新。
+其中__init__中的声明过的所有属性，需要在get_config函数中update一下。
+
+get_config模板如下，替换掉再跑就好了。
+
+def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            '属性1': self.属性1,
+            '属性2': self.属性2,
+            '属性3': self.属性3,
+        })
+        return config
+示例：
+
+class TokenAndPositionEmbedding(layers.Layer):
+    def __init__(self, maxlen, vocab_size, embed_dim):
+        super(TokenAndPositionEmbedding, self).__init__()
+        self.token_emb = layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
+        self.pos_emb = layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'token_emb': self.token_emb,
+            'pos_emb': self.pos_emb,
+        })
+        return config
+
+# 问题：
+出现dimension错误
+ValueError: Dimension must be 5 but is 4 for ‘attention_1/transpose_7’ (op: ‘Transpose’) with input shapes: [?,8,?,8,?], [4].
+参考解决：https://ask.csdn.net/questions/5610447
+
+keras降级为2.2.4
+（pip install keras==2.2.4 -i http://pypi.douban.com/simple --trusted-host pypi.douban.com）
+
+
+# 问题：
+问题描述： 
+
+from keras.datasets import imdb
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
+提示错误：
+
+ValueError: Object arrays cannot be loaded when allow_pickle=False
+解决方案：
+
+#好像是numpy版本的问题，numpy1.17的版本和keras没有完全兼容。
+ 
+#你在上面的代码上加上下面这段
+ 
+import numpy as np
+old = np.load
+np.load = lambda *a,**k: old(*a,**k,allow_pickle=True)
+from keras.datasets import imdb
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
+
+# 问题；在 Jupyter Notebook 中显示模型形状
+# 解决方法：
+import pydot
+from keras.utils import plot_model
+from IPython.display import Image 
+plot_model(model, show_shapes=True, show_layer_names=True, to_file="./result/images/model2.png")
+Image("./result/images/model2.png")
+
+# 问题：
+keras 模型训练时候出现：
+Tensor input_1:0, specified in either feed_devices or fetch_devices was not found in the Graph
+主要是因为：多个Keras Model实例同时加载，导致运行结果混乱的问题
+解决方法：
+model.fit(x=input_x, y=input_y, validation_data=(validation_x, validation_y), epochs=3, batch_size=16, verbose=0)
+改为：
+keras.backend.clear_session()
+config = tf.ConfigProto(
+#     device_count={'GPU': 1},
+    intra_op_parallelism_threads=1,
+    allow_soft_placement=True
+)
+
+config.gpu_options.allow_growth = True
+config.gpu_options.per_process_gpu_memory_fraction = 0.6
+
+session = tf.Session(config=config)
+
+keras.backend.set_session(session)
+
+with session.as_default():
+    with session.graph.as_default():
+        model = make_model() # 特别是使用jupyter时候，若之前训练了一遍，重新训练时候，一定要重新定义模型；否则使用的还是旧模型
+        model.fit(x=input_x, y=input_y, validation_data=(validation_x, validation_y), epochs=3, batch_size=16, verbose=0)
+
+# 加载已训练的模型二次训练时候报错：
+RuntimeError: You must compile a model before training/testing. Use `model.compile(optimizer, loss)`.
+解决方法：
+在加载过后，训练之前添加一句 compile
+model = load_model(last_best_model, compile=False, custom_objects={})
+model.compile(loss='binary_crossentropy',optimizer='adam', metrics=['accuracy']) # 添加该句
+model.fit(x=input_x, y=input_y, ...
+
+# 问题添加正则项后，loss持续降低，但acc不变：
+# kernel_regularizer：施加在权重上的正则项，为keras.regularizer.Regularizer对象
+# bias_regularizer：施加在偏置向量上的正则项，为keras.regularizer.Regularizer对象
+# activity_regularizer：施加在输出上的正则项，为keras.regularizer.Regularizer对象
+解决方法：删除掉 activity_regularizer 正则项，仅仅保留 kernel_regularizer 正则项；
+
+# 模型训练或者加载、转换PB模型时候报错：
+NotImplementedError: numpy() is only available when eager execution is enabled.
+解决方法：
+tensorflow 1.x 是在错误语句前面添加一句：
+tf.enable_eager_execution()
+tensorflow 2.x 是没有该语句的；
+直接重新import tensorflow 
+再执行改代码即可；
+
+# tensorflow 2.x 报错：
+AttributeError: module 'tensorflow' has no attribute 'enable_eager_execution'
+重新import tensorflow 
+或者：
+tf.compat.v1.enable_v2_behavior()
+
+# 在jupyter 中自定义评估函数，第二次训练的时候，报错：
+ValueError: Could not interpret metric function identifier: 14332
+解决方法：
+重新将定义的评估函数部分代码单元（cell below），重新运行一下，再运行训练代码的代码单元(cell below)即可；
+
+# Tensorflow 2.x 保存模型出错：
+NotImplementedError: Save or restore weights that is not an instance of `tf.Variable` is not supported in h5, use `save_format='tf'` instead. Got a model or layer IntegerLookup with weights [<keras.layers.preprocessing.index_lookup.VocabWeightHandler object at 0x7f5156419c10>]
+解决方法1：
+只有放弃model.save()
+转而使用model.save_weights()
+解决方法2：
+此模型改为用函数定义，便不会再出现这个错误。
+故而需重新定义模型，重新训练；
+

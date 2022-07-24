@@ -99,3 +99,13 @@ ssh登录时，自动加载~/.bash_aliases、~/.bashrc文件：
 # 有可能是要求添加“~/.bash_profile”文件，文件内有：
 source ~/.bashrc
 
+ssh 登录服务器后，中文显示问号：
+解决方法，在~/.bashrc 文件中添加如下内容：
+
+export LANG='UTF-8' 
+export LC_ALL='zh_CN.UTF-8' 
+export LC_CTYPE='zh_CN.UTF-8'
+
+保存，并使之使配置生效：
+source ~/.bashrc
+

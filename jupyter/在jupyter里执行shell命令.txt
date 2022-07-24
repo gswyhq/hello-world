@@ -5,3 +5,12 @@
 只要在 shell 命令前加 ! 即可，如：
 !tar -zxvf sp.tgz
 
+# jupyter-notebook中调用Shell变量
+如果想将变量a单独显示是没有问题的，用法和shell脚本中的用法一样，直接前面加个$号就可以。
+
+但是如果想要将变量嵌入到其他字符中，就不好使了，直接被隐身了。
+a=123
+!echo $a
+!echo ${a}bcd
+!echo {a}bcd
+

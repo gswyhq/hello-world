@@ -12,6 +12,9 @@ curl -XPUT localhost:9200/索引名称/类型名称/_mapping?pretty -d '{"类型
 
 curl -XPUT localhost:9200/abc/abc/_mapping?pretty -d '{"abc":{"properties":{"title":{"type":"text","index":"analyzed"}}}}'
 
+# 查看占用内存消耗情况：
+curl localhost:9200/_cat/indices
+curl localhost:9200/_cat/indices/{index}
 
 ES curl bulk 批量导入数据
 

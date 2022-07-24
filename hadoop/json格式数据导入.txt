@@ -1,0 +1,17 @@
+
+
+CREATE EXTERNAL TABLE `db3.test_imp06`(
+`name` string,
+`location` struct<lng:string, lat:string>
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
+
+
+insert into db3.test_imp06
+select
+    name ,
+    named_struct("lon", lng, "lat", lat)
+from
+    db3.address_result_join_addr_20220323_1716;
+
+

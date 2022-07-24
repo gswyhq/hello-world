@@ -13,6 +13,12 @@ drop database db_name;
 采用 if exists判断数据库是否存在，若存在则删除：
 drop database if exists db_name;
 
+# hive删除EXTERNAL外表
+  外表不能按一般步骤drop，否则你还得手动去hdfs rm -r xxx文件，并且还可能遇到因为文件太大而不能删除等问题；
+  最好需要执行以下两个步骤：
+  ALTER TABLE xxx SET TBLPROPERTIES('EXTERNAL'='False');
+  drop table xxx;
+
 如果数据库不为空，可以采用cascade命令，强制删除数据库：
 drop database db_name cascade;
 
@@ -104,11 +110,11 @@ $ hive -e "select user, login_timestamp from user_login" > /tmp/out.txt
  select * from user_login
 
 查看附件数据命令：
-hadoop dfs -ls /apps-data/hduser2020/caijing_data
+hadoop dfs -ls /apps-data/hive_user2020/caijing_data
 获取数据文件：
-hadoop dfs -get /apps-data/hduser2020/caijing_data/259786.tar.gz
+hadoop dfs -get /apps-data/hive_user2020/caijing_data/259786.tar.gz
 # 查看数据文件大小：
-# hadoop dfs -du -h /apps-data/hduser2020/caijing_data/259786.tar.gz
+# hadoop dfs -du -h /apps-data/hive_user2020/caijing_data/259786.tar.gz
 
 # 查看某个数据表数据最后的更新时间：
 第一步，获取hdfs路径：
@@ -200,6 +206,11 @@ hive分组排序函数
 注意： rank 在这里是别名，可任意
 partition by：类似于Hive的建表，分区的意思。
 order by ： 排序，默认是升序，加desc降序。
+
+# hive 去重查询，distince 和 group by：
+select name,age from test group by name,age;
+select distinct name,age from test;
+如果数据较多，distinct效率会更低一些，一般推荐使用group by。
 
 # 统计计数的高级用法：
 SELECT

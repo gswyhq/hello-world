@@ -1,6 +1,6 @@
 
 第一步：进入hive终端：
-[hadoop@SZE-L0403067 elasticsearch-hadoop-7.9.1]$ hive
+[hadoop@user123 elasticsearch-hadoop-7.9.1]$ hive
 
 第二步：添加jar包：
 hive> add jar /home/hadoop/elasticsearch-hadoop-7.9.1/elasticsearch-hadoop-7.9.1.jar;

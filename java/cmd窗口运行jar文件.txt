@@ -1,0 +1,20 @@
+
+cmd窗口运行jar文件示例：
+jdk1.8.0_172\bin\java.exe -jar -Dspring.profiles.active=dev -Dserver.port=8020 -Dfile.encoding=UTF-8 reveal-1.0-SNAPSHOT.jar
+
+reveal-1.0-SNAPSHOT.jar 文件的打包生成：
+启动Intellij IDEA, 打开项目，右侧选择 Vaven -> abcdtrade -> clean -> package;
+abcd_trade/abcdtrade_address/reveal/target 路径下即存在：reveal-1.0-SNAPSHOT.jar文件；
+
+问题：Cmd运行Jar出现乱码问题
+解决方法：
+设定cmd的编码为utf-8
+打开cmd，输入以下命令
+chcp 65001
+这样既可以更改cmd的编码为UTF-8了， 再运行jar文件即可。
+以下是常用的cmd编码
+字符编码	对应字符
+GBK(默认)	936
+美国英语	437
+utf-8	65001
+

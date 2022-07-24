@@ -1,9 +1,11 @@
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)  # 连续 patience 次，val_loss 都没有得到改善则退出训练。
 
-    model_checkpoint = ModelCheckpoint(filepath=os.path.join(model_save_path,
-                                                             'ner-classify-{epoch:02d}-{ner_out_crf_accuracy:.4f}-{rel_out_acc:.4f}.hdf5'),
-                                       save_best_only=True, save_weights_only=False)
+    model_checkpoint = ModelCheckpoint(filepath=os.path.join(model_save_path, 'ner-classify-{epoch:02d}-{ner_out_crf_accuracy:.4f}-{rel_out_acc:.4f}.hdf5'),
+                                   monitor = "val_acc", # 需要监视的值；默认是val_loss
+                                   mode='auto', # mode：'auto'，'min'，'max'之一，在save_best_only=True时决定性能最佳模型的评判准则， 例如，当监测值为val_acc时，模式应为max，当监测值为val_loss时，模式应为min。在auto模式下，评价准则由被监测值的名字自动推断。
+                                   save_best_only=True, # 当设置为True时，监测值有改进时才会保存当前的模型
+                                   save_best_only=True, save_weights_only=False)
 
     tb = TensorBoard(log_dir=log_dir,  # log 目录
                      histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
@@ -28,7 +30,7 @@
                      )
 
 
-EarlyStopping是Callbacks的一种，callbacks用于指定在每个epoch开始和结束的时候进行哪种特定操作。Callbacks中有一些设置好的接口，可以直接使用，如’acc’,’val_acc’,’loss’和’val_loss’等等。 
+EarlyStopping是Callbacks的一种，callbacks用于指定在每个epoch开始和结束的时候进行哪种特定操作。Callbacks中有一些设置好的接口，可以直接使用，如'acc','val_acc','loss'和'val_loss'等等。
 EarlyStopping是可以用于提前停止训练的callbacks。具体地，可以达到当训练集上的loss不在减小（即减小的程度小于某个阈值）的时候停止继续训练。
 
 patience: 当early stop被激活(如发现 loss 相比上一个 epoch 训练没有下降)，则经过 patience 个 epoch 后停止训练

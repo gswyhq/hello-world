@@ -1,0 +1,292 @@
+
+1, 经纬度数据导入，创建mapping：
+curl -XPUT -H 'Content-Type: application/json' http://localhost:9200/map -d '{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+      "properties":{
+        "name":{
+          "type":"text"
+        },
+        "location":{
+          "type":"geo_point"
+        }
+      }
+    }
+}'
+
+2,添加文档数据：
+curl -XPUT -H 'Content-Type: application/json' http://localhost:9200/map/_doc/1 -d '{
+  "name":"天安门",
+  "location":{
+    "lon": 116.403694,
+    "lat":39.914492
+  }
+}'
+
+cat test.json
+{"create": {"_index": "map", "_id": "2"}}
+{"name": "深圳市", "location": {"lon": 114.064505, "lat": 22.54918}}
+{"create": {"_index": "map", "_id": "3"}}
+{"name": "上海市", "location": {"lon": 121.480248, "lat": 31.236276}}
+{"create": {"_index": "map", "_id": "4"}}
+{"name": "广州市", "location": {"lon": 113.270766, "lat": 23.135618}}
+
+curl -XPOST localhost:9200/_bulk -H 'Content-Type: application/json'  --data-binary @test.json
+
+
+当然也可用其他es支持的格式导入，如：
+curl -X PUT "localhost:9200/my_map_index?pretty" -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "properties": {
+      "location": {
+        "type": "geo_point"
+      }
+    }
+  }
+}
+'
+curl -X PUT "localhost:9200/my_map_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as an object",
+  "location": { 
+    "lat": 41.12,
+    "lon": -71.34
+  }
+}
+'
+curl -X PUT "localhost:9200/my_map_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as a string",
+  "location": "41.12,-71.34" 
+}
+'
+curl -X PUT "localhost:9200/my_map_index/_doc/3?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as a geohash",
+  "location": "drm3btev3e86" 
+}
+'
+curl -X PUT "localhost:9200/my_map_index/_doc/4?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as an array",
+  "location": [ -71.34, 41.12 ] 
+}
+'
+curl -X PUT "localhost:9200/my_map_index/_doc/5?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as a WKT POINT primitive",
+  "location" : "POINT (-71.34 41.12)" 
+}
+'
+
+curl -X PUT "localhost:9200/my_map_index/_doc/6?pretty" -H 'Content-Type: application/json' -d'
+{
+  "text": "Geo-point as an object",
+  "location": {
+    "lat": "41.1200",
+    "lon": "-71.3410"
+  }
+}
+';
+
+curl -X GET "localhost:9200/my_map_index/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "geo_bounding_box": { 
+      "location": {
+        "top_left": {
+          "lat": 42,
+          "lon": -72
+        },
+        "bottom_right": {
+          "lat": 40,
+          "lon": -74
+        }
+      }
+    }
+  }
+}
+'
+# 注意，字符串地理点按 顺序排列lat,lon，而数组地理点按相反顺序排列：lon,lat。
+
+2,根据经纬度查询：
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "geo_distance": {
+      "location": {
+        "lon": 113.960423,
+        "lat": 22.546035
+      },
+      "distance": 200000,
+      "distance_type": "arc"
+    }
+  }
+}'
+
+geo_distance :直线距离检索方式, 在直线距离范围内的点都返回；
+geo_bounding_box: 以2个点确定一个矩形，获取再矩形内的数据
+geo_polygon:以多个点，确定一个多边形，获取多边形的全部数据
+#确定半径 "distance":20000, 
+以指定位置为中心的圆的半径。落入这个圈子的点被认为是匹配的。distance可以以各种单位指定
+
+# "distance_type":"arc"
+如何计算距离。可以是arc（默认）或plane（更快，但在长距离和靠近两极时不准确）。
+
+unit:距离单位，默认情况下，距离单位是m（米），但它也可以接受：（mi英里），in（英寸），yd（码），km（公里），cm（厘米），mm（毫米）;
+
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "geo_distance": {
+      "location": {
+        "lon": 113.960423,
+        "lat": 22.546035
+      },
+      "distance": 200,
+      "unit": "km",
+      "distance_type": "arc"
+    }
+  }
+}'
+
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {}
+        }
+      ],
+      "filter": {
+        "geo_distance": {
+          "distance": "200km",
+          "location": {
+            "lon": 113.960423,
+            "lat": 22.546035
+          }
+        }
+      }
+    }
+  }
+}'
+
+# 多边形搜索，搜索对应的图形内的点：
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "geo_polygon": {
+      "location": {
+        "points": [
+          {
+            "lat": 22.509063,
+            "lon": 113.956461
+          },
+          {
+            "lat": 22.616772,
+            "lon": 114.037672
+          },
+          {
+            "lat": 22.538083,
+            "lon": 114.122598
+          }
+        ]
+      }
+    }
+  }
+}'
+
+# 矩形，对角线搜索：
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "geo_bounding_box": {
+      "location": {
+        "bottom_right": {
+          "lat": 22.509063,
+          "lon": 113.956461
+        },
+        "top_left": {
+          "lat": 23.157107,
+          "lon": 113.263113
+        }
+      }
+    }
+  }
+}'
+
+# 在指定点200km范围内搜索，并对搜集结果按距离由近及远排序：
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "geo_distance": {
+      "distance": "200km",
+      "location": {
+        "lat": 22.509063,
+        "lon": 113.956461
+      }
+    }
+  },
+  "sort": [
+    {
+      "_geo_distance": {
+        "location": {
+          "lat": 22.509063,
+          "lon": 113.956461
+        },
+        "order": "asc"
+      }
+    }
+  ]
+}'
+
+注：排序时候，对应的关键词是"_geo_distance"，首位有个下划线，升序排序（asc），若需要降序排序，则将order指定为desc;
+
+# 指定经纬度范围内搜索，并优先按分数排序，在按距离排序：
+curl -XPOST localhost:9200/map/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "geo_distance": {
+            "distance": "20km",
+            "location": {
+              "lat": 22.509063,
+              "lon": 113.956461
+            }
+          }
+        }
+      ],
+      "must": [
+        {
+          "match": {
+            "name": "高新园"
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  },
+  "from": 0,
+  "size": 10,
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "_geo_distance": {
+        "location": {
+          "lat": 22.509063,
+          "lon": 113.956461
+        },
+        "order": "desc"
+      }
+    }
+  ],
+  "aggs": {}
+}'
+
+
+

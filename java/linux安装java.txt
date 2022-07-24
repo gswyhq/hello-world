@@ -1,0 +1,12 @@
+
+# 方法一：
+~$ apt-get install openjdk-8-jdk
+
+# 方法二：
+步骤1：https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz 下载：jdk-8u191-linux-x64.tar.gz
+步骤2：cd /root && mkdir /root/java && tar -zxf jdk-8u191-linux-x64.tar.gz -C /root/java
+步骤3： echo "export JAVA_HOME=/root/java/jdk1.8.0_191/" >> ~/.bashrc && \
+    echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc && \
+    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc && \
+    source ~/.bashrc
+

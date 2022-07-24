@@ -133,6 +133,10 @@ defg
 gswyhq@gswyhq-PC:~$ echo ${alpha: -3} 
 xyz
 
+# 截取倒数3个字符:
+echo ${alpha:0-3}
+xyz
+
 # 截取第三个字符之后到倒数第四个字符
 gswyhq@gswyhq-PC:~$ echo ${alpha:3:-4} 
 defghijklmnopqrstuv
@@ -140,9 +144,19 @@ defghijklmnopqrstuv
 # 截取倒数第五个字符后面到倒数第二个字符， 第一个冒号后面有空格
 gswyhq@gswyhq-PC:~$ echo ${alpha: -5:-2} 
 vwx
+centos6不支持这种写法,可能会报错：-bash: -4: substring expression < 0
+centos7上是可以的，取倒数第5个至倒数第二个之间的字符；
+
+# 截取倒数第六个之后的4个字符，即 [-6:-4];
+gswyhq@gswyhq-PC:~$ echo ${alpha:0-6:4}
+uvwx
+
+# 截取指定字符串左侧字符：
+gswyhq@gswyhq-PC:~$ echo ${alpha%fghi*}
+abcde
 
 计算字符串长度 
- 
+
 echo | awk '{print length("'${string}'")}' 
  
 // 结果为： 29 
@@ -151,6 +165,14 @@ echo | awk '{print length("'${string}'")}'
 echo | awk '{ print toupper("test"), tolower("TEST") }' 
  
 结果为: TEST  test
+
+# shell 大小写转换：
+[root@centos8 ~]#str="i love python"
+[root@centos8 ~]#echo ${str^^}
+I LOVE PYTHON
+[root@centos8 ~]#str="WELCOME TO BEIJING"
+[root@centos8 ~]#echo ${str,,}
+welcome to beijing
 
 # 替换文件中的字符串,将文件default_excalibur.cfg中的所有`127.0.0.1`替换为`0.0.0.0`：
 sed -i s/127.0.0.1/0.0.0.0/g "default_excalibur.cfg"

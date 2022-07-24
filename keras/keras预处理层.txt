@@ -1,0 +1,17 @@
+
+
+使用 Keras 预处理层，可以构建和导出真正的端到端模型：接受原始图像或原始结构化数据作为输入的模型；自行处理特征归一化或特征值索引。
+tf中可用的数据预处理层包括：
+文本预处理：
+tf.keras.layers.TextVectorization：将原始字符串转换为可由Embedding层或Dense层读取的编码表示。
+数值特征处理：
+tf.keras.layers.Normalization：执行输入特征的特征归一化。
+tf.keras.layers.Discretization: 将连续的数字特征转换为整数分类特征。
+分类特征处理：
+tf.keras.layers.CategoryEncoding：将整数分类特征转换为单热、多热或计数密集表示。
+tf.keras.layers.Hashing：执行分类特征散列，也称为“散列技巧”。
+tf.keras.layers.StringLookup：将字符串分类值转换为可由Embedding层或Dense层读取的编码表示。
+tf.keras.layers.IntegerLookup：将整数分类值转换为可由Embedding层或Dense层读取的编码表示。
+
+
+

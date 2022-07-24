@@ -17,6 +17,7 @@ MobaXterm远程连接服务器中文乱码的问题
 解决方案：
 方法1，点击顶端的 Settings -> configuration -> Terminal -> Font 选择 MobaFont; Charset 选择 UTF-8(Unicode)
 方法2，点击左侧的 Sessions -> 选择登录的服务器,右键 -> Edit session -> Terminal settings -> Terminal font settings -> Font 选择 MobaFont; Charset 选择 UTF-8(Unicode)
+方法3，点击左侧的 Sessions -> 选择登录的服务器,右键 -> Edit session -> SSH -> Advanced SSH settings -> Execude command 输入 export LANG=zh_CN.utf8;locale|grep LANG;locale -a|grep -i zh_CN -> 点击 OK
 
 MobaXterm终端输入中文正常，但vi 编辑文件，文件内中文显示乱码，或者登录后各项操作，提示:
 -bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)

@@ -18,11 +18,11 @@ Caused by: org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.security.Acce
 
 tar -xzf spark-2.4.8-bin-hadoop2.7.tgz
 
-[root@SZE-L0403067 waterdrop-1.5.1]# cp -r /root/test_clickhouse/waterdrop-1.5.1 /home/hadoop/
-[root@SZE-L0403067 waterdrop-1.5.1]# cp -r /root/test_clickhouse/spark-2.4.8-bin-hadoop2.7 /home/hadoop/
-[root@SZE-L0403067 waterdrop-1.5.1]# chown hadoop:hadoop -R /home/hadoop/spark-2.4.8-bin-hadoop2.7
-[root@SZE-L0403067 waterdrop-1.5.1]# chown hadoop:hadoop -R /home/hadoop/waterdrop-1.5.1
-[root@SZE-L0403067 waterdrop-1.5.1]# su - hadoop
+[root@user123 waterdrop-1.5.1]# cp -r /root/test_clickhouse/waterdrop-1.5.1 /home/hadoop/
+[root@user123 waterdrop-1.5.1]# cp -r /root/test_clickhouse/spark-2.4.8-bin-hadoop2.7 /home/hadoop/
+[root@user123 waterdrop-1.5.1]# chown hadoop:hadoop -R /home/hadoop/spark-2.4.8-bin-hadoop2.7
+[root@user123 waterdrop-1.5.1]# chown hadoop:hadoop -R /home/hadoop/waterdrop-1.5.1
+[root@user123 waterdrop-1.5.1]# su - hadoop
 
 设置spark的路径，即更改文件：waterdrop-1.5.1/config/waterdrop-env.sh
 将 SPARK_HOME=${SPARK_HOME:-/opt/spark}
@@ -30,10 +30,10 @@ tar -xzf spark-2.4.8-bin-hadoop2.7.tgz
 SPARK_HOME=${SPARK_HOME:/home/hadoop/spark-2.4.8-bin-hadoop2.7}
 
 # 进入waterdrop工作目录，并迁移数据：
-[hadoop@SZE-L0403067 ~]$ cd waterdrop-1.5.1/
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ ls
+[hadoop@user123 ~]$ cd waterdrop-1.5.1/
+[hadoop@user123 waterdrop-1.5.1]$ ls
 bin  config  docs  lib  LICENSE  plugins  README.md
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ ./bin/start-waterdrop.sh --master local[4] --deploy-mode client --config ./config/hdfs-clickhouse2.conf
+[hadoop@user123 waterdrop-1.5.1]$ ./bin/start-waterdrop.sh --master local[4] --deploy-mode client --config ./config/hdfs-clickhouse2.conf
 
 # 迁移数据前的准备工作：
 # 准备工作1，准备hive数据表：
@@ -58,7 +58,7 @@ curl localhost:8124 -d 'CREATE TABLE tutorial.hdfs2ch2
 
 # 准备工作3，编写迁移数据文件：
 
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ cat config/hdfs-clickhouse2.conf
+[hadoop@user123 waterdrop-1.5.1]$ cat config/hdfs-clickhouse2.conf
 spark {
   #程序名称
   spark.app.name = "Waterdrop"
@@ -117,21 +117,21 @@ output {
     bulk_size = 20000
 }
 }
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$
+[hadoop@user123 waterdrop-1.5.1]$
 注：hive创建表的hdfs路径，可以通过查hive表得知：
  若有多个字段需要转换数据类型，则在filter下写多个convert即可；
  若不需要有日期格式转换，则将 date 就后面的 {} 都注释掉即可；
 
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ hive -e "show create table test_hdfs2ch2"|grep -A 1 LOCATION
+[hadoop@user123 waterdrop-1.5.1]$ hive -e "show create table test_hdfs2ch2"|grep -A 1 LOCATION
 OK
 LOCATION
   'hdfs://12.12.21.22:9001/user/hive/warehouse/test_hdfs2ch2'
 
 # 至此，准备工作都完成，直接导入数据即可：
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ ./bin/start-waterdrop.sh --master local[4] --deploy-mode client --config ./config/hdfs-clickhouse2.conf
+[hadoop@user123 waterdrop-1.5.1]$ ./bin/start-waterdrop.sh --master local[4] --deploy-mode client --config ./config/hdfs-clickhouse2.conf
 # 导入完成后，即可在clickhouse查询到对应的导入数据：
 
-[hadoop@SZE-L0403067 waterdrop-1.5.1]$ curl localhost:8124 -d 'select * from tutorial.hdfs2ch2'
+[hadoop@user123 waterdrop-1.5.1]$ curl localhost:8124 -d 'select * from tutorial.hdfs2ch2'
 1       zhangsan        2020-01-01 01:01:01
 2       lisi    2020-01-01 01:01:01
 

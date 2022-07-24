@@ -1,0 +1,8 @@
+
+问题：jmeter使用报错：
+Error: Unable to access jarfile ApacheJMeter.jar
+errorlevel=1
+问题原因及解决方法：
+应在官网 https://jmeter.apache.org/download_jmeter.cgi 下载 Binaries包，而非是Source包；
+即下载编译好的二进制包，而非源码包；
+

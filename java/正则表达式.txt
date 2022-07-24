@@ -1,0 +1,18 @@
+
+零宽断言
+(?=exp)也叫零宽度正预测先行断言，它断言被匹配的字符串以表达式exp结尾但除了结尾以外的部分。比如\b\w+(?=ing\b)，匹配以ing结尾的单词的前面部分(除了ing以外的部分)，如查找I'm singing while you're dancing.时，它会匹配sing和danc。
+(?<=exp)也叫零宽度正回顾后发断言，它断言自身出现的位置的前面能匹配表达式exp。比如(?<=\bre)\w+\b会匹配以re开头的单词的后半部分(除了re以外的部分)，例如在查找reading a book时，它匹配ading。
+
+代码/语法	说明
+(?=exp)	匹配exp前面的位置
+(?<=exp)	匹配exp后面的位置
+(?!exp)	匹配后面跟的不是exp的位置
+(?<!exp)	匹配前面不是exp的位置
+
+Pattern pattern = Pattern.compile("(?<=^.{15,50}[0-9a-zA-Z]{1,6}[栋幢座区]).{1,20}$", Pattern.UNICODE_CHARACTER_CLASS);
+address = pattern.matcher(address).replaceAll("");
+
+————————————————
+版权声明：本文为CSDN博主「晓宇码匠」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_37651267/article/details/90967365
+

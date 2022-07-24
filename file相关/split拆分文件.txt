@@ -54,6 +54,12 @@ count=blocks：只拷贝输入文件的前blocks块
 [gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=103M count=16 skip=32 of=file3
 [gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=103M count=16 skip=48 of=file4
 
+或者(分成四块，每块大小1.6G，且每块存储为一个文件)：
+[gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=0 of=file1
+[gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=1 of=file2
+[gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=2 of=file3
+[gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=3 of=file4
+
 # 将拆分后的文件合并成一个文件
 [gswyhq.IQSZ-L4856] ➤ cat file1 file2 file3 file4 > file_all
 

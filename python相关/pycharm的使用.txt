@@ -56,9 +56,19 @@ $ conda clean -a
 File -> Invalidate Caches / Restart...
 出现弹框有四个选项：Invalidate and Restart（清空缓存并重启）、 Invalidate（清空缓存）、Cancel（取消）和Just Restart（仅重启）.
 
+# pycharm 背景色的设置，设置背景为白色
+Files--Settings--Appearance&Behavior--Appearance--Theme,选择Intelli Light
+
 # pycharm 无法代码自动补全：
 1，关闭掉 省电模式：
 File -> Power Save Mode, 取消勾选；
 2，设置editor
 File -> setting -> Editor -> Inspections -> 勾选上 Python 和 Spelling 
+
+# 关闭自动换行
+有时候一行内容过多，pycharm在显示的时候会多行显示，关闭自动换行的方法：
+方法1（仅对当前Py文件）：View ->  Active Editor -> 取消勾选 Use Soft Wraps
+对所有文件都起到效果，就要在setting里面进行操作。
+方法2（针对所有py文件）：File -> Settings -> Editor -> General -> Use soft wraps in console（不选中则不换行）。
+
 

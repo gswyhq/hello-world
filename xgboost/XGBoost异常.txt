@@ -1,0 +1,8 @@
+
+# 问题：xgboost在多核CPU机器上训练超级慢，如40个CPU的集群机器
+解决方法：xgboost设置cpu核数
+根据nthread 这个参数进行设置
+xg默认是满核 运行，设置不同核数运行速度，一般情况下核数多速度快；
+有时候核数多的集群，速度超级慢，这个时候不妨将nthread设置为1，速度反而暴增；
+xgb_model = xgb.XGBRegressor(nthread=1)
+

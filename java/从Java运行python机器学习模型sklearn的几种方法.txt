@@ -58,6 +58,15 @@ java version "1.8.0_191"
 Java(TM) SE Runtime Environment (build 1.8.0_191-b12)
 Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
 
+但有时候，命令行运行java -version 等均无问题，但还是报错：
+Java is not installed, or the Java executable is not on system path
+import os
+os.getenv("JAVA_HOME")
+os.getenv("PATH")
+都正常，这时，可能是python环境及shell环境不一致所致，只需要在转换之前添加一句即可：
+# os.environ["JAVA_HOME"] = "/root/java/jdk1.8.0_191"
+os.environ["PATH"] = "/root/java/jdk1.8.0_191/bin:" + os.getenv("PATH")
+
 第二步：java，读取模型并预测
 ```java
 package PmmlModel;

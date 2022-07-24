@@ -25,6 +25,12 @@ Out[15]:
 可以通过下面的方法过滤得到非空值，即达到删除空值的目的，如：
 df[df['客户号'] !='']
 
+# 填充空值(对所有的NaN填充为空字符串)：
+df = df.fillna("")
+
+# 对指定列空值null进行填充：
+dataframe.fillna({'code':'code', 'date':'date'})，第一个code和date分别表示列，后面的表示在该列填充的内容
+
 # 筛选某行或某列有空值，或所有值均为空值
 df = pd.DataFrame({'col1':[1, True], 'col2':[False, '是'], 'col3': [32, 0]})
 # 筛选哪些列所有值不为空；
@@ -216,6 +222,9 @@ data.drop_duplicates(subset=['A','B'],keep='first',inplace=True)
 keep='first'表示保留第一次出现的重复行，是默认值。keep另外两个取值为"last"和False，
 分别表示保留最后一次出现的重复行和去除所有重复行。 
 
+# drop_duplicates() 删除重复行
+dfLancome = dfLancome.drop_duplicates()
+
 # 筛选出重复行：
 df3=pd.DataFrame([[1,2], [2,3], [2,4]], columns=['a', 'b'])
 df3
@@ -269,6 +278,7 @@ Out[45]:
 1  4  y
 2  2  z
 # 找出 dfa中，指定列a，与dfb重复的行；
+dfa = dfa.drop_duplicates(subset=['a']) # 先要保证 dfa 自己指定列 a没有重复的；
 dfa[pd.concat([dfa, dfb.drop_duplicates(subset=['a'])], axis=0).duplicated(subset=['a'], keep='last')[:dfa.shape[0]]==True]
 Out[58]: 
    a  b
@@ -339,6 +349,37 @@ uid
 A   2020-10-13 00:21:00
 B   2020-11-06 12:00:00
 C   2020-12-18 03:00:00
+
+# 输出某列唯一值：
+df['col'].unique()
+
+# 输出多列唯一值：
+# 不同列数据类型一致：
+np.unique(df[['阈值1', '阈值2']], axis=0)
+
+# 若不同列数据类型不一致时，输出多列唯一值：
+np.unique(df[['类型', '阈值1']].values.astype("<U22"), axis=0)
+
+# 两个字段，多列 字符串比较筛选
+df[df['落单日期'].apply(lambda x: x.replace("-", "")[:6]) == df['落单日期'].apply(lambda x: x.replace("-", "")[:6])
+]
+
+# 自定义函数筛选：
+df[
+df['names'].apply(lambda x: len(x)>1) &
+df['cars'].apply(lambda x: "i" in x) &
+df['age'].apply(lambda x: int(x)<2)
+]
+
+# 使用自定义函数对指定列进行处理：
+df['ExtraScore'] = df['Nationality'].apply(lambda x : 5 if x != '汉' else 0)
+
+# 按某些列进行分组，对组内的数据，自定义函数进行处理：
+df3=data_5316429_tag_df2.groupby(['流水号', '标注间隔天数']).apply(lambda x: " [SEP] ".join(x['tag_words'].values)).reset_index()
+将相同 流水号+标注间隔天数 的 tag_words列 通过 [SEP] 符号拼接起来；
+为了将 groupby 排序列 重新设置为列，我们通常在调用完毕后再次调用reset_index（）方法
+而as_index参数也可以起到同样作用，该参数是控制groupby方法是否需要将列作为新的index。默认是True，为了达到上述目的，我们只需要将其设置为False即可
+>>> df.groupby(by='grade', as_index=False).sum()
 
 def main():
     pass

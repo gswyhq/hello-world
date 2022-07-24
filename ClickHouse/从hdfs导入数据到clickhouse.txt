@@ -1,5 +1,5 @@
 
-[hadoop@SZE-L0403067 ~]$ cat book3.csv
+[hadoop@user123 ~]$ cat book3.csv
 0553573403,book,A Game of Thrones,7.99
 0553579908,book,A Clash of Kings,7.99
 055357342X,book,A Storm of Swords,7.99
@@ -50,7 +50,7 @@ STORED AS INPUTFORMAT
 OUTPUTFORMAT
   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat';
 或者：
-[hadoop@SZE-L0403067 ~]$ hive -e "create table if not exists test_tb6(mid string, tag int, db_table int) row format delimited fields terminated by '\t' stored as Parquet";
+[hadoop@user123 ~]$ hive -e "create table if not exists test_tb6(mid string, tag int, db_table int) row format delimited fields terminated by '\t' stored as Parquet";
 
 第二步：hive表中导入数据；
 hive> insert into table test_tb6 (mid, tag, db_table) select mid, tag, db_table from test_tb1;
@@ -58,7 +58,7 @@ hive> insert into table test_tb6 (mid, tag, db_table) select mid, tag, db_table 
 hive> INSERT INTO table test_tb6 VALUES ('a', 1, 3), ('b', 1, 2), ('a', 21, 8), ('b', 32, 2), ('a', 1, 2), ('b',8, 1), ('a',7, 121), ('a', 2, 14);
 
 第三步：查询hive表数据文件存储路径：
-[hadoop@SZE-L0403067 ~]$ hive -e "show create table test_tb6" |grep -A 1 LOCATION
+[hadoop@user123 ~]$ hive -e "show create table test_tb6" |grep -A 1 LOCATION
 
 LOCATION
   'hdfs://12.45.23.12:9001/user/hive/warehouse/test_tb6'

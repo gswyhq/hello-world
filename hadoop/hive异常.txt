@@ -72,11 +72,11 @@ STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat';
 
 # hadoop dfs异常：
-[hadoop@SZE-L0403067 ~]$ hadoop dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+[hadoop@user123 ~]$ hadoop dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
 DEPRECATED: Use of this script to execute hdfs command is deprecated.
 Instead use the hdfs command for it.
 命令过期了，需改为：
-[hadoop@SZE-L0403067 ~]$ hdfs dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
+[hadoop@user123 ~]$ hdfs dfs -du -h hdfs://12.45.23.12:9001/user/hive/warehouse/parquet_test_tb5
 
 # 删除es外部表报错：
 hive> drop table es_cmb_test ;
@@ -279,4 +279,39 @@ ERROR parse.CalcitePlanner: CBO failed, skipping CBO.
 set hive.cbo.enable=false;
 可以使用统计信息来优化查询以提高性能。基于成本的优化器（CBO）还使用统计信息来比较查询计划并选择最佳计划。通过查看统计信息而不是运行查询，效率会很高。这里将CBO关闭。
 
+# 加载自定义函数报错：
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+解释：JDK6新增错误类型。
+    当GC为释放很小空间占用大量时间时会抛出此异常
+    即（Sun 官方对此的定义：超过98%的时间用来做GC并且回收了不到2%的堆内存时会抛出此异常）。
+    一般是因为堆太小，导致异常的原因：没有足够的内存。 
+解决方案1：  
+    1、查看系统是否有使用大内存的代码或死循环。
+    2、可以添加JVM的启动参数来限制使用内存：-XX:-UseGCOverheadLimit
+       方法如下：linux环境下在tomcat的catalina.sh文件中 在cygwin=false这一行上面加入 
+     JAVA_OPTS="-Xms512m -Xmx2048m -Xss1024K -XX:PermSize=256m -XX:MaxPermSize=512m -XX:-UseGCOverheadLimit"
+解决方案2(临时方案，当前终端退出后失效)：
+[root@user123 hive]# grep HADOOP_CLIENT_OPTS /data/bbd-component/hadoop-2.6.0/etc/hadoop/hadoop-env.sh
+export HADOOP_CLIENT_OPTS="-Xmx512m $HADOOP_CLIENT_OPTS"
+[root@user123 hive]# echo $HADOOP_CLIENT_OPTS
+-Xmx1024m
+[root@user123 hive]# export HADOOP_CLIENT_OPTS="-Xmx2048m"
+[root@user123 hive]# echo $HADOOP_CLIENT_OPTS
+-Xmx2048m
+
+# 有时候hive添加的自定义函数，却报错：
+java.lang.NoSuchMethodError
+这时除了版本冲突原因外，也有可能是依赖包未导入；
+这时，启动hive-cli时候，可以添加 --auxpath 参数， 如：
+~$ hive --auxpath /home/test123/fastjson-1.2.75.jar,/home/test123/fastjson-1.2.75-sources.jar
+hive> add jar file:///home/test123/fastjson-1.2.75.jar;
+hive> add jar file:///home/test123/fastjson-1.2.75-sources.jar;
+之后再定义自定义函数，依赖包问题可以解决；
+但若有包冲突的话，该方法则无效；
+
+问题：执行此HQL，应该会报错：ql.Driver (SessionState.java:printError(960)) - FAILED: ParseException line 48:52 cannot recognize input near '<EOF>' '<EOF>' '<EOF>' in subquery source
+解决方法：
+子查询需要加上别名 否则报错。 
+HQL的书写，select * from (select * from table) ;
+修改HQL为select * from (select * from table) a，执行成功。
 

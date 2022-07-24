@@ -10,6 +10,9 @@ sed 's/ruby/bird/g'    #替换ruby为bird
 # 对指定行的字符进行替换：
 sed -i '5s/a/A/g' test.txt 对第五行的a替换成A
 
+# 含有转义字符的替换，如 tab键, 这个时候需要添加一个$符号，Bash 将处理 $' ' 内的转义符，例如 \t，然后将其作为 arg 传递给 sed：
+cat 1.txt | sed $'s/ /\t/g'
+
 # 对指定行之后一行的内容进行替换：
 # cat test.txt
 aaa12

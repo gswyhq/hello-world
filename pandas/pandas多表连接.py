@@ -126,6 +126,10 @@ pd.merge(df4, df5, left_on='key', right_index=True, how='outer')
 
 # 来源：https://blog.csdn.net/print_and_return/article/details/80577561
 
+# 多字段，多个关联key 关联：
+data_df8_10 = pd.merge(data_df, df8_10, on=["流水号", "落单时间"])
+on：列名，join用来对齐的那一列的名字，用到这个参数的时候一定要保证左表和右表用来对齐的那一列都有相同的列名。这里on是一个列表，表示多个关联字段。
+
 # 对多个 pandas dataframe 进行 join，三个及三个以上 DataFrame join
 df1 = pd.DataFrame({'uid':[1,2,5], 'd1':[1,2,5]})
 df2 = pd.DataFrame({'uid':[1,4,6], 'd2':[1,4,6]})

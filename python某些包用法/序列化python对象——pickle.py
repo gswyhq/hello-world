@@ -40,3 +40,15 @@ print(pkf1)
 # 这是一个整数，表示最高可用的协议版本。这个值可以作为参数protocol传给函数dump()和dumps()以及Pickler构造器。
 # pickle.DEFAULT_PROTOCOL
 # 这是一个整数，表示用来pickling的默认协议版本。可能比pickle.HIGHEST_PROTOCOL小。目前默认的协议版本是3，协议3是专门为Python3设计的一种新的协议。
+
+pickle 序列化对象报错：
+AttributeError: Can't pickle local object 'get_lookup_encoding.<locals>.<lambda>'
+这个时候可以使用 dill 来代替：
+import dill
+fun_a = lambda x: x+3
+with open('fun_a.pkl', 'wb') as f:
+    dill.dump(fun_a, f)
+with open('fun_a.pkl', 'rb') as f:
+    fun_b = dill.load(f)
+fun_b(10)
+

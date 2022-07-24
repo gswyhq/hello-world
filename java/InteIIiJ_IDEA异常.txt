@@ -11,6 +11,7 @@ Dependency 'com.mayabot.mynlp:mynlp:3.2.1' not found
 
 # .m2\repository 目录中，有对应的包文件，但pom文件中仍然提示：
 Dependency **** not found
+这个时候，需要intellij idea maven 本地仓库地址配置
 解决方法：
 File -> Settings -> Build, Execution, Deployment -> Build Tools -> Maven
 User settings file: D:\User\Name\.m2\settings.xml

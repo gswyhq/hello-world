@@ -1,0 +1,34 @@
+
+# 第一步从pb文件中读取图结构，并输入到文件中
+import tensorflow as tf
+from tensorflow.python.platform import gfile
+
+pb_file = ‘xxx/xxx/xxx.pb’
+pb_log_dir = ‘xxx/xxx/log/’
+
+
+def show_pb_graph():
+
+    graph = tf.get_default_graph()
+    graph_def = graph.as_graph_def()
+    graph_def.ParseFromString(gfile.FastGFile(pb_file, 'rb').read())
+    tf.import_graph_def(graph_def, name='graph')
+
+    writer = tf.summary.FileWriter(pb_log_dir, graph)
+    writer.close()
+
+    print('\n logs has been saved at  {} \n'.format(pb_log_dir))
+
+show_pb_graph()
+
+# 第二步：
+TensorBoard可视化
+命令行到当前目录，使用命令启动TensorBoard，默认会在本地计算机启动一个端口号为6006的TensorBoard服务器。打开浏览器，在地址栏输入 localhost:6006，查看图。
+
+$ tensorboard --logdir=xxx/xxx/log
+
+
+注意：在tf 1.14.0版本下生成的图文件
+用TensorBoard 2.6.0，展示可能有问题：
+换成TensorBoard 1.14.0 展示就没问题了；
+

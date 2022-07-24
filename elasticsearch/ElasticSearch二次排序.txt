@@ -71,6 +71,7 @@
 }
 
 constant_score查询。该查询能够包含一个查询或者一个过滤器，所有匹配文档的相关度分值都为1，不考虑TF/IDF：
+注意：最新版本 constant_score 里头不支持 query, 需将 query 改为：filter
 {
   "query": {
     "bool": {
@@ -582,6 +583,72 @@ title 查询语句的重要性是 content 查询的 2 倍，因为它的权重�
   }
 }
 
+# 自定义排序函数：
+{
+  "size": 15,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "name": {
+              "query": "星河COCO Park",
+              "boost": 2
+            }
+          }
+        },
+        {
+          "match": {
+            "address": {
+              "query": "星河COCO Park",
+              "boost": 1
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "_script": {
+        "script": {
+          "lang": "painless",
+          "params": {
+            "eng": "park"
+          },
+          "inline": "if(doc['name.keyword'].value.contains(params.eng)) {return 1}else{return 0}"
+        },
+        "type": "number",
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "script": {
+          "params": {
+            "a": 5,
+            "b": 1.2
+          },
+          "inline": "if (_score>30){double num = Math.ceil(_score/params.b+params.a);return num}else {return 0}"
+        },
+        "type": "number",
+        "order": "desc"
+      }
+    },
+    {
+      "_script": {
+        "type": "number",
+        "script": "doc['name.keyword'].value.length()",
+        "order": "asc"
+      }
+    },
+    {
+      "_score": {
+        "order": "desc"
+      }
+    }
+  ]
+}
 
 脚本中可以使用的内置函数(使用时，需要在前面添加`Math.`,并且区分大小写):
 Function	Description

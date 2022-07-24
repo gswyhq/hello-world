@@ -16,6 +16,14 @@ gswewf@gswewf-PC:~$ snapshot_name=`date +%Y%m%d%H%M%S`
 gswewf@gswewf-PC:~$ echo $snapshot_name
 20180611122057
 
+~$ date +%Y-%m-%d\ %H:%M:%S
+2022-02-23 17:16:16
+
+~$ date -Iseconds
+2022-02-23T17:18:04+0800
+
+若需长久更改date输出格式，可以修改~/.bash_aliases, 添加：
+alias date='date +%Y-%m-%d\ %H:%M:%S'
 
 日期循环：
 第一种

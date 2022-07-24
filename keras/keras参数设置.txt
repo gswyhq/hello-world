@@ -16,6 +16,25 @@ class_weight：字典，将不同的类别映射为不同的权值，该参数�
 
 sample_weight：权值的numpy array，用于在训练时调整损失函数（仅用于训练）。可以传递一个1D的与样本等长的向量用于对样本进行1对1的加权，或者在面对时序数据时，传递一个的形式为（samples，sequence_length）的矩阵来为每个时间步上的样本赋不同的权。这种情况下请确定在编译模型时添加了sample_weight_mode='temporal'。
 
+示例：要将数据集的数据分为三类，用0，1，2代表这三类，我这里想为0分配权重0.3，为1分配权重1，为2分配权重2。
+我的数据是存储在csv文件中的，我提取出标签列表，标签列表的内容是0，1，2的集合，列表名称为y_train。我用下面代码生成一个权重的列表：
+sample_weights=[]
+for sw in range(len(y_train)):
+    if y_train[sw]==0:
+            sample_weights.append(0.3)
+    if y_train[sw]==1:
+            sample_weights.append(1)
+    if y_train[sw]==2:
+            sample_weights.append(2)
+sample_weights=np.array(sample_weights)
+当标签为0时， sample_weights添加0.3，当标签为1时， sample_weights添加1，当标签为2时， sample_weights添加2。
+这里记得不要漏了最后一行，将列表转化为numpy数组。因为sample_weight只能是numpy数组。
+
+class_weight---主要针对的上数据不均衡问题，比如：异常检测的二项分类问题，异常数据仅占1%，正常数据占99%; 此时就要设置不同类对loss的影响。
+sample_weigh---主要解决的是样本质量不同的问题，比如前1000个样本的可信度，那么它的权重就要高，后1000个样本可能有错、不可信，那么权重就要调低。
+
+注意：sample_weight会覆盖class_weight，因此您必须使用一个或另一个，但不能同时使用两者，因此请注意不要混合使用。
+
 initial_epoch: 从该参数指定的epoch开始训练，在继续之前的训练时有用。
 
 steps_per_epoch: 一个epoch包含的步数（每一步是一个batch的数据送入）; batch_size = 数据集大小/steps_per_epoch的，如果我们在生成函数里设置了batch_size的大小，那么在fit_generator传参的时候，steps_per_epoch=len(x_train)//(batch_size)
