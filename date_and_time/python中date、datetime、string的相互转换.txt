@@ -9,6 +9,12 @@ string转换为datetime：
 >>> time1 = datetime.datetime.strptime(string,'%Y-%m-%d %H:%M:%S')
 >>> print time1
 2014-01-08 11:59:58
+dt = datetime.fromordinal(736959) # datetime.min以来的天数
+dt = datetime.fromisoformat('2018-09-22')
+dt = datetime.fromisoformat('2018-09-22 16:28:22')
+dt = datetime.fromisoformat('2018-09-22 16:28:22.666')
+dt = datetime.fromisoformat('2018-09-22 16:28:22.666+08:00')
+dt = datetime.strptime('2018-09-22 16:28:22', '%Y-%m-%d %H:%M:%S')
 
 时间的加减：
 >>> last = time1 - datetime.timedelta(hours = 24)
@@ -42,6 +48,8 @@ datetime转为字符串：
 >>> time1_str = datetime.datetime.strftime(time1,'%Y-%m-%d %H:%M:%S')
 >>> time1_str
 '2014-01-08 11:59:58'
+datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+Out[19]: '2022-02-09 12:55:50'
 
 python获取当前时间：
 time.time() 获取当前时间戳
@@ -62,6 +70,8 @@ Out[3]: time.struct_time(tm_year=2018, tm_mon=1, tm_mday=11, tm_hour=8, tm_min=5
 # time格式转换为datetime格式：
 datetime.datetime.fromtimestamp(time.time())  
 Out[5]: datetime.datetime(2018, 1, 11, 8, 53, 59, 977699)
+dt = datetime.fromtimestamp(time.time())
+dt = datetime.utcfromtimestamp(time.time())
 
 # datetime格式转为time格式:
 print(time.mktime(datetime.datetime.now().timetuple()))
