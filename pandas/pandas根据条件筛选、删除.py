@@ -178,6 +178,8 @@ df4['labels'].values
 # array(['餐饮美食', '其他', '餐饮美食', '其他', '餐饮美食', '餐饮美食', '购物活动', '购物活动', '餐饮美食',
 #        '额度高', '其他', '健康权益', '其他'], dtype=object)
 
+# 获取指定列（这里是word列）字符串长度大于2的行：
+df[df.apply(lambda x : len(x['word'])>2,axis=1)]
 
 # 获取字符串长度小于2的行：
 df[df['column name'].map(len) < 2]

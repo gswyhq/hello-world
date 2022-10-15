@@ -135,3 +135,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> torch.cuda.is_available()
 False
 
+# 模型训练时候，最后一轮batch_size 不匹配：
+ValueError: Expected input batch_size (32) to match target batch_size (7).
+除了模型结构存在问题外，也有可能是定义字段时候，batch_first 没有设置为True;
+batch_first默认值为False，batch_first:如果为假，则输入和输出张量以(seq_len, batch)的形式提供。
+batch_first:如果为真，则输入和输出张量以(batch, seq_len)的形式提供。
+若以以(seq_len, batch)的形式提供，会与target的batch_size (batch)不匹配；
+TEXT = data.Field(sequential=True, tokenize=x_tokenize, fix_length=BATCH_SIZE, include_lengths=True, use_vocab=True, batch_first=True)
+

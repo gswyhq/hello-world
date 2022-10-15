@@ -1,0 +1,8 @@
+
+hive终端上面执行spark代码：
+[zhangsan@abcd71649 ~]$ sudo su - abc5536
+[abc5536@abcd71649 test_20210312]$ source /appcom/spark-2.2.1-config/spark-env.sh
+[abc5536@abcd71649 test_20210312]$ pyspark --master local[2]
+这样就进入了pyspary, 再运行代码即可；
+
+

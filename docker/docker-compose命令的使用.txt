@@ -2,6 +2,25 @@
 docker-compose的安装：
 pip3 install docker-compose
 
+也可以通过如下方式安装：
+# curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-#(uname -s)-#(uname -m)" -o /usr/local/bin/docker-compose
+# chmod +x /usr/local/bin/docker-compose
+
+uname可显示linux主机所用的操作系统的版本、硬件的名称等基本信息。
+参　　数：
+-a或–all     详细输出所有信息，依次为内核名称，主机名，内核版本号，内核版本，硬件名，处理器类型，硬件平台类型，操作系统名称
+-m或–machine   显示主机的硬件(CPU)名，如：x86_64, i686
+-n或-nodename 显示主机在网络节点上的名称或主机名称
+-r或–release       显示linux操作系统内核版本号
+-s或–sysname    显示linux内核名称, 如：Linux
+-v                      显示显示操作系统是第几个 version 版本
+-p                      显示处理器类型或unknown
+-i                       显示硬件平台类型或unknown
+-o                      显示操作系统名
+
+验证安装
+# docker-compose version
+
 # 查看版本：
 gswyhq@gswyhq-PC:~/nlp_server$ docker-compose --version
 docker-compose version 1.17.0, build ac53b73

@@ -1,0 +1,114 @@
+
+# https://github.com/KarchinLab/bigmhc
+# 数据：https://doi.org/10.17632/dvmz6pkzvb.1
+# BigMHC是基于质谱分析中的肽MHC呈递数据训练的，参数达到了5100万，随后基于表位呈递模型在免疫原性数据上进行了迁移学习，对免疫原性新表位进行预测。
+
+git clone https://github.com/KarchinLab/bigmhc
+也可以直接下载 https://codeload.github.com/KarchinLab/bigmhc/zip/refs/heads/master，
+得到 bigmhc-master.zip 文件，约365MB，再解压即可，但无对应的git log信息；
+cd bigmhc/src
+bigmhc/src $ python predict.py -i=../data/example1.csv -m=el -t=2 -d="cpu"
+bigmhc/src $ python predict.py -i=../data/example2.csv -m=el -a=HLA-A*02:02 -p=0 -c=0 -d="cpu"
+
+预测将写入`../data/example1.csv.prd`和`../data/example2.csv.prd`中；
+
+bigmhc/src $ cat ../data/example1.csv
+mhc,pep,tgt
+HLA-A*02:02,AAADIVNFL,1
+HLA-A*02:02,AAAGIPVFAWKGES,0
+HLA-A*11:01,RRGLEKGLN,0
+HLA-B*07:02,RVPGPPARLGLPL,1
+HLA-B*08:01,FAYLRDLL,1
+HLA-B*27:05,LGAAIDFLEEIGLDE,0
+HLA-C*03:03,EVGVAIQEK,1
+HLA-C*05:01,QEVIGEVTGNP,0
+HLA-C*12:03,PEYMEVRKQAGDFL,0
+                                                                                                                                                                                                                          ✔
+bigmhc/src $ cat ../data/example2.csv
+AAADIVNFL
+AAAGIPVFAWKGES
+
+bigmhc/src $  cat ../data/example1.csv.prd
+mhc,pep,tgt,len,bigmhc_el
+HLA-A*02:02,AAADIVNFL,1.0,9,0.99993193
+HLA-A*02:02,AAAGIPVFAWKGES,0.0,14,7.68727e-08
+HLA-A*11:01,RRGLEKGLN,0.0,9,8.7249354e-08
+HLA-B*07:02,RVPGPPARLGLPL,1.0,13,0.9987219
+HLA-B*08:01,FAYLRDLL,1.0,8,0.9997509
+HLA-B*27:05,LGAAIDFLEEIGLDE,0.0,15,2.984736e-08
+HLA-C*03:03,EVGVAIQEK,1.0,9,0.9950925
+HLA-C*05:01,QEVIGEVTGNP,0.0,11,2.472012e-09
+HLA-C*12:03,PEYMEVRKQAGDFL,0.0,14,9.362279e-11
+
+bigmhc/src $ cat ../data/example2.csv.prd
+mhc,pep,tgt,len,bigmhc_el
+HLA-A*02:02,AAADIVNFL,,9,0.99993193
+HLA-A*02:02,AAAGIPVFAWKGES,,14,7.6872844e-08
+
+
+必需的参数：
+-i或--输入CSV文件
+列为零索引
+必须有一列肽
+也可以有一列MHC-I等位基因名称
+
+-m或--要加载的BigMHC模型
+el或bigmhc_el加载bigmhc el
+im或bigmhc_im加载bigmhc im
+可以是BigMHC模型目录的路径
+
+重新培训所需的参数
+-t或--目标值的tgtcol列索引
+predict.py可选
+如果使用predict.py，此列用于计算性能指标。
+如果使用retrain.py，此列中的元素被视为基本真值。
+
+输入格式化参数
+-a或--等位基因名称或等位基因列
+如果等位基因是一个列索引，那么每行必须有一个MHC-I等位基因名称
+
+-p或--pepcol肽柱
+是每行包含一个肽序列的CSV文件的列索引。
+
+-c或--hdrcnt头计数
+在使用输入之前跳过第一个hdrcnt行
+
+输出参数
+-o或--输出文件或目录
+如果使用`predict.py`，将CSV数据保存到此文件,默认为input.prd
+
+如果使用`retrain.py`，将重新培训的BigMHC模型保存到此目录
+
+默认为在模型目录中创建新的细分
+-z或--saveatt布尔值，指示是否保存注意值
+仅适用于predict.py
+使用1表示真，使用0表示假
+
+其他可选参数
+-d或--运行BigMHC的设备
+
+设置为all以利用所有GPU
+要使用可用GPU的子集，请提供一个以逗号分隔的GPU设备索引列表
+设置为在cpu上运行的cpu（不建议用于大型数据集）
+
+-v或--verbose切换详细打印
+使用1表示真，使用0表示假
+
+-j或--并行数据加载的工作数
+这些工作线程在整个脚本执行过程中都是持久的
+
+-f或--预取每个数据加载程序工作线程要预取的批数
+增加这个数字有助于防止GPU等待CPU，但会增加内存使用
+
+-b或--maxbat最大批量大小
+如果内存不足，请将其调低
+
+如果使用 `predict.py`，默认为一个估计占用最少内存的设备的值
+
+如果使用`retrain.py`，默认为1024
+
+-l或--lr Adam优化器学习率
+仅适用于`retrain.py`
+
+-e或--用于迁移学习的epoch数
+仅适用于`retrain.py`

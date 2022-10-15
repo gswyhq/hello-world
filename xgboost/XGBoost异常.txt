@@ -6,3 +6,8 @@ xg默认是满核 运行，设置不同核数运行速度，一般情况下核�
 有时候核数多的集群，速度超级慢，这个时候不妨将nthread设置为1，速度反而暴增；
 xgb_model = xgb.XGBRegressor(nthread=1)
 
+# 训练xgboost模型的时候报错：
+AttributeError: /usr/lib/libxgboost.so: undefined symbol: XGDMatrixCreateFromDense
+原因：训练环境，既有源码安装xgboost，又pip3 install 安装；
+解决方法，删除源码安装编译文件即可：rm -rf /usr/lib/libxgboost.so
+

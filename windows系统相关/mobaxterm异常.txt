@@ -47,9 +47,11 @@ LC_CTYPE="en_US.UTF-8"
 Persistent home directory  在mobaxterm终端打开的初始目录，ls 即可显示该目录下的内容；
 Persistent root(/) directory
 
-MobaXterm使用apt-get install *** 安装软件时，出现：package *** has not been found.
+# 问题：MobaXterm使用apt-get install *** 安装软件时，出现：package *** has not been found.
 解决方法：apt-get update 之后，再尝试 apt-get install *** 
 
+# 问题：MobaXterm使用apt-get install *** 安装软件时，可以正常使用；但是这些包在关闭 MobaXterm 时就消失了. 不能永久安装：
+解决方法：是设置一个特定的 Settings -> General -> Persistent root (/) 目录，而不是默认的<Temp>；
 
 # 问题：mobaxterm在git项目路劲，敲任何git命令，比如git branch -av或git log，终端的左下角都显示standard input, 必须按下q才会退出并进入终端？
 原因：当前版本默认设置了GIT_PAGER的环境变量为busybox less -R
@@ -110,9 +112,12 @@ docker save ubuntu:18.04 > ubuntu-18.04-save.tar
 如：find . -name '*baidu*'
 就可以正常查找；
 问题原因及解决方法：
-原因目前未知；解决方法采用替代命令，如：find .|grep 的
+原因就是mobaxterm自带的find命令，不是一般linux系统下的find命令；
+解决方法：安装linux系统一般使用的find命令（“find”命令存在于包“findutils”中）：
+apt-get install findutils
+当然若不想安装，也可以采用替代命令，如：find .|grep 的
 
-# fing命令使用异常：
+# find命令使用异常：
 解决方法：
 apt-get install findutils
 

@@ -1,0 +1,304 @@
+
+针对离散型特征，如学历，性别等，lightgbm和CatBoost，可以直接处理类别型变量。不存在问题；
+但XgBoost、Random Forest或者深度学习模型，不能直接处理类别型变量，必须先编码成为数值型变量。
+
+http://contrib.scikit-learn.org/category_encoders/#
+这个库的作者将类别编码分为两类,无监督和有监督(指用target)
+
+无监督编码(Unsupervised):
+Backward Difference Contrast
+BaseN
+Binary
+Count
+Hashing
+Helmert Contrast
+Ordinal
+One-Hot
+Polynomial Contrast
+Sum Contrast
+Word Embedding
+
+有监督编码(Supervised):
+CatBoost
+James-Stein Estimator
+LeaveOneOut 
+M-estimator
+Target Encoding
+Weight of Evidence
+
+注意：
+利用标签进行特征编码例如target encoding、woe encoding或者是catboost encoding本质上都是利用类别和标签之间的某种统计特征来代替原始的类别，从而使得无法直接处理类别的模型可以在编码后的结果上正常运行。
+利用标签进行特征编码，极端情况下是存在特征穿越的风险的。
+
+
+# 编码举例:
+01、序号编码 OrdinalEncoder
+OrdinalEncoder的输入是二维，比如 DataFrame
+序号编码通常用于处理类别间具有大小关系的数据。如产品等级分为高、中、低三档，存在“高>中>低”的排序关系。
+序号编码则按照大小关系对类别型特征赋值一个数值ID，如高表示为3，中表示为2，低表示为1，转换后依然保持大小关系。
+from category_encoders import OrdinalEncoder
+OrdinalEncoder().fit_transform([['a', 'b', 'c'], ['b', 'b', 'c']])
+Out[74]:
+   0  1  2
+0  1  1  1
+1  2  1  1
+
+02、标签编码（Label Encoder）
+标签编码就是简单地赋予不同类别，不同的数字标签。
+LabelEncoder的输入是一维，比如1d ndarray
+from sklearn.preprocessing import LabelEncoder
+LabelEncoder().fit_transform(['a', 'b', 'c', 'b', 'b', 'c'])
+Out[72]: array([0, 1, 2, 1, 1, 2], dtype=int64)
+
+03、直方图编码（Hist Encoder）
+直方图编码属于目标编码的一种，适用于分类任务。
+它先将类别属性分类，然后在对应属性下，统计不同类别标签的样本****占比进行编码。
+直方图编码能清晰看出特征下不同类别对不同预测标签的贡献度，缺点在于：使用了标签数据，若训练集和测试集的类别特征分布不一致，那么编码结果容易引发过拟合。
+此外，直方图编码出的特征数量是分类标签的类别数量，若标签类别很多，可能会给训练带来空间和时间上的负担。
+如：类别特征：['A', 'A', 'B', 'A', 'B', 'A'] 对应分类标签为：[0, 1, 0, 2, 1, 2]
+则特征A 在标签0、1、2上面的统计为：1、1、2,占比为：1/4、1/4、2/4，故特征A的编码为：[0.25,0.25,0.5]
+同理特征B在标签0、1、2上面的统计为：1、1、0，占比为：1/2、1/2、0，故特征B的编码为：[0.5, 0.5, 0]
+
+04、模型编码（Model Encoder）
+目前GBDT模型中，只有LGBM和CatBoost自带类别编码。
+LGBM的类别编码采用的是GS编码（Gradient Statistics），将类别特征转为累积值 (一阶偏导数之和/二阶偏导数之和)再进行直方图特征排序。
+定义lgb数据集时，指定categorical_feature。
+train_data = lgb.Dataset(data, label=label, feature_name=['c1', 'c2', 'c3'], categorical_feature=['c3'])
+
+05、独热编码OneHotEncoder
+独热编码通常用于处理类别间不具有大小关系的特征。
+例如血型，一共4个值，独热编码将其变成4维的稀疏向量。
+独热编码的特征向量只有一维取值为1，其余为0。
+缺点是它处理不好类别取值多的特征，类别数越大会带来过很多列的稀疏特征，消耗内存和训练时间。
+对于类别取值较多的情况要注意通过特征选择降低维度。
+
+06、二进制编码BinaryEncoder
+二进制编码分2步，先用序号编码给每个类别赋予一个类别ID，然后将类别ID对应的二进制编码作为结果。
+本质 上是利用二进制对ID进行哈希映射，最终得到0/1特征向量，且维数少于独热编码，节省存储空间。
+优点：1. 容易实现；2. 分类很精确；3. 可用于在线学习
+缺点：1. 计算效率不高；2. 不能适应可增长的类别；3. 只适用于线性模型；4. 对于大数据集，需要大规模的分布式优化
+
+07、计数编码CountEncoder
+对于给定的分类特征，按照每个类别分组，统计组计数，将每个类别都映射到该类别的样本数。
+清晰地反映了类别在数据集中的出现次数，缺点是忽略类别的物理意义，比如说两个类别出现频次相当，但是在业务意义上，模型的重要性也许不一样。
+Count encoding是将分类特征替换为它们的出现次数，比如某个分类中'Peking'出现了10次，那么'Peking'就会被替换为10
+import category_encoders as ce
+features = ['Peking', 'Peking', 'Shanghai', 'Peking', 'Guangzhou', 'Shanghai']
+count_enc = ce.CountEncoder()
+count_enc.fit_transform(features)
+输出：（第一列是索引，第二列是编码值）
+0  3
+1  3
+2  2
+3  3
+4  1
+5  2
+
+08、哈希编码HashingEncoder
+哈希编码是使用二进制对标签编码做哈希映射。
+好处在于哈希编码器不需要维护类别字典，且输出长度是固定的。
+若**后续出现训练集未出现的类别，哈希编码还能接受新值**。
+另外，对于类别取值较多的特征，哈希法编码可以将原始的高维特征向量压缩成较低维特征向量，且尽量不损失原始特征的表达能力。
+但按位分开哈希编码，模型学习相对比较困难。
+优点：1. 容易实现；2. 模型训练成本更低；3. 容易适应新类别；4. 容易处理稀有类；5. 可用于在线学习；
+缺点：1. 只适合线性模型或核方法；2. 散列后的特征无法解释；3. 精确度难以保证；
+
+09、BaseNEncoder
+Base-N 编码器将类别编码为它们的 base-N 表示的数组。
+基数 1 等价于 one-hot 编码（不是真正的 base-1，但很有用），基数 2 等价于二进制编码。
+N=实际类别的数量，相当于普通的序数编码。
+from category_encoders import BaseNEncoder
+BaseNEncoder(base=2).fit_transform(['猫', '老鼠', '猫', '猫', '狗'])
+Out[24]:
+   0_0  0_1
+0    0    1
+1    1    0
+2    0    1
+3    0    1
+4    1    1
+
+BaseNEncoder(base=4).fit_transform(['猫', '老鼠', '猫', '猫', '狗'])
+Out[27]:
+   0_0
+0    1
+1    2
+2    1
+3    1
+4    3
+
+10、求和编码SumEncoder
+SumEncoder 属于一个名为“对比度编码”的类。这些编码被设计成在回归问题中使用时具有特定的行为。换句话说，如果你想让回归系数有一些特定的属性，你可以使用其中的一种编码。
+求和编码通过比较某一特征取值下对应标签（或其他相关变量）的均值与标签的均值之间的差别来对特征进行编码。
+特别是，当你希望回归系数加起来为0时，使用SumEncoder。
+求和编码：
+SumEncoder().fit_transform(['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗'])
+Out[30]:
+   intercept  0_0  0_1
+0          1  1.0  0.0
+1          1  0.0  1.0
+2          1  1.0  0.0
+3          1  1.0  0.0
+4          1 -1.0 -1.0
+5          1  0.0  1.0
+6          1  1.0  0.0
+7          1 -1.0 -1.0
+8          1  1.0  0.0
+9          1 -1.0 -1.0
+
+求和编码等价于（先OneHot编码，再弃倒数第一列；若剩余加起来等于1则保持不变，若不等于1则将0替换为-1）：
+one_hot_encoding = OneHotEncoder().fit_transform(['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗'])
+one_hot_encoding.iloc[:, :-1].apply(lambda row: row if row.sum() == 1 else row.replace(0, -1), axis = 1)
+Out[34]:
+   0_1  0_2
+0    1    0
+1    0    1
+2    1    0
+3    1    0
+4   -1   -1
+5    0    1
+6    1    0
+7   -1   -1
+8    1    0
+9   -1   -1
+
+11、Backward Difference Contrast
+也是一种对比度编码。
+在此编码系统中，将离散变量的一个类别的因变量的平均值与先前相邻类别的因变量的平均值进行比较。
+这个编码器对序数变量很有用，也就是说，可以用有意义的方式对其等级进行排序的变量。BackwardDifferenceEncoder设计用于比较相邻的等级。
+使用这种编码系统，将类别变量的相邻类别进行比较，每个类别都与前一个类别进行比较。
+BackwardDifferenceEncoder().fit_transform(['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗'])
+Out[43]:
+   intercept       0_0       0_1
+0          1 -0.666667 -0.333333
+1          1  0.333333 -0.333333
+2          1 -0.666667 -0.333333
+3          1 -0.666667 -0.333333
+4          1  0.333333  0.666667
+5          1  0.333333 -0.333333
+6          1 -0.666667 -0.333333
+7          1  0.333333  0.666667
+8          1 -0.666667 -0.333333
+9          1  0.333333  0.666667
+
+12、Helmert Contrast
+HelmertEncoder与BackwardDifferenceEncoder非常相似，但是不仅将其与上一个进行比较，还将每个类别与所有先前的类别进行比较。这种类型的编码系统对于诸如种族、性别、国籍之类的名义变量（nominal variable）没有多大意义。
+Helmert 编码（也称为差异编码）：不仅将类别变量的每个类别与前一个类别的平均值进行比较，还将每个类别与所有先前类别的平均值进行比较。
+
+13、多项式编码Polynomial Contrast
+多项式编码是趋势分析的一种形式，因为它正在寻找分类变量中的线性、二次和三次趋势。这种类型的编码系统只能与类别等间距的序数变量一起使用。基于假设：基础分类变量具有不仅可观的而且均等间隔的级别。如果你考虑连续变量与离散变量是否具有线性（或二次、三次）关系，可以谨慎使用它。
+
+14、目标编码TargetEncoder
+在贝叶斯架构下，利用要预测的因变量（target variable），有监督地确定最适合这个类别特征的编码方式。有监督的编码方式，适用于分类和回归问题。
+target encoding其实就是将分类特征替换为对应目标值的后验概率。
+编码值的计算过程其实很简单，比如说cat出现次数是5次，5次中target是1的次数有2次，因为编码值为0.4 。
+import pandas as pd
+from category_encoders import TargetEncoder
+encoder = TargetEncoder(smoothing=0) # 默认情况下平滑因子不为0，这里为了演示结果设置为0
+data = ['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗']
+target = [1, 0, 0, 1,1,1,0, 1,0, 0]
+encoded = encoder.fit_transform(data, target)
+编码结果：（第一列是索引，第二列是编码值）
+0  0.400000
+1  0.500000
+2  0.400000
+3  0.400000
+4  0.666667
+5  0.500000
+6  0.400000
+7  0.666667
+8  0.400000
+9  0.666667
+
+15、MEstimateEncoder
+MEstimateEncoder支持的目标类型：二项式和连续式。
+这是目标编码器的简化版本，其名称为 m 概率估计（m-probability estimate）或已知发生率的加性平滑（additive smoothing with known incidence rates）。
+与目标编码器相比，m 概率估计只有一个可调参数（m），而目标编码器有两个可调参数（min_samples_leaf 和smoothing）。
+该参数设置全局平均值应按绝对值加权的大小。
+
+16、JamesSteinEncoder
+詹姆斯-斯坦估计器。
+支持的目标类型：二项式和连续式。
+一个高方差的群体的平均值应该不那么可信。因此，群体方差越高，权重就越低。
+TargetEncoder和MEstimateEncoder既取决于组的数量，也取决于用户设置的参数值（分别是smoothing和m）。这不方便，因为设置这些权重是一项手动任务。
+JamesSteinEncoder试图在不需要任何人为干预的情况下，以一种基于统计数据的方式来做到这一点。
+
+17、Generalized Linear Mixed Model Encoder
+广义线性混合模型。
+支持的目标类型：二项式和连续式。
+这是一个类似于 TargetEncoder 或 MEstimateEncoder 的监督编码器，
+但有一些优点：1）该技术背后有扎实的统计理论。混合效应模型是统计学的一个成熟分支。2) 没有要调整的超参数。收缩量是通过估计过程自动确定的。
+简而言之，一个类别的观察数越少，（和/或）一个类别的结果变化越大，那么对“先验”或“总体均值（grand mean）”的正则化就越高。
+3) 该技术适用于连续目标和二项式目标。如果目标是连续的，则编码器返回观测类别与全局平均值的正则化差异。
+如果目标是二项式，则编码器返回每个类别的正则化对数赔率（log odds）。
+
+18、WOEEncoder
+WOE(Wieght of Evidence)Encoder只能用于二进制目标变量，即0/1的目标变量。
+WOE（Weight of Evidence）叫做证据权重
+WOE编码可以这么理解，它表示的是当前这个类别中坏客户和好客户的比值 与 所有样本中坏客户和好客户的比值。这个差异是用这两个比值的比值，再取对数来表示的。WOE越大，这种差异越大，WOE越小，差异越小
+处理缺失值：当数据源没有100%覆盖时，那就会存在缺失值，此时可以把null单独作为一个分箱。这点在分数据源建模时非常有用，可以有效将覆盖率哪怕只有20%的数据源利用起来。
+处理异常值：当数据中存在离群点时，可以把其通过分箱离散化处理，从而提高变量的鲁棒性（抗干扰能力）。例如，age若出现200这种异常值，可分入“age > 60”这个分箱里，排除影响。
+业务解释性：我们习惯于线性判断变量的作用，当x越来越大，y就越来越大。但实际x与y之间经常存在着非线性关系，此时可经过WOE变换。
+计算WOE步骤：
+1.对于连续型变量，进行分箱（binning），可以选择等频、等距，或者自定义间隔；对于离散型变量，如果分箱太多，则进行分箱合并。
+2.统计每个分箱里的好人数(bin_goods)和坏人数(bin_bads)。
+3.分别除以总的好人数(total_goods)和坏人数(total_bads)，得到每个分箱内的边际好人占比(margin_good_rate)和边际坏人占比(margin_bad_rate)。
+4.计算每个分箱里的 WOE = math.ln(margin_bad_rate/margin_good_rate)
+5.检查每个分箱（除null分箱外)里woe值是否满足单调性，若不满足，返回step1。注意：null分箱由于有明确的业务解释，因此不需要考虑满足单调性。
+6.计算每个分箱里的IV，最终求和，即得到最终的IV。
+在WOEEncoder里：只有两种分布：
+1的分布（每组y=1的数量/所有y=1的数量）
+0的分布（每组y=0的数量/所有y=0的数量）
+算法核心：对每个分组，将1的分布除以0的分布；这个值越高，越有信心偏向该组的1，反之亦然。
+from category_encoders import WOEEncoder
+import pandas as pd
+from sklearn.datasets import load_boston
+bunch = load_boston()
+y = bunch.target > 22.5
+X = pd.DataFrame(bunch.data, columns=bunch.feature_names)
+enc = WOEEncoder(cols=['CHAS', 'RAD']).fit(X, y)  # cols:指定哪些列需要WOEEncoder编码
+numeric_dataset = enc.transform(X)
+print(numeric_dataset.info())
+
+19、LeaveOneOutEncoder
+假设你使用TargetEncoder。这意味着你在X_train中引入了关于y_train的信息，这可能会导致严重的过拟合风险。
+LeaveOneOutEncoder在限制过拟合的风险的同时保持有监督的编码。
+它执行普通的目标编码，但是对于每一行，它不考虑该行观察到的y值。这样，就避免了行方向的泄漏。
+LeaveOneOutEncoder().fit_transform(['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗'], [1, 0, 0, 1, 1, 1, 0, 1, 0, 0])
+Out[52]:
+0  0.25
+1  1.00
+2  0.50
+3  0.25
+4  0.50
+5  0.00
+6  0.50
+7  0.50
+8  0.50
+9  1.00
+这样编码结果，在少量数据时会出现同样是“猫”编码结果不一样，如：索引为0的“猫”编码为0.25(1/4),而索引为2的“猫”编码为0.5(2/4)。
+
+20、CatBoostEncoder
+CatBoostEncoder支持的目标类型：二项式和连续式。
+这与留一法编码非常相似，但会“即时”计算值。因此，这些值在训练阶段自然会发生变化，并且没有必要添加随机噪声。
+请注意，训练数据必须随机排列。
+CatBoostEncoder().fit_transform(['猫', '老鼠', '猫', '猫', '狗', '老鼠', '猫', '狗', '猫', '狗'], [1, 0, 0, 1, 1, 1, 0, 1, 0, 0])
+Out[62]:
+0  0.500000
+1  0.500000
+2  0.750000
+3  0.500000
+4  0.500000
+5  0.250000
+6  0.625000
+7  0.750000
+8  0.500000
+9  0.833333
+
+21、Feature Embedding(Word Embedding)
+先将每个特征不同的取值，采用不同的数字表示；
+使用Embedding层进行特征的数字张量表示; 如果有3条数据，每条数据有10个特征，通过张量表示，则该张量的形状一定是(3, 10)，可是如果我们把每个特征用60个数字来抽象的表示，
+那该数据集的张量形状变成了(3, 10, 60)其中60就是所谓的特征嵌入维度。
+
+数据和特征决定了机器学习的上限，而模型和算法只是逼近这个上限而已。
+同理，数据和特征的上限在于数据，特征编码只是让模型和算法更好地逼近这个上限而已。
+

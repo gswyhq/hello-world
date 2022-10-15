@@ -1,0 +1,30 @@
+
+安装 Mkdocs
+Mkdocs是用Python开发的工具
+可以使用pip命令来安装
+pip install mkdocs
+使用
+使用很简单直接在命令行
+mkdocs new my-project
+这样就会在本地建立一个my-project文件夹　其中包括了一个mkdocs.yml和一个docs文件夹
+mkdocs.yml: 这个文件是一个配置文件，主要是写好对应的md文件位置等；
+docs: 是存放你要写的 Markdown 文档的地方。当然，也可以在mkdocs.yml中定义该目录，如：docs_dir: sources
+
+具体可以参考：https://github.com/keras-team/keras-docs-zh/blob/master/mkdocs.yml
+
+安装PDF插件：
+pip install mkdocs-with-pdf
+并在 mkdocs.yml 文件中添加：
+plugins:
+    - with-pdf
+
+添加好后，执行如下命令，即可合并md文件到PDF
+$ mkdocs build
+
+合并过程中，会有如下日志：
+INFO     -  Rendering for PDF.
+INFO     -  Output a PDF to "...\site\pdf/document.pdf".
+fsSelection bits 7, 8 and 9 are only defined in OS/2 table version 4 and up: version 3
+INFO     -  Converting 78 articles to PDF took 56.2s
+INFO     -  Documentation built in 58.56 seconds
+

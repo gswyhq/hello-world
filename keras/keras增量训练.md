@@ -82,3 +82,33 @@ Epoch 11/30
   3/300 [..............................] - ETA: 56:31 - loss: 0.3156 - acc: 0.9271
 
 若没有中途退出训练，训练会在Epoch 30/30 之后停止。
+
+
+增量训练：
+```python
+def generate_arrays_from_file(path, batch_size):
+    input_1, input_2, output = [], [], []
+    while True:
+        with open(path) as f:
+            for line in f:
+                # 从文件中的每一行生成输入数据和标签的 numpy 数组，
+                x1, x2, y = process_line(line)
+                input_1.append(x1)
+                input_2.append(x2)
+                output.append(y)
+                if len(input_1) == batch_size:
+                    yield ({'input_1': input_1, 'input_2': input_2}, output)
+                    input_1, input_2, output = [], [], []
+        f.close()
+        
+historys = model.fit_generator(generate_arrays_from_file("train_data.txt", batch_size), 
+                               steps_per_epoch=868,  # 在声明一个 epoch 完成并开始下一个 epoch 之前从 generator 产生的总步数（批次样本）。 它通常应该等于你的数据集的样本数量除以批量大小。len(train_data)/batch_size
+                               validation_data=generate_arrays_from_file("dev_data.txt", batch_size), 
+                               validation_steps=103,  # 仅当 validation_data 是一个生成器时才可用。 在停止前 generator 生成的总步数（样本批数）。len(dev_data)/batch_size
+          epochs=20, 
+#           batch_size=batch_size,  # 通过迭代器输入训练数据时候，不需要该项
+          verbose=1,
+          shuffle=True,
+         )
+print(historys.history)
+```

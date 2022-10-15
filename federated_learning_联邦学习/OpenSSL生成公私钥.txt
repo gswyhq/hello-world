@@ -1,0 +1,65 @@
+
+OpenSSL生成公私钥:
+
+# 第一步：生成私钥
+命令行输入openssl，进入openssl的命令行，输入：`genrsa -out rsa_private_key.pem 2048`
+这里生成的密钥文件是2048比特。
+
+~ $openssl
+OpenSSL> genrsa -out rsa_private_key.pem 2048
+Generating RSA private key, 2048 bit long modulus (2 primes)
+.....................................................................................+++++
+................+++++
+e is 65537 (0x010001)
+
+执行完上步骤后，即在当前目录下生成一个私钥文件：
+~ $ls
+rsa_private_key.pem
+~ $ cat rsa_private_key.pem
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAxGiYIJMDutT/wYocvriPO1//mDG3xKCK/uhSmuagqS1FIwsT
+uL0Wjd1nYv/Ht1vOYZvZso2PaGkdBQotw4pNMBzTm3YTFcoa2LK8e+xfaB/iDKRm
+...
+以上便是经过base64编码后的密钥。
+
+# 第二步：生成公钥(由秘钥产生)
+首先要明白一点，公钥是公开透明的，私钥是独有的，我们想要的效果就是难以从公钥推出私钥，这就涉及到数学中的模运算了。
+从私钥生成公钥是通过正向的模运算算得的，计算机很快就能产生，但要反过来要计算机从公钥做逆模运算求得私钥，只要位数够长，就几乎是难以算出的。
+因此公钥、私钥，都是成对出现的，公钥也是由私钥经过运算求得的。
+
+同样进入ssl，输入：
+OpenSSL> rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
+writing RSA key
+
+~ $ ls
+rsa_private_key.pem  rsa_public_key.pem
+
+一. 利用openssl命令进行BASE64编码解码（base64 encode/decode）
+1. BASE64编码命令
+   对字符串‘abc’进行base64编码：
+       \# echo abc | openssl base64
+       YWJjCg==  （编码结果）
+   如果对一个文件进行base64编码（文件名t.txt）：
+       \# openssl base64 -in t.txt
+2. BASE64解码命令
+   求base64后的字符串‘YWJjCg==’的原文：
+       \# echo YWJjCg== | openssl base64 -d
+       abc   （解码结果）
+   如果对一个文件进行base64解码（文件名t.base64）：
+       \# openssl base64 -d -in t.base64
+二. 利用openssl命令进行md5/sha1摘要（digest）
+
+1. 对字符串‘abc’进行md5摘要计算：echo abc | openssl md5
+   若对某文件进行md5摘要计算：openssl md5 -in t.txt
+2. 对字符串‘abc’进行sha1摘要计算：echo abc | openssl sha1
+   若对某文件进行sha1摘要计算：openssl sha1 -in t.txt
+三. 利用openssl命令进行AES/DES3加密解密（AES/DES3 encrypt/decrypt）
+
+ 对字符串‘abc’进行aes加密，使用密钥123，输出结果以base64编码格式给出：
+    \# echo abc | openssl aes-128-cbc -k 123 -base64
+    U2FsdGVkX18ynIbzARm15nG/JA2dhN4mtiotwD7jt4g=   （结果）
+ 对以上结果进行解密处理：
+    \# echo U2FsdGVkX18ynIbzARm15nG/JA2dhN4mtiotwD7jt4g= | openssl aes-128-cbc -d -k 123 -base64
+    abc  （结果）
+ 若要从文件里取原文（密文）进行加密（解密），只要指定 -in 参数指向文件名就可以了。
+ 进行des3加解密，只要把命令中的aes-128-cbc换成des3就可以了。

@@ -29,3 +29,10 @@ root@03a897b4f42c:~# pip3 install PyQt5-5.15.4-cp36-abi3-manylinux1_x86_64.whl
 
 # 下载 whl 文件到本地，并安装到指定路径（whl文件可以在pipy网站下载，需下载与本机匹配的版本）；
 pip install requests.whl --target=D:\Users\...\Lib\site-packages
+
+可以下载whl文件参考地址：
+https://www.lfd.uci.edu/~gohlke/pythonlibs/
+https://pypi.doubanio.com/simple/numpy
+https://pypi.tuna.tsinghua.edu.cn/simple/numpy/
+https://mirrors.cloud.tencent.com/pypi/simple/numpy/
+

@@ -294,3 +294,8 @@ https://mp.weixin.qq.com/s/Apy3yqyo-VHTwtjr9xTrxA
 # 中药图片识别数据集
 https://gitee.com/xiaohaoo/chinese-medicine-identification-admin
 
+# Uni-Mol：一个通用的3D分子表示学习框架
+Uni-Mol是一个通用的3D分子预处理框架，极大地扩展了药物设计的表示能力和应用范围。
+Uni-Mol由两个模型组成：一个由209M分子3D构象训练的分子预处理模型；用3M候选蛋白质口袋数据训练的口袋预训练模型。这两种模型分别用于不同的任务，在用于蛋白质配体结合任务时结合使用。Uni-Mol在14/15分子性质预测任务中表现优于SOTA。此外，Uni-Mol在三维空间任务中取得了优异的性能，包括蛋白质-配体结合位姿预测、分子构象生成等。
+https://github.com/dptech-corp/Uni-Mol
+

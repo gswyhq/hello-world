@@ -1,0 +1,247 @@
+
+通过 PostgreSQL自带的工具 pg_dump 也可以实现备份数据，可以具体到database, schema, table级别，但若要定时备份，可能需要写定时任务来实现；
+
+PG_RMAN是Postgresql的一款插件，用于备份和还原PostgreSQL数据库；它需要对整个数据库集群，存档WAL和服务器日志进行物理在线备份。
+pg_rman具有以下功能：
+
+仅使用一个命令即可对整个数据库（包括表空间）进行备份。
+只需一个命令即可从备份中恢复。
+支持增量备份和备份文件压缩，以便占用更少的磁盘空间。
+管理备份版本并显示备份目录。
+支持存储快照。
+pg_rman支持以下命令：
+
+init --初始化备份目录。
+backup --进行在线备份。
+restore --还原。
+show --显示备份历史记录。详细信息选项显示每个备份的附加信息。
+validate --验证备份文件。未经验证的备份不能用于还原和增量备份。
+delete --删除备份文件。
+purge --从备份目录中删除已删除的备份。
+
+# 第一步：安装pg_rman
+可以从以下链接下载对应版本的pg_rman；
+https://github.com/ossc-db/pg_rman/releases
+安装方法1：
+--从源码编译安装，缺包编译报错需要下载对应包任何重试
+[root@wcbpg /]# su - pgsql
+Last login: Thu Dec 16 23:19:06 CST 2021 on pts/0
+# 注意插件pg_rman版本需要与PostgreSQL版本对应
+[pgsql@wcbpg ~]$ wget https://github.com/ossc-db/pg_rman/releases/download/V1.3.11/pg_rman-1.3.11-pg13.tar.gz
+[pgsql@wcbpg ~]$ tar -zxvf pg_rman-1.3.11-pg13.tar.gz
+[pgsql@wcbpg ~]$ cd pg_rman-1.3.11-pg13/
+[pgsql@wcbpg pg_rman-1.3.11-pg13]$ make && make install
+[pgsql@wcbpg pg_rman-1.3.11-pg13]$ which pg_rman
+/postgresql/pg13/bin/pg_rman
+--将生成的pg_rman拷贝到/opt/pgsql/12/bin、/usr/bin
+
+安装方法2：
+--RPM包安装
+# rpm -ivh pg_rman-x.x.xx-x.pgxx.rhelx.x86_64.rpm
+--默认生成在/usr/pgxxx下面
+--将生成的pg_rman拷贝到/opt/pgsql/12/bin、/usr/bin
+
+# 使用pg_rman的前提
+#创建归档目录
+[pgsql@wcbpg pg_rman-1.3.11-pg13]$mkdir -p /postgresql/archive
+#开启归档
+[pgsql@wcbpg pg_rman-1.3.11-pg13]$cat >> /postgresql/pgdata/postgresql.conf <<"EOF"
+wal_level='replica'
+archive_mode='on'
+archive_command='test ! -f /postgresql/archive/%f && cp %p /postgresql/archive/%f'
+restore_command='cp /postgresql/archive/%f %p'
+EOF
+
+#查询是否开启归档
+[pgsql@wcbpg pg_rman-1.3.11-pg13]$ psql
+psql (13.2)
+Type "help" for help.
+
+postgres=# select * from pg_settings where name in ('wal_level','archive_mode','archive_command');
+
+
+初始化备份目录：
+
+#初始化需要两个参数，分别为备份目标目录，以及数据库的$PGDATA
+[root@wcbpg /]# mkdir /pgbackup
+[root@wcbpg /]# chown -R pgsql:pgsql  /pgbackup
+[root@wcbpg /]# su - pgsql
+[pgsql@wcbpg ~]$ pg_rman init -B /pgbackup -D /opt/pgdata/pg_root
+INFO: ARCLOG_PATH is set to '/pgarchive'
+INFO: SRVLOG_PATH is set to '/opt/pgdata/pg_root/log'
+
+查看配置文件：
+
+cat pg_rman.ini
+ARCLOG_PATH='/pgarchive'
+SRVLOG_PATH='/opt/pgdata/pg_root/log'
+
+cat system_identifier
+SYSTEM_IDENTIFIER='6940149485915408008'
+#可见和控制文件的系统标识号一致
+pg_controldata | grep system
+Database system identifier:           6940149485915408008
+
+#全量备份
+[pgsql@wcbpg bk]$ pg_rman backup --backup-mode=full -B /pgbackup
+pg_rman backup -B /pgbackup -D /opt/pgdata/pg_root -b full -s -Z -C --keep-data-days=10 --keep-arclog-files=15 --keep-arclog-days=10 --keep-srvlog-files=10 --keep-srvlog-days=15 -h 127.0.0.1 -p 1921 -U postgres -d postgres
+INFO: copying database files
+INFO: copying archived WAL files
+
+#验证
+pg_rman validate -B /pgbackup/
+
+#增量备份
+[pgsql@wcbpg bk]$ pg_rman backup --backup-mode=incremental -B /pgbackup
+pg_rman backup -B /pgbackup -D /opt/pgdata/pg_root -b incremental -s -Z -C --keep-data-days=10 --keep-arclog-files=15 --keep-arclog-days=10 --keep-srvlog-files=10 --keep-srvlog-days=15 -h 127.0.0.1 -p 1921 -U postgres -d postgres
+INFO: copying database files
+
+#再次验证
+pg_rman validate -B /pgbackup/
+
+#查看备份信息
+postgres@nano-dev-nano-python-test-database-02-> pg_rman show detail -B /pgbackup/
+======================================================================================================================
+ StartTime           EndTime              Mode    Data  ArcLog  SrvLog   Total  Compressed  CurTLI  ParentTLI  Status
+======================================================================================================================
+2021-03-18 19:59:19  2021-03-18 19:59:21  INCR    17kB    33MB      0B    33kB        true       1          0  OK
+2021-03-18 19:37:45  2021-03-18 19:37:48  FULL    50MB    33MB    71kB  6689kB        true       1          0  OK
+
+# pg_rman 删除备份集
+若果提示不能删除，请执行查看输出信息。如果实在手贱，可以指定 -f 参数。
+
+$ pg_rman delete '2018-06-11 23:30:47'
+WARNING: cannot delete backup with start time "2018-06-11 23:30:47"
+DETAIL: This is the latest full backup necessary for successful recovery.
+
+$ pg_rman delete -f '2018-06-11 23:30:47'
+INFO: delete the backup with start time: "2018-06-11 23:30:47"
+
+$ pg_rman show
+=====================================================================
+ StartTime           EndTime              Mode    Size   TLI  Status
+=====================================================================
+2018-06-11 23:40:57  2018-06-11 23:40:59  INCR   907kB     1  OK
+
+# 恢复到最新时间
+#先停止pg数据库
+[pgsql@wcbpg bk]$ pg_ctl stop
+waiting for server to shut down.... done
+server stopped
+# 因为是模型恢复，故先删除之前的数据库数据
+[pgsql@wcbpg bk]$ rm -rf /postgresql/pgdata/
+#进行恢复
+[pgsql@wcbpg bk]$ pg_rman restore -B /pgbackup
+
+# 重启关闭的pg服务
+[pgsql@wcbpg bk]$ pg_ctl start
+
+[pgsql@wcbpg bk]$ psql
+psql (13.2)
+Type "help" for help.
+
+postgres=# select * from test1;
+
+# 恢复到指定的时间点
+[pgsql@wcbpg bk]$ pg_ctl stop
+[pgsql@wcbpg bk]$ rm -rf /postgresql/pgdata/
+[pgsql@wcbpg bk]$ pg_rman show -B /pgbackup
+=====================================================================
+ StartTime           EndTime              Mode    Size   TLI  Status
+=====================================================================
+2021-12-16 23:33:49  2021-12-16 23:33:51  INCR    33MB     1  OK
+2021-12-16 23:31:15  2021-12-16 23:31:17  FULL    49MB     1  OK
+[pgsql@wcbpg bk]$  pg_rman restore -B /pgbackup --recovery-target-time="2021-12-16 23:31:17"
+
+[pgsql@wcbpg bk]$ pg_ctl start
+
+# 有时候restore后启动会碰到如下错误：
+invalid primary checkpoint record
+invalid secondary checkpoint record
+could not locate a valid checkpoint record
+此时只能重置xlog，并取消恢复模式
+
+$ pg_resetxlog -f $PGDATA
+$ mv $PGDATA/recovery.conf $PGDATA/recovery.done
+
+相关option:
+
+init   #初始化备份目录
+backup   #在线备份
+restore   #恢复选项
+show  #显示备份集历史，detail选项会显示每个备份集更多的信息
+validate  #验证备份文件，如果不验证，备份无法用于恢复和增量备份
+delete  #删除备份文件
+purge  #从备份目录删除备份
+
+
+为了减轻主节点的压力，当然我们更加喜欢在备节点做备份，以下附上参数解释
+
+pg_rman backup \
+-b full \                          # 全量备份
+-B /pgbackup \       # 备份目录
+-D /opt/pgdata/pg_root \   # 备库的$PGDATA
+-s \                               # 备份pg_log
+-Z \                               # 压缩
+--keep-data-generations=3 \        # 保留3个全量备份，删除不需要的全量备份
+--keep-data-days=10 \              # 保证能恢复到10天内的任意时间点，删除不需要的
+--keep-arclog-files=30 \           # 保留最近30个归档文件
+--keep-arclog-days=20 \            # 保留20天内的归档文件
+--keep-srvlog-files=10 \           # 保留最近10个日志文件(pg_log)
+--keep-srvlog-days=20 \            # 保留20天内的日志文件(pg_log)
+--standby-host=127.0.0.1 \         # 如何连接standby
+--standby-port=1921 \              # 如何连接standby
+-h 10.4.9.166 \                     # 如何连接primary
+-p 1921 \                          # 如何连接primary
+-U postgres \                      # 如何连接primary, standby(超级用户)
+-d postgres                        # 如何连接primary, standby(database name)
+
+
+备节点备份：
+
+#备节点做一次全备
+pg_rman backup -b full  -B /pgbackup  -D /opt/pgdata/pg_root -s -Z  --keep-data-generations=3  --keep-data-days=10 --keep-arclog-files=30  --keep-arclog-days=20  --keep-srvlog-files=10 --keep-srvlog-days=20 --standby-host=127.0.0.1  --standby-port=1921  -h 10.4.9.166 -p 1921  -U postgres  -d postgres
+INFO: copying database files
+
+
+pg_rman validate -B /pgbackup/
+INFO: validate: "2021-03-18 20:27:12" backup, archive log files and server log files by CRC
+INFO: backup "2021-03-18 20:27:12" is valid
+
+#验证备份
+pg_rman validate -B /pgbackup/
+INFO: validate: "2021-03-18 20:27:12" backup, archive log files and server log files by CRC
+INFO: backup "2021-03-18 20:27:12" is valid
+
+#查看备份
+pg_rman show detail -B /pgbackup/
+======================================================================================================================
+ StartTime           EndTime              Mode    Data  ArcLog  SrvLog   Total  Compressed  CurTLI  ParentTLI  Status
+======================================================================================================================
+2021-03-18 20:27:12  2021-03-18 20:27:17  FULL    49MB      0B    18kB  5749kB        true       1          0  OK
+
+操作指令大全
+复制代码
+1、初始化指令
+PGPASSWORD=XXX $PGHOME/bin/pg_rman -D $PGDATA -B /pg_basebackup -A /pg_arch -P init
+
+2、全库备份指令（用于还原需要在执行验证指令）
+PGPASSWORD=XXX $PGHOME/bin/pg_rman -D $PGDATA -B /pg_basebackup -A /pg_arch -P -v -b full backup
+
+3、增量备份策略（用于还原需要在执行验证指令）
+PGPASSWORD=XXX $PGHOME/bin/pg_rman -D $PGDATA -B /pg_basebackup -A /pg_arch -P -v -b incremental backup
+
+4、standby节点全库备份
+pg_rman backup -D /home/postgres/pgdata_sby（备节点） -b full --host=masterIP --standby-host=standbyIP --standby-port=5432
+
+5、验证备份文件。未经验证的备份不能用于还原和增量备份。
+PGPASSWORD=XXX $PGHOME/bin/pg_rman  -B /pg_basebackup validate
+
+6、备份查看指令
+$PGHOME/bin/pg_rman -a show
+
+7、备份删除指令
+pg_rman delete 2020-11-30 13:30:30
+
+8、删除已删除的备份，尽管该delete命令从文件系统中删除了实际数据，但是仍然保留一些已删除备份的目录信息
+pg_rman purge

@@ -1,0 +1,26 @@
+
+TensorFlow提取特征。
+
+1.必须在模型中命名好要提取的那一层，如下
+self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total], name=‘h_pool_flat’)
+2.通过调用sess.run()来获取h_pool_flat层特征
+feature = graph.get_operation_by_name(“h_pool_flat”).outputs[0]
+batch_predictions, batch_feature =
+sess.run([predictions, feature], {input_x: x_test_batch, dropout_keep_prob: 1.0})
+
+keras 输出中间层结果方法：
+方法1 通过K.function()函数打印模型中间层的输出
+思路是通过K.function()函数创建Keras函数，然后再将数据输入到函数中即可。
+model2 = load_model('./result/20220729120534/classify-01-0.2302-0.0946-0.1773.hdf5', custom_objects=custom_objects)
+实例化keras函数
+representation_layer = K.function(inputs={l.name:l.input for l in model2.layers if isinstance(l, keras.engine.input_layer.InputLayer)}, outputs=[model2.get_layer('output').output])调用实例化后的keras函数获取学习到的特征
+representation = representation_layer([X_train])
+
+方法2 通过函数API打印模型中间层的输出
+与K.function()函数类似，根据输入输出关系通过Model()构建一个新的模型，然后在新的模型上对输入数据做预测。
+
+通过函数模型API
+representation_model = Model(inputs=model.inputs, outputs=model.get_layer(‘dense_3’).output)
+
+这个模型的预测值即为学习到的特征
+dense_3_output = representation_model.predict(X_train)

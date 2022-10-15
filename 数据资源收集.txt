@@ -330,7 +330,7 @@ zdal_log
 
 语义匹配语料：
 new_esim
-LCQMC: http://icrc.hitsz.edu.cn/info/1037/1146.htm
+LCQMC: http://icrc.hitsz.edu.cn/info/1037/1146.htm;  https://github.com/xiaohai-AI/lcqmc_data
 sentencesim
 chinese_sts_corpus
 ChineseSTSCorpus = CCKS + LCQMC + sentencesim + chinese_sts_corpus
@@ -420,6 +420,11 @@ CCKS2019关系抽取数据
 - origin_data [origin data](https://pan.baidu.com/s/1EGPYAQp90usvpzROdNilPw) d6vp
 - preprocess_data [preprocessed data](https://pan.baidu.com/s/1lHD-IO7zI4EwyNfi_Fe1HQ) 4f93
 
+十万条通过规则抽取的因果关系数据集：
+格式：原因事件@结果事件\t频次
+数据集：https://github.com/liuhuanyong/CausalDataset
+基于规则抽取因果事件抽取方法：https://github.com/liuhuanyong/CausalityEventExtraction/blob/master/causality_extract.py
+
 维基百科`598454`个词 50维的词向量模型，包括原始的训练数据
 zhwiki.zip
 
@@ -454,7 +459,7 @@ https://drive.google.com/file/d/15FTuNdF5YswRMo3USL_lT_h1hI3ylrAc/view?usp=shari
 英文单词音频数据集
 speech_commands_v0.01.tar.gz
 https://pan.baidu.com/s/1Au85kI_oeDjode2hWumUvQ
-speech_commands_v0.02.tar.gz
+speech_commands_v0.02.tar.gz 2.3G
 http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz
 
 
@@ -819,6 +824,15 @@ gswyhq@gswyhq-PC:~/data$ md5sum 200.zip
 http://openkg1.oss-cn-beijing.aliyuncs.com/ded3c185-fb07-4dfc-8c44-7a2626ab3f09/musicknowledge.ttl
 http://openkg.cn/dataset/http-www-summba-com-ontologies-music-tdb
 
+# 歌曲数据，基于14W歌曲知识库的问答
+包含以下几个字段：
+1)singer:歌手名
+2)album:专辑
+3)song:歌曲名称
+4)author:作词者
+5)composer:作曲者
+来源：https://github.com/liuhuanyong/MusicLyricChatbot
+
 MovieLen 1M数据及简介
 MovieLens 1M数据集包含包含6000个用户在近4000部电影上的100万条评分，也包括电影元数据信息和用户属性信息。下载地址为：
 http://files.grouplens.org/datasets/movielens/ml-1m.zip
@@ -837,6 +851,7 @@ $ wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-20m.zip
 wget -c -t 0 http://files.grouplens.org/datasets/movielens/ml-100k.zip .
 
 电影数据集：ml-latest-small.zip
+MovieLens 数据集的小型版本包括来自 610 位用户对 9,742 部电影的大约 100k 评分。
 http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 
 电影数据集 Moviedata-10M
@@ -1104,5 +1119,19 @@ GitHub地址：https://github.com/thunlp/WantWords
 
 时空关联关系分析，影子账户挖掘数据集：
 https://github.com/Nicole456/Analysis-of-students-consumption-behavior-on-campus
+
+
+# 美国人口普查收入数据集。
+该任务是二元分类来预测一个人是否有可能年收入超过 50,000 美元。
+该数据集包括 48,842 个实例，具有 14 个输入特征：5 个数字特征和 9 个分类特征。
+https://archive.ics.uci.edu/ml/machine-learning-databases/adult/
+包含文件：adult.data   adult.names  adult.test old.adult.names
+
+# 时间序列数据
+# 使用365天的数据作为原始训练集
+# 只使用10000小时的数据作为总数据
+# 数据集来源于：https://archive.ics.uci.edu/ml/datasets/Beijing+PM2.5+Data
+PRSA_data_2010.1.1-2014.12.31.csv
+
 
 

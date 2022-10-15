@@ -125,3 +125,14 @@ df.rename(columns={'sheet_num2':'label'}, inplace = False).head()
 data['name'].str.split('|',expand=True)
 关键是参数expand，这个参数取True时，会把切割出来的内容当做一列。 如果不需要pandas为你分好列，expand=False就可以了。
 
+# 将类别标签数据，转换为0-1编码数据
+用pd.get_dummies() 方法是为了将原本不好区分的数据进行再次打标签区分，从而得到更细的数据。
+data = pd.DataFrame({"学号": [1001, 1002, 1003],
+                     "性别": ["男", "女", "男"],
+                     "学历": ["本科", "硕士", "专科"]})
+pd.get_dummies(data)
+     学号  性别_女  性别_男  学历_专科  学历_本科  学历_硕士
+0  1001     0     1      0      1      0
+1  1002     1     0      0      0      1
+2  1003     0     1      1      0      0
+

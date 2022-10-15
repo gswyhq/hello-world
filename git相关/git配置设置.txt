@@ -150,8 +150,12 @@ Enter new passphrase (empty for no passphrase):
 Enter same passphrase again:
 Your identification has been saved with the new passphrase.
 
-git diff ^M的消除,让git diff的时候忽略换行符的差异：
+git diff ^M的消除,让git diff的时候忽略换行符的差异（但是git status还是会显示差异）：
 git config --global core.whitespace cr-at-eol
+git config core.autocrlf true
+
+也可以添加参数“--ignore-cr-at-eol”临时忽略：
+git diff --ignore-cr-at-eol README.txt
 
 github 修改密码方法：
 Settings -> Security -> Change password

@@ -3,7 +3,7 @@
 # Faiss的主要功能就是相似度搜索！
 
 # 安装：
-# pip install faiss-cpu -c pytorch
+# pip install faiss-cpu -c pytorch  或者： pip3 install faiss-cpu
 # CPU-only version
 # $ conda install -c pytorch faiss-cpu
 # GPU(+CPU) version
@@ -22,19 +22,19 @@
 # 如果数据量低于1百万：用k-means聚类向量
 # 如果考虑内存：一系列方法
 
-# 准备数据
+# 第一步：准备数据
 import faiss
 import numpy as np
-d = 64                           # dimension
-nb = 100000                      # database size
-nq = 10000                       # nb of queries
+d = 64                           # 定义向量维度
+nb = 1000                     # 定义训练向量样本大小
+nq = 100                      # 定义查询向量样本大小
 np.random.seed(1234)             # make reproducible
-xb = np.random.random((nb, d)).astype('float32') # 训练数据
+xb = np.random.random((nb, d)).astype('float32')  # 训练数据
 xb[:, 0] += np.arange(nb) / 1000.
-xq = np.random.random((nq, d)).astype('float32') # 查询数据
+xq = np.random.random((nq, d)).astype('float32')  # 查询数据
 xq[:, 0] += np.arange(nq) / 1000.
 
-# 创建索引(Index)
+# 第二步：创建索引(Index)
 # faiss创建索引对向量预处理，提高查询效率。
 # faiss提供多种索引方法，这里选择最简单的暴力检索L2距离的索引：IndexFlatL2。
 # 创建索引时必须指定向量的维度d。大部分索引需要训练的步骤。IndexFlatL2跳过这一步。
@@ -43,18 +43,39 @@ xq[:, 0] += np.arange(nq) / 1000.
 # search就是寻找相似相似向量了
 # 一些索引可以保存整型的ID，每个向量可以指定一个ID，当查询相似向量时，会返回相似向量的ID及相似度(或距离)。如果不指定，将按照添加的顺序从0开始累加。其中IndexFlatL2不支持指定ID。
 
-index = faiss.IndexFlatL2(d)   # build the index
+index = faiss.IndexFlatL2(d)   # 创建L2距离的索引，创建索引时必须指定向量的维度d; 注意：如果需要存储的向量太多，通过暴力搜索索引IndexFlatL2速度很慢
 print(index.is_trained)
-index.add(xb)                  # add vectors to the index 训练数据
+index.add(xb)                  # add方法一般添加训练时的样本，search就是寻找相似相似向量了。
 print(index.ntotal) # 看索引的总数量 按行来
 
-# 查找相似向量
+# 第三步：查找相似向量
 # 我们有了包含向量的索引后，就可以传入搜索向量查找相似向量了。
 # D表示与相似向量的距离(distance)，维度，I表示相似用户的ID。
-k = 4                          # we want to see 4 nearest neighbors
-D, I = index.search(xq, k)     # actual search
-print(I[:5])                   # neighbors of the 5 first queries-对应ID
-print(D[-5:])                  # neighbors of the 5 last queries-对应距离
+k = 4                          # 定义返回每个需要查询向量的最近k个向量。
+D, I = index.search(xb[2:5], k)     # 查询返回两个numpy array对象D和I。D表示与相似向量的距离(distance)，维度，I表示相似用户的ID。
+print("相似用户ID:", I)
+print("向量距离：", D)
+
+
+
+# 自定义索引ID
+# 默认情况下，Faiss为每个向量设置id。有些Index实现了add_with_ids方法，为向量添加64bit的ids，检索时返回ids而不需返回原始向量。
+index = faiss.IndexFlatL2(xb.shape[1])
+ids = np.array([t+1000 for t in np.arange(xb.shape[0])]) # 自定义索引ID（索引ID必须为int类型），这里是在原ID上加1000
+# index.add_with_ids(xb, ids)  # IndexFlatL2 索引不支持 add_with_ids
+index2 = faiss.IndexIDMap(index)
+index2.add_with_ids(xb, ids) # 添加训练样本及自定义索引，向量（vectors）存储在基础索引中
+D, I = index2.search(xb[2:5], 2)     # 查询返回两个numpy array对象D和I。D表示与相似向量的距离(distance)，维度，I表示相似用户的ID。
+print("相似用户ID:", I)
+print("向量距离：", D)
+# IndexIVF原生提供了ass_with_ids方法，就不需要IndexIDMap了。
+# 相似用户ID: [[1002 1304]
+#  [1003 1173]
+#  [1004 1288]]
+# 向量距离： [[0.        5.7964087]
+#  [0.        7.277905 ]
+#  [0.        6.763804 ]]
+
 
 # 加速搜索
 # 如果需要存储的向量太多，通过暴力搜索索引IndexFlatL2速度很慢
@@ -121,6 +142,7 @@ print(I[-5:])                  # neighbors of the 5 last queries
 # 减少内存
 # 索引IndexFlatL2和IndexIVFFlat都会全量存储所有的向量在内存中
 # 为满足大的数据量的需求，faiss提供一种基于Product Quantizer(乘积量化)的压缩算法编码向量大小到指定的字节数。此时，存储的向量时压缩过的，查询的距离也是近似的。
+# 有时候虽说减少了内存，但构建索引时候，耗时可能会比较长；
 
 # 使用IndexIVFPQ
 nlist = 100 # 聚类中心个数

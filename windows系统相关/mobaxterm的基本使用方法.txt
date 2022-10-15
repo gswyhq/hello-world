@@ -55,3 +55,8 @@ source ~/.bashrc
 # 查询某命令路径，如：
 ~$ which zip
 
+# mobaxterm 中设置光标的颜色：
+Settings -> Terminal -> Colors scheme: Customize -> Cursor settings -> Cursor color -
+> 设置颜色即可；
+设置好后，需在新开窗口中才会生效，已经打开窗口，是无效的；
+

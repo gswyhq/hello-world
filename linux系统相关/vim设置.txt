@@ -74,4 +74,21 @@ vim 粘贴多余缩进问题
 1. 在拷贝前输入:set paste (再输入i, 进入编辑模式进行粘贴；这样的话，vim就不会启动自动缩进，而只是纯拷贝粘贴）
 2. 拷贝完成之后，输入:set nopaste (关闭paste, 可以直接 :wq，保存退出即可)
 
+# vim 查找关键词的时候，设置高亮：
+在.vimrc里加入set cursorline即可开启高亮光标所在行,同理加入 set cursorColumn,即可高亮光标所在列。
+如果想同时修改高亮的颜色，可以在其后加入高亮颜色的设置。
+cterm可以用ctermfg设置前景色；用ctermbg设置背景色。
+推荐使 用的颜色包括：black, brown, grey, blue, green, cyan, magenta, yellow, white。
+为了保持各平台下的一致性，我们应该使用十六进制颜色代码来指定颜色。例如,ctermfg=#00afff ctermbg=#a8a8a8
+" 开启高亮光标行
+set cursorline
+hi CursorLine   cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+" 开启高亮光标列
+set cursorcolumn
+hi CursorColumn cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+
+# mobaxterm 中设置光标的颜色：
+Settings -> Terminal -> Colors scheme: Customize -> Cursor settings -> Cursor color -> 设置颜色即可；
+设置好后，需在新开窗口中才会生效，已经打开窗口，是无效的；
+
 

@@ -22,9 +22,11 @@ tokenizer = BertTokenizer.from_pretrained(BERT_BASE_CHINESE_PATH)
 model = BertForMaskedLM.from_pretrained(BERT_BASE_CHINESE_PATH)
 model.eval()
 
-def mask_pred(text='[CLS] 深 圳 是 一 座 [MASK] [MASK] 的 城 市 [SEP]', masked_index=None):
+def mask_pred(text:str='[CLS] 深 圳 是 一 座 [MASK] [MASK] 的 城 市 [SEP]', masked_index:int=None):
     """
     对字符串中的首个mask进行预测
+    这里是先预测一个 mask 位，预测完成后，再把已经预测的mask填好，继续预测下一个mask位，而不是多个mask位一起预测；
+    多个mask 位一起预测的时候，针对候选比较多的情况，预测效果极差，如：'[CLS] [MASK] [MASK] 是 一 座 海 滨 的 城 市 [SEP]'
     :param text:
     :return:
     """
@@ -52,6 +54,7 @@ def mask_pred(text='[CLS] 深 圳 是 一 座 [MASK] [MASK] 的 城 市 [SEP]', 
     # print("预测最有可能的结果：{}".format(predicted_token))
     top10_mask = []
     sorted, indices = torch.sort(predictions[0][0][masked_index], descending=True)
+
     for weight, index in zip(sorted[:10], indices[:10]):
         pred_token = tokenizer.convert_ids_to_tokens([index])[0]
         # print('{} -> {}'.format(pred_token, weight))
@@ -63,6 +66,7 @@ def main(reverse=False):
     import copy
     beam_size = 50
     # text = '[CLS] 深 圳 是 一 座 [MASK] [MASK] 的 城 市 [SEP]'
+    text = '[CLS] [MASK] [MASK] 是 一 座 海 滨 的 城 市 [SEP]'
     text = '[CLS] 欧 拉 是 一 位 [MASK] [MASK] 的 [MASK] [MASK] 家 。[SEP]'
     text = '[CLS] 是 一 种 [MASK] [MASK] 而 又 [MASK] [MASK] [MASK] 的 方 法 。[SEP]'
     tokenized_text = text.split()

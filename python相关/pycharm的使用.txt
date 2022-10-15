@@ -71,4 +71,48 @@ File -> setting -> Editor -> Inspections -> 勾选上 Python 和 Spelling
 对所有文件都起到效果，就要在setting里面进行操作。
 方法2（针对所有py文件）：File -> Settings -> Editor -> General -> Use soft wraps in console（不选中则不换行）。
 
+# Pycharm查看变量的方法
+在Pycharm界面的右上方，点击运行栏的这个灰色向下箭头，选择“Edit Configurations”，在接下来出现的窗口中，勾选“run with Python console”
+设置完成后重启Pycharm，运行程序，点击"show variables"就会出现查看变量的窗口; 即点击左边那个小眼睛。
+有时候，在Python Console中，“小眼睛”按钮不见了；这时，点击“Python Console”栏右侧“设置”齿轮状按钮，找到“Show Toolbar”勾选；这时“小眼睛”按钮就出现了，点击即可开启或关闭查看变量“show Variables”；
+若想长久关闭，则需：
+File -> Settings -> Build, Execution, Deployment -> Console -> 取消勾选："Show console variables by default"
+
+# pycharm Python console 导入包路径设置：
+file -> Settings -> Python Console, Starting script 里面输入以下内容：
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+# sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])
+sys.path.sort()
+这样每次进入 Python Console，就能自定义导入包路径了；
+若要自动切换到项目路径，则需将变量“WORKING_DIR_AND_PYTHON_PATHS”，添加到 sys.path中；
+
+# pycharm 重命名文件报错：
+cannot perform refactoring. selected file is not located inside the project
+解决方法：File -> Invalidate Caches，清除缓存，重新启动 IDEA。
+
+# pycharm 配置autopep8
+autopep8是一个可以将Python代码自动排版为PEP8风格第三方包，使用它可以轻松地排版出格式优美整齐的代码。
+第一步：安装autopep8
+File -> Settings -> Project -> Project Interpreter, 在点击右侧加号图标, 进入Avaliable Packages后搜索autopep8, 选中后点击下方的Install Package即可安装。(若发现已经安装了就可以跳过此步)
+第二步：配置autopep8到扩展工具（External Tools）
+在Pycharm中点击 File--Settings---Tools--External Tools, 点击图中加号图标添加扩展工具
+需要填写Name, Program, Arguments, Working directory 以及Output Filters这几项。填写内容如下：
+Name：可以随意命名，如：autopep8
+Program: 需要填写autopep8.exe的存放路径。如：　　
+C:\ProgramData\Anaconda3\Scripts\autopep8.exe
+Arguments: 
+--in-place --aggressive --aggressive $FilePath$
+Woking directory: 
+$ProjectFileDir$
+Output Filters输入：
+$FILE_PATH$:$LINE$:$COLUMN$:.*
+点击OK后就配置完成了。
+第三步：使用autopep8
+打开一个python 的py文件，编写一些不符合pep8格式的代码，然后在编辑区中右键---External Tools--Autopep8, 
+即可自动将代码格式调整为pep8的格式。
+实际上等价于在命令行运行（此处test123.py即为打开的一个py文件）：
+C:\ProgramData\Anaconda3\Scripts\autopep8.exe --in-place --aggressive --aggressive test123.py
+
+
+
 

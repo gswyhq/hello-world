@@ -1,0 +1,76 @@
+
+# 两个表合并取样：
+select uid,cate1,cate2,"0" as flag from tableA where dt='sth1' limit 10
+union all
+select uid,cate1,cate2,"1" as flag from tableB where dt='sth2' limit 10
+上面查询语句会报错：
+需改成：
+select uid,cate1,cate2,"0" as flag from tableA where dt='sth1' TABLESAMPLE(10 ROWS)
+union all
+select uid,cate1,cate2,"1" as flag from tableB where dt='sth2' TABLESAMPLE(10 ROWS)
+
+# 合并多表的结果，并去重(按uid去重，并保留最新时间的数据；table_a1无时间字段，设置为默认时间字段)：
+select name, addr, uid, time
+from 
+(select name, addr, uid, time,
+ row_number() over (partition by uid order by `time` desc) num
+from (select name, addr, uid, '1970-00-00 00:00:00' as `time`
+      from db1.table_a1
+      union all
+      select name, addr, uid, `time`
+      from db1.table_a2
+     ) ta
+) tb where tb.num = 1;
+
+
+# 多表查询结果合并，并排序：
+select uid,cate1,cate2 from
+    (select * from
+    (select uid,cate1,cate2,"0" as flag from tableA where dt='sth1'
+    union all
+    select uid,cate1,cate2,"1" as flag from tableB where dt='sth2'
+    )ts
+    distribute by uid sort by uid,flag asc
+)a
+
+
+# 三种方法来看 union all 及 group by 不同的使用顺序对CPU时间及耗时的影响 ：
+方法1. 先Union All， 再Group By (并行度高，但最耗CPU资源)
+select inctmid ctmid,cnlid,inwhsid whsid,sum(qty) qty,goodsid 
+from
+(     select inctmid,cnlid,inwhsid,qty,goodsid 
+       from DtrBill a,DtrDetail b
+       where a.billno=b.billno 
+       union all
+       select inctmid,cnlid,inwhsid,-1*qty qty,goodsid 
+       from DtrBillRet a,DtrDetailRet b
+       where a.billno=b.billno
+)a
+group by inctmid,cnlid,inwhsid,goodsid 
+
+方法2. 分别Group By，再Union All，再Group By (并行度中等，最节省CPU资源)
+select inctmid ctmid,cnlid,inwhsid whsid,sum(qty) qty,goodsid 
+from
+(    select inctmid,cnlid,inwhsid,sum(qty) qty,goodsid 
+      from DtrBill a,DtrDetail b
+      where a.billno=b.billno 
+      group by inctmid,cnlid,inwhsid,goodsid
+      union all
+     select inctmid,cnlid,inwhsid,sum(-1*qty) qty,goodsid 
+     from DtrBillRet a,DtrDetailRet b
+     where a.billno=b.billno
+     group by inctmid,cnlid,inwhsid,goodsid
+)a
+group by inctmid,cnlid,inwhsid,goodsid
+
+方法3. 先Group By，再Union (并行度最低，消耗CPU资源中等)
+select inctmid,cnlid,inwhsid,sum(qty) qty,goodsid 
+from DtrBill a,DtrDetail b
+where a.billno=b.billno 
+group by inctmid,cnlid,inwhsid,goodsid
+union 
+select inctmid,cnlid,inwhsid,sum(-1*qty) qty,goodsid 
+from DtrBillRet a,DtrDetailRet b
+where a.billno=b.billno
+group by inctmid,cnlid,inwhsid,goodsid
+

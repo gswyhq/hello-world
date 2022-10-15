@@ -13,3 +13,9 @@ temp_recommend_question.sort(key=recommend_question.index)
 temp_recommend_question
 Out[7]: ['a', 'b', 'd', 'w', 'q', 'f', 'x', 's', 'e']
 
+
+# 字符串左侧补0：
+"{:0>04d}-{:0>2d}-{:0>2d}".format(11, 1, 3)
+输出：'0011-01-03'
+
+

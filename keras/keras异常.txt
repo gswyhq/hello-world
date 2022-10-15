@@ -466,3 +466,82 @@ NotImplementedError: Save or restore weights that is not an instance of `tf.Vari
 此模型改为用函数定义，便不会再出现这个错误。
 故而需重新定义模型，重新训练；
 
+# Tensorflow 2.x 求解特征图梯度报错：
+grads=K.gradients(african_elephant_output,last_conv_layer.output)[0]
+RuntimeError: tf.gradients is not supported when eager execution is enabled. Use tf.GradientTape instead.
+解决方法1：
+使用tf1的compat模式禁用eager-execution约束表单tf2，添加如下代码：
+import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+解决方案2：
+with tf.GradientTape() as gtape:
+    grads = gtape.gradient(african_elephant_output, last_conv_layer.output)
+
+# 求解梯度时候报错：
+with tf.GradientTape() as gtape:
+    grads = gtape.gradient(african_elephant_output, last_conv_layer.output)
+AttributeError: 'KerasTensor' object has no attribute '_id'
+问题原因及解决方法：
+african_elephant_output, last_conv_layer 这两个参数存在问题；
+african_elephant_output 应该是最大类别可能的概率，如：
+Out[55]: <tf.Tensor: shape=(1,), dtype=float32, numpy=array([0.9166607], dtype=float32)>
+last_conv_layer.output，应该为指定层的输出，其shape应该为：
+Out[54]: TensorShape([1, 14, 14, 512])
+完整代码(来源：https://blog.csdn.net/Forrest97/article/details/105895591)：
+from tensorflow.keras import models
+last_conv_layer = VGG16_model.get_layer('block5_conv3')
+heatmap_model =models.Model([VGG16_model.inputs], [last_conv_layer.output, VGG16_model.output])
+#Grad-CAM 算法实现
+import tensorflow.keras.backend as K
+with tf.GradientTape() as gtape:
+    conv_output, Predictions = heatmap_model(img)
+    prob = Predictions[:, np.argmax(Predictions[0])] # 最大可能性类别的预测概率
+    grads = gtape.gradient(prob, conv_output)  # 类别与卷积层的梯度 (1,14,14,512)
+    pooled_grads = K.mean(grads, axis=(0,1,2)) # 特征层梯度的全局平均代表每个特征层权重
+heatmap = tf.reduce_mean(tf.multiply(pooled_grads, conv_output), axis=-1) #权重与特征层相乘，512层求和平均
+
+
+# 加载robert 预训练模型报错：
+--> 285     query_shape = config.pop("query_shape")
+    286     key_shape = config.pop("key_shape")
+    287     value_shape = config.pop("value_shape")
+
+KeyError: 'query_shape'
+可能是 custom_objects 参数未定义清楚, 改成如下定义即可：
+from keras.engine.input_layer import InputLayer 
+from keras_bert.layers.embedding import TokenEmbedding 
+from keras.layers.embeddings import Embedding 
+from keras.layers.merge import Add
+from keras_pos_embd.pos_embd import PositionEmbedding
+from keras.layers.core import Dropout
+from keras_layer_normalization.layer_normalization import LayerNormalization 
+from keras_multi_head.multi_head_attention import MultiHeadAttention 
+from keras_position_wise_feed_forward.feed_forward import FeedForward 
+custom_objects = {"TokenEmbedding": TokenEmbedding, "PositionEmbedding": PositionEmbedding,
+                 "PositionEmbedding": PositionEmbedding, "LayerNormalization": LayerNormalization,
+                  "MultiHeadAttention": MultiHeadAttention,
+                  "FeedForward": FeedForward
+                 }
+bert_model = load_model("data/adult/bert_model3.h5", custom_objects=custom_objects)
+或者通过训练前的预训练模型，再如下方式：
+custom_objects = {layer.__class__.__name__:layer for layer in bert_model.layers}
+
+# keras 定义模型结构时候，出现错误：
+报错： Cannot convert a symbolic Keras input/output to a numpy array. This error may indicate that you're trying to pass a symbolic value to a NumPy call, which is not supported. Or, you may be trying to pass Keras symbolic inputs/outputs to a TF API that does not register dispatching, preventing Keras from automatically converting the API call to a lambda layer in the Functional Model.
+问题的描述是指Keras的输入无法隐式转化为numpy数组, 主要原因是keras 和 tf.keras混用造成；
+KerasTensor和Tensor是完全不同的类，kera_tensor源码中可以发现Keras可以将Tensor转成KerasTensor，但是没发现将KerasTensor转成Tensor的部分。
+Tensor+KerasTensor = KerasTensor
+若定义函数输入的是KerasTensor，默认输出的是Tensor，而这里会导致输出KerasTensor，所以就报错了。
+解决方法，统一使用tf.keras 或keras
+如deepctr库中同时使用tensorflow.keras和tensorflow.python.keras 以layers/interaction.py为例，文件头部用到大量tensorflow.python引用import tensorflow as tf
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.backend import batch_dot
+而模型文件models/deepfm.py使用 tf.keras.layers.Dense，导致数据不一致;
+修改方法按以下步骤：
+修改feature_column.py和inputs.py中 tensorflow.python.keras->tensorflow.keras 
+修改layers目录下.py文件中 tensorflow.python.keras->tensorflow.keras
+修改layers/utils.py文件中from xxx.lookup_ops.xxx部分修改为from tensorflow.lookup
+修改layers/interaction.py文件中from xxx import utils部分修改为 from tensorflow.keras import utils
+sed -i 's/tensorflow.python.keras/tensorflow.keras/g' /usr/local/lib/python3.8/dist-packages/deepctr/*.py
+sed -i 's/tensorflow.python.keras/tensorflow.keras/g' /usr/local/lib/python3.8/dist-packages/deepctr/layers/*.py
+

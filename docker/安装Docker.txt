@@ -7,9 +7,11 @@ upgrade 是升级已安装的所有软件包，升级之后的版本就是本地
 
 # 安装docker
 gswewf@gswewf-pc:~$ sudo apt-get install docker.io 
-或者： sudo apt-get install docker-ce
+或者（安装社区版）： sudo apt-get install docker-ce
 Created symlink from /etc/systemd/system/sockets.target.wants/docker.socket to /lib/systemd/system/docker.socket.
 正在处理用于 systemd (229-4) 的触发器 ...
+
+“CE”缩写通常代表Community Edition”,意思是“社区版”
 
 # 或者直接下载安装文件进行安装：
 ubuntu@10-13-109-255:~$ sudo curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.05.0-ce.tgz 
