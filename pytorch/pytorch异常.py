@@ -143,3 +143,31 @@ batch_first:如果为真，则输入和输出张量以(batch, seq_len)的形式�
 若以以(seq_len, batch)的形式提供，会与target的batch_size (batch)不匹配；
 TEXT = data.Field(sequential=True, tokenize=x_tokenize, fix_length=BATCH_SIZE, include_lengths=True, use_vocab=True, batch_first=True)
 
+# pytorch 读取自带数据集，速度慢的问题：
+读取自带数据集，速度慢，可以预先下载好数据集，再从指定路径读取即可：
+如：
+from torchvision import datasets
+from torchvision import transforms
+train_dataset = datasets.MNIST(root='~/.torch', train=True, transform=transforms.ToTensor(), download=True)
+test_dataset = datasets.MNIST(root='~/.torch', train=False, transform=transforms.ToTensor(), download=True)
+预先下载好下面四个文件：
+https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz
+https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz
+https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz
+https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz
+创建层级目录：mkdir -p ~/.torch/MNIST/raw
+并将 下载好的四个文件放到：~/.torch/MNIST/raw 路径下（如下所示）；datasets.MNIST类初始化参数root路径填写：'~/.torch'，当然也可以是其他的，但届时，MNIST/raw目录也需要移至到相应目录下即可；
+~/.torch tree
+.
++--- MNIST
+|   +--- raw
+|   |   +--- t10k-images-idx3-ubyte.gz
+|   |   +--- t10k-labels-idx1-ubyte.gz
+|   |   +--- train-images-idx3-ubyte.gz
+|   |   +--- train-labels-idx1-ubyte.gz
+
+# 训练模型出错：
+RuntimeError: Expected tensor for argument #1 'indices' to have one of the following scalar types: Long, Int; but got torch.FloatTensor instead (while checking arguments for embedding)
+问题原因及解决方法：输入参数需要转成long类型才能作为nn.embedding层的输入；
+inputs = inputs.long()
+

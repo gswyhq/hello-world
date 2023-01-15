@@ -103,4 +103,6 @@ That is 200.
 # grep 通过正则匹配转义字符，如tab键：
 grep -P "\t" test.txt
 
+# 查找三位数字，比如查找超过100MB但小于1GB的文件：
+du -sh *|grep '[0-9][0-9][0-9]M'
 

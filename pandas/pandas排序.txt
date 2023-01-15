@@ -70,6 +70,17 @@ df.sort_values(by='ba')
 # 自定义排序函数排序：
 df.sort_values(by = '时间', key=lambda x: x.str.lower(), ascending = True).head(10)
 
+# 自定义排序：
+#数据集
+df = pd.DataFrame({'word':['a','b','c'], 'num':[2,1,3]})
+#自定义排序顺序，设置ascending=True，升序排列；
+list_sorted = ['b', 'a', 'c']
+#对相关列进行自定义排序
+df['word'] = df['word'].astype('category').cat.set_categories(list_sorted)
+#结果
+df_sortes = df.sort_values(by=['word'], ascending=True, inplace=False)
+
+
 # 对两列和排序(不创建新的一列)：
 data = {"Column 1": [1, 3, 1], "Column 2": [1, 2, 3]}
 df = pd.DataFrame(data)

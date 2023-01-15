@@ -24,3 +24,44 @@ representation_model = Model(inputs=model.inputs, outputs=model.get_layer(‘den
 
 这个模型的预测值即为学习到的特征
 dense_3_output = representation_model.predict(X_train)
+
+# 将多个模型合并成一个模型时候，有时候会报错：
+ValueError: The name "dense" is used 3 times in the model. All layer names should be unique.
+主要是模型层名称冲突了；
+若直接重命名，又会报错：
+AttributeError: Can't set the attribute "name", likely because it conflicts with an existing read-only @property of the object. Please choose a different name
+在重命名时，不使用.name 而是使用._name 即可，如下：
+robert_model = load_model(r'classify-14-0.3912-0.1248-0.2570.hdf5', custom_objects=custom_objects).get_layer('model_2')
+se_model = load_model(r'classify-02-0.2537-0.1176-0.1179.hdf5', custom_objects=custom_objects)
+unique_name_set = set([l.name for l in robert_model.layers]) & set([l.name for l in se_model.layers])
+for layer in robert_model.layers:
+    layer.trainable = True
+    if layer.name in unique_name_set:
+        layer._name = "robert_" + layer.name
+for layer in se_model.layers:
+    layer.trainable = True
+    if layer.name in unique_name_set:
+        layer._name = "se_" + layer.name
+
+x1 = robert_model.layers[-1].output
+x2 = se_model.layers[-3].output
+# 若使用Model这样，不会显示各个子模型层详情情况
+# x1 = Model(inputs=robert_model.inputs, outputs=[robert_model.layers[-1].output])([input_indices, input_segments])
+# x2 = Model(inputs=se_model.inputs, outputs=[se_model.layers[-3].output])([input_word_ids, input_weights])
+
+x = Concatenate(name="concatenate_2")([x1, x2])
+x = Dense(128, activation='relu')(x)
+output = Dense(1, activation='sigmoid')(x)
+model = Model(inputs=[
+    *robert_model.inputs,
+    *se_model.inputs
+], outputs=output)
+
+model.compile(
+    loss='binary_crossentropy',
+    optimizer=keras.optimizers.Adam(learning_rate=1e-5), # 用足够小的学习率
+    metrics=['accuracy'])
+
+model.summary()
+
+

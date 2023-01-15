@@ -1,4 +1,136 @@
 
+xargs命令的作用，是将标准输入转为命令行参数。
+$ echo "hello world" | xargs echo
+hello world
+上面的代码将管道左侧的标准输入，转为命令行参数hello world，传给第二个echo命令。
+
+# 大多数命令（比如rm、mkdir、ls）与管道一起使用时，都需要xargs将标准输入转为命令行参数。
+$ echo "one two three" | xargs mkdir
+上面的代码等同于mkdir one two three。如果不加xargs就会报错，提示mkdir缺少操作参数。
+
+# xargs 的单独使用
+xargs后面的命令默认是echo。
+$ xargs
+# 等同于
+$ xargs echo
+大多数时候，xargs命令都是跟管道一起使用的。但是，它也可以单独使用。
+输入xargs按下回车以后，命令行就会等待用户输入，作为标准输入。你可以输入任意内容，然后按下Ctrl d，表示输入结束，这时echo命令就会把前面的输入打印出来。
+
 # 取文件的每行前两个字符，并通过tap键 连接上原本的文本内容：
 head demand_side_id.txt | xargs -I {} bash -c 'echo -e "${1:0:2}\t$1"' - {} 
+
+# xargs -d 参数与分隔符
+默认情况下，xargs将换行符和空格作为分隔符，把标准输入分解成一个个命令行参数。
+$ echo "one two three" | xargs mkdir
+上面代码中，mkdir会新建三个子目录，因为xargs将one two three分解成三个命令行参数，执行mkdir one two three。
+-d参数可以更改分隔符。
+$ echo -e "a\tb\tc" | xargs -d "\t" echo
+a b c
+上面的命令指定制表符\t作为分隔符，所以a\tb\tc就转换成了三个命令行参数。echo命令的-e参数表示解释转义字符。
+
+# 由于xargs默认将空格作为分隔符，所以不太适合处理文件名，因为文件名可能包含空格。
+find命令有一个特别的参数-print0，指定输出的文件列表以null分隔。然后，xargs命令的-0参数表示用null当作分隔符。
+$ find /path -type f -print0 | xargs -0 rm
+上面命令删除/path路径下的所有文件。由于分隔符是null，所以处理包含空格的文件名，也不会报错。
+
+# xargs实用程序从标准输入读取空格,制表符,换行符和文件结尾分隔符,并以字符串作为参数执行实用程序.
+您希望避免使用空格作为分隔符.这可以通过更改xargs的分隔符来完成.根据手册:
+-0将xargs更改为期望NUL（“\0”）字符作为分隔符，而不是空格和换行。预计将用于与find（1）中的-print0函数一致。
+ -0      Change xargs to expect NUL (``\0'') characters as separators,
+         instead of spaces and newlines.  This is expected to be used in
+         concert with the -print0 function in find(1).
+如:
+ find . -name "*.mp3" -print0 | xargs -0 du -sh
+ find . \( -name "*.mp3" -or -name "*.mp4" \) -print0 | xargs -0 du -sh
+
+# 文件明明存在，但是xargs 命令报错：
+cat pathfile.txt|xargs -I {} du -sh {}
+No such file or directory
+但 echo 输出路径又正常：
+cat pathfile.txt|xargs -I {} echo {}
+问题原因及解决方法：
+路径文件pathfile.txt中的文件路径存在特殊符号，如行尾是"^M"；
+解决方法：删除行尾特殊符号"^M"
+sed -i 's/\r//g' pathfile.txt
+有的时候其他行的文件都正常，唯有第一行的报错：No such file or directory
+这个时候，可能是文件头包含特殊符号"\ufeff"所致，解决方法是删除对应的特殊符号即可。
+
+# xargs -p 参数，-t 参数
+使用xargs命令以后，由于存在转换参数过程，有时需要确认一下到底执行的是什么命令。
+-p参数打印出要执行的命令，询问用户是否要执行。
+$ echo 'one two three' | xargs -p touch
+touch one two three ?...
+上面的命令执行以后，会打印出最终要执行的命令，让用户确认。用户输入y以后（大小写皆可），才会真正执行。
+-t参数则是打印出最终要执行的命令，然后直接执行，不需要用户确认。
+$ echo 'one two three' | xargs -t rm
+rm one two three
+
+# xargs -L 参数
+如果标准输入包含多行，-L参数指定多少行作为一个命令行参数。
+$ xargs find -name
+"*.txt"
+"*.md"
+find: paths must precede expression: `*.md'
+上面命令同时将"*.txt"和*.md两行作为命令行参数，传给find命令导致报错。
+
+使用-L参数，指定每行作为一个命令行参数，就不会报错。
+$ xargs -L 1 find -name
+"*.txt"
+./foo.txt
+./hello.txt
+"*.md"
+./README.md
+上面命令指定了每一行（-L 1）作为命令行参数，分别运行一次命令（find -name）。
+
+下面是另一个例子。
+$ echo -e "a\nb\nc" | xargs -L 1 echo
+a
+b
+c
+上面代码指定每行运行一次echo命令，所以echo命令执行了三次，输出了三行。
+
+# xargs -n 参数
+-L参数虽然解决了多行的问题，但是有时用户会在同一行输入多项。
+$ xargs find -name
+"*.txt" "*.md"
+find: paths must precede expression: `*.md'
+上面的命令将同一行的两项作为命令行参数，导致报错。
+
+-n参数指定每次将多少项，作为命令行参数。
+$ xargs -n 1 find -name
+上面命令指定将每一项（-n 1）标准输入作为命令行参数，分别执行一次命令（find -name）。
+
+下面是另一个例子。
+$ echo {0..9} | xargs -n 2 echo
+0 1
+2 3
+4 5
+6 7
+8 9
+上面命令指定，每两个参数运行一次echo命令。所以，10个阿拉伯数字运行了五次echo命令，输出了五行。
+
+# xargs -I 参数
+如果xargs要将命令行参数传给多个命令，可以使用-I参数。
+-I指定每一项命令行参数的替代字符串。
+$ cat foo.txt
+one
+two
+three
+
+$ cat foo.txt | xargs -I file sh -c 'echo file; mkdir file'
+one
+two
+three
+
+$ ls
+one two three
+上面代码中，foo.txt是一个三行的文本文件。
+我们希望对每一项命令行参数，执行两个命令（echo和mkdir），使用-I file表示file是命令行参数的替代字符串。
+执行命令时，具体的参数会替代掉echo file; mkdir file里面的两个file。
+
+# xargs --max-procs 参数
+xargs默认只用一个进程执行命令。如果命令要执行多次，必须等上一次执行完，才能执行下一次。
+--max-procs参数指定同时用多少个进程并行执行命令。--max-procs 2表示同时最多使用两个进程，--max-procs 0表示不限制进程数。
+$ docker ps -q | xargs -n 1 --max-procs 0 docker kill
+上面命令表示，同时关闭尽可能多的 Docker 容器，这样运行速度会快很多。
 

@@ -500,6 +500,12 @@ with tf.GradientTape() as gtape:
     pooled_grads = K.mean(grads, axis=(0,1,2)) # 特征层梯度的全局平均代表每个特征层权重
 heatmap = tf.reduce_mean(tf.multiply(pooled_grads, conv_output), axis=-1) #权重与特征层相乘，512层求和平均
 
+tf 2.x 求导示例(GradientTape是eager模式下计算梯度用的，而eager模式是TensorFlow2.0的默认模式。)：
+x = tf.constant(3.0)
+with tf.GradientTape() as g:
+    g.watch(x) # watch作用：确保某个tensor被tape追踪
+    y = x * x
+dy_dx = g.gradient(y, x) # gradient作用：根据tape上下文来计算某个或者某些tensor的梯度
 
 # 加载robert 预训练模型报错：
 --> 285     query_shape = config.pop("query_shape")
@@ -544,4 +550,144 @@ from tensorflow.python.keras.backend import batch_dot
 修改layers/interaction.py文件中from xxx import utils部分修改为 from tensorflow.keras import utils
 sed -i 's/tensorflow.python.keras/tensorflow.keras/g' /usr/local/lib/python3.8/dist-packages/deepctr/*.py
 sed -i 's/tensorflow.python.keras/tensorflow.keras/g' /usr/local/lib/python3.8/dist-packages/deepctr/layers/*.py
+
+# load_model 报错：
+from keras.models import Model, load_model
+model = load_model(rf"D:\Users\{USERNAME}\data\icwb2-data\model20221024.h5")
+报错：
+AttributeError: module 'keras.api._v2.keras.models' has no attribute 'Functional'
+解决方法，改为：
+from keras.api._v1.keras.models import load_model
+from keras.engine.functional import Functional
+model = load_model(rf"D:\Users\{USERNAME}\data\icwb2-data\model20221024.h5", custom_objects={"Functional": Functional})
+
+# load_model, 自定义Adam，导致与keras重名，且参数不一致报错：
+TypeError: Unexpected keyword argument passed to optimizer: bias_correction. Allowed kwargs are {'lr', 'clipvalue', 'decay', 'global_clipnorm', 'clipnorm'}.
+解决方法：先设置compile=False，然后手动compile
+model = load_model(rf"D:\Users\{USERNAME}\data\icwb2-data\model20221024.h5", custom_objects={'Adam': Adam, "Functional": Functional, }, compile=False)
+model.compile(
+    loss=CRF.sparse_loss,
+    optimizer=Adam(learning_rate),
+    metrics=[CRF.sparse_accuracy]
+)
+
+# 问题：模型训练完了，但load_model时候，出错，或者不报错，卡住了：
+# 可能原因，save_model 与load_model模型方法不配套，如用keras保存的，但用tf.keras加载，这个时候，就可能不成功；
+要么用1：
+from tensorflow.python.keras.models import  save_model, load_model
+要么用2：
+from tensorflow.keras.models import save_model, load_model
+不要1与2混用。
+
+# keras模型训练时候没有问题，但是保存模型时候出错：
+WARNING:tensorflow:Model failed to serialize as JSON. Ignoring... ('Not JSON Serializable:', <tf.Tensor: shape=(), dtype=int32, numpy=58)
+可能是因为tf.keras 与 python keras混用 
+即：import keras 与 from tensorflow.python import keras 混用造成的。
+
+# keras模型训练时候没有问题，但是保存模型时候出错
+TypeError: Unable to serialize KerasTensor(type_spec=TensorSpec(shape=(None, 800, 32), dtype=tf.float32, name=None), name='add/add:0', description="created by layer 'add'") to JSON. Unrecognized type <class 'keras.engine.keras_tensor.KerasTensor'>.
+可能是没有使用Lambda 函数；或者使用了，但该函数的参数没有使用，如：
+positions = Lambda(lambda x: K.tile(K.reshape(K.arange(0, num_patches), shape=(1, num_patches, 1)), [1, 1, projected_patches.shape[-2]//num_patches]))(projected_patches)
+改为：
+feature_dim = projected_patches.shape[-2] // num_patches
+positions = Lambda(lambda x: K.tile(K.reshape(K.arange(0, num_patches), shape=(1, num_patches, 1)), [1, 1, feature_dim]))(projected_patches)
+就正常了；
+
+# 有时候，训练完成，保存模型也正常，但是加载模型报错：
+load_model('./result/20221114133351/classify-13-0.0149.hdf5')
+ValueError: Shape must be rank 2 but is rank 3 for '{{node concatenate/concat}} = ConcatV2[N=2, T=DT_FLOAT, Tidx=DT_INT32](Placeholder, Placeholder_1, concatenate/concat/axis)' with input shapes: [?,256], [?,6,1], [].
+这个时候，若指定模型定义过程，可以先重新定义下模型；
+定义完成后，再load_weights，可能就可以了；
+model.load_weights( './result/20221114133351/classify-13-0.0149.hdf5')
+
+# 问题使用卷积神经网络 Conv1D 时候报错：
+ValueError: Negative dimension size caused by subtracting 5 from 3 for '{{node conv1d_30/conv1d}} = Conv2D[T=DT_FLOAT, data_format="NHWC", dilations=[1, 1, 1, 1], explicit_paddings=[], padding="VALID", strides=[1, 1, 1, 1], use_cudnn_on_gpu=true](conv1d_30/conv1d/ExpandDims, conv1d_30/conv1d/ExpandDims_1)' with input shapes: [?,1,3,128], [1,5,128,128].
+解决方法：
+在卷积层使用 参数 padding = 'same’
+注意：在实践的过程中，可能是在 MaxPool和Conv1D中同时加上参数 padding=‘same’
+
+# 展示模型结构的时候，有时会报错：
+from keras.utils.vis_utils import plot_model
+from IPython.display import Image
+plot_model(model, show_shapes=True, show_layer_names=True, to_file=r"model.png")
+You must install pydot (`pip install pydot`) and install graphviz (see instructions at https://graphviz.gitlab.io/download/) for plot_model/model_to_dot to work.
+解决问题方法：
+apt-get install graphviz
+pip3 install pydot
+至于windows系统，则需下载graphviz的exe文件，如：
+https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/
+graphviz-install-2.44.1-win64.exe
+https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/7.0.2/windows_10_cmake_Release_graphviz-install-7.0.2-win64.exe
+下载exe文件后安装至本机，将安装目录下的bin目录配置到环境变量path中
+配置成功在cmd输入dot -version会出现版本信息，则为成功。
+在使用时如果出现以下报错：
+graphviz.backend.CalledProcessError: Command ‘[‘dot’, ‘-Tpng’, ‘-O’, ‘web_service’]’ returned non-zero exit status 1. [stderr: b’Format: “png” not recognized. Use one of:\r\n’]
+可尝试：如果你之前用pip安装了graphiz，先用pip卸载：
+pip uninstall graphiz
+再尝试
+conda install graphviz
+conda install python-graphviz
+
+# keras 训练完模型保存模型出错：
+RuntimeError: Unable to create link (name already exists)
+临时解决方法，保存的时候，指定参数include_optimizer=False
+In [7]: model.save('./result/20221208093753/classify-01-0.2757-0.1113-0.1411.hdf5', include_optimizer=False)
+使用模型的时候，先定义好模型结构，再加载模型权重，如：
+model2 = build_model()
+model2.load_weights('./result/20221208093753/classify-01-0.2757-0.1113-0.1411.hdf5')
+
+# 含有自定义层时候，保存模型报错：
+NotImplementedError: 
+这时候，可能需要将模型定义由model 改为：layer
+如：class NeuralDecisionForest(Model):
+改为：class NeuralDecisionForest(Layer):
+
+# 含自定义层的时候，保存模型报错：
+TypeError: ('Not JSON Serializable:', <tf.Variable 'Variable:0' shape=(1024, 2) 
+model.save正在尝试保存不可JSON序列化的tf.Variable。
+解决方法：
+1、从“def get_config(self):”，“def __init__(self,” 删除报错参数的定义；
+2、将需要初始化定义的参数，在“def build(self, input_shape)”中实现即可；
+
+# 查看模型结构，model.summary()时候，报错：
+ValueError: This model has not yet been built. Build the model first by calling `build()` or by calling the model on a batch of data.
+在使用Sequential 或Functional API，已经“自动”（implicitly）调用了model.build方法；而通过下面的代码（子类API）构建模型，需要自己调用model.build方法：
+num_conv_layers=2
+num_output_channels=[64, 128]
+kernel_size=3
+stride=1 
+padding=1
+pooling_kernel_size=3 
+pooling_stride=2
+conv_model = keras.Sequential()
+for i in range(num_conv_layers):
+    conv_model.add(
+        layers.Conv2D(
+            num_output_channels[i],
+            kernel_size,
+            stride,
+            padding="valid",
+            use_bias=False,
+            activation="relu",
+            kernel_initializer="he_normal",
+        )
+    )
+    conv_model.add(layers.ZeroPadding2D(padding))
+    conv_model.add(
+        layers.MaxPool2D(pooling_kernel_size, pooling_stride, "same")
+    )
+conv_model.build(input_shape=(None, 32,32,3)) # 需要显式调用build方法，并指明输入的input_shape参数；
+conv_model.summary()
+
+# 问题：使用tf.matmul、K.batch_dot连接两个变量，plot_model展示模型结构的时候，出现错误，不展示对应的连接部分；
+# 解决方法，将对应的连接改为对应的Lambda函数，如：
+weighted_representation = K.batch_dot(attention_weights, representation, axes=(1, 1))
+改为：
+weighted_representation = Lambda(lambda x: K.batch_dot(x[0], x[1], axes=(1, 1)))([attention_weights, representation])
+
+# 问题tensorflow2 使用tf.py_func报错：
+AttributeError: module 'tensorflow' has no attribute 'py_func'
+解决方法：
+改用：tf.numpy_function即可；
+
 

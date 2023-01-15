@@ -130,6 +130,25 @@ pd.merge(df4, df5, left_on='key', right_index=True, how='outer')
 data_df8_10 = pd.merge(data_df, df8_10, on=["流水号", "落单时间"])
 on：列名，join用来对齐的那一列的名字，用到这个参数的时候一定要保证左表和右表用来对齐的那一列都有相同的列名。这里on是一个列表，表示多个关联字段。
 
+# pandas merge函数,内存开销过大
+治标不治本的方法：
+步骤1：我们在拼接之前首先作删重处理。然后再进行merge拼接：
+df_train = df_train_original.drop_duplicates(subset= ['id'],keep='first',inplace=False)
+步骤2：使用validate参数进行检查。validate：validate作用是检查on（或right_on和right_on）选中的列中的元素是否存在重复值，即检查该列所有的值在列中是否唯一。告警为：MergeError: Merge keys are not unique in right dataset; not a one-to-one merge如果验证结果不符合validate定的规则，会产生报错！报错！报错！
+默认None，可选值为：
+“1:1”，即“one_to_one” ：要求左右两表选中的列均为unique；一对一关系，关联的key都是唯一的;
+“1:m”，即“one_to_many”：只要求左表选中的列为unique，右表无要求；一对多关系，左边唯一key，右边不唯一key;
+“m:1”，即“many_to_one”：只要求右表选中的列为unique；多对一关系，左边不唯一key，右边唯一key;
+“m:m”，即“many_to_many”：左右表均无要求，一般不用这种写法。多对多关系，左边右边都不是唯一的;
+df2 = pd.merge(mini_df, merge_data_df2, on=['流水号', '投诉间隔时间'], how='inner', validate="one_to_many")
+方法2，不采用merge, 找到对应索引，通过索引筛选:
+ds = {k: v for k, v in mini_df[['流水号', '投诉间隔时间']].values}
+merge_index_list = []
+for idx, (k, v) in enumerate(merge_data_df2[['流水号', '投诉间隔时间']].values):
+    if ds.get(k) == v:
+        merge_index_list.append(idx)
+merge_data_df2 = merge_data_df2.loc[merge_index_list, :]
+
 # 对多个 pandas dataframe 进行 join，三个及三个以上 DataFrame join
 df1 = pd.DataFrame({'uid':[1,2,5], 'd1':[1,2,5]})
 df2 = pd.DataFrame({'uid':[1,4,6], 'd2':[1,4,6]})

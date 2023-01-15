@@ -474,4 +474,14 @@ sudo apt remove apparmor
 sudo apt-get install apparmor
 sudo apt-get install apparmor-profiles-extra apparmor-utils
 
+# docker build 构建镜像时候报错：
+max depth exceeded
+解决方法一（推荐）
+        Dockerfile中去掉COPY、RUN相关的命令，所需文件采用-v 命令挂载文件夹的方式实现
+解决方法二（不推荐）
+        docker build 项目出现 max depth exceeded时，执行以下代码：
+docker system prune -a
+        备注：该命令会清理未启动的容器和未挂载的容器，请谨慎使用
+出现原因：
+        docker在构建镜像时，会构建多个层级，在使用Dockerfile时，过度使用COPY、RUN命令，在频繁构建容器时，就会出现构建层数过多的情况，报max depth exceeded错误，并且无法再次构建容器。
 

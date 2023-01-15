@@ -60,4 +60,34 @@ Notebook ****.ipynb is not trusted
 $ jupyter trust ***.ipynb
 方法2：在notebook中点击页面右上角处的“不可信/Not Trusted”, 在弹出页面中点击“可信/Trust”即可；
 
+问题：启动jupyter终端报错：
+[W 2022-11-17 15:27:56.424 ServerApp] 404 GET /api/kernels/97402eaf-6f18-4f7d-882d-271099dc6f3b/channels?session_id=75292270-84dc-4984-b742-055152e18045 (127.0.0.1) 2.99ms referer=None
+[W 2022-11-17 15:27:56.429 ServerApp] 404 GET /api/kernels/97402eaf-6f18-4f7d-882d-271099dc6f3b?1668670076427 (127.0.0.1): Kernel does not exist: 97402eaf-6f18-4f7d-882d-271099dc6f3b
+[W 2022-11-17 15:27:56.430 ServerApp] Kernel does not exist: 97402eaf-6f18-4f7d-882d-271099dc6f3b
+解决问题方法：
+将~/AppData/Roaming/jupyter/runtime 目录下的内容清空，重启jupyter即可；
+
+# 问题：jupyterlab使用的时候无菜单栏，打开*.ipynb页面后，仅有“保存”、“复制”、“剪切”等按钮，无kernel“运行”、“重启”、“停止”按钮；
+解决方法：
+将之前的jupyter、notebook、ipython等全部卸载掉，重新安装指定版本就好；
+pip3 uninstall -y ipywidgets nbclassic widgetsnbextension
+jupyter、notebook、ipython相关安装包，可通过如下命令查找：
+pip3 list|grep -e notebook -e jupyter -e ipython -e nbconvert -e nbclient -e ipykernel -e ipdb -e nbclient -e nbclassic
+卸载完全后，重新安装，即可：
+pip3 install ipython==7.29.0 ipython-genutils==0.2.0 jupyter-client==7.0.6 jupyter-core==4.9.1 jupyter-tensorboard==0.2.0 jupyterlab==2.3.2 jupyterlab-pygments==0.1.2 jupyterlab-server==1.2.0 notebook==6.4.3
+后期分析主要原因是
+通过pip3 install jupyterlab-system-monitor，将“JupyterLab 2.x”升级为“JupyterLab 3.x”；
+而又没有安装对应的插件：“jupyterlab-topbar-extension”，导致菜单栏不显示了；
+查询已安装的插件命令：
+root@227eacca4499:~# jupyter labextension list
+JupyterLab v2.2.8
+Known labextensions:
+   app dir: /usr/local/share/jupyter/lab
+        @telamonian/theme-darcula v2.0.0  enabled  OK
+        jupyterlab-spreadsheet v0.3.2  enabled  OK
+        jupyterlab-system-monitor v0.6.0  enabled  OK
+        jupyterlab-topbar-extension v0.5.0  enabled  OK
+安装插件的命令：jupyter labextension install <extension name> ，如：jupyter labextension install jupyterlab-topbar-extension
+卸载已经安装插件的命令：jupyter labextension uninstall <extension name>， 如：jupyter labextension uninstall @telamonian/theme-darcula jupyterlab-spreadsheet
+
 

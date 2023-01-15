@@ -302,3 +302,24 @@ Out[62]:
 数据和特征决定了机器学习的上限，而模型和算法只是逼近这个上限而已。
 同理，数据和特征的上限在于数据，特征编码只是让模型和算法更好地逼近这个上限而已。
 
+
+# 周期特征的循环编码
+from sklearn.preprocessing import FunctionTransformer
+
+
+def sin_transformer(period):
+    return FunctionTransformer(lambda x: np.sin(x / period * 2 * np.pi))
+
+
+def cos_transformer(period):
+    return FunctionTransformer(lambda x: np.cos(x / period * 2 * np.pi))
+
+# sin和cos来进行日期的encoding，好处在于相对于例如对于周一，周二。。。周日的日期而言，周一和周日是接近的两天，因此我们会认为他们的encoding结果相似，但是使用简单的ordinary encoding编码则周一为1，周日为7，无法cover这种周期上的相似性，因此使用周期特征的循环编码来解决这种问题。
+sin_transformer(7).transform(np.array([t for t in range(1, 8)]+[t for t in range(1, 8)]))
+Out[21]: 
+array([ 7.81831482e-01,  9.74927912e-01,  4.33883739e-01, -4.33883739e-01,
+       -9.74927912e-01, -7.81831482e-01, -2.44929360e-16,  7.81831482e-01,
+        9.74927912e-01,  4.33883739e-01, -4.33883739e-01, -9.74927912e-01,
+       -7.81831482e-01, -2.44929360e-16])
+
+

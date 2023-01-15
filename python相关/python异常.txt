@@ -109,3 +109,24 @@ mv sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.wh
 3、安装重命名后的whl文件
 pip3 install sentencepiece-0.1.96-cp36-cp36m-manylinux_2_17_x86_64.manylinux1_x86_64.whl
 
+# 问题，通过如下给字段赋值，赋值存在问题：
+ds = {}
+ts = [1,2,3]
+ds['key'] = ts.copy()
+当ts占据空间较小时候，不存在问题；但ts包含数据比较多时候，存在问题：
+会出现赋值之后，ts的值改变后，ds的值也会改变；
+应该改为：
+import copy 
+ds[key] = copy.deepcopy(ts)
+主要原因：
+list2 = list1.copy()
+list3 = list1[:]
+list4 = copy.deepcopy(list1)
+这里，list2 和 list3 都是list1的浅拷贝；list4是深拷贝。
+python的list里面存的都是引用，如果存的是listnode，实际上存的是listnode的引用，也就是地址，毕竟如果listnode里存了很多关于这个node的信息的话，直接在list里面存这段信息的地址就很方便，等到要用这段信息的时候（比如list1[0].val），只要找到地址(list1[0])再到这段地址取值(.val)就可以了。
+浅拷贝的意思是，开辟一段内存，这段内存里复制了原list的地址。
+地址还是那个地址，所以可以看出**id(list1[0]),id(list2[0])**是完全一样的。这会带来的问题是，当我们把这段地址里的值.val变化一下(list1[0].val = 5), 浅拷贝的数组里对应元素的值也就跟着变了
+
+深拷贝就厉害了，不光把原数组存的地址拷贝了，就连原数组地址里对应的数据也都进行了复制，所以可以看到**id(list1[0]),id(list4[0])**变得不一样了
+
+

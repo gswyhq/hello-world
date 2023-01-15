@@ -67,3 +67,24 @@ def mean_squared_error2(y_true, y_pred):
 在model编译阶段将loss指定为我们自定义的函数：
 
 model.compile(optimizer='rmsprop',loss=mean_squared_error2)
+
+###################################################################################################################################################
+在 tf.keras 中，有两个交叉熵相关的损失函数 tf.keras.losses.categorical_crossentropy 和 tf.keras.losses.sparse_categorical_crossentropy 。
+如果 labels 是 one-hot 编码，用 categorical_crossentropy
+如果你的 tagets 是 数字编码 ，用 sparse_categorical_crossentropy
+其中 sparse 是稀疏的意思，真实的标签值 y_true 可以直接传入 int 类型的标签类别，
+即 sparse_categorical_crossentropy 时 y 不需要one-hot，而 categorical_crossentropy 需要。具体而言：
+loss = tf.keras.losses.sparse_categorical_crossentropy(y_true=y, y_pred=y_pred)
+loss = tf.keras.losses.categorical_crossentropy(
+    y_true=tf.one_hot(y, depth=tf.shape(y_pred)[-1]),
+    y_pred=y_pred
+)
+或
+loss = tf.keras.losses.categorical_crossentropy(
+    y_true=tf.keras.utils.to_categorical(y_true, num_classes=2),
+    y_pred=y_pred
+)
+
+
+
+

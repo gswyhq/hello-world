@@ -31,10 +31,19 @@ txt = ['我','今','晚','上','吃','了','个','鲸']
 import matplotlib.pyplot as plt
 plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 plt.scatter(x, y)
+plt.plot(x, y) # 将散点图的点连线连起来
 for i in range(len(x)):
     plt.annotate(txt[i], xy = (x[i], y[i]), xytext = (x[i]+0.1, y[i]+0.1)) # 这里xy是需要标记的坐标，xytext是对应的标签坐标
 plt.show()
+
+# 这里散点标记文本，使用annotate函数
+#plt.annotate(" 标记的文本 ", xy, xytext)
+#第一个参数是预标记的文本
+#第二个参数是预标注的点坐标
+#第三个参数是预标记文本的坐标
+
 ####################################################################################################################
+# 标记点挨着太近，可以使用from adjustText import adjust_text，渲染；
 
 def main():
     pass

@@ -136,3 +136,12 @@ pd.get_dummies(data)
 1  1002     1     0      0      0      1
 2  1003     0     1      1      0      0
 
+# apply多列运算时候太慢，可以使用：swifter，并行计算加速
+import pandas as pd
+import swifter
+import numpy as np
+df = pd.DataFrame(np.random.random(size=(3, 4)))
+df[4] = df.apply(lambda x: x[1] * x[2] * x[3], axis=1)
+改为：
+df[4] = df.swifter.apply(lambda x: x[1] * x[2] * x[3], axis=1)
+

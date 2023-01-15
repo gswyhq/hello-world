@@ -1,0 +1,105 @@
+
+import numpy as np
+from tensorflow.keras import layers
+import tensorflow as tf
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+x = tf.constant(3.0)
+with tf.GradientTape(persistent = False) as tape:
+	tape.watch(x) # watch函数需要再声明函数体之前就确定好好追踪哪一个变量，否则梯度计算之后就会返回None值。
+	y = x*x*x*x
+	dy = tape.gradient(target=y,sources=x)
+	
+	print(dy)
+
+# 返回结果：tf.Tensor(108.0, shape=(), dtype=float32)
+
+gradient函数参数:
+target：张量或者变量的列表或者嵌套结构
+sources：张量或者变量的列表或者嵌套结构。
+output_gradients：梯度的列表，一一对应target中的元素，默认为None。
+unconnected_gradients：一个值，可以保留“none”或“zero”，并更改目标和源未连接时将返回的值。
+返回值：张量的列表或嵌套结构（或IndexedSlices或None），一一对应sources中的元素，返回的结构与的sources相同。
+————————————————
+# 默认情况下，GradientTape将自动监视在上下文中访问的所有可训练变量， 如果要对监视哪些变量进行精细控制，可以通过将watch_accessed_variables = False传递给tape构造函数来禁用自动跟踪
+tf.GradientTape参数:
+persistent：Boolean，用于控制是否创建持久梯度带，默认情况下为False，这意味着最多可以在此对象上对gradient()方法进行一次调用
+watch_accessed_variables：Boolean，控制tape在处于活动状态时是否将自动监视所有（可训练的）变量，默认值为True，表示可以从tape中通过计算可训练变量得出的结果来计算梯度。 如果False用户必须显式地watch他们想要从中计算梯度的变量
+————————————————
+
+###################################################################################################################################
+# 在使用模型时，应确保在使用watch_accessed_variables = False时变量存在，否则，这将导致你的迭代中没有使用梯度：
+inputs = np.random.random(size=(2,4))
+a = tf.keras.layers.Dense(32)
+b = tf.keras.layers.Dense(32)
+with tf.GradientTape(persistent=False, watch_accessed_variables=False) as tape:
+  tape.watch(a.variables)  # 由于此时尚未调用`a.build`，因此`a.variables`将返
+# 回一个空列表，并且tape将不会监视任何内容。
+  result = b(a(inputs))
+  grad = tape.gradient(target=result, sources=a.variables)  # 该计算的结果将是“None”的列表，因为不会监视a的变量
+  print(grad)
+
+# 返回结果：[None, None]
+
+###################################################################################################################################
+# 在使用模型时，应确保在使用watch_accessed_variables = False时变量存在，否则，这将导致你的迭代中没有使用梯度：
+inputs = np.random.random(size=(2,2))
+a = tf.keras.layers.Dense(2)
+b = tf.keras.layers.Dense(3)
+with tf.GradientTape(persistent=False, watch_accessed_variables=True) as tape:
+  tape.watch(a.variables)  # 由于此时尚未调用`a.build`，因此`a.variables`将返
+# 回一个空列表，并且tape将不会监视任何内容。
+  result = b(a(inputs))
+  grad = tape.gradient(target=result, sources=a.variables)  # 该计算的结果将是“None”的列表，因为不会监视a的变量
+  print(grad)
+
+  
+# 返回结果：[<tf.Tensor: shape=(2, 2), dtype=float32, numpy=array([[-0.86299  , -1.5216004],
+       [-1.2893176, -2.2732897]], dtype=float32)>, <tf.Tensor: shape=(2,), dtype=float32, numpy=array([-1.8513317, -3.2642174], dtype=float32)>]
+
+###################################################################################################################################
+计算同个函数的多阶导数（注意要手动释放资源）
+默认情况下，调用 GradientTape.gradient() 方法时， GradientTape 占用的资源会立即得到释放。通过创建一个持久的梯度带， 参数 persistent=True, 可以计算同个函数的多个导数，但是注意要手动释放资源del tape。
+with tf.GradientTape(persistent=True) as tape:
+	tape.watch(x)
+	y = x * x
+	z = y * y
+dz_dx = tape.gradient(z, x)  # 求一阶导数
+dy_dx = tape.gradient(y, x)  # 求二阶导数
+print(dz_dx, dy_dx)
+del tape     #手动释放资源  
+# tf.Tensor(108.0, shape=(), dtype=float32) tf.Tensor(6.0, shape=(), dtype=float32)
+# 若 persistent参数取默认值False, 会报错：RuntimeError: A non-persistent GradientTape can only be used to compute one set of gradients (or jacobians)
+
+###################################################################################################################################
+import tensorflow as tf
+x = tf.convert_to_tensor(10.)
+w = tf.Variable(2.)
+b = tf.Variable(3.)
+with tf.GradientTape() as tape:
+    z = w * x + b
+dz_dw = tape.gradient(z,w)
+print(dz_dw)
+# tf.Tensor(10.0, shape=(), dtype=float32)
+对于参与计算梯度、也就是参与梯度下降的变量，是需要用tf.Varaible来定义的;
+不管是变量还是输入数据，都要求是浮点数float，如果是整数的话会报错，并且梯度计算输出None；
+
+###################################################################################################################################
+使用的是PyTorch, 获取导数/梯度
+
+import torch
+# Create tensors.
+x = torch.tensor(10., requires_grad=True)
+w = torch.tensor(2., requires_grad=True)
+b = torch.tensor(3., requires_grad=True)
+# Build a computational graph.
+y = w * x + b    # y = 2 * x + 3
+# Compute gradients.
+y.backward()
+# Print out the gradients.
+print(x.grad)    # tensor(2.)
+print(w.grad)    # tensor(10.)
+print(b.grad)    # tensor(1.)
+
+

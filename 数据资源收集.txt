@@ -181,6 +181,11 @@ raw_chat_corpus.zip
 https://pan.baidu.com/s/1QUsKcFWZ7Tg1dk_AbldZ1A, 提取码：2dva
 WebQA.v1.0.7z
 
+问答数据集：
+WebQA.json SogouQA.json
+数据集： 链接:https://pan.baidu.com/s/11C21BAupOpiYWoOx23J7Mg 密码:dh9w
+https://github.com/HunterXuan/QAMatch
+
 纯净版：
 链接: https://pan.baidu.com/s/1pLXEYtd 密码: 6fbf
 文件列表：
@@ -1133,5 +1138,42 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/adult/
 # 数据集来源于：https://archive.ics.uci.edu/ml/datasets/Beijing+PM2.5+Data
 PRSA_data_2010.1.1-2014.12.31.csv
 
+# IFLYTEK' 长文本分类 Long Text classification
+该数据集共有1.7万多条关于app应用描述的长文本标注数据，包含和日常生活相关的各类应用主题，共119个类别："打车":0,"地图导航":1,"免费WIFI":2,"租车":3,….,"女性":115,"经营":116,"收款":117,"其他":118(分别用0-118表示)。
+
+    数据量：训练集(12,133)，验证集(2,599)，测试集(2,600)
+    例子：
+    {"label": "110", "label_des": "社区超市", "sentence": "朴朴快送超市创立于2016年，专注于打造移动端30分钟即时配送一站式购物平台，商品品类包含水果、蔬菜、肉禽蛋奶、海鲜水产、粮油调味、酒水饮料、休闲食品、日用品、外卖等。朴朴公司希望能以全新的商业模式，更高效快捷的仓储配送模式，致力于成为更快、更好、更多、更省的在线零售平台，带给消费者更好的消费体验，同时推动中国食品安全进程，成为一家让社会尊敬的互联网公司。,朴朴一下，又好又快,1.配送时间提示更加清晰友好2.保障用户隐私的一些优化3.其他提高使用体验的调整4.修复了一些已知bug"}
+    每一条数据有三个属性，从前往后分别是 类别ID，类别名称，文本内容。
+IFLYTEK'数据集下载: https://github.com/CLUEbenchmark/CLUE
+https://storage.googleapis.com/cluebenchmark/tasks/iflytek_public.zip
+
+# 图片中文描述数据集：
+华为诺亚方舟实验室的研究者发布了一个名为「悟空」的大型中文跨模态数据集，其中包含来自网络的 1 亿个图文对。为了保证多样性和泛化性，悟空数据集是根据一个包含 20 万个高频中文单词列表收集的。
+https://wukong-dataset.github.io/wukong-dataset/benchmark.html
+
+# 象棋棋谱数据：
+https://pan.baidu.com/s/1JYO3gT84YqMbNs_SsX_hdQ  24s7
+https://github.com/bojone/gpt_cchess 
+训练好的中国象棋模型权重下载：https://pan.baidu.com/s/1Vj90eLYO7pgRjNWqCeQKfw 提取码: w4i3
+
+# 小学数学应用题数据集
+https://kexue.fm/archives/7809
+数据集为ape210k：https://github.com/Chenny0808/ape210k
+
+# 中文新闻内容及标题数据集：
+https://hyper.ai/datasets/9277
+# 数据集转自：http://thuctc.thunlp.org/
+# THUCNews是根据新浪新闻RSS订阅频道2005~2011年间的历史数据筛选过滤生成，包含74万篇新闻文档（2.19 GB），均为UTF-8纯文本格式。
+# 在原始新浪新闻分类体系的基础上，重新整合划分出14个候选分类类别：财经、彩票、房产、股票、家居、教育、科技、社会、时尚、时政、体育、星座、游戏、娱乐。
+# 处理流程；
+# 1、分类提取，已“财经”文件夹为例：首先读取这个文件夹中的所有txt文档，取每个文档第一行，然后写入一个新的txt文档，写入格式为“财经+Tab符+第一行标题”
+# 2、14个类别中分别挑出10%的数据作为验证集，剩下的10%作为训练集数据；
+# 3、14个类别提取完毕之后，训练集合并为一个文档，验证集合并为一个文档，待用
+# 4、详细代码请见我的github：https://github.com/happyAmanda/cnewsExtractTitle
+# 5、剔除无效数据：比如有些文档是空的
+# 以下是下载地址：
+# 链接：https://pan.baidu.com/s/1zR5ymSBZ5wF0KJVpYVSb5g
+# 提取码：5e76
 
 

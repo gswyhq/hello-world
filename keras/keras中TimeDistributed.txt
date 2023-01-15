@@ -24,6 +24,80 @@ x = TimeDistributed(Dropout(dropout))(x)
 
 TimeDistributed的真正意义在于使不同层的特征图共享权重
 
+############################################################################################################################
+Dense层的计算过程：
+keras.backend.clear_session()
+model1 = Sequential()
+model1.add(TimeDistributed(Dense(2), input_shape=(3, 4)))
+model1.summary()
 
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #
+=================================================================
+ time_distributed (TimeDistr  (None, 3, 2)             10
+ ibuted)
 
+=================================================================
+Total params: 10
+Trainable params: 10
+Non-trainable params: 0
+_________________________________________________________________
+
+#获得第一层的权重和偏置
+weight1, bias1 = model1.layers[0].get_weights()
+
+keras.backend.clear_session()
+model2 = Sequential()
+model2.add(Dense(2 , input_shape=(3, 4)))  # 注意：当input的秩小于等于2时，那么它直接与权重矩阵进行点乘；当input的秩大于2时，它首先被展平flatten，再计算与权重矩阵的点乘。
+# Dense层的输出公式为：Out=Activation( Input·Kernel )+Bias
+model2.summary()
+
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #
+=================================================================
+ dense (Dense)               (None, 3, 2)              10
+
+=================================================================
+Total params: 10
+Trainable params: 10
+Non-trainable params: 0
+_________________________________________________________________
+
+#获得第一层的权重和偏置
+weight2, bias2 = model2.layers[0].get_weights()
+
+x = np.random.randint(0, 6, size=(2,3,4))
+x
+Out[83]:
+array([[[5, 5, 3, 2],
+        [4, 0, 4, 2],
+        [5, 4, 2, 2]],
+       [[2, 3, 0, 4],
+        [3, 3, 3, 4],
+        [4, 4, 4, 5]]])
+
+model1.predict(x)
+1/1 [==============================] - 0s 65ms/step
+Out[109]:
+array([[[-5.5425944, -4.274486 ],
+        [-1.3887062, -0.9112687],
+        [-4.6975994, -2.732473 ]],
+       [[-4.5089684, -0.0733254],
+        [-4.673404 , -1.9415209],
+        [-6.074486 , -2.761533 ]]], dtype=float32)
+
+rank = tf.cast(x, dtype='float32').shape.rank
+rank
+Out[204]: 3
+tf.tensordot(tf.cast(x, dtype='float32'), weight1, [[rank - 1], [0]])
+Out[205]:
+<tf.Tensor: shape=(2, 3, 2), dtype=float32, numpy=
+array([[[-5.5425944, -4.274486 ],
+        [-1.3887062, -0.9112687],
+        [-4.6975994, -2.732473 ]],
+       [[-4.5089684, -0.0733254],
+        [-4.673404 , -1.9415209],
+        [-6.074486 , -2.761533 ]]], dtype=float32)>
 

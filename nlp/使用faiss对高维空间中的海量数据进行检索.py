@@ -252,3 +252,16 @@ print('{}个词总共耗时：{}'.format(len(test_words), time.time() - start_ti
 # 另外 ['另外', '穿戴整齐', '成分表', 'JIAC', '李牧腾']
 # 海鲜 ['海鲜', '火锅', '龙虾', '三文鱼', '烧烤']
 # 17个词总共耗时：0.189988374710083
+
+# faiss异常：
+pip3 install faiss-cpu 安装之后，import faiss 报错：
+ImportError: DLL load failed while importing _swigfaiss: 找不到指定的模块。
+解决方法，导入对应dll文件之后，再import faiss,如：
+from ctypes import WinDLL
+from glob import glob
+import os
+USERNAME = os.getenv("USERNAME")
+for lib in glob(fr'D:\Users\{USERNAME}\AppData\Roaming\Python\Python39\site-packages\faiss_cpu.libs\*.dll'):
+    WinDLL(lib)
+import faiss
+

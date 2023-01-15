@@ -25,6 +25,11 @@ ImportError: Missing required dependencies ['numpy']
 pd.read_csv(r'test.csv', sep=',', error_bad_lines=False, header=None, engine='python', encoding='utf-8')
 此时正确做法应该对read_csv设置参数quoting=3或者quoting=csv.QUOTE_NONE (实际上csv.QUOTE_NONE=3)
 pd.read_csv(r'test.csv', sep=',', quoting=csv.QUOTE_NONE, header=None, engine='python', encoding='utf-8')
+在csv模块中，数据可能会用引号等字符包裹起来，quoting参数用来控制识别字段的引号模式，它可以是Python csv模块中的csv.QUOTE_*常量，也可以传入对应的数字。各个传入值的意义如下。
+0或csv.QUOTE_MINIMAL：仅特殊字段有引号。
+1或csv.QUOTE_ALL：所有字段都有引号。
+2或csv.QUOTE_NONNUMERIC：所有非数字字段都有引号。
+3或csv.QUOTE_NONE：所有字段都没有引号。
 
 用read_csv读取文件，报错 OSError: Initializing from file failed
 问题原因，读取的文件路径中有中文汉字；
@@ -53,5 +58,10 @@ pandas.core.indexing.IndexingError: Unalignable boolean Series provided as index
 原因是原始数据行数，与索引行数不匹配
 dataframe = pd.DataFrame(data=np.random.random(size=(3, 5)), index=['a', 'b', 'c'])
 dataframe.loc[pd.Series([True, True], index=['a', 'b']).index]
+
+# 数据里头有特殊字符，比如换行符、分隔符等，导致存储数据，再读取的时候失败，这个时候，可以指定特殊分隔符，并设置所有字段都有引号：
+df2.to_csv("./result_5520w.txt", encoding='utf-8', index=False, sep='\001', quoting=csv.QUOTE_ALL)
+读取的时候，也是一样指定就好：
+df = pd.read_csv("./result_5520w.txt", encoding='utf-8', sep='\001', quoting=csv.QUOTE_ALL)
 
 

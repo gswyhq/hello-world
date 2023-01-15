@@ -1,0 +1,25 @@
+
+Jupyter Lab是Jupyter的一个拓展
+
+pip3 install jupyterlab
+
+在命令行输入jupyter lab --generate-config生成jupyterlab的配置文件jupyter_lab_config.py
+一般在：~/.jupyter/jupyter_lab_config.py
+
+设置中文
+在基础环境中下载中文包
+pip install jupyterlab-language-pack-zh-CN
+打开Jupyterlab依次点击 设置->语言->中文 即可。
+
+# 启动服务示例：
+jupyter lab --allow-root --no-browser --ip 0.0.0.0 --NotebookApp.disable_check_xsrf=True --NotebookApp.allow_origin='*' --NotebookApp.allow_remote_access=True --NotebookApp.token="654321"
+
+# jupyterlab使用时，为了在页面右下角或右上角展示内存使用, 需安装jupyterlab-system-monitor：再重启 jupyterlab即可；
+JupyterLab 3.x
+pip install jupyterlab-system-monitor
+JupyterLab 2.x
+pip install nbresuse
+jupyter labextension install jupyterlab-topbar-extension jupyterlab-system-monitor
+注：JupyterLab 2.x若直接“pip install jupyterlab-system-monitor”，会将“JupyterLab 2.x”升级为“JupyterLab 3.x”
+升级到“JupyterLab 3.x”可能会引起“菜单栏不显示的问题”。
+
