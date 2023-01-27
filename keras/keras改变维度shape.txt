@@ -1,0 +1,68 @@
+
+import numpy as np
+from keras.layers import Reshape, Lambda
+from keras import backend as K
+
+
+若通过 Reshape层改变维度的话，是无法改变batch_size所在的维度：
+x = np.random.randint(0, 5, size=(2,3,4))
+x
+Out[141]: 
+array([[[4, 2, 4, 1],
+        [3, 1, 4, 1],
+        [0, 3, 3, 0]],
+       [[4, 1, 2, 2],
+        [2, 1, 0, 4],
+        [4, 0, 4, 4]]])
+Reshape((12,), input_shape=(2, 3, 4))(x)
+Out[143]: 
+<tf.Tensor: shape=(2, 12), dtype=int32, numpy=
+array([[4, 2, 4, 1, 3, 1, 4, 1, 0, 3, 3, 0],
+       [4, 1, 2, 2, 2, 1, 0, 4, 4, 0, 4, 4]])>
+即 Reshape需要保证输入、输出的batch_size是一致的；
+
+但 K.reshape 可实现包括batch size所在维度的reshape
+x
+Out[147]: 
+array([[[4, 2, 4, 1],
+        [3, 1, 4, 1],
+        [0, 3, 3, 0]],
+       [[4, 1, 2, 2],
+        [2, 1, 0, 4],
+        [4, 0, 4, 4]]])
+Lambda(lambda x: K.reshape(x, (6, 4)))(x)
+Out[148]: 
+<tf.Tensor: shape=(6, 4), dtype=int32, numpy=
+array([[4, 2, 4, 1],
+       [3, 1, 4, 1],
+       [0, 3, 3, 0],
+       [4, 1, 2, 2],
+       [2, 1, 0, 4],
+       [4, 0, 4, 4]])>
+
+# 新增一个维度：
+x = np.random.random(size=(2,3))
+K.expand_dims(x, axis=1).shape
+Out[244]: TensorShape([2, 1, 3])
+
+# 指定维度拼接：
+x = np.random.randint(5,size=(2, 1, 3))
+y = np.random.randint(5,size=(2, 1, 3))
+x, y
+Out[253]: 
+(array([[[3, 1, 0]],
+ 
+        [[1, 4, 2]]]), array([[[2, 2, 4]],
+ 
+        [[1, 0, 0]]]))
+Concatenate(axis=1)([x, y])
+Out[254]: 
+<tf.Tensor: shape=(2, 2, 3), dtype=int32, numpy=
+array([[[3, 1, 0],
+        [2, 2, 4]],
+       [[1, 4, 2],
+        [1, 0, 0]]])>
+
+
+
+

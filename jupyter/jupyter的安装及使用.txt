@@ -12,6 +12,16 @@ pip3 install ipython==6.4.0
 pip3 install ipykernel==4.8.2
 pip3 install jupyter==1.0.0
 
+# jupyter使用时，为了在页面右下角或右上角展示内存使用, 需要安装jupyter-resource-usage
+pip3 install jupyter-resource-usage
+# jupyterlab使用时，为了在页面右下角或右上角展示内存使用, 需安装jupyterlab-system-monitor：
+JupyterLab 3.x
+pip install jupyterlab-system-monitor
+JupyterLab 2.x
+pip install nbresuse
+jupyter labextension install jupyterlab-topbar-extension jupyterlab-system-monitor
+注：JupyterLab 2.x若直接“pip install jupyterlab-system-monitor”，会将“JupyterLab 2.x”升级为“JupyterLab 3.x”
+
 2、在ipynb所在的目录打开jupyter notebook
 3、 远程访问
 启动的时候加上ip和端口

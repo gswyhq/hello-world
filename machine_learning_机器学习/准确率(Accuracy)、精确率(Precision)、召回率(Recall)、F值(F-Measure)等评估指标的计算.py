@@ -5,6 +5,9 @@ import numpy as np
 from sklearn.metrics import f1_score, accuracy_score, fbeta_score, precision_score, recall_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import precision_recall_curve
+from scipy import stats
+from sklearn.metrics import det_curve, DetCurveDisplay
 
 # 真实标签
 y_true = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
@@ -171,6 +174,53 @@ r_list = [0/0.00001, 3/5, 2/4, 2/3, 1/2]
 sum([2 * p * r / (p + r + 0.00001) for p, r in zip(p_list, r_list)])/5
 Out[57]: 0.4833295694750185
 
+# 如何找到最适合的阈值及计算f1-score
+# 计算方法也非常简单粗暴，直接把可能阈值全部计算一遍，得到一个 F1-score 数组，然后找到最大值以及对一个的阈值即可。
+precisions, recalls, thresholds = precision_recall_curve(y_true,y_test)
+
+# 拿到最优结果以及索引
+f1_scores = (2 * precisions * recalls) / (precisions + recalls)  # 计算全部f1-score
+best_f1_score = np.max(f1_scores[np.isfinite(f1_scores)])
+best_f1_score_index = np.argmax(f1_scores[np.isfinite(f1_scores)])
+
+# 阈值
+print("最佳阈值及其F1-score: {}, {}".format(thresholds[best_f1_score_index], best_f1_score))
+
+def d_prime(hits, false_alarms, miss, correct_rejection):
+    """
+    d prime score 指标计算
+    Calculate the sensitivity index d'.
+    Parameters
+    ----------
+    hits : float
+        命中数量The number of hits when detecting a signal.
+    false_alarms : float
+        误报数量；The number of false alarms.
+    miss : int
+        漏报数量，即样本中为正,预测为负的样本数量；
+    correct_rejection : int
+        正确拒绝数量，即样本为负，预测为负的样本数量；
+    Returns
+    -------
+    d : float
+        其中：hit rate(H) = HIT/(HIT+MISS)
+        false alarm rate(F) = FALSE ALARM/(FALSE ALARM + CORRECT REJECTION)
+        The calculated d' value, z(hit_rate) - z(false_alarm_rate).
+    Example
+    -------
+    >>> d_prime(20, 10, 5, 15)
+    1.094968336708714
+    """
+    if hits == 0 or miss == 0:
+        hit_rate = (hits+0.5) / (hits + miss+1)
+    else:
+        hit_rate = hits /(hits+miss)
+    if false_alarms == 0 or correct_rejection == 0:
+        fa_rate = (false_alarms+0.5) / (false_alarms+correct_rejection+1)
+    else:
+        fa_rate = false_alarms / (false_alarms + correct_rejection)
+    d_prime_score = stats.norm.ppf(hit_rate) - stats.norm.ppf(fa_rate)
+    return d_prime_score
 
 def main():
     pass

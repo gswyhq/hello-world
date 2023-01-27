@@ -194,13 +194,14 @@ def cosent_loss(y_true, y_pred):
     """排序交叉熵
     y_true：标签/打分，y_pred：句向量
     """
-    y_true = y_true[::2, 0]
-    y_true = K.cast(y_true[:, None] < y_true[None, :], K.floatx())
-    y_pred = K.l2_normalize(y_pred, axis=1)
-    y_pred = K.sum(y_pred[::2] * y_pred[1::2], axis=1) * 20
-    y_pred = y_pred[:, None] - y_pred[None, :]
-    y_pred = K.reshape(y_pred - (1 - y_true) * 1e12, [-1])
-    y_pred = K.concatenate([[0], y_pred], axis=0)
+    y_true = y_true[::2, 0]  # 获取偶数位标签，即取出真实的标签；
+    y_true = K.cast(y_true[:, None] < y_true[None, :], K.floatx())  # 取出负例-正例的差值
+    y_pred = K.l2_normalize(y_pred, axis=1)  # 对输出的句子向量进行l2归一化   后面只需要对应位相乘  就可以得到cos值了
+    y_pred = K.sum(y_pred[::2] * y_pred[1::2], axis=1) * 20  # 奇偶位向量相乘，得到对应cos
+    y_pred = y_pred[:, None] - y_pred[None, :]  # 取出负例-正例的差值, # 这里是算出所有位置 两两之间余弦的差值
+    # 矩阵中的第i行j列  表示的是第i个余弦值-第j个余弦值
+    y_pred = K.reshape(y_pred - (1 - y_true) * 1e12, [-1])  # 乘以e的12次方,要排除掉不需要计算(mask)的部分
+    y_pred = K.concatenate([[0], y_pred], axis=0)  # 这里加0是因为e^0 = 1相当于在log中加了1
     return K.logsumexp(y_pred)
 
 

@@ -97,9 +97,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 tokenizer = BertTokenizer.from_pretrained(rf'D:\Users\{USERNAME}\data\roberta_chinese_3L312_clue_tiny')
 model = BertModel.from_pretrained(rf'D:\Users\{USERNAME}\data\roberta_chinese_3L312_clue_tiny')
 
-text = '尊享惠康是一款什么样的保险'
+text = '尊享汇康是一款什么样的保险'
 tokenizer.tokenize(text)
-# ['尊', '享', '惠', '康', '是', '一', '款', '什', '么', '样', '的', '保', '险']
+# ['尊', '享', '汇', '康', '是', '一', '款', '什', '么', '样', '的', '保', '险']
 print(tokenizer.encode(text))
 # [101, 1892, 671, 2291, 2088, 2741, 573, 3072, 680, 620, 2916, 3904, 812, 5882, 102]
 BatchEncoding = tokenizer.batch_encode_plus([text], return_tensors='pt')
@@ -119,7 +119,7 @@ model.embeddings.word_embeddings.weight[812][:5]
 model.embeddings.word_embeddings.weight[5882][:5]
 # Out[207]: tensor([ 0.0165, -0.0155,  0.0181,  0.0082,  0.0050], grad_fn=<SliceBackward0>)
 
-special_tokens_dict = {'additional_special_tokens': ['尊享惠康', '保险']}
+special_tokens_dict = {'additional_special_tokens': ['尊享汇康', '保险']}
 num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
 model.resize_token_embeddings(len(tokenizer))
 # Embedding(8023, 312)
@@ -133,7 +133,7 @@ model.embeddings.word_embeddings.weight[8022][:5]
 # Out[202]: tensor([ 0.0044,  0.0049, -0.0198,  0.0108,  0.0163], grad_fn=<SliceBackward0>)
 
 tokenizer.tokenize(text)
-# Out[188]: ['尊享惠康', '是', '一', '款', '什', '么', '样', '的', '保险']
+# Out[188]: ['尊享汇康', '是', '一', '款', '什', '么', '样', '的', '保险']
 print(tokenizer.encode(text))
 # [101, 8021, 2741, 573, 3072, 680, 620, 2916, 3904, 8022, 102]
 BatchEncoding = tokenizer.batch_encode_plus([text], return_tensors='pt')

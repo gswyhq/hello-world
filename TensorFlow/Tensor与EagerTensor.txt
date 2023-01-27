@@ -1,0 +1,14 @@
+
+tf.Tensor与tf.EagerTensor
+
+EagerTensor是实时的，可以在任何时候获取到它的值，即通过numpy获取
+
+Tensor是非实时的，它是静态图中的组件，只有当喂入数据、运算完成才能获得该Tensor的值，
+
+
+tensorflow.python.framework.ops.EagerTensor
+tensorflow.python.framework.ops.Tensor
+
+在tensorflow2.x中，凡是可以用numpy获取值的都是指的是EagerTensor，Tensor没有numpy属性。所以只能使用tf.py_function()进行封装。
+
+

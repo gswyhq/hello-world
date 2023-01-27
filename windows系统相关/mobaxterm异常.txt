@@ -134,4 +134,6 @@ $ mvn clean package spring-boot:repackage
 mobaxterm local terminal failed to start due to memory access denied.
 解决方法，检查资源消耗，如内存、硬盘空间是否超阈值，排除故障后，再重启电脑，重启mobaxterm;
 
-
+# tar命令参数无效，命令不完整；
+解决方法，重新安装tar，直接在mobaxterm终端运行：
+apt-get install tar

@@ -18,6 +18,8 @@ data = pd.read_csv('./examples/criteo_sample.txt') #读取数据, 数据来源�
 
 sparse_features = ['C' + str(i) for i in range(1, 27)] # 字符型，稀疏特征一般是类别特征
 dense_features = ['I'+str(i) for i in range(1, 14)]  # 数值型
+# # 注意：历史行为序列特征名称必须以“hist_”开头。故而，其他非历史行为序列，最好不要以hist_开头
+
 
 data[sparse_features] = data[sparse_features].fillna('-1', ) # fillna是对空值的填充处理函数
 data[dense_features] = data[dense_features].fillna(0,)
@@ -163,6 +165,11 @@ samples_data = pd.read_csv("samples.txt", sep="\t", header = None)
 samples_data.columns = ["user_id", "movie_id", "gender", "age", "hist_movie_id", "hist_len", "label"]
 
 samples_data.head()
+# 	user_id	movie_id	gender	age	hist_movie_id	hist_len	label
+# 0	1	112	1	1	186,0,0,0,0...	1	1
+# 1	1	84	1	1	112,186,0,0...	2	1
+# 2	1	52	1	1	84,112,186,0...	3	1
+
 # 本示例中包含：6个特征。
 # user端特征有5个，分别为["user_id", "gender", "age", "hist_movie_id", "hist_len"]；
 # user_id 为 用户ID特征，离散特征，从1-3表示；
@@ -299,6 +306,17 @@ history = model.fit(X_train, y_train, batch_size=32, epochs=10, verbose=1, valid
 # models模块则包含了各个CTR算法，比如FM、DFM、DIN等，我们可以直接调用这些方法用在具体任务上
 # feature_column.py中的类SparseFeat、DenseFeat、VarLenSparseFeat 就是分别处理类别特征、数值特征和变长序列特征
 # VarLenSparseFeat,可以出来变长的类别特征，而变长的浮点型特征用DenseFeat处理就好，只需要设置好对应的维度即好(一般是＞1)
+# DenseFeat(name, dimension, dtype)、参数含义
+# name：特征名称
+# dimension：密集特征向量的维度
+# dtype	默认float32。dtype of input tensor(张量)
+
+# VarLenSparseFeat(sparsefeat, maxlen, combiner, length_name)
+# 参数	含义
+# sparsefeat	一个系数特征的实例
+# maxlen	在所有的样本当中，此特征的最大长度
+# combiner	池化方法，可以是 sum、mean 、max
+# length_name	特征长度名称，如果None，用 0 填充
 
 # feature_columns.py还包含了四个函数：
 # def get_feature_names作用：获取所有特征列的名字，以列表形式返回

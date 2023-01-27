@@ -41,9 +41,9 @@ print(pkf1)
 # pickle.DEFAULT_PROTOCOL
 # 这是一个整数，表示用来pickling的默认协议版本。可能比pickle.HIGHEST_PROTOCOL小。目前默认的协议版本是3，协议3是专门为Python3设计的一种新的协议。
 
-pickle 序列化对象报错：
-AttributeError: Can't pickle local object 'get_lookup_encoding.<locals>.<lambda>'
-这个时候可以使用 dill 来代替：
+# pickle 序列化对象报错：
+# AttributeError: Can't pickle local object 'get_lookup_encoding.<locals>.<lambda>'
+# 这个时候可以使用 dill 来代替：
 import dill
 fun_a = lambda x: x+3
 with open('fun_a.pkl', 'wb') as f:
@@ -51,4 +51,22 @@ with open('fun_a.pkl', 'wb') as f:
 with open('fun_a.pkl', 'rb') as f:
     fun_b = dill.load(f)
 fun_b(10)
+
+# pickle 分片，分块存储：
+import pickle, math
+import numpy as np
+filename = "myfile.pkl"
+batch_size = 32
+data = np.random.random(size=(1000,))
+with open(filename, 'wb') as file_handle:
+    for item in range(math.ceil(data.shape[0]/batch_size)):
+        pickle.dump(data[item*batch_size:item*batch_size+batch_size], file_handle)
+
+with open(filename, 'rb') as file_handle:
+    try:
+        while True:
+            result = pickle.load(file_handle)
+            print(result)
+    except EOFError:
+        print('读取完成！')
 

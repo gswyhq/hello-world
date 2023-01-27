@@ -1,0 +1,269 @@
+
+from keras import backend as K
+from keras.layers import Multiply, multiply, Dot, dot
+import numpy as np
+
+a235 = np.random.randint(0, 6, size=(2, 3, 5))
+a235
+Out[167]: 
+array([[[0, 2, 5, 3, 5],
+        [1, 4, 2, 3, 2],
+        [4, 2, 3, 0, 3]],
+       [[4, 1, 2, 3, 5],
+        [0, 0, 1, 1, 5],
+        [4, 3, 1, 1, 4]]])
+
+b23 = np.random.randint(0, 4, size=(2, 3,))
+b23
+Out[177]: 
+array([[1, 0, 1],
+       [2, 2, 1]])
+
+# 对应行相乘再求和：shape(2,3,5)*shape(2,3) -> shape(2,5)
+Dot(axes=1)([a235, b23])
+Out[178]: 
+<tf.Tensor: shape=(2, 5), dtype=int32, numpy=
+array([[ 4,  4,  8,  3,  8],
+       [12,  5,  7,  9, 24]])>
+
+# 矩阵的转置，将最后两个维度转置，但保持第一个维度不变：shape(2,3,5) -> shape(2,5,3)
+K.permute_dimensions(a235, pattern=(0, 2, 1))
+Out[184]: 
+<tf.Tensor: shape=(2, 5, 3), dtype=int32, numpy=
+array([[[0, 1, 4],
+        [2, 4, 2],
+        [5, 2, 3],
+        [3, 3, 0],
+        [5, 2, 3]],
+       [[4, 0, 4],
+        [1, 0, 3],
+        [2, 1, 1],
+        [3, 1, 1],
+        [5, 5, 4]]])>
+
+# 若需要将1,3维度转置，只需要将pattern=(2,1,0),即可;
+
+# 对应维度相乘：shape(3,)*shape(2,3) -> shape(2,3)
+a3 = np.random.randint(0, 3, size=(3,))
+a3
+Out[189]: array([2, 1, 1])
+a23
+Out[190]: 
+array([[2, 2, 3],
+       [0, 5, 0]])
+a3*a23
+Out[195]: 
+array([[4, 2, 3],
+       [0, 5, 0]])
+
+# shape(2,3)*shape(3,) -> shape(2,3)
+a23*a3
+Out[196]: 
+array([[4, 2, 3],
+       [0, 5, 0]])
+
+# shape(2,5,3)*shape(2,3) -> shape(2,5,3)
+a253
+Out[200]: 
+array([[[5, 2, 1],
+        [1, 1, 5],
+        [4, 4, 5],
+        [5, 1, 4],
+        [2, 4, 5]],
+       [[5, 5, 4],
+        [4, 2, 5],
+        [1, 4, 3],
+        [3, 5, 0],
+        [1, 1, 5]]])
+multiply([a253, a23])
+Out[199]: 
+<tf.Tensor: shape=(2, 5, 3), dtype=int32, numpy=
+array([[[10,  4,  3],
+        [ 2,  2, 15],
+        [ 8,  8, 15],
+        [10,  2, 12],
+        [ 4,  8, 15]],
+       [[ 0, 25,  0],
+        [ 0, 10,  0],
+        [ 0, 20,  0],
+        [ 0, 25,  0],
+        [ 0,  5,  0]]])>
+
+# shape(2,3,5)*shape(2,3) - > shape(2,3,5) 
+Lambda(lambda x: K.permute_dimensions(multiply([K.permute_dimensions(x[0], pattern=(0, 2, 1)), x[1]]), pattern=(0, 2, 1)))([a235, b23])
+Out[203]: 
+<tf.Tensor: shape=(2, 3, 5), dtype=int32, numpy=
+array([[[ 0,  2,  5,  3,  5],
+        [ 0,  0,  0,  0,  0],
+        [ 4,  2,  3,  0,  3]],
+       [[ 8,  2,  4,  6, 10],
+        [ 0,  0,  2,  2, 10],
+        [ 4,  3,  1,  1,  4]]])>
+
+# 两个矩阵相乘：shape(k, j)*shape(j, h) -> shape(k, h)
+import tensorflow as tf
+a = tf.constant([1, 2, 3, 4, 5, 6], shape=[2, 3])
+b = tf.constant([7, 8, 9, 10, 11, 12], shape=[3, 2])
+c = tf.matmul(a, b)
+
+# 矩阵自己与自己相乘，即计算矩阵的平方：
+a = tf.constant([1, 2, 3, 4], shape=(2,2))
+tf.square(a)
+Out[142]: 
+<tf.Tensor: shape=(2, 2), dtype=int32, numpy=
+array([[ 1,  4],
+       [ 9, 16]])>
+
+# 矩阵减法，对应位置相减：
+a = tf.constant([[3]]) #广播为：[[3, 3], [3, 3]]
+b = tf.constant([[1, 6], [2, 9]])
+tf.subtract(a, b)
+Out[143]: 
+<tf.Tensor: shape=(2, 2), dtype=int32, numpy=
+array([[ 2, -3],
+       [ 1, -6]])>
+
+# 标量与标量相乘, 标量与向量相乘，标量与矩阵相乘，直接使用“*”即可：
+x = tf.constant(2, dtype=tf.float32, name=None)
+Y1 = tf.constant(3, dtype=tf.float32, name=None)
+tf.scalar_mul(x, Y1)         # 标量×标量
+Out[144]: <tf.Tensor: shape=(), dtype=float32, numpy=6.0>
+当然，也可以直接是：x*Y1
+
+# 张量的扩充，复制：
+tile函数主要用于张量的扩充，参数multiples表示扩充的倍数。比如，对于一个二维张量，multiples=[2, 3]表示张量在维度一（行）上面扩充两倍，在维度二（列）上面扩充三倍。
+a = tf.constant([[1,2,3],[4,5,6]], tf.int32)
+b = tf.constant([1,2], tf.int32)
+tf.tile(a, b)
+Out[50]: 
+<tf.Tensor: shape=(2, 6), dtype=int32, numpy=
+array([[1, 2, 3, 1, 2, 3],
+       [4, 5, 6, 4, 5, 6]])>
+
+# 从张量的形状中删除尺寸为1的尺寸
+tf.squeeze(np.random.random(size=(1,2,3,1,4))).shape
+Out[62]: TensorShape([2, 3, 4])
+tf.squeeze(np.random.random(size=(1,2,1,3,1)), axis=[0, -3]).shape
+Out[63]: TensorShape([2, 3, 1])
+
+# tf.einsum—爱因斯坦求和约定
+发现记住numpy/PyTorch/TensorFlow中那些计算点积、外积、转置、矩阵-向量乘法、矩阵-矩阵乘法的函数名字和签名很费劲，那么einsum记法就是我们的救星。
+einsum记法是一个表达以上这些运算，包括复杂张量运算在内的优雅方式，基本上，可以把einsum看成一种领域特定语言.
+Einsum允许通过定义张量计算来定义张量。该计算由 equation （基于爱因斯坦求和的简写形式）定义。例如，考虑将两个矩阵A和B相乘以形成矩阵C。C的元素由下式给出：
+C[i,k] = sum_j A[i,j] * B[j,k]
+对应的 einsum equation 为：
+ij,jk->ik
+通常，要将元素式方程式转换为 equation 字符串，请使用以下过程（括号中提供的矩阵乘法示例的中间字符串）：
+1、删除变量名称，方括号和逗号（ ik = sum_j ij * jk ）
+2、将“ *”替换为“，”（ ik = sum_j ij , jk ）
+3、下降求和符号，和（ ik = ij, jk ）
+4、将输出右移，同时用“->”替换“ =”。（ ij,jk->ik ）
+注意：如果未指定输出索引，则对重复的索引求和。所以 ij,jk->ik 可以简化为 ij,jk 。
+一些tf.einsum函数使用示例：
+①外积tf.einsum('ij,ij->ij', x, y) 相当于 tf.multiply(x, y)
+y = np.array([[5, 9],
+       [0, 5]])
+tf.einsum('ij,ij->ij', y, y)
+Out[67]:
+array([[25, 81],
+       [ 0, 25]])
+②点积 tf.einsum('ij,jk->ik', x, z) 相当于 tf.matmul(x, z)
+tf.einsum('ij,jk->ik', y, y)
+Out[72]:
+<tf.Tensor: shape=(2, 2), dtype=int32, numpy=
+array([[25, 90],
+       [ 0, 25]])>
+③转置 tf.einsum('ij->ji', x) 相当于 tf.transpose(x, [1, 0])
+tf.einsum('ij->ji', y)
+Out[74]:
+<tf.Tensor: shape=(2, 2), dtype=int32, numpy=
+array([[5, 0],
+       [9, 5]])>
+④维度位置互换 tf.einsum('abcd->acbd', y) 相当于 K.permute_dimensions(y, pattern=(0, 2, 1, 3))
+y = np.random.random(size=(2,3,4,5))
+tf.einsum('abcd->acbd', y).shape
+Out[80]: TensorShape([2, 4, 3, 5])
+⑤求和 tf.einsum('ijk->', y) 相当于 tf.reduce_sum(y)
+如果没有指定输出维度,则对相应维度进行求和。
+y = np.array([[[4, 8, 0, 3],
+        [6, 6, 9, 8],
+        [3, 7, 7, 8]],
+       [[3, 8, 4, 1],
+        [9, 4, 2, 3],
+        [9, 0, 0, 6]]])
+tf.einsum('ijk->', y)
+Out[87]: <tf.Tensor: shape=(), dtype=int32, numpy=118>
+⑥行求和或列求和，或指定维度求和：
+tf.einsum('ijk->i', y)
+Out[88]: <tf.Tensor: shape=(2,), dtype=int32, numpy=array([69, 49])>
+tf.einsum('ijk->j', y)
+Out[89]: <tf.Tensor: shape=(3,), dtype=int32, numpy=array([31, 47, 40])>
+tf.einsum('ijk->k', y)
+Out[90]: <tf.Tensor: shape=(4,), dtype=int32, numpy=array([34, 33, 22, 29])>
+tf.einsum('ijk->jk', y)
+Out[91]:
+<tf.Tensor: shape=(3, 4), dtype=int32, numpy=
+array([[ 7, 16,  4,  4],
+       [15, 10, 11, 11],
+       [12,  7,  7, 14]])>
+⑦矩阵或向量相乘
+tf.einsum("ijk,ikl->ijl", x, y)
+x = np.random.randint(10, size=(2, 3, 4))
+y = np.random.randint(10, size=(2, 4, 5))
+tf.einsum("ijk,ikl->ijl", x, y).shape
+Out[95]: TensorShape([2, 3, 5])
+tf.einsum("ijk,ikl->ij", x, y)
+Out[97]:
+<tf.Tensor: shape=(2, 3), dtype=int32, numpy=
+array([[184, 523, 275],
+       [398, 628, 556]])>
+⑧张量缩约(通过求和实现维度减少，通过扩增实现维度增加)
+a = np.random.random(size=(2,3,5,7))
+b = np.random.random(size=(11,13,3,17,5))
+tf.einsum('pqrs,tuqvr->pstuv', a, b).shape
+Out[98]: TensorShape([2, 7, 11, 13, 17])
+⑨ 双线性变换
+a = np.random.random(size=(2,3))
+b = np.random.random(size=(5,3,7))
+c = np.random.random(size=(2,7))
+tf.einsum('ik,jkl,il->ij', a, b, c)
+Out[99]:
+<tf.Tensor: shape=(2, 5), dtype=float64, numpy=
+array([[2.51800034, 2.27229557, 1.58964107, 2.28257922, 1.79367788],
+       [2.67219775, 3.21843008, 2.55158305, 2.99894212, 2.61580272]])>
+einsum是一个函数走天下，是处理各种张量操作的瑞士军刀。
+从上面的真实用例可以看到，我们仍然需要在einsum之外应用非线性和构造额外维度（unsqueeze）。
+类似地，分割、连接、索引张量仍然需要应用其他库函数。
+⑩输出重复索引（行标列标相等）元素，即输出对角元素
+m = tf.reshape(tf.range(9), [3,3])
+diag = tf.einsum('ii->i', m)
+diag
+Out[124]: <tf.Tensor: shape=(3,), dtype=int32, numpy=array([0, 4, 8])>
+⑪# 重复索引相加，即对角元素相加
+trace = tf.einsum('ii', m)  #输出[j，i] = trace（m）= sum_i m [i，i]
+assert trace == sum(diag)
+print(trace.shape)
+⑫轴上广播(无法在命名轴上广播)
+Einsum将在省略号覆盖的轴上广播。
+s = tf.random.normal(shape=[11, 7, 5, 3])
+t = tf.random.normal(shape=[11, 7, 3, 2])
+e =  tf.einsum('...ij,...jk->...ik', s, t)
+print(e.shape)
+(11, 7, 5, 2)
+s = tf.random.normal(shape=[11, 1, 5, 3])
+t = tf.random.normal(shape=[1, 7, 3, 2])
+e =  tf.einsum('...ij,...jk->...ik', s, t)
+print(e.shape)
+(11, 7, 5, 2)
+注意：tf.einsum不支持在命名轴上广播。
+具有匹配标签的所有轴应具有相同的长度。如果您有长度为 1 的轴，请使用 tf.squeeze 或 tf.reshape 消除它们。
+
+# 矩阵的分割，tf.split
+y.shape
+Out[106]: (2, 4, 5)
+s1, s2 = tf.split(y, [1, 3], axis=1)
+s1.shape, s2.shape
+Out[108]: (TensorShape([2, 1, 5]), TensorShape([2, 3, 5]))
+
+
+

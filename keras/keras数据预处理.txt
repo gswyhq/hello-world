@@ -49,5 +49,38 @@ model3 = tf.keras.Sequential([
 ])
 model3.summary()
 在该模型之中，因为Masking层是位于第一层，因此我们要设置参数input_shape，这里的参数（256，）表示的是我们的每条数据都是padding长度为256的序列。
+注意：对于输入张量中的每个时间步长（张量中的维数1），如果该时间步长上输入张量中的所有值都等于 mask_value ，则该时间步长将在所有下游层中被屏蔽（跳过）（只要它们支持）掩蔽）。
+如果任何下游层不支持掩码但又收到这样的输入掩码,就会引发异常。
+即使用keras自带的Masking层，只能是整行mask,而不能对某行个别值进行mask，举例：
+from keras.utils import pad_sequences
+seqs = [[1,2,3,4],[2,3,4,5,6,6,6], [2, 2]]
+x = pad_sequences(seqs, maxlen=10, dtype='float32', padding='pre', truncating='pre', value=2)
+mask_x = Masking(mask_value=2.)(x)
+x
+Out[71]:
+array([[2., 2., 2., 2., 2., 2., 1., 2., 3., 4.],
+       [2., 2., 2., 2., 3., 4., 5., 6., 6., 6.],
+       [2., 2., 2., 2., 2., 2., 2., 2., 2., 2.]], dtype=float32)
+mask_x
+Out[72]:
+<tf.Tensor: shape=(3, 10), dtype=float32, numpy=
+array([[2., 2., 2., 2., 2., 2., 1., 2., 3., 4.],
+       [2., 2., 2., 2., 3., 4., 5., 6., 6., 6.],
+       [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], dtype=float32)>
+# 只能对所在行都是mask_value才有效，若只有个别是mask_value，则无效；
 
-
+# 若想要将行内的值也被mask掉；这个时候可以先先扩展一个维度，如下所示：
+from keras.utils import pad_sequences
+seqs = [[1,2,3,4],[2,3,4,5,6,6,6], [2, 2]]
+x = pad_sequences(seqs, maxlen=10, dtype='float32', padding='pre', truncating='pre', value=2)
+x = tf.expand_dims(x, axis=-1)  # 扩展一个维度后，再mask；即shape (3, 10) -> (3, 10, 1)
+mask_x = Masking(mask_value=2.)(x)
+mask_x._keras_mask
+Out[131]:
+<tf.Tensor: shape=(3, 10), dtype=bool, numpy=
+array([[False, False, False, False, False, False,  True, False,  True,
+         True],
+       [False, False, False, False,  True,  True,  True,  True,  True,
+         True],
+       [False, False, False, False, False, False, False, False, False,
+        False]])>

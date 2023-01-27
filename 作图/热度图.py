@@ -1,8 +1,49 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+#######################################################################################################################
+from matplotlib.colors import LinearSegmentedColormap
+from pylab import mpl
+from matplotlib import pyplot as plt
+mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体
+mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
+import numpy as np
+import matplotlib.pyplot as plt
+tem = np.random.random(size=(3,5))
+name = 'Reds'  # 选中一个渐变色
+print("全部配色方案：{}".format(plt.colormaps()))
+cmap =  LinearSegmentedColormap('cmap', plt.get_cmap(name)._segmentdata, 256)  # 这里分级显示，分为256级；
+plt.imshow(tem,cmap = cmap)  # plt.imshow()作用就是展示一副热度图，将数组表示为一幅图
+plt.ylim(ymax=2.5,ymin=-0.5)
+for col in range(5):
+    plt.text(col, 0, 'center_{}'.format(col), ha='center')  # 热度图中填充文本
+
+plt.colorbar(label='颜色渐变范围')
+plt.xticks(range(5), list('abcde'), rotation=0)  # 设置X坐标轴刻度名称, rotation: 旋转度数，控制横向、竖向或倾斜
+plt.yticks(range(3), ['1行', '2行', '3行'])  # 设置y坐标轴刻度名称
+plt.show()
+
+# 更多颜色范围参考：
+# https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
+
+#######################################################################################################################
+from matplotlib import pyplot as plt
+import numpy as np
+import seaborn as sns
+from matplotlib.colors import LinearSegmentedColormap
+from pylab import mpl
+mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体
+mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
+M, N = 5, 10
+mat = np.random.rand(M, N)
+labels = np.random.choice(['X', '☀', '★', '♛'], size=(M, N))  # 不同级别，填充不同图案
+ax = sns.heatmap(mat, cmap="Reds", annot=labels, annot_kws={'fontsize': 16}, fmt='s')
+plt.show()
+
+#######################################################################################################################
+
 import numpy as NP
-from matplotlib import pyplot as PLT
+from matplotlib import pyplot as plt
 from matplotlib import cm as CM
 from matplotlib import axes
 A = NP.array([
@@ -34,7 +75,7 @@ A = NP.array([
  ])
 
 # 设定一个图像，背景为白色。
-fig = PLT.figure(facecolor='w')
+fig = plt.figure(facecolor='w')
 #注意位置坐标，数字表示的是坐标的比例
 ax1 = fig.add_subplot(2,1,1,position=[0.1,0.15,0.9,0.8])
 #注意标记旋转的角度
@@ -51,11 +92,11 @@ cmap = CM.get_cmap('rainbow', 1000)
 #那个aspect参数，对确定图形在整个图中的位置和大小有关系。上面的add_subplot中的position参数的数值要想有作用，这里的这个参数一定要选auto。
 map = ax1.imshow(A, interpolation="nearest", cmap=cmap,aspect='auto', vmin=0,vmax=15)
 #shrink是标尺缩小的比例
-cb = PLT.colorbar(mappable=map, cax=None, ax=None,shrink=0.5)
+cb = plt.colorbar(mappable=map, cax=None, ax=None,shrink=0.5)
 cb.set_label('(%)')
 
 # plot it
-PLT.show()
+plt.show()
 
 def main():
     pass

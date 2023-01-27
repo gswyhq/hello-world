@@ -6,7 +6,7 @@
                                    mode='auto', # mode：'auto'，'min'，'max'之一，在save_best_only=True时决定性能最佳模型的评判准则， 例如，当监测值为val_acc时，模式应为max，当监测值为val_loss时，模式应为min。在auto模式下，评价准则由被监测值的名字自动推断。
                                    save_best_only=True, # 当设置为True时，监测值有改进时才会保存当前的模型
                                    save_best_only=True, save_weights_only=False)
-
+    # 注意： 这里mode=auto, max, min, 仅仅决定保存模型条件，并不能决定模型训练loss优化方向，也不是决定早停的依据。
     tb = TensorBoard(log_dir=log_dir,  # log 目录
                      histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
                      batch_size=batch_size,  # 用多大量的数据计算直方图

@@ -4,6 +4,10 @@
 # https://stackoverflow.com/questions/8409095/matplotlib-set-markers-for-individual-points-on-a-line
 
 import matplotlib.pylab as plt
+import matplotlib
+
+print("全部形状字典：", matplotlib.markers.MarkerStyle().markers))
+
 markers=['.',',','o','v','^','<','>','1','2','3','4','8','s','p','P','*','h','H','+','x','X','D','d','|','_']
 descriptions=['point', 'pixel', 'circle', 'triangle_down', 'triangle_up','triangle_left', 'triangle_right', 'tri_down', 'tri_up', 'tri_left','tri_right', 'octagon', 'square', 'pentagon', 'plus (filled)','star', 'hexagon1', 'hexagon2', 'plus', 'x', 'x (filled)','diamond', 'thin_diamond', 'vline', 'hline']
 x=[]

@@ -213,6 +213,16 @@ df = df.sample(50)
 df.shape
 Out[15]: (50, 11)
 
+# 全部数据打乱，重新洗牌：
+方法1：采用pandas中自带的 sample这个方法。
+df = df.sample(frac=1)
+这样对可以对df进行shuffle。其中参数frac是要返回的比例，比如df中有10行数据，我只想返回其中的30%,那么frac=0.3。
+有时候，我们可能需要打混后数据集的index（索引）还是按照正常的排序。我们只需要这样操作
+df.sample(frac=1).reset_index(drop=True)
+方法2：
+from sklearn.utils import shuffle
+df = shuffle(df)
+
 # 取出多列并去重，根据多列内容去重, 删除某列重复值：
 df.drop_duplicates(subset=['province', 'city'],keep='first')
 DataFrame中存在重复的行或者几行中某几列的值重复，这时候需要去掉重复行，
@@ -311,6 +321,9 @@ Out[112]:
    a  b
 0  5  a
 2  5  c
+
+# 根据索引取行，筛选指定索引行号的数据，如：选取选取索引号为1、3、4的行
+df2.loc[[1,3, 4],:]
 
 # 自定义函数，在某列中筛选符合要求的行：
 dft=pd.DataFrame([['5,9'], ['2,3'], ['4,6']], columns=['status']) #若status列字符串分割后在集合{'1', '2', '4'}中，则取出

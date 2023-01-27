@@ -2,6 +2,8 @@
 Keras Embedding层
 
 Embedding层只能作为模型的第一层。
+Embedding层是不可导的,梯度东流至此回,所以把embedding放在中间层是没有意义的,emebedding只能作为第一层.
+embedding层的作用是把一个one hot向量变为一个稠密向量
 
 函数原型
 class Embedding(Layer):

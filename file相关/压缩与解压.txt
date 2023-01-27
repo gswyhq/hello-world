@@ -150,6 +150,36 @@ f是指定文件
 7、压缩成tar.gz文件
 gswewf@gswewf-pc:~/服务器上的文件$ tar -czvf /home/gswewf/服务器上的文件/360热点.tar.gz 360热点/  #将当前目录下的“360热点”文件夹 压缩成‘/home/gswewf/服务器上的文件/360热点.tar.gz’
 
+# 将当前目录及其子目录，指定后缀为sql的文件压缩成：backup.tar.gz (注意：使用xargs，当文件太多时候，可能出现因为参数截断导致压缩文件不全)
+~$ find . -type f -name "*.sql" |xargs tar zcvf backup.tar.gz
+# 将当前目录及其子目录，指定后缀为sql或sh的文件压缩成：backup.tar.gz
+~$ find . -type f -name "*.sql" -or -name "*.sh" |xargs tar zcvf backup.tar.gz
+# 将当前目录及其子目录，指定后缀为sql或sh的文件压缩成：backup.tar.gz, 文件中含有空格问题：
+~$ find . -type f \( -name "*.sql" -or -name "*.sh" \) -print0 |xargs -0 tar zcvf backup.tar.gz
+# print选项使用\n(换行符)分隔输出的每个文件或目录名。而-print0选项则使用空字符 '\0’来分隔。-print0的主要用法是将包含换行符或空白字符的文件名传给xargs命令
+# -print0：告诉find命令，在输出文件名之后，跟上NULL字符，而不是换行符；-0：告诉xargs，以NULL作为参数分隔符；
+
+# 从文件中读取文件路径，并压缩：
+cat pathfile.txt|xargs tar zcvf abc.tar.gz
+这个执行下来没有报错，但是 abc.tar.gz 中并没有包含全部的文件：
+Linux 有个系统参数，用来控制命令行下参数的长度（包含环境数据），这个参数是 ARG_MAX ，如 131072 (bytes) ：
+$ getconf ARG_MAX
+131072
+凡是超过 131072 bytes 长度的参数都会被截断， * 分批 * 传给 xargs 后面的参数。
+第二批参数列表产生的压缩包把第一批参数列表产生的压缩包覆盖掉了，第三批又把第二批覆盖掉了。
+实际上只有最后一次传进来的参数被打进了压缩包中。
+解决办法：
+先追加打包所有文件，再压缩；
+当然也可以从文件pathfile.txt中读取待压缩文件路径，再压缩成文件：tarball.tar.gz
+tar -zcv -T pathfile.txt -f tarball.tar.gz
+
+问题：
+tar -czvf compress_file.tar.gz $(cat file_list.txt)
+-bash: /bin/tar: Argument list too long
+文件数太长，该如何解决?
+解决方法同样是使用"-T"选项将文件传递到包含tar的文件名的tar.
+tar -zcv -T file_list.txt -f tarball.tar.gz
+
 8、7z解压缩
 yum install p7zip p7zip-plugins
 7z x 360热点.7z  #将压缩文件“360热点.7z”解压到同目录下的“360热点”文件夹中，其目录结构不变

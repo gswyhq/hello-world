@@ -1,0 +1,41 @@
+
+Slice 的意思是从 Tensor 里面取下标得到的一部分，比如说原来是 [10,10] 的一个 Tensor，取下标 [0] 得到一个 [10] 的 Tensor，这个 Tensor 就是原 Tensor 的一个 Slice。
+然后 IndexedSlices 意思就很明显了，就是一堆 Slices 和它们所对应的下标（也就是 Index）。
+那么这么做有什么好处呢，其实就是因为你原来的 Tensor 太大了，但是你只用了其中的几行，在梯度更新的过程中，如果为了更新这几行的值，去建立与原矩阵一样大的梯度矩阵，那代价就太大了。
+所以设计了这么一个数据结构，来做一个稀疏的存储。所以如果你在前向传播过程中用了 lookup 之类的函数取了一个 Tensor 中的几行，那最后得出来的梯度就会是 IndexedSlices，
+这个结构中的 Indices 就是你前向传播中取的那几个位置，也就是最后要更新的那几个位置，values 就是这些位置所对应的梯度值，dense_shape 就是矩阵原本的形状。
+而如果你没有做 lookup 这类的操作的话，梯度应该是不会使用 IndexedSlices 的。
+
+稀疏矩阵的表示（tf.SparseTensor()）
+tf.SparseTensor(indices=,values=,dense_shape=)# ragged tensor的特点是，所有的0元素都在非0元素之后，所以不适合存储稀疏矩阵
+# sparse tensor <----> dense tensor
+s = tf.SparseTensor(indices=[[0,1], [1,0], [2, 3]],
+            values=[1., 2., 3.],
+            dense_shape=[3,4])
+print(s)
+# SparseTensor(indices=tf.Tensor(
+[[0 1]
+ [1 0]
+ [2 3]], shape=(3, 2), dtype=int64), values=tf.Tensor([1. 2. 3.], shape=(3,), dtype=float32), dense_shape=tf.Tensor([3 4], shape=(2,), dtype=int64))
+
+# SparseTensor 类转换为 Tensor
+print(tf.sparse.to_dense(s))
+# tf.Tensor(
+[[0. 1. 0. 0.]
+ [2. 0. 0. 0.]
+ [0. 0. 0. 3.]], shape=(3, 4), dtype=float32)
+
+
+# IndexedSlices 类 转换为 Tensor
+s = tf.IndexedSlices(indices=[3,2,0,2],
+            values=np.random.random(size=(4, 3)),
+            dense_shape=[5,3])
+tf.convert_to_tensor(s)
+Out[67]: 
+<tf.Tensor: shape=(5, 3), dtype=float64, numpy=
+array([[0.64087439, 0.19451255, 0.36250647],
+       [0.        , 0.        , 0.        ],
+       [0.85047116, 0.57424176, 1.05272019],
+       [0.87513544, 0.50498867, 0.19865726],
+       [0.        , 0.        , 0.        ]])>
+

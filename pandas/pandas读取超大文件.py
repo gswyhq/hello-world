@@ -5,8 +5,11 @@
 
 # 方法1, 设置chunksize, 分块读取
 chunksize = 10 ** 6  # # 每块为chunksize条数据(index)
+chunks = []
 for chunk in pd.read_csv(filename, chunksize=chunksize):
     print(chunk)
+    chunks.append(chunk)
+df = pd.concat(chunks, ignore_index=True)
 
 # 方法2, 使用iterator, 但是也需要设置chunksize
 chunkSize = 10 ** 6
@@ -23,6 +26,9 @@ while True:
 df.to_csv("result.txt", index=False, sep='\001', line_terminator='\n\001\001\001\n') 
 # line_terminator：自定义换行符
 # sep: 自定义分列符号，分隔符；
+
+# 超大文件，仅仅读取指定行，读取前几行：
+df  = pandas.read_csv(filename, header=0, nrows=1000) # nrows: 读取前几行，这里读取前1000行；
 
 def main():
     pass

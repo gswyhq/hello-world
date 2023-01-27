@@ -1,0 +1,20 @@
+
+# Python3判断变量/对象是否定义的两种方法, 变量若未定义直接使用，会报错：is not defined
+NameError: name 's' is not defined
+# 方法1：使用内置函数locals()：
+# locals()：获取已定义对象字典
+# testvar未定义的判断
+if 'testvar' in locals().keys():
+   print("testvar已定义")
+else:
+   print("testvar未定义")
+
+# 方法2：使用内置函数dir()：
+# dir()：获取已定义对象列表
+# testvar未定义的判断
+if 'testvar' in dir():
+   print("testvar已定义")
+else:
+   print("testvar未定义")
+
+
