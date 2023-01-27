@@ -4,6 +4,8 @@ linux:
 　　sudo apt-get install nodejs
 　　sudo apt-get install npm
 　　sudo npm install elasticdump -g
+但是通过apt-get install nodejs安装的话，可能出现版本过低；
+故而还是通过下载二进制安装包,离线安装；
 
 windows：
 安装了nodejs，则npm也安装好了：
@@ -16,9 +18,11 @@ v14.15.4
 离线安装node.js和npm
 1.下载官方安装包并拷贝到离线机器上。
 官方下载地址：https://nodejs.org/en/download/
+wget https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz
 
 2.解压文件：
 tar-xJf node-v8.9.4-linux-x64.tar.xz
+~$ tar -xvf node-v18.12.1-linux-x64.tar.xz
 
 2.放到相应目录例如/opt/
 sudo mv node-v8.9.4-linux-x64 /opt/

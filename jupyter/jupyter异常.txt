@@ -60,4 +60,10 @@ Notebook ****.ipynb is not trusted
 $ jupyter trust ***.ipynb
 方法2：在notebook中点击页面右上角处的“不可信/Not Trusted”, 在弹出页面中点击“可信/Trust”即可；
 
+# jupyterlab 成功安装后，运行 jupyter lab 报错：
+Jupyter command `jupyter-lab` not found.
+可能是因为“pip3 install jupyterlab”安装，而不是“sudo pip3 install jupyterlab”安装；
+导致不在环境路径中，只需要运行如下命令即可；
+export PATH="$HOME/.local/bin:$PATH"
+当然也可以将该命令写入~/.bashrc文件中，这样不用每次都需要如此运行；
 

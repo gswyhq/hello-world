@@ -535,6 +535,10 @@ http://download.geofabrik.de/asia-latest.osm.bz2 #要下载的文件的网址
 使用wget -b后台下载
 命令：
 wget -b http://www.minjieren.com/wordpress-3.1-zh_CN.zip
+如果需要wget对下载的文件进行重命名，则可以通过 -O 参数指定文件名，需要注意的是，如果重命名中包含路径，那么该路径必须实现创建好。
+示例：
+wget  http://download.redis.io/releases/redis-4.0.9.tar.gz  -O /usr/local/src/redis.tar.gz
+经测试 小写的和大写的都可以 但是大写的会显示下载过程 小写的不会
 
 protoc 命令安装：
 

@@ -6,7 +6,7 @@ def test1(url='https://www.baidu.com/'):
     from selenium import webdriver
     # PhantomJS 是一个基于 WebKit（WebKit是一个开源的浏览器引擎，Chrome，Safari就是用的这个浏览器引擎） 的服务器端 JavaScript API，
     # 主要应用场景是：无需浏览器的 Web 测试，页面访问自动化，屏幕捕获，网络监控
-    # sudo apt-get install PhantomJS
+    # sudo apt-get install phantomjs
     # gswewf@gswewf-pc:~$ whereis phantomjs
     # phantomjs: /usr/bin/phantomjs /usr/lib/phantomjs /usr/share/man/man1/phantomjs.1.gz
     driver = webdriver.PhantomJS(executable_path='/usr/bin/phantomjs')

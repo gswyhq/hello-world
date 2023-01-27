@@ -137,6 +137,40 @@ wget “ftp://host/test/*”
  
 wget -t0 -c -nH -x -np -b -m -P /home/sunny/NOD32view/  http://downloads1.kaspersky-labs.com/bases/ -o wget.log
 
+# 问题：浏览器打开正常，但wget下载时候404
+gswyhq@gswyhq-PC:~/Downloads$ wget -c -t 0 http://ysting.ysxs8.vip:81/网络玄幻/丹道宗师/第0574集.mp3
+--2022-11-27 15:06:55--  http://ysting.ysxs8.vip:81/%E7%BD%91%E7%BB%9C%E7%8E%84%E5%B9%BB/%E4%B8%B9%E9%81%93%E5%AE%97%E5%B8%88/%E7%AC%AC0574%E9%9B%86.mp3
+正在解析主机 ysting.ysxs8.vip (ysting.ysxs8.vip)... 223.13.185.197
+正在连接 ysting.ysxs8.vip (ysting.ysxs8.vip)|223.13.185.197|:81... 已连接。
+已发出 HTTP 请求，正在等待回应... 404 Not Found
+2022-11-27 15:06:55 错误 404：Not Found。
+解决方法：
+添加请求头，如：
+wget -d --header="User-Agent: Mozilla/5.0 (Windows NT 6.0) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11" --header="Referer: http://xmodulo.com/" --header="Accept-Encoding: compress, gzip" http://www.google.com/
+# 当然，也可以在 ~/.wgetrc 文件中添加：
+gswyhq@gswyhq-PC:~$ cat ~/.wgetrc
+header = Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+header = Accept-Encoding: gzip, deflate
+header = Accept-Language: zh-CN,zh;q=0.9
+header = Cache-Control: max-age=0
+header = Connection: keep-alive
+header = Cookie: Hm_lvt_74282cdb6d2503a28d8cd9fcb13934bd=1669463195; virtualwall=vsid=da80b26e7fc45ba00cbdba53b792f7e0; Hm_lpvt_74282cdb6d2503a28d8cd9fcb13934bd=1669519699
+header = Host: ysting.ysxs8.vip:81
+header = Upgrade-Insecure-Requests: 1
+header = User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36
+
+# 问题：wget 下载文件 304 Not Modified
+正在连接 ysting.ysxs8.vip (ysting.ysxs8.vip)|223.13.185.197|:81... 已连接。
+已发出 HTTP 请求，正在等待回应... 304 Not Modified
+2022-11-27 15:20:49 错误 304：Not Modified。
+问题原因：
+ 在客户端向服务端发送http请求时，若返回状态码为304 Not Modified 则表明此次请求为条件请求。在请求头中有两个请求参数：If-Modified-Since 和 If-None-Match。
+        当客户端缓存了目标资源但不确定该缓存资源是否是最新版本的时候, 就会发送一个条件请求。在进行条件请求时,客户端会提供给服务器一个If-Modified-Since请求头,其值为服务器上次返回响应头中Last-Modified值,还会提供一个If-None-Match请求头,值为服务器上次返回的ETag响应头的值。
+        服务器会读取到这两个请求头中的值,判断出客户端缓存的资源是否是最新的,如果是的话,服务器就会返回HTTP/304 Not Modified响应头, 但没有响应体.客户端收到304响应后,就会从本地缓存中读取对应的资源。 所以：当访问资源出现304访问的情况下其实就是先在本地缓存了访问的资源。
+解决方法：将请求头中的如下内容删除即可：
+header = If-Modified-Since: Thu, 04 Aug 2022 11:50:12 GMT
+header = If-None-Match: "a499c5bf8a7d81:0"
+header = Range: bytes=0-3430121
 
 
 

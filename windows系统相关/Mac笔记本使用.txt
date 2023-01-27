@@ -33,3 +33,8 @@ scp username@hostname:remotefile localdirectory
 # 远程桌面连接工具：
 若Teamviewer不能用，可以使用RustDesk，后者更轻量级。
 
+# 如何将电脑文件传入到ipad:
+ipad 安装 ES文件浏览器，打开es文件浏览器，找到“Wifi传输”，点击开来，按照提示：
+如在电脑浏览器打开“http://192.168.0.102:5050/”，上传对应的文件即可；
+
+
