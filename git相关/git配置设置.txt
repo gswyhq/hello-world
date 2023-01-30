@@ -5,16 +5,30 @@ git config --global credential.helper erase
 git config --global credential.helper store
 git config --global core.autocrlf true
 
-# // 提交时转换为LF，检出时转换为CRLF
+# 为了解决不同操作系统换行符不一致问题，git会自动对换行符进行转换。转换的方案有3种：
+# 方案一：提交时转换为LF(\n)，检出(checkout)时转换为CRLF(\r\n);
+在提交时将CRLF转换为LF，在拉取（检出checkout）时将UNIX换行符（LF）替换成CRLF。（Windows系统推荐使用，我们在windows上安装git的时候，如果一路next，默认是使用这个方案）
 git config core.autocrlf true
-// 提交时转换为LF，检出时不转换
+# 方案二：提交时转换为LF，检出时不转换;
+在提交时将CRLF转换为LF，在拉取（检出checkout）时不进行转换。（Linux/Unix和Mac OS和Mac OS X推荐使用，在Unix或者类Unix操作系统上安装git，默认使用这种方案）
 git config core.autocrlf input
-// 提交检出均不转换
+# 方案三：提交检出均不转换（这种方案对于跨平台项目不推荐使用）。
 git config core.autocrlf false
 
 Dos和Windows平台： 使用回车（CR）和换行（LF）两个字符来结束一行，回车+换行(CR+LF)，即“\r\n”；
 Mac 和 Linux平台：只使用换行（LF）一个字符来结束一行，即“\n”；
 影响：Unix/Mac系统下的文件在Windows里打开的话，所有文字会变成一行；而Windows里的文件在Unix/Mac下打开的话，在每行的结尾可能会多出一个^M符号。
+
+# 一般在项目中，为了避免项目中同时出现CRLF和LF，还可以开启safecrlf检查。
+当然，如果你的项目自己定义了语法检查规则，例如使用eslint去约束换行符必须是LF，那么当你的文件中出现CRLF的时候，eslint会给你错误提示信息，
+告诉你不能包含CRLF，这时候，不开启safecrlf也是可以的 （一般建议开启）。
+但若开启safecrlf检查了，在windows系统中，git add 添加LF文件时候，可能会出现“fatal: LF would be replaced by CRLF in ...”导致无法添加，这个时候又需要关闭或者改为warn
+// 开启safecrlf检查，即拒绝提交包含混合换行符的文件 （一般设置为true）
+git config --global core.safecrlf true
+// 允许提交包含混合换行符的文件
+git config --global core.safecrlf false
+// 提交包含混合换行符的文件时给出警告
+git config --global core.safecrlf warn
 
 # 查看git所有的配置：
 git config --list
@@ -150,7 +164,7 @@ Enter new passphrase (empty for no passphrase):
 Enter same passphrase again:
 Your identification has been saved with the new passphrase.
 
-git diff ^M的消除,让git diff的时候忽略换行符的差异（但是git status还是会显示差异）：
+git diff ^M的消除,让git diff的时候忽略换行符的差异（但是git status还是会显示差异，因为status是比较文件的SHA1哈希表示，不同换行符影响文件的SHA1）：
 git config --global core.whitespace cr-at-eol
 git config core.autocrlf true
 
