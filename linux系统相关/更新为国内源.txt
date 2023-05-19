@@ -33,6 +33,19 @@ echo "deb-src http://mirrors.163.com/debian/ buster-backports main non-free cont
 echo "deb http://mirrors.163.com/debian-security/ buster/updates main non-free contrib" >> /etc/apt/sources.list && \
 echo "deb-src http://mirrors.163.com/debian-security/ buster/updates main non-free contrib" >> /etc/apt/sources.list
 
+Debian GNU/Linux 11 \n \l
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+echo "deb https://mirrors.aliyun.com/debian/ bullseye main non-free contrib"  >> /etc/apt/sources.list && \
+echo "deb-src https://mirrors.aliyun.com/debian/ bullseye main non-free contrib"  >> /etc/apt/sources.list && \
+echo "deb https://mirrors.aliyun.com/debian-security/ bullseye-security main"  >> /etc/apt/sources.list && \
+echo "deb-src https://mirrors.aliyun.com/debian-security/ bullseye-security main"  >> /etc/apt/sources.list && \
+echo "deb https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib"  >> /etc/apt/sources.list && \
+echo "deb-src https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib"  >> /etc/apt/sources.list && \
+echo "deb https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib"  >> /etc/apt/sources.list && \
+echo "deb-src https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib"  >> /etc/apt/sources.list
+
+
+
 tensorflow/tensorflow:1.13.1-py3
 # head /etc/issue
 Ubuntu 16.04.6 LTS \n \l

@@ -1,0 +1,9 @@
+
+https://www.zhihu.com/question/584053473
+https://github.com/AUTOMATIC1111/stable-diffusion-webui
+模型下载：
+https://civitai.com/models/6424/chilloutmix#
+在线生成：
+https://app.prodia.com/#/
+
+

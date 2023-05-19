@@ -14,3 +14,15 @@ deepin系统：
 > Exec=/usr/bin/google-chrome-stable --enable-easy-off-store-extension-install %U
 重启浏览器即可。
 
+# 问题：
+google chrome 右上角提示版本太旧，但打开更新又无法打开网站，www.google.com/chrome
+解决方法：
+将网站改为 www.google.cn/chrome
+删除旧版本，并下载最新的版本安装；
+删除旧版本：
+$ sudo apt purge google-chrome-stable
+安装新版本：
+$ sudo apt install ./google-chrome-stable_current_amd64.deb
+注意：
+需要在www.google.cn/chrome下载，在 https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb ，下载的deb包仍旧提示不是最新版本；
+
