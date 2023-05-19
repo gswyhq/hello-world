@@ -10,6 +10,7 @@ df = pd.read_excel(yiyuan_excel_file, sheet_name="Sheet1", index_col=0, dtype={'
 
 但这两种方案，只能是针对excel数据中，本就是文本类型的数据；
 若原excel中是自定义的`0000`类型的数据， 如0001，读取出来的结果仍旧是: "1".
+当然，也可以设置dtype=object，这个时候不对数据进行转换；
 
 import pandas 出现以下错误：
 ImportError: Missing required dependencies ['numpy']
@@ -64,4 +65,15 @@ df2.to_csv("./result_5520w.txt", encoding='utf-8', index=False, sep='\001', quot
 读取的时候，也是一样指定就好：
 df = pd.read_csv("./result_5520w.txt", encoding='utf-8', sep='\001', quoting=csv.QUOTE_ALL)
 
+# Python Console中，df.head(), 中文显示乱码，问号：
+可能是Pychon Console配置问题，不管pandas的事，输入任何中文，输出都是乱码；
+修改pycharm配置
+FILE-》setting-》Editor-》File Encodings，Global Encoding, Project Encoding, Default encoding ...都修改为UTF-8，重启pycharm即可。
+
+# Pycharm, Python Console中，df.head()报错：
+‘NoneType‘ object is not callable
+解决方案，是在pyCharm里代码中加入：
+pd.set_option('display.max_columns', None)#所有列
+pd.set_option('display.max_rows', None)#所有行
+df.head()
 

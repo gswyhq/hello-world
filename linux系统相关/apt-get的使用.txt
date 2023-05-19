@@ -51,5 +51,33 @@ apt-get source package 下载该包的源代码
 sudo apt-get clean && sudo apt-get autoclean 清理无用的包
 
 sudo apt-get check 检查是否有损坏的依赖
+sudo apt update # 获取可用更新的列表
+sudo apt upgrade # 安装一些更新;不删除包
+sudo apt full-upgrade # 安装更新;如果需要，也可以删除一些包
+sudo apt autoremove # 删除任何不再需要的旧软件包
+
+---------------------------------------------------------------------------------------
+在Ubuntu18.04以后，尽量使用apt，而不是apt-get。apt可以给出更多的建议安装等提示。
+apt是新的命令，有一些操作不支持，apt-get是老命令，可以支持更多的操作
+apt与apt-get的用法:
+apt 命令	取代的命令	命令的功能
+apt install	apt-get install	安装软件包
+apt remove	apt-get remove	移除软件包
+apt purge	apt-get purge	移除软件包及配置文件
+apt update	apt-get update	刷新存储库索引
+apt upgrade	apt-get upgrade	升级所有可升级的软件包
+apt autoremove	apt-get autoremove	自动删除不需要的包
+apt full-upgrade	apt-get dist-upgrade	在升级软件包时自动处理依赖关系
+apt search	apt-cache search	搜索应用程序
+apt show	apt-cache show	显示装细节
+当然，apt 还有一些自己的命令：
+
+新的apt命令	命令的功能
+apt list	列出包含条件的包（已安装，可升级等）
+apt edit-sources	编辑源列表
+————————————————
+示例：apt 更新指定程序包：
+在root用户下， apt upgrade firefox 可以更新firefox软件
+普通用户下，sudo apt upgrade firefox  ，更新firefox软件。（sudo是以当前用户获得root临时权限）
 
 

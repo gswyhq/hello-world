@@ -913,6 +913,16 @@ git pull --rebase origin master
 6、把本地库的内容推送到远程，使用 git push命令，实际上是把当前分支master推送到远程。执行此命令后会要求输入用户名、密码，验证通过后即开始上传。
 git push -u origin master
 
+# 修改，更换远程仓库地址：
+方法1：
+git remote -v  #查看远端地址
+git remote #查看远端仓库名
+git remote set-url origin https://gitee.com/xx/xx.git (新地址)
+
+方法2：
+git remote rm origin #删除远程的仓库
+git remote add origin  https://gitee.com/xx/xx.git(新地址) #重新添加远程仓库
+
 高亮行,定位到某一行
 例如，在 URL 中加上 #L52 可以高亮第52行。或者你也可以直接点击行数。
 多行高亮同样支持。你可以使用类似#L53-L60格式，或者在按住shift的同时点击。

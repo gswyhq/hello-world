@@ -690,4 +690,29 @@ AttributeError: module 'tensorflow' has no attribute 'py_func'
 解决方法：
 改用：tf.numpy_function即可；
 
+# 加载tensorflow lite模型报错：
+ValueError: Op builtin_code out of range: 150. Are you using old TFLite binary with newer model?Registration failed.
+转换为tensorflow lite所用tensorflow版本与加载lite所用版本可能不一致；
+
+# keras模型转换为tensorflow lite模型报错：
+Some ops are not supported by the native TFLite runtime, you can enable TF kernels fallback using TF Select
+通过如下方式转换：
+converter = lite.TFLiteConverter.from_keras_model(keras_model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.target_spec.supported_ops = [
+        tf.lite.OpsSet.TFLITE_BUILTINS, tf.lite.OpsSet.SELECT_TF_OPS
+]
+converter.target_spec.supported_types = [tf.float32]  # 若不指定类型，可能转换前后结果不一致；
+converter.inference_input_type = tf.float32
+converter.inference_output_type = tf.float32
+converter.post_training_quantize = True
+tflite_model = converter.convert()
+open(save_tflite_file, "wb").write(tflite_model)
+
+# 导入keras包出现异常：
+from keras.layers import *
+ImportError: cannot import name 'transpose_shape' from 'keras.utils.generic_utils'
+解决方法：
+卸载掉keras tensorflow，重新安装即可；
+pip3 uninstall keras tensorflow
 

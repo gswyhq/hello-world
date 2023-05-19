@@ -1,0 +1,74 @@
+
+
+先说一下Gradle，Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化构建开源工具。
+它使用一种基于Groovy的特定领域语言(DSL)来声明项目设置，目前也增加了基于Kotlin语言的kotlin-based DSL，抛弃了基于XML的各种繁琐配置。
+面向Java应用为主。当前其支持的语言限于Java、Groovy、Kotlin和Scala，计划未来将支持更多的语言。通俗的说，Gradle就是打包用的。
+
+可能有人说，那为什么要用Gradle打包呢，首先，打包的时候可能要修改一些东西，比如说配置文件中的一些账号和密码，你本地开发和正式环境运行时的内容肯定不一致，所以需要有两个文件，开发的时候用一个，正式环境的时候用一个。
+这样每次打包的时候都要重复的做这些事，每次打包都需要注意这些东西。Gradle可以把这些东西写成脚本自动运行，这是其一。
+其次，当我们搭建环境的时候，要用很多jar包，很多jar包之间都有依赖，为了方便引用并下载jar包，就可以用Gradle来配置了。其第一个功能类似Ant，第二个功能类似Maven，
+
+Gradle可以完美的结合这两个功能，即进行了配置，也完美的进行jar包的下载。
+
+接下来，我们来说说配置环境。
+
+搭建Gradle环境的步骤如下：
+
+1）进入Gradle官网https://gradle.org/下载软件包。
+gradle官网下载：
+https://gradle.org/releases/ 或： https://services.gradle.org/distributions/
+嫌弃官网下载速度太慢的同学，可以点击下面的连接进行下载：
+https://mirrors.cloud.tencent.com/gradle/
+
+2）解压到指定目录即完成安装。
+3）添加新环境变量GRADLE_HOME，值为你的安装目录，并为环境变量Path添加一项%GRADLE_HOME%\bin。
+4）命令行下运行gradle -version，检查安装和配置是否成功。
+
+如此简单，环境搭建完成。
+
+再说一下gradlew，我们在新建项目目录下使用cmd输入gradle wrapper。
+
+在目录下可以发现出现gradle新建的文件，其中gradlew.bat文件，就是windows上的可执行文件（但是不要双击哈，使用cmd中 gradlew命令执行）
+
+那gradlew和gradle有什么区别呢？
+
+gradle的版本会不断的更新，大家开发的时候经常会遇到版本不一致，而gradlew可以算是在gradle外面加了一层包装，当我们执行在上面执行gradle wrapper的时候，可以看到gradle-wrapper.properties文件中已经记录了我们当前使用gradle的版本信息。这时候我们执行gradlew命令的时候，会根据配置信息来使用对应版本的gradle来进行构建，不一致则会下载。这样可以保持gradle版本一致。
+
+最后，介绍一些gradlew的命令。
+
+gradlew -v 查看当前gradle，groovy，ant，jvm，os等版本信息
+
+gradlew build 检查依赖并编译打包
+
+gradlew build --info 编译并打印日志信息
+
+gradlew build --xtest 编译并不运行测试文件
+
+gradlew clean 清理工程目录下build文件夹
+
+gradlew tasks --all 查看所有任务
+
+gradlew clean build --refresh -dependencies 强制更新最新依赖，清楚并构建
+
+gradlew build --info --debug --stacktrace 调试模式并打印堆栈信息
+
+gradlew assembleDebug 编译并打Debug包（可用于开发环境）
+
+gradlew assembleRelease 编译并打Release包（可用于正式环境）
+
+gradlew installRelease Release模式打包并安装
+
+gradlew uninstallRelease 卸载Release模式包
+
+gradlew dependencies 依赖信息查看
+
+gradlew dependencies --info 查看详细的依赖信息
+
+
+PS：当依赖一个很大的第三方库，出现某个库错误的时候，又不知道是哪里的问题，可以用gradlew build --info --debug --stacktrace命令打印并排查堆栈信息。
+
+
+
+Windows¶
+gradlew compileJNI
+This task will send a Jni library copy to pytorch-engine model to test locally.

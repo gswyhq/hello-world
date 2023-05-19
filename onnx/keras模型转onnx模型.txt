@@ -1,0 +1,25 @@
+
+因keras2onnx包未及时更新，通过下面方法转换可能会出错：
+h5_file = './result/20230223094704/classify-03-0.0630-0.3579-0.7285.hdf5'
+onnx_file = h5_file.replace('.hdf5', '.onnx')
+
+import keras2onnx
+import onnx
+from keras.models import load_model
+
+h5_model = load_model(h5_file, custom_objects={"wubao": wubao, "loubao": loubao})
+
+onnx_model = keras2onnx.convert_keras(h5_model, h5_model.name)
+onnx.save_model(onnx_model, onnx_file)
+
+故而需要通过如下方法转换：
+import tf2onnx
+h5_model = load_model(h5_file, custom_objects={"wubao": wubao, "loubao": loubao})
+onnx_model = tf2onnx.convert.from_keras(h5_model, output_path=onnx_file, opset=11)
+
+
+
+
+
+
+

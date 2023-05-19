@@ -315,3 +315,32 @@ hive> add jar file:///home/test123/fastjson-1.2.75-sources.jar;
 HQL的书写，select * from (select * from table) ;
 修改HQL为select * from (select * from table) a，执行成功。
 
+问题：
+hive执行报错：(关联on上不支持非等操作)Both left and right aliases encountered in JOIN
+原因：两个表join的时候，不支持两个表的字段 非相等 操作。
+方法1：可以把不相等条件拿到 where语句中。
+SELECT * FROM T1 LEFT JOIN T2 on T1.id=T2.id and T1.name != T2.name
+改写成
+SELECT * FROM T1 LEFT JOIN T2 on T1.id=T2.id where T1.name != T2.name
+方法2：
+在 select 中使用字段进行判断 (根据加工结果中 condition 字段的结果 0,1 进行判断)
+select
+	...
+	if(ybnsrsb.skssqq <= jsqz and and ybnsrsb.skssqz >= jsqq,0,1) as condition,
+	...
+from
+ybnsrsb 
+left join nsrxx
+on nsrxx.djxh = ybnsrsb.djxh
+
+# 问题，查询hive中es外部表报错：
+org.apache.hive.service.cli.HiveSQLException: java.io.IOException: org.elasticsearch.hadoop.EsHadoopIllegalArgumentException: Index [*****/_doc] missing and settings [es.index.read.missing.as.empty] is set to false
+问题原因：
+出现该问题，是因为hive中es外部表数据存储在es,将es中表数据删除的时候，hive外部表并未删除；
+当查询一个在es中数据表被删除了的hive外部表时候，就报上面这个错误；
+实际上，这个时候，这个hive外部表是没有存在意义的；直接删除掉即可；
+删除hive外部表，需要先添加软件包，再删除：
+hive> add jar /home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar;
+hive> drop table es_cmb_test;
+
+

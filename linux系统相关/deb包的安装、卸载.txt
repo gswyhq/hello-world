@@ -1,3 +1,59 @@
+apt 与 dpkg 均为 ubuntu 下面的包管理工具。
+dpkg 侧重于本地软件的管理。
+apt 基于dpkg，侧重于远程包的下载和依赖管理，相当于 dpkg 的前端。
+apt 与 dpkg 的主要区别：
+1、dpkg 仅用于安装本地的软件包，安装时不会安装依赖包，不解决依赖问题。
+sudo dpkg -i <package_name>.deb
+
+2、apt 默认会从远程仓库搜索包的名字，下载并安装，安装时会自动安装依赖包，并解决依赖问题。
+sudo apt install <package_name>
+
+3、如果需要使用apt 从本地安装，需要在包名前指定路径，否则只从远程仓库查找。
+sudo apt install <path>/<package_name>.deb
+————————————————
+
+dpkg 的常用命令
+查看包的版本，架构和描述信息
+查看指定包的版本，架构和描述信息:
+dpkg -l <package_name>
+或
+dpkg --list <package_name>
+
+列出所有已安装的包，和其版本，架构和描述信息
+dpkg -l
+相当于
+apt list --installed
+
+查看包的安装路径
+dpkg -L <package_name>
+查看包是否安装
+dpkg -s <package_name>
+或
+dpkg --status <package_name>
+
+查找指定文件所属的包名
+即这个文件是由哪个包安装产生的
+
+dpkg -S <file_name>
+或
+dpkg --search <file_name>
+
+
+apt 常用命令
+更新包信息
+sudo apt update
+
+根据包信息升级包
+sudo apt upgrade
+
+安装包
+sudo apt install <package_name>
+
+删除不再需要的依赖包
+sudo apt autoremove
+————————————————
+
+###################################################################################################################################################################
 
 deb包是debian，ubuntu等LINUX发行版的软件安装包，是类似于rpm的软件包，而非debian,ubuntu系统不推荐使用deb软件包，因为要解决软件包依赖问题，安装也比较麻烦。 
 安装方法有两种： 
@@ -8,4 +64,29 @@ deb包是debian，ubuntu等LINUX发行版的软件安装包，是类似于rpm的
 卸载安装包时，在终端中，输入:sudo dpkg -r package_name
 如果要卸载安装的应用我们通过“sudo dpkg -l”查看已经安装的软件,并找到自己的安装的软件名。
 最后使用”sudo dpkg -r 软件名“进行卸载。
+
+示例：在 Ubuntu、Debian 和 Linux Mint 上安装 Google Chrome 浏览器。
+$ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+$ sudo apt install ./google-chrome-stable_current_amd64.deb
+
+# 更新已安装的deb程序：
+$ sudo apt install google-chrome-stable
+
+# 清除卸载 deb程序：
+$ sudo apt purge google-chrome-stable
+
+# apt-get 提供了一个用于下载和安装软件包的简易命令行界面。
+卸载软件包主要有这3个命令:
+1、remove – 卸载软件包，卸载的是自己以及自己的下系
+例如： A 依赖于 B, B 依赖于 C
+apt-get remove 删除B的同时，将删除A(很好理解，A依赖于B，B被删了，A也就无法正常运行了)
+
+2、autoremove – 卸载所有自动安装且不再使用的软件包
+卸载与自己相关而没有被其他手动安装包所依赖的包,
+例如：C 依赖于 B, D 依赖于B, 且D没有被其他手动安装的包依赖
+apt-get remove C 将删除C, 同时提示你用apt-get autoremove去清除B,D 
+删除C, 那么B,D 这两个包既是自动安装的,且没有其他手动安装的包依赖于它们, 则可以判定B,D也是没必要的
+但若对一个包不了解的话，使用autoremove需慎重，因为你压根就不知道自动删除的后果。
+
+3、purge – 卸载并清除软件包的配置
 

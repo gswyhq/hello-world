@@ -1,0 +1,72 @@
+
+########################################################################################################################
+torch安装,不同语言安装方法可能不同（https://pytorch.org/get-started/locally/）
+python: pip3 install torch torchvision torchaudio
+C++/Java:
+Download here (Release version):
+https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.13.1%2Bcpu.zip
+unzip libtorch-win-shared-with-deps-1.13.1%2Bcpu.zip
+在 环境 里添加libtorch动态库的路径
+PATH=D:\Code_Lib\libtorch\lib;%PATH%
+注意：下载的Libtorch需和生成.pt文件的pytorch版本一致，否则会无法读取.pt文件。
+libtorch 的版本和 pytorch 是对应的，比如 libtorch 1.6.0 对应于 pytorch 1.6.0
+########################################################################################################################
+
+# https://docs.djl.ai/engines/pytorch/pytorch-engine/index.html
+
+用python先训练好模型。模型训练好后，首先要做的是把pytorch模型转为TorchScript，TorchScript会把模型结构和参数都加载进去的
+import os
+import torch
+import torchvision
+from sklearn.metrics.pairwise import cosine_similarity
+from transformers import AutoTokenizer, AutoModel
+
+USERNAME = os.getenv('USERNAME')
+model = AutoModel.from_pretrained(rf"D:\Users\{USERNAME}\data\SimCSE-bert-base")
+tokenizer = AutoTokenizer.from_pretrained(rf"D:\Users\{USERNAME}\data\SimCSE-bert-base")
+sentences_str_list = ['今天天气真不错，我们去散步吧！', '今天天气真糟糕，还是在宅家里写bug吧！']
+inputs = tokenizer(sentences_str_list, None,True,'max_length',True,32,0,False,None,'pt',None,None,False,)
+outputs = model(inputs['input_ids'],  inputs['attention_mask'], inputs['token_type_ids'],)
+cosine_similarity(outputs[0][0][0].reshape(1, -1).tolist(), outputs[0][1][0].reshape(1, -1).tolist(), )
+# Out[61]: array([[0.41692835]])
+
+
+########################################################################################################################
+import torch, os
+from transformers import AutoTokenizer, AutoModel
+USERNAME = os.getenv('USERNAME')
+model = AutoModel.from_pretrained(rf"D:\Users\{USERNAME}\data\SimCSE-bert-base", torchscript=True)  # 设置TorchScript标志
+tokenizer = AutoTokenizer.from_pretrained(rf"D:\Users\{USERNAME}\data\SimCSE-bert-base", torchscript=True)
+model.eval() # 模型设置为评估模式
+sentences_str_list = ['今天天气真不错，我们去散步吧！', '今天天气真糟糕，还是在宅家里写bug吧！']
+inputs = tokenizer(sentences_str_list, None,True,'max_length',True,32,0,False,None,'pt',None,None,False,)
+input_ids, attention_mask, token_type_ids = inputs['input_ids'],  inputs['attention_mask'], inputs['token_type_ids']
+dummy_input = [input_ids, attention_mask, token_type_ids]
+traced_model = torch.jit.trace(model, [input_ids, attention_mask, token_type_ids])
+torch.jit.save(traced_model, "traced_bert.pt")
+
+########################################################################################################################
+# 加载以前以名称traced_bert.pt保存到磁盘的BertModel
+# 有时候加载报错：Unrecognized data format
+# 可能是操作系统或torch系统版本不一致，这个时候，保持导出、导入环境及版本一致即可；
+loaded_model = torch.jit.load("traced_bert.pt")
+loaded_model.eval()
+
+input_ids = torch.tensor([[ 101,  791, 1921, 1921, 3698, 4696,  679, 7231, 8024, 2769,  812, 1343,
+         3141, 3635, 1416, 8013,  102,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0],
+        [ 101,  791, 1921, 1921, 3698, 4696, 5136, 5130, 8024, 6820, 3221, 1762,
+         2125, 2157, 7027, 1091, 8761, 1416, 8013,  102,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0]], dtype=torch.int32)
+attention_mask = (input_ids>0).type(torch.int32)
+token_type_ids = torch.zeros_like(input_ids)
+
+outputs = loaded_model(input_ids, attention_mask, token_type_ids)
+cosine_similarity(outputs[0][0][0].reshape(1, -1).tolist(), outputs[0][1][0].reshape(1, -1).tolist(), )
+#  array([[0.41692835]])
+
+# 来源：https://huggingface.co/docs/transformers/main/en/torchscript
+########################################################################################################################
+
+
+

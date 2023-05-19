@@ -171,3 +171,59 @@ RuntimeError: Expected tensor for argument #1 'indices' to have one of the follo
 问题原因及解决方法：输入参数需要转成long类型才能作为nn.embedding层的输入；
 inputs = inputs.long()
 
+# 有时候数据类型转换警告：
+UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+在使用torch.tensor()， 对某个变量进行转换的时候会报这个错误。我们只需要将其换成torch.as_tensor()就好了。
+原来的代码：
+x = torch.tensor(x)
+修改为：
+x = torch.as_tensor(x)
+
+# 训练时候报错：
+IndexError: Dimension out of range (expected to be in range of [-1, 0], but got 1)
+模型预测值V在训练阶段最后一个step时，tensor维度从二维变成一维，导致出错。
+例：训练集个数81，bs设置为4时，最后一个step 只剩1张图片。最后step时tensor维度从二维变成一维。
+于是添加以下判断语句解决问题。如果有其他方法，可以交流一下
+ v = net(inputs)
+ if len(v.shape)==1:  #方式出现训练最后一个step时，出现v是一维的情况
+     v=torch.unsqueeze(v,0)  
+ loss = loss_func(v, targets)
+
+# 问题：torch.jit.trace(model, (inputs_a['input_ids'], inputs_a['attention_mask'], inputs_a['token_type_ids']) )转换模型出错：
+RuntimeError: Encountering a dict at the output of the tracer might cause the trace to be incorrect, this is only valid if the container structure does not change based on the module's inputs. Consider using a constant container instead (e.g. for `list`, use a `tuple` instead. for `dict`, use a `NamedTuple` instead). If you absolutely need this and know the side effects, pass strict=False to trace() to allow this behavior.
+可能错误原因
+网络输出为list或dict出现错误
+解决方案
+将输出用tuple和NamedTuple包裹。
+如：
+from collections import namedtuple
+from typing import Any
+import torch
+# pylint: disable = abstract-method
+class ModelWrapper(torch.nn.Module):
+    """
+    Wrapper class for model with dict/list rvalues.
+    """
+    def __init__(self, model: torch.nn.Module) -> None:
+        """
+        Init call.
+        """
+        super().__init__()
+        self.model = model
+    def forward(self, input_x: torch.Tensor, *args, **kwargs) -> Any:
+        """
+        Wrap forward call.
+        """
+        data = self.model(input_x, *args, **kwargs)
+        if isinstance(data, dict):
+            data_named_tuple = namedtuple("ModelEndpoints", sorted(data.keys()))  # type: ignore
+            data = data_named_tuple(**data)  # type: ignore
+        elif isinstance(data, list):
+            data = tuple(data)
+        return data
+
+script_model = torch.jit.trace(  ModelWrapper(model), (inputs_a['input_ids'], inputs_a['attention_mask'], inputs_a['token_type_ids'],))
+script_model.save('script_model.pt')
+~$ netron script_model.pt
+
+

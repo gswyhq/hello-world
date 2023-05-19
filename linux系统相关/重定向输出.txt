@@ -27,6 +27,26 @@ bash 拒绝这么做，提示权限不够，是因为重定向符号 “>” 也
 sudo sh -c "echo 1 > /proc/sys/vm/drop_caches"
 
 或者
-echo 1 |sudo tee /proc/sys/vm/drop_caches 
+echo 1 |sudo tee /proc/sys/vm/drop_caches
+
+Linux给程序提供三种 I/O 设备：
+1、标准输入（STDIN） －0 默认接受来自终端窗口的输入
+2、标准输出（STDOUT）－1 默认输出到终端窗口
+3、标准错误（STDERR） －2 默认输出到终端窗口
+
+支持的操作符号包括：
+1> 或 > ：把STDOUT重定向到文件
+2> ：把STDERR重定向到文件
+&> ：把标准输出和错误都重定向
+>& ：和上面功能一样，建议使用上面方式
+
+# 将标准错误，标准输出都重定向到文件：
+方法1：
+hive -f test.sql > test.log 2>&1 ;
+方法2：
+hive -f test.sql &> test.log;
+注：上面第1种方法中，一定要注意顺序，2>&1 要放在命令的最后，其本质是先将标准输出重定向至文件，再将错误重定向至标准输出，从而实现标准输出和错误的整体重定向。
+注意,下面这样“2>&1”没有放置到最后，并不会将标准错误重定向到文件，仅仅将查询结果重定向到文件：
+hive -f test.sql 2>&1 >> test.log;
 
 

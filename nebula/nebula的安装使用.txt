@@ -1,0 +1,203 @@
+# nebula的安装部署，通过docker-compose.yaml文件进行安装部署：
+https://github.com/vesoft-inc/nebula-docker-compose/blob/release-3.5/docker-compose.yaml
+启动服务：
+docker-compose -f docker-compose.yaml up -d
+
+# 执行如下命令查看 NebulaGraph 服务状态：
+$ sudo /usr/local/nebula/scripts/nebula.service status all
+或者在安装部署目录下运行：
+(DEV)[root@ABC-D0666666 scripts]# ls
+meta-transfer-tools.sh  nebula-graphd.service  nebula.service           utils.sh
+nebula-console          nebula-metad.service   nebula-storaged.service
+(DEV)[root@ABC-D0666666 scripts]# /bin/bash nebula.service status all
+[INFO] nebula-metad(c9f84b1): Running as 3843, Listening on 9559
+[INFO] nebula-graphd(c9f84b1): Running as 3937, Listening on 9669
+[INFO] nebula-storaged(c9f84b1): Running as 3974, Listening on 9779
+
+如果返回如上结果，表示 NebulaGraph 服务正常运行。
+
+# 连接 NebulaGraph：
+首次连接到NebulaGraph 后，必须先注册 Storage 服务，才能正常查询数据。
+从 NebulaGraph 3.0.0 版本开始，必须先使用ADD HOSTS添加主机，才能正常通过 Storage 服务读写数据。
+NebulaGraph支持多种类型的客户端，包括命令行客户端、可视化界面客户端和流行编程语言（C++、Java、Python、Go）客户端。
+目前仅 NebulaGraph Java 客户端支持线程安全（thread-safe）。
+
+# 安装 python 客户端：
+NebulaGraph Python 是一款 Python 语言的客户端，可以连接、管理 NebulaGraph 图数据库。
+python客户端需安装 NebulaGraph Python，并且要求NebulaGraph Python版本 与 NebulaGraph 版本一致。
+pip 安装
+$ pip install nebula3-python==3.3.0
+
+# 命令行客户端连接：
+(DEV)[root@ABC-D0666666 scripts]# ./nebula-console -addr 127.0.0.1 -port 9669 -u root -p abcd1234
+Welcome to Nebula Graph!
+(root@nebula) [(none)]>
+
+# 检查主机状态，确认全部在线（若不在线，需先添加 Storage 主机）：
+(root@nebula) [(none)]> SHOW HOSTS;
++-------------+------+-----------+----------+--------------+----------------------------------------------------------------------+----------------------------------------------------------------------+---------+
+| Host        | Port | HTTP port | Status   | Leader count | Leader distribution                                                  | Partition distribution                                               | Version |
++-------------+------+-----------+----------+--------------+----------------------------------------------------------------------+----------------------------------------------------------------------+---------+
+| "127.0.0.1" | 9779 | 19779     | "ONLINE" | 60           | "ColumnGraph:15, TableGraph:15, basketballplayer:15, Graph:15" | "ColumnGraph:15, TableGraph:15, basketballplayer:15, Graph:15" | "3.3.0" |
++-------------+------+-----------+----------+--------------+----------------------------------------------------------------------+----------------------------------------------------------------------+---------+
+Got 1 rows (time spent 4.132ms/6.63995ms)
+也可以在web页面通过下地址查看状态：
+http://127.0.0.1:19779/
+{"git_info_sha":"c9f84bb","status":"running"}
+
+# 添加 Storage 主机。
+执行如下命令添加主机：
+ADD HOSTS <ip>:<port> [,<ip>:<port> ...];
+示例：
+nebula> ADD HOSTS 192.168.10.100:9779, 192.168.10.101:9779, 192.168.10.102:9779;
+
+请确保添加的主机 IP 和配置文件nebula-storaged.conf中local_ip配置的 IP 一致，否则会导致添加 Storage 主机失败。
+
+# 可视化界面客户端
+NebulaGraph Studio（简称 Studio）是一款可以通过 Web 访问的开源图数据库可视化工具，搭配 NebulaGraph 内核使用，提供构图、数据导入、编写 nGQL 查询等一站式服务。
+Studio 提供 web 服务使用默认端口是7001。
+部署 Studio 成功后；
+即通过浏览器访问 http://127.0.0.1:7001,会出现自动跳转到登录页面（http://127.0.0.1:7001/login）；
+会要求输入host:port, username, password;
+host:port, NebulaGraph的 Graph 服务本机 IP 地址以及服务所用端口。默认端口为 9669。
+用户名 和 密码：根据NebulaGraph的身份验证设置填写登录账号和密码。
+如果未启用身份验证，可以填写默认用户名 root 和任意密码。
+如果已启用身份验证，但是未创建账号信息，用户只能以 GOD 角色登录，必须填写 root 及对应的密码 nebula。
+如果已启用身份验证，同时又创建了不同的用户并分配了角色，不同角色的用户使用自己的账号和密码登录。
+
+# nebula 内置角色权限
+角色1：God
+初始最高权限角色，拥有所有操作的权限。类似于 Linux 中的root和 Windows 中的administrator。
+Meta 服务初始化时，会自动创建 God 角色用户root，密码为nebula。
+在nebula-graphd.conf文件中（默认目录为/usr/local/nebula/etc/），当--enable_authorize为true时：
+    一个集群只能有一个 God 角色用户，该用户可以管理集群内所有图空间。
+    不支持手动授权 God 角色，只能使用默认 God 角色用户root。
+
+角色2：Admin
+对权限内的图空间拥有 Schema 和 data 的读写权限。
+可以将权限内的图空间授权给其他用户。
+只能授权低于 ADMIN 级别的角色给其他用户。
+
+角色3：DBA
+对权限内的图空间拥有 Schema 和 data 的读写权限。
+无法将权限内的图空间授权给其他用户。
+
+角色4：User
+对权限内的图空间拥有 Schema 的只读权限。
+对权限内的图空间拥有 data 的读写权限。
+
+角色5：Guest
+对权限内的图空间拥有 Schema 和 data 的只读权限。
+
+# 启用本地身份验证
+编辑配置文件nebula-graphd.conf（默认目录为/usr/local/nebula/etc/），设置如下参数：
+--enable_authorize：是否启用身份验证，可选值：true、false。
+默认情况下，身份验证功能是关闭的，用户可以使用root用户名和任意密码连接到NebulaGraph。
+开启身份验证后，默认的 God 角色账号为root，密码为nebula。
+
+# 只有 God 角色可以执行SHOW USERS和SHOW SNAPSHOTS语句。
+# 显示用户信息。
+(root@nebula) [(none)]> SHOW USERS;
++---------+
+| Account |
++---------+
+| "root"  |
++---------+
+Got 1 rows (time spent 3.06ms/5.264845ms)
+
+# 显示所有快照信息。
+(root@nebula) [(none)]> SHOW SNAPSHOTS;
++------+--------+-------+
+| Name | Status | Hosts |
++------+--------+-------+
++------+--------+-------+
+Empty set (time spent 2.412ms/3.762309ms)
+
+# 列出创建成功的图空间
+nebula> SHOW SPACES;
+(root@nebula) [(none)]> SHOW SPACES;
++--------------------+
+| Name               |
++--------------------+
+| "ColumnGraph"    |
+| "TableGraph"     |
+| "basketballplayer" |
+| "graph2"          |
++--------------------+
+Got 4 rows (time spent 3.416ms/5.892145ms)
+
+# 选择数据库
+USE <graph_space_name>;
+如，选择图空间basketballplayer 。
+nebula[(none)]> USE basketballplayer;
+
+# 执行如下语句创建名为basketballplayer 的图空间。
+nebula> CREATE SPACE basketballplayer(partition_num=15, replica_factor=1, vid_type=fixed_string(30));
+
+# 在NebulaGraph中，用户必须先有 Schema，才能向其中写入点数据和边数据。
+
+# # 查看 Tag （节点类型）：
+(root@nebula) [ColumnGraph]> SHOW TAGS;
++-----------------+
+| Name            |
++-----------------+
+| "column_vertex" |
++-----------------+
+Got 1 rows (time spent 1.329ms/2.851544ms)
+
+# 查看边类型（Edge type）：
+(root@nebula) [ColumnGraph]> SHOW EDGES;
++------------------+
+| Name             |
++------------------+
+| "column_Graph" |
++------------------+
+Got 1 rows (time spent 3.063ms/4.8192ms)
+
+# 统计图空间中的数据。
+(root@nebula) [ColumnGraph]> SUBMIT JOB STATS;
++------------+
+| New Job Id |
++------------+
+| 175        |
++------------+
+Got 1 rows (time spent 2.474ms/3.299667ms)
+
+# 查看统计结果。
+(root@nebula) [ColumnGraph]> SHOW STATS;
++---------+------------------+-------+
+| Type    | Name             | Count |
++---------+------------------+-------+
+| "Tag"   | "column_vertex"  | 4     |
+| "Edge"  | "column_Graph" | 4     |
+| "Space" | "vertices"       | 4     |
+| "Space" | "edges"          | 4     |
++---------+------------------+-------+
+Got 4 rows (time spent 2.658ms/4.507461ms)
+
+# 执行 CLEAR SPACE 清空图空间 basketballplayer。
+nebula[basketballplayer]> CLEAR SPACE IF EXISTS basketballplayer;
+# IF EXISTS 检查待清空的图空间是否存在，如果图空间存在，则继续执行清空操作；如果图空间不存在，则完成执行，并且提示执行成功，
+不会提示图空间不存在。若不设置该选项，当图空间不存在时， CLEAR SPACE 语句会执行失败，系统会报错。
+图空间中， CLEAR SPACE 不会删除的数据包括：
+Tag 信息。
+Edge type 信息。
+原生索引和全文索引的元数据。
+即“CLEAR SPACE”命令，会清空图空间内的数据，但保留图空间结构；
+
+# DROP SPACE 彻底删除图空间，包括数据及结构
+DROP SPACE 语句用于删除指定图空间以及其中的所有信息。
+DROP SPACE 是否删除图空间对应的硬盘数据由 Storage 配置参数auto_remove_invalid_space 决定。auto_remove_invalid_space 的默认值为true ，表示会删除数据。
+如需在删除逻辑图空间时保留硬盘数据，将auto_remove_invalid_space 的值修改为false 。
+执行DROP SPACE 后，即使快照中存在该图空间的数据，该图空间的数据也无法恢复。但是如果auto_remove_invalid_space 的值为false 时，可联系商务人员恢复数据。
+
+# 查询节点：
+$ MATCH (v) RETURN v limit 10;
+
+# 查询边：
+MATCH ()<-[e]-() RETURN e LIMIT 3
+
+# 退出命令行客户端：
+(root@nebula) [ColumnGraph]> exit
+Bye root!
+

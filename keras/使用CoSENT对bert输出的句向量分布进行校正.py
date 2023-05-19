@@ -18,12 +18,12 @@ from keras.callbacks import History
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from tqdm import tqdm
-from keras.optimizer_v2.adam import Adam
+from keras.optimizers import adam_v2
 from keras.models import load_model
 import matplotlib.pyplot as plt
 from pylab import mpl
 import scipy
-mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体   
+mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体
 mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
 
 '''标准的SimCSE是只需要正样本对的（通过Dropout或者人工标注构建），然后它将batch内的所有其他样本都视为负样本；
@@ -216,7 +216,7 @@ output = keras.layers.Lambda(lambda x: K.mean(x, axis=1))(bert_model.get_layer(
             'Encoder-4-FeedForward-Norm').output)
 encoder = keras.models.Model(bert_model.inputs, output)
 model = encoder
-model.compile(loss=cosent_loss, optimizer=Adam(2e-5))
+model.compile(loss=cosent_loss, optimizer=adam_v2.Adam(2e-5))
 
 
 def compute_corrcoef(x, y):
@@ -275,6 +275,17 @@ print(u'test_score: %.5f' % test_score)
 custom_objects = {layer.__class__.__name__:layer for layer in bert_model.layers}
 custom_objects['cosent_loss'] =cosent_loss
 encoder2 = load_model(save_h5_file, custom_objects=custom_objects)
+
+# tf2_hdf5_to_pb(save_h5_file, custom_objects=custom_objects, load_model=load_model)
+# D:\Users\{USERNAME}\data\SimCSE-bert-base\My_CoSENT.pb
+# 2023-02-10 08:49:06.799548: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 0
+# 2023-02-10 08:49:06.801550: I tensorflow/core/grappler/clusters/single_machine.cc:358] Starting new session
+# Frozen model inputs:
+# [<tf.Tensor 'Input-Token:0' shape=(None, None) dtype=float32>, <tf.Tensor 'Input-Segment:0' shape=(None, None) dtype=float32>]
+# Frozen model outputs:
+# [<tf.Tensor 'Identity:0' shape=(None, 312) dtype=float32>]
+# input is : ['Input-Token', 'Input-Segment']
+# output is: ['lambda/Mean:0']
 
 def l2_normalize(vecs):
     """标准化

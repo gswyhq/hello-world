@@ -1,4 +1,7 @@
 
+判断字符串长度：
+select length('abc');
+
 判断字符串中是否包含某个特定字符
 方法1、用 like函数
 select '32002,32002,11001,11001,' like '%2%';
@@ -78,6 +81,9 @@ substr函数适合定长的字符串截取，如果起始位置超过了字符�
 select substr('123456', -8, 8); 返回结果为空；
 select substr('123456', 2, 8); 返回结果为：23456
 需注意的是：select substr('123456', 0, 8); 和 select substr('123456', 1, 8); 的返回结果均是：123456
+
+# 字符串不在某个列表中，如：
+select * from db_name.table where name not in ('张三', '李四');
 
 # 不查询，仅仅返回一个固定字符串；
 select "你好中国";

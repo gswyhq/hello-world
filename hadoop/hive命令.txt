@@ -10,6 +10,11 @@ truncate table db_name.table_name;
 删除空数据库：
 drop database db_name;
 
+查询某个表是否存在：
+show tables in DB like 'TABLENAME';
+在DB数据库中查询表TABLENAME是否存在；如果表存在，则返回其名称，否则将不返回任何内容。
+注意：表名称外面有个单引号，若不加引号的话，不论表是否存在，返回的都不返回任何内容。
+
 采用 if exists判断数据库是否存在，若存在则删除：
 drop database if exists db_name;
 

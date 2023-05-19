@@ -1,0 +1,34 @@
+
+LinkedHashSet去重
+去重后保持原有顺序（重复数据只保留一条）
+
+String[] arr = new String[] {"java", "265", "com", "very", "good", "web"};   
+Collection<string> noDups = new LinkedHashSet<string>(Arrays.asList(arr));   
+System.out.println("(LinkedHashSet) distinct words:    " + noDups); 
+
+
+HashSet去重方法一
+去重后顺序打乱（重复数据只保留一条）
+
+String[] arr = new String[] {"java", "265", "com", "very", "good", "web"};
+Collection<string> noDups = new HashSet<string>(Arrays.asList(arr));   
+System.out.println("(HashSet) distinct words:    " + noDups);  
+
+# 需要注意的是，二维数组，或二维字符串，并不能通过上面方法去重，如下面去重，会存在问题：
+        String[][] arr = new String[][] {{"java", "265"}, {"com", "very"}, {"good", "web", "265"}, {"com", "very"}, {"good", "GOOD", "very"}};
+        Collection<String[]> noDups = new LinkedHashSet<String[]>();
+        List<String[]> newList = new ArrayList<>();
+        for(String[] t: arr){
+            noDups.add(t);
+            newList.add(t);
+        }
+        for(String[] t: noDups) {
+            System.out.println("(LinkedHashSet) distinct words:    " + t[0] + t[1]);
+        }
+
+        newList = newList.stream().distinct().collect(Collectors.toList());
+        for(String[] t: newList) {
+            System.out.println("newList by Stream: " + t[0] + t[1]);
+        }
+ 
+

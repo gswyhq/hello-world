@@ -275,3 +275,34 @@ $ pip install -e path/to/project       # project in another directory
 解决方案，加大超时时间，如 ：
 pip3 --default-timeout=6000 install scikit_learn==0.19.2
 
+####################################################################################################################################################################################
+windows python多版本并存：
+第一步：将要安装的python版本放在环境变量变量PATH
+一般都会在环境变量path中配置python的路径
+如：C:\Python36;C:\Python36\Scripts;
+
+第二步：修改python.exe的文件名
+分别在python2和python3的安装目录下找到Python.exe,然后分别修改为Python3.exe和Python2.exe。这样在命令行输入Python3和Python2就能任意使用两个版本了。
+如将 Python39下的：python.exe   pythonw.exe 重命名为：python39.exe   pythonw39.exe
+将 Python36下的：python.exe   pythonw.exe 重命名为：python36.exe   pythonw36.exe
+
+第三步：指定python 版本安装
+python36 -m pip install lettuce
+python39 -m pip install lettuce
+
+第四步：若想指定pip版本麻烦，可以重命名pip.exe
+进入 Python39\Scripts, 将pip.exe 重命名为pip39.exe
+再pip39 install jieba 进行安装即可；
+
+
+虽然可以用 pip install -t ‘文件夹路径’ ‘库名’ 这样的指令方式把库安装到指令目录，但每次这样会有点麻烦，另处的方式就是修改pip默认的安装目录。方法为修改Python的site.py文件。
+使用python -m site -help可以查看到site.py具体所在目录。
+打开并编辑“USER_SITE”和“USER_BASE”，指向需要的目录，并保存。
+也可以用pip show jieba来检查jieba库的信息
+修改pip安装site-packages的路径:
+首先找到python的位置，进入lib,找到site.py文件, 修改 USER_BASE、USER_SITE变量值；  
+修改后，查看 安装包 site-packages 的存放路径：
+命令行运行 ~$ python -m site
+USER_BASE: 'D:\\Users\\AppData\\Roaming\\Python' (exists)
+USER_SITE: 'D:\\Users\\AppData\\Roaming\\Python\\Python39\\site-packages
+

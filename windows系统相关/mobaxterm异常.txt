@@ -137,3 +137,10 @@ mobaxterm local terminal failed to start due to memory access denied.
 # tar命令参数无效，命令不完整；
 解决方法，重新安装tar，直接在mobaxterm终端运行：
 apt-get install tar
+
+# 更改日期格式，ls无效：
+解决方法，安装coreutils:
+apt-get install coreutils
+export TIME_STYLE='+%Y-%m-%d %H:%M:%S'
+ls -alrt
+这个时候ls命令的日期格式就更新成功了；

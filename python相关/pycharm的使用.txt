@@ -113,6 +113,24 @@ $FILE_PATH$:$LINE$:$COLUMN$:.*
 实际上等价于在命令行运行（此处test123.py即为打开的一个py文件）：
 C:\ProgramData\Anaconda3\Scripts\autopep8.exe --in-place --aggressive --aggressive test123.py
 
-
-
-
+# 问题pycharm 中，Pychon Console 终端输出中文乱码，print 中文乱码：
+方法1、打印中文之前前面加u
+转换成unicode，console也能正常打印
+print(u"中文")
+方法2、在python文件最开始加上
+# -*- coding:utf-8 -*-
+方法3、修改pycharm配置
+FILE-》setting-》Editor-》File Encodings，Global Encoding, Project Encoding, Default encoding ...都修改为UTF-8，重启pycharm即可。
+方法4，有时候可能是,PyCharm 默认打开时，python console中如果用到windows下cmd里的命令时，会输出乱码，
+原因：
+cmd默认的编码是gbk（代码页：936），而python console 里面的编码是utf-8（代码页：65001），由于编码不一致，所以输出时会出现乱码
+解决办法：
+如下：
+1、File-Setting-Search-console-python console
+2、添加以下代码 !chcp 65001
+3、重启python console即可
+!chcp 936 切换到gbk编码
+!chcp 65001 切换到utf-8编码
+Active code page: 65001
+!chcp  查询当前编码
+Active code page: 65001

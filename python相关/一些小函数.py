@@ -86,6 +86,33 @@ def is_period_hour_and_minute(start_hour=7, start_minute=0, end_hour=9, end_minu
     else:
         return False
 
+# 将字典转换为对象，类似属性访问:
+config = {'architectures': ['BertForMaskedLM'],
+ 'attention_probs_dropout_prob': 0.1,
+ 'bos_token_id': 0,
+ 'directionality': 'bidi',
+ 'eos_token_id': 2,
+ 'hidden_act': 'gelu',
+ 'hidden_dropout_prob': 0.1,
+ 'hidden_size': 768,
+ 'biaffine_size': 256,
+ 'initializer_range': 0.02,
+ 'intermediate_size': 3072,
+}
+class Dict(dict):
+    __setattr__ = dict.__setitem__
+    __getattr__ = dict.__getitem__
+
+def dict_to_object(dictObj):
+    if not isinstance(dictObj, dict):
+        return dictObj
+    inst = Dict()
+    for k, v in dictObj.items():
+        inst[k] = dict_to_object(v)
+    return inst
+
+# 转换字典成为对象，可以用"."方式访问对象属性
+args = dict_to_object(config)
 
 def main():
     pass

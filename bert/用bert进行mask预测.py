@@ -37,17 +37,23 @@ def mask_pred(text:str='[CLS] 深 圳 是 一 座 [MASK] [MASK] 的 城 市 [SEP
 
     # Create the segments tensors.
     segments_ids = [0] * len(tokenized_text)
+    attention_mask = [1] * len(tokenized_text)
 
     # Convert inputs to PyTorch tensors
     tokens_tensor = torch.tensor([indexed_tokens])
     segments_tensors = torch.tensor([segments_ids])
+    attention_mask = torch.tensor([attention_mask])
 
     if masked_index is None:
         masked_index = tokenized_text.index('[MASK]')
 
     # Predict all tokens
     with torch.no_grad():
-        predictions = model(tokens_tensor, segments_tensors)
+        # 注意，此处旧的transformers(3.0.2)版本用法
+        # predictions = model(tokens_tensor, segments_tensors)
+        # 新版本transformers(4.9.1)用法：
+        predictions = model(tokens_tensor, attention_mask, segments_tensors)
+
     # print(predictions)
     # predicted_index = torch.argmax(predictions[0][0][masked_index]).item()
     # predicted_token = tokenizer.convert_ids_to_tokens([predicted_index])[0]

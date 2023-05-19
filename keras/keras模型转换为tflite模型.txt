@@ -1,0 +1,19 @@
+
+h5_file = './result/20230303091758/classify-05-0.2407-0.1039-0.1230.hdf5'
+tflite_file = h5_file.replace('.hdf5', '.tflite')
+h5_model = load_model(h5_file, custom_objects={})
+
+# Convert the model.
+converter = tf.lite.TFLiteConverter.from_keras_model(h5_model)
+
+converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS,
+                                      tf.lite.OpsSet.SELECT_TF_OPS]
+converter.allow_custom_ops = True
+
+tflite_model = converter.convert()
+
+# Save the model.
+with open(tflite_file, 'wb') as f:
+    f.write(tflite_model)
+
+

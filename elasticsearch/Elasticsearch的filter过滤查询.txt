@@ -1,0 +1,1068 @@
+
+ES中的查询操作分为2种: 查询(query)和过滤(filter)。查询即是之前提到的query查询，它 (查询)默认会计算每个返回文档的得分，然后根据得分排序。
+而过滤(filter)只会筛选出符合的文档，并不计算 得分，且它可以缓存文档 。所以，单从性能考虑，过滤比查询更快。
+换句话说，过滤适合在大范围筛选数据，而查询则适合精确匹配数据。一般应用时， 应先使用过滤操作过滤数据， 然后使用查询匹配数据。
+实际上filter是在query之前还是只后执行，得视具体情况而定；具体详见：
+https://www.elastic.co/cn/blog/elasticsearch-query-execution-order
+https://blog.csdn.net/lsgqjh/article/details/108047616
+
+Bool查询包括四种子句：
+must， 返回的文档必须满足must子句的条件，并且参与计算分值
+filter， 返回的文档必须满足filter子句的条件。但是跟Must不一样的是，不会计算分值， 并且可以使用缓存
+should，当使用should查询时，如果同级包含了must或者filter查询，那么should的查询语句就不是或者的意思了,而是有或者没有都行的含义。
+如果should同级没有filter和must查询的话，那么必须满足一个should中的条件。当然也可设置： "minimum_should_match":1，即至少满足should中的一个条件
+must_not， 返回的文档必须不满足must_not子句的条件
+————————————————
+
+# 查找深圳市或北京市的数据：
+curl -XPOST localhost:9200/index_name_alias/_search -H 'Content-Type: application/json' -d '{
+  "query": {
+    "bool": {
+      "query": {
+        "match_all": {}
+      },
+      "filter": {
+        "terms": {
+          "city.keyword": ["深圳市", "北京市"]
+        }
+      }
+    }
+  }
+}'
+
+# 组合查询
+# must: 条件必须满足，相当于 and
+# should: 条件可以满足也可以不满足，相当于 or
+# must_not: 条件不需要满足，相当于 not
+# 过滤查找，广东省或武汉市，但不能是深圳市的数据：
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "should": [
+            { "term": {
+              "province.keyword": "广东省"
+            }},
+            { "term": {
+              "city.keyword": "武汉市"
+            }}
+          ],
+          "must_not": [
+            { "term": {
+              "city.keyword": "深圳市"
+            }}
+          ]
+        }
+      }
+    }
+  }
+}
+
+# 嵌套查询：
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "should": [
+            { "term": {
+              "name.keyword": "张家河"
+            }},
+            {
+              "bool": {
+                "must": [
+                  { "term": {
+                    "province.keyword": "广东省"
+                  }},
+                  {
+                    "term": {
+                      "city.keyword": "深圳市"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+# 嵌套查询：
+{
+  "query": {
+    "bool": {
+      "must": [{
+            "match_phrase":{
+                "name.keyword":{
+                    "query":"平安金融中心",
+                    "boost":5
+                }
+            }
+      }],
+      "filter": {
+        "bool": {
+            "must": [
+              {
+                "term" : {
+                  "province.keyword": "广东省"
+                }
+              },
+              {
+                "term" : {
+                  "city.keyword" : "深圳市"
+                }
+              }
+              ]
+          }
+      }
+    }
+  }
+}
+
+# 过滤空字段 road is not null：
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+            "must": [
+              {
+                "exists": {
+                  "field": "road"
+                }
+              }
+              ]
+          }
+      }
+    }
+  }
+}
+
+# 当上面语句仅仅只能过滤掉内容为null的，若内容是空字符串，则过滤不了，若想连空字符串也过滤掉，则需通过下面的方法：
+# 将字段road为null 或内容为空字符串的，都过滤掉：
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+            "must": [
+              {
+                "exists": {
+                  "field": "road"
+                }
+              }
+              ],
+            "must_not": [
+              {
+                "term": {
+                  "road.keyword": ""
+                }
+              }]
+          }
+      }
+    }
+  }
+}
+
+# 原始查询语句，耗时1.2s：
+{
+"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "should": []
+                                          }},
+                                    {"dis_max": {"boost": 300,
+                                                 "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}}
+                                ]}
+  }
+}
+
+修改后，但查询时间并没有减少：
+{
+  "query": {
+    "bool": {
+      "must": [{"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "should": []
+                                          }},
+                                    {"dis_max": {"boost": 300,
+                                                 "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+# 继续修改，查询时间还是不降低：
+{
+  "query": {
+    "bool": {
+      "must": [{"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }},
+                                    {"dis_max": {"boost": 300,
+                                                 "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+# 继续修改2，查询时间还是不降低，增加到4s：
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }},
+                                    {"dis_max": {"boost": 300,
+                                                 "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+# 修改3, 时间为1.3s：
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+# 修改4, 时间为1.2s：
+{
+  "query": {
+    "bool": {
+      "must": [{"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+修改5， 耗时1.2s：
+{
+  "query": {
+    "bool": {
+      "must": [{"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"bool": {"should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }}
+                                ]}
+  }],
+      "filter": {
+        "bool": {
+        "should": [{"bool": {
+            "must": [{"match": {"province.keyword": "吉林省"}},
+                     {"match": {"city.keyword": "长春市"}}
+              ]
+          }},
+          {"match_phrase": {"address": {"boost": 3,
+                            "query": "吉林省长春市汽车厂东风大街4号"}}}
+          ]
+      }
+    }
+  }
+}}
+
+修改6，1.2s
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"bool": {"should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }}
+                                ]}
+  }]
+  }
+}}
+
+修改7，1.2s
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"bool": {"should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"term": {"province.keyword": "吉林省"}},
+                                                             {"term": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            },
+                                          "should": []
+                                          }}
+                                ]}
+  }]
+  }
+}}
+
+修改8，0.6s-0.8s，filter在query之前执行：
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"term": {"province.keyword": "吉林省"}},
+                                                             {"term": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            }
+                                          }}
+                                ]}
+  }]
+  }
+}}
+
+修改9，3s，filter在query之后执行：
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {"boost": 100,
+                                          "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                    ],
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            }
+                                          }},
+                                    {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "filter": {
+                                                    "bool": {
+                                                    "must": [
+                                                      {"match_phrase": {"address": {"boost": 3,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                      ]
+                                                  }
+                                                }
+                                                                                           }}
+                                ]}
+  }]
+  }
+}}
+
+修改10， 3.2s：
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": {
+                                            "boost": 100,
+                                          "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                            {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                            {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                            ]
+                                          ,
+                                          "must":  [
+                                                    {"term": {"province.keyword": "吉林省"}},
+                                                    {"term": {"city.keyword": "长春市"}}
+                                                   ]
+                                          }},
+                                    {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "filter": {
+                                                    "bool": {
+                                                    "must": [
+                                                      {"match_phrase": {"address": {"boost": 3,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                      ]
+                                                  }
+                                                }
+                                                                                           }}
+                                ]}
+  }]
+  }
+}}
+
+修改11, 耗时3s：
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "must": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}}
+                                  ]
+                          }
+                        }
+                      }},
+                {"bool": {"boost": 300,
+                             "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                         {"match_phrase": {"address": {"boost": 3,
+                                                                       "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                              "filter": {
+                                "bool": {
+                                "must": [
+                                  {"match_phrase": {"address": {"boost": 3,
+                                                    "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                  ]
+                              }
+                            }}}
+            ]
+  }
+}}
+
+# 修改12，耗时5.6s：
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address.keyword": {"boost": 5000, "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 30000, "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "should": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}},
+                                         {"match_phrase": {"address": "吉林省长春市汽车厂东风大街4号"}}
+                                  ],
+                                "minimum_should_match": 1
+                          }
+                        }
+                      }}
+
+            ]
+  }
+}}
+
+修改13，耗时0.9s，删除了match_phrase查询
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address.keyword": {"boost": 5000, "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "should": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}},
+                                         {"match_phrase": {"address": "吉林省长春市汽车厂东风大街4号"}}
+                                  ],
+                                "minimum_should_match": 1
+                          }
+                        }
+                      }}
+
+            ]
+  }
+}}
+
+修改14，耗时1.5s
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address.keyword": {"boost": 5000, "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                {"query_string": {"default_field": "address", "query": "吉林省长春市汽车厂东风大街4号"}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "should": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}},
+                                         {"match_phrase": {"address": "吉林省长春市汽车厂东风大街4号"}}
+                                  ],
+                                "minimum_should_match": 1
+                          }
+                        }
+                      }}
+
+            ]
+  }
+}}
+
+修改15，耗时3s: 加引号括起来，且加了boost，耗时增加
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address.keyword": {"boost": 5000, "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                {"query_string": {"boost": 3000, "default_field": "address", "query": "\"吉林省长春市汽车厂东风大街4号\""}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "should": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}},
+                                         {"match_phrase": {"address": "吉林省长春市汽车厂东风大街4号"}}
+                                  ],
+                                "minimum_should_match": 1
+                          }
+                        }
+                      }}
+
+            ]
+  }
+}}
+
+修改16，耗时1s: 加引号括起来，且，query_string 里头的 "boost": 3000, 去掉了；耗时降低了；
+{
+  "query": {
+    "bool": {
+      "should": [{"bool": {"boost": 100,
+                      "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}},
+                                {"match": {"address.keyword": {"boost": 5000, "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                {"query_string": {"default_field": "address", "query": "\"吉林省长春市汽车厂东风大街4号\""}}
+                                ],
+                      "filter": {
+                            "bool": {
+                                "should": [{"match": {"province.keyword": "吉林省"}},
+                                         {"match": {"city.keyword": "长春市"}},
+                                         {"match_phrase": {"address": "吉林省长春市汽车厂东风大街4号"}}
+                                  ],
+                                "minimum_should_match": 1
+                          }
+                        }
+                      }}
+
+            ]
+  }
+}}
+
+注意：
+query_string的查询块中指定了两个属性：default_field 指定要查询的字段，query 指定要查询的子串。
+上述代码的功能就是实现查找 address 字段中包含"吉林省长春市汽车厂东风大街4号"字符串的文档。
+注意query字段中字符串的表示形式，需要显示的用双引号扩起来，才不会进行分词
+想到这里就猜想，在match匹配时，将查询字符串显示的用双引号扩起来是不是也可以避免分词，答案是否定的。
+
+修改17：constant_score
+{
+  "query": {
+    "bool": {
+      "must": [{"bool": {"should": [{"bool": "must": [
+                                                {"bool": {"boost": 100,
+                                                  "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                            {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                            {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                            ]
+                                                  }},
+                                                {"constant_score": {
+                                                    "filter": {
+                                                            "bool": {
+                                                                "must": [{"match": {"province.keyword": "吉林省"}},
+                                                                         {"match": {"city.keyword": "长春市"}}
+                                                                  ]
+                                                          }
+                                                        }}
+                                                }
+                                        ]},
+                                    {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "filter": {
+                                                    "bool": {
+                                                    "must": [
+                                                      {"match_phrase": {"address": {"boost": 3,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                      ]
+                                                  }
+                                                }
+                                                                                           }}
+                                ]}
+  }]
+  }
+}}
+
+修改18,0.02s，但结果不对
+{
+  "query": {
+    "constant_score": {
+      "filter": {"bool": {"should": [{"bool": {"boost": 100,
+                                          "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                    ],
+                                          "minimum_should_match":1,
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            }
+                                          }},
+                                    {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "minimum_should_match":1,
+                                                  "filter": {
+                                                    "bool": {
+                                                    "must": [
+                                                      {"match_phrase": {"address": {"boost": 3,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                      ]
+                                                  }
+                                                }
+                                                                                           }}
+                                ]}
+  }
+  }
+}}
+
+修改19:0.8s
+{
+     "query": {"bool": {"must": [{
+                                     "constant_score": {
+                                         "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                              }
+                                            }
+                                     }
+                                 }
+                                 ],
+                        "must_not": [
+                            {
+                              "term": {
+                                "road.keyword": ""
+                              }
+                            }
+                        ],
+                        "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                    ]
+                                                    }},
+     "size": 10,
+     "sort": []
+}
+
+修改20,0.7s:
+{
+     "query": {"bool": {"should": [{"bool": {"must": [{
+                                     "constant_score": {
+                                         "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                                              }
+                                                            }
+                                                     }
+                                                 }
+                                                 ],
+                                        "must_not": [],
+                                        "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                                    ]
+                                                                    }}
+                                 ]
+                                                    }},
+     "size": 10,
+     "sort": []
+}
+
+修改21， 耗时3s:
+{
+     "query": {"bool": {"should": [{"bool": {"must": [{
+                                     "constant_score": {
+                                         "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                                              }
+                                                            }
+                                                     }
+                                                 }
+                                                 ],
+                                        "must_not": [],
+                                        "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                                    ]
+                                                                    }},
+                                    {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "minimum_should_match":1,
+                                                  "filter": {
+                                                    "bool": {
+                                                    "must": [
+                                                      {"match_phrase": {"address": {"boost": 3,
+                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                      ]
+                                                  }
+                                                }
+                                                                                           }}
+                                 ]
+                                                    }},
+     "size": 10,
+     "sort": []
+}
+
+修改22，耗时2.2s
+{
+     "query": {"bool": {"should": [{"bool": {"must": [{
+                                     "constant_score": {
+                                         "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                                              }
+                                                            }
+                                                     }
+                                                 }
+                                                 ],
+                                        "must_not": [],
+                                        "should": [{"match": {"address.keyword": {"boost": 5, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}},
+                                                                    {"match": {"address": {"boost": 1, "query": "汽车厂东风大街4号"}}}
+                                                                    ]
+                                                                    }},
+                                     {"bool": {"boost": 300,
+                                                 "should": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}],
+                                                  "minimum_should_match":1,
+                                                  "must": [{
+                                                         "constant_score": {
+                                                             "filter": {
+                                                                    "bool": {
+                                                                        "must": [
+                                                                                  {"match_phrase": {"address": {"boost": 3,
+                                                                                                    "query": "吉林省长春市汽车厂东风大街4号"}}}
+                                                                                  ]
+                                                                                  }
+                                                                                }
+                                                                         }
+                                                                     }
+                                                                     ]
+                                                }}
+                                 ]
+                                                    }},
+     "size": 10,
+     "sort": []
+}
+
+# 修改23，耗时1.1s:
+{
+"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "must": [{"match": {"province.keyword": "吉林省"}},
+                                                   {"match": {"city.keyword": "长春市"}},
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "should": []
+                                          }}
+                                ]}
+  }
+}
+
+# 修改24,0.67s
+{
+"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                                              }
+                                                            },
+                                          "must": [
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "should": []
+                                          }}
+                                ]}
+  }
+}
+
+# 修改25,0.8s
+{
+"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "filter": {
+                                                "bool": {
+                                                    "must": [{"match": {"province.keyword": "吉林省"}},
+                                                             {"match": {"city.keyword": "长春市"}}
+                                                      ]
+                                                              }
+                                                            },
+                                          "must": [
+                                                   {"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}
+                                                                            ]}
+                                                   }],
+                                          "should": []
+                                          }},
+                                    {"dis_max": {"boost": 300,
+                                                 "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                            "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                             {"match_phrase": {"address": {"boost": 3,
+                                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}}
+                                ]}
+  }
+}
+
+
+
+

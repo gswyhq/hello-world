@@ -361,6 +361,17 @@ preprocessed
 来源：百度 智能问答大赛 
 https://www.kesci.com/home/competition/5ad56e667238515d80b53704/content/2
 
+语义相似度语料：
+https://github.com/bojone/SimCSE
+senteval_cn.zip
+https://pan.baidu.com/s/1d6jSiU1wHQAEMWJi7JJWCQ 提取码: qkt6
+解压后包含如下语料：
+ATEC: https://github.com/IceFlameWorm/NLP_Datasets/tree/master/ATEC (重新划分了train、valid和test)
+BQ: http://icrc.hitsz.edu.cn/info/1037/1162.htm
+LCQMC: http://icrc.hitsz.edu.cn/Article/show/171.html
+PAWSX: https://arxiv.org/abs/1908.11828 (只保留了中文部分)
+STS-B: https://github.com/pluto-junzeng/CNSD
+
 nietzsche.txt
 #尼采的一些作品
 https://s3.amazonaws.com/text-datasets/nietzsche.txt
@@ -1025,6 +1036,8 @@ https://huggingface.co/models?filter=zh
 
 # 中国省市区县街道五级地址数据：
 https://github.com/kakuilan/china_area_mysql
+国家统计局数据：http://www.stats.gov.cn/sj/tjbz/qhdm/
+民政部行政区划代码：https://www.mca.gov.cn/article/sj/xzqh/1980/
 
 # 收货地址、电话号码、姓名数据（量不多仅有1600条）
 https://github.com/jglcomeon/GRU-CRF
@@ -1176,4 +1189,48 @@ https://hyper.ai/datasets/9277
 # 链接：https://pan.baidu.com/s/1zR5ymSBZ5wF0KJVpYVSb5g
 # 提取码：5e76
 
+# 中文指令数据集，聊天机器人提示训练数据集：
+https://huggingface.co/datasets/BAAI/COIG
+
+# 中文文本蕴含数据集, 由英文数据集翻译而来；约88万；
+https://github.com/liuhuanyong/ChineseTextualInference.git
+
+# 部分城市POI数据，高德地图兴趣点数据：
+百度网盘链接：https://pan.baidu.com/s/15VvPenIMxtzaNkUXwvztPQ?pwd=i3e4
+提取码：i3e4
+
+# 全国省会城市POI数据
+包含 '汽车服务'、'餐饮服务'、'住宿服务'、'风景名胜' 四类实体
+坐标系为 WGS84
+https://github.com/Pyjacc/data-poi
+
+# 中文地址已标注数据：
+# https://github.com/qq1065507891/ChineseAddressNER/torch_ner/data/CCKS2021/train.conll
+# 或 https://github.com/leodotnet/neural-chinese-address-parsing/data/train.txt
+# 或 https://github.com/xueyouluo/ccks2021-track2-code/user_data/extra_data/train.txt
+
+# 浙江省A级景区基本信息：景区名称，等级，地址等信息
+cata_4368_json.zip
+http://data.zj.gov.cn/jdop_front/detail/data.do?iid=4368&searchString=景区
+
+# 浙江省3A级以上旅游景区信息,包含景区ID等信息
+cata_20371_json.zip
+景区描述，景区地址，经纬度等；
+
+# 浙江省公共图书馆地理信息
+图书馆信息(新),包含场馆名称,场馆编码、地理信息以及行政区划代码等信息
+cata_21089_json.zip
+http://data.zj.gov.cn/jdop_front/channal/data_public.do?domainId=4&deptId=
+
+# 浙江省民政标准地名地址库地址信息
+浙江省区划地名系统-浙江省民政标准地名地址库地址数据,包含数据ID,标准地址永久唯一码,标准地址代码,标准地名永久唯一码,所属区划代码等信息
+cata_23294_json.zip
+http://data.zj.gov.cn/jdop_front/channal/data_public.do?domainId=4&deptId=
+
+# 公司名语料库
+https://github.com/wainshine/Company-Names-Corpus
+
+# 1978-2019，31个省市区企业注册地址数据：
+https://github.com/kinginsun/Enterprise-Registration-Data-of-Chinese-Mainland
+企业名称,统一社会信用代码,注册日期,企业类型,法人代表,注册资金,经营范围,所在省份,地区,注册地址
 

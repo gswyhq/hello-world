@@ -1,0 +1,29 @@
+
+第一步：安装netron:
+pip install netron
+
+第二步：启动netron服务，展示模型结构
+netron model.onnx
+
+第三步：打开浏览器查看展示的模型结构图
+http://localhost:8080/
+
+当然，也可以通过 netron命令，先启动服务，再在浏览器打开服务页面，上传对应的模型，展示模型结构；
+
+netron可以展示模型包括：
+ONNX: squeezenet [open]
+TensorFlow Lite: yamnet [open]
+TensorFlow: chessbot [open]
+Keras: mobilenet [open]
+TorchScript: traced_online_pred_layer [open]
+Core ML: exermote [open]
+Darknet: yolo [open]
+
+如：
+netron classify-05-0.2407-0.1039-0.1230.pb
+netron classify-05-0.2407-0.1039-0.1230.tflite
+netron classify-05-0.2407-0.1039-0.1230.hdf5
+
+资料来源：https://github.com/lutzroeder/netron
+
+

@@ -1,0 +1,7 @@
+
+# 模型量化时候报错：
+WARNING:root:The original model opset version is 9, which does not support quantization. Please update the model to opset >= 11. Updating the model automatically to opset 11. Please verify the quantized model.
+警告：root：原始模型opset版本为9，不支持量化。请将模型更新为opset>=11。将模型自动更新到opset 11。请验证量化模型。
+问题原因：默认情况下，tensorflow onnx对生成的onnx图使用opset-9。
+故而在模型转换为onnx模型时候，指定其opset,如：
+onnx_model = tf2onnx.convert.from_keras(h5_model, output_path=onnx_file, opset=11)

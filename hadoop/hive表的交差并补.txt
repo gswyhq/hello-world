@@ -144,8 +144,44 @@ where
 4   lijie4  80      10  10      IT1
 结论 
 当把过滤条件写在left join on上面会让基表所有数据都能显示，不满足条件的右表会以null填充，当过滤条件写在where上只会让符合筛选条件的数据显示。
+区别：
+on 和 where 在筛选条件的时候，on 会显示所有满足 | 不满足条件的数据，而 where 只显示满足条件的数据。
+原因是筛选条件没加on的话两张表是笛卡尔积，后面用where筛选出来符合条件的数据。
+on后面加关联条件，可以加上where对关联出的数据进行一个筛选显示。
+————————————————
+注意：将“left join” 改为 “right join” 或 “inner join”，上面这种情况，左表的筛选条件放在on和放在where上面是一样的效果，都可以对最后的结果进行一个筛选；
+将“left join ”改为“full join”，如同“left join”时一样，对左表的筛选条件，放在on上面没有筛选效果，放在where上面才有筛选效果；
 
+至于为何会出现上面这样情况，主要是on与where同时存在时的执行顺序有关：
+join 内连接：where 下的左表、右表筛选条件 -> on 下的条件关联数据
+left join 左外连接： where 下的左表筛选条件 -> on下面的右表筛选条件 -> 进行left join -> where 下的右表条件
+right join 右外连接： where 下的右表筛选条件 -> on下面的左表筛选条件 -> 进行right join -> where 下的左表条件
+full join 满外连接： on下面的左表、右表筛选条件 -> 进行full join -> where下的左表、右表筛选条件
+————————————————————————————————————————————————————————————————
+在on条件下
+join 内连接(默认是inner join)： 筛选条件严格，只要不满足on条件的这一项数据就不会显示出来，不论是哪个表的这一行数据-等值连接。
+left join 左外连接： 左外连接就是在等值连接的基础上加上主表(左表)中的未匹配数据。
+right join 右外连接： 右外连接是在等值连接的基础上加上被连接表(右表)的不匹配数据 。
+full join 满外连接： 全外连接是在等值连接的基础上将左表和右表的未匹配数据都加上。在full join中不会自动添加join 键为is not null的条件
+————————————————
+没有where条件的inner join的结果，查看执行计划,查看执行过程详情：
+explain SELECT  * from `user` u  inner join  department d  on d.id=u.department_id;
+首先对inner join 后的右表(department)进行全表扫描，扫描到了n条数据，然后默认添加id is not null的过滤条件对其扫描到的n条数据进行过滤（自动优化，如果join下要保留null的行的话需要提前做特殊处理，不然默认就被优化掉了，会导致数据丢失），
+最终得到过滤后还剩下的数据参与inner join。
+然后对from后的左表(user)进行全表扫描，扫描到了m条数据，同样添加默认的过滤条件department_id is not null，最终得到数据参与inner join。
 
+看一个有where条件和on条件下的结果，查看执行计划,查看执行过程详情：
+SELECT  * from `user` u inner join  department d on d.id=u.department_id and d.count > 9 and u.age > 20 where u.age < 30;
+首先扫描inner join 后的右表(department)，全表扫描n条数据，并对其进行过滤：((count > 9) and id is not null) ，过滤结果剩下数据进行inner join操作
+然后扫描from后的左表(user)，也是全表扫描m条数据，并对其进行过滤((age > 20) and department_id is not null and (age < 30))，过滤剩下数据（这里是有误差的，hive的执行计划是一个大概的统计执行过程，不完全正确）进行inner join操作
+小总结：inner join在不使用分区过滤的情况下，会对其两个表都进行全表扫描，然后自动为join的键（on d.id=u.department_id）添加is not null的过滤条件，然后在配合on和where后面的条件进行过滤，在inner join中where和on是同时进行过滤的。
+
+分区表先进行分区过滤，然后对指定的分区进行全部扫描，然后再使用on和where以及自动添加的is not null条件进行过滤，过滤后的数据才进行inner join;
+使用分区过滤的区别就是在对表进行扫描的时候是扫描全部还是扫描指定的分区，如果没有分区过滤，则扫描全表，否则，只对指定的分区进行扫描。
+在inner join下，如果where条件中使用了分区过滤，则扫描指定的分区的数据，然后在通过where和on条件进行过滤，以及为join的键（on d.id=u.department_id）添加is not null的过滤条件
+（这里需要注意的是join键为null的数据是否要保留，需要保留的话，就需要对join键进行特殊的处理，否则数据则被过滤掉，导致数据丢失），这里on和where是同时过滤的，不区分先后。
+
+————————————————————————————————————————————————————————————————
 非空查找函数：
 语法: COALESCE(T v1, T v2, …)
 说明: 返回参数中的第一个非空值，从左到右返回第一个不为NULL的值，如果所有值都为NULL，那么返回NULL。

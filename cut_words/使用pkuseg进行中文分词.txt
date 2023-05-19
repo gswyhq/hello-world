@@ -7,6 +7,39 @@ pip install pkuseg
 将pkuseg文件放到目录下，通过import pkuseg使用
 模型需要下载或自己训练。
 
+pip install pkuseg 安装异常：
+python >=3.9 通过pip安装时候，可能因为没有编译好的whl文件导致需从源码安装，而通过源码安装又报错：
+error: command 'C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\BIN\\x86_amd64\\cl.exe' failed with exit code 2
+解决方法：
+在https://github.com/lancopku/pkuseg-python下载最新的代码压缩文件：
+再pip3 install pkuseg-python-master.zip, 进行安装pkuseg，这是安装的pkuseg是不包含预训练模型的；
+需在https://github.com/lancopku/pkuseg-python/releases，下载最新的预训练模型；
+
+举例来说：若运行时候报错，说没有unigram_word.txt等文件，
+那是另外还需要下载features.pkl等文件 放于：site-packages/pkuseg/models/default/unigram_word.txt
+即默认的模型路径model_dir = site-packages/pkuseg/models/default
+site-packages/pkuseg/models$ tree
+.
++--- default
+|   +--- features.pkl
+|   +--- weights.npz
+|   +--- __init__.py
++--- __init__.py
+具体需要下载哪些文件放于site-packages/pkuseg/models，可搜索：pkuseg/feature_extractor.pyx 文件内；
+也可以从 https://mirrors.cloud.tencent.com/pypi/simple/pkuseg/ 下载 pkuseg-0.0.25.tar.gz，解压出内的models目录复制到site-packages/pkuseg/models即可；
+
+若离线运行报错ConnectionError：无法下载postag.zip等文件，
+那是另外还需要下载postag.zip 等文件放于 '~/.pkuseg' 文件内；
+如将 postag.zip 文件解压后的文件features.pkl和weights.npz 放于 ~/.pkuseg/postag目录中；
+具体需要下载哪些文件，可以参考：./pkuseg/config.py 文件内；
+~/.pkuseg $ tree
+.
++--- postag
+|   +--- features.pkl
+|   +--- weights.npz
++--- postag.zip
+
+########################################################################################################################
 正确率明显高于jieba,但效率却不如：
 In [3]: seg = pkuseg.pkuseg()
 loading model

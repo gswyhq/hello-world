@@ -1,0 +1,17 @@
+
+# 问题：
+    image, cnts, hierarchy = cv2.findContours(img_new, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+ValueError: not enough values to unpack (expected 3, got 2)
+出现错误原因：如果用的是cv 4.0版本，findContours返回的是两个参数，旧版(cv 3.4版本)的返回的则是三个参数；
+解决方法1：
+降低版本：pip3 install -U opencv-python==3.4.18.65
+解决方法2：
+修改代码为：
+contours, hierarchy = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+
+# 问题：
+    cv.gapi.wip.GStreamerPipeline = cv.gapi_wip_gst_GStreamerPipeline
+AttributeError: partially initialized module 'cv2' has no attribute 'gapi_wip_gst_GStreamerPipeline' (most likely due to a circular import)
+# 解决方法，升级 opencv-python 版本：
+如：pip3 install -U opencv_python==4.5.5
+

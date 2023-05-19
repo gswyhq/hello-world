@@ -66,6 +66,11 @@ Out[25]: 'aaa-aaa-aaa-aaa-aaa-aaa-aaa||aaa-aaa-aaa'
 re.sub("(^(.*?-){4}.*?)-", "\\1|", txt2)
 Out[26]: 'aaa-aaa-aaa-aaa-aaa|aaa-aaa||aaa-aaa-aaa'
 
+# 非匹配，不匹配某个字符：
+匹配句子中有“公司”，但末尾不是“公司”：
+import re
+p = re.compile('公司(.(?!公司))+$')
+p.search("大连天华石材市场有限公司泡崖分公司"), p.search("大连天华石材市场有限公司泡崖分公")
 
 def main():
     pass

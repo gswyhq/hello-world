@@ -162,3 +162,21 @@ CALL apoc.index.nodes('Tongyonggraph','name:姚明 OR name:叶莉')YIELD node
 解决方法：
 提供足够的硬盘空间即可。
 
+#问题：windows系统，启动neo4j报错：
+neo4j.bat console
+拒绝访问。
+未有任何报错提示信息，仅仅是“拒绝访问”。
+问题原因：
+查看 C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+发现无权限访问该文件；
+而 neo4j.bat 中有该命令 Powershell ；
+
+# windows系统，neo4j启动后，http://localhost:7474, 输入密码后报错：
+Error: The client is unauthorized due to authentication failure.
+解决方法：
+修改conf/neo4j.conf文件
+取消下面内容的注释：
+dbms.security.auth_enabled=false
+
+
+

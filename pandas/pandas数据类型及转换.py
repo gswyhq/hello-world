@@ -44,6 +44,10 @@ data2    3 non-null object
 dtypes: object(3)
 memory usage: 152.0+ bytes
 
+# 将某列数据，整列转换：
+df['mode'] = df['mode'].astype('float32')
+将列名为mode的数据类型转换为float32,并替换原有列数据；
+
 # numpy.datetime64 转换为字符串
 t, type(t)
 (numpy.datetime64('2021-01-01T00:00:00.000000000'), numpy.datetime64)

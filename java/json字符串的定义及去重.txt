@@ -1,0 +1,69 @@
+
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+      <version>1.2.75</version>
+    </dependency>
+
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+# 定义方法1：
+用单引号，最外层用双引号：
+        String json="[{'name':'a','age':'18','value':1},{'name':'b','age':'18','value':2}" +
+                ",{'name':'b','age':'18','value':3},{'name':'d','age':'18','value':4}" +
+                ",{'name':'b','age':'18','value':4},{'name':'d','age':'18','value':5}]";
+
+        JSONArray j1= JSON.parseArray(json);
+
+        Long collect1 = j1.stream().filter(t -> ((JSONObject) t).getString("age").equals("18")).count();
+        Long collect2 = j1.stream().filter(t -> ((JSONObject) t).getString("age").equals("18")).map(t -> ((JSONObject) t).getString("name")).distinct().count();
+        System.out.println("去重前："+collect1);
+        System.out.println("去重后："+collect2);
+
+# 定义方法2：
+用双引号，但这个时候需要添加转义字符，看起来没那么直观：
+        JSONArray esResultArray = JSONArray.parseArray("[{\"name\": \"攀钢集团售后服务公司东风生活管理所-第四宿舍\", \"address\": \"四川省攀枝花市东区弄弄坪街道东风社区木棉路226号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"弄弄坪街道\", \"village\": \"东风社区\", \"road\": \"木棉路\", \"roadno\": \"226号\", \"zone\": \"\", \"source\": 0, \"level1\": \"房地产\", \"level2\": \"宿舍\", \"level3\": \"\", \"location\": {\"lon\": \"101.708099\", \"lat\": \"26.573218\"}, \"detail_url\": \"\", \"uid\": \"LArjuxOmpaZw\"}, {\"name\": \"攀钢集团售后服务公司东风生活管理所第四宿舍\", \"address\": \"四川省攀枝花市东区弄弄坪街道东风社区木棉路226号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"弄弄坪街道\", \"village\": \"东风社区\", \"road\": \"木棉路\", \"roadno\": \"226号\", \"zone\": \"\", \"source\": 2, \"level1\": \"房地产\", \"level2\": \"宿舍\", \"level3\": \"\", \"location\": {\"lon\": \"101.708122\", \"lat\": \"26.573239\"}, \"detail_url\": \"\", \"uid\": \"RDtEVhuLocSx\"}, {\"name\": \"攀枝花市冶金东街社区公共服务中心\", \"address\": \"四川省攀枝花市东区弄弄坪街道东风社区木棉路174号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"弄弄坪街道\", \"village\": \"东风社区\", \"road\": \"木棉路\", \"roadno\": \"174号\", \"zone\": \"\", \"source\": 1, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.706384\", \"lat\": \"26.571269\"}, \"detail_url\": \"\", \"uid\": \"bpwPYJKfxAkF\"}, {\"name\": \"中冶·金沙\", \"address\": \"四川省攀枝花市东区南充路3号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"南充路\", \"roadno\": \"3号\", \"zone\": \"\", \"source\": 1, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.740860\", \"lat\": \"26.583051\"}, \"detail_url\": \"\", \"uid\": \"gPaFrtYKkXDJ\"}, {\"name\": \"锦华苑\", \"address\": \"四川省攀枝花市东区德才路29号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"德才路\", \"roadno\": \"29号\", \"zone\": \"\", \"source\": 0, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.751564\", \"lat\": \"26.590053\"}, \"detail_url\": \"\", \"uid\": \"mJYSapsIAPvW\"}, {\"name\": \"迎宾苑小区\", \"address\": \"四川省攀枝花市东区聚宝路27号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"聚宝路\", \"roadno\": \"27号\", \"zone\": \"\", \"source\": 0, \"level1\": \"房产小区\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.762207\", \"lat\": \"26.575698\"}, \"detail_url\": \"\", \"uid\": \"ceVUPgIYoKCG\"}, {\"name\": \"鸿光苑\", \"address\": \"四川省攀枝花市东区锦阳路1号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"锦阳路\", \"roadno\": \"1号\", \"zone\": \"\", \"source\": 1, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.691114\", \"lat\": \"26.559330\"}, \"detail_url\": \"\", \"uid\": \"SdwtgvMuJoBq\"}, {\"name\": \"龙珠小区\", \"address\": \"四川省攀枝花市东区阳春路8号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"阳春路\", \"roadno\": \"8号\", \"zone\": \"\", \"source\": 2, \"level1\": \"房产小区\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.750261\", \"lat\": \"26.577845\"}, \"detail_url\": \"\", \"uid\": \"kJMUfIqAGbcl\"}, {\"name\": \"倮果花园\", \"address\": \"四川省攀枝花市东区隆庆东路348号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"隆庆东路\", \"roadno\": \"348号\", \"zone\": \"\", \"source\": 0, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.792633\", \"lat\": \"26.605266\"}, \"detail_url\": \"\", \"uid\": \"zPClbDHndZcE\"}, {\"name\": \"倮果花园-西苑\", \"address\": \"四川省攀枝花市东区隆庆东路352号\", \"province\": \"四川省\", \"city\": \"攀枝花市\", \"area\": \"东区\", \"street\": \"\", \"village\": \"\", \"road\": \"隆庆东路\", \"roadno\": \"352号\", \"zone\": \"\", \"source\": 2, \"level1\": \"房地产\", \"level2\": \"\", \"level3\": \"\", \"location\": {\"lon\": \"101.792788\", \"lat\": \"26.605164\"}, \"detail_url\": \"\", \"uid\": \"xBnYwrIZyvCF\"}]\n");
+        String[][] pcasvList = {{"四川省","攀枝花市","东区","弄弄坪街道","东风社区"}};
+        String[][] roadNoZoneArray = {{"木棉路","226号",""}};
+        String originAddres = "四川省攀枝花市东区弄弄坪街道东风社区木棉路226号";
+        List<JSONObject>  newEsResult = esResultArray.stream().filter(t -> ((JSONObject) t).getString("road").equals("木棉路")).map(item ->{
+            return (JSONObject)item;
+        }).collect(Collectors.toList());
+        System.out.println(newEsResult.toString());
+
+
+// 类似列表推导式，对列表字典进行过滤：
+        String road = "木棉路";
+        String roadno = "174号";
+        road = road.replaceAll("^.{1,}((街道)|(社区)|[省市区县镇])(?=.{2,}[道路街])", "");
+        System.out.println(road);
+
+        JSONArray newEsResultArray = new JSONArray();
+        for(int idx=0;idx<esResultArray.size();idx++){
+            JSONObject esRet = esResultArray.getJSONObject(idx);
+            String esRetRoad = esRet.getString("road");
+            String esRetRoadno = esRet.getString("roadno");
+            if ((roadStrList.stream().filter(esRetRoad::contains).count() >= roadStrList.size())&&(esRetRoadno.equals(roadno))){
+                newEsResultArray.add(esRet);
+                System.out.println("ok");
+            }
+        }
+
+        System.out.println("根据路号过滤："+newEsResultArray.toString());
+
+
+# 多层嵌套修改元素值，put 多层嵌套更新json:
+直接get到我们想要修改的那一层，然后fluentPut 即可。
+
+jsonObject.getJSONObject("temp_realtime_features_monitor_log_39200")
+                .getJSONObject(Constants.SETTINGS)
+                .getJSONObject(Constants.INDEX).fluentPut(Constants.NUMBER_OF_SHARDS, "1");
+
+System.out.println(jsonObject);
+
+# 多层嵌套添加列表元素值：
+asvRescoreQueryObject.getJSONObject("bool").getJSONArray("should").fluentAdd(JSONObject.parseObject(String.format("{\"match\": {\"area.keyword\": \"%s\"}}", area)));
+

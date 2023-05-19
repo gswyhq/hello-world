@@ -299,3 +299,32 @@ Uni-Mol是一个通用的3D分子预处理框架，极大地扩展了药物设�
 Uni-Mol由两个模型组成：一个由209M分子3D构象训练的分子预处理模型；用3M候选蛋白质口袋数据训练的口袋预训练模型。这两种模型分别用于不同的任务，在用于蛋白质配体结合任务时结合使用。Uni-Mol在14/15分子性质预测任务中表现优于SOTA。此外，Uni-Mol在三维空间任务中取得了优异的性能，包括蛋白质-配体结合位姿预测、分子构象生成等。
 https://github.com/dptech-corp/Uni-Mol
 
+# 基于 Electra 预训练模型的中文拼写检查
+https://github.com/gged/ElectraForSpellingCheck
+https://huggingface.co/WangZeJun/electra-base-chinese-spelling-check
+
+# ChatGPT 中文调教指南
+https://github.com/PlexPt/awesome-chatgpt-prompts-zh
+
+# 在两个语言的6个数据集上的，实体关系三元组抽取、命名实体识别和事件抽取。
+在线调用gpt-3.5-turbo接口实现。
+https://github.com/cocacola-lab/ChatIE
+
+# 基于GLM-6B的zero-shot信息抽取方案
+文本分类任务（Text Classification）、文本匹配任务（Text Matching）、信息抽取（Information Extraction）
+https://github.com/HarderThenHarder/transformers_tasks/tree/main/LLM
+
+# ChatGLM中文纠错LoRA模型
+https://huggingface.co/shibing624/chatglm-6b-csc-zh-lora
+
+# 给定实体生成受限的句子，造句：
+在悟道数据集上进行通用预训练的Deep VAE模型后又在命名实体识别任务的数据上微调的CVAE模型。其中编码器和解码器都是GPT-2架构。可以在给定命名实体和其类别后生成包含该命名实体的句子。
+https://huggingface.co/IDEA-CCNL/Randeng-DELLA-CVAE-226M-NER-Chinese
+
+# 基于 SAM，他们提出「修补一切」（Inpaint Anything，简称 IA）模型。区别于传统图像修补模型，IA 模型无需精细化操作生成掩码，支持了一键点击标记选定对象，IA 即可实现移除一切物体（Remove Anything）、填补一切内容（Fill Anything）、替换一切场景（Replace Anything）
+https://github.com/geekyutao/Inpaint-Anything
+
+# 非法词(敏感词)检测
+https://github.com/toolgood/ToolGood.Words
+
+

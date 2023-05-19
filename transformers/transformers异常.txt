@@ -1,0 +1,6 @@
+
+# 问题：
+数据编码预处理时候报错：
+TypeError: TextEncodeInput must be Union[TextInputSequence, Tuple[InputSequence, InputSequence]]
+是由transformers版本更新导致的报错，由如果用transformers-4.x执行transformers-3.x的代码，在tokenize时可能报这个错误，原因是代码逻辑更新造成的不兼容。
+

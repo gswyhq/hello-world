@@ -10,4 +10,42 @@ ImportError: cannot import name 'main'
 解决方案（卸载掉pip，并重新安装）：
 sudo python3 -m pip uninstall pip && sudo apt install python3-pip --reinstall
 
+# pip 离线安装：
+pipy网址https://pypi.org/ 下载 pip-23.0.tar.gz 安装文件；
+解压：tar -zxvf pip-23.0.tar.gz
+进入解压后的目录安装：
+python3 setup.py install
+
+# 执行pip时Unable to create process using 
+主要是因为python有多个版本，版本冲突造成；
+解决方法：
+第一步：通过修改python.exe的命名将两个版本区别开来；若命令不能使用，则检查对应的路径，是否在环境变量PAHT中;
+第二步：进入不同版本python的根目录【Lib】文件中的【site-packages】文件夹，删除对应版本的【pip】和【pip-xxx.dist.info】文件夹
+第三步：进入https://pypi.org/project/pip/， 下载pip 安装包;
+第四步：通过可以区分的python命令，进入pip解压路径安装pip, 如: python39 setup.py install
+
+# pip install 安装时候报错：is not a supported wheel on this platform
+问题原因：造成这个问题的原因是因为版本的兼容性问题；
+通常解决方法是：
+1.下载一个可以兼容版本的.whl文件（适用于Windows系统）
+2.切换python版本（适用于Linux系统）
+因不兼容，查看whl和python支持的版本，执行如下命令：
+pip debug --verbose
+
+查看默认安装第三方库包的路径，命令行下输入以下命令：
+python -m site
+
+# 问题：
+windows下 pip install deepspeed报错：
+AssertionError: Unable to pre-compile async_io
+目前无法在windows系统安装deepspeed；
+
+# 问题：
+WARNING: Ignoring invalid distribution -pencv-python (d:\users\xxx\appdata\roaming\python\python39\site-packages)
+WARNING: Ignoring invalid distribution -pencv-python (d:\users\xxx\appdata\roaming\python\python39\site-packages)
+解决方案:
+在报错的路径下(d:\users\xxx\appdata\roaming\python\python39\site-packages)，找到~对应文件夹，此处报错WARNING: Ignoring invalid distribution -pencv-python，故删除如下文件夹:
+rm -rf ~pencv_python-4.5.4.60.dist-info
+原因分析：由于安装了多个版本的库，会出现这种情况。有时conda或pip无法卸载版本，相反，它会将其重命名为"~包名"。因此，建议您在python安装中找到site-packages(可通过pip show 包名，查看路径)，并搜索"~包名"并删除以"~包名"开头的文件夹。在此之后，忽略无效分布的问题通常将得到解决，再使用pip安装包时不会再有此类警告。
+
 

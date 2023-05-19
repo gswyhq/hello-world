@@ -2,6 +2,9 @@
 # -*- coding:UTF-8 -*-
 
 
+# 新版的 selenium已经放弃PhantomJS改用Chorme headless
+# 如果还想继续用PhantomJS的话只能使用旧版的selenium，卸载之后重新pip install selenium==2.48.0安装成功。
+
 def test1(url='https://www.baidu.com/'):
     from selenium import webdriver
     # PhantomJS 是一个基于 WebKit（WebKit是一个开源的浏览器引擎，Chrome，Safari就是用的这个浏览器引擎） 的服务器端 JavaScript API，
@@ -11,6 +14,7 @@ def test1(url='https://www.baidu.com/'):
     # phantomjs: /usr/bin/phantomjs /usr/lib/phantomjs /usr/share/man/man1/phantomjs.1.gz
     driver = webdriver.PhantomJS(executable_path='/usr/bin/phantomjs')
     # obj = webdriver.PhantomJS(executable_path='C:\Python27\Scripts\phantomjs.exe') #windows
+    # https://mirrors.huaweicloud.com/phantomjs/phantomjs-2.1.1-windows.zip
 
     # 隐式等待5秒，可以自己调节
     driver.implicitly_wait(5)

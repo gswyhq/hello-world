@@ -87,3 +87,12 @@ git config core.autocrlf true
 1、在Interllij IDEA左侧，Project 目录结构中，选中有冲突的文件，或者包含冲突文件的目录。
 2、File -> File Properties -> Line Separators -> 选择 CRLF、LF、CR之一，选中了什么，对应文件或目录下的所有文件的换行符就转换了什么。
 
+# Windows系统，在 Intellij IDEA中启动服务，读取文件指定了编码，却还是报错：
+com.alibaba.fastjson.JSONException: unclosed string : �
+解决方法：
+File -> Settings -> Editor -> Code Style -> File Encodings -> Default encoding for properties files: 由 ISO-8859-1 修改为： GB18030;
+再点击Apply。
+这个时候直接重新服务，发现没有生效，问题依旧存在；
+找到右侧 Maven -> 项目名 -> Lifecycle -> clean 之后，再点击install;
+之后，再启动服务就正常了。
+

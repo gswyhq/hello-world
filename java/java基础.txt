@@ -12,4 +12,9 @@ mvn install:install-file -Dfile=jar包的位置(参数一) -DgroupId=groupId(参
 下载jar包，如：https://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar
 mvn install:install-file -Dfile="D:\Users\abc123\Downloads\junit-4.12.jar" -DgroupId=junit -DartifactId=junit -Dversion=4.12 -Dpackaging=jar
 
+# 空字符串的判断：
+isEmpty 等价于 str == null || str.length == 0
+isBlank  等价于 str == null || str.length == 0 || str.trim().length == 0
+isNotEmpty等价于 a != null && a.length > 0
+isNotBlank 等价于 a != null && a.length > 0 && str.trim().length > 0
 

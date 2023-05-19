@@ -1,4 +1,9 @@
 
+Github 对文件大小的限制
+如果你在命令行用 git push > 50 MB 的文件，你会收到一个 warning，但是你仍然可以正常 push，但是 > 100 MB 的时候就无法 push 了
+如果你在浏览器要上传文件的话，限制更为严重，不能超过 25 MB
+
+
 git对于大文件的管理：
 
 1.安装
@@ -7,6 +12,19 @@ git对于大文件的管理：
 或者：
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 来源： https://packagecloud.io/github/git-lfs/install
+
+或者：
+git lfs install
+
+使用示例：
+git clone https://huggingface.co/clue/albert_chinese_tiny
+
+##################################################################################################################################
+为什么需要 gif-lfs
+上面提到的 Github 对文件大小的限制是一点
+另外因为每次我们在使用 git commit 的时候，其实是给当前的仓库创建了一次快照，本质是全仓库的克隆，如果大文件太多是很不好的，你的 Git 仓库会越来越大
+
+
 
 Git LFS向Git中添加了一条新命令lfs，支持以下参数：
 

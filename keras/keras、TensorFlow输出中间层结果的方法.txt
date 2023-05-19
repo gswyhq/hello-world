@@ -64,4 +64,7 @@ model.compile(
 
 model.summary()
 
+# 查看某一层的详细参数：
+# In [27]: model.get_layer("Embedding-Token").__dict__
+
 

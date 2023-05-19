@@ -3,4 +3,95 @@
 类型转换函数，将一个不可训练的类型tensor转换成可以训练的类型parameter并将这个parameter绑定到这个module里面(net.parameter()中就有这个绑定的parameter，所以在参数优化的时候可以进行优化的)
 与torch.tensor([1,2,3],requires_grad=True)的区别，在于后者只是将参数变成可训练的，并没有绑定在module的parameter列表中。
 
+# 两个列表拼接：
+t = torch.randn((3,))
+t
+Out[146]: tensor([-0.5978,  0.1392, -0.2718])
+torch.stack([t, t]).shape 
+Out[147]: torch.Size([2, 3])
+
+t = torch.randn((2, 3))
+torch.cat([t, t], 0).shape 
+Out[149]: torch.Size([4, 3])
+torch.cat([t, t], 1).shape 
+Out[150]: torch.Size([2, 6])
+
+# 获取单个元素元素值
+torch数据类型的item方法是得到只有一个元素张量里面的元素值。
+如下：
+>>> x = torch.tensor(4)
+>>> x.item()
+4
+
+# 空值nan 或无穷大值inf判断：
+1.torch.isfinite()
+import torch
+num = torch.tensor(1)  # 数字1
+res = torch.isfinite(num)
+print(res)
+'''
+输出：
+tensor(True)
+'''
+这个num必须是tensor
+
+import torch
+num = torch.tensor(float('inf')) # 正无穷大
+res = torch.isfinite(num)
+print(res)
+'''
+输出：
+tensor(False)
+'''
+import torch
+num = torch.tensor(float('-inf')) # 负无穷大
+res = torch.isfinite(num)
+print(res)
+'''
+输出：
+tensor(False)
+'''
+import torch
+num = torch.tensor(float('nan')) # 空
+res = torch.isfinite(num)
+print(res)
+'''
+输出：
+tensor(False)
+'''
+torch.isfinite(torch.tensor([1, float('inf'), 2, float('-inf'), float('nan')]))
+Out[113]: tensor([ True, False,  True, False, False])
+
+torch.isfinite: 一个布尔张量，在 input 是有限的地方为真，在其他地方为假
+返回一个带有布尔元素的新张量，表示每个元素是否为finite。
+当实数值不是 NaN、负无穷或无穷大时，它们是有限的。当复数值的实部和虚部都是有限的时，复数值是有限的。
+
+2.torch.isnan()
+
+import torch
+res=torch.isnan(torch.tensor([1, float('inf'), 2, float('-inf'), float('nan')]))
+print(res)
+'''
+输出：
+tensor([False, False, False, False,  True])
+'''
+可以看出torch.isnan()是用来判断输入的张量是否为空的函数，当输入为空是，返回True。
+
+# Pytorch 替换tensor中大于某个值的所有元素
+方法1：
+a = torch.rand((1, 3))
+# 保证和a相同的维度大小
+zero = torch.zeros_like(a)
+one = torch.ones_like(a)
+# a中大于0.5的用one(1)替换,否则a替换,即不变
+a = torch.where(a > 0.5, one, a)
+# a中小于0.5的用zero(0)替换,否则a替换,即不变
+a = torch.where(a < 0.5, zero, a)
+
+方法2：
+a[a > 0.5] = 1
+a[a < 0.5] = 0
+将nan元素替换为0：
+a[torch.isnan(a)] = 0
+
 

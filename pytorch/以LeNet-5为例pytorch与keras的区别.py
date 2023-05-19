@@ -288,6 +288,13 @@ net = create_net()
 print(summary(net, input_shape=(15,)))
 # 结果如下所示：----------------------------------------------------------------
 
+outputs_b = model(**inputs_b ,output_hidden_states=True)
+summary(model, **inputs_b)
+
+# 方法3：
+from torchinfo import summary
+# pip3 install torchinfo
+
 
 def main():
     pass

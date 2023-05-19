@@ -174,3 +174,22 @@ MySQL server has gone away 把mysql配置的max_allowed_packet改大点,比如
 mysql> set global max_allowed_packet = 200*1024*1024;
 Query OK, 0 rows affected (0.00 sec)
 
+# python3 使用 torndb 报错：
+    import torndb
+  File "/usr/local/lib/python3.6/dist-packages/torndb.py", line 33, in <module>
+    import MySQLdb.constants
+ModuleNotFoundError: No module named 'MySQLdb'
+解决方法：pip3 install mysqlclient
+
+# 问题：
+    import torndb
+  File "/usr/local/lib/python3.6/dist-packages/torndb.py", line 260, in <module>
+    CONVERSIONS[field_type] = [(FLAG.BINARY, str)] + CONVERSIONS[field_type]
+TypeError: can only concatenate list (not "type") to list
+解决方法，修改安装torndb的源码：
+修改连接参数，以及遍历字段类型时所使用的列表增加元素（python3使用append进行元素的添加，而不是使用加号）
+找到torndb.py 文件第260行：
+for field_type in field_types:
+    # CONVERSIONS[field_type] = [(FLAG.BINARY, str)] + CONVERSIONS[field_type]
+    CONVERSIONS[field_type] = [(FLAG.BINARY, str)].append(CONVERSIONS[field_type])
+

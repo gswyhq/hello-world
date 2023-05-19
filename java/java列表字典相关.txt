@@ -26,3 +26,9 @@ countData.add(Arrays.asList("0301", 4));
 countData.add(Arrays.asList("0501", 2));
 countData.add(Arrays.asList("0401", 1));
 
+# 数组列表相互转换：
+
+String[] -> List<String>
+List<String> roadStrList = Arrays.asList("木棉路23号".split(""));
+
+

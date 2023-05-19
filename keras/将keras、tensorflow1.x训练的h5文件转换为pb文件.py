@@ -232,6 +232,81 @@ with tf.Graph().as_default():
         #             print(ret)
         print(confusion_matrix(y_test[1][:100], ret.argmax(1)))
 
+"""----------------------------------TF1.15 --> TF1.13: 转到TF1.15的pb在TF1.13下会报错("NodeDef mentions attr 'batch_dims' not in Op")------------------------------"""
+# 借助SavedModel格式将TF1.15与TF1.13的pb模型打通(这样也打通了TF2与TF1.13),  那么将TF2的pb转为TF1.13的pb具体步骤为:
+# 1、在TF2.2中将mode.save()保存的模型转为TF1.15中的pb；
+# 2、在TF1.15中读入第一步转好的pb, 并在TF1.15中存为SavedModel格式的模型；
+# 3、在TF1.13中读入第二步SavedModel模型, 并在TF1.13中将其存为Frozen Graph格式的pb模型；
+# 4、在TF1.13中读入上一步转好的pb, 进行推理预测.
+
+# 在TF1.15中将pb转为SavedModel  # 环境: TF1.15
+
+import os
+import tensorflow as tf
+from tensorflow.python.saved_model import signature_constants, tag_constants
+
+# 准备输入输出地址
+tf115_pb_model = 'path_to_tf1.15_frozen_graph_model.pb'
+tf115_saved_model = 'path_to_output_dir'
+
+# 读入TF1.15 pb模型
+with tf.gfile.GFile(pb_model, 'rb') as f:
+    graph_def = tf.GraphDef()
+    graph_def.ParseFromString(f.read())
+
+# 创建builder, 指定输出路径
+builder = tf.saved_model.builder.SavedModelBuilder(tf115_saved_model)
+
+# 通过SavedModelBuild及指定signature输出SavedModelmoxing
+sigs = {}
+with tf.Session(graph=tf.Graph()) as sess:
+    tf.import_graph_def(graph_def, name="")
+    seq_wordids = sess.graph.get_tensor_by_name("seq_wordids:0")
+    predict_probs = sess.graph.get_tensor_by_name("predict_probs:0")
+    sigs[signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY] = \
+        tf.saved_model.signature_def_utils.predict_signature_def(
+            {'seq_wordids': seq_wordids},
+            {'predict_probs': predict_probs})
+    builder.add_meta_graph_and_variables(sess,
+                                         [tag_constants.SERVING],
+                                         signature_def_map=sigs)
+builder.save()
+# 以上输出模型的目录结构为:
+# -tf115_save_model
+#     -saved_model.pb
+#     variables/
+
+
+# 在TF1.13中读入第二步SavedModel模型, 并在TF1.13中将其存为FrozenGraph格式的pb模型:
+# 环境: TF1.13
+# tf113_savedmodel_to_pb.py
+
+import tensorflow as tf
+from tensorflow.python.framework.graph_util import convert_variables_to_constants
+
+# 准备输入输出路径
+tf115_saved_model_dir = 'path_to_tf115_savedmodel_dir'
+tf113_pb_model_dir = 'path_to_output_tf113_pb'
+
+# 在tf1.13中读取tf1.15保存的SavedModel
+with tf.Session(graph=tf.Graph()) as sess:
+    tf.saved_model.loader.load(sess, ['serve'], saved_model_dir)
+    graph = tf.get_default_graph()
+
+    # 测试tf1.13可以用读入的模型来推理(可选)
+    feed_dict = {"seq_wordids:0": [[0] * 32]}
+    x = sess.run('predict_probs:0', feed_dict=feed_dict)
+    print(x)
+
+    # 将模型转存为tf1.13的frozen graph的pb格式
+    out_graph_def = convert_variables_to_constants(
+        sess,
+        sess.graph_def,
+        output_node_names=['predict_probs'])
+    tf.train.write_graph(out_graph_def, tf113_pb_model_dir, 'model.pb', as_text=False)
+
+# 来源：https://zhuanlan.zhihu.com/p/382652354
+
 
 def main():
     pass

@@ -172,5 +172,7 @@ header = If-Modified-Since: Thu, 04 Aug 2022 11:50:12 GMT
 header = If-None-Match: "a499c5bf8a7d81:0"
 header = Range: bytes=0-3430121
 
+# wget命令模拟浏览器下载和访问.
+wget  --user-agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"  https://developer.aliyun.com/article/1061274
 
 

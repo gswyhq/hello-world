@@ -226,3 +226,8 @@ sed -i '/QWQ/d' *.csv
 sed -i '/<configuration>/a abcd\n123456' core-site.xml
 在文件 core-site.xml ，查找 <configuration> 所在行，并在之后插入两行内容：abcd\n123456
 若是该行之前插入，则需将 /a 改为 /i,如：sed -i '/<configuration>/i abcd\n123456' core-site.xml
+
+# 在DOS/Windows里，文本文件的换行符为\r\n，而在nix系统里则为\n，所以DOS/Windows里编辑过的文本文件到了nix里，每一行都多了个^M
+解决方法：
+使用sed命令sed -i "s/\r//" filename  或者 sed -i "s/^M//" filename直接替换结尾符为unix格式
+

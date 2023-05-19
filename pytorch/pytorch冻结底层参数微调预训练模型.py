@@ -27,6 +27,22 @@ for name, param in model.named_parameters():
     if "fc1" in name:
         param.requires_grad = False
 
+
+方法1：
+# 冻结fc1层
+model.fc1.weight.requires_grad = False
+optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.1)
+# 
+# compute loss 
+# loss.backward()
+# optmizer.step()
+ 
+# 解冻fc1层
+model.fc1.weight.requires_grad = True
+optimizer.add_param_group({'params': model.fc1.parameters()})
+
+###########################################################################################################################################
+
 # 不将不更新的模型参数传入optimizer
 
 # 定义一个fliter，只传入requires_grad=True的模型参数
@@ -57,9 +73,19 @@ print("model.fc2.weight", model.fc2.weight)
 print("model.fc1.weight.requires_grad:", model.fc1.weight.requires_grad)
 print("model.fc2.weight.requires_grad:", model.fc2.weight.requires_grad)
 
+# 最优做法是，优化器只传入requires_grad=True的参数，这样占用的内存会更小一点，效率也会更高。
 # 节省显存：不将不更新的参数传入optimizer
 # 提升速度：将不更新的参数的requires_grad设置为False，节省了计算这部分参数梯度的时间
 
+方法2：
+# 冻结fc1层
+optimizer = optim.Adam([{'params':[ param for name, param in model.named_parameters() if 'fc1' not in name]}], lr=0.1)
+# compute loss
+# loss.backward()
+# optimizer.step()
+ 
+# 解冻fc1层
+optimizer.add_param_group({'params': model.fc1.parameters()})
 
 def main():
     pass

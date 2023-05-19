@@ -94,9 +94,15 @@ test.txt 是被压缩的文件
     -l 压缩文件时，把LF字符置换成LF+CR字符。
     -ll 压缩文件时，把LF+CR字符置换成LF字符。
 
-# 不解压zip、7z文件，查看文件内容：
+# 不解压zip、7z文件，查看文件内容, unzip查看目录结构(不解开压缩文件)：
 ~$ unzip -l export_20210501_1854.zip
 ~$ 7z l ****.7z 
+
+# tar查看目录结构(不解开压缩文件), 仅仅查看tar.gz 文件，目录结构，不解压文件：
+只查看目录结构：
+ tar -tvf  sns.tar.gz | grep ^d
+查看文件列表（包含路径）：
+tar -tf sns.tar.gz
 
 5、解压出现乱码
 在ubuntu中如果解压zip包出现中文乱码，
@@ -158,6 +164,11 @@ gswewf@gswewf-pc:~/服务器上的文件$ tar -czvf /home/gswewf/服务器上的
 ~$ find . -type f \( -name "*.sql" -or -name "*.sh" \) -print0 |xargs -0 tar zcvf backup.tar.gz
 # print选项使用\n(换行符)分隔输出的每个文件或目录名。而-print0选项则使用空字符 '\0’来分隔。-print0的主要用法是将包含换行符或空白字符的文件名传给xargs命令
 # -print0：告诉find命令，在输出文件名之后，跟上NULL字符，而不是换行符；-0：告诉xargs，以NULL作为参数分隔符；
+# 排除文件名包含"ipynb_checkpoints"进行打包压缩(注意，此时仅仅能排除文件名中的，并不能排除文件目录中的)：
+~$ find . -type f \( \( -not -name "*ipynb_checkpoints*" \) -and \( -name "*.sql" -or -name "*.sh" -or -name "*.ipynb" \) \) -print0 |xargs -0 tar zcvf backup.tar.gz
+# 排除文件名或目录中包含：
+~$ find . -type f \( -name "*.sql" -or -name "*.sh" -or -name "*.ipynb" \)  -print0 |grep --null-data -v  "/.ipynb_checkpoints/" |xargs -0 tar zcvf backup.tar.gz
+# grep -z, --null-data 匹配数据时，以“0 ”作为结尾，而非换行符
 
 # 从文件中读取文件路径，并压缩：
 cat pathfile.txt|xargs tar zcvf abc.tar.gz

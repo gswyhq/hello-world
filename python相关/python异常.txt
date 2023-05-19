@@ -14,6 +14,9 @@ UnicodeEncodeError: 'ascii' codec can't encode character '\u5408' in position 0:
 root@6c6656292234:~# export LANG=en_US.UTF-8
 root@6c6656292234:~# export PYTHONIOENCODING=UTF-8
 
+# 解决'\u'开头的字符串转中文的方法
+'\\u53f7'.encode('utf-8').decode('unicode_escape')
+
 问题：终端的输出不能重定向到文件
 在脚本中运行： nohup python3 -u main.py 2>&1 > train.log &
 不能将终端显示的内容重定向到文件 train.log ; 但直接在终端训练命令，却有输出。
@@ -128,5 +131,22 @@ python的list里面存的都是引用，如果存的是listnode，实际上存�
 地址还是那个地址，所以可以看出**id(list1[0]),id(list2[0])**是完全一样的。这会带来的问题是，当我们把这段地址里的值.val变化一下(list1[0].val = 5), 浅拷贝的数组里对应元素的值也就跟着变了
 
 深拷贝就厉害了，不光把原数组存的地址拷贝了，就连原数组地址里对应的数据也都进行了复制，所以可以看到**id(list1[0]),id(list4[0])**变得不一样了
+
+# pip3 install --user ***.whl 安装程序包的时候出错：
+ERROR: Could not install packages due to an EnvironmentError: [Errno 2] No such file or directo
+当在windows上使用pip安装 其他package的时候如果因为路径过长，超过一定的深度就会报这样的错误。
+Win+R开启打开“注册表编辑器”，可以用“regedit”命令，进入regedit，开启超长路径支持，在注册表HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem 路径下，LongPathsEnabled键值中，修改键值为1，开启支持即可。
+或者：修改Python pip install 默认路径，将路径改短点；
+可以用 pip install -t ‘文件夹路径’ ‘库名’ 这样的指令方式把库安装到指令目录
+可以用pip show jieba 来检查jieba库的安装路径信息
+
+# 问题， python3 setup.py install
+python打包程序为exe时，报错ModuleNotFoundError:No module named setuptools._distutils
+原因：setuptools版本太高，需要重新安装低于5.0.0的版本
+-解决：如安装低版本的setuptools：pip install setuptools==49.1.2
+
+# 问题：切换 python3.9 报错 ‘HTMLParser‘ object has no attribute ‘unescape‘ 
+解决方法：更新 setuptools 版本。
+安装 setuptools==49.2.1
 
 

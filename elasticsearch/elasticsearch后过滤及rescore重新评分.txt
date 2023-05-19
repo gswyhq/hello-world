@@ -1,0 +1,446 @@
+
+match与match_phrase对比
+
+match效率高，match_phrase效率低，因为match市全文检索匹配，但是match_phrase是搜索匹配所有单词后，要进行位置position连续计算，根据你的连续值来判断是否满足需求，另外还有一个前缀匹配 proximity search更加复杂，不仅要搜索所有单词，还要计算移动单词的位置来实现近似匹配，效率更低
+match效率 比match_phrase效率高 10倍左右， 比 proximity 效率高20倍左右
+————————————————
+# 耗时，0.7s;
+{"query":
+    {"bool": {"boost": 100,
+                "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                   {"match": {"city.keyword": "长春市"}}]}},
+                "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                       "query": "汽车厂东风大街4号"}}},
+                        {"match_phrase": {"address": {"boost": 3,
+                                                      "query": "汽车厂东风大街4号"}}},
+                        {"match": {"address": {"boost": 1,
+                                               "query": "汽车厂东风大街4号"}}}]}}],
+                "should": []}}
+}
+
+# rescore重新评分，但貌似耗时差不多；
+{
+    "query": {"bool": {"boost": 100,
+                "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                   {"match": {"city.keyword": "长春市"}}]}},
+                "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                       "query": "汽车厂东风大街4号"}}},
+                        {"match": {"address": {"boost": 1,
+                                               "query": "汽车厂东风大街4号"}}}]}}],
+                "should": []}},
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "rescore_query" : {
+            "match_phrase": {"address": {"boost": 3, "query": "汽车厂东风大街4号"}}
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   }
+}
+
+# 重新评分
+
+{
+   "query" : {
+      "match" : {
+         "city.keyword" : {
+            "query" : "深圳市"
+         }
+      }
+   },
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "match_phrase" : {
+               "name" : {
+                  "query" : "平安金融中心",
+                  "slop" : 2
+               }
+            }
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   }
+}
+
+#############################################################################################################################
+多个 rescore，也可以按顺序执行多个重新评分：
+POST /_search
+ {
+    "query" : {
+       "match" : {
+          "message" : {
+             "operator" : "or",
+             "query" : "the quick brown"
+          }
+       }
+     },
+     "rescore" : [ {
+        "window_size" : 100,
+        "query" : {
+           "rescore_query" : {
+              "match_phrase" : {
+                 "message" : {
+                    "query" : "the quick brown",
+                    "slop" : 2
+                 }
+              }
+           },
+           "query_weight" : 0.7,
+           "rescore_query_weight" : 1.2
+        }
+     }, {
+        "window_size" : 10,
+        "query" : {
+           "score_mode": "multiply",
+           "rescore_query" : {
+              "function_score" : {
+                 "script_score": {
+                    "script": {
+                      "source": "Math.log10(doc.count.value + 2)"
+                    }
+                 }
+              }
+           }
+        }
+     } ]
+  }
+第一个获取查询结果，然后第二个获取第一个的结果，依此类推。
+第二个分数将 “看到” 第一个分数完成的排序，因此可以在第一个分数上使用大窗口将文档拉入第二个分数的较小窗口。
+#############################################################################################################################
+# 案例2：原始， 2s：
+{"query": {"function_score": {"boost_mode": "multiply",
+                              "functions": [{"filter": {"bool": {"must": [{"match": {"road.keyword": "汽车厂东风大街"}},
+                                                                          {"match": {"roadno.keyword": "4号"}}]}},
+                                             "weight": 12}],
+                              "query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                                                       {"match": {"city.keyword": "长春市"}}]}},
+                                                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match": {"address": {"boost": 1,
+                                                                                                                                   "query": "汽车厂东风大街4号"}}}]}}],
+                                                                          "should": []}},
+                                                                {"dis_max": {"boost": 300,
+                                                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                                                                       "query": "吉林省长春市汽车厂东风大街4号"}}}]}}]}},
+                              "score_mode": "max"}},
+ "size": 10}
+
+ # 案例2：修改, 0.8s, 去掉function_score：
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                                                       {"match": {"city.keyword": "长春市"}}]}},
+                                                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match": {"address": {"boost": 1,
+                                                                                                                                   "query": "汽车厂东风大街4号"}}}]}}],
+                                                                          "should": []}},
+                                                                {"dis_max": {"boost": 300,
+                                                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                                                                       "query": "吉林省长春市汽车厂东风大街4号"}}}]}}]}},
+ "size": 10}
+
+# 案例2：修改2, 0.8s 但结果与之前不一致：
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                       {"match": {"city.keyword": "长春市"}}]}},
+                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                            {"match": {"address": {"boost": 1,
+                                                                                                   "query": "汽车厂东风大街4号"}}}]}}],
+                                          "should": []}},
+                                {"dis_max": {"boost": 300,
+                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                           "query": "吉林省长春市汽车厂东风大街4号"}}}]}},
+                                {"bool": {"filter": {"bool": {"must": [{"match": {"road.keyword": "汽车厂东风大街"}},
+                                                                          {"match": {"roadno.keyword": "4号"}}]}}
+                                             }}
+                                ]}},
+"size": 10}
+
+# 案例2：post_filter后过滤，2.7s, minimum_should_match设置为0，设置为-100，查询结果都为空
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                                                       {"match": {"city.keyword": "长春市"}}]}},
+                                                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match": {"address": {"boost": 1,
+                                                                                                                                   "query": "汽车厂东风大街4号"}}}]}}],
+                                                                          "should": []}},
+                                                                {"dis_max": {"boost": 300,
+                                                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                                                                       "query": "吉林省长春市汽车厂东风大街4号"}}}]}}]}},
+
+  "post_filter": {"bool": {
+                    "minimum_should_match": -100,
+                    "should": [{"bool": {
+                                    "must": [{"match": {"road.keyword": "汽车厂东风大街"}},
+                                             {"match": {"roadno.keyword": "4号"}}]}}]}},
+
+ "size": 10}
+
+# 案例2：重新评分, 0.85s
+{
+    "query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                                                       {"match": {"city.keyword": "长春市"}}]}},
+                                                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                                           "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                                                          "query": "汽车厂东风大街4号"}}},
+                                                                                                            {"match": {"address": {"boost": 1,
+                                                                                                                                   "query": "汽车厂东风大街4号"}}}]}}],
+                                                                          "should": []}},
+                                                                {"dis_max": {"boost": 300,
+                                                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                        "query": "吉林省长春市汽车厂东风大街4号"}}},
+                                                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                                                                       "query": "吉林省长春市汽车厂东风大街4号"}}}]}}]}},
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "bool": {"must": [{"match": {"road.keyword": "汽车厂东风大街"}},
+                                                                          {"match": {"roadno.keyword": "4号"}}]}
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+ "size": 10}
+
+#############################################################################################################################
+# 案例3：原始语句，耗时2s:
+{"query": {"function_score": {"boost_mode": "multiply",
+                              "functions": [{"filter": {"bool": {"must": [{"match": {"road.keyword": "太原南街"}},
+                                                                          {"match": {"roadno.keyword": "18号"}}]}},
+                                             "weight": 12}],
+                              "query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                                                          "filter": {"bool": {"must": [{"match": {"province.keyword": "辽宁省"}},
+                                                                                                       {"match": {"city.keyword": "沈阳市"}}]}},
+                                                                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                                           "query": "太原南街18号"}}},
+                                                                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                                                                          "query": "太原南街18号"}}},
+                                                                                                            {"match": {"address": {"boost": 1,
+                                                                                                                                   "query": "太原南街18号"}}}]}}],
+                                                                          "should": [{"match": {"area.keyword": {"boost": 0.01,
+                                                                                                                 "query": "和平区"}}}]}},
+                                                                {"dis_max": {"boost": 300,
+                                                                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                                                        "query": "辽宁省沈阳市和平区太原南街18号"}}},
+                                                                                         {"match_phrase": {"address": {"boost": 3,
+                                                                                                                       "query": "辽宁省沈阳市和平区太原南街18号"}}}]}}]}},
+                              "score_mode": "max"}},
+"size": 10}
+
+# 案例3，修改为rescore后，耗时0.7s:
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                          "filter": {"bool": {"must": [{"match": {"province.keyword": "辽宁省"}},
+                                                       {"match": {"city.keyword": "沈阳市"}}]}},
+                          "must": [{"dis_max": {"queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                           "query": "太原南街18号"}}},
+                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                          "query": "太原南街18号"}}},
+                                                            {"match": {"address": {"boost": 1,
+                                                                                   "query": "太原南街18号"}}}]}}],
+                          "should": [{"match": {"area.keyword": {"boost": 0.01,
+                                                                 "query": "和平区"}}}]}},
+                {"dis_max": {"boost": 300,
+                             "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                        "query": "辽宁省沈阳市和平区太原南街18号"}}},
+                                         {"match_phrase": {"address": {"boost": 3,
+                                                                       "query": "辽宁省沈阳市和平区太原南街18号"}}}]}}]}},
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "bool": {"must": [{"match": {"road.keyword": "太原南街"}},
+                              {"match": {"roadno.keyword": "18号"}}]}
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+"size": 10}
+
+注意：
+rescore重新评分是在召回window_size的结果中重新评分，若极端情况，window_size中不包含想要的结果，
+这时无论怎么二次评分，也不会把想要的结果排分到top1,这个时候，只能是改大windows_size,但改大windows_size后，查询效率当然也会受到负面影响。
+
+########################################################################################################################
+案例4，原始查询，耗时4s
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                             "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                          {"match": {"city.keyword": "长春市"}}]}},
+                                             "must": [{"dis_max": {"queries": [{"match": {"name.keyword": {"boost": 6,
+                                                                                                           "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address.keyword": {"boost": 5,
+                                                                                                              "query": "西安大路与青云街交汇腾阳中心"}}},
+                                                                               {"match_phrase": {"name": {"boost": 4,
+                                                                                                          "query": "交汇腾阳中心"}}},
+                                                                               {"match_phrase": {"address": {"boost": 3,
+                                                                                                             "query": "西安大路与青云街交汇腾阳中心"}}},
+                                                                               {"match": {"name": {"boost": 2,
+                                                                                                   "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address": {"boost": 1,
+                                                                                                      "query": "西安大路与青云街交汇腾阳中心"}}}]}}],
+                                             "should": [{"match": {"area.keyword": {"boost": 0.01,
+                                                                                    "query": "朝阳区"}}}]}},
+                                   {"dis_max": {"boost": 300,
+                                                "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                           "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}},
+                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                          "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}}]}}]}},
+"size": 10}
+
+拆开两个queries语句，分别耗时3.2s,0.1s;
+
+# 将部分match_phrase提到rescore里，耗时4.3s
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                             "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                          {"match": {"city.keyword": "长春市"}}]}},
+                                             "must": [{"dis_max": {"queries": [{"match": {"name.keyword": {"boost": 6,
+                                                                                                           "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address.keyword": {"boost": 5,
+                                                                                                              "query": "西安大路与青云街交汇腾阳中心"}}},
+                                                                               {"match": {"name": {"boost": 2,
+                                                                                                   "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address": {"boost": 1,
+                                                                                                      "query": "西安大路与青云街交汇腾阳中心"}}}]}}],
+                                             "should": [{"match": {"area.keyword": {"boost": 0.01,
+                                                                                    "query": "朝阳区"}}}]}},
+                                   {"dis_max": {"boost": 300,
+                                                "queries": [{"match": {"address.keyword": {"boost": 5,
+                                                                                           "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}},
+                                                            {"match_phrase": {"address": {"boost": 3,
+                                                                                          "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}}]}}]}},
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "bool": {"must": [{"match_phrase": {"name": {"boost": 4, "query": "交汇腾阳中心"}}},
+                              {"match_phrase": {"address": {"boost": 3, "query": "西安大路与青云街交汇腾阳中心"}}}]}
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+"size": 10}
+
+# 所有match_phrase提出来, 耗时3.8s
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                             "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                          {"match": {"city.keyword": "长春市"}}]}},
+                                             "must": [{"dis_max": {"queries": [{"match": {"name.keyword": {"boost": 6,
+                                                                                                           "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address.keyword": {"boost": 5,
+                                                                                                              "query": "西安大路与青云街交汇腾阳中心"}}},
+                                                                               {"match": {"name": {"boost": 2,
+                                                                                                   "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address": {"boost": 1,
+                                                                                                      "query": "西安大路与青云街交汇腾阳中心"}}}]}}],
+                                             "should": [{"match": {"area.keyword": {"boost": 0.01,
+                                                                                    "query": "朝阳区"}}}]}}
+                                                                                    ]}},
+   "rescore" : {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "dis_max": {"queries": [{"bool": {"must": [{"match_phrase": {"name": {"boost": 4, "query": "交汇腾阳中心"}}},
+                                                        {"match_phrase": {"address": {"boost": 3, "query": "西安大路与青云街交汇腾阳中心"}}}]}},
+                              {"bool": {"must": [{"match": {"address.keyword": {"boost": 50, "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}}]}},
+                              {"bool": {"must": [{"match_phrase": {"address": {"boost": 30, "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}}]}}
+                              ]}
+
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+"size": 10}
+
+# 改为多次二次排序，多次排序，2.3s：
+{"query": {"dis_max": {"queries": [{"bool": {"boost": 100,
+                                             "filter": {"bool": {"must": [{"match": {"province.keyword": "吉林省"}},
+                                                                          {"match": {"city.keyword": "长春市"}}]}},
+                                             "must": [{"dis_max": {"queries": [
+                                                                               {"match": {"name": {"boost": 1,
+                                                                                                   "query": "交汇腾阳中心"}}},
+                                                                               {"match": {"address": {"boost": 2,
+                                                                                                      "query": "西安大路与青云街交汇腾阳中心"}}}]}}]
+                                             }}
+                                                                                    ]}},
+   "rescore" : [{
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {"dis_max": {"queries": [{"match": {"area.keyword": {"boost": 1,
+                                                                                    "query": "朝阳区"}}}]}},
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+   {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {"dis_max": {"queries": [{"match": {"name.keyword": {"boost": 6, "query": "交汇腾阳中心"}}},
+                                              {"match": {"address.keyword": {"boost": 5, "query": "西安大路与青云街交汇腾阳中心"}}}]}},
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+   {
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {
+            "dis_max": {"queries": [
+                              {"match": {"address.keyword": {"boost": 50, "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}},
+                              {"match_phrase": {"address": {"boost": 30, "query": "吉林省长春市朝阳区西安大路与青云街交汇腾阳中心"}}}
+                              ]}
+
+         },
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   },
+{
+      "window_size" : 50,
+      "query" : {
+         "score_mode": "multiply",
+         "rescore_query" : {"dis_max": {"queries": [{"match_phrase": {"name": {"boost": 4, "query": "交汇腾阳中心"}}},
+                                                        {"match_phrase": {"address": {"boost": 3, "query": "西安大路与青云街交汇腾阳中心"}}}]}},
+         "query_weight" : 0.7,
+         "rescore_query_weight" : 1.2
+      }
+   }
+   ],
+"size": 10}

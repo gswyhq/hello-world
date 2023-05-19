@@ -15,6 +15,12 @@ ON CREATE SET p.age=10 return p
 MERGE (n:Label {id:28012}) SET n.name = 'Alices', n.age = 154 return n
 若有id为28012，则更改其属性name、age；若没有id为28012的节点则创建该节点，并更改其属性name、age；
 
+# 对属性进行更改（运行后，仅有一个age属性）：
+MERGE (n:Abc {name: "xyz"})  set n = {age: 30} return n;
+
+# 对属性进行追加（运行后，有name、age两个属性）：
+MERGE (n:Abc {name: "xyz"})  set n += {age: 30} return n;
+
 Merge子句
 
 Merge子句的作用有两个：当模式（Pattern）存在时，匹配该模式；当模式不存在时，创建新的模式，功能是match子句和create的组合。在merge子句之后，可以显式指定on creae和on match子句，用于修改绑定的节点或关系的属性。

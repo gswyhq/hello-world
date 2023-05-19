@@ -127,7 +127,7 @@ io.netty.channel.StacklessClosedChannelException
 Exiting. 启动服务时报java.lang.NoClassDefFoundError: org/slf4j/LoggerFactory，发现已存在slf4j相关jar包，且版本一致，不存在版本冲突问题。
 问题原因及解决方案：
     因把一个jar包(hive-exec-2.3.7.jar)放在$JAVA_HOME/jre/lib/ext目录下了，而这个jar包调用了org/slf4j/LoggerFactory，工程运行会先加载JDK中的jar包，然后JDK中的jar包无法加载相关依赖jar包，所以删掉JDK中的jar包就好了。
-    JDK的lib中添加新jar包最好不要和工程中冲突，而且JDK中的jar需要能调用到其相关依赖jar包，这个里面的jar包容易被忽略。
+  JDK的lib中添加新jar包最好不要和工程中冲突，而且JDK中的jar需要能调用到其相关依赖jar包，这个里面的jar包容易被忽略。
 
 # 通过 Intellij IDEA打包的jar包，运行提示：
 javaNLP.jar中没有主清单属性
@@ -400,4 +400,72 @@ Double.valueOf()方把数字类型的字符串转换成Double类型
 DecimalFormat df = new DecimalFormat("0.00");
 System.out.println(df.format(Double.parseDouble(pi)));
 System.out.println(df.format(Double.valueOf(pi)));
+
+# Maven项目，点击Lifecycle -> clean、 install,报错：
+-source 1.5 中不支持 diamond 运算符
+解决方法：
+在maven安装目录下找到settings.xml文件(地址一般在：C:\Program Files\JetBrains\IntelliJ IDEA *******\plugins\maven\lib\maven3\conf)或者项目下的pom.xml，添加如下内容：
+<profiles>
+  <profile>
+            <id>jdk1.8</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+            </properties>
+        </profile>
+</profiles>
+
+设置完成后保存，然后在idea里面重新打包即可。
+
+# Intellij IDEA 打开项目，左侧找不到文件路径，或右键找不到运行按钮；
+主要原因是项目目录下，缺失对应的.iml文件；
+解决方法：File -> Project Structure -> Project Settings -> Modules -> 若不存在当前项目，则点击“+”，再选择Import Mudule;
+ 将 src/man/java, 设置为Sources, 将 src/main/resources设置为Resources,再点击应用；
+
+# 问题，本地程序包存在，但提示：java: 程序包***不存在
+ 方法一：maven包管理的clean方法
+1、把项目的MavenProject打开
+2、点击clean，再点击run，即可运行
+分析其原因：
+之前点击了clean，再点击install，生成了错误的target，清除target之后重新生成就ok了
+方法二：清理缓存
+1、清理缓存并重启
+File -> Invalidate Caches / Restart
+方法三：更新pycharm repositories
+File -> Settings -> Build,Execution, Deployment -> Build Tools -> Maven -> Repositories -> Update -> Apply
+
+# java 加载pt模型报错：
+ai.djl.engine.EngineException: Failed to load PyTorch native library
+问题原因：
+java环境的torch没有配置好；
+torch安装,不同语言安装方法可能不同（https://pytorch.org/get-started/locally/）
+python: pip3 install torch torchvision torchaudio
+C++/Java，需要下载对应的libtorch压缩包:
+https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.13.1%2Bcpu.zip
+unzip libtorch-win-shared-with-deps-1.13.1%2Bcpu.zip
+在 环境 里添加libtorch动态库的路径
+PATH=D:\Code_Lib\libtorch\lib;%PATH%
+注意：下载的Libtorch需和生成.pt文件的pytorch版本一致，否则会无法读取.pt文件。
+libtorch 的版本和 pytorch 是对应的，比如 libtorch 1.6.0 对应于 pytorch 1.6.0
+
+# 加载模型报错：
+ai.djl.engine.EngineException: Failed to load PyTorch native library
+libtorch-win-shared-with-deps-1.12.0\lib\asmjit.lib: %1 不是有效的 Win32 应用程序。
+PyTorch需要Visual C++可再发行包。如果在Windows上使用DJL时遇到UnsatisfiedLinkError，请下载并安装Visual C++2019可再发行包并重新启动。
+
+java 11 安装：
+下载 java 11 压缩包：
+https://repo.huaweicloud.com/java/jdk/11.0.2+9/
+解压，修改环境变量：JAVA_HOME=D:\jdk-14.0.2
+CLASSPAHT=.;%JAVA_HOME\lib;%JAVA_HOME\lib\tools.jar;
+编辑系统变量PATH=%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;$PATH
+
+# 提示错误：illegal escape character in String literal
+写文件路径的时候可以使用/作为分隔符或者File.separator，最好不用\，因为这个斜杠用的时候需要在前面再加一个\转义，并且这个分隔符只对windows系统有用，局限性比较严重
 

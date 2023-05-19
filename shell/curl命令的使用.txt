@@ -1,6 +1,7 @@
 
 1、上传文件：
 curl -XPOST http://192.168.3.145:8000/fileupload -H "Content-Type:multipart/form-data" -F "pid=yhb" -F "sign=qfwi22r1afwef" -F "xianzhong=重疾险" -F "knowledge=条款" -F "filename=@/home/gswyhq/Downloads/实施方案.pdf;type=application/pdf"
+curl -XPOST localhost:8888/invoice/file -H "Content-Type:multipart/form-data" -F "_appid=mall" -F "_token=91ce2a68-3774-41a1-9253-535e3c1042a7" -F "file=@500_236.jpg"
 
 注意："-F"与"-d"有一点不同，"-d"可以使用“-d 'a=1&b=2'”将两个字段放一起；而"-F"不行，一个"-F"只能包含一个key/value对，如："-F a=1 -F b=2"。
 
@@ -27,6 +28,9 @@ $ curl https://www.example.com
 6、-A参数指定客户端的用户代理标头，即User-Agent。curl 的默认用户代理字符串是curl/[version]。
 $ curl -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36' https://google.com
 上面命令将User-Agent改成 Chrome 浏览器。
+
+curl命令模拟浏览器下载和访问：
+curl --user-agent  "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"  你要访问的地址
 
 $ curl -A '' https://google.com
 上面命令会移除User-Agent标头。

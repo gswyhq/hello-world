@@ -1,0 +1,10 @@
+
+NebulaGraph Explorer （简称 Explorer）是一款可以通过 Web 访问的可视化图探索工具，搭配 NebulaGraph 内核使用，用于与图数据进行可视化交互。
+Explorer 提供的 web 服务默认端口 7002
+
+# 获取授权 TOKEN
+使用 API 时，需要做 Token 信息校验。请使用如下命令获取 Token 信息。
+curl -i -X POST -H "Content-Type: application/json" -H "Authorization: Bearer WyJyb290IiwiMTIzIl0=" -d '{"address":"192.168.8.111","port":9669}' http://192.168.8.145:7002/api-open/v1/connect
+
+base64.b64encode(b'["root","123"]')
+Out[80]: b'WyJyb290IiwiMTIzIl0='

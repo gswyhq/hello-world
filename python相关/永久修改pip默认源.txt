@@ -25,4 +25,21 @@ trusted-host =pypi.douban.com
 ESC，输入:wq保存退出。
 然后再测试 pip install就可以发现已经是国内安装python包的速度了。
 
+问题：
+更改了pip源，却不生效
+有时候配置了~/.pip/pip.conf，却发现不生效，这个时候可以查看下当前pip源，并用命令更改下，会发现读取的配置文件并不是~/.pip/pip.conf
+
+# 查看当前pip源
+pip config list
+
+(crawl) E:\coding>pip config list
+global.index-url='http://pypi.douban.com/simple/'
+global.timeout='6000'
+global.trusted-host='pypi.douban.com'
+
+# 更改pip源，在本次例子中更改成清华源
+pip config set global.index-url 清华源网址
+
+(crawl) E:\coding>pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+Writing to C:\Users\admin\AppData\Roaming\pip\pip.ini
 
