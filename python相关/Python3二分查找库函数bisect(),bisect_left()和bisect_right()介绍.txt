@@ -1,0 +1,65 @@
+
+Python3二分查找库函数bisect(), bisect_left()和bisect_right()介绍
+bisect 的意思是 “平分，二等分”
+
+bisect 是 python 的内置库，有两个模块：
+
+bisect.bisect 二分查找模块，包括 bisect.bisect(), bisect.bisect_left() 和 bisect.bisect_right() 三个函数，返回值为查找元素的下标
+bisect.bisect 可以用于非逆序系列的二分查找，即递增列表和乱序列表都可以使用
+
+bisect.insort 插入模块, 包括 bisect.insort(), bisect.insort_left() 和 bisect.insort_right() 三个函数，返回值插入新元素后的列表
+bisect.insort 只能在递增列表中插入新元素，即不能用于乱序和逆向列表
+
+
+在已按升序排列的列表中找到对应元素插入位置的索引(元素不一定需要在列表中；列表必需已按升序排列)
+返回查找插入位置后，对应的原数组元素不会改变。
+
+bisect与bisect_right是一样的；
+
+bisect_left：返回值 i 使得 a[：i] 中的所有 e 都有 e < x，a[i：] 中的所有 e 都有 e >= x。。
+bisect_right：返回值 i 使得 a[：i] 中的所有 e 都有 e <= x，并且所有 e 在a[i：] 有 e > x。
+
+# 当被查找插入位置的元素不在列表中时，两者返回结果是一致的
+import bisect
+ls = [1,5,9,13,17]
+index1 = bisect.bisect(ls,7)
+index2 = bisect.bisect_left(ls,7)
+index3 = bisect.bisect_right(ls,7)
+print("index1 = {}, index2 = {}, index3 = {}".format(index1, index2, index3))
+index1 = 2, index2 = 2, index3 = 2
+
+# 当被查找插入位置的原始在列表中时，返回结果才有差异：
+import bisect
+ls = [1,5,7,9,13,17]
+index1 = bisect.bisect(ls,7)
+index2 = bisect.bisect_left(ls,7)
+index3 = bisect.bisect_right(ls,7)
+print("index1 = {}, index2 = {}, index3 = {}".format(index1, index2, index3))
+index1 = 3, index2 = 2, index3 = 3
+
+# 当原始列表不是升序排列，查找插入无意义：
+import bisect
+ls = [1, 9, 7, 13, 17, 5]
+index1 = bisect.bisect(ls,7)
+index2 = bisect.bisect_left(ls,7)
+index3 = bisect.bisect_right(ls,7)
+print("index1 = {}, index2 = {}, index3 = {}".format(index1, index2, index3))
+index1 = 1, index2 = 1, index3 = 1
+
+import bisect
+ls = [1, 3, 9, 7, 13, 17, 5]
+index1 = bisect.bisect(ls,7)
+index2 = bisect.bisect_left(ls,7)
+index3 = bisect.bisect_right(ls,7)
+print("index1 = {}, index2 = {}, index3 = {}".format(index1, index2, index3))
+index1 = 4, index2 = 2, index3 = 4
+
+import bisect
+ls = [17, 13, 9, 7, 5, 1]
+index1 = bisect.bisect(ls,7)
+index2 = bisect.bisect_left(ls,7)
+index3 = bisect.bisect_right(ls,7)
+print("index1 = {}, index2 = {}, index3 = {}".format(index1, index2, index3))
+index1 = 6, index2 = 0, index3 = 6
+
+

@@ -86,3 +86,41 @@ trade=# CREATE ROLE tradeopr login;
 有登录权限的角色，等同于用户；
 create user role1 与create role role1 login 是等价的.
 
+# PG插入数据报错：
+### SQL: INSERT INTO public.dms_base_info(               base_info_guid,               cluster_name,               database_name,               project_uuid,               table_name,               table_name_cn,               column_guid,               column_name,               column_name_cn,               created_by,               updated_by,               created_date,               updated_date             )VALUES                       ON CONFLICT (base_info_guid) DO UPDATE         SET updated_date = now()
+### Cause: org.postgresql.util.PSQLException: ERROR: syntax error at or near "ON"
+解析：
+1、ON CONFLICT仅从PostgreSQL 9.5开始支持。
+2、base_info_guid 字段需保证唯一性；
+可以创建唯一索引：
+CREATE UNIQUE INDEX UK_dms_base_info__base_info_guid 
+ON dms_base_info (base_info_guid);
+也可以在创建表的时候设置：
+CREATE TABLE if not exists public.dms_base_info (
+	base_info_guid varchar(64) NOT NULL, -- 主键ID
+	cluster_name varchar(64) NULL, -- 集群名
+	database_name varchar(64) NULL, -- 数据库名
+	project_uuid varchar(64) NULL, -- 项目Uuid
+	table_name varchar(128) NULL, -- 表英文名
+	table_name_cn varchar(128) NULL, -- 表中文名
+	column_guid varchar(64) NULL, -- 字段Guid
+	column_name varchar(256) NULL, -- 字段英文名
+	column_name_cn varchar(256) NULL, -- 字段中文名
+	created_by varchar(100) NOT NULL DEFAULT 'SYSTEM'::character varying, -- 创建人
+	updated_by varchar(100) NOT NULL DEFAULT 'SYSTEM'::character varying, -- 修改人
+	created_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 创建时间
+	updated_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 更新时间
+	CONSTRAINT dms_base_info_pkey PRIMARY KEY (base_info_guid)
+);
+若不是主键的话，也可以类似下面这样指定其唯一性，这里唯一字段是activity_name：
+CREATE TABLE IF NOT EXISTS config_activity_log
+(
+  id                      serial primary key,
+  activity_name           varchar(100) NOT NULL UNIQUE,
+  last_config_version     varchar(50) NOT NULL,
+  activity_status         varchar(100) NOT NULL DEFAULT 'Awaiting for cofman',
+  cofman_last_update      bigint NOT NULL DEFAULT -1,
+  is_error                boolean DEFAULT FALSE,
+  activity_timestamp      timestamp DEFAULT current_timestamp
+);
+

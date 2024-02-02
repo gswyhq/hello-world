@@ -33,7 +33,7 @@ topic = client.topics['goods-topic']
 producer = topic.get_producer()
 # 模拟接收前端生成的商品信息
 goods_dict = {
-  'option_type':'insert'
+  'option_type':'insert',
   'option_obj':{
     'goods_name':'goods-1',
     'goods_price':10.00,

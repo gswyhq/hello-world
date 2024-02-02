@@ -1,0 +1,44 @@
+
+
+CREATE EXTERNAL TABLE `db3.test_imp06`(
+`name` string,
+`location` struct<lng:string, lat:string>
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
+
+
+insert into db3.test_imp06
+select
+    name ,
+    named_struct("lon", lng, "lat", lat)
+from
+    db3.address_result_join_addr_20220323_1716;
+
+
+# 将查询结果输出为json:
+select collect_list(named_struct('clid',t1.clid,'asr_start_time',t1.asr_start_time))
+from (select * from abcd_source_safe.interact_log where etl_date= '20240128' and clid in ('1642236719',
+'1642484019',
+'1642338924',
+'1642228645',
+'1642534557',
+'1642531555',
+'1642531024')
+order by clid, asr_start_time
+			) t1;
+
+上面结果会将所有的json合并成一个列表，如：
+[{"clid":"1642228645","asr_start_time":"2024-01-28 08:06:02.0"},{"clid":"1642228645","asr_start_time":"2024-01-28 08:06:25.0"}]
+若想每行分开，去掉collect_list即可，如：
+select named_struct('clid',t1.clid,'asr_start_time',t1.asr_start_time)
+from (select * from abcd_source_safe.interact_log where etl_date= '20240128' and clid in ('1642236719',
+'1642484019',
+'1642338924',
+'1642228645',
+'1642534557',
+'1642531555',
+'1642531024')
+order by clid, asr_start_time
+                        ) t1;
+
+

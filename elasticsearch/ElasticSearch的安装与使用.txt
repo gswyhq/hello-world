@@ -46,6 +46,11 @@ https://github.com/elastic/elasticsearch-servicewrapper，下载service文件夹
 6、安装插件
 下载elasticsearch-head-master.zip，解压,
 gswewf@gswewf-pc:/usr/local/elasticsearch-2.4.1/plugins$ sudo mv /home/gswewf/下载/elasticsearch-head-master ./head
+命令行查看安装了哪些插件：
+curl localhost:9200/_cat/plugins
+node-1 analysis-hanlp  7.3.2
+node-1 analysis-ik     7.3.2
+node-1 analysis-pinyin 7.3.2
 
 7、添加数据,如在索引twitter中的tweet类型中存储了id为1的数据：
 curl -XPUT 'http://localhost:9200/twitter/tweet/1' -d '{

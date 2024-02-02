@@ -1,0 +1,24 @@
+
+ElasticSearch 监控
+监控
+为了监视集群的运行状况，该监视功能从每个节点收集指标并将其存储在Elasticsearch索引中。必须在每个节点的elasticsearch.yml文件中或在可能的情况下在动态集群设置中设置与Elasticsearch中与监视相关的所有设置。为了开始监视，我们需要检查集群设置，可以通过以下方式完成：
+curl -XGET localhost:9200/_cluster/settings
+
+堆栈中的每个组件负责监视自身，然后将这些文档转发到Elasticsearch生产集群以进行路由和索引（存储）。Elasticsearch中的路由和索引编制过程由所谓的收集器和导出器处理。
+
+收集器 Collectors
+收集器每个收集间隔运行一次，以从其选择监视的Elasticsearch中的公共API获取数据。数据收集完成后，数据将批量发送给导出器 （Exporters），以发送到监视集群。
+每种数据类型仅收集一个收集器。每个收集器可以创建零个或多个监视文档。
+
+
+导出器 Exporters
+导出器将从任何Elastic Stack源收集的数据路由到监视集群。可以配置多个导出器，但是常规设置和默认设置是使用一个导出器。导出器可以在节点级别和群集级别进行配置。
+Elasticsearch中有两种类型的导出器-
+local - 此导出器将数据路由回同一群集。
+http - 首选导出器，可用于将数据路由到可通过HTTP访问的任何受支持的Elasticsearch集群。
+导出器可以路由监控数据之前，他们必须设置某些Elasticsearch资源。这些资源包括模板和摄取管道
+
+
+也可以关闭对应的监控设置：
+curl -XPUT -u elastic:1234 localhost:9200/_cluster/settings -H 'Content-Type: application/json' -d '{"persistent": {"xpack.monitoring.collection.enabled":"false"}}'
+

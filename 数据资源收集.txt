@@ -554,7 +554,8 @@ http://nlp.stanford.edu/projects/kvret/kvret_dataset_public.zip
 - [大规模中文短文摘要数据集](https://arxiv.org/abs/1506.05865)：该语料库由超过200万个真正的中文短文组成，每个文本的作者给出简短的摘要。
 
 ### 中文OCR和手写数据集
-
+- 中科院自动化研究所-手写中文数据集CASIA-HWDB2.x http://www.nlpr.ia.ac.cn/databases/handwriting/Download.html
+- 由中科院手写数据和网上开源数据合并组合的数据集 https://aistudio.baidu.com/aistudio/datasetdetail/102884/0
 - [汉字](http://www.iapr-tc11.org/mediawiki/index.php?title=Harbin_Institute_of_Technology_Opening_Recognition_Corpus_for_Chinese_Characters_(HIT-OR3C))：包含909,818张图像的手写汉字数据集，对应于约10篇新闻文章。
 - [汉字生成器](https://www.kaggle.com/dylanli/chinesecharacter)：可用于中文文本OCR的中文字体数据集。
 - [中文文本](https://ctwdataset.github.io/)：中文文本数据集，大约有一百万个汉字由专家在超过30,000个街景图像中注释。对于数据集中的每个字符，注释包括其基础字符，边界框和6个属性。属性表明它是否具有复杂的背景，是否有凸起，是手写还是打印等。
@@ -896,6 +897,9 @@ comment_testset_2class.csv 5.2M
 百度网盘【提取码:jk8d】https://pan.baidu.com/s/1mkP59GyF9CZ8_r1F864GEQ 
 由作者GaoQ1(https://github.com/GaoQ1)提供的比较高质量的闲聊数据集，整理出了50w个多轮对话的语料
 
+助手对话数据集：
+https://huggingface.co/datasets/OpenAssistant/oasst2
+
 中文多项选择题数据集：
 https://github.com/nlpdata/c3
 收集的主要是形式自由的多项选择题，阅读材料来自汉语水平考试和民族汉语考试，包括试卷和练习。
@@ -1233,4 +1237,17 @@ https://github.com/wainshine/Company-Names-Corpus
 # 1978-2019，31个省市区企业注册地址数据：
 https://github.com/kinginsun/Enterprise-Registration-Data-of-Chinese-Mainland
 企业名称,统一社会信用代码,注册日期,企业类型,法人代表,注册资金,经营范围,所在省份,地区,注册地址
+
+# 中文心理健康数据集：
+https://github.com/qiuhuachuan/smile/tree/main
+
+# 67万条ChatGPT中文调教，prompt文本
+https://github.com/PlexPt/awesome-chatgpt-prompts-zh
+
+# 问答数据集：
+https://github.com/CyberCommy/baidu-qa-100w
+
+# 基于医疗泌尿专科知识构造的QA推理数据集
+http://openkg.cn/dataset/rjua-qadatasets
+
 

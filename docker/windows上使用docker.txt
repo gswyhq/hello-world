@@ -217,7 +217,15 @@ sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=http://f2d6cb40.m.daoc
 exit
 docker-machine restart default
 
-
+# 免安装docker使用：
+第一步：下载编译好的二进制压缩文件包：
+https://download.docker.com/win/static/stable/x86_64/
+第二步：将压缩文件解压，并将解压后的路径添加到环境变量Path
+第三步：注册Docker Deamon服务
+.\dockerd.exe --register-service
+第四步：启动docker服务
+Start-Service docker  
+第五步：使用docker
 
 
 

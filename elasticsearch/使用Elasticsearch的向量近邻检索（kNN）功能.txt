@@ -1,0 +1,174 @@
+
+使用Elasticsearch的向量近邻检索（kNN）功能
+
+Elasticsearch 8.0及以上版本新增向量近邻检索k-nearest neighbor（kNN）search功能，能够帮助您快速实现图像搜索、视频指纹采样、人脸识别、语音识别和商品推荐等向量检索场景的需求。
+
+# 资料来源：
+https://www.elastic.co/guide/en/elasticsearch/reference/8.6/knn-search.html#knn-prereqs
+https://help.aliyun.com/document_detail/604348.html?spm=a2c4g.141749.4.7.2e5a30e59fc4cG&scm=20140722.H_604348._.ID_604348-OR_rec-V_1
+
+# 前提条件
+创建 Elasticsearch 8.x版本实例。
+将业务数据转换成有意义的向量值（根据相似性设计向量，文档的向量与查询向量越接近，向量相似度匹配越好），并将向量数据存储在dense_vector类型的字段下。
+
+# 注意事项
+1、需使用dense_vector类型的索引字段存储向量值，且dense_vector类型不支持aggregations和sorting。
+2、nesetd字段类型下不支持近似kNN查询。
+3、Elasticsearch ccs场景使用kNN检索时，不支持ccs_minimize_roundtrips参数。
+4、kNN默认使用dfs_query_then_fetch查询类型，执行kNN查询时，不能显式设置search_type。
+
+# kNN支持两种检索方式：近似kNN和精确kNN
+二者都是全内存
+1、近似kNN：通过search API指定kNN参数查询。向量字段下index参数需要设置为true，才能开启近似kNN查询。
+说明 近似kNN搜索是在8.0版本新增的，在此之前，dense_vector类型的字段不支持在mapping中设置index为true。并且要使用kNN检索，需要确保创建的索引包含dense_vector类型的字段。为了支持近似kNN搜索，还需要重建索引并且设置新索引mapping中的index为true。
+近似kNN以较慢的索引速度和较低的准确性为代价来降低延迟。
+
+2、精确kNN：带向量函数的script_score查询。向量字段下index参数设置false或不要指定，可提高检索效率。script_score查询将扫描每个匹配的文档来计算向量函数，会导致搜索速度变慢。可以通过query限制传递给向量函数的文档数改善延迟。
+
+######################################################################################################
+近似kNN
+调整性能，通过近似kNN检索，您可以高效地找到与查询向量最近的K个向量，其搜索方式与其他查询存在差异，因此对集群性能有特殊要求，可参考以下方式调整：
+1、Elasticsearch将每个segment的密集向量值以HNSW图来存储，因此索引向量数据时主要耗时在HNSW图的构建过程中，建议您增加客户端超时时间且使用bulk请求写入数据。
+2、降低索引segment数或将所有segment合并为1个来提高检索效率。
+一种控制ES索引segment数量的方法：
+curl -XPOST 'http://localhost:9200/indexname/_optimize?max_num_segments=5'
+但该api适用的场景是那些只读索引，不应该被用在一个动态索引。假设每天有增量数据，是不能控制一个索引的segments数量，但是可以设置刷新频率和合并策略来减少segment的数量；
+elasticsearch会有一系列的daemon任务，去扫描以及合并小的segment，但是，并不会保证把segment合并到一个固定的数量
+3、数据节点的内存空间大于所有向量数据和索引结构所占空间。
+4、避免在kNN检索期间大量写入或更新数据。
+
+创建索引
+创建近似kNN时，索引mapping必须设置index为true，并指定similarity参数值。
+PUT image-index
+{
+  "mappings": {
+    "properties": {
+      "image-vector": {
+        "type": "dense_vector",
+        "dims": 3,
+        "index": true,
+        "similarity": "l2_norm"
+      },
+      "title": {
+        "type": "text"
+      },
+      "file-type": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+向量参数说明如下，更多参数说明，请参见dense-vector（https://www.elastic.co/guide/en/elasticsearch/reference/8.6/dense-vector.html?spm=a2c4g.604348.0.0.e825181a8xW8lB#dense-vector-params）。
+参数	说明
+type	用来存储浮点数的密集向量。需要设置为dense_vector。
+dims	向量的维度大小。当index为true时，不能超过1024；当index为false时，不能超过2048 。
+index	是否为kNN生成新的索引。实现近似kNN查询时，需要将index设置为true，默认为false。
+similarity	文档间的相似度算法。index为true时，此值必须设置。可选值：
+l2_norm：计算向量间欧式距离。_score公式：1 / (1 + l2_norm(query, vector)^2)。
+dot_product：计算两个向量点积，_score计算依赖element_type参数值。
+element_type为float，所有向量需归一化为单位长度。_score公式：(1 + dot_product(query, vector)) / 2。
+element_type为byte，所有向量需要有相同的长度，否则结果不准确。_score公式：0.5 + (dot_product(query, vector) / (32768 * dims))。
+cosine：计算向量间的余弦相似度。最有效的cosine使用方式是将所有向量归一化为单位长度代替dot_product。_score公式：(1 + cosine(query, vector)) / 2。
+重要 余弦相似度算法不允许向量数据为0。
+
+写入数据
+POST image-index/_bulk?refresh=true
+{ "index": { "_id": "1" } }
+{ "image-vector": [1, 5, -20], "title": "moose family", "file-type": "jpg" }
+{ "index": { "_id": "2" } }
+{ "image-vector": [42, 8, -15], "title": "alpine lake", "file-type": "png" }
+{ "index": { "_id": "3" } }
+{ "image-vector": [15, 11, 23], "title": "full moon", "file-type": "jpg" }
+
+向量检索
+近似向量检索需要通过search API调用knn参数（https://www.elastic.co/guide/en/elasticsearch/reference/8.6/search-search.html?spm=a2c4g.604348.0.0.e825181a8xW8lB#search-api-knn）。
+说明 knn_search API在Elasticsearch 8.4版本之后被废弃，请通过在search API中配置knn参数的方式进行向量检索。
+POST image-index/_search
+{
+  "knn": {
+    "field": "image-vector",
+    "query_vector": [-5, 9, -12],
+    "k": 10,
+    "num_candidates": 100
+  },
+  "fields": [ "title", "file-type" ]
+}
+knn参数说明如下，详细说明请参见search-api-knn（https://www.elastic.co/guide/en/elasticsearch/reference/8.6/search-search.html?spm=a2c4g.604348.0.0.e825181a8xW8lB#search-api-knn）。
+参数	是否必选	说明
+field	是	要检索的向量字段名称。
+query_vector	是	查询向量，必须与field指定的向量数据具有相同的维度。
+k	是	返回的最近邻对象的数量。k的值需要小于num_candidates。
+num_candidates	是	每个分片上需查找的最近邻候选对象的个数，不能超过10000。
+说明 增加num_candidates的值可提高最终K值的准确性，但相应搜索速度会变慢。
+filter	否	通过DSL语句过滤文档。kNN从过滤后的文档中返回前K个文档，如果不指定过滤器，将对所有文档做kNN近似计算。
+
+######################################################################################################
+精确kNN
+创建索引
+PUT zl-index
+{
+  "mappings": {
+    "properties": {
+      "product-vector": {
+        "type": "dense_vector",
+        "dims": 5,
+        "index": false
+      },
+      "price": {
+        "type": "long"
+      }
+    }
+  }
+}
+定义向量字段部分参数说明如下，更多参数说明请参见dense-vector（https://www.elastic.co/guide/en/elasticsearch/reference/8.6/dense-vector.html?spm=a2c4g.604348.0.0.e825181a8xW8lB#dense-vector-params）。
+参数	说明
+type	用来存储浮点数的密集向量，需要设置为dense_vector。
+dim	向量的维度大小。
+index	是否为kNN生成新的索引文件。默认值为false。使用精确kNN检索，可不配置index参数或将其设置为false，可提高精确kNN的检索效率。
+
+写入数据
+POST zl-index/_bulk?refresh=true
+{ "index": { "_id": "1" } }
+{ "product-vector": [230.0, 300.33, -34.8988, 15.555, -200.0], "price": 1599 }
+{ "index": { "_id": "2" } }
+{ "product-vector": [-0.5, 100.0, -13.0, 14.8, -156.0], "price": 799 }
+{ "index": { "_id": "3" } }
+{ "product-vector": [0.5, 111.3, -13.0, 14.8, -156.0], "price": 1099 }
+
+
+查询向量
+以下示例在script_score查询中指定向量函数cosineSimilarity，并使用script_score.query指定过滤器限制传递给vector文档数来降低搜索延迟。
+POST zl-index/_search
+{
+  "query": {
+    "script_score": {
+      "query" : {
+        "bool" : {
+          "filter" : {
+            "range" : {
+              "price" : {
+                "gte": 1000
+              }
+            }
+          }
+        }
+      },
+      "script": {
+        "source": "cosineSimilarity(params.queryVector, 'product-vector') + 1.0",
+        "params": {
+          "queryVector": [-0.5, 90.0, -10, 14.8, -156.0]
+        }
+      }
+    }
+  }
+}
+script_score支持以下向量函数，更多说明请参见向量访问（https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-script-score-query.html?spm=a2c4g.604348.0.0.e825181a8xW8lB#vector-functions）。
+函数名	说明
+cosineSimilarity	计算查询向量和文档向量的余弦相似度。
+dotProduct	计算查询向量和文档向量之间的点乘距离。
+l1norm	计算查询向量和文档向量之间的L1距离（曼哈顿距离）。
+l2norm	计算查询向量和文档向量之间的L2距离（欧式距离）。
+
+
+
+

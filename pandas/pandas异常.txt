@@ -77,3 +77,35 @@ pd.set_option('display.max_columns', None)#所有列
 pd.set_option('display.max_rows', None)#所有行
 df.head()
 
+# pandas 读取Excel出错：
+xlrd.biffh.XLRDError: Excel xlsx file; not supported
+可能是因为pandas版本太低，升级pandas版本，如：
+pip3 install -U pandas==1.5.3
+
+# pd.read_json报错：
+ValueError: Protocol not known: 
+原因
+json里有参数值是"https://www.biadu.com"，也就是说json里含有 // 。
+当把 // 这类参数值删除后，pd.read_json(json_demo) 正常。
+根本原因（猜测）
+Pandas 1.X中的pd.read_json()不再能读取简单的字符串，需进行格式之类的转换。
+解决办法
+from io import StringIO
+df = pd.read_json(StringIO(json_demo))
+
+# 问题 df.to_excel报内存错误，to_excel太耗内存：
+MemoryError
+因写入的数据量太大，导致报出“内存溢出”的错误。
+解决方法
+使用xlsxwriter模块将数据写入，代码更改为：
+import pandas as pd
+import numpy as np
+import xlsxwriter
+# 生成dataframe数据
+df = pd.DataFrame(np.arange(12000000).reshape(300000,40))
+# print(df)
+writer = pd.ExcelWriter('test.xlsx', engine='xlsxwriter', options={'strings_to_urls':False})  # options参数可带可不带，根据实际情况
+df.to_excel(writer, index=False)
+writer.save()
+更改后就不会报错了，xlsxwriter模块是一个python处理Excel写入的专有模块，不支持对Excel的读取，只支持写入，功能非常强大。
+

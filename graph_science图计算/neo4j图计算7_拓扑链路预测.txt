@@ -1,0 +1,23 @@
+
+拓扑链路预测
+Topological link prediction
+链路预测算法有助于使用图形的拓扑确定一对节点的接近程度。然后，计算出的分数可用于预测它们之间的新关系。
+
+1、Adamic Adar
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/adamic-adar/
+
+2、Common Neighbors
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/common-neighbors/
+
+3、Preferential Attachment
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/preferential-attachment/
+
+4、Resource Allocation
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/resource-allocation/
+
+5、Same Community
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/same-community/
+
+6、Total Neighbors
+https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/total-neighbors/
+

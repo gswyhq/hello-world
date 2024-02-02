@@ -1,0 +1,33 @@
+
+如果一个日志不停的增长下去， 显然不是什么好事。 因此日志必须要进行切分。 常见的两种方式：
+1、按照大小
+2、按照时间
+
+# 按照日志大小切分
+如果是按照大小进行切分， 引入RotatingFileHandler 即可。 举例：
+from logging.handlers import RotatingFileHandler 
+handler = RotatingFileHandler("flask.log", maxBytes=1024000, backupCount=10)
+简单解释一下：
+“flask.log” 就是日志的文件名
+maxBytes 就是 日志大小
+backupCount 就是保留的日志个数。 比如flask.log 写满了， 就会被重命名成flask.log.1, 程序继续向flask.log写入。
+更详细的解释可以看看官网说明: https://docs.python.org/2/library/logging.handlers.html#rotatingfilehandler
+
+# 按照日期进行切分
+在logging这个库之中， 还支持按照分钟、小时、天等级别进行切分。 根据我们业务的大小， 我一般选择按照“天” 进行切分。 可以参考下面的配置：
+from logging.handlers import TimedRotatingFileHandler
+handler = TimedRotatingFileHandler(
+        "flask.log", when="D", interval=1, backupCount=15,
+        encoding="UTF-8", delay=False, utc=True)
+when=D： 表示按天进行切分
+interval=1： 每天都切分。 比如interval=2就表示两天切分一下。
+backupCount=15: 保留15天的日志
+encoding=UTF-8: 使用UTF-8的编码来写日志
+utc=True: 使用UTC+0的时间来记录 （一般docker镜像默认也是UTC+0）
+
+when（例如D几天）或H几小时的大多数可能值与interval一起使用，例如，如果指定了when='D', interval=7，则日志将每7天轮换一次。
+同样，如果指定了when='H', interval=12，则日志将每12小时轮换一次，从脚本启动时开始。 
+when='midnight'是一种特殊情况，因为不使用interval参数，并且无论脚本何时启动，日志都会在午夜时间内每日进行翻转。
+
+
+

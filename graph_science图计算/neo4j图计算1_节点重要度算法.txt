@@ -1,0 +1,998 @@
+
+
+节点重要度算法
+1、PageRank
+2、ArticleRank
+3、特征向量中心性(Eigenvector Centrality)
+4、KCore
+5、度中心性DegreeCentrality（NStepDegree）
+6、DegreeWithTime
+7、BetweennessCentrality
+8、ClosenessCentrality
+9、Harmonic centrality
+10、基于超链接的主题搜索Hyperlink-Induced Topic Search (HITS)
+11、CELF（Cost Effective Lazy Forward，具有成本效益的惰性前向选择）算法
+
+测试环境：
+Version:	5.7.0
+Edition:	Community
+Name:	neo4j
+
+RETURN gds.version();
+╒═════════════╕
+│gds.version()│
+╞═════════════╡
+│"2.3.3"      │
+└─────────────┘
+
+资料来源：
+https://neo4j.com/docs/graph-data-science/current/algorithms/page-rank/
+https://docs.nebula-graph.com.cn/3.3.0/graph-computing/algorithm-description/
+###########################################################################################################################
+PageRank
+PageRank（页面排序）算法根据点之间的关系（边）计算点的相关性和重要性，通常使用在搜索引擎页面排名中。如果一个网页被很多其他网页链接，说明这个网页比较重要（PageRank 值较高）；
+如果一个 PageRank 值很高的网页链接到其他网页，那么被链接到的网页的 PageRank 值会提高。
+
+第一步：创建属性图
+CREATE
+  (home:Page {name:'Home'}),
+  (about:Page {name:'About'}),
+  (product:Page {name:'Product'}),
+  (links:Page {name:'Links'}),
+  (a:Page {name:'Site A'}),
+  (b:Page {name:'Site B'}),
+  (c:Page {name:'Site C'}),
+  (d:Page {name:'Site D'}),
+
+  (home)-[:LINKS {weight: 0.2}]->(about),
+  (home)-[:LINKS {weight: 0.2}]->(links),
+  (home)-[:LINKS {weight: 0.6}]->(product),
+  (about)-[:LINKS {weight: 1.0}]->(home),
+  (product)-[:LINKS {weight: 1.0}]->(home),
+  (a)-[:LINKS {weight: 1.0}]->(home),
+  (b)-[:LINKS {weight: 1.0}]->(home),
+  (c)-[:LINKS {weight: 1.0}]->(home),
+  (d)-[:LINKS {weight: 1.0}]->(home),
+  (links)-[:LINKS {weight: 0.8}]->(home),
+  (links)-[:LINKS {weight: 0.05}]->(a),
+  (links)-[:LINKS {weight: 0.05}]->(b),
+  (links)-[:LINKS {weight: 0.05}]->(c),
+  (links)-[:LINKS {weight: 0.05}]->(d);
+
+第二步：给属性图取一个名字
+CALL gds.graph.project(
+  'myGraph',
+  'Page',
+  'LINKS',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+
+第三步：(可选)可以评估一下这个属性图所占内存
+CALL gds.pageRank.write.estimate('myGraph', {
+  writeProperty: 'pageRank',
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+
+第四步：调用GDS中的PageRank算法(不带权重)
+CALL gds.pageRank.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤══════════════════╕
+│name     │score             │
+╞═════════╪══════════════════╡
+│"Home"   │3.215681999884452 │
+├─────────┼──────────────────┤
+│"About"  │1.0542700552146722│
+├─────────┼──────────────────┤
+│"Links"  │1.0542700552146722│
+├─────────┼──────────────────┤
+│"Product"│1.0542700552146722│
+├─────────┼──────────────────┤
+│"Site A" │0.3278578964488539│
+├─────────┼──────────────────┤
+│"Site B" │0.3278578964488539│
+├─────────┼──────────────────┤
+│"Site C" │0.3278578964488539│
+├─────────┼──────────────────┤
+│"Site D" │0.3278578964488539│
+└─────────┴──────────────────┘
+第五步：Stats模式
+CALL gds.pageRank.stats('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD centralityDistribution
+RETURN centralityDistribution.max AS max
+╒══════════════════╕
+│max               │
+╞══════════════════╡
+│3.2156810760498047│
+└──────────────────┘
+
+第六步：mutate模式
+CALL gds.pageRank.mutate('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  mutateProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+╒═════════════════════╤═════════════╕
+│nodePropertiesWritten│ranIterations│
+╞═════════════════════╪═════════════╡
+│8                    │20           │
+└─────────────────────┴─────────────┘
+
+第七步：write模式
+CALL gds.pageRank.write('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+
+第八步：执行带权重的算法计算
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │3.53751028396339   │
+├─────────┼───────────────────┤
+│"Product"│1.9357838291651097 │
+├─────────┼───────────────────┤
+│"About"  │0.7452612763883698 │
+├─────────┼───────────────────┤
+│"Links"  │0.7452612763883698 │
+├─────────┼───────────────────┤
+│"Site A" │0.18152677135466103│
+├─────────┼───────────────────┤
+│"Site B" │0.18152677135466103│
+├─────────┼───────────────────┤
+│"Site C" │0.18152677135466103│
+├─────────┼───────────────────┤
+│"Site D" │0.18152677135466103│
+└─────────┴───────────────────┘
+
+第九步：增加约束条件
+tolerance（表示迭代之间分数的最小变化）设为0.1，低于此值，算法结束，结果返回
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  tolerance: 0.1
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+
+# 阻尼系数（dampingFactor）
+阻尼因子配置参数接受介于 0（含）和 1（不包括）之间的值。如果其值太高，则可能会出现汇和蜘蛛陷阱的问题，并且值可能会振荡以使算法不收敛。
+如果它太低，那么所有分数都会被推到 1，结果将无法充分反映图形的结构。
+将阻尼系数（dampingFactor）由0.85改为0.05，各个节点得分差异变小：
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.05
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤══════════════════╕
+│name     │score             │
+╞═════════╪══════════════════╡
+│"Home"   │1.2487309425844906│
+├─────────┼──────────────────┤
+│"About"  │0.9708121818724536│
+├─────────┼──────────────────┤
+│"Links"  │0.9708121818724536│
+├─────────┼──────────────────┤
+│"Product"│0.9708121818724536│
+├─────────┼──────────────────┤
+│"Site A" │0.9597081216238426│
+├─────────┼──────────────────┤
+│"Site B" │0.9597081216238426│
+├─────────┼──────────────────┤
+│"Site C" │0.9597081216238426│
+├─────────┼──────────────────┤
+│"Site D" │0.9597081216238426│
+└─────────┴──────────────────┘
+
+# 个性化页面排名
+个性化PageRank是PageRank的变体，它偏向于一组源节点。PageRank的这种变体通常用作推荐系统的一部分。
+以下示例演示如何以“siteA”为中心运行 PageRank。
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  sourceNodes: [siteA]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.39902290442518784│
+├─────────┼───────────────────┤
+│"Site A" │0.16890325301726694│
+├─────────┼───────────────────┤
+│"About"  │0.11220151747374331│
+├─────────┼───────────────────┤
+│"Links"  │0.11220151747374331│
+├─────────┼───────────────────┤
+│"Product"│0.11220151747374331│
+├─────────┼───────────────────┤
+│"Site B" │0.01890325301726691│
+├─────────┼───────────────────┤
+│"Site C" │0.01890325301726691│
+├─────────┼───────────────────┤
+│"Site D" │0.01890325301726691│
+└─────────┴───────────────────┘
+
+缩放中心性分数
+要在算法执行过程中规范化最终分数，可以使用缩放器配置参数。常见的缩放器是 L1Norm，它将每个分数标准化为 0 到 1 之间的值。
+CALL gds.pageRank.stream('myGraph', {
+  scaler: "L1Norm"
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.4181682554824872 │
+├─────────┼───────────────────┤
+│"About"  │0.1370975954128506 │
+├─────────┼───────────────────┤
+│"Links"  │0.1370975954128506 │
+├─────────┼───────────────────┤
+│"Product"│0.1370975954128506 │
+├─────────┼───────────────────┤
+│"Site A" │0.04263473956974027│
+├─────────┼───────────────────┤
+│"Site B" │0.04263473956974027│
+├─────────┼───────────────────┤
+│"Site C" │0.04263473956974027│
+├─────────┼───────────────────┤
+│"Site D" │0.04263473956974027│
+└─────────┴───────────────────┘
+
+###########################################################################################################################
+ArticleRank是Page Rank算法的变体，用于测量节点的传递影响。
+页面排名遵循以下假设：源自低度节点的关系比来自高度节点的关系具有更高的影响力。文章排名通过降低每次迭代中发送到其邻居的分数来降低低度节点的影响。
+测试数据同PageRank
+第一步：评估articleRank算法的内存消耗：
+CALL gds.articleRank.write.estimate('myGraph', {
+  writeProperty: 'centrality',
+  maxIterations: 20
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│8        │14               │1024    │1024    │"1024 Bytes"  │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+第二步：在 stream 模式下计算每个节点不带权重得分：
+CALL gds.articleRank.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.5607071761939444 │
+├─────────┼───────────────────┤
+│"About"  │0.250337073634706  │
+├─────────┼───────────────────┤
+│"Links"  │0.250337073634706  │
+├─────────┼───────────────────┤
+│"Product"│0.250337073634706  │
+├─────────┼───────────────────┤
+│"Site A" │0.18152391630760797│
+├─────────┼───────────────────┤
+│"Site B" │0.18152391630760797│
+├─────────┼───────────────────┤
+│"Site C" │0.18152391630760797│
+├─────────┼───────────────────┤
+│"Site D" │0.18152391630760797│
+└─────────┴───────────────────┘
+
+第三步：计算带权重，每个节点得分
+CALL gds.articleRank.stream('myGraph', {
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.5160810726222141 │
+├─────────┼───────────────────┤
+│"Product"│0.24570958074084706│
+├─────────┼───────────────────┤
+│"About"  │0.1819031935802824 │
+├─────────┼───────────────────┤
+│"Links"  │0.1819031935802824 │
+├─────────┼───────────────────┤
+│"Site A" │0.15281123078335393│
+├─────────┼───────────────────┤
+│"Site B" │0.15281123078335393│
+├─────────┼───────────────────┤
+│"Site C" │0.15281123078335393│
+├─────────┼───────────────────┤
+│"Site D" │0.15281123078335393│
+└─────────┴───────────────────┘
+
+第四步：个性化排名
+MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
+CALL gds.articleRank.stream('myGraph', {
+  maxIterations: 20,
+  sourceNodes: [siteA, siteB]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤════════════════════╕
+│name     │score               │
+╞═════════╪════════════════════╡
+│"Site A" │0.15249052775314756 │
+├─────────┼────────────────────┤
+│"Site B" │0.15249052775314756 │
+├─────────┼────────────────────┤
+│"Home"   │0.1105231342997017  │
+├─────────┼────────────────────┤
+│"About"  │0.019777824032578193│
+├─────────┼────────────────────┤
+│"Links"  │0.019777824032578193│
+├─────────┼────────────────────┤
+│"Product"│0.019777824032578193│
+├─────────┼────────────────────┤
+│"Site C" │0.002490527753147571│
+├─────────┼────────────────────┤
+│"Site D" │0.002490527753147571│
+└─────────┴────────────────────┘
+
+第五步：得分正则化
+CALL gds.articleRank.stream('myGraph', {
+  scaler: "L1Norm"
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.275151294006312  │
+├─────────┼───────────────────┤
+│"About"  │0.12284588582564794│
+├─────────┼───────────────────┤
+│"Links"  │0.12284588582564794│
+├─────────┼───────────────────┤
+│"Product"│0.12284588582564794│
+├─────────┼───────────────────┤
+│"Site A" │0.08907776212918608│
+├─────────┼───────────────────┤
+│"Site B" │0.08907776212918608│
+├─────────┼───────────────────┤
+│"Site C" │0.08907776212918608│
+├─────────┼───────────────────┤
+│"Site D" │0.08907776212918608│
+└─────────┴───────────────────┘
+
+###########################################################################################################################
+特征向量中心性(Eigenvector Centrality)
+特征向量中心性是一种测量节点传递影响的算法。与来自低评分节点的连接相比，源自高评分节点的关系对节点分数的贡献更大。高特征向量分数意味着节点连接到许多本身具有高分数的节点。
+使用的样例数据，同PageRank
+同样的，先评估内存消耗：
+CALL gds.eigenvector.write.estimate('myGraph', {
+  writeProperty: 'centrality',
+  maxIterations: 20
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│8        │14               │1024    │1024    │"1024 Bytes"  │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+
+第二步：stream模式下，无权重特征向量中心性
+CALL gds.eigenvector.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤═══════════════════╕
+│name     │score              │
+╞═════════╪═══════════════════╡
+│"Home"   │0.7465574981728249 │
+├─────────┼───────────────────┤
+│"About"  │0.33997520529777137│
+├─────────┼───────────────────┤
+│"Links"  │0.33997520529777137│
+├─────────┼───────────────────┤
+│"Product"│0.33997520529777137│
+├─────────┼───────────────────┤
+│"Site A" │0.15484062876886298│
+├─────────┼───────────────────┤
+│"Site B" │0.15484062876886298│
+├─────────┼───────────────────┤
+│"Site C" │0.15484062876886298│
+├─────────┼───────────────────┤
+│"Site D" │0.15484062876886298│
+└─────────┴───────────────────┘
+
+第三步：带权重，特征向量中心性
+CALL gds.eigenvector.stream('myGraph', {
+  maxIterations: 20,
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+╒═════════╤════════════════════╕
+│name     │score               │
+╞═════════╪════════════════════╡
+│"Home"   │0.8328163407319487  │
+├─────────┼────────────────────┤
+│"Product"│0.5004775834976313  │
+├─────────┼────────────────────┤
+│"About"  │0.1668258611658771  │
+├─────────┼────────────────────┤
+│"Links"  │0.1668258611658771  │
+├─────────┼────────────────────┤
+│"Site A" │0.008327591469710233│
+├─────────┼────────────────────┤
+│"Site B" │0.008327591469710233│
+├─────────┼────────────────────┤
+│"Site C" │0.008327591469710233│
+├─────────┼────────────────────┤
+│"Site D" │0.008327591469710233│
+└─────────┴────────────────────┘
+
+###########################################################################################################################
+
+KCore
+KCore 算法用于计算出没有小于 K 度的点组成的子图，通常使用在社区发现、金融风控等场景。其计算结果是判断点重要性最常用的参考值之一，体现了点的传播能力。
+k-Core算法是一种用来在图中找出符合指定核心度的紧密关联的子图结构，在k-Core的结果子图中，每个顶点至少具有k的度数（简单理解，至少与周围k个点相连），且所有顶点都至少与该子图中的 k 个其他节点相连。
+k-Core通常用来对一个图进行子图划分，通过去除不重要的顶点，将符合逾期的子图暴露出来进行进一步分析。
+k-Core算法是一种子图挖掘算法，用于寻找一个图中符合指定核心度的顶点的集合，即要求每个顶点至少与该子图中的其他k个顶点相关联。任何一个图，在不包含孤立顶点的情况下，都是1-Core的。
+k-Core算法的过程也是非常简单的，一共分为两步，其实两步所做的内容是一样的，至于为什么要分两步执行同一个过程（因为有些节点最开始度数不是小于k，当将小于k的顶点移除后其度数才小于k，满足移除要求）。
+Step 1：将图G中度数小于k的顶点全部移除，得到子图G'。
+Step 2：将图G'中度数小于k的顶点全部移除，得到新子图G''。该子图G''就是最终k-Core划分的结果子图。
+
+###########################################################################################################################
+DegreeCentrality（NStepDegree）
+DegreeCentrality（度中心性） 算法用于查找图中的流行点。度中心性测量来自点的传入或传出（或两者）关系的数量，具体取决于关系投影的方向。一个点的度越大就意味着这个点的度中心性越高，该点在网络中就越重要。
+
+第一步：添加样例数据
+CREATE
+  (alice:User {name: 'Alice'}),
+  (bridget:User {name: 'Bridget'}),
+  (charles:User {name: 'Charles'}),
+  (doug:User {name: 'Doug'}),
+  (mark:User {name: 'Mark'}),
+  (michael:User {name: 'Michael'}),
+
+  (alice)-[:FOLLOWS {score: 1}]->(doug),
+  (alice)-[:FOLLOWS {score: -2}]->(bridget),
+  (alice)-[:FOLLOWS {score: 5}]->(charles),
+  (mark)-[:FOLLOWS {score: 1.5}]->(doug),
+  (mark)-[:FOLLOWS {score: 4.5}]->(michael),
+  (bridget)-[:FOLLOWS {score: 1.5}]->(doug),
+  (charles)-[:FOLLOWS {score: 2}]->(doug),
+  (michael)-[:FOLLOWS {score: 1.5}]->(doug)
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'User',
+  {
+    FOLLOWS: {
+      orientation: 'REVERSE',
+      properties: ['score']
+    }
+  }
+)
+
+若命名的图已存在，则报错：
+Failed to invoke procedure `gds.graph.project`: Caused by: java.lang.IllegalArgumentException: A graph with name 'myGraph' already exists.
+这个时候，可以删除指定名字的属性图（仅仅删除了该名称，相应的节点、关系数据还是存在的）：
+CALL gds.graph.drop('myGraph')
+
+当然，也可以取一个不重名的；
+
+第三步：评估下需要多少内存
+CALL gds.degree.write.estimate('myGraph', { writeProperty: 'degree' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│6        │8                │56      │56      │"56 Bytes"    │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+
+第四步：在 Stream 模式下，获取各个节点不带权重度中心性(degree centrality)
+不带权重度中心性，默认情况下是其指向自己的节点越多，得分越高
+CALL gds.degree.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score AS followers
+ORDER BY followers DESC, name DESC
+╒═════════╤═════════╕
+│name     │followers│
+╞═════════╪═════════╡
+│"Doug"   │5.0      │
+├─────────┼─────────┤
+│"Michael"│1.0      │
+├─────────┼─────────┤
+│"Charles"│1.0      │
+├─────────┼─────────┤
+│"Bridget"│1.0      │
+├─────────┼─────────┤
+│"Mark"   │0.0      │
+├─────────┼─────────┤
+│"Alice"  │0.0      │
+└─────────┴─────────┘
+
+第五步：带权重度中心性
+带权重度中心性，将所有指向自己的边权重相加，若小于0，则认为是0；
+CALL gds.degree.stream(
+   'myGraph',
+   { relationshipWeightProperty: 'score' }
+)
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers
+ORDER BY weightedFollowers DESC, name DESC
+╒═════════╤═════════════════╕
+│name     │weightedFollowers│
+╞═════════╪═════════════════╡
+│"Doug"   │7.5              │
+├─────────┼─────────────────┤
+│"Charles"│5.0              │
+├─────────┼─────────────────┤
+│"Michael"│4.5              │
+├─────────┼─────────────────┤
+│"Mark"   │0.0              │
+├─────────┼─────────────────┤
+│"Bridget"│0.0              │
+├─────────┼─────────────────┤
+│"Alice"  │0.0              │
+└─────────┴─────────────────┘
+
+第六步：计算度中心性，设置方向
+默认情况下，节点中心性使用 NATURAL（指向自己） 方向来计算度数。对于某些用例，分析不同的方向是有意义的，例如，如果我们想找出有多少用户关注另一个用户。为了改变方向，我们可以使用方向配置键。支持三个值：
+NATURAL（默认，仅考虑指向自己的）对应于计算每个节点的出度。
+REVERSE （仅考虑自己指向别人）反向对应于计算每个节点的入度。
+UNDIRECTED （不论方向）无向计算和求和每个节点的出度和入度。
+例如，不带权重，反向（自己指向其他节点越多分数越大）计算度中心性：
+CALL gds.degree.stream(
+   'myGraph',
+   { orientation: 'REVERSE' }
+)
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score AS followees
+ORDER BY followees DESC, name DESC
+╒═════════╤═════════╕
+│name     │followees│
+╞═════════╪═════════╡
+│"Alice"  │3.0      │
+├─────────┼─────────┤
+│"Mark"   │2.0      │
+├─────────┼─────────┤
+│"Michael"│1.0      │
+├─────────┼─────────┤
+│"Charles"│1.0      │
+├─────────┼─────────┤
+│"Bridget"│1.0      │
+├─────────┼─────────┤
+│"Doug"   │0.0      │
+└─────────┴─────────┘
+
+
+###########################################################################################################################
+DegreeWithTime
+DegreeWithTime 算法是基于边的时间范围统计邻居，查找出图中的流行点。
+
+###########################################################################################################################
+BetweennessCentrality
+BetweennessCentrality（介数中心性）算法是一种检测点对图中信息流的影响量的方法，用于查找从图的一部分到另一部分时作为桥梁的点。每个点都会根据通过该点的最短路径的数量获得一个分数，即介数中心性分数。
+第一步：创建样例数据
+CREATE
+  (alice:User {name: 'Alice'}),
+  (bob:User {name: 'Bob'}),
+  (carol:User {name: 'Carol'}),
+  (dan:User {name: 'Dan'}),
+  (eve:User {name: 'Eve'}),
+  (frank:User {name: 'Frank'}),
+  (gale:User {name: 'Gale'}),
+
+  (alice)-[:FOLLOWS {weight: 1.0}]->(carol),
+  (bob)-[:FOLLOWS {weight: 1.0}]->(carol),
+  (carol)-[:FOLLOWS {weight: 1.0}]->(dan),
+  (carol)-[:FOLLOWS {weight: 1.3}]->(eve),
+  (dan)-[:FOLLOWS {weight: 1.0}]->(frank),
+  (eve)-[:FOLLOWS {weight: 0.5}]->(frank),
+  (frank)-[:FOLLOWS {weight: 1.0}]->(gale);
+
+第二步：给属性图命名
+CALL gds.graph.project('myGraph', 'User', {FOLLOWS: {properties: 'weight'}})
+
+第三步：评估内存消耗
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│7        │7                │3632    │3632    │"3632 Bytes"  │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+
+评估单线程下的内存消耗：
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness', concurrency: 1 })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│7        │7                │1064    │1064    │"1064 Bytes"  │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+
+第四步：在 stream 模式下，返回节点中心性:
+CALL gds.betweenness.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+╒═══════╤═════╕
+│name   │score│
+╞═══════╪═════╡
+│"Alice"│0.0  │
+├───────┼─────┤
+│"Bob"  │0.0  │
+├───────┼─────┤
+│"Carol"│8.0  │
+├───────┼─────┤
+│"Dan"  │3.0  │
+├───────┼─────┤
+│"Eve"  │3.0  │
+├───────┼─────┤
+│"Frank"│5.0  │
+├───────┼─────┤
+│"Gale" │0.0  │
+└───────┴─────┘
+
+带权重得分：
+CALL gds.betweenness.stream('myGraph', {relationshipWeightProperty: 'weight'})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+╒═══════╤═════╕
+│name   │score│
+╞═══════╪═════╡
+│"Alice"│0.0  │
+├───────┼─────┤
+│"Bob"  │0.0  │
+├───────┼─────┤
+│"Carol"│8.0  │
+├───────┼─────┤
+│"Dan"  │0.0  │
+├───────┼─────┤
+│"Eve"  │6.0  │
+├───────┼─────┤
+│"Frank"│5.0  │
+├───────┼─────┤
+│"Gale" │0.0  │
+└───────┴─────┘
+
+第五步：采样（Sampling）近似评估
+介数中心性（Betweenness Centrality）计算可能非常耗费资源。为了帮助解决这个问题，可以使用采样技术来近似结果。配置参数 采样大小 和 采样种子 用于控制采样。
+我们在示例图上通过近似样本大小为 2 的介数中心性来说明这一点。种子值是任意整数，其中使用相同的值将在过程的不同运行之间产生相同的结果。
+以下内容将在流模式下运行算法，采样大小为 2:
+CALL gds.betweenness.stream('myGraph', {samplingSize: 2, samplingSeed: 0})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+╒═══════╤═════╕
+│name   │score│
+╞═══════╪═════╡
+│"Alice"│0.0  │
+├───────┼─────┤
+│"Bob"  │0.0  │
+├───────┼─────┤
+│"Carol"│4.0  │
+├───────┼─────┤
+│"Dan"  │2.0  │
+├───────┼─────┤
+│"Eve"  │2.0  │
+├───────┼─────┤
+│"Frank"│2.0  │
+├───────┼─────┤
+│"Gale" │0.0  │
+└───────┴─────┘
+
+第六步：无向图（Undirected）评估
+介数中心性也可以在无向图上运行。
+命名无向图，并将其存储在名为“myUndirectedGraph”的图形目录中。
+CALL gds.graph.project('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
+
+第七步：获取无向图介数中心性得分
+CALL gds.betweenness.stream('myUndirectedGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+╒═══════╤═════╕
+│name   │score│
+╞═══════╪═════╡
+│"Alice"│0.0  │
+├───────┼─────┤
+│"Bob"  │0.0  │
+├───────┼─────┤
+│"Carol"│9.5  │
+├───────┼─────┤
+│"Dan"  │3.0  │
+├───────┼─────┤
+│"Eve"  │3.0  │
+├───────┼─────┤
+│"Frank"│5.5  │
+├───────┼─────┤
+│"Gale" │0.0  │
+└───────┴─────┘
+
+###########################################################################################################################
+ClosenessCentrality
+ClosenessCentrality（紧密中心性）算法用于计算一个点到所有其他可达点的最短距离的平均值的倒数。值越大，点在图中的位置越靠近中心，也可以用来衡量信息从该点传输到其他点的时间长短。
+
+第一步，创建样例数据
+CREATE (a:Node {id:"A"}),
+       (b:Node {id:"B"}),
+       (c:Node {id:"C"}),
+       (d:Node {id:"D"}),
+       (e:Node {id:"E"}),
+       (a)-[:LINK]->(b),
+       (b)-[:LINK]->(a),
+       (b)-[:LINK]->(c),
+       (c)-[:LINK]->(b),
+       (c)-[:LINK]->(d),
+       (d)-[:LINK]->(c),
+       (d)-[:LINK]->(e),
+       (e)-[:LINK]->(d);
+
+第二步：给属性图命名
+CALL gds.graph.project('myGraph', 'Node', 'LINK')
+
+第三步：流模式下，计算紧密中心性得分：
+CALL gds.beta.closeness.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).id AS id, score
+ORDER BY score DESC
+╒═══╤══════════════════╕
+│id │score             │
+╞═══╪══════════════════╡
+│"C"│0.6666666666666666│
+├───┼──────────────────┤
+│"B"│0.5714285714285714│
+├───┼──────────────────┤
+│"D"│0.5714285714285714│
+├───┼──────────────────┤
+│"A"│0.4               │
+├───┼──────────────────┤
+│"E"│0.4               │
+└───┴──────────────────┘
+
+###########################################################################################################################
+调和中心性（Harmonic Centrality）算法是接近中心性算法的变种。
+接近中心性衡量的是节点在其连通分量中到其它各点的平均最短距离，显然在不连通图中就无法体现节点在全图的中心性；
+调和中心性提出的“平均最短距离”则是对这些最短距离的倒数求和，这使它可以处理非连通图中会出现的无限值。
+调和平均数（Harmonic Mean）是平均数的一种，与算术平均数不同，它是变量倒数的算术平均数的倒数，所以又称为倒数平均数。
+
+CALL gds.alpha.closeness.harmonic.stream('myGraph', {})
+YIELD nodeId, centrality
+RETURN gds.util.asNode(nodeId).id AS user, centrality
+ORDER BY centrality DESC
+╒════╤══════════════════╕
+│user│centrality        │
+╞════╪══════════════════╡
+│"C" │0.75              │
+├────┼──────────────────┤
+│"B" │0.7083333333333334│
+├────┼──────────────────┤
+│"D" │0.7083333333333334│
+├────┼──────────────────┤
+│"A" │0.5208333333333333│
+├────┼──────────────────┤
+│"E" │0.5208333333333333│
+└────┴──────────────────┘
+
+###########################################################################################################################
+基于超链接的主题搜索Hyperlink-Induced Topic Search (HITS)
+HITS算法的全称是“基于超链接的主题搜索”(Hyperlink-Induced Topic Search)，该算法与PageRank算法一样，也是一种用于对网页进行排序的算法。
+与PageRank不同的是，HITS将网页分成两类，即：Hub页面和Authority页面。
+其中Hub页面类似于常见的门户网站，像hao123首页之类的，它提供了大量高质量的网页链接；
+而Authority页面更像是用户希望访问的网站，比如搜索的时候我们希望用百度，购物的时候我们希望进入淘宝和京东等。
+Hub页面相当于充当了一个中间枢纽的角色，对于用户而言，他们更关注高Authority的网页。
+算法原理
+HITS采用互相增强原理，并基于以下两个假设：
+一个高质量的authority页面会被很多高质量的hub页面所指向。
+一个高质量的hub页面会指向很多高质量的authority页面。
+这两个假设也是非常好理解，利用上述两个基本假设及相互增强关系等原则进行多轮迭代计算，每轮迭代计算更新每个页面的两个权值，直到权值稳定不再发生明显的变化为止。
+
+第一步：创建样例数据
+CREATE
+  (a:Website {name: 'A'}),
+  (b:Website {name: 'B'}),
+  (c:Website {name: 'C'}),
+  (d:Website {name: 'D'}),
+  (e:Website {name: 'E'}),
+  (f:Website {name: 'F'}),
+  (g:Website {name: 'G'}),
+  (h:Website {name: 'H'}),
+  (i:Website {name: 'I'}),
+
+  (a)-[:LINK]->(b),
+  (a)-[:LINK]->(c),
+  (a)-[:LINK]->(d),
+  (b)-[:LINK]->(c),
+  (b)-[:LINK]->(d),
+  (c)-[:LINK]->(d),
+
+  (e)-[:LINK]->(b),
+  (e)-[:LINK]->(d),
+  (e)-[:LINK]->(f),
+  (e)-[:LINK]->(h),
+
+  (f)-[:LINK]->(g),
+  (f)-[:LINK]->(i),
+  (f)-[:LINK]->(h),
+  (g)-[:LINK]->(h),
+  (g)-[:LINK]->(i),
+  (h)-[:LINK]->(i);
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Website',
+  {LINK: {indexInverse: true}}
+);
+
+第三步：在流模式下，计算得分
+指向其他节点的边越多，其hub得分越高；指向自己的节点越多，auth得分越高
+CALL gds.alpha.hits.stream('myGraph', {hitsIterations: 20})
+YIELD nodeId, values
+RETURN gds.util.asNode(nodeId).name AS Name, values.auth AS auth, values.hub as hub
+ORDER BY Name ASC
+╒════╤═══════════════════╤═══════════════════╕
+│Name│auth               │hub                │
+╞════╪═══════════════════╪═══════════════════╡
+│"A" │0.0                │0.5147630377521207 │
+├────┼───────────────────┼───────────────────┤
+│"B" │0.42644630743935796│0.3573686670593437 │
+├────┼───────────────────┼───────────────────┤
+│"C" │0.3218729455718005 │0.23857061715828276│
+├────┼───────────────────┼───────────────────┤
+│"D" │0.6463862608483191 │0.0                │
+├────┼───────────────────┼───────────────────┤
+│"E" │0.0                │0.640681017095129  │
+├────┼───────────────────┼───────────────────┤
+│"F" │0.23646490227616518│0.2763222153580397 │
+├────┼───────────────────┼───────────────────┤
+│"G" │0.10200264424057169│0.23867470447760597│
+├────┼───────────────────┼───────────────────┤
+│"H" │0.426571816146601  │0.0812340105698113 │
+├────┼───────────────────┼───────────────────┤
+│"I" │0.22009646020698218│0.0                │
+└────┴───────────────────┴───────────────────┘
+
+###########################################################################################################################
+CELF（Cost Effective Lazy Forward，具有成本效益的惰性前向选择）算法可以在一个有传播行为的网络中选取一些种子节点作为传播源头，以达到影响力最大化（Influence Maximumization, IM）的效果。
+CELF 算法由 Jure Leskovec 等人于 2007 年提出，它改进了传统基于 IC 模型的贪心算法，利用函数次模性，只在初始时计算所有节点的影响力，之后不再重复计算所有节点的影响力，因此具有更高的成本效益。
+CELF 算法的一个典型应用场景是预防流行病爆发，通过选择出一小组人进行监测，从而达到任何疾病在爆发的早期就能被发现的效果。
+次模性（Submodular，又称子模性）是集合函数的一个属性，它描述的是一种边际效益（Marginal Gain）递减的现象。
+影响力传播模型中的独立层叠模型（independent cascading model，IC模型），影响力传播过程中，种子的影响力具备子模性（submodularity），即种子的边际影响力增量会呈现递减趋势，
+CELF算法（Cost-effective Lazy-forward）利用这个发现改进了Kempe&Kleinberg的原始的Greedy算法，使得算法的速度大幅提升。
+
+第一步：创建样例数据
+CREATE
+  (a:Person {name: 'Jimmy'}),
+  (b:Person {name: 'Jack'}),
+  (c:Person {name: 'Alice'}),
+  (d:Person {name: 'Ceri'}),
+  (e:Person {name: 'Mohammed'}),
+  (f:Person {name: 'Michael'}),
+  (g:Person {name: 'Ethan'}),
+  (h:Person {name: 'Lara'}),
+  (i:Person {name: 'Amir'}),
+  (j:Person {name: 'Willie'}),
+
+  (b)-[:FRIEND_OF]->(c),
+  (c)-[:FRIEND_OF]->(a),
+  (c)-[:FRIEND_OF]->(g),
+  (c)-[:FRIEND_OF]->(h),
+  (c)-[:FRIEND_OF]->(i),
+  (c)-[:FRIEND_OF]->(j),
+  (d)-[:FRIEND_OF]->(g),
+  (f)-[:FRIEND_OF]->(e),
+  (f)-[:FRIEND_OF]->(g),
+  (g)-[:FRIEND_OF]->(a),
+  (g)-[:FRIEND_OF]->(b),
+  (g)-[:FRIEND_OF]->(h),
+  (g)-[:FRIEND_OF]->(e),
+  (h)-[:FRIEND_OF]->(i);
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  'FRIEND_OF'
+);
+
+第三步：评估内存消耗
+CALL gds.beta.influenceMaximization.celf.write.estimate('myGraph', {
+  writeProperty: 'spread',
+  seedSetSize: 3
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory│
+╞═════════╪═════════════════╪════════╪════════╪══════════════╡
+│10       │14               │3144    │3144    │"3144 Bytes"  │
+└─────────┴─────────────────┴────────┴────────┴──────────────┘
+
+第四步：在Stream模型下计算：
+CALL gds.beta.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3})
+YIELD nodeId, spread
+RETURN gds.util.asNode(nodeId).name AS name, spread
+ORDER BY spread DESC, name ASC
+╒═════════╤══════════════════╕
+│name     │spread            │
+╞═════════╪══════════════════╡
+│"Alice"  │1.6               │
+├─────────┼──────────────────┤
+│"Ceri"   │1.08              │
+├─────────┼──────────────────┤
+│"Michael"│1.0799999999999996│
+└─────────┴──────────────────┘
+
+使用mutateProperty更新图形:
+CALL gds.beta.influenceMaximization.celf.mutate('myGraph', {
+  mutateProperty: 'celfSpread',
+  seedSetSize: 3
+})
+YIELD nodePropertiesWritten
+╒═════════════════════╕
+│nodePropertiesWritten│
+╞═════════════════════╡
+│10                   │
+└─────────────────────┘
+
+CALL gds.graph.nodeProperty.stream('myGraph', 'celfSpread')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS spread
+ORDER BY spread DESC, name ASC
+╒══════════╤══════════════════╕
+│name      │spread            │
+╞══════════╪══════════════════╡
+│"Alice"   │1.6               │
+├──────────┼──────────────────┤
+│"Ceri"    │1.08              │
+├──────────┼──────────────────┤
+│"Michael" │1.0799999999999996│
+├──────────┼──────────────────┤
+│"Amir"    │0.0               │
+├──────────┼──────────────────┤
+│"Ethan"   │0.0               │
+├──────────┼──────────────────┤
+│"Jack"    │0.0               │
+├──────────┼──────────────────┤
+│"Jimmy"   │0.0               │
+├──────────┼──────────────────┤
+│"Lara"    │0.0               │
+├──────────┼──────────────────┤
+│"Mohammed"│0.0               │
+├──────────┼──────────────────┤
+│"Willie"  │0.0               │
+└──────────┴──────────────────┘
+

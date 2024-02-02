@@ -1,0 +1,59 @@
+
+# 创建一个主题：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --zookeeper 192.168.3.105:2181 --create --topic DgpTableInfoTopicDEV  --partitions 1 --replication-factor 1
+Created topic "DgpTableInfoTopicDEV".
+
+# 查看主题列表：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --zookeeper 192.168.3.105:2181 --list
+ATLAS_HOOK
+ATLAS_HOOK_TEMP
+CustomerCountry
+CustomerCountry2
+DgpTableInfoTopicDEV
+
+# 查看主题分区数：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --zookeeper 192.168.3.105:2181  --describe  --topic DgpTableInfoTopicDEV
+Topic:DgpTableInfoTopicDEV      PartitionCount:1        ReplicationFactor:1     Configs:
+        Topic: DgpTableInfoTopicDEV     Partition: 0    Leader: 2       Replicas: 2     Isr: 2
+
+# 增加（修改）分区数量
+将topic为test分区设置为3个
+./bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 -alter --partitions 3 --topic test
+
+# 删除主题，这里是删除主题CustomerCountry2
+bin/kafka-topics.sh -delete --topic CustomerCountry2 --bootstrap-server 192.168.31.234:9092,192.168.31.235:9092,192.168.31.236:9092
+有时候删除命令删除不了的情况：
+应先停止生产和消费程序。否则topic的offset信息会一直在broker更新。调用kafka delete命令则无法删除该topic。取消自动创建topic，设置 auto.create.topics.enable = false。
+
+# 修改主题的分区数：
+bin/kafka-topics.sh --bootstrap-server <host>:<port> --alter --topic <topic_name> --partitions <新分区数>
+
+# 删除主题
+删除主题使用 --delete 操作，需要指定要删除的主题名称；
+bin/kafka-topics.sh --bootstrap-server <host>:<port> --delete --topic <topic_name>
+
+这里值得注意的是，如果有副本所在的 Broker 处于宕机的状态，是无法完成删除的。
+
+# 修改 Topic 级别的参数
+bin/kafka-configs.sh --zookeeper <host>:<port> --entity-type topics --entity-name <topic_name> --alter --add-config <参数名>=<参数值>
+
+注意这里并没有通过 --bootstrap-server 指定 Broker 节点的连接，而至通过 --zookeeper 指定了 ZooKeeper 的连接。
+
+# 查询消费组
+kafka-consumer-groups.sh --bootstrap-server {kafka连接地址} --list
+
+# 查询指定的组各topic消息消费情况
+./bin/kafka-consumer-groups.sh --bootstrap-server 172.16.331.120:11000 --describe --group op-order-core
+
+标记解释：
+TOPIC	topic名字
+PARTITION	分区id
+CURRENT-OFFSET	当前已消费的条数
+LOG-END-OFFSET	总条数
+LAG	未消费的条数
+CONSUMER-ID	消费id
+HOST	主机ip
+CLIENT-ID	客户端id
+
+# 删除消费组
+kafka-consumer-groups.sh --bootstrap-server {kafka连接地址} --delete --group {消费组}

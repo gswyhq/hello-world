@@ -1,0 +1,319 @@
+
+
+Java使用Aviator表达式
+
+获取执行引擎
+通过 ScriptEngineManager 可以获得 AviatorScript 的执行引擎：
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class ScriptEngineExample {
+  public static void main(final String[] args) {
+    final ScriptEngineManager sem = new ScriptEngineManager();
+    ScriptEngine engine = sem.getEngineByName("AviatorScript");
+
+  }
+}
+
+接下来我们将使用这个 engine 做各种例子演示。
+配置执行引擎
+可以从 ScriptEngine 里获取底层的 AviatorEvaluatorInstance 引用，进行引擎的相关配置：
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import com.googlecode.aviator.AviatorEvaluatorInstance;
+import com.googlecode.aviator.Feature;
+import com.googlecode.aviator.Options;
+import com.googlecode.aviator.script.AviatorScriptEngine;
+
+public class ConfigureEngine {
+  public static void main(final String[] args) throws Exception {
+    final ScriptEngineManager sem = new ScriptEngineManager();
+    ScriptEngine engine = sem.getEngineByName("AviatorScript");
+    AviatorEvaluatorInstance instance = ((AviatorScriptEngine) engine).getEngine();
+    // Use compatible feature set
+    instance.setOption(Options.FEATURE_SET, Feature.getCompatibleFeatures());
+    // Doesn't support if in compatible feature set mode.
+    engine.eval("if(true) { println('support if'); }");
+  }
+}
+
+默认的引擎处于下列模式：
+
+全语法特性支持
+缓存编译模式
+
+
+
+启用基于反射的 java 方法调用
+
+求值
+最简单的，你可以直接执行一段 AviatorScript 脚本，调用 eval(script) 方法即可
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class EvalScriptExample {
+  public static void main(final String[] args) throws Exception {
+    final ScriptEngineManager sem = new ScriptEngineManager();
+    ScriptEngine engine = sem.getEngineByName("AviatorScript");
+    engine.eval("print('Hello, World')");
+  }
+}
+
+这将打印 Hello, World 到控制台，调用了 print 函数，
+如果你的脚本是文件，也可以用 eval(reader) 方法：
+java复制代码import javax.script.*;
+public class EvalFile {
+    public static void main(String[] args) throws Exception {
+        // create a script engine manager
+        ScriptEngineManager factory = new ScriptEngineManager();
+        // create AviatorScript engine
+        ScriptEngine engine = factory.getEngineByName("AviatorScript");
+        // evaluate AviatorScript code from given file - specified by first argument
+        engine.eval(new java.io.FileReader(args[0]));
+    }
+}
+
+文件名通过执行的第一个参数指定。
+默认引擎处于缓存表达式模式。
+注入变量
+可以注入全局变量到脚本，并执行：
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import java.io.File;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class ScriptVars {
+  public static void main(final String[] args) throws Exception {
+    ScriptEngineManager manager = new ScriptEngineManager();
+    ScriptEngine engine = manager.getEngineByName("AviatorScript");
+
+    File f = new File("test.txt");
+    // expose File object as variable to script
+    engine.put("file", f);
+
+    // evaluate a script string. The script accesses "file"
+    // variable and calls method on it
+    engine.eval("print(getAbsolutePath(file))");
+  }
+
+}
+
+这里我们将文件 f 通过 engine.put 方法作为全局变量注入，然后执行脚本 print(getAbsolutePath(file)) ，打印文件的绝对路径。
+默认引擎启用了基于 java 反射的方法调用模式。
+编译脚本并执行
+AviatorScript 也支持了 Scripting API 的预编译模式：
+ini复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class CompileScript {
+  public static void main(final String[] args) throws Exception {
+    ScriptEngineManager manager = new ScriptEngineManager();
+    ScriptEngine engine = manager.getEngineByName("AviatorScript");
+
+    Compilable compilable = (Compilable) engine;
+    CompiledScript script = compilable.compile("a + b");
+
+    final Bindings bindings = engine.createBindings();
+    bindings.put("a", 99);
+    bindings.put("b", 1);
+    System.out.println(script.eval(bindings));
+  }
+
+}
+
+我们将表达式 a+b 编译成一个 CompiledScript 对象，接下来通过 createBindings 创建了一个环境绑定，将 a 和 b 分别绑定为 99 和 1，然后执行 eval(bindings) ，结果为 100。
+默认编译也是启用缓存表达式模式。
+调用脚本函数
+在 java 中调用 script 函数也同样支持：
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class InvokeScriptFunction {
+  public static void main(final String[] args) throws Exception {
+    ScriptEngineManager manager = new ScriptEngineManager();
+    ScriptEngine engine = manager.getEngineByName("AviatorScript");
+
+    // AviatorScript code in a String
+    String script = "fn hello(name) { print('Hello, ' + name); }";
+    // evaluate script
+    engine.eval(script);
+
+    // javax.script.Invocable is an optional interface.
+    // Check whether your script engine implements or not!
+    // Note that the AviatorScript engine implements Invocable interface.
+    Invocable inv = (Invocable) engine;
+
+    // invoke the global function named "hello"
+    inv.invokeFunction("hello", "Scripting!!" );
+  }
+}
+
+我们在脚本里定义了 hello 函数，然后通过 Invocable 接口就可以在 java 代码里调用并传入参数：
+复制代码Hello, Scripting!!
+
+在 AviatorScript 中可以使用 map 和闭包来模拟面向对象编程，同样，我们可以在 java 代码里调用 AviatorScript 中“对象”的方法：
+java复制代码package com.googlecode.aviator.example.scripting;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+public class InvokeScriptMethod {
+  public static void main(final String[] args) throws Exception {
+    ScriptEngineManager manager = new ScriptEngineManager();
+    ScriptEngine engine = manager.getEngineByName("AviatorScript");
+
+    // AviatorScript code in a String. This code defines a script object 'obj'
+    // with one method called 'hello'.
+    String script =
+        "let obj = seq.map(); obj.hello = lambda(name) -> print('Hello, ' + name); end;";
+    // evaluate script
+    engine.eval(script);
+
+    // javax.script.Invocable is an optional interface.
+    // Check whether your script engine implements or not!
+    // Note that the AviatorScript engine implements Invocable interface.
+    Invocable inv = (Invocable) engine;
+
+    // get script object on which we want to call the method
+    Object obj = engine.get("obj");
+
+    // invoke the method named "hello" on the script object "obj"
+    inv.invokeMethod(obj, "hello", "Script Method !!");
+  }
+}
+
+我们定义了对象 obj ，它有一个方法 hello(name) ，在 java 代码里通过 engine.get("obj") 获取该对象，然后通过 Invocable 接口调用  invokeMethod(obj, 方法名，方法参数列表) 就可以调用到该对象的方法。
+
+
+Dependency
+<dependency>
+  <groupId>com.googlecode.aviator</groupId>
+  <artifactId>aviator</artifactId>
+  <version>{version}</version>
+</dependency>
+可以在 search.maven.org 查看可用的版本。
+
+快速开始
+下载 aviator shell 到某个目录（最好是在系统的 PATH 环境变量内），比如 ~/bin/aviator:
+$ wget https://raw.githubusercontent.com/killme2008/aviator/master/bin/aviator
+$ chmod u+x aviator
+执行 aviator 命令，将自动下载最新文档版本 aviator jar 到 ~/.aviatorscript 下的安装目录并运行：
+$ aviator
+Downloading AviatorScript now...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   153  100   153    0     0    111      0  0:00:01  0:00:01 --:--:--   111
+100 1373k  100 1373k    0     0   689k      0  0:00:01  0:00:01 --:--:--  689k
+Usage: java com.googlecode.aviator.Main [file] [args]
+     : java com.googlecode.aviator.Main -e [script]
+     : java com.googlecode.aviator.Main -v
+将下面这个脚本保存为文件 hello.av:
+p("Hello, AviatorScript!");
+ 
+let a = tuple(1, 2, 3, 4, 5);
+ 
+p("sum of a is: " + reduce(a, +, 0));
+ 
+let date = new java.util.Date();
+p("The year is: "+ getYear(date));
+p("The month is: #{getMonth(date)}");
+执行脚本：
+$ aviator hello.av
+Hello, AviatorScript!
+sum of a is: 15
+The year is: 120
+The month is: 3
+示例：
+
+ public static void main(String[] args) {
+        Map<String,Object> params = new HashMap<>();
+       // params.put("T",null);
+        params.put("P",new BigDecimal(20));
+        params.put("L",100);
+        params.put("W",500);
+        params.put("Q",3);
+        // P*L*W*Q  可以写作 T=P*L*W*Q
+        Expression compiledExp = AviatorEvaluator.compile("T=P*L*W*Q");
+        BigDecimal totalPrice = (BigDecimal) compiledExp.execute(params);
+        System.out.println("totalPrice : "+totalPrice);
+    }
+更详细的请阅读用户指南。
+
+三元表达式
+ public static void main(String[] args) {
+ 
+        String expression = "W*L<0.1?0.1*329*P:W*L*329*P";
+        Map<String,Object>  params = new ConcurrentHashMap<>();
+        params.put("W",new BigDecimal(0.1));
+        params.put("L",new BigDecimal(0.5));
+        params.put("P",new BigDecimal(1));
+ 
+        BigDecimal finalPrice= BigDecimal.ZERO;
+ 
+        Expression compiledExp = AviatorEvaluator.compile(expression);
+ 
+        try {
+            finalPrice = (BigDecimal) compiledExp.execute(params);
+        } catch (ClassCastException e) {
+           if(compiledExp.execute(params) instanceof  Double
+                   || compiledExp.execute(params) instanceof  Float
+                   || compiledExp.execute(params) instanceof  Integer){
+               Double doubleVal = (Double)compiledExp.execute(params);
+               finalPrice = new BigDecimal(doubleVal);
+           }
+        }catch (Exception e) {
+            e.printStackTrace();
+            finalPrice =BigDecimal.ZERO;
+        }
+        finalPrice = finalPrice.setScale(2,BigDecimal.ROUND_HALF_UP);
+ 
+        System.out.println("finalPrice:"+finalPrice);
+ 
+        String result5=(String)AviatorEvaluator.execute("3>0? 'yes':'no'");
+        System.out.println(result5);
+    }
+
+aviator 命令行执行：
+1、下载aviator文件
+$ wget https://raw.githubusercontent.com/killme2008/aviator/master/bin/aviator
+$ chmod u+x aviator
+2、将下列脚本保存为文件  hello.av ：
+p('Hello, AviatorScript!');
+3、执行脚本：
+$ aviator hello.av Hello, AviatorScript!
+该命令会下载jar文件到~/.aviatorscript/self-installs/aviator-5.3.3.jar
+也可以自行下载并解压，再将aviator脚本中下载命令注释掉；
+也可以直接在命令行执行一段脚本，通过 -e 选项：
+$ aviator -e "p('Hello, AviatorScript!');"
+Hello, AviatorScript!
+null
+最后的 null 是整个表达式的执行结果。
+
+# 判断变量是否是字符串：
+println("123456: " + is_a("123456", String));
+
+# 获取变量的类型：
+println("type of list: " + type(list));
+
+链接：https://juejin.cn/post/7000742854700040222
+来源：稀土掘金
+# https://blog.csdn.net/qq_41415742/article/details/113244182
+# https://juejin.cn/column/6992213452605358117
+
+

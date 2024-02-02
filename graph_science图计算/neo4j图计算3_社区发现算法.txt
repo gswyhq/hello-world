@@ -1,0 +1,1321 @@
+
+社区检测
+社区检测算法用于评估节点组的聚类或分区方式，以及它们加强或分离的趋势。
+1、Louvain(Fast-Unfolding)
+2、标签传播算法（LPA,Label Propagation Algorithm）
+3、ConnectedComponent（联通分量）算法
+4、Triangle Count（三角形计数）算法
+5、局部聚集系数（Local Clustering Coefficient）
+6、K-1 着色算法
+7、模块度优化算法Modularity Optimization
+8、强连通分量(strongly connected components)
+9、SLAP（Speaker-Listener Label Propagation Algorithm）社区发现算法
+10、近似最大 k 切Approximate Maximum k-cut
+11、电导指标Conductance metric
+12、模块度指标Modularity metric
+13、K-均值聚类K-Means Clustering
+14、Leiden 算法
+###########################################################################################################################
+Louvain 算法
+原始论文为：《Fast unfolding of communities in large networks》。
+所以又被称为Fast unfolding算法。
+Louvain算法是一种基于模块度的社区发现算法。其基本思想是网络中节点尝试遍历所有邻居的社区标签，并选择最大化模块度增量的社区标签。在最大化模块度之后，每个社区看成一个新的节点，重复直到模块度不再增大。
+Louvain 算法是基于模块度的社区发现算法，该算法在效率和效果上都表现较好，并且能够发现层次性的社区结构，其优化目标是最大化整个社区网络的模块度。
+模块度用于区分社区内和社区间链路密度的差异，是衡量每个点划分社区的好坏。
+通常情况下，一个优秀的分群方法将会使得社区内部的模块度高于社区与社区之间。
+第一步：创建样例数据
+CREATE
+  (nAlice:User {name: 'Alice', seed: 42}),
+  (nBridget:User {name: 'Bridget', seed: 42}),
+  (nCharles:User {name: 'Charles', seed: 42}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+
+第二步，给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'seed',
+        relationshipProperties: 'weight'
+    }
+)
+第三步：评估内存消耗
+CALL gds.louvain.write.estimate('myGraph', { writeProperty: 'community' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+╒═════════╤═════════════════╤════════╤════════╤══════════════════════════╕
+│nodeCount│relationshipCount│bytesMin│bytesMax│requiredMemory            │
+╞═════════╪═════════════════╪════════╪════════╪══════════════════════════╡
+│6        │14               │5681    │563816  │"[5681 Bytes ... 550 KiB]"│
+└─────────┴─────────────────┴────────┴────────┴──────────────────────────┘
+
+第四步：计算每个节点的社区ID
+相同社区id,即认为在同一个社区
+CALL gds.louvain.stream('myGraph')
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name ASC
+
+第五步：计算每个节点的社区ID（考虑边权重）
+CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name ASC
+╒═════════╤═══════════╕
+│name     │communityId│
+╞═════════╪═══════════╡
+│"Alice"  │3          │
+├─────────┼───────────┤
+│"Bridget"│2          │
+├─────────┼───────────┤
+│"Charles"│2          │
+├─────────┼───────────┤
+│"Doug"   │3          │
+├─────────┼───────────┤
+│"Mark"   │5          │
+├─────────┼───────────┤
+│"Michael"│5          │
+└─────────┴───────────┘
+
+第六步，设置随机种子
+通过提供种子属性以增量方式运行。使用 seed 属性，可以为加载节点的子集提供初始社区映射。该算法将尝试保留种子社区 ID。
+CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name ASC
+╒═════════╤═══════════╕
+│name     │communityId│
+╞═════════╪═══════════╡
+│"Alice"  │42         │
+├─────────┼───────────┤
+│"Bridget"│42         │
+├─────────┼───────────┤
+│"Charles"│42         │
+├─────────┼───────────┤
+│"Doug"   │55         │
+├─────────┼───────────┤
+│"Mark"   │55         │
+├─────────┼───────────┤
+│"Michael"│55         │
+└─────────┴───────────┘
+
+第七步：使用中间社区，构建一个更复杂的图结构
+CREATE (a:Node {name: 'a'})
+CREATE (b:Node {name: 'b'})
+CREATE (c:Node {name: 'c'})
+CREATE (d:Node {name: 'd'})
+CREATE (e:Node {name: 'e'})
+CREATE (f:Node {name: 'f'})
+CREATE (g:Node {name: 'g'})
+CREATE (h:Node {name: 'h'})
+CREATE (i:Node {name: 'i'})
+CREATE (j:Node {name: 'j'})
+CREATE (k:Node {name: 'k'})
+CREATE (l:Node {name: 'l'})
+CREATE (m:Node {name: 'm'})
+CREATE (n:Node {name: 'n'})
+CREATE (x:Node {name: 'x'})
+
+CREATE (a)-[:TYPE]->(b)
+CREATE (a)-[:TYPE]->(d)
+CREATE (a)-[:TYPE]->(f)
+CREATE (b)-[:TYPE]->(d)
+CREATE (b)-[:TYPE]->(x)
+CREATE (b)-[:TYPE]->(g)
+CREATE (b)-[:TYPE]->(e)
+CREATE (c)-[:TYPE]->(x)
+CREATE (c)-[:TYPE]->(f)
+CREATE (d)-[:TYPE]->(k)
+CREATE (e)-[:TYPE]->(x)
+CREATE (e)-[:TYPE]->(f)
+CREATE (e)-[:TYPE]->(h)
+CREATE (f)-[:TYPE]->(g)
+CREATE (g)-[:TYPE]->(h)
+CREATE (h)-[:TYPE]->(i)
+CREATE (h)-[:TYPE]->(j)
+CREATE (i)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(m)
+CREATE (j)-[:TYPE]->(n)
+CREATE (k)-[:TYPE]->(m)
+CREATE (k)-[:TYPE]->(l)
+CREATE (l)-[:TYPE]->(n)
+CREATE (m)-[:TYPE]->(n);
+
+第八步：给属性图命名
+CALL gds.graph.project(
+    'myGraph2',
+    'Node',
+    {
+        TYPE: {
+            orientation: 'undirected',
+            aggregation: 'NONE'
+        }
+    }
+)
+
+第九步：计算节点社区id及中间社区id
+CALL gds.louvain.stream('myGraph2', { includeIntermediateCommunities: true })
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+ORDER BY name ASC
+╒════╤═══════════╤════════════════════════╕
+│name│communityId│intermediateCommunityIds│
+╞════╪═══════════╪════════════════════════╡
+│"a" │14         │[3, 14]                 │
+├────┼───────────┼────────────────────────┤
+│"b" │14         │[3, 14]                 │
+├────┼───────────┼────────────────────────┤
+│"c" │14         │[14, 14]                │
+├────┼───────────┼────────────────────────┤
+│"d" │14         │[3, 14]                 │
+├────┼───────────┼────────────────────────┤
+│"e" │14         │[14, 14]                │
+├────┼───────────┼────────────────────────┤
+│"f" │14         │[14, 14]                │
+├────┼───────────┼────────────────────────┤
+│"g" │7          │[7, 7]                  │
+├────┼───────────┼────────────────────────┤
+│"h" │7          │[7, 7]                  │
+├────┼───────────┼────────────────────────┤
+│"i" │7          │[7, 7]                  │
+├────┼───────────┼────────────────────────┤
+│"j" │12         │[12, 12]                │
+├────┼───────────┼────────────────────────┤
+│"k" │12         │[12, 12]                │
+├────┼───────────┼────────────────────────┤
+│"l" │12         │[12, 12]                │
+├────┼───────────┼────────────────────────┤
+│"m" │12         │[12, 12]                │
+├────┼───────────┼────────────────────────┤
+│"n" │12         │[12, 12]                │
+├────┼───────────┼────────────────────────┤
+│"x" │14         │[14, 14]                │
+└────┴───────────┴────────────────────────┘
+
+###########################################################################################################################
+标签传播算法（LPA,Label Propagation Algorithm）
+LPA（标签传播）算法是一种基于图的半监督学习方法，其基本思路是用已标记点的标签信息去预测未标记点的标签信息。
+利用样本间的关系建图，点包括已标注和未标注数据，其边表示两个点的相似度，点的标签按相似度传递给其他点。
+标签数据就像是一个源头，可以对无标签数据进行标注，点的相似度越大，标签越容易传播。
+第一步：创建样例数据
+CREATE
+  (alice:User {name: 'Alice', seed_label: 52}),
+  (bridget:User {name: 'Bridget', seed_label: 21}),
+  (charles:User {name: 'Charles', seed_label: 43}),
+  (doug:User {name: 'Doug', seed_label: 21}),
+  (mark:User {name: 'Mark', seed_label: 19}),
+  (michael:User {name: 'Michael', seed_label: 52}),
+
+  (alice)-[:FOLLOW {weight: 1}]->(bridget),
+  (alice)-[:FOLLOW {weight: 10}]->(charles),
+  (mark)-[:FOLLOW {weight: 1}]->(doug),
+  (bridget)-[:FOLLOW {weight: 1}]->(michael),
+  (doug)-[:FOLLOW {weight: 1}]->(mark),
+  (michael)-[:FOLLOW {weight: 1}]->(alice),
+  (alice)-[:FOLLOW {weight: 1}]->(michael),
+  (bridget)-[:FOLLOW {weight: 1}]->(alice),
+  (michael)-[:FOLLOW {weight: 1}]->(bridget),
+  (charles)-[:FOLLOW {weight: 1}]->(doug)
+
+第二步：属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    'FOLLOW',
+    {
+        nodeProperties: 'seed_label',
+        relationshipProperties: 'weight'
+    }
+)
+
+第三步：通过标签传播算法计算节点社区id
+CALL gds.labelPropagation.stream('myGraph')
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+╒═════════╤═════════╕
+│Name     │Community│
+╞═════════╪═════════╡
+│"Alice"  │48       │
+├─────────┼─────────┤
+│"Bridget"│48       │
+├─────────┼─────────┤
+│"Michael"│48       │
+├─────────┼─────────┤
+│"Charles"│52       │
+├─────────┼─────────┤
+│"Doug"   │52       │
+├─────────┼─────────┤
+│"Mark"   │52       │
+└─────────┴─────────┘
+
+第四步：计算节点社区id（考虑边权重）
+CALL gds.labelPropagation.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+╒═════════╤═════════╕
+│Name     │Community│
+╞═════════╪═════════╡
+│"Bridget"│48       │
+├─────────┼─────────┤
+│"Michael"│48       │
+├─────────┼─────────┤
+│"Alice"  │52       │
+├─────────┼─────────┤
+│"Charles"│52       │
+├─────────┼─────────┤
+│"Doug"   │52       │
+├─────────┼─────────┤
+│"Mark"   │52       │
+└─────────┴─────────┘
+
+种子社区
+在算法计算开始时，每个节点都用唯一的标签进行初始化，标签通过网络传播。
+可以通过设置 seedProperty 配置参数来提供一组初始标签。当我们投影 myGraph 时，我们还投影了节点属性seed_label。我们可以将此节点属性用作种子属性。
+该算法首先检查是否有分配给节点的种子标签。如果不存在种子标签，算法会为节点分配新的唯一标签。使用这组初步的标签，然后按顺序将每个节点的标签更新为新标签，这是每次标签传播迭代时其邻居中最常见的标签。
+连续 Ids 配置选项不能与种子属性结合使用以保留种子设定值。
+CALL gds.labelPropagation.stream('myGraph', { seedProperty: 'seed_label' })
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+╒═════════╤═════════╕
+│Name     │Community│
+╞═════════╪═════════╡
+│"Charles"│19       │
+├─────────┼─────────┤
+│"Doug"   │19       │
+├─────────┼─────────┤
+│"Mark"   │19       │
+├─────────┼─────────┤
+│"Alice"  │21       │
+├─────────┼─────────┤
+│"Bridget"│21       │
+├─────────┼─────────┤
+│"Michael"│21       │
+└─────────┴─────────┘
+
+###########################################################################################################################
+Weakly Connected Components
+ConnectedComponent（联通分量）算法用于计算出图中的一个子图，当中所有节点都相互连接。
+考虑路径方向的为强联通分量（strongly connected component），不考虑路径方向的为弱联通分量（weakly connected component）。
+第一步：创建样例数据
+CREATE
+  (nAlice:User {name: 'Alice'}),
+  (nBridget:User {name: 'Bridget'}),
+  (nCharles:User {name: 'Charles'}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK {weight: 0.5}]->(nBridget),
+  (nAlice)-[:LINK {weight: 4}]->(nCharles),
+  (nMark)-[:LINK {weight: 1.1}]->(nDoug),
+  (nMark)-[:LINK {weight: 2}]->(nMichael);
+
+第二步：属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'User',
+  'LINK',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+
+第三步：计算联通分量ID
+CALL gds.wcc.stream('myGraph')
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS name, componentId
+ORDER BY componentId, name
+╒═════════╤═══════════╕
+│name     │componentId│
+╞═════════╪═══════════╡
+│"Doug"   │0          │
+├─────────┼───────────┤
+│"Mark"   │0          │
+├─────────┼───────────┤
+│"Michael"│0          │
+├─────────┼───────────┤
+│"Alice"  │1          │
+├─────────┼───────────┤
+│"Bridget"│1          │
+├─────────┼───────────┤
+│"Charles"│1          │
+└─────────┴───────────┘
+
+# 带权重计算联通分量id
+CALL gds.wcc.stream('myGraph', {
+  relationshipWeightProperty: 'weight',
+  threshold: 1.0
+}) YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS ComponentId
+ORDER BY ComponentId, Name
+╒═════════╤═══════════╕
+│Name     │ComponentId│
+╞═════════╪═══════════╡
+│"Doug"   │0          │
+├─────────┼───────────┤
+│"Mark"   │0          │
+├─────────┼───────────┤
+│"Michael"│0          │
+├─────────┼───────────┤
+│"Alice"  │1          │
+├─────────┼───────────┤
+│"Charles"│1          │
+├─────────┼───────────┤
+│"Bridget"│2          │
+└─────────┴───────────┘
+
+###########################################################################################################################
+Triangle Count（三角形计数）算法
+三角计数算法（Triangle Count）统计图中三角形个数。三角形越多，代表图中节点关联程度越高，组织关系越严密。
+第一步：创建样例数据
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (michael:Person {name: 'Michael'}),
+  (karin:Person {name: 'Karin'}),
+  (chris:Person {name: 'Chris'}),
+  (will:Person {name: 'Will'}),
+  (mark:Person {name: 'Mark'}),
+
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (will)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (alice)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (chris)-[:KNOWS]->(karin)
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+
+第三步：计算三角形数量
+CALL gds.triangleCount.stream('myGraph')
+YIELD nodeId, triangleCount
+RETURN gds.util.asNode(nodeId).name AS name, triangleCount
+ORDER BY triangleCount DESC
+
+第四步：设置最大度数
+三角形计数算法支持 maxDegree 配置参数，如果节点的度数大于配置的值，该参数可用于从处理中排除节点。
+当图中存在具有非常高度的节点（所谓的超级节点）时，这对于加快计算速度很有用。超级节点对三角形计数算法的性能有很大的影响。
+从计算中排除的节点被分配一个三角形计数 -1。
+CALL gds.triangleCount.stream('myGraph', {
+  maxDegree: 4
+})
+YIELD nodeId, triangleCount
+RETURN gds.util.asNode(nodeId).name AS name, triangleCount
+ORDER BY name ASC
+╒═════════╤═════════════╕
+│name     │triangleCount│
+╞═════════╪═════════════╡
+│"Alice"  │0            │
+├─────────┼─────────────┤
+│"Chris"  │0            │
+├─────────┼─────────────┤
+│"Karin"  │0            │
+├─────────┼─────────────┤
+│"Mark"   │0            │
+├─────────┼─────────────┤
+│"Michael"│-1           │
+├─────────┼─────────────┤
+│"Will"   │0            │
+└─────────┴─────────────┘
+
+第五步：列出图形中所有的三角形
+CALL gds.alpha.triangles('myGraph')
+YIELD nodeA, nodeB, nodeC
+RETURN
+  gds.util.asNode(nodeA).name AS nodeA,
+  gds.util.asNode(nodeB).name AS nodeB,
+  gds.util.asNode(nodeC).name AS nodeC
+
+╒═════════╤═════════╤═══════╕
+│nodeA    │nodeB    │nodeC  │
+╞═════════╪═════════╪═══════╡
+│"Mark"   │"Michael"│"Will" │
+├─────────┼─────────┼───────┤
+│"Michael"│"Karin"  │"Chris"│
+├─────────┼─────────┼───────┤
+│"Michael"│"Chris"  │"Will" │
+└─────────┴─────────┴───────┘
+
+###########################################################################################################################
+局部聚集系数（Local Clustering Coefficient）
+局部聚集系数（Local Clustering Coefficient）是指将一个点的所有邻居配对后，邻居对有边相连的概率。
+局部聚集系数用来考察节点自我中心网络的紧密程度。
+自我中心网络（Ego Network）是指由一个中心节点（Ego）及其所有一步邻居（Alter）构成的子图。
+局部聚集系数是用一个节点的有边相连的邻居对的数量除以该节点所有邻居对的数量。
+第一步：创建样例数据
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (michael:Person {name: 'Michael'}),
+  (karin:Person {name: 'Karin'}),
+  (chris:Person {name: 'Chris'}),
+  (will:Person {name: 'Will'}),
+  (mark:Person {name: 'Mark'}),
+
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (will)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (alice)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (chris)-[:KNOWS]->(karin)
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+
+第三步：计算每个节点局部聚集系数
+CALL gds.localClusteringCoefficient.stream('myGraph')
+YIELD nodeId, localClusteringCoefficient
+RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
+ORDER BY localClusteringCoefficient DESC
+╒═════════╤══════════════════════════╕
+│name     │localClusteringCoefficient│
+╞═════════╪══════════════════════════╡
+│"Karin"  │1.0                       │
+├─────────┼──────────────────────────┤
+│"Mark"   │1.0                       │
+├─────────┼──────────────────────────┤
+│"Chris"  │0.6666666666666666        │
+├─────────┼──────────────────────────┤
+│"Will"   │0.6666666666666666        │
+├─────────┼──────────────────────────┤
+│"Michael"│0.3                       │
+├─────────┼──────────────────────────┤
+│"Alice"  │0.0                       │
+└─────────┴──────────────────────────┘
+
+###########################################################################################################################
+K-1 Coloring
+K-1 着色算法为图形中的每个节点分配一种颜色，尝试针对两个目标进行优化：
+使用尽可能少的颜色，确保给定节点的每个邻居的颜色都与节点本身不同。
+第一步：创建样例数据
+CREATE (alice:User {name: 'Alice'}),
+       (bridget:User {name: 'Bridget'}),
+       (charles:User {name: 'Charles'}),
+       (doug:User {name: 'Doug'}),
+
+       (alice)-[:LINK]->(bridget),
+       (alice)-[:LINK]->(charles),
+       (alice)-[:LINK]->(doug),
+       (bridget)-[:LINK]->(charles)
+第二步：给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK : {
+            orientation: 'UNDIRECTED'
+        }
+    }
+)
+
+第三步：计算每个点着色id
+CALL gds.beta.k1coloring.stream('myGraph')
+YIELD nodeId, color
+RETURN gds.util.asNode(nodeId).name AS name, color
+ORDER BY name
+╒═════════╤═════╕
+│name     │color│
+╞═════════╪═════╡
+│"Alice"  │0    │
+├─────────┼─────┤
+│"Bridget"│1    │
+├─────────┼─────┤
+│"Charles"│2    │
+├─────────┼─────┤
+│"Doug"   │1    │
+└─────────┴─────┘
+
+###########################################################################################################################
+Modularity Optimization
+模块度优化算法尝试根据模块度来检测图中的社区。
+模块度是对图形结构的度量，用于测量模块或社区内的连接密度。
+具有高模块度分数的图形在社区内将有许多连接，但只有少数指向其他社区。该算法将探索每个节点，如果将其社区更改为其相邻节点之一，其模块度分数是否会增加。
+第一步：创建样例数据
+CREATE
+  (a:Person {name:'Alice'})
+, (b:Person {name:'Bridget'})
+, (c:Person {name:'Charles'})
+, (d:Person {name:'Doug'})
+, (e:Person {name:'Elton'})
+, (f:Person {name:'Frank'})
+, (a)-[:KNOWS {weight: 0.01}]->(b)
+, (a)-[:KNOWS {weight: 5.0}]->(e)
+, (a)-[:KNOWS {weight: 5.0}]->(f)
+, (b)-[:KNOWS {weight: 5.0}]->(c)
+, (b)-[:KNOWS {weight: 5.0}]->(d)
+, (c)-[:KNOWS {weight: 0.01}]->(e)
+, (f)-[:KNOWS {weight: 0.01}]->(d)
+
+第二步：给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'Person',
+    {
+        KNOWS: {
+            orientation: 'UNDIRECTED',
+            properties: ['weight']
+        }
+    })
+
+第三步：模块度优化算法计算每个节点的社区id
+CALL gds.beta.modularityOptimization.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name
+╒═════════╤═══════════╕
+│name     │communityId│
+╞═════════╪═══════════╡
+│"Alice"  │1          │
+├─────────┼───────────┤
+│"Bridget"│3          │
+├─────────┼───────────┤
+│"Charles"│3          │
+├─────────┼───────────┤
+│"Doug"   │3          │
+├─────────┼───────────┤
+│"Elton"  │1          │
+├─────────┼───────────┤
+│"Frank"  │1          │
+└─────────┴───────────┘
+
+###########################################################################################################################
+强连通分量(strongly connected components)
+强连通分量 （SCC） 算法在有向图中查找连接节点的最大集合。如果集合中的每对节点之间存在有向路径，则集合被视为强连通分量。
+在有向图G中，如果两个顶点vi,vj间（vi>vj）有一条从vi到vj的有向路径，同时还有一条从vj到vi的有向路径，则称两个顶点强连通(strongly connected)。
+如果有向图G的每两个顶点都强连通，称G是一个强连通图。有向图的极大强连通子图，称为强连通分量(strongly connected components)，也就是说是图G的一些特殊子集。
+第一步：创建样例数据
+CREATE (nAlice:User {name:'Alice'})
+CREATE (nBridget:User {name:'Bridget'})
+CREATE (nCharles:User {name:'Charles'})
+CREATE (nDoug:User {name:'Doug'})
+CREATE (nMark:User {name:'Mark'})
+CREATE (nMichael:User {name:'Michael'})
+
+CREATE (nAlice)-[:FOLLOW]->(nBridget)
+CREATE (nAlice)-[:FOLLOW]->(nCharles)
+CREATE (nMark)-[:FOLLOW]->(nDoug)
+CREATE (nMark)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nMichael)
+CREATE (nDoug)-[:FOLLOW]->(nMark)
+CREATE (nMichael)-[:FOLLOW]->(nAlice)
+CREATE (nAlice)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nAlice)
+CREATE (nMichael)-[:FOLLOW]->(nBridget);
+
+第二步：给属性图命名
+CALL gds.graph.project('graph', 'User', 'FOLLOW')
+
+第三步：计算节点联通分量id
+CALL gds.alpha.scc.stream('graph', {})
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
+ORDER BY Component DESC
+
+###########################################################################################################################
+SLAP（Speaker-Listener Label Propagation Algorithm）社区发现算法
+SLPA(Speaker-listener Label Propagation Algorithm)算法是一种社区发现算法，它是对LPA算法（标签传播算法）的拓展。
+SLPA是一种重叠型社区发现算法，其中涉及一个重要阈值参数r，通过r的适当选取，可将其退化为非重叠型.
+SLAP重叠社区的发现主要认为每个节点不光只有一个标签，每次迭代增加一个标签，最后再通过r进行筛选
+该算法本质上是随机的，不会产生确定性的结果。为了适应这种情况，我们建议使用更多的迭代次数。
+第一步：创建样例数据
+CREATE
+  (a:Person {name: 'Alice'}),
+  (b:Person {name: 'Bob'}),
+  (c:Person {name: 'Carol'}),
+  (d:Person {name: 'Dave'}),
+  (e:Person {name: 'Eve'}),
+  (f:Person {name: 'Fredrick'}),
+  (g:Person {name: 'Gary'}),
+  (h:Person {name: 'Hilda'}),
+  (i:Person {name: 'Ichabod'}),
+  (j:Person {name: 'James'}),
+  (k:Person {name: 'Khalid'}),
+
+  (a)-[:KNOWS]->(b),
+  (a)-[:KNOWS]->(c),
+  (a)-[:KNOWS]->(d),
+  (b)-[:KNOWS]->(c),
+  (b)-[:KNOWS]->(d),
+  (c)-[:KNOWS]->(d),
+
+  (b)-[:KNOWS]->(e),
+  (e)-[:KNOWS]->(f),
+  (f)-[:KNOWS]->(g),
+  (g)-[:KNOWS]->(h),
+
+  (h)-[:KNOWS]->(i),
+  (h)-[:KNOWS]->(j),
+  (h)-[:KNOWS]->(k),
+  (i)-[:KNOWS]->(j),
+  (i)-[:KNOWS]->(k),
+  (j)-[:KNOWS]->(k);
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+);
+
+第三步：计算每个节点社区id
+CALL gds.alpha.sllpa.stream('myGraph', {maxIterations: 100, minAssociationStrength: 0.1})
+YIELD nodeId, values
+RETURN gds.util.asNode(nodeId).name AS Name, values.communityIds AS communityIds
+  ORDER BY Name ASC
+╒══════════╤════════════╕
+│Name      │communityIds│
+╞══════════╪════════════╡
+│"Alice"   │[7]         │
+├──────────┼────────────┤
+│"Bob"     │[7]         │
+├──────────┼────────────┤
+│"Carol"   │[7]         │
+├──────────┼────────────┤
+│"Dave"    │[7]         │
+├──────────┼────────────┤
+│"Eve"     │[2, 0]      │
+├──────────┼────────────┤
+│"Fredrick"│[0]         │
+├──────────┼────────────┤
+│"Gary"    │[0]         │
+├──────────┼────────────┤
+│"Hilda"   │[0]         │
+├──────────┼────────────┤
+│"Ichabod" │[0]         │
+├──────────┼────────────┤
+│"James"   │[0]         │
+├──────────┼────────────┤
+│"Khalid"  │[0]         │
+└──────────┴────────────┘
+
+###########################################################################################################################
+近似最大 k 切Approximate Maximum k-cut
+图的 k 切割是将其节点分配到 k 个不相交社区中。
+最大 k 切割是 k 切割，使得 k 切割中来自不同社区的节点之间关系的总权重最大化。
+也就是说，一个 k-cut，它最大化其源节点和目标节点分配给 k 切割中不同社区的关系权重的总和。
+第一步：创建样例数据
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bridget:Person {name: 'Bridget'}),
+  (charles:Person {name: 'Charles'}),
+  (doug:Person {name: 'Doug'}),
+  (eric:Person {name: 'Eric'}),
+  (fiona:Person {name: 'Fiona'}),
+  (george:Person {name: 'George'}),
+  (alice)-[:TRANSACTION {value: 81.0}]->(bridget),
+  (alice)-[:TRANSACTION {value: 7.0}]->(doug),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(doug),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(eric),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(fiona),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(george),
+  (charles)-[:TRANSACTION {value: 45.0}]->(bridget),
+  (charles)-[:TRANSACTION {value: 3.0}]->(eric),
+  (doug)-[:TRANSACTION {value: 3.0}]->(charles),
+  (doug)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (eric)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (fiona)-[:TRANSACTION {value: 3.0}]->(alice),
+  (fiona)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (george)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (george)-[:TRANSACTION {value: 4.0}]->(charles)
+
+第二步：给属性图命名
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  {
+    TRANSACTION: {
+      properties: ['value']
+    }
+  }
+)
+
+第三步：使用包含该节点的近似最大 k 切割的新节点属性更新命名图。
+CALL gds.alpha.maxkcut.mutate('myGraph', {mutateProperty: 'community'})
+YIELD cutCost, nodePropertiesWritten
+
+第四步：计算社区id
+CALL gds.graph.nodeProperty.stream('myGraph', 'community')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS community
+╒═════════╤═════════╕
+│name     │community│
+╞═════════╪═════════╡
+│"Eric"   │0        │
+├─────────┼─────────┤
+│"Fiona"  │0        │
+├─────────┼─────────┤
+│"George" │0        │
+├─────────┼─────────┤
+│"Alice"  │1        │
+├─────────┼─────────┤
+│"Bridget"│1        │
+├─────────┼─────────┤
+│"Charles"│1        │
+├─────────┼─────────┤
+│"Doug"   │0        │
+└─────────┴─────────┘
+
+###########################################################################################################################
+电导指标Conductance metric
+电导是用于评估检测社区质量的指标。社区 C 中的节点关系连接到 C 内部或 C 外部的节点。电导是指向 C 之外的关系与 C 关系总数之间的比率。电导越低，社区就越“紧密”。
+第一步：创建样例数据
+CREATE
+  (nAlice:User {name: 'Alice', seed: 42}),
+  (nBridget:User {name: 'Bridget', seed: 42}),
+  (nCharles:User {name: 'Charles', seed: 42}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+第二步：给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'seed',
+        relationshipProperties: 'weight'
+    }
+)
+第三步：使用 Louvain 算法将划分节点社区id
+CALL gds.louvain.mutate('myGraph', { mutateProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD communityCount
+
+第四步：展示louvain算法结果：
+CALL gds.graph.nodeProperty.stream('myGraph', 'community')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS community
+
+第五步：计算电导率计算社区好坏
+由于我们现在有一个社区检测，我们可以评估它在电导指标下的好坏。注意，这里使用了边权重。
+电导流过程返回每个社区的电导。
+CALL gds.alpha.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD community, conductance
+╒═════════╤═══════════════════╕
+│community│conductance        │
+╞═════════╪═══════════════════╡
+│2        │0.5                │
+├─────────┼───────────────────┤
+│3        │0.23076923076923078│
+├─────────┼───────────────────┤
+│5        │0.2                │
+└─────────┴───────────────────┘
+
+###########################################################################################################################
+模块度指标Modularity metric
+模块化是一个指标，可用于评估社区检测的质量。社区C中的节点关系连接到C内部或C外部的节点.具有高模块化的图在社区内的节点之间具有密集的连接，但不同社区中的节点之间的连接稀疏。
+第一步：创建样例数据
+CREATE
+  (nAlice:User {name: 'Alice', community: 3}),
+  (nBridget:User {name: 'Bridget', community: 2}),
+  (nCharles:User {name: 'Charles', community: 2}),
+  (nDoug:User {name: 'Doug', community: 3}),
+  (nMark:User {name: 'Mark', community: 5}),
+  (nMichael:User {name: 'Michael', community: 5}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+
+第二步：给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'community',
+        relationshipProperties: 'weight'
+    }
+)
+第三步：计算每个社区的模块度
+CALL gds.alpha.modularity.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD communityId, modularity
+RETURN communityId, modularity
+ORDER BY communityId ASC
+╒═══════════╤═══════════════════╕
+│communityId│modularity         │
+╞═══════════╪═══════════════════╡
+│2          │0.05785123966942149│
+├───────────┼───────────────────┤
+│3          │0.10537190082644629│
+├───────────┼───────────────────┤
+│5          │0.13016528925619833│
+└───────────┴───────────────────┘
+
+###########################################################################################################################
+K-均值聚类K-Means Clustering
+K-均值聚类是一种无监督学习算法，用于解决聚类问题。它遵循将给定数据集分类为多个聚类的简单过程，由参数 k 定义。
+Neo4j GDS 库根据节点属性进行聚类分析，浮点数组节点属性通过 nodeProperty 参数作为输入传递。然后将图中的节点定位为 d 维空间中的点（其中 d 是数组属性的长度）。
+然后，该算法首先选择 k 个初始聚类质心，它们是 d 维数组。质心充当集群的代表。
+然后，图中的所有节点计算其与每个聚类质心的欧氏距离，并将其分配给与它们之间最小距离的聚类。在这些赋值之后，每个聚类采用分配给它的所有节点（作为点）的平均值，以形成其新的代表性质心（作为 d 维数组）。
+该过程使用新的质心重复，直到结果稳定，即每次迭代只有少数节点更改集群或达到最大迭代次数。
+请注意，K-Means 实现忽略关系，因为它只关注节点属性。
+第一步：创建样例数据
+CREATE
+    (:City {name: '上海市', coordinates: [121.473667,31.230525]}),
+    (:City {name: '新疆', coordinates: [87.628579,43.793301]}),
+    (:City {name: '湖北省', coordinates: [114.341552,30.546222]}),
+    (:City {name: '辽宁省', coordinates: [123.435093,41.836743]}),
+    (:City {name: '广东省', coordinates: [113.266887,23.133306]}),
+    (:City {name: '内蒙古', coordinates: [111.765226,40.818233]}),
+    (:City {name: '黑龙江省', coordinates: [126.661998,45.742253]}),
+    (:City {name: '河南省', coordinates: [113.753094,34.767052]}),
+    (:City {name: '山东省', coordinates: [117.020725,36.670201]}),
+    (:City {name: '陕西省', coordinates: [108.953939,34.266611]}),
+    (:City {name: '贵州省', coordinates: [106.705251,26.600328]}),
+    (:City {name: '重庆市', coordinates: [106.550483,29.563707]}),
+    (:City {name: '西藏', coordinates: [91.117449,29.648694]}),
+    (:City {name: '安徽省', coordinates: [117.330139,31.734559]}),
+    (:City {name: '福建省', coordinates: [119.296194,26.101082]}),
+    (:City {name: '湖南省', coordinates: [112.982951,28.116007]}),
+    (:City {name: '海南省', coordinates: [110.348781,20.018639]}),
+    (:City {name: '江苏省', coordinates: [118.763563,32.061377]}),
+    (:City {name: '青海省', coordinates: [101.780482,36.622538]}),
+    (:City {name: '广西', coordinates: [108.327537,22.816659]}),
+    (:City {name: '宁夏', coordinates: [106.258889,38.472273]}),
+    (:City {name: '浙江省', coordinates: [120.152575,30.266619]}),
+    (:City {name: '河北省', coordinates: [114.530399,38.037707]}),
+    (:City {name: '香港', coordinates: [114.173355,22.320048]}),
+    (:City {name: '台湾省', coordinates: [121.509062,25.044332]}),
+    (:City {name: '澳门', coordinates: [113.54909,22.198951]}),
+    (:City {name: '甘肃省', coordinates: [103.826777,36.060634]}),
+    (:City {name: '四川省', coordinates: [104.076452,30.651696]}),
+    (:City {name: '天津市', coordinates: [117.201509,39.085318]}),
+    (:City {name: '江西省', coordinates: [115.816587,28.637234]}),
+    (:City {name: '云南省', coordinates: [102.709372,25.046432]}),
+    (:City {name: '山西省', coordinates: [112.578781,37.813948]}),
+    (:City {name: '北京市', coordinates: [116.407387,39.904179]}),
+    (:City {name: '吉林省', coordinates: [125.325802,43.896942]});
+
+第二步：给属性图命名
+CALL gds.graph.project(
+    'cities',
+    {
+      City: {
+        properties: 'coordinates'
+      }
+    },
+    '*'
+)
+
+第三步：计算每个节点集群（这里k设为5）
+CALL gds.beta.kmeans.stream('cities', {
+  nodeProperty: 'coordinates',
+  k: 5,
+  randomSeed: 42
+})
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY communityId, name ASC
+╒══════╤═══════════╕
+│name  │communityId│
+╞══════╪═══════════╡
+│"内蒙古" │0          │
+├──────┼───────────┤
+│"北京市" │0          │
+├──────┼───────────┤
+│"天津市" │0          │
+├──────┼───────────┤
+│"山东省" │0          │
+├──────┼───────────┤
+│"山西省" │0          │
+├──────┼───────────┤
+│"河北省" │0          │
+├──────┼───────────┤
+│"河南省" │0          │
+├──────┼───────────┤
+│"陕西省" │0          │
+├──────┼───────────┤
+│"吉林省" │1          │
+├──────┼───────────┤
+│"辽宁省" │1          │
+├──────┼───────────┤
+│"黑龙江省"│1          │
+├──────┼───────────┤
+│"云南省" │2          │
+├──────┼───────────┤
+│"广东省" │2          │
+├──────┼───────────┤
+│"广西"  │2          │
+├──────┼───────────┤
+│"海南省" │2          │
+├──────┼───────────┤
+│"澳门"  │2          │
+├──────┼───────────┤
+│"贵州省" │2          │
+├──────┼───────────┤
+│"重庆市" │2          │
+├──────┼───────────┤
+│"香港"  │2          │
+├──────┼───────────┤
+│"四川省" │3          │
+├──────┼───────────┤
+│"宁夏"  │3          │
+├──────┼───────────┤
+│"新疆"  │3          │
+├──────┼───────────┤
+│"甘肃省" │3          │
+├──────┼───────────┤
+│"西藏"  │3          │
+├──────┼───────────┤
+│"青海省" │3          │
+├──────┼───────────┤
+│"上海市" │4          │
+├──────┼───────────┤
+│"台湾省" │4          │
+├──────┼───────────┤
+│"安徽省" │4          │
+├──────┼───────────┤
+│"江苏省" │4          │
+├──────┼───────────┤
+│"江西省" │4          │
+├──────┼───────────┤
+│"浙江省" │4          │
+├──────┼───────────┤
+│"湖北省" │4          │
+├──────┼───────────┤
+│"湖南省" │4          │
+├──────┼───────────┤
+│"福建省" │4          │
+└──────┴───────────┘
+五个集群，刚好对应，华北、东三省、华南、西部、华东
+
+第四步：初始质心对 K-Means 的影响，质心分别为（北京、上海、广东、武汉、乌鲁木齐）
+CALL gds.beta.kmeans.stream('cities', {
+  nodeProperty: 'coordinates',
+  k: 5,
+  seedCentroids: [[121.473667,31.230525], [114.341552,30.546222],[113.266887,23.133306], [116.407387,39.904179],  [87.628579,43.793301]]
+})
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY communityId, name ASC
+╒══════╤═══════════╕
+│name  │communityId│
+╞══════╪═══════════╡
+│"上海市" │0          │
+├──────┼───────────┤
+│"台湾省" │0          │
+├──────┼───────────┤
+│"安徽省" │0          │
+├──────┼───────────┤
+│"江苏省" │0          │
+├──────┼───────────┤
+│"江西省" │0          │
+├──────┼───────────┤
+│"河南省" │0          │
+├──────┼───────────┤
+│"浙江省" │0          │
+├──────┼───────────┤
+│"湖北省" │0          │
+├──────┼───────────┤
+│"福建省" │0          │
+├──────┼───────────┤
+│"四川省" │1          │
+├──────┼───────────┤
+│"宁夏"  │1          │
+├──────┼───────────┤
+│"甘肃省" │1          │
+├──────┼───────────┤
+│"重庆市" │1          │
+├──────┼───────────┤
+│"陕西省" │1          │
+├──────┼───────────┤
+│"青海省" │1          │
+├──────┼───────────┤
+│"云南省" │2          │
+├──────┼───────────┤
+│"广东省" │2          │
+├──────┼───────────┤
+│"广西"  │2          │
+├──────┼───────────┤
+│"海南省" │2          │
+├──────┼───────────┤
+│"湖南省" │2          │
+├──────┼───────────┤
+│"澳门"  │2          │
+├──────┼───────────┤
+│"贵州省" │2          │
+├──────┼───────────┤
+│"香港"  │2          │
+├──────┼───────────┤
+│"内蒙古" │3          │
+├──────┼───────────┤
+│"北京市" │3          │
+├──────┼───────────┤
+│"吉林省" │3          │
+├──────┼───────────┤
+│"天津市" │3          │
+├──────┼───────────┤
+│"山东省" │3          │
+├──────┼───────────┤
+│"山西省" │3          │
+├──────┼───────────┤
+│"河北省" │3          │
+├──────┼───────────┤
+│"辽宁省" │3          │
+├──────┼───────────┤
+│"黑龙江省"│3          │
+├──────┼───────────┤
+│"新疆"  │4          │
+├──────┼───────────┤
+│"西藏"  │4          │
+└──────┴───────────┘
+
+###########################################################################################################################
+Leiden 算法是一种在大型关系网络上的社区检测算法，leiden算法计算社区之间的节点和边的关系，保证社区内部连接的有效性，并实现社区的分隔。
+当迭代应用 Leiden 算法时，它收敛到一个分区，在该分区中所有社区的所有子集都被局部最优分配，从而产生保证连接的社区。
+Leiden 算法是为了改进 Louvain 算法的缺陷，Louvain 算法可能会发现任意连接不良的社区。
+因此，Leiden保证了社区之间的良好连接， 而且算法速度更快，可扩展性更好，并且可以在数百万个节点的图上运行（只要它们可以放入内存）。
+Leiden 算法包括三个阶段：
+节点局部移动，快速找到分区
+分区细化
+基于细化分区的网络聚合，利用非细化分区为聚合网络创建初始分区。 迭代步骤直到收敛。
+第一步：创建样例数据
+CREATE
+  (nAlice:User {name: 'Alice', seed: 42}),
+  (nBridget:User {name: 'Bridget', seed: 42}),
+  (nCharles:User {name: 'Charles', seed: 42}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+
+第二步：给属性图命名
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'seed',
+        relationshipProperties: 'weight'
+    }
+)
+
+第三步：计算每个节点社区ID
+CALL gds.beta.leiden.stream('myGraph', { randomSeed: 19 })
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name ASC
+╒═════════╤═══════════╕
+│name     │communityId│
+╞═════════╪═══════════╡
+│"Alice"  │2          │
+├─────────┼───────────┤
+│"Bridget"│2          │
+├─────────┼───────────┤
+│"Charles"│2          │
+├─────────┼───────────┤
+│"Doug"   │5          │
+├─────────┼───────────┤
+│"Mark"   │5          │
+├─────────┼───────────┤
+│"Michael"│5          │
+└─────────┴───────────┘
+第四步：计算节点社区id，考虑边权重
+CALL gds.beta.leiden.stream('myGraph', { relationshipWeightProperty: 'weight', randomSeed: 19 })
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name ASC
+╒═════════╤═══════════╕
+│name     │communityId│
+╞═════════╪═══════════╡
+│"Alice"  │3          │
+├─────────┼───────────┤
+│"Bridget"│2          │
+├─────────┼───────────┤
+│"Charles"│2          │
+├─────────┼───────────┤
+│"Doug"   │3          │
+├─────────┼───────────┤
+│"Mark"   │5          │
+├─────────┼───────────┤
+│"Michael"│5          │
+└─────────┴───────────┘
+
+第五步：分层聚类演示
+Leiden 是一种分层聚类算法。这意味着在每个群集步骤之后，属于同一群集的所有节点都将减少为单个节点。
+同一集群的节点之间的关系成为自关系，与其它集群的节点之间的关系连接到集群代表。然后，此压缩图用于运行下一级聚类分析。重复此过程，直到群集稳定。
+为了演示这种迭代行为，我们需要构造一个更复杂的图。
+CREATE (a:Node {name: 'a'})
+CREATE (b:Node {name: 'b'})
+CREATE (c:Node {name: 'c'})
+CREATE (d:Node {name: 'd'})
+CREATE (e:Node {name: 'e'})
+CREATE (f:Node {name: 'f'})
+CREATE (g:Node {name: 'g'})
+CREATE (h:Node {name: 'h'})
+CREATE (i:Node {name: 'i'})
+CREATE (j:Node {name: 'j'})
+CREATE (k:Node {name: 'k'})
+CREATE (l:Node {name: 'l'})
+CREATE (m:Node {name: 'm'})
+CREATE (n:Node {name: 'n'})
+CREATE (x:Node {name: 'x'})
+
+CREATE (a)-[:TYPE]->(b)
+CREATE (a)-[:TYPE]->(d)
+CREATE (a)-[:TYPE]->(f)
+CREATE (b)-[:TYPE]->(d)
+CREATE (b)-[:TYPE]->(x)
+CREATE (b)-[:TYPE]->(g)
+CREATE (b)-[:TYPE]->(e)
+CREATE (c)-[:TYPE]->(x)
+CREATE (c)-[:TYPE]->(f)
+CREATE (d)-[:TYPE]->(k)
+CREATE (e)-[:TYPE]->(x)
+CREATE (e)-[:TYPE]->(f)
+CREATE (e)-[:TYPE]->(h)
+CREATE (f)-[:TYPE]->(g)
+CREATE (g)-[:TYPE]->(h)
+CREATE (h)-[:TYPE]->(i)
+CREATE (h)-[:TYPE]->(j)
+CREATE (i)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(m)
+CREATE (j)-[:TYPE]->(n)
+CREATE (k)-[:TYPE]->(m)
+CREATE (k)-[:TYPE]->(l)
+CREATE (l)-[:TYPE]->(n)
+CREATE (m)-[:TYPE]->(n);
+
+CALL gds.graph.project(
+    'myGraph2',
+    'Node',
+    {
+        TYPE: {
+            orientation: 'undirected',
+            aggregation: 'NONE'
+        }
+    }
+)
+
+CALL gds.beta.leiden.stream('myGraph2', {
+  randomSeed: 19,
+  includeIntermediateCommunities: true,
+  concurrency: 1
+})
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+ORDER BY name ASC
+
+╒════╤═══════════╤════════════════════════╕
+│name│communityId│intermediateCommunityIds│
+╞════╪═══════════╪════════════════════════╡
+│"a" │3          │[3, 3]                  │
+├────┼───────────┼────────────────────────┤
+│"b" │3          │[3, 3]                  │
+├────┼───────────┼────────────────────────┤
+│"c" │3          │[14, 3]                 │
+├────┼───────────┼────────────────────────┤
+│"d" │3          │[3, 3]                  │
+├────┼───────────┼────────────────────────┤
+│"e" │3          │[14, 3]                 │
+├────┼───────────┼────────────────────────┤
+│"f" │3          │[14, 3]                 │
+├────┼───────────┼────────────────────────┤
+│"g" │2          │[8, 2]                  │
+├────┼───────────┼────────────────────────┤
+│"h" │2          │[8, 2]                  │
+├────┼───────────┼────────────────────────┤
+│"i" │2          │[8, 2]                  │
+├────┼───────────┼────────────────────────┤
+│"j" │0          │[12, 0]                 │
+├────┼───────────┼────────────────────────┤
+│"k" │0          │[12, 0]                 │
+├────┼───────────┼────────────────────────┤
+│"l" │0          │[12, 0]                 │
+├────┼───────────┼────────────────────────┤
+│"m" │0          │[12, 0]                 │
+├────┼───────────┼────────────────────────┤
+│"n" │0          │[12, 0]                 │
+├────┼───────────┼────────────────────────┤
+│"x" │3          │[14, 3]                 │
+└────┴───────────┴────────────────────────┘
+
+###########################################################################################################################
+HANP（Hop Attenuation & Node Preference）算法是LPA算法的优化算法，考虑了标签的其他信息，例如度的信息、距离信息等，同时在传播时引入了衰减系数，防止过渡传播。
+
+###########################################################################################################################
+InfoMap
+InfoMap 算法使用双层编码方式将有向图进行社区分类。不同社区内部节点的编码复用，可以大幅缩短描述的信息长度。在实现方式上，该算法包含了 PageRank 算法，用于将随机游走转变为随机冲浪。
+
+

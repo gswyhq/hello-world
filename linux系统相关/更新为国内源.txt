@@ -117,4 +117,9 @@ bash: ppa-purge: command not found
 则可以通过下面命令安装：
 ~# apt install ppa-purge 
 
+# apt-get update -y 报错：
+E: Repository 'http://mirrors.***/debian buster InRelease' changed its 'Suite' value from 'oldstable' to 'oldoldstable'
+解决方法：
+先运行 apt update -y 
+再运行 apt-get update -y
 

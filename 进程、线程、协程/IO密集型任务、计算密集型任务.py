@@ -4,6 +4,7 @@ import multiprocessing
 import time
 import threading
 import math
+import traceback
 
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool
@@ -11,9 +12,9 @@ from multiprocessing.dummy import Pool
 g_search_list = list(range(10000))
 
 # 定义一个IO密集型任务：利用time.sleep()
-def io_task(n):
+def io_task(n, data=None):
     time.sleep(1)
-    return n
+    return {'n': n, "data": data}
 
 # 定义一个计算密集型任务：利用一些复杂加减乘除、列表查找等
 def cpu_task(count = 0):
@@ -38,10 +39,12 @@ if __name__ == '__main__':
     time_0 = time.time()
 
     with multiprocessing.dummy.Pool(processes=thread_count) as pool:  # 线程池
-        jobs = [pool.apply_async(func=io_task, args=(i, )) for i in range(test_count)]
+        jobs = [pool.apply_async(func=io_task, args=(i, ), kwds={"data": "data_{}".format(i)}) for i in range(test_count)]
+        pool.close()
+        pool.join()
         for ret in jobs:
             result = ret.get()
-            # print(result)
+            print("结果：", result)
     print("结束：", time.time() - time_0, "\n")
     print("========== 多进程执行IO密集型任务 ==========")
 
@@ -108,3 +111,63 @@ if __name__ == '__main__':
 
 # ========== 20个多线程执行CPU密集型任务 ==========
 # 结束： 132.36442589759827 
+
+# python multiprocessing.Pool 中map、map_async、apply、apply_async的区别
+#              多参数Multi-args   并发Concurrence    阻塞Blocking     有序结果Ordered-results
+# map          no           yes            yes          yes
+# apply        yes          no             yes          no
+# map_async    no           yes            no           yes
+# apply_async  yes          yes            no           no
+
+import time
+import traceback
+import multiprocessing.dummy
+def my_callback(d):
+    print(f'执行结果：{d}')
+    return d
+
+def my_error_callback(e):
+    print("执行出现错误：{}，错误详情：{}".format(e, traceback.format_exc()))
+    return e
+
+def my_func(a, b, c=None):
+    if a>0:
+        time.sleep(a)
+    print((a, b, c))
+    return a+b+c
+
+def ordered_results():
+    result_list = []
+    data_list = [(1, 2, 3),
+                 (2, 3, 4),
+                 (-1, 2, 3),
+                 (4, 6, 9)]
+    with multiprocessing.dummy.Pool(processes=20) as pool:  # 线程池
+        jobs = [pool.apply_async(func=my_func, args=(a, b),
+                                 kwds={"c": c},
+                                 callback=my_callback, error_callback=my_error_callback) for a, b, c in data_list]
+        # print("批量请求数：", len(data_list))
+        pool.close()
+        pool.join()
+        for ret in jobs:
+            result = ret.get(timeout=2)
+            result_list.append(result)
+    print('最终的结果是有顺序的是：', result_list)
+    return result_list
+
+start_time = time.time()
+ordered_results()
+print('总耗时：', time.time()-start_time)
+# (-1, 2, 3)
+# 执行结果：4
+# (1, 2, 3)
+# 执行结果：6
+# (2, 3, 4)
+# 执行结果：9
+# (4, 6, 9)
+# 执行结果：19
+# 最终的结果是有顺序的是： [6, 9, 4, 19]
+# 总耗时： 4.015351057052612
+
+
+

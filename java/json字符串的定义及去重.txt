@@ -67,3 +67,40 @@ System.out.println(jsonObject);
 # 多层嵌套添加列表元素值：
 asvRescoreQueryObject.getJSONObject("bool").getJSONArray("should").fluentAdd(JSONObject.parseObject(String.format("{\"match\": {\"area.keyword\": \"%s\"}}", area)));
 
+# 字符串截断：
+如果字符串长度是200，但是截取时用substring（str，0，200），看似好像没有什么问题，但是如果该字段的取值实际的长度只有150的话，这时substring（str，0，200）就会产生越界问题。解决方案：
+1）先判断长度，长度超长的话，再截取；没有超长就保留原值。但这种比较麻烦，还要加一层判断。不建议
+2）用StringUtil.left函数取代，来截取前200位。
+System.out.println("这样应该就没问题了吧:::"  + org.apache.commons.lang3.StringUtils.StringUtils.left(testStr,10));
+
+# 问题：json转字符串时候，值为null的字段丢失了
+JSON.toJSONString()空字段不忽略修改
+使用JSON.toJSONString(object)方法，返回的json中，null对应的key已经被过滤掉，这是因为默认会将为空的字段自动忽略，这明显不是我们想要的结果。 去掉JSON.toJSONString()空字段忽略方法两个如下
+
+方法一
+SerializerFeature序列化属性
+String s = JSON.toJSONString(user, SerializerFeature.WriteNullStringAsEmpty);
+QuoteFieldNames———-输出key时是否使用双引号,默认为true
+WriteMapNullValue——–是否输出值为null的字段,默认为false
+WriteNullNumberAsZero—-数值字段如果为null,输出为0,而非null
+WriteNullListAsEmpty—–List字段如果为null,输出为[],而非null
+WriteNullStringAsEmpty—字符类型字段如果为null,输出为”“,而非null
+WriteNullBooleanAsFalse–Boolean字段如果为null,输出为false,而非nul
+
+方法二
+加上这个过滤器后,所有的null和"“串都会被转换成”"值输出到字符串中
+
+    private static ValueFilter valueFilter = (o, s, o1) -> o1 == null ? "" : o1;
+
+    public static void main(String[] args) {
+        User user = new User();
+        String s = JSON.toJSONString(user, valueFilter);
+        System.out.println(s);
+    }
+
+方法三
+先将null替换为空字符串，再去转换：
+            for(String key: data.keySet()){
+                data.putIfAbsent(key, "");
+            }
+

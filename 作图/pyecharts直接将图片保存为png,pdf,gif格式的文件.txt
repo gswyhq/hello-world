@@ -4,10 +4,10 @@
 sudo apt-get install -y npm
 gswyhq@gswyhq-PC:~$ sudo npm install -g phantomjs --unsafe-perm
 gswyhq@gswyhq-PC:~$ sudo npm install -g phantomjs-prebuilt --unsafe-perm
- 
+
 第二步：安装了 Nodejs 环境
 sudo apt-get install nodejs
- 
+
 第三步：安装 pyecharts-snapshot
 pip3 install pyecharts-snapshot
 第四步：重启计算机，render（path=“”）的输出路径和格式即可
@@ -26,7 +26,7 @@ RUN cd /root && \
     mv $PHANTOM_JS /usr/local/share && \
     ln -sf /usr/local/share/$PHANTOM_JS/bin/phantomjs /usr/local/bin
 # phantomjs --version
- 
+
 支持保存作各种格式
 对象.render(path='snapshot.html')
 对象.render(path='snapshot.png')
@@ -39,4 +39,45 @@ bar.add("服装", ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "�
 bar.render(path='snapshot.html')
 bar.render(path='snapshot.png')
 bar.render(path='snapshot.pdf')
+
+# windows系统，html 转化为图片
+第一步：下载：chromedriver.exe
+下载地址：https://registry.npmmirror.com/binary.html?path=chromedriver/，保证版本与自己chrom浏览器版本第一个数字一致；
+第二步：pip3 install snapshot-selenium
+第三步：使用
+from pyecharts import options as opts
+from pyecharts.charts import Bar
+from pyecharts.render import make_snapshot
+
+from snapshot_selenium import snapshot
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service  # 新增
+from snapshot_selenium.snapshot import make_snapshot
+
+def get_chrome_driver(executable_path):
+    options = webdriver.ChromeOptions()
+    options.add_argument("headless")
+    service = Service(executable_path=executable_path)
+    return webdriver.Chrome(options=options, service=service)
+
+driver=get_chrome_driver(executable_path=rf"D:\Users\{USERNAME}\chromedriver_win32\chromedriver.exe")
+
+def bar_chart() -> Bar:
+    c = (
+        Bar()
+        .add_xaxis(["衬衫", "毛衣", "领带", "裤子", "风衣", "高跟鞋", "袜子"])
+        .add_yaxis("商家A", [114, 55, 27, 101, 125, 27, 105])
+        .add_yaxis("商家B", [57, 134, 137, 129, 145, 60, 49])
+        .reversal_axis()
+        .set_series_opts(label_opts=opts.LabelOpts(position="right"))
+        .set_global_opts(title_opts=opts.TitleOpts(title="Bar-测试渲染图片"))
+    )
+    return c
+
+make_snapshot(snapshot, bar_chart().render(), "bar0.png", driver=driver)
+make_snapshot(snapshot, "意图关联.html",
+    "意图关联.pdf",
+    driver=driver)
+    )
+
 

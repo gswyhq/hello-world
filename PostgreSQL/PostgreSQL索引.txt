@@ -1,0 +1,59 @@
+
+pg_indexes 是一个视图，可以通过它获取某个表的索引信息。
+pg_indexes中获取pg系统表pg_index表的索引信息, 即查看某个表哪些字段有索引：
+select * from pg_indexes where tablename = 'pg_index';
+
+# 给表的指定字段添加索引：
+CREATE INDEX IF NOT EXISTS idx_s_label_type_subject_id ON public.s_label_type USING btree (subject_id);
+
+# 常见可能出现即使创建了索引但实际未使用索引的情况:
+1、当查询条件中存在多个OR连接时，PostgreSQL需要将所有条件的结果集进行合并，而这个合并操作可能会导致索引失效。如：一个or连接两个索引列（走索引），两个or连接三个索引列（走全表扫描）
+要避免这种情况，可以尝试对查询条件进行重写，例如使用UNION ALL连接多个查询条件
+2、对于非常小的表或者索引，使用索引可能会比全表扫描更慢。这是因为使用索引需要进行额外的 I/O 操作，而这些操作可能比直接扫描表更慢。
+3、如果索引列中有大量重复的数据，或者一个字段全是一个值，这个时候，索引可能并不能发挥它的作用，起到加快检索的作用，因为这个索引并不能显著地减少需要扫描的行数，所以计算的代价可能远远大于走别的执行计划的代价。
+如：索引列选择性较好，分布较均匀的时候，可以正常使用到索引。而选择性不好的情况下
+4、如果查询条件模糊，例如使用了不等于（<>）、LIKE等运算符或者使用了函数等，那么索引可能无法被使用。
+因为正常情况下，等于（=）操作符可以直接利用B-tree或哈希索引进行查找。这是因为，这些操作符只需要在索引树中查找与给定值相等的项，就可以快速地定位到符合条件的记录。
+而不等于（<>）操作符则需要查找所有不符合条件的记录，这会导致需要遍历整个索引树来找到匹配的记录，因此使用索引的成本比全表扫描更高。
+LIKE操作符也可能导致不使用索引。这是因为，LIKE操作符通常需要执行模糊匹配，即查找包含你给的关键字的记录。虽然可以使用B-tree索引进行模糊匹配，但是如果模式以通配符开头（例如’%abc’），则索引将不会被使用，因为这种情况下需要遍历整个索引树来查找符合条件的记录。
+NOT，相当于使用函数
+where a is null索引生效，但是where a is not null导致索引失效。类似导致索引失效的还有NOT IN，NOT LIKE等，但是NOT EXISTS不会导致索引失效。
+
+5、表的一个列上有重复索引；在一个表的同一列上的两个索引其实作用是一样的，仅仅名字不一样，属于重复索引，这种情况下，就算用到索引，同一时刻也就会使用到一个索引。
+6、优化器选项关闭了索引扫描
+PostgreSQL里有着很多的可以影响优化器的参数，例如enable_indexscan,enable_bitmapscan,enable_hashjoin,enable_sort等等，这些参数可以在session，用户，数据库级别进行设置。可以通过设置这些参数的值，来改变相关SQL执行时的执行计划。但是需要注意的是，为了个别的SQL，去盲目改变这些参数的值，往往是得不偿失的，操作的时候需要严谨并且仔细考虑，否则，这些类型的参数的改变，对于数据库的性能影响可能是巨大的。
+7、统计信息不准确
+因为CBO本身是基于代价的优化器，而计算代价要根据统计信息去做计算，统计信息不准确，得到的执行计划可能不是最优
+8、Hints影响执行计划
+PostgreSQL数据库里有着像ORACLE里类似的Hints功能，即pg_hint_plan工具，用Hints能够改变sql语句的执行计划，hint就是优化器的一种指示。
+9、查询条件中使用函数
+当查询条件中包含函数调用时，PostgreSQL里可能无法使用索引，因为它需要对所有数据进行计算，而不是只计算索引值。
+10、查询条件中有不等于运算符
+因为在索引扫描期间，不等于运算符会导致索引中的每一行都需要进行比较，因此需要走全表扫描，不会走索引。
+任何计算、函数、类型转换,都会影响索引，如下面的例子运算、函数、类型转换却导致索引失效了。
+where a + 1 = 1
+where power(a,2) = 1
+where a::varchar = '1'
+
+如何解决呢？可参考表达式索引解决：
+create index idx_tbl_index_a on tbl_index ((a+1));
+create index idx_tbl_index_a on tbl_index ((power(a,2)));
+create index idx_tbl_index_a on tbl_index ((a::varchar));
+
+11、多字段btree索引查询条件不包含第一列
+
+# 在PostgreSQL中优化窗口函数以使用索引
+SELECT id, date
+FROM (
+    SELECT id, date, ROW_NUMBER() OVER (PARTITION BY id ORDER BY date DESC) rn
+    FROM foo
+) sbt
+WHERE sbt.rn = 1;
+改为：
+SELECT id, date
+FROM (
+    SELECT id, date, MAX(date) OVER (PARTITION BY id) as maxDate
+    FROM foo
+) sbt
+WHERE date = maxDate;
+

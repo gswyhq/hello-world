@@ -1,0 +1,155 @@
+
+
+运行docker-oracle
+docker save store/oracle/database-enterprise:12.2.0.1 |gzip > oracle-12.2.0.1-save.tgz
+docker load < oracle-12.2.0.1-save.tgz
+docker run --name ora3 -d -p 21521:1521 -p 25500:5500 -e TZ=Asia/Shanghai  store/oracle/database-enterprise:12.2.0.1
+docker logs -f ora3 
+
+进入容器
+docker exec -it ora3 bash
+添加环境变量
+export PATH=$PATH:/u01/app/oracle/product/12.2.0/dbhome_1/bin/
+使用超级用户登录
+sqlplus  sys/Oradoc_db1 as sysdba
+修改密码
+alter user sys identified by ******;
+创建新用户
+create user c##dgpdata identified by ******;
+授权
+GRANT CONNECT, RESOURCE, DBA TO c##dgpdata;
+切换用户
+CONNECT c##dgpdata/******@ORCLCDB
+测试建表
+CREATE TABLE table1 (
+	created_by varchar(100) ,
+	created_date varchar(100) ,
+	updated_date varchar(100) ,
+	updated_by varchar(100) 
+);
+查看用户所拥有的表：
+SELECT TABLE_NAME FROM USER_TABLES;
+
+使用orclpdb1.localdomain作为servicename 连接
+
+
+
+
+创建PDB用户
+sqlplus  sys/****** as sysdba
+CONNECT sys/****** as sysdba
+
+SQL> alter session set container=ORCLPDB1;
+SQL> startup
+ORA-65019: pluggable database ORCLPDB1 already open
+
+SQL> create user test identified by test;
+SQL> grant connect,resource,dba to test;
+SQL> grant create sequence,select any sequence to test;
+
+# 查询当前有哪些数据库
+SQL> select name,pdb from v$services;
+
+
+NAME
+----------------------------------------------------------------
+PDB
+--------------------------------------------------------------------------------
+orclpdb1.localdomain
+ORCLPDB1
+
+# 查询有哪些用户(模式)
+SQL> SELECT username FROM dba_users;
+
+使用orclpdb1.localdomain作为servicename 连接
+
+
+drop user user2 ； 仅仅是删除用户，
+drop user user2 cascade ；会删除此用户名下的所有表和视图。
+
+1、创建数据库
+create database databasename
+
+2、删除数据库
+drop database dbname
+
+schema就是一些数据库对象的集合 ，如 表 索引 sequence等（查看文档或者oracle10g EM）。
+一个用户一般对应一个schema。
+因此，创建schema必须通过创建用户进行。创建了一个用户以后，你就会发现出现了一个和用户名相同名字的schema。
+
+oracle表和字段是有大小写的区别。oracle默认是大写，如果我们用双引号括起来的就区分大小写，如果没有，系统会自动转成大写。
+
+①不加双引号创建表：
+CREATE TABLE  "ROOT".personal_user_table (
+personal_id NUMBER(10) NOT NULL  ,
+login_name VARCHAR2(20 BYTE) NOT NULL  ,
+login_password VARCHAR2(20 BYTE) NOT NULL  ,
+register_time DATE NOT  NULL  ,
+fullname VARCHAR2(20 BYTE) NOT NULL  ,
+sex CHAR(1 BYTE) NULL ,
+id_card CHAR(18 BYTE) NULL ,
+email VARCHAR2(30 BYTE) NULL ,
+tel CHAR(11 BYTE) NULL ,
+address VARCHAR2(64 BYTE) NULL ,
+work_units VARCHAR2(64 BYTE) NULL ,
+monthly_income NUMBER(8,2) NULL ,
+bank_account CHAR(20 BYTE) NULL ,
+credit_rating NUMBER(1) NULL
+)
+
+②加双引号，跟我们使用navicat可视化操作的结果一样：
+CREATE TABLE  "ROOT"."personal_user_table" (
+"personal_id" NUMBER(10) NOT NULL  ,
+"login_name" VARCHAR2(20 BYTE) NOT NULL  ,
+"login_password" VARCHAR2(20 BYTE) NOT NULL  ,
+"register_time" DATE  NOT  NULL  ,
+"fullname" VARCHAR2(20 BYTE) NOT NULL  ,
+"sex" CHAR(1 BYTE) NULL ,
+"id_card" CHAR(18 BYTE) NULL ,
+"email" VARCHAR2(30 BYTE) NULL ,
+"tel" CHAR(11 BYTE) NULL ,
+"address" VARCHAR2(64 BYTE) NULL ,
+"work_units" VARCHAR2(64 BYTE) NULL ,
+"monthly_income" NUMBER(8,2) NULL ,
+"bank_account" CHAR(20 BYTE) NULL ,
+"credit_rating" NUMBER(1) NULL
+)
+
+双引号在oracle中表示区分大小写，Oracle是严格区分大小写的，未使用双引号时默认全部转换为大写，可能很多人都会误以为oracle是不区分大小写的，
+原因是我们在写查询语句的时候，大小写都无所谓，结果都是一样的，这个只是表面的现象，只要你不使用双引号区分大小写，默认情况下是不区分大小写的。
+
+1、创建货品表
+-- 创建"货品表"
+create table goods(
+  billing_cycle_id VARCHAR2(8) NOT NULL PRIMARY KEY,   -- 账期， 其值例如：20191029
+  sum_num     NUMBER DEFAULT NULL,             -- 当日数据总量， 其值例如：1400
+  re_sum_num  NUMBER,             -- 昨日数据量， 其值例如： 1320
+  ratio       VARCHAR2(41),       -- 波动百分比， 其值例如： 20.15%
+  create_date date,               -- 创建时间， 其值例如：20191029 02:01:33
+  update_date date,               -- 更新时间， 其值例如：20191029 02:01:33
+  remark      varchar2(2000)      -- 备注， 其值例如：这是一条测试数据.
+);
+
+注意：
+Oracle使用的是PL/SQL, 不支持IF NOT EXISTS 条件。
+判断表是否存在：
+使用counter在USER_ALL_TABLES中来列举有几个PRODUCT表 ，如果i>0则说明至少有一个PRODUCT表。
+SELECT count(*) INTO i FROM USER_ALL_TABLES WHERE TABLE_NAME='PRODUCT';
+select tname from tab where tname ='TABLENAME' 记得表名要大写,因为ORACLE是区分大小写的,所有的表名都存放在tab表中
+
+2、给表添加注释
+COMMENT ON TABLE goods IS '货品信息表';
+
+3、给字段添加注释
+
+COMMENT ON COLUMN goods.billing_cycle_id IS '账期';
+COMMENT ON COLUMN goods.sum_num IS '当日数据总量';
+COMMENT ON COLUMN goods.re_sum_num IS '昨日数据总量';
+COMMENT ON COLUMN goods.ratio IS '波动百分比';
+COMMENT ON COLUMN goods.create_date IS '创建时间';
+COMMENT ON COLUMN goods.update_date IS '更新时间';
+COMMENT ON COLUMN goods.remark IS '备注';
+
+
+
+

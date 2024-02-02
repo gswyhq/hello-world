@@ -18,3 +18,12 @@ isBlank  等价于 str == null || str.length == 0 || str.trim().length == 0
 isNotEmpty等价于 a != null && a.length > 0
 isNotBlank 等价于 a != null && a.length > 0 && str.trim().length > 0
 
+# 统计某段代码耗时：
+logger.info("当前是base_info任务，开始执行；");
+long t1=System.currentTimeMillis();
+fetchBaseInfo(taskAnalysis, loginUser);
+long t2=System.currentTimeMillis();
+logger.info("base_info任务执行完成,耗时："+(t2-t1)/1000.0);
+
+
+

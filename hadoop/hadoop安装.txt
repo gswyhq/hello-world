@@ -177,3 +177,14 @@ drwxr-xr-x   - root supergroup          0 2021-06-18 06:36 /test
 
 # 需要开启metastore服务
 root@27d832029d21:~# hive --service metastore -p 9083 &
+
+授权操作：
+#变更目录或文件的权限 可以使用数字 也可以使用字母 u g o a + - r w x
+hadoop fs -chmod [-R] 777 /user/itcast/foo
+hadoop fs -chmod [-R] u+x,o-x /user/itcast/foo
+#变更目录或文件的属主或用户组
+hadoop fs -chown [-R] itcast /user/itcast/foo
+hadoop fs -chown [-R] itcast:ogroup /user/itcast/foo
+#变更用户组
+hadoop fs -chgrp [-R] group1 /user/itcast/foo
+

@@ -307,6 +307,9 @@ ALTER TABLE db_name.table_name SET TBLPROPERTIES('comment' = '这是表新注释
 修改字段:
 ALTER TABLE table_name CHANGE COLUMN muid muid_new STRING COMMENT '这里是列新注释!'; 
 
+若不修改字段，仅仅修改注释的话：
+alter table hive_db.hive_table change column col_name col_name string comment '新的注释信息'
+
 hads查看文件路径：
 hdfs dfs -ls /tmp/hd36
 
@@ -360,4 +363,30 @@ Hello Java
 百度：22.54753467820749, 113.9750246884934
 高德：22.541564058383628, 113.96853564046431
 GPS84：22.544522797896512, 113.96361616729034
+
+# 创建临时数据并统计：
+select mm.* from (
+select t.w,str_to_map(CONCAT_WS('&',COLLECT_SET(concat(M,":",mc))),"&",":") k_V
+FROM (
+SELECT 1 W,'A' M,"中" mc
+UNION ALL
+SELECT 1 W,'B' M,"国" mc
+UNION ALL
+SELECT 2 W,'C' M,"好" mc
+) T  group by t.w 
+) mm where k_V["A"] is not null
+;	
+
+# hive不能使用select from values创建临时表数据，但可以通过如下命令创建临时表数据：
+select t.*
+FROM (
+SELECT 1 id, '104:1' val 
+UNION ALL
+SELECT 2 id, '104:1' val 
+UNION ALL
+SELECT 3 id , "104:1 579:1" val
+UNION ALL
+SELECT 4 id , "107:1" val	
+) t
+;	
 

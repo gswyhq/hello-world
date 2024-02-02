@@ -195,6 +195,14 @@ df = df.drop(df[df.score < 50].index)
 # 替换版本
 df.drop(df[df.score < 50].index, inplace=True)
 
+# 删除满足条件行列数据
+df = df.drop(df.index[df['A'] == 2]) ## 删除A列数值为2的行
+df = df.drop(df.index[(df['A'] == 2)|(df['A'] == 3)])  ## 删除A列数值为2或者3的数据所在行
+df = df.drop(df.index[(df['A'] >= 2)&(df['A'] < 3)]) ## 删除A列数值大于等于且3的数据所在行## 删除列数据
+df = df.drop(df.columns[df.loc['a'] == 3],axis = 1) ## 删除a行数据为3的列
+df = df.drop(df.columns[(df.loc['a'] == 3) | (df.loc['a'] == 2)],axis = 1) 
+df = df.drop(df.columns[(df.loc['a'] < 3) & (df.loc['a'] >= 2)],axis = 1)
+
 # 多条件情况：
 # 可以使用操作符： | 只需其中一个成立, & 同时成立, ~ 表示取反，它们要用括号括起来。
 # 例如删除列“score<50 和>20的所有行

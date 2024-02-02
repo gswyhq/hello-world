@@ -178,5 +178,15 @@ Error: The client is unauthorized due to authentication failure.
 取消下面内容的注释：
 dbms.security.auth_enabled=false
 
+# 问题登录页面，密码怎么也不对：
+Neo.ClientError.Security.Unauthorized: The client is unauthorized due to authentication failure
+解决方法：
+停止neo4j服务，删除 data/dbms 目录，重启neo4j服务；重新设置密码即可；
 
+# 问题，服务启动后，浏览器输入
+http://localhost:7474 页面出现空白，无反应
+而输入http://127.0.0.1:7474 页面又是正常的；
+取消下面的注释，并没有作用
+dbms.connectors.default_listen_address=0.0.0.0
+目前原因不明，可能是因为多版本冲突问题；
 

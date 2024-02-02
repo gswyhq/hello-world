@@ -17,5 +17,8 @@
 sudo apt-get install lsof
 gswewf@gswewf-pc:~$ lsof -i:8005
 
+# 检查连接某个端口的网络是否通畅：
+# telnet  30.10.16.20 8000
+若一直卡在trying 30.10.16.20 ... 就代表网络不通；
 
 

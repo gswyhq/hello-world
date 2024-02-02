@@ -9,3 +9,17 @@ wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_6
 tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2
 4.将phantomjs文件移动到/usr/bin/
 sudo cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/
+
+# 使用报错：
+driver=webdriver.Chrome(rf"D:\Users\{USERNAME}\chromedriver_win32\chromedriver.exe")
+报错：
+AttributeError: 'str' object has no attribute 'capabilities'
+解决方法：
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service  # 新增
+service = Service(executable_path=rf"D:\Users\{USERNAME}\chromedriver_win32\chromedriver.exe")
+driver = webdriver.Chrome(service=service)
+driver.get('https://www.baidu.com/')
+driver.close()
+driver.quit()
+

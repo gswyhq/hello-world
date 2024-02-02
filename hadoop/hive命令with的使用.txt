@@ -1,3 +1,39 @@
+# with as 是什么
+with...as...需要定义一个sql片段,会将这个片段产生的结果集保存在内存中，后续的sql均可以访问这个结果集和,作用与视图或临时表类似。
+一、完整格式
+with q1 as ( select key from src where key = '5')
+select * from q1;
+
+二、同级的多个q之间用,分割with只需要一次,as后的子句必须用()
+with q1 as ( select key from q2 where key = '5'),
+q2 as ( select key from src where key = '5')
+select * from (select key from q1) a;
+
+三、不允许嵌套使用
+下面嵌套使用会报语法错误：
+with temp2 as (
+    with temp1 as (
+        select * from xxx
+    )
+    select * from temp1
+)
+select * from temp2;
+但是同级with, 可以后面with使用前面的with, 同样达到嵌套使用的效果，如：
+with temp1 as (
+        select * from xxx
+    ),
+temp2 as (
+    select * from temp1
+)
+select * from temp2;
+
+四、只能在一条sql中使用
+with temp1 as (
+    select * from xxx
+)
+select * from temp1;
+select xxx from temp1; -- error! no table named temp1;
+
 # 给一个表赋值：
 
 with mytable as

@@ -201,6 +201,9 @@ postgres=# select distinct on(course)id,name,course,score from student order by 
   6 | 周星驰 | 语文   |    91
 (5 rows)
 
+# 注意：
+在pg中，distinct关键字与select语句一起使用，用于去除重复记录。然而postgresql目前缺乏从有序索引中有效提取唯一值列表的能力, 它需要扫描整个索引来找到唯一的值。随着表的增长，这个操作会很慢。
+
 # 查询某个字段大于某个阈值的记录有多少：
 select sum(case when correlativity > 0.2 then 1 else 0 end )/sum(1.0) from public.collision_preliminary_result
 
@@ -208,4 +211,39 @@ select sum(case when correlativity > 0.2 then 1 else 0 end )/sum(1.0) from publi
 select coalesce(sum(table_associated_num)/sum(1), 1) as table_associated_num,
 coalesce(sum(scarcity)/sum(1), 1) as scarcity 
 from db_name.table_name where flag=true;
+
+# SQL 使用VALUES生成带数据的临时表：
+SELECT * FROM (VALUES (123456),(123456),(123456),(123456),(123456)) AS t(c1);
+select * FROM (
+  VALUES (1,2,3,4,123456)
+        ,(2,3,40000,5000,123456)
+        ,(3,4222,5,6000,123456)
+        ,(4,100,100,3,123456)
+        ,(23,4,5,5,123456)
+) AS t(c1,c2,c3,c4,c5);
+
+# int类型，数字类型的模糊查询
+select * from [表名] where cast([字段名] as char) like '%1%'
+select * from newploay where cast(no2 as char) like '%1%'
+
+# 时间类型的模糊查询 timestamp 
+select * from [表名] where (TO_CHAR([字段名], 'yyyy-mm-dd hh24:mi:ss') LIKE '%2021%') 
+
+select * from newploay where (TO_CHAR(no3, 'yyyy-mm-dd hh24:mi:ss') LIKE '%2021%') 
+
+# 修改表注释：
+表的备注信息增加：comment on table 表名  is '备注信息';
+
+# 修改字段注释：
+表的列名备注信息增加：comment on column 表名.列名  is '备注信息';
+
+# update join 多表关联更新：
+update a
+set value = 'test'
+from b,c
+where
+a.b_id = b.id
+and b.c_id = c.id
+and a.key = 'test'
+and c.value = 'test';
 

@@ -1,0 +1,95 @@
+
+# windows系统如何下载svn代码库
+第一步：安装TortoiseSVN
+第二步：点击鼠标右键，选择【SVN Checkout…】
+第三步：在弹出的界面，输入 URL of repository:
+如：https://svn.siro-info.com:8081/svn/odm/trunk/efm_siro
+Checkout directory: 选择本地存储路径；
+再点击 OK 即可；
+第四步：在弹出界面中输入用户名、密码
+此时已经拉入完SVN库，也就是电脑和svn建立了连接关系。接下里需要上传文件
+
+上传代码到svn
+右键 -> TortoiserSVN -> Repo-browser
+在弹出的界面输入之前填入拉去svn库的地址
+登录成功后，弹出操作界面
+可以直接将要上传的文件复制或拉入到对应文件夹中；
+单击鼠标右键，选择Add folder，添加文件夹到svn上
+在弹出的界面上，选择要上传的文件夹
+选中后，点击OK按钮进行上传
+
+# 命令行命令
+# 安装 svn
+apt-get install subversion
+
+# 将代码下载到本地：
+svn checkout url 
+url是代码库的地址，可以是HTTP、HTTPS、SVN、SVNSH、FILE等协议。
+ 例如：svn checkout  svn://192.168.1.1/pro/domain
+
+# 更新代码：
+svn update 
+执行该命令时，SVN会自动检测服务器上是否有更新的代码，并将其下载到本地。
+
+# 提交代码：
+svn commit -m "提交说明"
+将本地修改的代码提交到服务器。-m参数是提交说明，用于描述本次提交的内容。
+
+# 查看文件状态：
+svn status
+查看本地代码与服务器代码的差异。执行该命令时，SVN会列出本地代码库中与服务器代码库中不同的文件和目录，并显示出它们的状态。
+
+# 恢复文件：
+svn revert filename
+将某个文件恢复到服务器上的版本。执行该命令时，SVN会将指定的文件恢复到服务器上的版本。
+
+# 添加文件
+svn add filename
+将新增的文件添加到版本控制中。执行该命令时，SVN会将指定的文件添加到本地代码库中，并将其标记为待提交状态。
+
+# 删除文件
+svn delete filename
+将不再需要的文件从版本控制中删除。执行该命令时，SVN会将指定的文件从本地代码库中删除，并将其标记为待提交状态。
+
+# 查看日志：svn log
+查看版本库的提交日志。执行该命令时，SVN会列出版本库中的所有提交记录，并显示出每次提交的作者、时间、提交说明等信息。
+
+# 查看代码差异
+svn diff
+查看本地代码与服务器代码的具体差异。执行该命令时，SVN会比较本地代码库和服务器代码库中的文件，并显示出它们之间的具体差异。
+
+# 创建分支
+svn copy url1 url2
+将一个版本库的代码复制到另一个版本库中，可以实现创建分支的效果。url1是源代码库的地址，url2是目标代码库的地址。
+
+# 合并分支
+svn merge url1 url2
+将一个分支的代码合并到主干代码中。执行该命令时，SVN会将指定的分支代码库中的代码合并到主干代码库中，并自动解决代码冲突。url1是分支代码库的地址，url2是主干代码库的地址。
+
+# 新建、删除分支标签
+svn copy base_branch new_branch -m "make B branch"
+svn rm （分支）URL   -m "commit log"
+svn cp . （tag）URL
+svn rm （tag）URL -m "commit log"
+
+# 将代码库的指定版本导出到本地目录
+svn export
+执行该命令时，SVN会将指定版本的代码导出到本地目录中，而不会在本地生成SVN元数据。
+
+# 查看代码库的详细信息，包括当前所在分支
+svn info
+执行该命令时，SVN会显示出代码库的URL、版本信息、最后修改时间等详细信息。
+ Relative URL: 或 URL: 即可确定当前所在的分支。
+
+# 查看远程有哪些分支，列出所有branches下的分支
+svn ls svn://192.168.0.178/yewu/branches
+或者显示详细内容：
+svn ls svn://192.168.0.178/yewu/branches --verbose
+
+# 切换分支
+svn　switch　svn://***(新分支)
+svn　switch　svn://***　svn://***本地目录当前分支
+svn switch http://localhost/test/456 . //(原为123的分支)当前所在目录分支到localhost/test/456
+svn switch 版本库根/branches/新分支名称
+
+

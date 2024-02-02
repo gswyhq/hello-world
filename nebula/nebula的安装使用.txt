@@ -3,6 +3,22 @@ https://github.com/vesoft-inc/nebula-docker-compose/blob/release-3.5/docker-comp
 启动服务：
 docker-compose -f docker-compose.yaml up -d
 
+有时该文件中不包括nebula-graph-studio，需额外添加：
+nebula-graph-studio-3.5.1  cat docker-compose.yml
+version: '3.4'
+services:
+  web:
+    image: vesoft/nebula-graph-studio:v3.5.1
+    environment:
+      USER: root
+    ports:
+      - 7001:7001
+    networks:
+      - nebula-web
+
+networks:
+  nebula-web:  
+
 # 执行如下命令查看 NebulaGraph 服务状态：
 $ sudo /usr/local/nebula/scripts/nebula.service status all
 或者在安装部署目录下运行：
@@ -64,6 +80,10 @@ host:port, NebulaGraph的 Graph 服务本机 IP 地址以及服务所用端口�
 如果未启用身份验证，可以填写默认用户名 root 和任意密码。
 如果已启用身份验证，但是未创建账号信息，用户只能以 GOD 角色登录，必须填写 root 及对应的密码 nebula。
 如果已启用身份验证，同时又创建了不同的用户并分配了角色，不同角色的用户使用自己的账号和密码登录。
+
+nebula-graph-studio 的安装 docker-compose.yml 下载地址：
+https://oss-cdn.nebula-graph.com.cn/nebula-graph-studio/3.5.1/nebula-graph-studio-3.5.1.tar.gz
+docker run --rm -it -e USER=root -p 7001:7001 vesoft/nebula-graph-studio:v3.5.1
 
 # nebula 内置角色权限
 角色1：God
@@ -200,4 +220,8 @@ MATCH ()<-[e]-() RETURN e LIMIT 3
 # 退出命令行客户端：
 (root@nebula) [ColumnGraph]> exit
 Bye root!
+
+
+图数据库流行度排行榜单：
+https://db-engines.com/en/ranking/graph+dbms
 

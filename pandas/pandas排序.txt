@@ -122,6 +122,10 @@ Out[30]:
 5   B  3.0
 2   C  3.0
 3   D  4.0
+
+# 按 api_name列进行分组，再取出每组中rt列最大值的一行
+df.loc[df.groupby('api_name')['rt'].idxmax()]
+
 方法3：在分组中取出最大值行（若最大值有多行，则取出所有最大值行）
 dft=pd.DataFrame([['A', 1.2], ['B', 2], ['C', 3], ['D', 4], ['A', 2], ['B', 3], ['A', 3], ['B', 1], ['C', 2.3], ['D', 1.4], ['A', 3.0]], columns=['tag', 'num'])
 dft.groupby('tag').apply(lambda t: t[t.num==t.num.max()])

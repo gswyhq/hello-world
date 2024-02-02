@@ -165,3 +165,18 @@ ifconfig command not found
 解决方法：
 apt-get install net-tools 
 
+# 问题：
+linux系统下遇到cannot execute binary file的问题，一般由以下情况造成：
+1、非root用户或者无执行权限
+2、编译环境不同（程序由其他操作环境复制过来）
+3、命令存在问题，如/bin/bash /bin/bash
+/bin/bash: /bin/bash: cannot execute binary file
+
+# 问题：
+systemctl命令不存在
+systemctl start httpd.service
+bash: systemctl: command not found
+启动服务，但是不行，没有systemctl这个命令
+解决方案
+使用service httpd start启动服务即可
+

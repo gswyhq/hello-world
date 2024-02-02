@@ -36,4 +36,14 @@ root:x:0:0:root:/root:/bin/bash
 3、编辑~/.bashrc,添加：
 source /usr/share/bash-completion/completions/git
 
+windows系统自动补全：
+1、下载git-completion.bash 文件
+https://github.com/git/git/blob/master/contrib/completion/git-completion.bash 并重命名为：.git-completion.bash
+2、找到本机git安装目录：
+>where git
+C:\Program Files\Git\cmd\git.exe
+3、 将.git-completion.bash文件复制到git安装目录下的etc文件夹
+cp .git-completion.bash C:\Program Files\Git\etc\
+4、 打开etc同目录下的 bash.bashrc 文件，在文件末尾添加：
+source ~/.git-completion.bash
 

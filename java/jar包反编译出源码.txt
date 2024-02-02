@@ -1,0 +1,25 @@
+
+jar包反编译出源码：
+Jar包反编译，可以用工具软件，如JD-GUI、BytecodeViewer等。
+
+1. 下载JD-GUI。
+http://java-decompiler.github.io/
+或：
+https://github.com/java-decompiler/jd-gui/releases
+如下载：jd-gui-1.6.6.jar
+
+2. 打开命令提示符，进入jar包所在目录，执行以下命令：
+
+```
+java -jar jd-gui-1.6.6.jar <jar包名>.jar
+```
+
+例如：
+
+```
+java -jar jd-gui-1.6.6.jar myapp.jar
+```
+
+3. 在弹出的窗口中选择“File” -> “Save All Sources” -> 保存反编译后的代码。
+
+

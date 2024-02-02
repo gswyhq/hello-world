@@ -1,0 +1,22 @@
+
+图特征算法
+1、TriangleCount
+https://neo4j.com/docs/graph-data-science/current/algorithms/triangle-count/
+
+2、Node2Vec
+https://neo4j.com/docs/graph-data-science/current/machine-learning/node-embeddings/node2vec/
+
+3、Tree_stat
+
+4、HyperANF
+
+5、Fast Random Projection
+https://neo4j.com/docs/graph-data-science/current/machine-learning/node-embeddings/fastrp/
+
+6、GraphSAGE
+https://neo4j.com/docs/graph-data-science/current/machine-learning/node-embeddings/graph-sage/
+
+7、HashGNN
+https://neo4j.com/docs/graph-data-science/current/machine-learning/node-embeddings/hashgnn/
+
+

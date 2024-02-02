@@ -1,0 +1,59 @@
+
+# 将字符串转换为map:
+select t2.id, str_to_map(t2.val, ' ', ':')
+from (
+        select t.*
+                FROM (
+                SELECT 1 id, '104:1' val
+                UNION ALL
+                SELECT 2 id, '104:1' val
+                UNION ALL
+                SELECT 3 id , "104:1 579:1" val
+                UNION ALL
+                SELECT 4 id , "107:1" val
+                ) t
+        )t2
+;
+
+
+# 将map按key拆分为多行：
+SELECT  a.c1,
+        a.c_map,
+        b.map_key,
+        b.map_value
+FROM    (
+            SELECT  'test' AS c1,
+                    MAP('a', 'b', 'c', 'd', 'e', 'f') AS c_map
+        ) a
+LATERAL VIEW
+        EXPLODE(c_map) b AS map_key,
+        map_value;
+
+# 将字符串转换为map，并按key对value进行求和统计：
+select t3.map_key, sum(cast(t3.map_value AS BIGINT) )
+from (
+	SELECT  a.c1,
+					a.c_map,
+					b.map_key,
+					b.map_value
+	FROM    (
+							select t2.id as c1 , str_to_map(t2.val, ' ', ':') AS c_map
+								from (
+									select t.*
+										FROM (
+										SELECT 1 id, '104:1' val 
+										UNION ALL
+										SELECT 2 id, '104:1' val 
+										UNION ALL
+										SELECT 3 id , "104:1 579:1" val
+										UNION ALL
+										SELECT 4 id , "107:1" val	
+										) t
+									)t2  
+					) a
+	LATERAL VIEW
+					EXPLODE(c_map) b AS map_key,
+					map_value
+	)t3 
+	group by t3.map_key;
+

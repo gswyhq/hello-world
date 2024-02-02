@@ -1,0 +1,287 @@
+
+使用fluent mybatis也可以不用写具体的 xml 文件，通过 java api 可以构造出比较复杂的业务 sql 语句，做到代码逻辑和 sql 逻辑的合一。不再需要在 Dao 中组装查询或更新操作，或在 xml 与 mapper 中再组装参数。
+
+我们通过一个比较典型的业务需求来具体实现和对比下，假如有学生成绩表结构如下:
+
+
+
+create table `student_score`
+(
+    id           bigint auto_increment comment '主键ID' primary key,
+    student_id bigint            not null comment '学号',
+    gender_man tinyint default 0 not null comment '性别, 0:女; 1:男',
+    school_term int               null comment '学期',
+    subject varchar(30) null comment '学科',
+    score int               null comment '成绩',
+    gmt_create datetime not null comment '记录创建时间',
+    gmt_modified datetime not null comment '记录最后修改时间',
+    is_deleted tinyint default 0 not null comment '逻辑删除标识'
+) engine = InnoDB default charset=utf8;
+
+
+现在有需求:
+
+
+
+「统计 2000 年三门学科('英语', '数学', '语文')及格分数按学期,学科统计最低分，最高分和平均分, 且样本数需要大于 1 条,统计结果按学期和学科排序」
+
+
+
+我们可以写 SQL 语句如下
+
+
+
+select school_term,
+       subject,
+       count(score) as count,
+       min(score) as min_score,
+       max(score) as max_score,
+       avg(score) as max_score
+from student_score
+where school_term >= 2000
+  and subject in ('英语', '数学', '语文')
+  and score >= 60
+  and is_deleted = 0
+group by school_term, subject
+having count(score) > 1
+order by school_term, subject;
+
+
+那上面的需求，分别用fluent mybatis, 原生mybatis和Mybatis plus来实现一番。
+
+3
+
+三者实现对比
+
+使用fluent mybatis 来实现上面的功能
+
+    @Test
+    public void fluent_mybatis_demo() {
+        mapper.delete(new StudentScoreQuery());
+        // 批量插入1000条随机记录
+        mapper.insertBatch(this.newScores(1000));
+        StudentScoreQuery query = new StudentScoreQuery()
+            .select
+            .schoolTerm()
+            .subject()
+            .count.score("count")
+            .min.score("min_score")
+            .max.score("max_score")
+            .avg.score("avg_score")
+            .end()
+            .where.schoolTerm().ge(2000)
+            .and.subject().in(new String[]{"英语", "数学", "语文"})
+            .and.score().ge(60)
+            .and.isDeleted().isFalse()
+            .end()
+            .groupBy.schoolTerm().subject().end()
+            .having.count.score().gt(1).end()
+            .orderBy.schoolTerm().asc().subject().asc().end();
+        List<Map<String, Object>> summary = mapper.listMaps(query);
+        System.out.println(summary);
+    }
+
+
+
+具体代码：
+https://gitee.com/fluent-mybatis/fluent-mybatis-docs/blob/master/spring-boot-demo/src/test/java/cn/org/fluent/mybatis/springboot/demo/test/FluentMybatisDemo.java
+
+我们可以看到fluent api的能力，以及 IDE 对代码的渲染效果。
+
+换成mybatis原生实现效果
+
+定义Mapper接口
+
+
+public interface MyStudentScoreMapper {
+    List<Map<String, Object>> summaryScore(SummaryQuery paras);
+}
+
+
+定义接口需要用到的参数实体 SummaryQuery
+
+
+
+@Data
+@Accessors(chain = true)
+public class SummaryQuery {
+    private Integer schoolTerm;
+    private List<String> subjects;
+    private Integer score;
+    private Integer minCount;
+}
+
+
+定义实现业务逻辑的mapper xml文件
+
+
+
+<select id="summaryScore" resultType="map" parameterType="cn.org.fluent.mybatis.springboot.demo.mapper.SummaryQuery">
+    select school_term,
+    subject,
+    count(score) as count,
+    min(score) as min_score,
+    max(score) as max_score,
+    avg(score) as max_score
+    from student_score
+    where school_term >= #{schoolTerm}
+    and subject in
+    <foreach collection="subjects" item="item" open="(" close=")" separator=",">
+        #{item}
+    </foreach>
+    and score >= #{score}
+    and is_deleted = 0
+    group by school_term, subject
+    having count(score) > #{minCount}
+    order by school_term, subject
+</select>
+
+
+实现业务接口(这里是测试类，实际应用中应该对应 Dao 类)。另外，搜索公众号顶级算法后台回复“算法”，获取一份惊喜礼包。
+
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = QuickStartApplication.class)
+public class MybatisDemo {
+    @Autowired
+    private MyStudentScoreMapper mapper;
+    @Test
+    public void mybatis_demo() {
+        // 构造查询参数
+        SummaryQuery paras = new SummaryQuery()
+            .setSchoolTerm(2000)
+            .setSubjects(Arrays.asList("英语", "数学", "语文"))
+            .setScore(60)
+            .setMinCount(1);
+
+        List<Map<String, Object>> summary = mapper.summaryScore(paras);
+        System.out.println(summary);
+    }
+}
+
+
+总之，直接使用 mybatis，实现步骤还是相当的繁琐，效率太低。那换成mybatis plus的效果怎样呢？
+
+
+换成Mybaits原生实现效果
+
+
+mybatis plus的实现比mybatis会简单比较多，实现效果如下
+
+
+    @Test
+    public void mybatis_plus_demo() {
+        mapper.selectMaps(new QueryWrapper<StudentScore>()
+            .select("gender_man",
+            "school_term",
+            "subject",
+            "count(1) as count",
+            "min(score) as min_score",
+            "max(score) as max_score",
+            "avg(score) as avg_score",
+            )
+            .ge("school_term", 2000)
+            .in("subject", "英语", "数学", "语文")
+            .ge("score", 60)
+            .eq("is_deleted", false)
+            .groupBy("gender_man", "school_term", "subject")
+            .having("count(1) > 1")
+            .orderByAsc("school_term", "subject")
+    	);
+    }
+
+
+如红框圈出的，写mybatis plus实现用到了比较多字符串的硬编码（可以用 Entity 的 get lambda 方法部分代替字符串编码）。字符串的硬编码，会给开发同学造成不小的使用门槛，个人觉的主要有 2 点：
+
+
+
+字段名称的记忆和敲码困难
+
+Entity 属性跟随数据库字段发生变更后的运行时错误
+
+
+
+其他框架，比如TkMybatis在封装和易用性上比mybatis plus要弱，就不再比较了。
+
+4
+
+生成代码编码比较
+
+fluent mybatis生成代码设置
+
+
+
+public class AppEntityGenerator {
+    static final String url = "jdbc:mysql://localhost:3306/fluent_mybatis_demo?useSSL=false&useUnicode=true&characterEncoding=utf-8";
+    public static void main(String[] args) {
+        FileGenerator.build(Abc.class);
+    }
+
+    @Tables(
+        /** 数据库连接信息 **/
+        url = url, username = "root", password = "password",
+        /** Entity类parent package路径 **/
+        basePack = "cn.org.fluent.mybatis.springboot.demo",
+        /** Entity代码源目录 **/
+        srcDir = "spring-boot-demo/src/main/java",
+        /** Dao代码源目录 **/
+        daoDir = "spring-boot-demo/src/main/java",
+        /** 如果表定义记录创建，记录修改，逻辑删除字段 **/
+        gmtCreated = "gmt_create", gmtModified = "gmt_modified", logicDeleted = "is_deleted",
+        /** 需要生成文件的表 ( 表名称:对应的Entity名称 ) **/
+        tables = @Table(value = {"student_score"})
+    )
+    static class Abc {
+    }
+}
+
+
+ Mybatis Plus代码生成设置
+
+
+
+public class CodeGenerator {
+    static String dbUrl = "jdbc:mysql://localhost:3306/fluent_mybatis_demo?useSSL=false&useUnicode=true&characterEncoding=utf-8";
+    @Test
+    public void generateCode() {
+        GlobalConfig config = new GlobalConfig();
+        DataSourceConfig dataSourceConfig = new DataSourceConfig();
+        dataSourceConfig.setDbType(DbType.MYSQL)
+            .setUrl(dbUrl)
+            .setUsername("root")
+            .setPassword("password")
+            .setDriverName(Driver.class.getName());
+        StrategyConfig strategyConfig = new StrategyConfig();
+        strategyConfig
+            .setCapitalMode(true)
+            .setEntityLombokModel(false)
+            .setNaming(NamingStrategy.underline_to_camel)
+            .setColumnNaming(NamingStrategy.underline_to_camel)
+            .setEntityTableFieldAnnotationEnable(true)
+            .setFieldPrefix(new String[]{"test_"})
+            .setInclude(new String[]{"student_score"})
+            .setLogicDeleteFieldName("is_deleted")
+            .setTableFillList(Arrays.asList(
+                new TableFill("gmt_create", FieldFill.INSERT),
+                new TableFill("gmt_modified", FieldFill.INSERT_UPDATE)));
+
+        config
+            .setActiveRecord(false)
+            .setIdType(IdType.AUTO)
+            .setOutputDir(System.getProperty("user.dir") + "/src/main/java/")
+            .setFileOverride(true);
+
+        new AutoGenerator().setGlobalConfig(config)
+            .setDataSource(dataSourceConfig)
+            .setStrategy(strategyConfig)
+            .setPackageInfo(
+                new PackageConfig()
+                    .setParent("com.mp.demo")
+                    .setController("controller")
+                    .setEntity("entity")
+            ).execute();
+    }
+}
+
+

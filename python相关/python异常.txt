@@ -149,4 +149,18 @@ python打包程序为exe时，报错ModuleNotFoundError:No module named setuptoo
 解决方法：更新 setuptools 版本。
 安装 setuptools==49.2.1
 
+# requests.post 发送请求时候报错：
+Python报错：‘latin-1‘ codec can‘t encode characters in position 48-56: ordinal not in range(256)
+解决方法：
+header = {k: v.encode("utf-8").decode("latin1") for k, v in header.items()}
+res = requests.post(url=url, headers=header, data=data.encode("utf-8").decode("latin1"), cookies=cookie, timeout=(1, 10))
+
+# requests.post 发送请求连接超时timeout, 但ping得通, curl不通
+ping www.abc.com ,是可以拼得通；但通过curl 请求远程地址Remote Address，发现是超时：
+curl 30.123.111.226:80
+curl: (7) Failed connect to 30.123.111.226:80; Connection timed out
+更换另外一台机器又是正常的，这个时候往往都是因为客户端网络问题。
+
+
+
 

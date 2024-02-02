@@ -48,6 +48,10 @@ aabaa
 # 根据关键词查找匹配，并删除查找匹配到的行(这里删除包含字符串 123 的行)：
 sed -i -e '/123/d' file_name.txt
 
+# 在文件中查找某一行并注释改行：
+sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+在/etc/rsyslog.conf 文件中，查找“imklog”所在的行，并在行首添加 “#” 号, 注释掉改行；
+
 增加一个 -e 选项的方式能让 sed 接受多个命令。
 sed -e ‘s/foo/bar/g’ -e ‘s/chicken/cow/g’ myfile.txt 1>myfile2.txt 
 

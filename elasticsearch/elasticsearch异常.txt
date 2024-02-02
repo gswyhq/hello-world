@@ -317,3 +317,238 @@ curl -XPUT -H 'Content-Type: application/json' 'localhost:9200/test/_mapping/typ
 { "update" : { "_index" : "test", "_type" : "es_cmb_test", "_id" : "str6" } }
 {"doc": {"bill_date": 1, "ptf_id": "str6"}, "doc_as_upsert": true}
 
+#问题, elastcsearch启动报错：
+ERROR: [1] bootstrap checks failed
+[1]: the default discovery settings are unsuitable for production use; at least one of [discovery.seed_hosts, discovery.seed_providers, cluster.initial_master_nodes] must be configured
+因设置了：
+node.name: node-1
+修改 elasticsearch.yml 文件
+#cluster.initial_master_nodes: ["node-1", "node-2"]
+改为：
+cluster.initial_master_nodes: ["node-1"]
+
+# 问题，es启动报错：
+Exception in thread "main" org.elasticsearch.bootstrap.BootstrapException: java.nio.file.AccessDeniedException: /usr/elasticsearch/elasticsearch-7.3.2/config/elasticsearch.keystore
+问题原因：
+启动用户无/usr/elasticsearch/elasticsearch-7.3.2/config/elasticsearch.keystore 文件权限
+设置用户权限即可(这里是ela用户启动es)：
+chown -R ela:ela  /usr/elasticsearch/elasticsearch-7.3.2
+
+# 批量插入数据报错：
+{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"The bulk request must be terminated by a newline [\\n]"}],"type":"illegal_argument_exception","reason":"The bulk request must be termina
+解决方法：
+若参数是来自文件，那在最后一行, 敲回车出来一个空行；
+若是命令行参数，最后一个单引号单独占一行即可，如：
+curl -XPUT localhost:9200/_bulk -H 'Content-Type: application/json;charset=utf-8' -d '
+{"index":{"_index":"milk", "_id":1}}} 
+{"brand":"蒙牛", "series":"特仑苏", "price":60} 
+{"index":{"_index":"milk", "_id":2}}}
+{"brand":"蒙牛", "series":"真果粒", "price":40}
+{"index":{"_index":"milk", "_id":3}}}
+{"brand":"华山牧", "series":"华山牧", "price":49.90}
+{"index":{"_index":"milk", "_id":4}}}
+{"brand":"伊利", "series":"安慕希", "price":49.90}
+{"index":{"_index":"milk", "_id":5}}}
+{"brand":"伊利", "series":"金典", "price":49.90}
+'
+若还是报错，特别是从文件中读取数据的时候，这时需要将 -d改为：--data-binary 如：
+curl -X PUT -u elastic:p1234 "localhost:9200/address_20220218/_bulk?refresh&pretty" -H 'Content-Type: application/json'  --data-binary  @address_20220218_100.json
+因为加载json文件时如果使用普通的-d方法加载文件会造成空行被忽略，也就是说我们加上去的新行并没有起作用，–data-binary数据二进制格式的加载方式，可以保证我们的空行还在
+
+# 搜索报错：
+curl -XPOST http://192.168.3.105:9200/milk2/_search -H 'Content-Type: application/json' -d'{
+  "query": {
+    "script_score": {
+      "query": {
+        "match": {
+          "name": "保险qy"
+        }
+      },
+      "script": {
+        "source": "doc['name.keyword'].value.length() / 10 "
+      }
+    }
+  }
+}'
+{"error":{"root_cause":[{"type":"script_exception","reason":"compile error","script_stack":["doc[name.keyword].value.lengt ...","    ^---- HERE"],"script":"doc[name.keyword].value.length() / 10 ","lang":"painless"}],"type":"search_phase_execution_exception","reason":"all shards failed","phase":"query","grouped":true,"failed_shards":[{"shard":0,"index":"milk2","node":"mtRgiaimTaKgiCuR8jvrng","reason":{"type":"query_shard_exception","reason":"script_score: the script could not be loaded","index_uuid":"ejhu4f7GSx-gCObkasde0Q","index":"milk2","caused_by":{"type":"script_exception","reason":"compile error","script_stack":["doc[name.keyword].value.lengt ...","    ^---- HERE"],"script":"doc[name.keyword].value.length() / 10 ","lang":"painless","caused_by":{"type":"illegal_argument_exception","reason":"Variable [name] is not defined."}}}}],"caused_by":{"type":"script_exception","reason":"compile error","script_stack":["doc[name.keyword].value.lengt ...","    ^---- HERE"],"script":"doc[name.keyword].value.length() / 10 ","lang":"painless","caused_by":{"type":"illegal_argument_exception","reason":"Variable [name] is not defined."}}},"status":400}
+
+# 解决方法是改用inline参数传入的方式,如下：
+curl -XPOST http://192.168.3.105:9200/milk2/_search -H 'Content-Type: application/json' -d'{
+  "query": {
+    "script_score": {
+      "query": {
+        "match": {
+          "name": "保险qy"
+        }
+      },
+      "script": {
+        "inline": "doc[params.name].value.length() / 10 ",
+        "params": {"name": "name.keyword"}
+      }
+    }
+  }
+}'
+
+但是上面语句还是报错
+"No field found for [name.keyword] in mapping with types []"
+更新索引 mapping 的定义方式
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text",
+        "analyzer": "ik_pinyin_analyzer"
+      }
+    }
+  }
+改为：
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text",
+        "analyzer": "ik_pinyin_analyzer",
+        "fields": {
+            "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+            }
+        }
+      }
+    }
+  }
+字段name主类型是text，映射是keyword, 这个时候就正常了；
+
+curl 查询的时候报错：
+
+Unexpected character ('\"' (code 34)): was expecting comma to separate Object entries\n at
+因为转义的问题，在curl中转义三引号方法：
+使用单个"来包围脚本值，并\u0027在脚本中转义单引号。
+如：
+GET hockey/_search
+{
+  "query": {
+    "function_score": {
+      "script_score": {
+        "script": {
+          "lang": "painless",
+          "source": """
+            int total = 0;
+            for (int i = 0; i < doc['goals'].length; ++i) {
+              total += doc['goals'][i];
+            }
+            return total;
+          """
+        }
+      }
+    }
+  }
+}
+转义后的表示为：
+curl -X GET "localhost:9200/hockey/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "function_score": {
+      "script_score": {
+        "script": {
+          "lang": "painless",
+          "source": "int total = 0;\nfor (int i = 0; i < doc[\u0027goals\u0027].length; ++i) {\n  total += doc[\u0027goals\u0027][i];\n}\nreturn total;"
+        }
+      }
+    }
+  }
+}
+'
+
+# elasticsearch 高的版本会自动创建一些监控日志索引：
+green  open .monitoring-kibana-7-2023.06.09                                 YjdfeAoHR2eHTrrYQ_XmPQ 1 0     28      0 121.9kb 121.9kb
+green  open .monitoring-es-7-2023.06.14                                     m7TP8Qh1RaGvkkEx0d3PIw 1 0 174394  60480  75.8mb  75.8mb
+green  open .monitoring-es-7-2023.06.15                                     R18NST3HRS-UmqUOP9XzpA 1 0 285330 411598 143.3mb 143.3mb
+green  open .monitoring-es-7-2023.06.16                                     AzV5pReNTpCFXTo5m3fQKQ 1 0 103266 324103  68.5mb  68.5mb
+Elasticsearch自动生产的系统监控索引（.monitoring-es-*） 默认保留近7天的监控数据，且索引创建时间为北京时间早上8点整。系统监控索引的大小与实例中的索引个数（包含系统索引）和节点个数有关，
+会占用Elasticsearch实例的存储空间。为了避免实例的大部分空间被监控索引占用，可通过以下两种方式进行优化:
+方法1：设置监控索引的保留天数。
+PUT _cluster/settings
+{"persistent": {"xpack.monitoring.history.duration":"1d"}}
+
+curl -XPUT -u elastic:123456789 localhost:9200/_cluster/settings -H 'Content-Type: application/json' -d '{"persistent": {"xpack.monitoring.history.duration":"1d"}}'
+
+您可以按照需求自定义监控索引的保留天数，最少保留一天。
+这种设置目前只影响local类型的导出器，使用http导出器创建的索引不会自动删除。
+查询对应是设置：curl -XGET -u elastic:123456789 localhost:9200/_cluster/settings
+也可以关闭对应的监控设置：
+curl -XPUT -u elastic:ppaa1234 localhost:9200/_cluster/settings -H 'Content-Type: application/json' -d '{"persistent": {"xpack.monitoring.collection.enabled":"false"}}'
+
+方法2：设置需要采集的监控索引。
+通过调用API设置哪些索引需要监控以及哪些索引不需要监控，以减少.monitoring-es-6-*索引所占用的磁盘空间。以下命令以禁掉采集系统索引为例。
+PUT _cluster/settings
+{"persistent": {"xpack.monitoring.collection.indices": "*,-.*"}}
+如只监控名为einterface，和school索引。
+xpack.monitoring.collection.indices: einterface,school
+当然上面两项设置也可以通过修改elasticsearch.yml的配置设置；
+
+# elasticsearch 单机部署时，若复制分片大于0，对应索引状态变成黄色yellow:
+curl -XGET -u elastic:1234 localhost:9200/_cat/indices?v
+health status index                                                           uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   milk2                                                           -kSPVCAKTCeSIsJBc8ZOGw   1   1         51            1     16.4kb         16.4kb
+yellow open   address_20220218                           i4VPIeTgTem-MriKMa1zTw   1   1        200            0    110.3kb        110.3kb
+green  open   mdm2es_column_data_aies                                         yp819OnkSaaFsuXcHnuC8Q   3   0          0            0       849b           849b
+结果字段：
+health：索引的健康状态
+index：索引名
+pri：索引主分片数量
+rep：索引复制分片数
+docs.count：文档总数
+docs.deleted：已删除文档数
+store.size：索引主分片，复制分片，总占用存储空间
+pri.store.size：索引总占用空间，不计算复制分片，占用空间
+
+# 修改副本数,修改索引复制分片数,这里将索引复制分片数设置为0
+curl -XPUT -u elastic:1234 localhost:9200/address_20220218/_settings -H 'Content-Type: application/json'  -d '{"index": {"number_of_replicas" :0 } }'
+之后再去查对应的索引状态，会发现有黄色变成了绿色
+
+# 索引一旦创建就无法修改主分片数
+ElasticSearch中的数据会被分别存储在不同的分片上，索引库的分片数量是在索引库创建的时候通过settings去设置的，如果不设置，分片数默认是5，分片数一旦确定就不能改变。如果执行下面语句会报错
+curl -XPUT -u elastic:1234 localhost:9200/address_20220218/_settings -H 'Content-Type: application/json'  -d '{"index": {"number_of_shards" :3 } }'
+
+{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"Can't update non dynamic settings [[index.number_of_shards]] for open indices [[address_20220218/i4VPIeTgTem-MriKMa1zTw]]"}],"type":"illegal_argument_exception","reason":"Can't update non dynamic settings [[index.number_of_shards]] for open indices [[address_20220218/i4VPIeTgTem-MriKMa1zTw]]"},"status":400}
+
+# docker restart es_9200 报错：
+docker: Error response from daemon: endpoint with name es_9200 already exists in network bridge.
+原因是容器是docker run --rm 启动的，当重启容器时候，对应的容器被删除了；
+这个时候，需要删除网桥
+docker network disconnect --force bridge xxx
+再重新运行容器即可；
+
+# 问题 es集群状态为yellow
+# curl localhost:9200/_cluster/health?pretty
+{
+  "cluster_name" : "es_prd",
+  "status" : "yellow",
+  "timed_out" : false,
+  "number_of_nodes" : 3,
+  "number_of_data_nodes" : 3,
+  "active_primary_shards" : 159,
+  "active_shards" : 299,
+  "relocating_shards" : 0,
+  "initializing_shards" : 4,
+  "unassigned_shards" : 15,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 94.0251572327044
+}
+# 具体查询每个索引的话，有的是green, 有些是yellow
+# curl localhost:9200/_cat/indices
+yellow open mdm2es_database_info                                            keJ1J2LHTCSjcw0TfGEqBA 3 1      1649        0     1mb 673.9kb
+green  open completion_table_index                                          LqnrvRl_TEG3mzbX722Csw 3 1     16131    10924   9.4mb   4.7mb
+yellow open mdm2es_database_data                                            n5wh0j_sSMag0XfT5NEgyw 3 1      3184       69   2.3mb   1.3mb
+
+通过分片恢复指令curl -XPOST localhost:9200/_cluster/reroute?retry_failed=true 有时候是可以恢复成功的，但若数据比较大的话，可能耗时比较久；
+有时候数据表比较大，耗时比较久，可以多等会儿，也可以通过如下命令查看恢复进度：
+curl http://localhost:9200/_cat/health?v
+epoch	timestamp cluster		    status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent
+1689558722 01:52:02  es_prd yellow	    3	   3    315 159    0    2	  1		 0			-		     99.1%
+
+
+
+

@@ -1,0 +1,50 @@
+
+测试系统：
+root@7ef4d4855013:~# head /etc/issue
+Debian GNU/Linux 10 \n \l
+
+安装rsyslogd
+root@7ef4d4855013:~# apt-get -y install rsyslog
+
+启动rsyslogd
+root@7ef4d4855013:~# rsyslogd
+rsyslogd: imklog: cannot open kernel log (/proc/kmsg): Operation not permitted.
+rsyslogd: activation of module imklog failed [v8.1901.0 try https://www.rsyslog.com/e/2145 ]
+启动报错：
+imklog：无法打开内核日志（/ proc / kmsg）：操作不允许。
+从/proc/kmsg需要超级用户权限。 你是否以root身份启动rsyslogd
+root@7ef4d4855013:~# ls -al /proc/kmsg
+-r-------- 1 root root 0 Jul 20 18:05 /proc/kmsg
+root@7ef4d4855013:~# head /proc/kmsg
+head: cannot open '/proc/kmsg' for reading: Operation not permitted
+若是docker 容器内，即使是root用户的话，也可能无该权限；
+可以在docker容器启动的时候添加privileged参数，使用该参数，container内的root拥有真正的root权限。
+否则，container内的root只是外部的一个普通用户权限。
+privileged启动的容器，可以看到很多host上的设备，并且可以执行mount。
+甚至允许你在docker容器中启动docker容器。
+设置privileged启动的容器：
+[root@localhost ~]# docker run -t -i --privileged centos:latest bash
+
+如若不想访问内核日志，又不想rsyslog启动不了，可以编辑 /etc/rsyslog.conf，注释掉该行，您也将摆脱此警告
+module(load="imklog")
+sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+注释掉 /etc/rsyslog.conf 文件中 含有imklog的行
+
+停止rsyslogd
+root@7ef4d4855013:~# service rsyslog stop
+
+重启rsyslogd
+root@7ef4d4855013:~# service rsyslog restart
+
+root@3520d5cf96b9:~# logger "Hello rsyslog"  # 发送一条日志
+
+root@3520d5cf96b9:~# cat /var/log/messages  # 查看日志内容
+...
+Jul 20 18:13:55 3520d5cf96b9 kernel: [10223201.745681] overlayfs: Warning: Copying up statoverride, but open R/O on fd 3 which will cease to be coherent [pid=21133 dpkg-statoverri]
+Jul 20 18:13:55 3520d5cf96b9 rsyslogd:  [origin software="rsyslogd" swVersion="8.1901.0" x-pid="1309" x-info="https://www.rsyslog.com"] start
+Jul 20 18:14:20 3520d5cf96b9 root: Hello rsyslog
+
+# 若注释掉了
+module(load="imklog")   # provides kernel logging support
+那么一些内核日志记录就无法查找了；如服务如何挂掉，kill掉的原因就无法查询了；
+

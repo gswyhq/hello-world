@@ -10,6 +10,8 @@ ubuntu新建用户有两个命令，adduser 和 useradd：
 
 并且系统默认为新建的用户在/home目录下建立以用户名为名字的家目录，并且默认加入sudo用户组，自动设置shell，总之，很方便；
 
+以非交互方式运行ADDUSER, 免提示创建用户abcd
+adduser --disabled-password --gecos "" abcd
 
 
 2、useradd，使用不太方便，需要自己设置家目录，需要自己把用户加入sudo用户组，如果不加入sudo用户组的话，sudo命令不能用，还需要自己设置shell等等，但是有些时候，我们就是希望不要把家目录放到默认的/home/下，想放到别的硬盘下，这时候的useradd就显得很有用了，先看一下useradd可跟的参数，

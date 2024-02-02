@@ -1,0 +1,40 @@
+
+# FP16也叫做 float16，两种叫法是完全一样的，全称是Half-precision floating-point(半精度浮点数)，在IEEE 754标准中是叫做binary16，简单来说是用16位二进制来表示的浮点数
+Sign(符号位): 1 位，0表示整数；1表示负数。
+Exponent(指数位)：5位，简单地来说就是表示整数部分
+Fraction(尾数位)：10位，简单地来说就是表示小数部分
+
+# BF16也叫做bfloat16(这是最常叫法)，或叫“BF16”，全称brain floating point，也是用16位二进制来表示的，和上述FP16不一样的地方就是指数位和尾数位不一样
+Sign(符号位): 1 位，0表示整数；1表示负数
+Exponent(指数位)：8位，表示整数部分，偏置值是 127
+Fraction(尾数位)：7位，表示小数部分
+
+# FP32也叫做 float32，两种叫法是完全一样的，全称是Single-precision floating-point(单精度浮点数)，在IEEE 754标准中是叫做binary32，简单来说是用32位二进制来表示的浮点数
+Sign(符号位): 1 位，0表示整数；1表示负数
+Exponent(指数位)：8位，表示整数部分，偏置值是 127
+Fraction(尾数位)：23位，表示小数部分
+
+这里要注意一下，并不是所有的硬件都支持bfloat16，因为它是一个比较新的数据类型，在 NVIDIA GPU 上，只有 Ampere 架构以及之后的GPU 才支持，如何判断呢？很简单：
+import transformers
+transformers.utils.import_utils.is_torch_bf16_gpu_available()
+结果为True就是支持
+
+
+# 在自动混合精度策略（AMP）场景下判断设备是否支持 bfloat16、float16。
+import paddle
+paddle.amp.is_bfloat16_supported() # True or False
+paddle.amp.is_float16_supported() # True or False
+
+#  PyTorch 中的这三种数据类型的差异
+import torch
+torch.finfo(torch.float32), torch.finfo(torch.float16), torch.finfo(torch.bfloat16)
+Out[5]: 
+(finfo(resolution=1e-06, min=-3.40282e+38, max=3.40282e+38, eps=1.19209e-07, smallest_normal=1.17549e-38, tiny=1.17549e-38, dtype=float32),
+ finfo(resolution=0.001, min=-65504, max=65504, eps=0.000976563, smallest_normal=6.10352e-05, tiny=6.10352e-05, dtype=float16),
+ finfo(resolution=0.01, min=-3.38953e+38, max=3.38953e+38, eps=0.0078125, smallest_normal=1.17549e-38, tiny=1.17549e-38, dtype=bfloat16))
+
+可以看到，虽然精度bfloat16比 float16 要差很多，但 bfloat16 数据类型拥有和 float32 相同的表示范围。
+很多情况下，更大的范围比精度重要很多（能够有效防止上下溢出）。
+
+transformer是层数多且有lipschitz常量大的组件的模型，在训练时梯度很容易超过fp16的表示范围，导致训练loss爆掉，而BF16表示范围跟fp32一致，训练模型非常稳定；
+

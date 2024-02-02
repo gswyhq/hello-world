@@ -1,0 +1,158 @@
+
+使用HTTP接口创建数据库
+使用POST方式发送到URL的/query路径，参数q为CREATE DATABASE <new_database_name>，下面的例子发送一个请求到本地运行的InfluxDB创建数据库mydb:
+
+curl -i -XPOST http://localhost:8086/query --data-urlencode "q=CREATE DATABASE mydb"
+使用HTTP接口写数据
+通过HTTP接口POST数据到/write路径是我们往InfluxDB写数据的主要方式。下面的例子写了一条数据到mydb数据库。这条数据的组成部分是measurement为cpu_load_short，tag的key为host和region，对应tag的value是server01和us-west，field的key是value，对应的数值为0.64，而时间戳是1434055562000000000。
+
+curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
+当写入这条数据点的时候，你必须明确存在一个数据库对应名字是db参数的值。如果你没有通过rp参数设置retention policy的话，那么这个数据会写到db默认的retention policy中。
+
+# 同时写入多条数据：
+下面的例子就是写了三个数据点到mydb数据库中。第一个点所属series的measurement为cpu_load_short，tag是host=server02，timestamp是server本地的时间戳；第二个点同样是measurement为cpu_load_short，但是tag为host=server02,region=us-west,且有明确timestamp为1422568543702900257的series；第三个数据点和第二个的timestamp是一样的，但是series不一样，其measurement为cpu_load_short，tag为direction=in,host=server01,region=us-west。
+curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary 'cpu_load_short,host=server02 value=0.67
+cpu_load_short,host=server02,region=us-west value=0.55 1422568543702900257
+cpu_load_short,direction=in,host=server01,region=us-west value=2.0 1422568543702900257'
+
+从文件中写入数据
+可以通过curl的@filename来写入文件中的数据，且这个文件里的数据的格式需要满足InfluxDB那种行的语法。
+给一个正确的文件(cpu_data.txt)的例子：
+cpu_load_short,host=server02 value=0.67
+cpu_load_short,host=server02,region=us-west value=0.55 1422568543702900257
+cpu_load_short,direction=in,host=server01,region=us-west value=2.0 1422568543702900257
+看我们如何把cpu_data.txt里的数据写入mydb数据库：
+curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary @cpu_data.txt
+说明：如果你的数据文件的数据点大于5000时，你必须把他们拆分到多个文件再写入InfluxDB。
+因为默认的HTTP的timeout的值为5秒，虽然5秒之后，InfluxDB仍然会试图把这批数据写进去，但是会有数据丢失的风险。
+
+注意：如果你试图写入一个和之前的类型不一样的数据(例如，filed字段之前接收的是数字类型，现在写了个字符串进去)，那么InfluxDB会拒绝这个数据。
+
+# 使用HTTP接口查询数据
+HTTP接口是InfluxDB查询数据的主要方式。通过发送一个GET请求到/query路径，并设置URL的db参数为目标数据库，设置URL参数q为查询语句。下面的例子是查询在写数据里写入的数据点。
+
+curl -G 'http://localhost:8086/query?pretty=true' --data-urlencode "db=mydb" --data-urlencode "q=SELECT \"value\" FROM \"cpu_load_short\" WHERE \"region\"='us-west'"
+InfluxDB返回一个json值，你查询的结果在result列表中，如果有错误发送，InfluxDB会在error这个key里解释错误发生的原因。
+
+说明：添加pretty=ture参数在URL里面，是为了让返回的json格式化。这在调试或者是直接用curl的时候很有用，但在生产上不建议使用，因为这样会消耗不必要的网络带宽。
+
+# 批量查询，多个查询
+在一次API调用中发送多个InfluxDB的查询语句，可以简单地使用分号分隔每个查询，例如：
+curl -G 'http://localhost:8086/query?pretty=true' --data-urlencode "db=mydb" --data-urlencode "q=SELECT \"value\" FROM \"cpu_load_short\" WHERE \"region\"='us-west';SELECT count(\"value\") FROM \"cpu_load_short\" WHERE \"region\"='us-west'"
+
+# 查询数据时的其他可选参数
+时间戳格式
+在InfluxDB中的所有数据都是存的UTC时间，时间戳默认返回RFC3339格式的纳米级的UTC时间，例如2015-08-04T19:05:14.318570484Z，如果你想要返回Unix格式的时间，可以在请求参数里设置epoch参数，其中epoch可以是[h,m,s,ms,u,ns]之一。例如返回一个秒级的epoch：
+curl -G 'http://localhost:8086/query' --data-urlencode "db=mydb" --data-urlencode "epoch=s" --data-urlencode "q=SELECT \"value\" FROM \"cpu_load_short\" WHERE \"region\"='us-west'"
+
+# 分块(chunking)查询
+可以设置参数chunked=true开启分块，使返回的数据是流式的batch，而不是单个的返回。
+返回结果可以按10000数据点被分块，为了改变这个返回最大的分块的大小，可以在查询的时候加上chunk_size参数，例如返回数据点是每20000为一个批次。
+curl -G 'http://localhost:8086/query' --data-urlencode "db=deluge" --data-urlencode "chunked=true" --data-urlencode "chunk_size=20000" --data-urlencode "q=SELECT * FROM liters"
+
+
+# GROUP BY子句后面可以跟用户指定的tags或者是一个时间间隔。
+语法
+SELECT_clause FROM_clause [WHERE_clause] GROUP BY [* | <tag_key>[,<tag_key]]
+语法描述
+GROUP BY *
+对结果中的所有tag作group by。
+
+GROUP BY <tag_key>
+对结果按指定的tag作group by。
+
+GROUP BY <tag_key>,<tag_key>
+对结果数据按多个tag作group by，其中tag key的顺序没所谓。
+
+例子
+例一：对单个tag作group by
+> SELECT MEAN("water_level") FROM "h2o_feet" GROUP BY "location"
+
+name: h2o_feet
+tags: location=coyote_creek
+time                           mean
+----                           ----
+1970-01-01T00:00:00Z     5.359342451341401
+
+
+name: h2o_feet
+tags: location=santa_monica
+time                           mean
+----                           ----
+1970-01-01T00:00:00Z     3.530863470081006
+上面的查询中用到了InfluxQL中的函数来计算measurement h2o_feet的每location的water_level的平均值。InfluxDB返回了两个series：分别是location的两个值。
+
+说明：在InfluxDB中，epoch 0(1970-01-01T00:00:00Z)通常用作等效的空时间戳。如果要求查询不返回时间戳，例如无限时间范围的聚合函数，InfluxDB将返回epoch 0作为时间戳。
+
+# GROUP BY时间间隔
+GROUP BY time()返回结果按指定的时间间隔group by。
+
+基本的GROUP BY time()语法
+语法
+SELECT <function>(<field_key>) FROM_clause WHERE <time_range> GROUP BY time(<time_interval>),[tag_key] [fill(<fill_option>)]
+基本语法描述
+基本GROUP BY time()查询需要SELECT子句中的InfluxQL函数和WHERE子句中的时间范围。请注意，GROUP BY子句必须在WHERE子句之后。
+
+time(time_interval)
+GROUP BY time()语句中的time_interval是一个时间duration。决定了InfluxDB按什么时间间隔group by。例如：time_interval为5m则在WHERE子句中指定的时间范围内将查询结果分到五分钟时间组里。
+
+fill(<fill_option>)
+fill（<fill_option>）是可选的。它会更改不含数据的时间间隔的返回值。
+
+覆盖范围：基本GROUP BY time()查询依赖于time_interval和InfluxDB的预设时间边界来确定每个时间间隔中包含的原始数据以及查询返回的时间戳。
+
+基本语法示例
+下面的例子用到的示例数据如下：
+
+> SELECT "water_level","location" FROM "h2o_feet" WHERE time >= '2015-08-18T00:00:00Z' AND time <= '2015-08-18T00:30:00Z'
+
+name: h2o_feet
+--------------
+time                   water_level   location
+2015-08-18T00:00:00Z   8.12          coyote_creek
+2015-08-18T00:00:00Z   2.064         santa_monica
+2015-08-18T00:06:00Z   8.005         coyote_creek
+2015-08-18T00:06:00Z   2.116         santa_monica
+2015-08-18T00:12:00Z   7.887         coyote_creek
+2015-08-18T00:12:00Z   2.028         santa_monica
+2015-08-18T00:18:00Z   7.762         coyote_creek
+2015-08-18T00:18:00Z   2.126         santa_monica
+2015-08-18T00:24:00Z   7.635         coyote_creek
+2015-08-18T00:24:00Z   2.041         santa_monica
+2015-08-18T00:30:00Z   7.5           coyote_creek
+2015-08-18T00:30:00Z   2.051         santa_monica
+例一：时间间隔为12分钟的group by
+> SELECT COUNT("water_level") FROM "h2o_feet" WHERE "location"='coyote_creek' AND time >= '2015-08-18T00:00:00Z' AND time <= '2015-08-18T00:30:00Z' GROUP BY time(12m)
+
+name: h2o_feet
+--------------
+time                   count
+2015-08-18T00:00:00Z   2
+2015-08-18T00:12:00Z   2
+2015-08-18T00:24:00Z   2
+该查询使用InfluxQL函数来计算location=coyote_creek的water_level数，并将其分组结果分为12分钟间隔。每个时间戳的结果代表一个12分钟的间隔。 第一个时间戳记的计数涵盖大于2015-08-18T00：00：00Z的原始数据，但小于且不包括2015-08-18T00：12：00Z。第二时间戳的计数涵盖大于2015-08-18T00：12：00Z的原始数据，但小于且不包括2015-08-18T00：24：00Z。
+
+例二：时间间隔为12分钟并且还对tag key作group by
+> SELECT COUNT("water_level") FROM "h2o_feet" WHERE time >= '2015-08-18T00:00:00Z' AND time <= '2015-08-18T00:30:00Z' GROUP BY time(12m),"location"
+
+name: h2o_feet
+tags: location=coyote_creek
+time                   count
+----                   -----
+2015-08-18T00:00:00Z   2
+2015-08-18T00:12:00Z   2
+2015-08-18T00:24:00Z   2
+
+name: h2o_feet
+tags: location=santa_monica
+time                   count
+----                   -----
+2015-08-18T00:00:00Z   2
+2015-08-18T00:12:00Z   2
+2015-08-18T00:24:00Z   2
+该查询使用InfluxQL函数来计算water_leval的数量。它将结果按location分组并分隔12分钟。请注意，时间间隔和tag key在GROUP BY子句中以逗号分隔。查询返回两个measurement的结果：针对tag location的每个值。每个时间戳的结果代表一个12分钟的间隔。第一个时间戳记的计数涵盖大于2015-08-18T00：00：00Z的原始数据，但小于且不包括2015-08-18T00：12：00Z。第二时间戳的计数涵盖大于2015-08-18T00：12：00Z原始数据，但小于且不包括2015-08-18T00：24：00Z。
+
+# 更多数据查询见：https://jasper-zhang1.gitbooks.io/influxdb/content/Query_language/data_exploration.html
+# 更多函数见：https://jasper-zhang1.gitbooks.io/influxdb/content/Query_language/functions.html
+
+

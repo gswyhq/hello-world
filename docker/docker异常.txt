@@ -485,3 +485,32 @@ docker system prune -a
 出现原因：
         docker在构建镜像时，会构建多个层级，在使用Dockerfile时，过度使用COPY、RUN命令，在频繁构建容器时，就会出现构建层数过多的情况，报max depth exceeded错误，并且无法再次构建容器。
 
+# 问题：在docker 中修改"vm.max_map_count"报错：
+root@1e8fe4dc5f3c:~# sysctl -p
+sysctl: setting key "fs.file-max": Read-only file system
+sysctl: setting key "vm.max_map_count": Read-only file system
+问题原因：
+基于 sysclt 设置与内核主机共享；
+docker会继承主机上的一些设置文件，为了防止影响全局，上述文件在docker中会被设置为read-only。所以需要到主机上去更改以上配置。主机更改完成后，docker也就自动继承了。
+
+# windows使用docker异常：
+>.\dockerd.exe --register-service
+Access is denied.
+因为当前用户不是最高权限，需要設定用戶群組。
+CMD窗口运行：
+>C:\WINDOWS\system32\compmgmt.msc
+打开“计算机管理”对话窗口
+系统工具 -> 本地用户和组 -> 选中“组”，查看有无名为“docker-users”的用户组；
+若不存在，则右键->新建组, 组名 docker-users; 描述 Users of Docker for Windows；
+成员，那里选择添加当前的用户，添加好后，再点击创建；
+若点击创建后，出现“创建组 docker-users时，出现了以下错误：拒绝访问。”
+那是因为当前用户没有管理员权限，需要申请到管理员权限进行创建添加。
+
+# centos 安装docker报错：
+su -
+yum update
+rpm -i docker-ce-18.06.3.ce-3.el7.x86_64.rpm
+error: Failed dependencies: libltdl.so.7()(64bit) is needed by
+解决办法：
+ sudo yum install libtool-ltdl.x86_64
+

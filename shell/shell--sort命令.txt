@@ -82,6 +82,10 @@ cat test_sort.txt
 ## sort -t -k
 cat test_sort.txt |sort -n -t "|" -k 3
 
+## 若分隔符为TAB键，则需按如下形式：
+cat clid_group1.txt |sort -n -t $'\t' -k 2
+如果不加$符号的话,会返回:sort: multi-character tab `\t'的错误。
+
 按时间排序：　　
 # 按修改文件时间升序排列：
 ls -rtl
@@ -102,4 +106,46 @@ less abcd.txt|sort | uniq -c | sort -n -r
 uniq -c，统计各行出现的次数，并把次数打印在每行前端
 sort -n -r 每行都以数字开头，按数字从达到小，排列各行
 
- 
+# 分组统计：
+# test.txt
+YD5Gxxx|6618151|6825449073|6476534190|36251|超级会员|0
+YD5Gxxx|8968336|1445546463|6476534190|36251|超级会员|0
+YD5Gxxx|2545939|6904742993|0858636804|36251|超级会员|80%以上
+YD5Gxxx|3200810|6896525523|6501574903|36251|普通|0
+分组统计
+[$6] 实现分组，count[$6]++ 实现计数。
+awk -F '|' '{count[$6]++;} END {for(i in count) {print i count[i]}}' test.txt
+根据第7列进行筛选之后，再按第6列进行分组统计。
+awk -F '|' '{if($7=="0") {count[$6]++;}} END {for(i in count) {print i count[i]}}' test.txt
+
+分组求和
+对所有进行求和。
+awk -F '|' '{sum += $2} END {print sum}' test.txt
+# 48629596
+分组一般使用x[$2]=x[$3]的方式来实现，其中x[$2]中的$2为要分的组，可以多个分组，x[$3]为要处理的值。
+
+一次分组
+awk -F '|' '{x[$6] += $2} END {for(i in x){print i, x[i]}}' test.txt
+
+二次分组
+awk -F '|' '{x[$6"-"$7] += $2} END {for(i in x){print i, x[i]}}' test.txt
+
+格式化处理
+awk -F '|' '{x[$6] += $2} END {for(i in x){print("%s\t%d\n",i,x[i])}}' test.txt
+
+分组求平均值
+awk -F '|' '{sum += $2} END {print "Average = ", sum/NR}' test.txt
+# Average =  4.86296e+06
+
+awk -F '|' '{a[$6] += $2; ca[$6]++} END {for(i in a){print(i,a[i]/ca[i])}}' test.txt
+
+分组求最大最小
+awk -F '|' 'BEGIN {max=0} {if($2>max){max=$2}} END {print max}' test.txt
+# 最大值
+
+awk -F '|' '{if($2>x[$6]){x[$6]=$2}} END {for(i in x) {print i, x[i]}}' test.txt
+
+分组整理字符
+awk -F '|' '{x[$6]=x[$6]"\n"$2} END {for(i in x){print i ":" x[i]}}' test.txt
+
+

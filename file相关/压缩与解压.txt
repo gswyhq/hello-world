@@ -293,6 +293,37 @@ tar –xZvf file.tar.Z   //解压tar.Z
 unrar e file.rar //解压rar
 unzip file.zip //解压zip
 
+Linux服务器使用tar加密压缩文件
+使用tar命令进行加密压缩时需要和OpenSSL进行结合
+
+tar加密压缩命令如下：
+tar -zcf  - filename  |openssl des3 -salt -k passwd | dd of=filename.des3
+filename你要打包的文件、或目录名
+-k可以不使用,-k参数后跟密码表示自动验证密码,不使用则需要手动输入密码
+passwd加密的密码
+filename.des3输出的文件名
+
+tar加密文件解压命令：
+dd if=filename.des3 |openssl des3 -d -k passwd | tar zxf -
+最后的 “-” 表示释放所有文件
+
+# 问题：tar解密时候出现错误：
+140654076405056:error:06065064:digital envelope routines:EVP_DecryptFinal_ex:bad decrypt:../crypto/evp/evp_enc.c:610:
+可能是因为加密、解密环境openssl的版本不一致所致；
+如加密环境~$ openssl version
+OpenSSL 1.0.2g  1 Mar 2016
+解密环境~# openssl version
+OpenSSL 1.1.1f  31 Mar 2020
+因为在Openssl 1.1中将默认摘要从MD5更改为SHA256
+这时可将解压命令由：
+root@4134f30f7430:~# dd if=20230531.tar.gz |openssl des3 -d -k 12345|tar zxvf -
+更改为：
+root@4134f30f7430:~# dd if=20230531.tar.gz |openssl des3 -md md5 -d -k 12345|tar zxvf -
+使用-md md5 强制使用相同的摘要；
+总之：
+在1.1.0中添加" -md md5"以解密较低版本的数据，并且
+在较低版本中添加" -md sha256"以从1.1.0解密数据
+
 bzip2
 　　bzip2是采用更好压缩算法的压缩程序，一般可以提供较之gzip更好的压缩效果。其具有与gzip相似的指令选项，压缩产生 .bz2 后缀的压缩文件。
 　　bzip2的常用指令选项如下：

@@ -96,3 +96,71 @@ File -> Settings -> Editor -> Code Style -> File Encodings -> Default encoding f
 找到右侧 Maven -> 项目名 -> Lifecycle -> clean 之后，再点击install;
 之后，再启动服务就正常了。
 
+# Intellij IDEA 中缺失命令行参数
+命令行启动：
+java -jar dgp_api-1.0-SNAPSHOT.jar --spring.profiles.active=local --spring.application.name=ai_smart 
+解决方法：
+IDEA -> Run -> Edit Configurations -> Build and run -> Program arguments -> 填入 “--spring.profiles.active=dev  --spring.application.name=ai_smart” 即可；
+
+# 启动服务报错：
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled
+问题原因，启动端口被占用；
+cmd 中输入 netstat -ano
+找到端口对应的pid,或者：
+tasklist | findstr "3060" 
+或：netstat -ano|findstr 3060
+找到3060端口被占用的pid
+
+widows系统，cmd 根据进程号 pid杀死进程 1234：
+taskkill /f /t /im 1234
+
+# Intellij IDEA启动服务报错：
+[ERROR] Failed to execute goal on project ****: Could not resolve dependencies for project 
+was cached in the local repository, resolution will not be reattempted until the update interval of maven-public has elapsed or updates are forced 
+主要是因为Maven默认会使用本地缓存的库来编译工程，而上次下载的库失败导致的。
+解决办法
+共有三种方法，以下择一即可:
+方法1：删除~/.m2/repository/对应目录或目录下的*.lastUpdated文件，然后再次运行maven命令
+方法2：maven命令后加-U，如mvn package -U ; 然后点 maven 的更新按钮 进行 reload all maven projects。 
+方法2：在repository的release或者snapshots版本中新增updatePolicy属性，其中updatePolicy可以设置为”always”、”daily” (默认)、”interval:XXX” (分钟)或”never”
+<repositories>
+    <repository>
+      <id>io.spring.repo.maven.release</id>
+      <url>http://repo.spring.io/release/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+  </repositories>
+
+# maven窗口命令执行方法
+1、打开idea提供的maven工具窗口
+2、选择对应的需要执行的maven命令的模块
+3、点击maven窗口的工具栏上面的 m (有时没有m, 是一个大方框里面有个小小的绿色小三角)按钮，弹出run anything 窗口
+4、在run anything 窗口里面输入我们要执行的命令, 如: mvn package -U,回车执行即可
+
+# Intellij IDEA 中文乱码问题：
+1、首先查清楚文本文件本身的编码是utf-8、还是GB18030
+2、首先是编辑器的乱码，这个很好解决，file->settings-> Appearance & Behavior -> appearence, Use custom font设置成支持中文的字体,如Microsoft YaHei UI
+3、settings中的Eidtor->File Encodings里面设置字体编码格式，一般都是UTF-8
+但若文件编码本身就是gbk, 而这时要求在IDEA中看到的不是乱码，这时就需要将“Default encoding for properties files” 设置为 GB18030, 该编码，对应IDEA页面右下角显示的那个编码；
+
+# Maven父子项目导入报错：
+please verify your project structure
+检查对应的pom.xml是否有问题；导入项目的时候，仅仅导入父项目，右侧的Maven那里仅仅只有父项目；
+
+#IDEA启动项目报错：
+Java heap space
+这个显而易见是堆内存溢出，首先想到的时tomcat的内存分配太小了，调整Idea的内存分配：
+Help–>Edit Custom VM Options–>
+将配置改为以下内容:
+-Xms2048m  #JVM启动时分配的内存
+-Xmx2048m #JVM运行时内存
+整个报错过程，堆溢出的错误不是在代码compiler时报出来的。
+在代码compiler之前有一个build(构建)过程，报错是在这里报出来的。
+检查相应配置File–>settings–>Build,Execution,Deployment–>Compiler选项中有一个地方和堆大小有关
+即:
+Share Build process heap size(mybtes): 2048
+

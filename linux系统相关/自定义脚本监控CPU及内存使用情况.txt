@@ -1,0 +1,217 @@
+
+
+实时监控CPU，内存，每隔一秒监控一次，并写入日志文件：
+[root@d304cbbc1e5f ~]# nohup top -c -bw 500 -d 1 -b > /nas1/dms/dma_logs/top.log &
+
+一、监控CPU和内存的日志工具的使用
+1、阿里云提供了一个监控CPU和内存的脚本，因free版本不同的原因，脚本中的内容有做细微的修改，脚本内容如下：
+
+#!/bin/bash
+#When the free memory very less ,this script to collect CPU/memory usage information and dmessage information. 
+#Version 1.0 time:2014-3-11
+#Version 2.0 time:2014-12-23
+#Version 3.0 time:2020-07-12
+
+logfile=/tmp/$0.log
+
+check_os_release()
+{
+  while true
+  do
+    os_release=$(grep "Red Hat Enterprise Linux Server release" /etc/issue 2>/dev/null)
+    os_release_2=$(grep "Red Hat Enterprise Linux Server release" /etc/redhat-release 2>/dev/null)
+    if [ "$os_release" ] && [ "$os_release_2" ]
+    then
+      if echo "$os_release"|grep "release" >/dev/null 2>&1
+      then
+        os_release=redhat
+        echo "$os_release"
+      else
+        os_release=""
+        echo "$os_release"
+      fi
+      break
+    fi
+    os_release=$(grep "Aliyun Linux release" /etc/issue 2>/dev/null)
+    os_release_2=$(grep "Aliyun Linux release" /etc/aliyun-release 2>/dev/null)
+    if [ "$os_release" ] && [ "$os_release_2" ]
+    then
+      if echo "$os_release"|grep "release" >/dev/null 2>&1
+      then
+        os_release=aliyun
+        echo "$os_release"
+      else
+        os_release=""
+        echo "$os_release"
+      fi
+      break
+    fi
+    os_release_2=$(grep "CentOS" /etc/*release 2>/dev/null)
+    if [ "$os_release_2" ]
+    then
+      if echo "$os_release_2"|grep "release" >/dev/null 2>&1
+      then
+        os_release=centos
+        echo "$os_release"
+      else
+        os_release=""
+        echo "$os_release"
+      fi
+      break
+    fi
+    os_release=$(grep -i "ubuntu" /etc/issue 2>/dev/null)
+    os_release_2=$(grep -i "ubuntu" /etc/lsb-release 2>/dev/null)
+    if [ "$os_release" ] && [ "$os_release_2" ]
+    then
+      if echo "$os_release"|grep "Ubuntu" >/dev/null 2>&1
+      then
+        os_release=ubuntu
+        echo "$os_release"
+      else
+        os_release=""
+        echo "$os_release"
+      fi
+      break
+    fi
+    os_release=$(grep -i "debian" /etc/issue 2>/dev/null)
+    os_release_2=$(grep -i "debian" /proc/version 2>/dev/null)
+    if [ "$os_release" ] && [ "$os_release_2" ]
+    then
+      if echo "$os_release"|grep "Linux" >/dev/null 2>&1
+      then
+        os_release=debian
+        echo "$os_release"
+      else
+        os_release=""
+        echo "$os_release"
+      fi
+      break
+    fi
+    break
+    done
+}
+
+rhel_fun()
+{
+  while true
+  do
+    #vm_mem=$(free -m|grep "buffers/cache"|awk '{print $4}')
+    vm_mem=$(free -m|grep "Mem"|awk '{print $7}')
+    cpu=$(top -bn2|grep "Cpu(s)"|awk '{print $8}'|awk -F'%' '{print $1}'|tail -n1)
+    check_cpu=$(echo "$cpu <20" |bc)
+    if [[ $vm_mem -le 100 ]] || [[ $check_cpu -eq 1  ]]
+    then
+      echo "======================================================" >>$logfile
+      date >>$logfile
+      echo "======================================================" >>$logfile
+      echo "The memory is too less." >>$logfile
+      free -m >>$logfile
+      echo "=======================CPU info========================" >>$logfile
+      (ps aux|head -1;ps aux|sort -nrk3|grep -v "RSS") >>$logfile
+      echo "=======================Memory info=====================" >>$logfile
+      (ps aux|head -1;ps aux|sort -nrk6|grep -v "RSS") >>$logfile
+      date >>$logfile
+      echo "=======================Dmesg info=====================" >>$logfile
+      dmesg >>$logfile
+      dmesg -c
+    fi
+    sleep 10
+  done
+}
+
+debian_fun()
+{
+  while true
+  do
+    vm_mem=$(free -m|grep "buffers/cache"|awk '{print $4}')
+    cpu=$(top -bn2|grep "Cpu(s)"|awk '{print $5}'|awk -F'%' '{print $1}'|tail -n1)
+    check_cpu=$(echo "$cpu <20" |bc)
+    if [[ $vm_mem -le 100 ]] || [[ $check_cpu -eq 1  ]]
+    then
+      echo "======================================================" >>$logfile
+      date >>$logfile
+      echo "======================================================" >>$logfile
+      echo "The memory is too less." >>$logfile
+      free -m >>$logfile
+      echo "=======================CPU info========================" >>$logfile
+      (ps aux|head -1;ps aux|sort -nrk3|grep -v "RSS") >>$logfile
+      echo "=======================Memory info=====================" >>$logfile
+      (ps aux|head -1;ps aux|sort -nrk6|grep -v "RSS") >>$logfile
+      date >>$logfile
+      echo "=======================Dmesg info=====================" >>$logfile
+      dmesg >>$logfile
+      dmesg -c
+    fi
+    sleep 10
+  done
+}
+
+check_os_release
+
+case "$os_release" in
+redhat|centos|aliyun)
+  yum install bc -y
+  rhel_fun
+  ;;
+debian|ubuntu)
+  apt-get install bc -y
+  debian_fun
+  ;;
+esac
+复制代码
+2、上传到/tmp目录中
+
+3、执行如下命令并后台运行该脚本
+
+cd /tmp
+nohup bash get_cpu_mem_info.sh &
+4、该工具会在/tmp目录下生成一个以脚本名字命名的日志文件，实时记录系统的CPU、内存的使用情况，等到系统异常时可以用于分析日志。
+
+二、监控CPU和内存的日志工具的详解
+logfile=/tmp/$0.log：$0表示Shell本身的文件名
+
+check_os_release()：该函数检测的是Linux是属于哪种发行版本
+
+rhel_fun()：
+
+　　1、vm_mem获取的是Mem行available值
+
+　　2、cpu：该变量是top连续运行两次之后匹配%Cpu(s)这一行，id这一列的值，结果是两行，取最后一行
+
+　　3、check_cpu：将cpu计算出来的值与20进行比较，再通过管道符给bc进行计算，如果是真返回1，如果是假返回0
+
+　　4、if [[ $vm_mem -le 100 ]] || [[ $check_cpu -eq 1  ]]：如果变量vm_mem小于等于100则继续执行，如若不是，则变量check_cpu与1进行比较，如果等于1则执行then之后的命令，否则直接sleep10s，然后继续循环比较。
+
+　　5、ps aux|head -1;ps aux|sort -nrk3|grep -v "RSS"：ps aux|head -1获取行首信息，以便后续命令倒序更好查看；sort -nrk3对第三个域（%CPU这一列）数值进行相反的顺序排序；grep -v "RSS"因为超出8行以后会多显示一行行首，为了排版好看，不要多余无用数据，所以加-v排除这一行。
+
+　　6、dmesg：该命令显示Linux内核的环形缓冲区信息，我们可以从中获得诸如系统架构、CPU、挂载的硬件，RAM等多个运行级别的大量的系统信息。当计算机启动时，系统内核（操作系统的核心部分）将会被加载到内存中。在加载的过程中会显示很多的信息，在这些信息中我们可以看到内核检测硬件设备
+
+ 
+
+1) dmesg 是一个显示内核缓冲区系统控制信息的工具;比如系统在启动时的信息会写到/var/log/
+
+2) dmesg 命令显示Linux内核的环形缓冲区信息，我们可以从中获得诸如系统架构、CPU、挂载的硬件，RAM等多个运行级别的大量的系统信息。当计算机启动时，系统内核（操作系统的核心部分）将会被加载到内存中。在加载的过程中会显示很多的信息，在这些信息中我们可以看到内核检测硬件设备
+
+3) dmesg 命令设备故障的诊断是非常重要的。在dmesg命令的帮助下进行硬件的连接或断开连接操作时，我们可以看到硬件的检测或者断开连接的信息
+
+
+使用dmesg命令需要完全的root权限，否则会报错：
+[root@d304cbbc1e5f ~]# dmesg
+dmesg: read kernel buffer failed: Operation not permitted
+若是docker容器，则需设置privileged启动的容器，否则容器内的root也不是完全的root权限：
+[root@localhost ~]# docker run -t -i --privileged centos:latest bash
+ 
+
+【备注】: 
+
+dmesg用来显示内核环缓冲区（kernel-ring buffer）内容，内核将各种消息存放在这里。在系统引导时，内核将与硬件和模块初始化相关的信息填到这个缓冲区中。内核环缓冲区中的消息对于诊断系统问题 通常非常有用。在运行dmesg时，它显示大量信息。通常通过less或grep使用管道查看dmesg的输出，这样可以更容易找到待查信息。
+
+1) 如果发现硬盘性能低下，可以使用dmesg来检查它们是否运行在DMA模式：dmesg | grep DMA
+
+2) 可以用来探测系统内核模块的加载情况，比如要检测ACPI的加载情况，使用dmesg | grep acpi
+
+3) 可以使用mail -s "Boot Log Of xxx Server" user@xxx.com < messages来发送这些日志信息
+
+————————————————
+关于dmesg，原文链接：https://blog.csdn.net/Jerry_1126/article/details/54643018
+

@@ -74,3 +74,16 @@ from DtrBillRet a,DtrDetailRet b
 where a.billno=b.billno
 group by inctmid,cnlid,inwhsid,goodsid
 
+# 子句分别查询有结果，但union all查询结果为空：
+用with 替代解决，如：
+WITH t1 AS (
+        SELECT *
+        FROM carinfo
+    ), 
+    t2 AS (
+        SELECT *
+        FROM car_blacklist
+    )
+SELECT *
+FROM t1, t2
+

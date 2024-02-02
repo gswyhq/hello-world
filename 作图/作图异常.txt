@@ -25,13 +25,26 @@ gswyhq@gswyhq-PC:~$ echo $PATH
 gswyhq@gswyhq-PC:~$ sudo mv chromedriver /usr/local/bin/
 
 windows系统，需要将解压得到的chromedriver.exe 文件，放到sys.path中任一目录中即可；如：D:\Users\gsw\Anaconda3
-
 或者在调用的时候，指明绝对路径即可，如：
 browser = webdriver.Chrome(executable_path='/home/gswyhq/Downloads/chromedriver')
+
+# 最新版本可能需要下面这样解决：
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service  # 新增
+service = Service(executable_path=rf"D:\Users\{USERNAME}\chromedriver_win32\chromedriver.exe")
+browser = webdriver.Chrome(service=service)
 
 # pyecharts在linux下使用phantomjs生成图片后中文乱码及样式问题解决
 问题分析：因为Linux服务器上没有字体库导致的，所以需要先安装字体库
 解决方案：安装“文泉驿”字体，这个是Linux上最流行的免费中文字体：
 apt-get install -y fonts-wqy-zenhei
 
-
+# 问题： pyecharts render生成的html图片 下载后背景为黑色
+如果想要将下载的图片背景颜色更改为白色，需要在 set_global_opts——toolbox_opts——feature中修改相应参数，代码如下
+Line()
+.set_global_opts(
+toolbox_opts=opts.ToolboxOpts(is_show=True,
+feature=opts.ToolBoxFeatureOpts(save_as_image=opts.ToolBoxFeatureSaveAsImageOpts(background_color='white')))
+)
+或者直接修改html文件,将 background_color 由auto改为：white
+但是这样做貌似没有什么用，保存到文件中的图片底色还是黑色，但这时候页面有下载按钮，直接用页面上面的“保存为图片”下载按钮，下载的图片就是底色为白色；在html页面右键另存为图片的话，底色还是黑色；

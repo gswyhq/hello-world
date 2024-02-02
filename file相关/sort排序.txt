@@ -101,3 +101,9 @@ $ sort  -t $'\t' -k3,3n a.txt>a.sort
 $ sort -t'<ctrl>v<tab>' -k3,3n a.txt>a.sort
 <ctrl>v<tab>代表先同时按下Ctrl和v键，然后松开，按下tab键。
 
+# 根据指定列进行去除重复行：
+sort md5_20230606.log -k1| awk -F " " '!i[$1]++' > md5_20230606_2.log 
+-k1: 是指根据第1列进行排序；
+用awk对相邻两行数据进行比较如果第一列的数据相同则去除重复行(保留第一个相同的行)
+
+

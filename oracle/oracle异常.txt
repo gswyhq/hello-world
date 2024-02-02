@@ -1,0 +1,93 @@
+
+问题：DBeaver连接 oracle报错：
+ORA-12514: 无法连接到数据库。服务 %s 未注册到 %s 中的监听程序。 (CONNECTION_ID=Q9yTQlfkTs+qAhlrK2ZK0Q==)
+检查对应的驱动版本是否正常：
+https://repo1.maven.org/maven2/com/oracle/database/jdbc/ojdbc8/18.3.0.0/
+下载驱动：
+ojdbc8-18.3.0.0.jar 
+
+问题2：
+Listener refused the connection with the following error:
+ORA-12514, TNS:listener does not currently know of service requested in connect descriptor
+检查对应的服务ip,端口，用户名密码，服务名是否正常：
+通过终端连接Oracle，进入后执行
+select global_name from global_name;
+语句查询Oracle的服务名。
+
+问题：dbeaver 连接oracle报错：
+Listener refused the connection with the following error:
+ORA-12514, TNS:listener does not currently know of service requested in connect descriptor
+对比了主机名，用户名，密码都是正确的，也能ping通。
+可能是Database的空格填错了，应该选SID（而不是选Service Name）,填实例名。
+
+
+问题：ORA-12505: TNS: 监听程序当前无法识别连接描述符中所给出的SID
+给程序配置新的数据库的时候，出现了以下错误
+ORA-12505, TNS:listener does not currently know of SID given in connect descriptor
+说明给到的sid有误,很有可能就是服务名和sid混淆使用。
+首先了解数据库url的写法有两种
+//监听sid服务，表示sid为orcl
+database.url=jdbc:oracle:thin:@171.xxx.96.xx:xxxx:orcl
+//监听服务名，表示服务名为orcl
+database.url=jdbc:oracle:thin:@171.xxx.96.xx:xxxx/orcl
+第一种是监听sid服务，第二种则是监听服务名
+所以发现是自己的sid写错导致出现这个错误，把服务名当做了sid
+把orcl的 “ : ” 改为 “ / ”  访问正常
+
+# 问题：
+ORA-01017: invalid username/password; logon denied
+解决方法：确认用户名是否创建，用户密码是否正确；
+
+# 创建带有中文字符的字段名报错：即使用双引号括起来也是报错：
+create table student
+   (
+   学号 varchar2(15),
+   姓名 varchar2(15) not null,
+    性别 varchar2(5) not null,
+   年龄 number,
+    种族 varchar2(20) default '汉族' not null,
+    出生日期 date not null,
+    入学日期 date not null,
+   constraint idnum_pk primary key(学号)
+   );
+ERROR at line 4:
+ORA-00957: duplicate column name
+1、查询数据库字符集
+SQL> select userenv('language') from dual;
+
+USERENV('LANGUAGE')
+----------------------------------------------------
+AMERICAN_AMERICA.AL32UTF8
+2、查询客户端字符集
+echo $NLS_LANG        //与数据库字符集不一致或为空
+解决方法：
+如果客户端与数据库的字符集不一致，解决方法如下(选其一进行修改）：
+1）修改数据库字符集和客户端的一致
+修改Oracle服务器端的字符集
+SQL> shutdown immediate
+SQL> startup nomount
+SQL> alter database mount exclusive;           //装载数据为专用的高级模式;
+SQL> alter system enable restricted session;   //启用受限制的session模式
+SQL> alter system set job_queue_processes=0;   //'maximum number of job queue slave processes' 设置工作队列的最大进程数为0
+SQL> alter system set aq_tm_processes=0;
+SQL> alter database open;
+SQL> alter database character set INTERNAL_USE  AL32UTF8;  // 或者设置为ZHS16GBK   alter database character set INTERNAL_USE ZHS16GBK;
+SQL> shutdown immediate
+SQL> startup
+
+2）或修改客户端和数据库的字符集一致
+echo "export NLS_LANG=AMERICAN_AMERICA.AL32UTF8" >> ~/.bash_profile       //修改如下图NLS_LANG的值与数据库字符集一致
+source ~/.bash_profile     //修改完之后记得生效
+
+PS: 需要注意的是，对于之前已经存在的数据，在修改了字符集之后还是会显示为乱码，只有新插入的数值才会生效。
+
+# 问题：
+create user GENESYSREP identified by test;
+报错：
+oracledb.exceptions.DatabaseError: ORA-00922: missing or invalid option
+解决方法及原因：
+检查对应的SQL语句是否正常，另外oracle终端sqlplus命令是需要分号，但python包oracledb使用的时候，SQL末尾不要有分号；
+
+# 问题：
+oracledb.exceptions.DatabaseError: ORA-01920: user name 'GENESYSDATA' conflicts with another user or role name
+检查用户名是否已经存在了；

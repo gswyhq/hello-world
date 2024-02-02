@@ -1,0 +1,30 @@
+
+1、zookeeper安装、默认安装最新版本
+docker pull zookeeper
+docker run -d -p 2181:2181 --name zookeeper zookeeper
+
+2、kafka安装
+docker pull wurstmeister/kafka
+docker run -d -p 9092:9092 --link zookeeper:zookeeper \
+--name kafka -e KAFKA_ADVERTISED_HOST_NAME=localhost \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+-e KAFKA_HEAP_OPTS="-Xmx256M -Xms128M" wurstmeister/kafka
+
+3、进入kafka容器，创建topic
+docker exec -it kafka /bin/bash
+ 
+cd /opt/kafka/bin
+ 
+./kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic test
+
+
+4、创建生产者生产消息（例如生产112233a这条消息）
+./kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic test
+  
+
+5、另外开一个窗口创建消费者消费消息（消费者消费了112233a这条消息）
+./kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic test
+
+
+

@@ -34,7 +34,10 @@ find . -name "*.py" |xargs grep "requests"
 
 # 安装终端命令；
 一般的linux命令，mobaxterm都有，但也有些不存在，对于不存在的，可以通过类型如下方式安装：
-  06/05/2021   09:32.50   /home/mobaxterm/hello-world   master  apt-get install zip
+  06/05/2021   09:32.50   /home/mobaxterm/hello-world   master  apt-get et install zip
+
+指定镜像源安装：
+apt-get install -y cmake -m http://mirrors.cloud.tencent.com/cygwin
 
 
 # mobaxterm终端使用python:

@@ -1,0 +1,39 @@
+
+一些旧版本neo4j并不支持图计算：
+Neo4j Graph Data Science (GDS)
+
+GDS version	Neo4j version	Java Version
+GDS 1.0.x	Neo4j 3.5.9 - 3.5.20	Java 1.8
+GDS 1.1.x	Neo4j 3.5.9 - 3.5.33	Java 1.8
+GDS 1.2.x	Neo4j 4.0.0 – 4.0.6	Java 11
+GDS 2.3.3	Neo4j 5.x <=5.7.0	Java 17
+...
+更多版本对应关系见：
+https://github.com/neo4j/graph-data-science/
+
+使用图计算，需要安装对应的gps插件;
+不同方式启动neo4j,其插件安装方法可见：https://neo4j.com/docs/graph-data-science/current/installation/
+
+如docker方式：
+docker run -it --rm \
+  --publish=7474:7474 --publish=7687:7687 \
+  --user="$(id -u):$(id -g)" \
+  -e NEO4J_AUTH=none \
+  --env NEO4JLABS_PLUGINS='["graph-data-science"]' \
+  neo4j:4.4
+
+windows版本，图计算插件下载地址：
+https://graphdatascience.ninja/neo4j-graph-data-science-2.3.3.zip
+最新下载地址页面，可在https://neo4j.com/download-center/#ngds，查询到；
+https://dist.neo4j.org/neo4j-community-5.8.0-windows.zip
+~$ mv neo4j-graph-data-science-2.3.3 neo4j-community-5.8.0/plugins/
+~$ vim  $NEO4J_HOME/conf/neo4j.conf
+dbms.security.procedures.unrestricted=gds.*
+dbms.security.procedures.allowlist=gds.*
+
+# 验证安装：
+要验证您的安装，请通过打开 Neo4j 浏览器并运行
+RETURN gds.version();
+
+# 列出所有可用的过程
+CALL gds.list();

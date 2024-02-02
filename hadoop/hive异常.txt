@@ -343,4 +343,7 @@ org.apache.hive.service.cli.HiveSQLException: java.io.IOException: org.elasticse
 hive> add jar /home/hadoop/elasticsearch-hadoop-6.8.5/dist/elasticsearch-hadoop-6.8.5.jar;
 hive> drop table es_cmb_test;
 
+add jar hdfs://hdfs01-sh/tmp/hive_user8888/elasticsearch-hadoop-hive-7.9.2.jar;
+drop table if exists db_name.table_202112250210_ext;
+
 

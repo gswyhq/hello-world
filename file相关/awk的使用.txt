@@ -116,4 +116,6 @@ $ less table_schema.csv |awk -F "," '($2=="Stock"){print}'
 语文 数学 语文 数学 语文 数学 英语
 张三 张三 李四 李四 王五 王五 王五
 
+# 指定列求和, 如对text.txt文件第二列求和：
+cat text.txt |awk -F "\t" '{sum += $2};END {print sum}'
 
