@@ -1,0 +1,67 @@
+
+创建图空间
+CREATE SPACE IF NOT EXISTS company_address_graph (
+    partition_num = 100,
+    replica_factor = 1,
+    vid_type = FIXED_STRING(32)
+    )
+    COMMENT = '公司企业注册地址图谱';
+
+# 列出当前有哪些图空间：
+SHOW SPACES;
+
+DESCRIBE SPACE语句可以显示指定图空间的信息。
+desc space company_address_graph;
+
+# 清除图空间数据，但不清除图空间结构：
+CLEAR SPACE语句用于清空图空间中的点和边，但不会删除图空间本身以及其中的 Schema 信息。
+CLEAR SPACE IF EXISTS company_address_graph;
+
+# 删除图空间数据及结构
+DROP SPACE语句用于删除指定图空间以及其中的所有信息。
+DROP SPACE IF EXISTS company_address_graph;
+
+# 创建节点类型
+创建 Tag 前，需要先用USE语句指定工作空间。
+
+CREATE TAG IF NOT EXISTS `企业名称`
+    (
+      name string,
+      `统一社会信用代码` string,
+      `注册日期` timestamp,
+      `企业类型` string,
+      `注册资金` string,
+      `经营范围` string,
+      `注册地址` string
+    )
+    COMMENT = '公司企业';
+
+CREATE TAG IF NOT EXISTS `企业法人`
+    (
+      name string
+    )
+    COMMENT = '公司法人代表';
+
+CREATE TAG IF NOT EXISTS `省份`
+    (
+      name string
+    )
+    COMMENT = '省份';
+
+CREATE TAG IF NOT EXISTS `地区`
+    (
+      name string
+    )
+    COMMENT = '地区';
+
+# 创建定义节点关系，即创建定义边
+CREATE EDGE IF NOT EXISTS `法人代表`();
+CREATE EDGE IF NOT EXISTS `所在地区`();
+CREATE EDGE IF NOT EXISTS `所属省份`();
+
+# 一次插入 2 个点。
+nebula> INSERT VERTEX t2 (name, age) VALUES "13":("n3", 12), "14":("n4", 8);
+
+# 一次插入 2 条边。
+nebula> INSERT EDGE e2 (name, age) VALUES \
+        "12"->"13":("n1", 1), "13"->"14":("n2", 2);

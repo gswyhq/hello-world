@@ -1,0 +1,34 @@
+
+使用Library下载模型#
+若该模型已集成至ModelScope的Library中，则您只需要几行代码即可加载模型。您可以点击模型卡片中的“快速使用”按钮查看如何使用Library进行模型的下载。前期是需要先安装ModelScope的Library。 只需要知道模型id，以及希望使用的模型版本(默认为master)，就可以通过一行代码，完成模型寻找，下载，以及加载的工作：
+
+from modelscope.models import Model
+model = Model.from_pretrained('damo/nlp_xlmr_named-entity-recognition_viet-ecommerce-title', revision='v1.0.1')
+# revision为可选参数，不指定版本会取模型默认版本，默认版本，默认版本为ModelScope library发布前最后一个版本
+# 如何得到发布时间
+# import modelscope
+# print(modelscope.version.__release_datetime__)
+#model = Model.from_pretrained('damo/nlp_structbert_word-segmentation_chinese-base')
+使用Library Hub下载模型#
+您可以使用modelscope modelhub从 repos 创建、删除、更新和检索信息。您还可以从 repos 下载文件或将它们集成到您的库中，并且可指定下载模型的地址。
+
+from modelscope.hub.snapshot_download import snapshot_download
+
+model_dir = snapshot_download('damo/nlp_xlmr_named-entity-recognition_viet-ecommerce-title', cache_dir='path/to/local/dir', revision='v1.0.1')
+您也可以使用modelscope modelhub从repos中指定下载单个文件。
+
+from modelscope.hub.file_download import model_file_download
+
+model_dir = model_file_download(model_id='AI-ModelScope/rwkv-4-world',file_path='RWKV-4-World-CHNtuned-7B-v1-20230709-ctx4096.pth',revision='v1.0.0')
+默认模型会下载到~/.cache/modelscope/hub中，如果需要修改下载目录，可以手动指定环境变量：MODELSCOPE_CACHE，modelscope会将模型和数据集下载到该环境变量指定的目录中。
+
+使用Git下载模型#
+# 公开模型下载
+git lfs install
+git clone https://www.modelscope.cn/<namespace>/<model-name>.git
+# 例如: git clone https://www.modelscope.cn/damo/ofa_image-caption_coco_large_en.git
+git clone https://www.modelscope.cn/baichuan-inc/Baichuan2-7B-Chat-4bits.git
+
+# 资料来源：
+https://www.modelscope.cn/docs/模型的下载
+

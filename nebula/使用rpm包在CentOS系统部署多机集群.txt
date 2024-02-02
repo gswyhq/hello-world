@@ -1,0 +1,91 @@
+
+第一步：查看系统版本
+[root@SCA-LQA700559 ~]# cat /etc/redhat-release 
+CentOS Linux release 7.9.2009 (Core)
+[root@SCA-LQA700559 ~]# cat /proc/version 
+Linux version 3.10.0-1160.49.1.el7.x86_64 (mockbuild@kbuilder.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) ) #1 SMP Tue Nov 30 15:51:32 UTC 2021
+查看系统架构，是amd还是arm
+[root@SCA-LQA700559 ~]# arch
+x86_64
+返回x86_64就是amd的
+查看是64位还是32位：
+[root@SCA-LQA700559 ~]# getconf LONG_BIT
+64
+
+第二步：下载nebula安装包，如下载3.5.0
+wget https://oss-cdn.nebula-graph.com.cn/package/3.5.0/nebula-graph-3.5.0.el7.x86_64.rpm
+wget https://oss-cdn.nebula-graph.com.cn/package/3.5.0/nebula-graph-3.5.0.el7.x86_64.rpm.sha256sum.txt
+
+第三步：安装NebulaGraph
+在集群的每一台服务器上都安装NebulaGraph，安装后暂不需要启动服务。
+安装 RPM 包
+$ sudo rpm -ivh --prefix=<installation_path> <package_name>
+--prefix为可选项，用于指定安装路径。如不设置，系统会将NebulaGraph安装到默认路径/usr/local/nebula/。
+
+第四步：修改配置文件
+修改每个服务器上的NebulaGraph配置文件。
+NebulaGraph的所有配置文件均位于安装目录的etc目录内，包括nebula-graphd.conf、nebula-metad.conf和nebula-storaged.conf，用户可以只修改所需服务的配置文件。各个机器需要修改的配置文件如下。
+机器名称	待修改配置文件
+A	nebula-graphd.conf、nebula-storaged.conf、nebula-metad.conf
+B	nebula-graphd.conf、nebula-storaged.conf、nebula-metad.conf
+C	nebula-graphd.conf、nebula-storaged.conf、nebula-metad.conf
+D	nebula-graphd.conf、nebula-storaged.conf
+E	nebula-graphd.conf、nebula-storaged.conf
+
+主要修改
+--meta_server_addrs=192.168.10.111:9559,192.168.10.112:9559,192.168.10.113:9559
+--local_ip=192.168.10.111
+meta_server_addrs修改为A,B,C三个机器的IP及9559端口
+local_ip修改为本机器的IP
+
+第五步：启动集群
+依次启动各个服务器上的对应进程。
+
+机器名称	待启动的进程
+A	graphd、storaged、metad
+B	graphd、storaged、metad
+C	graphd、storaged、metad
+D	graphd、storaged
+E	graphd、storaged
+
+如：启动 graphd、storaged 和 metad 
+[root@SCA-LQA700559 ~]# /usr/local/nebula/scripts/nebula.service start all
+[INFO] Starting nebula-metad...
+[INFO] Done
+[INFO] Starting nebula-graphd...
+[INFO] Done
+[INFO] Starting nebula-storaged...
+[INFO] Done
+
+# 查看启动 graphd、storaged 和 metad 的服务状态
+[root@SCA-LQA700559 ~]# /usr/local/nebula/scripts/nebula.service status all
+
+D、E机器仅仅启动 graphd、storaged
+[root@SCA-LQA700563 ~]# /usr/local/nebula/scripts/nebula.service start graphd
+[INFO] Starting nebula-graphd...
+[INFO] Done
+[root@SCA-LQA700563 ~]# /usr/local/nebula/scripts/nebula.service start storaged
+[INFO] Starting nebula-storaged...
+[INFO] Done
+
+# 安装原生 CLI 客户端 NebulaGraph Console
+# 在 Nebula Console 下载页面(https://github.com/vesoft-inc/nebula-console/releases)，确认需要的版本
+# 查看linux系统的架构是amd还是arm 
+arch
+返回x86_64就是amd的
+wget -c -t 0 https://github.com/vesoft-inc/nebula-console/releases/download/v3.5.0/nebula-console-linux-amd64-v3.5.0
+
+[root@SCA-LQA700562 ~]# mv nebula-console-linux-amd64-v3.5.0 nebula-console
+[root@SCA-LQA700562 ~]# chmod 111 nebula-console 
+[root@SCA-LQA700562 ~]# 
+
+连接任何一个已启动 graphd 进程的机器，添加 Storage 主机，然后执行命令SHOW HOSTS检查集群状态。例如：
+[root@SCA-LQA700562 ~]# ./nebula-console -addr 10.8.163.62 -port 9669 -u root -p 1234
+> ADD HOSTS 192.168.10.111:9779, 192.168.10.112:9779, 192.168.10.113:9779, 192.168.10.114:9779, 192.168.10.115:9779;
+> SHOW HOSTS;
+Welcome!
+
+
+详情参考：
+https://docs.nebula-graph.com.cn/3.5.0/4.deployment-and-installation/2.compile-and-install-nebula-graph/deploy-nebula-graph-cluster/
+

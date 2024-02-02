@@ -30,3 +30,18 @@ git push origin tag v5.6.10
 2、在githup网站上设置：
 依次点击`releases`->`v5.6.10`->`Edit tag`->` Attach binaries by dropping them here or  selecting them.`->`Publish release`；
 
+# github 双因素验证 2fa
+第一步：下载google浏览器插件：Authenticator
+如下载Free Download Authenticator CRX 6.3.5 for Chrome
+A Free Productivity Extension By authenticator.cc
+插件ID：bhghoamapcdpbohphigoooaddinpkbai
+下载地址：https://www.crx4chrome.com/crx/4259/
+第二步：安装插件；
+第三步：打开github双因素验证界面
+如：https://github.com/settings/two_factor_authentication/setup/intro
+点击浏览器，右上方的插件按钮；
+点击身份验证器，出现扫描框，点击扫描框按钮，选中页面上面的二维码；
+注意重新打开页面的时候，可能需要重新选择设置；
+设置好后，会出现6位数字；
+最后验证成功，可以下载一个名为github-recovery-codes.txt的文件；
+

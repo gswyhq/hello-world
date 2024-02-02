@@ -1,7 +1,20 @@
 # nebula的安装部署，通过docker-compose.yaml文件进行安装部署：
 https://github.com/vesoft-inc/nebula-docker-compose/blob/release-3.5/docker-compose.yaml
 启动服务：
-docker-compose -f docker-compose.yaml up -d
+~$ docker-compose -f docker-compose.yaml up -d
+~$ docker-compose -f docker-compose.yaml ps -a
+~$ docker exec -it nebula-docker-compose_console_1 /bin/sh
+/ # nebula-console -u root -p nebula --address=graphd --port=9669
+(root@nebula) [(none)]> SHOW HOSTS;
++-------------+------+----------+--------------+----------------------+------------------------+---------+
+| Host        | Port | Status   | Leader count | Leader distribution  | Partition distribution | Version |
++-------------+------+----------+--------------+----------------------+------------------------+---------+
+| "storaged0" | 9779 | "ONLINE" | 0            | "No valid partition" | "No valid partition"   | "3.5.0" |
+| "storaged1" | 9779 | "ONLINE" | 0            | "No valid partition" | "No valid partition"   | "3.5.0" |
+| "storaged2" | 9779 | "ONLINE" | 0            | "No valid partition" | "No valid partition"   | "3.5.0" |
++-------------+------+----------+--------------+----------------------+------------------------+---------+
+Got 3 rows (time spent 542µs/1.026792ms)
+
 
 # 执行如下命令查看 NebulaGraph 服务状态：
 $ sudo /usr/local/nebula/scripts/nebula.service status all

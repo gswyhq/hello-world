@@ -485,3 +485,21 @@ docker system prune -a
 出现原因：
         docker在构建镜像时，会构建多个层级，在使用Dockerfile时，过度使用COPY、RUN命令，在频繁构建容器时，就会出现构建层数过多的情况，报max depth exceeded错误，并且无法再次构建容器。
 
+# 问题：docker镜像仓库hub.docker.com无法访问
+DNS污染导致访问不了；
+解决命令行访问；
+gswyhq@gswyhq-PC:/usr/libexec/docker$ sudo vim /etc/docker/daemon.json
+添加如下内容：
+{ "registry-mirrors" :["https://docker.mirrors.ustc.edu.cn"]}
+重启docker
+gswyhq@gswyhq-PC:/usr/libexec/docker$ sudo systemctl daemon-reload
+gswyhq@gswyhq-PC:/usr/libexec/docker$ sudo systemctl restart docker
+这时可以用docker pull, docker search 等命令了；
+
+# docker 容器内安装deb包报错：
+ 'debian-keyring_2023.05.26_all.deb' (size=30850884) member 'control.tar': lzma error: Cannot allocate memory
+而实际上内存是足够的；主要是因为docker容器内root无完全的root权限；
+解决方法：
+docker run -dit --name llama2-chinese -p 6780:5780 --privileged ubuntu:22.04 /bin/bash
+--privileged，权限全开，不利于宿主机安全；容器内root有完全root权限；
+

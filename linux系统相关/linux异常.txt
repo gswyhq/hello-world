@@ -165,3 +165,54 @@ ifconfig command not found
 解决方法：
 apt-get install net-tools 
 
+# apt-get update 报错：
+Err:1 http://deb.debian.org/debian bookworm InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 0E98404D386FA1D9 NO_PUBKEY 6ED0E7B82643E131 NO_PUBKEY F8D2585B8783D481
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [52.1 kB]
+Err:2 http://deb.debian.org/debian bookworm-updates InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 0E98404D386FA1D9 NO_PUBKEY 6ED0E7B82643E131
+解决办法：
+root@916cb5695249:~# gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/rabbit.gpg --keyserver keyserver.ubuntu.com --recv  0E98404D386FA1D9
+Debian系统也是上命令;
+但若是docker容器内报上错误，可能是docker容器内root无完全权限，需要添加privileged参数启动容器；
+docker run -dit --name llama2-chinese -p 6780:5780 --privileged ubuntu:22.04 /bin/bash
+
+root@916cb5695249:~# gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/rabbit.gpg --keyserver keyserver.ubuntu.com --recv  0E98404D386FA1D9
+gpg: keyring '/etc/apt/trusted.gpg.d/rabbit.gpg' created
+gpg: connecting dirmngr at '/root/.gnupg/S.dirmngr' failed: End of file
+gpg: keyserver receive failed: No dirmngr
+root@916cb5695249:~# whereis dirmngr
+dirmngr: /usr/bin/dirmngr /usr/share/man/man8/dirmngr.8.gz
+root@916cb5695249:~# gpg --keyserver pgp.mit.edu --recv-keys 0E98404D386FA1D9
+gpg: connecting dirmngr at '/root/.gnupg/S.dirmngr' failed: IPC connect call failed
+gpg: keyserver receive failed: No dirmngr
+root@916cb5695249:~# gpg --keyserver keys.openpgp.org --recv-keys  0E98404D386FA1D9
+gpg: connecting dirmngr at '/root/.gnupg/S.dirmngr' failed: End of file
+gpg: keyserver receive failed: No dirmngr
+出现上面错误，可能是因为dirmngr未安装，也可能是其他原因；若没有安装dirmngr直接apt install dirmngr就好；
+若是其他原因，可以离线下载公钥，方法步骤：
+1、获取pub_key的ID。
+2、然后转到http://keyserver.ubuntu.com/并以十六进制形式搜索密钥，例如，如果密钥为7936A783B，则搜索0x7936A783B。单击pup链接，然后复制密钥内容并将其保存到txt文件中,如key.txt。
+3、转到终端并导航到文件并运行：gpg --import key.txt
+
+cat URL.pub | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/NAME.gpg --import
+
+root@916cb5695249:~# gpg --import key1.txt 
+gpg: key 73A4F27B8DD47936: 6 signatures not checked due to missing keys
+gpg: key 73A4F27B8DD47936: public key "Debian Archive Automatic Signing Key (11/bullseye) <ftpmaster@debian.org>" imported
+gpg: can't connect to the agent: IPC connect call failed
+gpg: Total number processed: 1
+gpg:               imported: 1
+gpg: no ultimately trusted keys found
+注意这里的公钥都是 unkown 的状态，如果现在进行校验，可能会报错gpg: no ultimately trusted keys found ，因为这些公钥尚未授信。可以对公钥进行编辑：
+修改授信等级步骤如下:
+gpg --import private.key
+导入私钥，从输出获得 KEY
+gpg --edit-key KEY trust quit
+输入 5 , y
+修改该私钥的信任等级为[ultimate]而不是[unknown]
+
+root@916cb5695249:~# gpg --edit-key 73A4F27B8DD47936 trust quit
+输入5，再输入y;
+root@916cb5695249:~# gpg --import key1.txt 
+

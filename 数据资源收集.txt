@@ -559,6 +559,18 @@ http://nlp.stanford.edu/projects/kvret/kvret_dataset_public.zip
 - [汉字生成器](https://www.kaggle.com/dylanli/chinesecharacter)：可用于中文文本OCR的中文字体数据集。
 - [中文文本](https://ctwdataset.github.io/)：中文文本数据集，大约有一百万个汉字由专家在超过30,000个街景图像中注释。对于数据集中的每个字符，注释包括其基础字符，边界框和6个属性。属性表明它是否具有复杂的背景，是否有凸起，是手写还是打印等。
 
+中科院自动化研究所-手写中文数据集
+数据来源：http://www.nlpr.ia.ac.cn/databases/handwriting/Download.html
+数据简介：包含在线和离线两类手写数据，HWDB1.0~1.2总共有3895135个手写单字样本，分属7356类（7185个汉字和171个英文字母、数字、符号）；HWDB2.0~2.2总共有5091页图像，分割为52230个文本行和1349414个文字。所有文字和文本样本均存为灰度图像。
+
+华南理工大学-手写中文数据集
+数据来源：https://github.com/HCIILAB/SCUT-EPT_Dataset_Release
+数据简介：SCUT-EPT数据集适用于手写文档和字符识别的模型训练，从2986位志愿者试卷中提取得到，总共包含5万张文本行图片，分属4250类（4033个常见汉字、104个符号和113个生僻字）；生僻字是指字符不在CASIA-HWDB1.0-1.2字符集合中的字。SCUT-EPT数据集中总字符数为1,267,161，每个文本行大约25个字符。
+
+NIST手写单字数据集-英文
+数据来源: https://www.nist.gov/srd/nist-special-database-19
+数据简介: NIST19数据集适用于手写文档和字符识别的模型训练，从3600位作者的手写样本表格中提取得到，总共包含81万张字符图片。
+
 ### 中文翻译和并行文本数据集
 
 - [中英文电子邮件](http://catalog.elra.info/en-us/repository/browse/ELRA-W0113/)：包含15,000个中文字符（相当于10,000个单词）和电子邮件，以及英文参考译文。

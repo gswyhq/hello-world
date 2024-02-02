@@ -1,0 +1,6 @@
+
+# 问题，训练报错：
+ERROR: Unexpected BUS error encountered in DataLoader worker. This might be caused by insufficient shared memory (shm), please check whether use_shared_memory is set and storage space in /dev/shm is enough
+解决方法：
+num_workers设置为核心数的一半或者设置为0；
+

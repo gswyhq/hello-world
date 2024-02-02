@@ -1,0 +1,27 @@
+
+第一步：安装 node_exporter及prometheus
+在页面（https://prometheus.io/download/#node_exporter），找到系统对应的安装包，如：
+https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+注意，需要在每个节点机器上启动node_exporter服务，但prometheus,不需要单独启动，因dashboard看板服务启动时候，就包含了prometheus服务；
+
+第二步：下载 （https://oss-cdn.nebula-graph.com.cn/nebula-graph-dashboard/3.5.0/nebula-dashboard-3.5.0.x86_64.tar.gz）TAR 包 nebula-dashboard-3.5.0.x86_64.tar.gz。
+
+第三步：执行命令tar -xvf nebula-dashboard-3.5.0.x86_64.tar.gz解压缩。
+
+第四步：进入解压缩的nebula-dashboard文件夹，并修改配置文件config.yaml。
+
+配置文件内主要包含 4 种依赖服务的配置和集群的配置。依赖服务的说明如下。
+
+服务名称	默认端口号	说明
+nebula-http-gateway	8090	为集群服务提供 HTTP 接口，执行 nGQL 语句与NebulaGraph进行交互。
+nebula-stats-exporter	9200	收集集群的性能指标，包括服务 IP 地址、版本和监控指标（例如查询数量、查询延迟、心跳延迟 等）。
+node-exporter	9100	收集集群中机器的资源信息，包括 CPU、内存、负载、磁盘和流量。
+prometheus	9090	存储监控数据的时间序列数据库。
+
+执行./dashboard.service start all一键启动服务。
+管理 Dashboard 服务¶
+Dashboard 使用脚本dashboard.service管理服务，包括启动、重启、停止和查看状态。
+
+资料来源：
+https://docs.nebula-graph.com.cn/3.5.0/nebula-dashboard/2.deploy-dashboard/
+

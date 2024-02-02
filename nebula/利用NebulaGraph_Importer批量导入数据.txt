@@ -1,0 +1,29 @@
+
+NebulaGraph Importer（简称 Importer）是一款NebulaGraph的 CSV 文件单机导入工具，可以读取并导入多种数据源的 CSV 文件数据。
+
+第一步：Importer 的安装：
+下载与系统配套的安装文件：
+https://github.com/vesoft-inc/nebula-importer/releases/
+或者下载编译好的二进制文件，不需要安装，解压即可使用：
+https://github.com/vesoft-inc/nebula-importer/releases/download/v4.0.0/nebula-importer_4.0.0_Linux_x86_64.tar.gz
+
+或者docker 运行
+$ docker pull vesoft/nebula-importer:<version>
+
+第二步：准备节点及边的写入csv文件
+
+第三步：准备yaml文件
+具体的可在 https://github.com/vesoft-inc/nebula-importer/blob/master/examples/basic/basic.string.v3.yaml 基础上修改
+
+第四步：将csv文件数据写入nebula
+$ docker run --rm -ti \
+      --network=host \
+      -v <config_file>:<config_file> \
+      -v <data_dir>:<data_dir> \
+      vesoft/nebula-importer:<version>
+      --config <config_file>
+
+time ./nebula-importer --config basic.string.v3.yaml
+
+资料来源：
+https://docs.nebula-graph.com.cn/3.5.0/nebula-importer/use-importer/

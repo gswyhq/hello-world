@@ -226,4 +226,11 @@ script_model = torch.jit.trace(  ModelWrapper(model), (inputs_a['input_ids'], in
 script_model.save('script_model.pt')
 ~$ netron script_model.pt
 
+# 出现异常：
+import torchmetrics
+出现：
+OSError: libcudart.so.10.2: cannot open shared object file: No such file or directory
+可能是因为对应版本与cuda版本不匹配，降低或升高对应版本尝试即可；
+如：因使用的是：torch 1.12.0+cu113， 
+pip3 install -U torchmetrics==0.9.0即可解决问题；
 

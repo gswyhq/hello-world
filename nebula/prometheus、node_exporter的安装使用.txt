@@ -1,0 +1,157 @@
+
+第一步，下载node_exporter包
+在https://prometheus.io/docs/guides/node-exporter/，找到对应编译包的下载地址；
+如：
+https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+
+第二步：解压下载的编译包
+[root@SCA-LQA700559 ~]# tar -zxvf node_exporter-1.5.0.linux-amd64.tar.gz 
+node_exporter-1.5.0.linux-amd64/
+node_exporter-1.5.0.linux-amd64/LICENSE
+node_exporter-1.5.0.linux-amd64/NOTICE
+node_exporter-1.5.0.linux-amd64/node_exporter
+
+当然，也可以解压到指定路径，如：
+[root@SCA-LQA700559 ~]# tar -zxvf node_exporter-1.5.0.linux-amd64.tar.gz -C /usr/local
+或者将node_exporter的二进制文件复制到 /usr/local/bin路径
+
+设置已复制的node_exporter文件的文件许可权，如下所示
+[root@prometheusserver tmp]# chown node_exporter:node_exporter /usr/local/bin/node_exporter
+
+
+解压编译包就可以直接使用node_exporter命令，但若需将node_exporter,部署为服务，则需要进行第三步
+
+第三步：创建node_exporter.service的 systemd unit 文件
+
+centos下创建服务
+cat > /usr/lib/systemd/system/node_exporter.service <<EOF
+[Unit]
+Description=node_exporter
+Documentation=https://prometheus.io/
+After=network.target
+ 
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/bin/node_exporter
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+
+ubuntu下创建服务
+cat > /etc/systemd/system/node_exporter.service <<EOF
+[Unit]
+Description=node_exporter
+Documentation=https://prometheus.io/
+After=network.target
+ 
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/bin/node_exporter
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+
+第四步、启动服务
+systemctl daemon-reload
+systemctl stop node_exporter.service
+systemctl enable node_exporter.service
+systemctl restart node_exporter.service
+
+第五步、运行状态
+systemctl status node_exporter.service
+
+curl http://localhost:9100/metrics | grep "node_"
+-----------------------------------
+
+第六步：配置安装prometheus
+通过页面（https://prometheus.io/docs/guides/node-exporter/）找到下载地址，下载prometheus编译安装包
+如：
+https://github.com/prometheus/prometheus/releases/download/v2.44.0/prometheus-2.44.0.linux-amd64.tar.gz
+
+第七步：解压编译包
+wget https://github.com/prometheus/prometheus/releases/download/v*/prometheus-*.*-amd64.tar.gz
+tar xvf prometheus-*.*-amd64.tar.gz
+cd prometheus-*.*
+
+第八步：修改配置文件
+添加如下内容：
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # 采集node exporter监控数据
+  - job_name: 'node'
+    static_configs:
+      - targets: ['10.8.163.62:9100']
+
+
+第九步：prometheus启动文件的制作
+启动文件制作
+
+ # cd /usr/lib/systemd/system
+
+ # vi prometheus.service
+
+[Unit]
+Description=prometheus
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/root/prometheus-2.44.0.linux-amd64
+ExecStart=/root/prometheus-2.44.0.linux-amd64/prometheus --config.file=/root/prometheus-2.44.0.linux-amd64/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target
+
+# 重新加载修改的启动文件
+ # systemctl daemon-reload
+
+prometheus启动
+
+ # systemctl start prometheus
+
+ # systemctl status prometheus
+
+设置prometheus自动启动
+
+ # systemctl enable prometheus
+
+ # prometheus --version
+
+#########################################################################################################################
+# 当然，服务的启动，也可以自己手动后台控制，如：
+后台启动prometheus和node_exporter
+启动命令如下：
+# 启动prometheus
+cd /root/installed/prometheus
+nohup ./prometheus --config.file=prometheus.yml > prometheus.file 2>&1 &
+
+# 启动node_exporter
+cd /root/installed/node_exporter
+nohup ./node_exporter --web.listen-address 172.17.0.2:8080 > nodeout.file 2>&1 &
+
+mv *.service /usr/lib/systemd/system/
+mv node_exporter /usr/local/bin/
+sed -i 's/10.8.163.62/10.8.163.66/g' prometheus.yml
+systemctl daemon-reload
+systemctl enable node_exporter.service
+systemctl restart node_exporter.service
+systemctl restart prometheus
+systemctl enable prometheus
+systemctl status prometheus

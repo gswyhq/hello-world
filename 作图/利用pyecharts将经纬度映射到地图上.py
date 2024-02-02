@@ -6,6 +6,83 @@ from pyecharts import options as opts
 from pyecharts.globals import GeoType
 
 
+def test1():
+    datas = [('清平实验学校', '113.836682', '22.74969'),
+ ('新桥小学', '113.842804', '22.741015'),
+ ('壆岗小学', '113.825633', '22.739964'),
+ ('拾悦小学', '113.828513', '22.731102'),
+ ('荣根学校', '113.820273', '22.744235'),
+ ('第二外国语学校', '113.842312', '22.729277'),
+ ('上星学校', '113.838697', '22.723419'),
+ ('蚝业小学', '113.812304', '22.745944'),
+ ('万丰小学', '113.831317', '22.730886'),
+ ('深圳外国语学校', '113.827698', '22.721244'),
+ ('黄埔小学', '113.853363', '22.719951'),
+ ('茭塘小学', '113.81677', '22.724037'),
+ ('和一学校', '113.805078', '22.726765'),
+ ('才华学校', '113.820546', '22.76264'),
+ ('明德外语实验学校', '113.80861', '22.759181'),
+ ('冠群实验学校', '113.802878', '22.746979'),
+ ('华南中英文学校', '113.810698', '22.715969'),
+ ('北亭实验学校', '113.83151', '22.771519'),
+ ('沙井东山书院', '113.831735', '22.75474'),
+ ('立才实验学校', '113.801221', '22.740042'),
+ ('宝华学校', '113.819458', '22.728794'),
+ ('为明双语实验学校', '113.824883', '22.746379'),
+ ('金源学校', '113.817053', '22.721121'),
+ ('上南学校', '113.850787', '22.728097'),
+ ('华一实验学校', '113.840184', '22.730214'),
+ ('厚德小学', '113.850722', '22.712298'),
+ ('欣欣小学', '113.845834', '22.737545'),
+ ('**幼儿园', '113.832573', '22.731622')]
+    gongban_list = ['清平实验学校', '新桥小学', '壆岗小学', '拾悦小学', '荣根学校', '第二外国语学校', '上星学校', '蚝业小学', '万丰小学', '深圳外国语学校', '黄埔小学', '茭塘小学', '和一学校']
+    city = '深圳'
+    g = Geo()
+    g.add_schema(maptype=city)
+
+    # 定义坐标对应的名称，添加到坐标库中 add_coordinate(name, lng, lat)
+    for k, lng, lat in datas:
+        g.add_coordinate(k, lng, lat)
+
+    # 定义数据对，
+    ds3 = {}
+    for k, t1, t2 in datas:
+        ds3.setdefault(k, 0)
+        if k in gongban_list:
+            ds3[k] +=90
+        ds3[k] += 1
+        if k == '**幼儿园':
+            ds3[k] += 200
+    data_pair = [(k, v) for k, v in ds3.items()]
+
+    # Geo 图类型，有 scatter, effectScatter, heatmap, lines 4 种，建议使用
+    # from pyecharts.globals import GeoType
+    # GeoType.GeoType.EFFECT_SCATTER，GeoType.HEATMAP，GeoType.LINES
+
+    # 将数据添加到地图上
+    g.add('', data_pair, type_=GeoType.EFFECT_SCATTER, symbol_size=5)
+    # 设置样式
+    g.set_series_opts(label_opts=opts.LabelOpts(is_show=True, formatter='{b}', font_size=9))
+    # 自定义分段 color 可以用取色器取色
+    pieces = [
+        # {'max': 1, 'label': '0以下', 'color': '#50A3BA'},
+        {'min': 1, 'max': 10, 'label': '民办', 'color': '#3700A4'},
+        # {'min': 10, 'max': 20, 'label': '10-20', 'color': '#81AE9F'},
+        # {'min': 20, 'max': 30, 'label': '20-30', 'color': '#E2C568'},
+        # {'min': 30, 'max': 50, 'label': '30-50', 'color': '#FCF84D'},
+        {'min': 50, 'max': 100, 'label': '公办', 'color': '#DD0200'},
+        # {'min': 100, 'max': 200, 'label': '100-200', 'color': '#DD675E'},
+        {'min': 200, 'label': '**幼儿园', 'color': 'green'}  # 有下限无上限
+    ]
+    #  is_piecewise 是否自定义分段， 变为true 才能生效
+    g.set_global_opts(
+        visualmap_opts=opts.VisualMapOpts(is_piecewise=True, pieces=pieces),
+        title_opts=opts.TitleOpts(title="{}-周边小学分布".format('**幼儿园')),
+    )
+
+    # 渲染成html, 可用浏览器直接打开
+    g.render(r'/home/gswyhq/形势和危机/入学/附近各个学校位置.html')
+
 def test_geo():
     city = '长沙'
     g = Geo()

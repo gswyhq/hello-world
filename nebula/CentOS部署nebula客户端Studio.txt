@@ -1,0 +1,54 @@
+
+第一步：下载最新版本 Studio客户端
+https://oss-cdn.nebula-graph.com.cn/nebula-graph-studio/3.7.0/nebula-graph-studio-3.7.0.x86_64.rpm
+
+第二步：使用sudo rpm -i <rpm_name>命令安装 RPM 包。
+
+例如，安装 Studio 3.7.0 版本需要运行以下命令，默认安装路径为/usr/local/nebula-graph-studio：
+
+
+$ sudo rpm -i nebula-graph-studio-3.7.0.x86_64.rpm
+也可以使用以下命令安装到指定路径：
+
+$ sudo rpm -i nebula-graph-studio-3.7.0.x86_64.rpm --prefix=<path> 
+
+第三步：浏览器访问
+启动成功后，在浏览器地址栏输入 http://<ip address>:7001。
+
+# 卸载
+用户可以使用以下的命令卸载 Studio。
+$ sudo rpm -e nebula-graph-studio-3.7.0.x86_64
+
+异常处理
+如果在安装过程中自动启动失败或是需要手动启动或停止服务，请使用以下命令：
+
+手动启动服务
+
+$ bash /usr/local/nebula-graph-studio/scripts/rpm/start.sh
+手动停止服务
+
+$ bash /usr/local/nebula-graph-studio/scripts/rpm/stop.sh
+如果启动服务时遇到报错报错 ERROR: bind EADDRINUSE 0.0.0.0:7001，用户可以通过以下命令查看端口 7001 是否被占用。
+
+
+$ lsof -i:7001
+如果端口被占用，且无法结束该端口上进程，用户可以通过以下命令修改 Studio 服务启动端口，并重新启动服务。
+
+
+//修改 studio 服务启动端口
+$ vi etc/studio-api.yam
+
+//修改
+Port: 7001 // 修改这个端口号，改成任意一个当前可用的即可
+
+//重启服务
+$ systemctl restart nebula-graph-studio.service
+
+Studio服务开启后，就可以连接nebula的graphd服务，默认的是9669端口；
+studio 链接 nebula 本质上不是从浏览器，而是通过 studio 自己的后端中转的，所以需要保证 studio 运行的机器上可以访问到 graphD 的 ip:port
+
+若nebula-studio、nebula-graphd, 部署在同一台机器上；
+那么7001端口，需要在web浏览器页面机器上可以访问得到；而9669端口，不需要web浏览器所在机器访问到也可以；
+如：web浏览器打开 公网IP:7001, 再连接 内网IP:9669, 也是可以的。
+
+

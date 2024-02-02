@@ -2,6 +2,11 @@
 # coding: utf-8
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+mpl.rcParams["font.sans-serif"] = ["SimHei"]  # 展示中文字体
+mpl.rcParams["axes.unicode_minus"] = False  # 处理负刻度值
+
 plt.title("I'm a scatter diagram.")
 
 # 设置xy,边界

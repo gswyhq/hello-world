@@ -1,0 +1,29 @@
+
+
+1、本地安装 docker 环境
+
+参考 docker 官方文档：https://docs.docker.com/get-started/
+
+2、拉取镜像
+
+docker pull tugraph/tugraph-runtime-centos7
+
+3、启动docker
+
+docker run -d -p 7070:7070 -p 9090:9090 --name tugraph_demo tugraph/tugraph-runtime-centos7 lgraph_server
+# 7070是默认的http端口，web访问使用。
+# 9090是默认的rpc端口，rpc client访问使用。
+
+4、web 访问
+
+http://x.x.x.x:7070
+
+默认用户名为 admin，密码为 73@TuGraph
+
+5、手动启动方式
+
+docker run -dt -p 7070:7070 --name tugraph_demo tugraph/tugraph-runtime-centos7
+docker exec -it tugraph_demo bash
+# 进入docker环境后执行如下命令启动服务
+lgraph_server -d start
+

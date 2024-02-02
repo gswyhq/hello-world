@@ -3,6 +3,8 @@
 
 import pandas as pd
 from matplotlib import pyplot as plt
+mpl.rcParams["font.sans-serif"] = ["SimHei"]  # 展示中文字体
+mpl.rcParams["axes.unicode_minus"] = False  # 处理负刻度值
 
 # 数据来源
 # "https://raw.githubusercontent.com/selva86/datasets/master/midwest_filter.csv"
