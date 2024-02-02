@@ -1,0 +1,21 @@
+
+windows系统：
+1、下载安装包：
+https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip
+其他系统安装包，可在https://www.oracle.com/cn/java/technologies/downloads/#jdk17-windows， 页面查找到；
+
+或者：
+https://download.java.net/openjdk/jdk11.0.0.1/ri/openjdk-11.0.0.1_windows-x64_bin.zip
+
+也可从https://adoptium.net/zh-CN/temurin/releases/?version=11，下载预编译版本；
+https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.19%2B7/OpenJDK11U-jdk_x64_windows_hotspot_11.0.19_7.zip
+https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.19%2B7/OpenJDK11U-jre_x64_windows_hotspot_11.0.19_7.zip
+
+https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.7_7.zip
+https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.7_7.zip
+
+设置环境变量：
+CLASSPATH
+JAVA_HOME
+PATH
+

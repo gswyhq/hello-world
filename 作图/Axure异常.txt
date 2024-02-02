@@ -1,0 +1,19 @@
+
+chrome浏览器打开 Axure RP 的html文件报错：
+chrome浏览器打开axure生成的HTML静态文件页面预览打开如下图显示 AXURE RP EXTENSION FOR CHROME，这是因为chrome浏览器没有安装Axure插件axure-chrome-extension导致的。
+需要安装axure rp extension for chrome插件；
+
+安装axure rp extension for chrome插件方法：
+
+解决方法一（下载扩展程序）
+拖拉安装的方法在最新版的谷歌浏览器中已经无法安装成功。会提示：程序包无效：“CRX_HEADER_INVALID”
+如果你遇到这样的情况无法安装Axure谷歌浏览器插件，请按照以下方法操作即可解决：
+
+第一步：首先下载扩展程序，解压得到一个axure_chrome_extension_V0.6.3的文件夹。
+第二步：在浏览器中地址栏中输入chrome://extensions/  或者点击浏览器的右上角选择更多工具->扩展程序，打开扩展程序界面。在页面右上角打开【开发者模式】。
+第三步：点击【加载已解压的扩展程序】，选择刚刚解压得到的“axure_chrome_extension_V0.6.3”文件夹，即可安装成功。
+
+解决方法二（不用找axure扩展程序）
+如果找不到axure扩展程序(axure_chrome_extension)的话，可以在生成静态原型页面的路径下，找到resources\chrome\axure-chrome-extension.crx，这就是需要的插件了。
+将axure-chrome-extension.crx重命名成axure-chrome-extension.zip或者重名为*.7z 然后解压，再通过方法一中的方式安装，同样有效。
+

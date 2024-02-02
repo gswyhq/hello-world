@@ -1,0 +1,133 @@
+
+docker pull docker.io/akaiot/oracle_11g
+
+#.启动临时容器获取初始化数据
+docker run -d --name test_oracle --restart unless-stopped -p 1521:1521 docker.io/akaiot/oracle_11g
+
+mkdir -p /home/oracle/
+
+docker cp test_oracle:/home/oracle/app/oracle/oradata/ /home/oracle/
+
+cd /home/oracle/oradata/
+
+#赋权给容器内Oracle用户
+chown -R 500.500 helowin
+
+4.删除临时容器并创建运行正式容器
+
+docker rm -f test_oracle
+
+docker run -d --name oracle11g --restart unless-stopped \
+-v /home/oracle/oradata/helowin:/home/oracle/app/oracle/oradata/helowin \
+-p 1521:1521 docker.io/akaiot/oracle_11g
+ 
+
+ 
+
+5.进入容器配置
+
+
+# 默认容器root密码为：helowin，自己决定是否更改
+docker exec -it -u root 35e7a8fa0b79  /bin/bash
+vi /etc/profile
+#新增
+# oracle home目录
+export ORACLE_HOME=/home/oracle/app/oracle/prouct/11.2.0/dbhome_2   
+# oracle 服务名或者 SID名，要记住这个名字helowin，它是naivcat或者DBeaver登录的重要选项
+export ORACLE_SID=helowin     
+# oracle环境变量
+export PATH=$ORACLE_HOME/bin:$PATH
+
+#刷新
+source /etc/profile
+
+#创建软链接
+ln -s $ORACLE_HOME/bin/sqlplus /usr/bin
+
+ 
+
+6.用户密码相关操作
+
+
+su - oracle
+删除新生成的版本控制文件，将数据卷中的版本控制文件复制为新生成的版本控制文件，操作时要保证容器内用户是oracle用户而非root，否则报控制文件出错。
+rm -rf /home/oracle/app/oracle/flash_recovery_area/helowin/control02.ctl
+cp /home/oracle/app/oracle/oradata/helowin/control01.ctl /home/oracle/app/oracle/flash_recovery_area/helowin/control02.ctl
+sqlplus / as sysdba          # 以 dba 身份连接 oracle 数据库
+shutdown immediate;          # 关闭数据库实例（这里会报错，不用管）
+startup;  
+
+sqlplus /nolog  
+conn /as sysdba  
+alter user system identified by system;--修改system用户账号密码；
+alter user sys identified by system;--修改sys用户账号密码；
+create user hrsoft identified by hrsoft; -- 创建内部管理员账号密码；
+grant connect,resource,dba to hrsoft; --将dba权限授权给内部管理员账号和密码；
+ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED; --修改密码规则策略为密码永不过期；（会出现坑，后面讲解）
+alter system set processes=1000 scope=spfile; --修改数据库最大连接数据；
+
+ 
+
+7.修改字符集信息等
+
+
+sqlplus / as sysdba
+shutdown immediate; --关闭数据库
+
+# 调整字符集
+# 启动数据库mount，
+startup mount 
+ALTER SYSTEM ENABLE RESTRICTED SESSION;
+ALTER SYSTEM SET JOB_QUEUE_PROCESSES=0; 
+ALTER SYSTEM SET AQ_TM_PROCESSES=0; 
+# 启动数据库
+alter database open;
+# 修改数据库
+ALTER DATABASE CHARACTER SET ZHS16GBK; 
+ALTER DATABASE character set INTERNAL_USE ZHS16GBK; 
+
+# 重新启动数据库
+shutdown immediate; 
+startup; --启动数据库
+
+# 查询字符集
+select userenv ('language')  from dual;
+exit：退出软链接
+
+ 
+
+8.关于外部访问，如使用navicat工具访问。
+
+找到监听配置的两个文件，一个是监听器listener.ora一个是tnsnames.ora
+
+su - root
+find / | grep /network/admin #查找属于自己的oracle监听配置文件目录
+vi /home/oracle/app/oracle/product/11.2.0/dbhome_2/network/admin/tnsnames.ora  
+vi /home/oracle/app/oracle/product/11.2.0/dbhome_2/network/admin/listener.ora  
+如果外部需要访问该oracle需要将上面两个文件中的localhost改为主机名或者为空。
+
+较新版本的镜像中该值均为空,可以直接连接无需此设置。
+
+实验证明，默认配置即可，上面两个文件什么都不用改就能远程访问。
+
+ 
+
+如果修改了需要进行如下操作生效
+
+
+exit#退出容器
+systemctl restart docker.service#重启服务
+docker start 《自己的容器id/名》#重启容器
+docker exec -it -u root 《自己的容器id/名称》 bash#重新进入容器
+su - oracle#切换oracle账户
+sqlplus / as sysdba #登入数据库
+SQL>alter system register;#强制重新注册实例
+SQL>quit#退出数据库
+lsnrctl reload#在容器内重启监听
+lsnrctl status#查看监听服务状态
+
+ 
+
+ 
+
+9.远程访问(使用navicat测试)

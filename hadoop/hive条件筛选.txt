@@ -3,5 +3,36 @@
 # 根据正则表达式作为条件筛选：
 select * from default.cmb_test where ptf_name rlike '张|李是'
 
+# 查找重复的数据：
+根据id分组进行计数，输出>1的行：
+select t1.* from mytable t1
+join (
+select id, count(*)
+from mytable
+group by id
+having count(*) > 1
+	) t2
+	on t1.id=t2.id;
+或者：
+select t1.* from mytable t1
+t1.id in (
+select id
+from mytable
+group by id
+having count(*) > 1
+	);
+
+注意：下面这样并不能达到筛选重复id数据的效果，
+结果只是说这些id在原有数据中是重复的，但没有包含重复id其rk=1的数据：
+select t2.* from
+(
+	select t1.*,
+	row_number() over(partition by t1.id) rk
+	from mytable t1
+	)  t2
+where t2.rk > 1;
+
+
+
 
 

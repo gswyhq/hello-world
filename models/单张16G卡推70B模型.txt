@@ -1,0 +1,286 @@
+
+单张16G卡推70B模型方案总结
+不量化，不损失精度，如何用一张16GB的显卡推断 fp16的70B大模型？
+用16GB的T4显卡+32GB内存推断70B的大模型，
+
+正常来讲，把模型加载到RAM里，用fp16的话的显存消耗量大约是模型参数量的两倍的数量级，比如70B模型，大概需要140GB显存存放模型。
+要是使用32位全精度的话，需要4倍的数据数量级参数， 计算原理（1 个float32耗费4bytes，1个float16耗费 2bytes）
+
+既然显卡放不下一个模型，那我们放一部分到显卡上，边推理边释放
+具体的流程可以讲解为：
+1.创建一个空的（例如，没有权重的）模型
+2.决定每一层将要去哪里（当有多个设备可用时）
+3.在内存中加载其权重的一部分
+4.在空模型中加载这些权重
+5.将权重移动到设备上进行推理 
+6.从第3步重复，直到所有的权重都被加载
+
+这个过程实现得益得以依赖于PyTorch 1.9引入了一种新的设备，称为元设备(meta device)。
+比如下面的代码，内存不够的话就会崩掉
+
+import torch
+large_tensor = torch.randn(100000, 100000)
+这个大张量需要4 * 10**10字节（默认精度是FP32，所以张量的每个元素占用4字节），因此需要40GB的RAM。然而，在元设备上执行相同的操作就可以正常运行：
+
+import torch
+large_tensor = torch.randn(100000, 100000, device="meta")
+这个张量没有关联的数据，只有一个形状。
+
+accelerate库有一个context manager，整合了meta device可以实例化一个空模型。
+
+# Load meta model (no memory used)
+with init_empty_weights():
+    self.model = AutoModelForCausalLM.from_config(self.config, trust_remote_code=True)
+    self.model.tie_weights()
+这一步很关键，我们知道每个权重的形状，因此我们可以知道一旦我们完全加载预训练的张量，它们将消耗多少内存。因此，我们可以决定如何在CPU和GPU之间分割我们的模型。
+
+除此之外，定义了两个关键的方法，分别是load_layer_to_cpu，负责把 权重从disk挪到CPU，另外一个是move_layer_to_device，负责把权重从cpu挪到显卡。还有一个释放显存的方法clean_memory，负责清空显存。
+
+# For LLM
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, AutoModel
+from accelerate import init_empty_weights
+from accelerate.utils.modeling import set_module_tensor_to_device
+from safetensors.torch import load_file
+from optimum.bettertransformer import BetterTransformer
+
+N_BATCHES = 3
+MAX_LENGTH = 4096
+
+def clean_memory():
+    gc.collect()
+    ctypes.CDLL("libc.so.6").malloc_trim(0)
+    torch.cuda.empty_cache()
+
+
+# Class for sharded llama
+class ShardedLlama:
+    def __init__(self, checkpoint_path, weights_loader, device="cuda:0", dtype=torch.float16):
+
+        # Save parameters
+        self.checkpoint_path = Path(checkpoint_path)
+        self.weights_loader = weights_loader
+        self.device = device 
+        self.dtype = dtype
+
+        # Create model
+        self.config = AutoConfig.from_pretrained(self.checkpoint_path)   
+        self.tokenizer = AutoTokenizer.from_pretrained(checkpoint_path)
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.tokenizer.padding_side = "right"
+        self.init_model()
+        self.layer_names = ["model.embed_tokens"] + [f"model.layers.{i}" for i in range(len(self.model.model.layers))] + ["model.norm", "value_head"]
+
+    def init_model(self):
+    
+        # Load meta model (no memory used)
+        with init_empty_weights():
+            self.model = AutoModelForCausalLM.from_config(self.config)
+            self.model.lm_head = torch.nn.Linear(8192, 8, bias=False) # originally 32k
+            self.model.eval()
+            self.model = BetterTransformer.transform(self.model) # enable flash attention
+            self.model.tie_weights()
+            
+        self.layers = [self.model.model.embed_tokens] + list(self.model.model.layers) + [self.model.model.norm, self.model.lm_head]
+
+        # Move buffers to device (note that much GPU memory used)
+        for buffer_name, buffer in self.model.named_buffers():
+            set_module_tensor_to_device(self.model, buffer_name, self.device, value=buffer, dtype=self.dtype)
+
+    def load_layer_to_cpu(self, layer_name):
+        self.weights_loader.set_state_dict(layer_name, self.device)
+        state_dict = self.weights_loader.get_state_dict(self.device)
+        if "value_head.weight" in state_dict:
+            state_dict = {"lm_head.weight" : state_dict["value_head.weight"]}
+        return state_dict
+        
+    def move_layer_to_device(self, state_dict):
+        for param_name, param in state_dict.items():
+            assert param.dtype != torch.int8, "int8 not supported (need to add fp16_statistics)"
+            set_module_tensor_to_device(self.model, param_name, self.device, value=param, dtype=self.dtype)
+
+    def __call__(self, inputs):
+        # inputs = [(prefix, suffix), ...] with prefix.shape[0] = 1 and suffix.shape[0] = 5
+        
+        # Reboot the model to make sure buffers are loaded and memory is clean
+        del self.model
+        clean_memory()
+        self.init_model()
+        
+       # Send batch to device
+        batch = [(prefix.to(self.device), suffix.to(self.device)) for prefix, suffix in inputs]
+        n_suffixes = len(batch[0][1])
+        suffix_eos = [(suffix != self.tokenizer.pad_token_id).sum(1) - 1 for _, suffix in inputs]
+
+        # Create attention mask for the largest input, and position ids to use KV cache
+        attention_mask = torch.ones(MAX_LENGTH, MAX_LENGTH)
+        attention_mask = attention_mask.triu(diagonal=1)[None, None, ...] == 0
+        attention_mask = attention_mask.to(self.device)
+        position_ids = torch.arange(MAX_LENGTH, dtype=torch.long, device=self.device)[None, :]
+
+        with ThreadPoolExecutor() as executor, torch.inference_mode():
+
+            # Load first layer
+            future = executor.submit(self.load_layer_to_cpu, "model.embed_tokens")
+
+            for i, (layer_name, layer) in tqdm(enumerate(zip(self.layer_names, self.layers)), desc=self.device, total=len(self.layers)):
+
+                # Load current layer and prepare next layer
+                state_dict = future.result()
+                if (i + 1) < len(self.layer_names):
+                    future = executor.submit(self.load_layer_to_cpu, self.layer_names[i + 1])
+                self.move_layer_to_device(state_dict)
+                
+                # Run layer
+                for j, (prefix, suffix) in enumerate(batch):
+                    if layer_name == "model.embed_tokens":
+                        batch[j] = (layer(prefix), layer(suffix))
+                    elif layer_name == "model.norm":
+                        # Only keep the last token at this point
+                        batch[j] = (None, layer(suffix[torch.arange(n_suffixes), suffix_eos[j]][:, None]))
+                    elif layer_name == "value_head":
+                        batch[j] = layer(suffix)[:, 0].mean(1).detach().cpu().numpy()
+                    else:
+                        # Run prefix
+                        len_p, len_s = prefix.shape[1], suffix.shape[1]
+                        new_prefix, (k_cache, v_cache) = layer(prefix, use_cache=True, attention_mask=attention_mask[:, :, -len_p:, -len_p:])
+                        
+                        # Run suffix
+                        pos = position_ids[:, len_p:len_p + len_s].expand(n_suffixes, -1)
+                        attn = attention_mask[:, :, -len_s:, -len_p - len_s:].expand(n_suffixes, -1, -1, -1)
+                        kv_cache = (k_cache.expand(n_suffixes, -1, -1, -1), v_cache.expand(n_suffixes, -1, -1, -1))
+                        new_suffix = layer(suffix, past_key_value=kv_cache, position_ids=pos, attention_mask=attn)[0]
+                        batch[j] = (new_prefix, new_suffix)
+
+                # Remove previous layer from memory (including buffers)
+                layer.to("meta")
+                clean_memory() # proposed by CPMP
+
+        # Get scores
+        return batch
+
+
+
+
+def run_model(device, df, weights_loader):
+    model = ShardedLlama(checkpoint_path, weights_loader, device=device)
+    f = partial(get_tokens, tokenizer=model.tokenizer)
+    inputs = df.apply(f, axis=1).values
+    batches = np.array_split(inputs, N_BATCHES)
+    outputs = []
+    for i, batch in enumerate(batches):
+        outputs += model(batch)
+    return outputs
+    
+完整的代码可以参考链接：https://www.kaggle.com/code/simjeg/platypus2-70b-without-wikipedia-rag
+
+----------------------------------------------------------------------------------------------------------------------------------------
+加载 x B 参数的 FP32 模型权重需要大约 4 *x  GB 显存
+加载有 x B 参数的 BF16/FP16 模型权重需要大约 2 *x  GB 显存
+举几个例子来说明用 bfloat16 加载模型大约需要多少显存:
+GPT3 需要 2 * 175 GB = 350 GB 显存
+Bloom 需要 2 * 176 GB = 352 GB 显存
+Llama-2-70b 需要 2 * 70 GB = 140 GB 显存
+Falcon-40b 需要 2 * 40 GB = 80 GB 显存
+MPT-30b 需要 2 * 30 GB = 60 GB 显存
+bigcode/starcoder (https://huggingface.co/bigcode/starcoder) 需要 2 * 15.5 = 31 GB 显存
+
+# 以 bfloat16 精度加载模型
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+import torch
+
+model = AutoModelForCausalLM.from_pretrained("bigcode/octocoder", torch_dtype=torch.bfloat16, device_map="auto", pad_token_id=0)
+tokenizer = AutoTokenizer.from_pretrained("bigcode/octocoder")
+
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+prompt = "Question: Please write a function in Python that transforms bytes to Giga bytes.\n\nAnswer:"
+
+result = pipe(prompt, max_new_tokens=60)[0]["generated_text"][len(prompt):]
+result
+
+定义一个 flush(...) 函数来释放所有已分配的显存，以便我们可以准确测量分配的 GPU 显存的峰值。
+
+del pipe
+del model
+
+import gc
+import torch
+
+def flush():
+  gc.collect()
+  torch.cuda.empty_cache()
+  torch.cuda.reset_peak_memory_stats()
+
+要使用 Transformer 权重量化方案，请确保bitsandbytes 库已安装。
+
+# !pip install bitsandbytes
+然后，只需在 from_pretrained 中添加 load_in_8bit=True 参数，即可用 8 比特量化加载模型。
+
+model = AutoModelForCausalLM.from_pretrained("bigcode/octocoder", load_in_8bit=True, pad_token_id=0)
+现在，再次运行我们的示例，并测量其显存使用情况。
+
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+result = pipe(prompt, max_new_tokens=60)[0]["generated_text"][len(prompt):]
+result
+
+看一下这次用了多少显存。
+def bytes_to_giga_bytes(bytes):
+  return bytes / 1024 / 1024 / 1024
+bytes_to_giga_bytes(torch.cuda.max_memory_allocated())
+
+看下 4 比特量化的 GPU 显存消耗峰值是多少
+删除模型并再次刷一下显存。
+
+del model
+del pipe
+flush()
+用与之前相同的 API 将模型量化为 4 比特 - 这次参数设置为 load_in_4bit=True 而不是 load_in_8bit=True 。
+
+model = AutoModelForCausalLM.from_pretrained("bigcode/octocoder", load_in_4bit=True, low_cpu_mem_usage=True, pad_token_id=0)
+
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+result = pipe(prompt, max_new_tokens=60)[0]["generated_text"][len(prompt):]
+result
+bytes_to_giga_bytes(torch.cuda.max_memory_allocated())
+
+模型权重可以量化为 8 比特或 4 比特，甚至可以将模型量化为 3 或 2 比特
+量化方案旨在降低权重的精度，同时尽量保持模型的推理结果尽可能准确 ( 即 尽可能接近 bfloat16)。
+
+一般来说，所有量化技术的工作原理如下:
+1、将所有权重量化至目标精度
+2、加载量化权重，并把 bfloat16 精度的输入向量序列传给模型
+3、将权重动态反量化为 bfloat16 ，并基于 bfloat16 精度与输入进行计算
+4、计算后，将权重再次量化回目标精度。[译者注: 这一步一般不需要做]
+当输入向量走过模型计算图时，所有权重矩阵都会依次执行反量化和重量化操作。
+因此，使用权重量化时，推理时间通常 不会 减少，反而会增加。
+
+模型量化会提高内存效率，但会牺牲准确性，在某些情况下还会牺牲推理时间。
+
+另外还可以，用内存和计算效率更高的版本替换自注意力算法
+Flash 注意力。
+
+简而言之，Flash 注意力将 V * Softmax(QKT) 的计算分解成若干步骤，通过迭代多个 softmax 计算步来将输出分成多个较小的块进行计算
+通过跟踪 softmax 统计归一化值再加上一些聪明的数学技巧，与默认的自注意力层相比，Flash 注意力的计算结果 完全相同，而内存成本仅随着  线性增加。
+
+直觉上来讲，Flash 注意力肯定比默认的自注意力公式要慢很多，因为需要进行更多的计算。确实，与普通注意力相比，Flash 注意力需要更多的 FLOP，因为需要不断重新计算 softmax 统计归一化值 。
+然而，与默认注意力相比，Flash 注意力的推理速度要快得多，这是因为它能够显著减少对较慢的高带宽显存的需求，而更多使用了更快的片上内存 (SRAM)。
+从本质上讲，Flash 注意力确保所有中间写入和读取操作都可以使用快速 片上 SRAM 来完成，而不必访问较慢的显存来计算输出向量 O 。
+
+# 启用 Flash 注意力。 
+我们将模型转换为 BetterTransformers，这会因此而启用 PyTorch 的 SDPA 自注意力，其实现是基于 Flash 注意力的。
+
+model = AutoModelForCausalLM.from_pretrained("bigcode/octocoder", torch_dtype=torch.bfloat16, device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained("bigcode/octocoder")
+
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+model.to_bettertransformer() # 将模型转换为 BetterTransformers
+start_time = time.time()
+with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
+    result = pipe(long_prompt, max_new_tokens=60)[0]["generated_text"][len(long_prompt):]
+
+print(f"Generated in {time.time() - start_time} seconds.")
+result
+
+结果与之前完全相同，但由于 Flash 注意力，我们可以观察到非常显著的加速。
+

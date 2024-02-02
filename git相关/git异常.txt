@@ -1,12 +1,27 @@
 
-具体报错
+git clone时候一直报错：
 fatal: The remote end hung up unexpectedly
 error: RPC failed; curl 18 transfer closed with outstanding read data remaining
+fatal: the remote end hung up unexpectedly
+fatal: early EOF
+fatal: unpack-objects failed
 
-解决方法
-git config --global http.postBuffer 524288000
-
+解决方法1:
+把缓存区大小设置大点：根据项目的具体情况来设置缓冲区大小
+git config --global http.postBuffer 524288000 　　　　# 2GB
+git config --global http.postBuffer 2097152000　　      # 2GB
+git config --global http.postBuffer 3194304000 　　    # 3GB
 需要注意的是http.postBuffer 后，单位是b，524288000B也就500M左右
+
+解决方法2：
+执行上面命令如果依旧clone失败，考虑可能原因2：网络下载速度缓慢
+git config --global http.lowSpeedLimit 0
+git config --global http.lowSpeedTime 999999
+
+解决方法3：
+用http方式下载代码，发现可能依旧会存在该问题，用ssh方式来下载代码
+用ssh方式下载代码
+git  clone   git@gitee.com:......ssh地址
 
 # root@5420f754d9e6:/chat_bot# git diff HEAD conf/system_conf.py
 WARNING: terminal is not fully functional
@@ -186,3 +201,38 @@ fatal: unable to access 'https://*****@github.com/gswyhq/hello-world/': gnutls_h
 fatal: unable to access 'https://github.com/gswyhq/hello-world.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.
 因为对应的githup验证方法有变更所致，需要用对应的token地址，如：
 https://ghp_n*************@github.com/gswyhq/hello-world
+
+# 问题，git diff --stat时候，不展示全路径：
+git log --stat显示全部文件路径
+git在没有终端连接的时候会只显示80列的。
+执行git log --stat时，对于一些太长的路径会出现以“…”来省略的情况。
+解决方法：
+可以手动设置显示宽度
+git diff --stat=200
+git log --stat=200
+这样的话就可以设置成显示200列了，就会显示完整的路径
+
+# git diff 忽略换行符不一致时候报错：
+git diff --ignore-cr-at-eol README.md
+error: invalid option: --ignore-cr-at-eol
+改成：
+git diff --ignore-space-at-eol README.md
+
+# 问题：
+在 mobaxterm 中运行名git status，发现好多文件没有添加到暂存区；
+通过命令 git checkout -- 文件名，放弃工作区的更改，发现无效果；
+在cmd，命令提示符窗口，又不存在该问题；
+mobaxterm 运行 git diff -- 文件名
+出现：
+old mode 100644
+new mode 100755
+说明git把文件权限也算作文件差异的一部分；
+在这个例子中，"old mode 100644" 表示原始文件的权限是 "u=rw,g=r,o=r"，属性是 "rw-rw-r--"。"new mode 100755" 表示新文件的权限是 "u=rwx,g=rx,o=rx"，属性是 "rwx-rwx-r--"。
+解决办法：
+git中可以加入忽略文件权限的配置，具体如下：
+$ git config core.filemode false  // 当前版本库
+$ git config --global core.fileMode false // 所有版本库
+这个时候再运行git status，发现没有提示有文件未添加到暂存区；
+
+
+

@@ -1,0 +1,444 @@
+
+自 Elasticsearch 6.0 以后的版本不再支持 Groovy，Javascript 及 Python 语言。仅仅支持Painless script 编程；
+在命令行使用curl命令时，在source 中最外层使用双引号，内部字符串使用单引号，且单引号需使用转义表示: \u0027
+
+# 查询在 name 字段中含有 “理赔” 的所有文档。
+curl -X POST "192.168.3.105:9200/milk2/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "script": {
+      "script": {
+        "source": "doc[\u0027name.keyword\u0027].toString().contains(params.name)",
+        "lang": "painless",
+        "params": {
+          "name": "理赔"
+        }
+      }
+    }
+  }
+}
+'
+
+# elasticsearch查询使用script比较两个字符串字段
+curl -X POST "192.168.3.105:9200/twitter/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "must": {
+        "script": {
+          "script": {
+            "source": "String a = doc[\u0027province.keyword\u0027].value; String b=doc[\u0027city.keyword\u0027].value;if(a.compareTo(b)>0){true}else{false}"
+          }
+        }
+      }
+    }
+  }
+}
+'
+
+# 不依赖es文档，单独验证某个painless脚本
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "source": "Double.toString(Math.floor((params.a-params.b)/60))",
+    "params": {
+      "a": 70,
+      "b": 10
+    }
+  }
+}
+'
+
+# 插入样例数据：
+curl -X PUT "192.168.3.105:9200/hockey/_bulk?refresh&pretty" -H 'Content-Type: application/json' -d'
+{"index":{"_id":1}}
+{"first":"johnny","last":"gaudreau","goals":[9,27,1],"assists":[17,46,0],"gp":[26,82,1],"born":"1993/08/13"}
+{"index":{"_id":2}}
+{"first":"sean","last":"monohan","goals":[7,54,26],"assists":[11,26,13],"gp":[26,82,82],"born":"1994/10/12"}
+{"index":{"_id":3}}
+{"first":"jiri","last":"hudler","goals":[5,34,36],"assists":[11,62,42],"gp":[24,80,79],"born":"1984/01/04"}
+{"index":{"_id":4}}
+{"first":"micheal","last":"frolik","goals":[4,6,15],"assists":[8,23,15],"gp":[26,82,82],"born":"1988/02/17"}
+{"index":{"_id":5}}
+{"first":"sam","last":"bennett","goals":[5,0,0],"assists":[8,1,0],"gp":[26,1,0],"born":"1996/06/20"}
+{"index":{"_id":6}}
+{"first":"dennis","last":"wideman","goals":[0,26,15],"assists":[11,30,24],"gp":[26,81,82],"born":"1983/03/20"}
+{"index":{"_id":7}}
+{"first":"david","last":"jones","goals":[7,19,5],"assists":[3,17,4],"gp":[26,45,34],"born":"1984/08/10"}
+{"index":{"_id":8}}
+{"first":"tj","last":"brodie","goals":[2,14,7],"assists":[8,42,30],"gp":[26,82,82],"born":"1990/06/07"}
+{"index":{"_id":39}}
+{"first":"mark","last":"giordano","goals":[6,30,15],"assists":[3,30,24],"gp":[26,60,63],"born":"1983/10/03"}
+{"index":{"_id":10}}
+{"first":"mikael","last":"backlund","goals":[3,15,13],"assists":[6,24,18],"gp":[26,82,82],"born":"1989/03/17"}
+{"index":{"_id":11}}
+{"first":"joe","last":"colborne","goals":[3,18,13],"assists":[6,20,24],"gp":[26,67,82],"born":"1990/01/30"}
+'
+
+
+# 对某个数组字段求和
+curl -X GET "192.168.3.105:9200/hockey/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "function_score": {
+      "script_score": {
+        "script": {
+          "lang": "painless",
+          "source": "int total = 0;\nfor (int i = 0; i < doc[\u0027goals\u0027].length; ++i) {\n  total += doc[\u0027goals\u0027][i];\n}\nreturn total;"
+        }
+      }
+    }
+  }
+}
+'
+
+# 可以使用脚本字段而不是函数分数来执行相同的操作：
+curl -X GET "192.168.3.105:9200/hockey/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "script_fields": {
+    "total_goals": {
+      "script": {
+        "lang": "painless",
+        "source": "int total = 0;\nfor (int i = 0; i < doc[\u0027goals\u0027].length; ++i) {\n  total += doc[\u0027goals\u0027][i];\n}\nreturn total;"
+      }
+    }
+  }
+}
+'
+
+# 拼接多个字符串字段：
+curl -X GET "192.168.3.105:9200/hockey/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": {
+    "_script": {
+      "type": "string",
+      "order": "asc",
+      "script": {
+        "lang": "painless",
+        "source": "doc[\u0027first.keyword\u0027].value + \u0027 \u0027 + doc[\u0027last.keyword\u0027].value"
+      }
+    }
+  }
+}
+'
+
+# doc['myfield'].value 如果文档中缺失某个字段会引发异常：
+可通过如下方法检查是否缺失某个字段：
+if (!doc.containsKey('myfield') || doc['myfield'].empty) { return "unavailable" } else { return doc['myfield'].value }
+要检查文档是否缺少值，可以调用 
+doc['myfield'].size() == 0.
+
+# 对某个字段的数据进行更新：
+curl -X POST "localhost:9200/hockey/_update/1?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = params.last",
+    "params": {
+      "last": "hockey"
+    }
+  }
+}
+'
+
+# 也可以同时更新多个字段：
+curl -X POST "localhost:9200/hockey/_update/1?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = params.last;\nctx._source.nick = params.nick",
+    "params": {
+      "last": "gaudreau",
+      "nick": "hockey"
+    }
+  }
+}
+'
+
+# 对应date字段，获取对应的年份
+curl -X GET "192.168.3.105:9200/hockey/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script_fields": {
+    "birth_year": {
+      "script": {
+        "source": "doc.born.value.year"
+      }
+    }
+  }
+}
+'
+
+# 条件更新数据：
+# 执行下面的语句需要在 elasticsearch.yaml 中配置  script.painless.regex.enabled = true
+curl -X POST "192.168.3.105:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "if (ctx._source.last =~ /b/) {\n  ctx._source.last += \"matched\";\n} else {\n  ctx.op = \"noop\";\n}"
+  }
+}
+'
+
+curl -X POST "localhost:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "if (ctx._source.last ==~ /[^aeiou].*[aeiou]/) {\n  ctx._source.last += \"matched\";\n} else {\n  ctx.op = \"noop\";\n}"
+  }
+}
+'
+
+# 捕获元音并删除：
+curl -X POST "localhost:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = /[aeiou]/.matcher(ctx._source.last).replaceAll(\u0027\u0027)"
+  }
+}
+'
+
+# 也可以指定正则匹配分组：
+curl -X POST "localhost:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = /n([aeiou])/.matcher(ctx._source.last).replaceAll(\u0027$1\u0027)"
+  }
+}
+'
+
+# 姓氏中的所有元音大写： 
+curl -X POST "localhost:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = ctx._source.last.replaceAll(/[aeiou]/, m ->\n  m.group().toUpperCase(Locale.ROOT))"
+  }
+}
+'
+
+# 将第一个元音大写：
+curl -X POST "localhost:9200/hockey/_update_by_query?pretty" -H 'Content-Type: application/json' -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "ctx._source.last = ctx._source.last.replaceFirst(/[aeiou]/, m ->\n  m.group().toUpperCase(Locale.ROOT))"
+  }
+}
+'
+
+# 返回子字符串
+示例：返回 URL 中最后一个斜线之后的部分
+语言：Painless
+返回类型：字符串
+ def path = doc['url.keyword'].value;
+if (path != null) {
+    int lastSlashIndex = path.lastIndexOf('/');
+    if (lastSlashIndex > 0) {
+    return path.substring(lastSlashIndex+1);
+    }
+}
+return "";
+
+{
+  "query": {
+    "match_all": {}
+  },
+  "script_fields": {
+    "name": {
+      "script": {
+        "lang": "painless",
+        "source": "  def s = doc[\u0027name\u0027'].value;  def bg = s.indexOf(\u0027分院\u0027); def str = s.substring(0,bg);  return str "
+      }
+    }
+  }
+}
+
+注意：尽可能避免使用正则表达式提取子字符串，因为 indexOf() 运算消耗的资源更少，也更不易出错。 
+
+匹配字符串并返回匹配项
+示例：返回域，即“host”字段中最后一个点之后的字符串。
+语言：Painless
+返回类型：字符串
+def m = /^.*\.([a-z]+)$/.matcher(doc['host.keyword'].value);
+if ( m.matches() ) {
+   return m.group(1)
+} else {
+   return "no match"
+}
+注意：通过 regex matcher() 函数定义对象，您可以提取并返回多组与该正则表达式匹配的字符。 
+
+匹配数字并返回匹配项
+示例：返回 IP 地址的前八位字节（存储为字符串）并将其视为数字。
+语言：Painless
+返回类型：数字
+ def m = /^([0-9]+)\..*$/.matcher(doc['clientip.keyword'].value);
+if ( m.matches() ) {
+   return Integer.parseInt(m.group(1))
+} else {
+   return 0
+}
+注意：必须在脚本中返回正确的数据类型。即使匹配了数字，正则表达式匹配也会返回字符串，因此应在返回时将其显式转换为整数。 
+
+产生字符串的日期计算
+示例：将日期解析为星期几，然后解析为字符串
+语言：Painless
+返回类型：字符串
+LocalDateTime.ofInstant(Instant.ofEpochMilli(doc['@timestamp'].value), ZoneId.of('Z')).getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault())
+注意：Painless 支持 Java 的所有原生类型，因此提供对这些类型的原生函数的访问权限，例如 LocalDateTime()，可用于执行更高级的日期计算。
+
+# 对列表字段元素的添加及删除：
+PUT test/_doc/1
+{
+    "counter" : 1,
+    "tags" : ["red"]
+}
+
+你可以使用和 update 脚本将 tag 添加到 tags 列表（这只是一个列表，因此即使存在标记也会添加）：
+POST test/_update/1
+{
+    "script" : {
+        "source": "ctx._source.tags.add(params.tag)",
+        "lang": "painless",
+        "params" : {
+            "tag" : "blue"
+        }
+    }
+}
+
+显示 “blue”，已经被成功加入到 tags 列表之中了。
+你还可以从 tags 列表中删除 tag。 删除 tag 的 Painless 函数采用要删除的元素的数组索引。 为避免可能的运行时错误，首先需要确保 tag 存在。 如果列表包含tag的重复项，则此脚本只删除一个匹配项。
+POST test/_update/1
+{
+  "script": {
+    "source": "if (ctx._source.tags.contains(params.tag)) { ctx._source.tags.remove(ctx._source.tags.indexOf(params.tag)) }",
+    "lang": "painless",
+    "params": {
+      "tag": "blue"
+    }
+  }
+}
+
+# 对某个字段做点号分隔，添加到新的字段上
+POST /daily_quotes/_update_by_query?conflicts=proceed
+{
+  "script": {
+    "source": "String s = ctx._source['tsCode'];String[] array = /\\./.split(s);ctx._source.code_a = array[0];ctx._source.region = array[1]",
+    "lang": "painless"
+  }
+}
+
+做空格分隔时
+curl -XPOST /daily_quotes/_update_by_query?conflicts=proceed
+{
+  "script": {
+    "source": "String s = ctx._source['tsCode'];String[] array = / /.split(s);ctx._source.code_a = array[0];ctx._source.region = array[1]",
+    "lang": "painless"
+  }
+}
+
+# 验证脚本
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d '
+{
+  "script": {
+    "source": "String[] array = /\\./.split(params.count); return array.length",
+    "params": {
+      "count": "123.SH",
+      "total": 1000.0
+    }
+  }
+}
+'
+
+# 字符串分割，切分字符串
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d '
+{
+  "script": {
+    "source": "String[] array = params.count.splitOnToken(\u0027.\u0027); return [array.length, array[1]]",
+    "params": {
+      "count": "123.SH",
+      "total": 1000.0
+    }
+  }
+}
+'
+{"result":"[2, SH]"}       
+
+# 字符串转换为字符串列表：
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d '
+{
+  "script": {
+    "source": "List words1 = new ArrayList(); String s = params.count.toString(); for (int i=0;i<s.length();i++){words1.add(s.substring(i, i+1));} return [words1.length, words1[4]]",
+    "params": {
+      "count": "123.SH",
+      "total": 1000.0
+    }
+  }
+}
+'
+{"result":"[6, S]"} 
+
+# 字符串转换为字符集合：
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d '
+{
+  "script": {
+    "source": "Set words1 = new HashSet(); String s = params.count.toString(); for (int i=0;i<s.length();i++){words1.add(s.substring(i, i+1));} return [words1.size(), words1]",
+    "params": {
+      "count": "123.SH",
+      "total": 1000.0
+    }
+  }
+}
+'
+{"result":"[6, [1, 2, 3, S, H, .]]"}                                                        
+
+# 求解两个字符串的交集,差集,并集：
+curl -XPOST 192.168.3.105:9200/_scripts/painless/_execute -H 'Content-Type: application/json' -d '
+{
+  "script": {
+    "source": "Set words1 = new HashSet(); Set words2 = new HashSet(); Set jiao = new HashSet(); Set cha = new HashSet(); Set bing = new HashSet();  String s1 = params.word1.toString(); String s2 = params.word2.toString();for (int i=0;i<s1.length();i++){words1.add(s1.substring(i, i+1));} for (int i=0;i<s2.length();i++){words2.add(s2.substring(i, i+1));} jiao.addAll(words1); jiao.retainAll(words2);cha.addAll(words1); cha.removeAll(words2); bing.addAll(words1); bing.addAll(words2); return [words1.size(), words2.size(), words1, words2, jiao, cha, bing]",
+    "params": {
+      "word1": "保险理财",
+      "word2": "保险理赔金"
+    }
+  }
+}
+'
+{"result":"[4, 5, [财, 理, 险, 保], [金, 赔, 理, 险, 保], [理, 险, 保], [财], [金, 财, 赔, 理, 险, 保]]"}  
+
+# 使用painless脚本更新历史数据。有几点需要注意：
+只更新符合某些条件的数据，可以使用_update_by_query操作，这个例子比较简单没有设置query语句。
+执行过程中冲突处理方式，这里使用的是conflicts=proceed，表示继续执行；
+painless检测对象类型使用关键字instanceof;
+painless脚本拆分字符串，想避免使用正则表达式，而是选用了StringTokenizer实现。
+POST test_cj/_update_by_query?conflicts=proceed
+{
+  "script": {
+    "source": """
+    if(ctx._source['imgs'] instanceof String){
+      String s=ctx._source['imgs'];
+      ArrayList array=new ArrayList();
+      if(!s.isEmpty()){
+         String splitter = ",";
+         StringTokenizer tokenValue = new StringTokenizer(s, splitter);
+         while (tokenValue.hasMoreTokens()) {
+            array.add(tokenValue.nextToken());
+         }
+      }
+     ctx._source.imgs=array;
+    }
+"""
+  }
+}
+如果更新数据量较大，需要执行一段时间，期间查看执行进度：
+GET _tasks?detailed=true&actions=*byquery
+查看执行结果。
+GET test_cj/_search
+

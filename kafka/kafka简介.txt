@@ -1,0 +1,48 @@
+
+什么是Kafka
+Kafka是一个分布式流处理系统，流处理系统使它可以像消息队列一样publish或者subscribe消息，分布式提供了容错性，并发处理消息的机制。
+Kafka的基本概念
+kafka运行在集群上，集群包含一个或多个服务器。kafka把消息存在topic中，每一条消息包含键值（key），值（value）和时间戳（timestamp）。
+kafka有以下一些基本概念：
+Producer - 生产者，用于生产数据，可将生产后的消息送入指定的 Topic；消息生产者，就是向kafka broker发消息的客户端。
+Consumer - 消费者，获取数据，可消费指定的 Topic 里面的数据; 消息消费者，是消息的使用方，负责消费Kafka服务器上的消息。
+Topic - 主题，一组消息数据的标记符；由用户定义并配置在Kafka服务器，用于建立Producer和Consumer之间的订阅关系。生产者发送消息到指定的Topic下，消息者从这个Topic下消费消息。
+Group：消费者组，同一个 group 可以有多个消费者，一条消息在一个 group 中，只会被一个消费者 获取；
+Partition - 分区，为了保证 kafka 的吞吐量，一个 Topic 可以设置多个分区。同一分区只能被一个消费者订阅。
+    消息分区，一个topic可以分为多个 partition，每个 partition是一个有序的队列。partition中的每条消息都会被分配一个有序的 id（offset）。
+Broker - 一台kafka服务器就是一个broker。一个集群由多个broker组成。一个broker可以容纳多个topic。
+Consumer Group - 消费者分组，用于归组同类消费者。每个consumer属于一个特定的consumer group，多个消费者可以共同消息一个Topic下的消息，每个消费者消费其中的部分消息，这些消费者就组成了一个分组，拥有同一个分组名称，通常也被称为消费者集群。
+Offset - 消息在partition中的偏移量。每一条消息在partition都有唯一的偏移量，消息者可以指定偏移量来指定要消费的消息。
+
+auto_offset_reset：总共3种值：earliest 、latest、none
+earliest ： 当各分区下有已提交的 offset 时，从提交的 offset 开始消费；无提交的 offset时，从头开始消费
+latest ：当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，消费新产生的该分区下的数据
+none ： topic 各分区都存在已提交的 offset 时，从 offset 后开始消费；只要有一个分区不存在已提交的 offset，则抛出异常
+auto_offset_reset ：消费者启动的时刻，消息队列中或许已经有堆积的未消费消息，有时候需求是从上一次未消费的位置开始读(则该参数设置为 earliest )，
+有时候的需求为从当前时刻开始读之后产生的，之前产生的数据不再消费(则该参数设置为 latest )。
+enable_auto_commit， auto_commit_interval_ms ：是否自动commit，当前消费者消费完该数据后，需要commit，才可以将消费完的信息传回消息队列的控制中心。
+enable_auto_commit 设置为 True 后，消费者将自动 commit，并且两次 commit 的时间间隔为 auto_commit_interval_ms 。
+
+
+# 生产者消费者模式
+点对点模式（一对一，消费者主动拉取数据，消息收到后消息清除）
+消息生产者生产消息发送到Queue中，然后消息消费者从Queue中取出并且消费消息。
+消息被消费以后，Queue中不再有存储，所以消息消费者不可能消费到已经被消费的消息。Queue支持 存在多个消费者，但是对一个消息而言，只会有一个消费者可以消费。
+
+# 发布订阅模式
+发布/订阅模式（一对多，消费者消费数据之后不会清除消息）
+消息生产者（发布）将消息发布到topic中，同时有多个消息消费者（订阅）消费该消息。和点对点模式 不同，发布到topic的消息会被所有订阅者消费。
+
+
+生产者分区策略
+生产者分区策略是 决定生产者将消息发送到哪个分区的算法， 主要有以下几种：
+轮询策略：Round-robin 策略，即顺序分配， 轮询策略有非常优秀的负载均衡表现，它总是能保证消息最大限度地被平均分配到所有分区上，故默认情况下它是最合理的分区策略。（默认、常用）
+随机策略：Randomness 策略。所谓随机就是我们随意地将消息放置到任意一个分区上。
+消息键保序策略：key-ordering 策略，Kafka 中每条消息都会有自己的key，一旦消息被定义了 Key，那么你就可以保证同一个 Key 的所有消息都进入到相同的分区里面，由于每个分区下的消息处理都是有顺序的
+kafka消息的有序性，是采用消息键保序策略来实现的。 一个topic，一个partition(分割)，一个consumer，内部单线程消费，写N个内存queue，然后N个线程分别消费一个内存queue。
+
+通过指定key的方式，具有相同key的消息会分发到同一个partition
+partition会内部对其进行排序，保证其有序性。
+
+
+

@@ -1,0 +1,156 @@
+
+Intellij IDEA 通过数据库表生成带注解的实体类
+
+# 第一步，保证Database Navigator 插件已经安装
+首先需要保证Intellij IDEA 安装有Database Navigator 插件
+若没有安装Database Navigator Plugin，则:
+方法一，在线安装：
+idea-> File -> settings -> editor -> plugins -> 然后在marketplace输入database，找到database navigate，点击install
+
+方法二，IDEA离线安装插件：
+1、离线下载好插件，插件下载地址：JetBrains Marketplace（https://plugins.jetbrains.com/idea）
+2、找到合适版本插件下载；
+3、直接 将下载的zip 文件包，拖入到idea主界面中，会自动安装，然后 重启 idea 。
+4、或者：idea --- Settings --- Plugins --- 按钮"Install plugin from disk..."
+
+# 第二步，IDEA连接数据库
+在idea左侧找到DB Browser（下载了插件就直接有了）->点击加号 -> 选择你需要使用的数据库（如：mysql）
+添加url,用户名密码等信息；
+至此解决了在idea中找到View->Tool Windows，IDEA找不到Database的问题；
+可以在properties里面进行修改时区
+选中DB Browser -> Connection 右键选中“Settings” -> 点击“properties”
+点一下＋号，在property列上添加serverTimezone，在value列上添加Asia/Shanghai
+
+社区版idea只有DB Browser的选项，没有Database
+
+# 第三步：生成实体类
+1、先打开数据库视图（左侧的DB Browser），选择要生成的数据表，右键选择生成。
+
+###########################################################################################################################
+idea使用Free mybatis plugin, MyBatisCodeHelperPro生成mysql中数据库代码（实体类Bean和映射mapper）
+第一步：安装插件
+第二步：主要需要配置的文件是pom.xml和MybatisGenerator.xml两个文件。
+pom.xml中配置如下内容：
+
+  <build>
+    <plugins>
+      <!--mybatis-generator插件-->
+      <plugin>
+        <!--1-Mybatis-generator插件,用于自动生成Mapper和POJO-->
+        <groupId>org.mybatis.generator</groupId>
+        <artifactId>mybatis-generator-maven-plugin</artifactId>
+        <version>1.3.2</version>
+        <configuration>
+          <!--配置文件的位置  一定要改成配置文件的位置-->
+          <configurationFile>src/main/resources/MybatisGenerator.xml</configurationFile>
+          <verbose>true</verbose>
+          <overwrite>true</overwrite>
+        </configuration>
+        <executions>
+          <execution>
+            <id>Generate MyBatis Artifacts</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>1.3.2</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+
+选择resources目录，右键，new-> New MybatisGenerator生成 MybatisGenerator.xml文件
+修改MybatisGenerator.xml文件中MySQL的url，用户名密码，修改tableName等信息；
+右侧Maven-> Profiles -> Plugins -> mybatis-generator -> mybatis-generator:generate 右键 -> Run Maven build;
+若提示 resources/generator/generatorConfig.xml文件不存在，则构建；
+编辑generatorConfig.xml
+mysql版本
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <classPathEntry
+            location="D:\apache-maven-3.6.1-bin\repository\mysql\mysql-connector-java\8.0.17\mysql-connector-java-8.0.17.jar" />
+    <context id="mysql">
+        <property name="javaFileEncoding" value="UTF-8"/>
+        <property name="xmlFormatter" value="org.mybatis.generator.api.dom.DefaultXmlFormatter"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+        <commentGenerator>
+            <property name="suppressAllComments" value="true" />
+        </commentGenerator>
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/column_hole?serverTimezone=Asia/Shanghai&amp;"
+                        userId="root"
+                        password="zkzl1-1=mysql">
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+        <!-- 生产entity类 -->
+        <javaModelGenerator targetPackage="com.qsy.entity" targetProject="./src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+        <!-- 生产mapper接口 可去除 -->
+        <sqlMapGenerator targetPackage="com.qsy.mapper" targetProject="./src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+        <!-- 生产xml映射 可去除 -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.qsy.mapper" targetProject="./src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+        <table  tableName="%"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false" >
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+    </context>
+</generatorConfiguration>
+
+oracle版本
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <classPathEntry
+            location="C:\Users\JW21080146.JINGWEIEC\.m2\repository\com\oracle\ojdbc8\ojdbc8.jar" />
+    <context id="mysql">
+        <property name="javaFileEncoding" value="UTF-8"/>
+        <property name="xmlFormatter" value="org.mybatis.generator.api.dom.DefaultXmlFormatter"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+        <commentGenerator>
+            <property name="suppressAllComments" value="true" />
+        </commentGenerator>
+        <jdbcConnection driverClass="oracle.jdbc.OracleDriver"
+                        connectionURL="jdbc:oracle:thin:@172.16.1.182:1521/xepdb1"
+                        userId="c##qsy"
+                        password="123456">
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+        <javaModelGenerator targetPackage="com.qsy.test.entity" targetProject="./src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+        <table  tableName="%" schema="C##QSY" <!-- chema用于指定数据库-->
+                enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+                enableSelectByExample="false" selectByExampleQueryId="false" >
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+    </context>
+</generatorConfiguration>
+
+继续右侧Maven-> Profiles -> Plugins -> mybatis-generator -> mybatis-generator:generate 右键 -> Run Maven build;
+至此entity、mapper、xml文件全部生成。
+

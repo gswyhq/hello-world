@@ -114,6 +114,16 @@ http://lucene.apache.org/core/4_0_0/core/org/apache/lucene/search/similarities/T
 gswewf@gswewf-pc:~/yhb$ curl -XGET 'localhost:9200/yhb/log_qa/29723/_termvectors?fields=question&pretty'
 
 在页面“http://localhost:9100/”搜索时，"yhb/log_qa/_search"改为“yhb/log_qa/_search?explain”也可以查看详细的分数信息, 即可查看分数详情
+一些高版本，查看打分详情，可能需要如下操作：
+curl -X POST "localhost:9200/milk2/_explain/21" -H 'Content-Type: application/json' -d'{
+  "query": {
+    "match": {
+      "name": "保险qy"
+    }
+  }
+}'
+
+
 开启性能分析
 需要开启性能分析，只需要在原有请求中设置"profile": true。而当查询嵌套的内容比较多的时候返回的性能分析内容会非常冗长，所以可以在请求URI后面设置?human=true获取比较清晰的结构。
 GET /kibana_sample_data_ecommerce/_search?human=true

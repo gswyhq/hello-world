@@ -1,4 +1,60 @@
 
+显卡、GPU和CUDA
+显卡（Video card，Graphics card）全称显示接口卡，又称显示适配器; 
+显卡是电脑进行数模信号转换的设备，承担输出显示图形的任务。具体来说，显卡接在电脑主板上，它将电脑的数字信号转换成模拟信号让显示器显示出来。
+原始的显卡一般都是集成在主板上，只完成最基本的信号输出工作，并不用来处理数据。随着显卡的迅速发展，就出现了GPU的概念，显卡也分为独立显卡和集成显卡。
+GPU是显卡上的一块芯片，就像CPU是主板上的一块芯片。
+
+1）、最开始GPU仅用于图形渲染;
+2）、后来人们发现，GPU这么一个强大的器件只用于图形处理太浪费了，它应该用来做更多的工作，例如浮点运算。怎么做呢？
+直接把浮点运算交给GPU是做不到的，因为那个时候它只能用于图形处理。最开始，是把浮点运算做一些处理，包装成图形渲染任务，然后交给GPU来做。这就是GPGPU（General Purpose GPU）的概念。
+不过这样做有一个缺点，就是你必须有一定的图形学知识，否则你不知道如何包装。
+3）、于是，为了让不懂图形学知识的人也能体验到GPU运算的强大，Nvidia公司又提出了CUDA的概念。
+这也就是为何说，并不是所有GPU都支持CUDA。
+计算机右击–>管理–>设备管理器–>显示适配器,可看到是否支持cuda;
+若支持cuda,会有NVIDIA的显示适配器，再去英伟达官网选择自己的系列类型
+https://developer.nvidia.com/cuda-gpus
+更详细的CUDA版本查看
+（1）打开控制面板；
+（2）在右上方的搜索框里输入NVIDIA；
+（3）鼠标放在搜索出来的NVIDIA上；
+（4）完成上一步骤后，界面里可以查看NVIDIA的一些信息，显卡的驱动版本
+
+要查看您电脑支持的CUDA版本，可以按照以下步骤操作：
+1、安装NVIDIA 显卡驱动程序，驱动程序包含了CUDA的安装包。可以从NVIDIA官网下载对应版本的驱动程序。
+https://www.nvidia.cn/Download/index.aspx?lang=cn
+2、打开终端或命令提示符，输入以下命令：nvcc --version
+3、如果您的电脑支持CUDA，则会显示CUDA的版本信息，如下所示：
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2019 NVIDIA Corporation
+Built on Sun_Jul_28_19:07:16_PDT_2019
+Cuda compilation tools, release 10.1, V10.1.243
+在上面的示例中，CUDA版本为10.1。
+
+要查看Windows电脑可安装的CUDA版本，可以按照以下步骤进行：
+1、打开NVIDIA官网的CUDA下载页面：
+https://developer.nvidia.com/cuda-downloads
+2、在“操作系统”下拉菜单中选择“Windows”。
+3、在“体系结构”下拉菜单中选择您的操作系统的位数（32位或64位）。
+4、在“版本”下拉菜单中，您将看到所有可用的CUDA版本。您可以根据您的需要选择一个版本。
+5、单击选定的CUDA版本，您将看到该版本的详细信息，包括支持的GPU和操作系统版本。
+请注意，您需要检查您的GPU是否与所选的CUDA版本兼容。您可以在NVIDIA的CUDA支持网页上找到有关支持的GPU的信息：
+https://developer.nvidia.com/cuda-gpus
+
+CUDA(Compute Unified Device Architecture)，通用并行计算架构，是一种运算平台。它包含CUDA指令集架构以及GPU内部的并行计算引擎。
+只要开发CUDA程序，从而可以更加方便的利用GPU强大的计算能力，而不是像以前那样先将计算任务包装成图形渲染任务，再交由GPU处理。
+
+CPU和GPU的关系
+在没有GPU之前，基本上所有的任务都是交给CPU来做的。有GPU之后，二者就进行了分工，CPU负责逻辑性强的事物处理和串行计算，GPU则专注于执行高度线程化的并行处理任务（大规模计算任务）。
+
+独立显卡和集成显卡的区别。
+所谓集成，是指显卡集成在主板上，不能随意更换。而独立显卡是作为一个独立的器件插在主板的AGP接口上的，可以随时更换升级。
+另外，集成显卡使用物理内存，而独立显卡有自己的显存。
+集成显卡和独立显卡都是有GPU的。
+
+###################################################################################################
+# GPU的使用：
+
 明明内存够用，但是还是提示内存错误：
 错误类型：CUDA_ERROE_OUT_OF_MEMORY
 E tensorflow/stream_executor/cuda/cuda_driver.cc:924] failed to alloc 17179869184 bytes on host: CUDA_ERROR_OUT_OF_MEMORY
@@ -91,4 +147,26 @@ export CUDA_VISIBLE_DEVICES=n python main.py
 # 禁用GPU,禁止使用GPU，仅仅需要CUDA_VISIBLE_DEVICES设置为空即可；CUDA_DEVICE_ORDER设置为PCI_BUS_ID是为了保证设备ID与物理ID一致(NVML工具nvidia-smi按设备的PCI Bus ID 为设备分配索引序号，由于PCI Bus ID 是硬件相关的，我们把设备的 PCI Bus ID 或者按该ID分配的索引号为物理ID；设置 CUDA_DEVICE_ORDER = PCI_BUS_ID 来要求运行时设备查询按照 PCI_BUS_ID 的顺序索引，从而使得 设备ID=物理ID 保证CUDA应用按期望使用指定设备)
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+
+#  查看自己的电脑是否支持GPU
+方法一：
+1、首先打开任务管理器
+2、然后点击性能
+3、然后点击左侧下拉框，往下拉，如果看到有GPU，及适配器，如：NVIDIA GeForce MX3.* 则表示自己的电脑是有GPU的
+方法二：
+1、计算机右击–>管理–>设备管理器–>显示适配器
+2、去英伟达官网查看，选择自己的系列类型： https://developer.nvidia.com/cuda-gpus
+3、如何检查显卡支持哪个版本的CUDA？
+3.1、打开控制面板，然后在右上方的搜索框里输入NVIDIA，如下图所示：第一张是打开控制面板时的图，第二张是输入NVIDIA之后，从图中的左上角可以看到搜索出来的NVIDIA。
+3.2、完成上面步骤之后，鼠标放在搜索出来的NVIDIA上，如下图红框圈出部分，然后双击。
+3.3、完成上一步骤后，进入如下界面，在该界面里可以查看NVIDIA的一些信息，显卡的驱动版本，如下图的左侧菜单所示。
+3.4、点击帮助菜单，在下拉的菜单里选择系统信息选项，如下图红色框圈出选项。
+3.5、在弹出的系统信息窗口里有两个菜单页面：显示和组件，选择组件，可以看到很多文件名，在文件名中找到NVCUDA，在产品名称一列可以看到该NVCUDA的版本，如下图红色框圈出部分。该CUDA是9.1版本的
+4、更新NVDIA驱动程序：https://www.nvidia.cn/Download/index.aspx?lang=cn
+
+
+
+
+
 

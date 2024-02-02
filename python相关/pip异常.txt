@@ -48,4 +48,22 @@ WARNING: Ignoring invalid distribution -pencv-python (d:\users\xxx\appdata\roami
 rm -rf ~pencv_python-4.5.4.60.dist-info
 原因分析：由于安装了多个版本的库，会出现这种情况。有时conda或pip无法卸载版本，相反，它会将其重命名为"~包名"。因此，建议您在python安装中找到site-packages(可通过pip show 包名，查看路径)，并搜索"~包名"并删除以"~包名"开头的文件夹。在此之后，忽略无效分布的问题通常将得到解决，再使用pip安装包时不会再有此类警告。
 
+# 问题：
+pip3 install sasl 
+报错：
+gcc: error trying to exec ‘cc1plus‘: execvp: no such file or directory
+解决方法，检查gcc、g++是否安装且版本是否一致；
+~$ gcc -v
+~$ g++ -v
+
+# pip3 install ***
+报错：
+.cpp:4:20: fatal error: Python.h: No such file or directory
+解决方法：
+sudo apt-get install python3-dev
+
+centos安装 python-dev包提示No package python-dev available:
+出现此问题的原因是python-dev的包在centos的yum中不叫python-dev,而是python-devel.
+所以使用下面的命令即可安装python-dev:
+yum install python3-devel
 

@@ -83,6 +83,15 @@ Line #    Mem usage    Increment   Line Contents
 
 从结果可以看出，内存使用是以MiB为单位衡量的，表示的mebibyte（1MiB = 1.05MB）。
 
+Mem usage表示当前内存使用，Increment表示该行代码的内存增量，Occurences表示该行代码运行了几次。
+
+如果要找内存泄漏，直接看Increment就OK了；如果想找内存瓶颈，就看Mem usage。
+
+如果想记录.py文件运行时，内存使用随时间的变化，也很简单，直接运行：
+mprof run *.py
+此时，在运行目录中会多出一个mprofile_xxxxxxxxxxxx.dat文件，可以通过这个文件画出时间-内存图：
+mprof plot mprofile_xxxxxxxxxxxxxxxx.dat
+
 使用示例见： http://www.cnblogs.com/kaituorensheng/p/5669861.html
 
 最后，python2中通过guppy包可以知道在代码执行的每个阶段中，每种类型（str、tuple、dict等）分别创建了多少对象。在Python3中可以使用： objgraph

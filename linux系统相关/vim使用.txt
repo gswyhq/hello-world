@@ -26,4 +26,14 @@ sudo apt-get install vim
 sudo apt remove vim
 sudo add-apt-repository --remove ppa:jonathonf/vim
 
+# 问题: vim使用时，中文乱码
+解决方法，编辑 ~/.vimrc 文件
+1、添加如下内容保存：
+set termencoding=utf-8
+set encoding=utf8
+set fileencodings=utf8,ucs-bom,gbk,cp936,gb2312,gb18030
+
+2、说明：
+encoding是Vim内部使用的字符编码方式，一般设置为utf8。termencoding是Vim所工作的终端(或者 Windows的Console窗口)的字符编码方式，一般设置为utf8。fileencodings是Vim自动探测fileencoding的顺序列表，启动时会按照它所列出的字符编码方式逐一探测即将打开的文件的字符编码方式。这些设置需要set命令来进行设置生效。
+3、执行:wq保存退出vim，再次用vim打开文件即可。
 

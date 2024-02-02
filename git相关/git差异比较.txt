@@ -22,6 +22,56 @@ git show -s --pretty=raw ca53e82
   git diff --cached 比较的是暂存区和版本库的差别
   git diff HEAD 可以查看工作区和版本库的差别(HEAD代表的是本地最近的一次commit)
 
+# git 的几个状态：
+Workspace： 工作区，就是你平时存放项目代码的地方
+Index / Stage： 暂存区，用于临时存放你的改动，事实上它只是一个文件，保存即将提交到文件列表信息
+Repository： 仓库区（或版本库），就是安全存放数据的位置，这里面有你提交到所有版本的数据。其中HEAD指向最新放入仓库的版本
+Remote： 远程仓库，托管代码的服务器，可以简单的认为是你项目组中的一台电脑用于远程数据交换
+
+# 状态转换操作命令：
+工作区 -> 暂存区: git add
+暂存区 -> 本地仓库: git commit
+本地仓库 -> 远程仓库: git push
+取消暂存，撤销git add操作：git reset HEAD <文件>
+取消本地提交，撤销git commit的操作：git reset --soft HEAD^
+reset --soft作用：不删除工作空间修改过的代码，仅撤销commit
+取消本地提交和暂存: git reset --hard HEAD^
+reset --hard作用：删除工作空间修改过的代码，撤销commit&撤销add
+注：reset 命令只能回滚最新的提交，无法满足保留最后一次提交只回滚之前的某次提交。
+命令解释：
+HEAD^ 表示上一个版本，即上一次的commit，几个^代表几次提交，如果回滚两次就是HEAD^^。
+也可以写成HEAD~1，如果进行两次的commit，想要都撤回，可以使用HEAD~2。
+--soft: 不删除工作空间的改动代码 ，撤销commit，不撤销add
+--hard: 删除工作空间的改动代码，撤销commit且撤销add; 使用时候需注意，该命令会删除工作区的改动，保留的仅是暂存区的内容；
+如果commit后面的注释写错了，先别急着撤销，可以运行git commit --amend 
+进入vim编辑模式，修改完保存即可
+远程仓库 -> 本地仓库：git fetch / git clone
+远程仓库 -> 工作区：git pull
+本地仓库 -> 工作区：git checkout
+git push的撤销有两个命令可以达到：回退reset和反做revert
+回退reset和反做revert区别：回退reset，版本回到之前版本，回退版本后的记录都丢失了；反做revert仅仅是代码内容恢复到回退版本，但中间的记录还是保存了，相当于改之后push提交一次，又改回去了再push提交一次；
+回退reset又分为三种：
+1.git reset --mixed  版本号
+暂存区(add/index区)和提交区(commit区)会回退到某个版本，但代码不改变。
+2.git reset --soft  版本号
+提交区(commit区)会回退到某个版本，暂存区(add/index区)不会回退，代码不改变。
+3.git reset --hard  版本号
+暂存区(add/index区)和提交区(commit区)会回退到某个版本，代码会改变。
+git reset后通过git push origin master --force强制提交当前版本号；
+此时如果用“git push”会报错，因为我们本地库HEAD指向的版本比远程库的要旧；
+
+如果我们想撤销之前的某一版本git push，但是又想保留该目标版本后面的版本，记录下这整个版本变动流程，就可以用这种方法。
+（1）反做，使用“git revert -n 版本号”命令。如下命令，我们反做版本号为8b89621的版本：
+git revert -n 8b89621019c9adc6fc4d242cd41daeb13aeb9861
+注意： 这里可能会出现冲突，那么需要手动修改冲突的文件。而且要git add 文件名。
+（2）提交，使用“git commit -m 版本名”，如：
+git commit -m "本次提交的解释说明" 
+
+# git diff 比较忽略空格换行符：
+有时候文件明明仅仅改动一点点，但是git diff 一比较，发现有一大片的不同，这时可能是因为空格，换行符引起的，需要在比较的时候忽略掉：
+git diff --ignore-all-space  -- 待比较的文件.txt
+git diff -w代表--ignore-all-space
+
 使用git diff时如何忽略某些文件
     第一步：自定义diff驱动器
     （见其中diff.driver.command的说明http://git-scm.com/docs/git-config），意思是说git-diff的时候可以指定一个命令去跑，而不是跑内置的。有了这个配置支持，我们就可以设置如下nodiff的指令（在项目根路径）：

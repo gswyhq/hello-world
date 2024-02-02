@@ -1,0 +1,159 @@
+
+查看主题列表报错：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --bootstrap-server 192.168.3.105:9092 --list
+Exception in thread "main" joptsimple.UnrecognizedOptionException: bootstrap-server is not a recognized option
+        at joptsimple.OptionException.unrecognizedOption(OptionException.java:108)
+        at joptsimple.OptionParser.handleLongOptionToken(OptionParser.java:510)
+        at joptsimple.OptionParserState$2.handleArgument(OptionParserState.java:56)
+        at joptsimple.OptionParser.parse(OptionParser.java:396)
+        at kafka.admin.TopicCommand$TopicCommandOptions.<init>(TopicCommand.scala:352)
+        at kafka.admin.TopicCommand$.main(TopicCommand.scala:44)
+        at kafka.admin.TopicCommand.main(TopicCommand.scala)
+或者：
+Kafka报错：Exception in thread “main“ joptsimple.UnrecognizedOptionException: zookeeper is not a recogn
+kafka版本过高所致，2.2+=的版本，已经不需要依赖zookeeper来查看/创建topic，新版本使用 --bootstrap-server替换老版本的 --zookeeper-server。
+解决方法：
+kafka 2.11版本：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --zookeeper 192.168.3.105:2181 --list
+kafaka 2.2版本：
+[root@d35e11a780bd kafka]# bin/kafka-topics.sh  --bootstrap-server 192.168.3.105:9092 --list
+
+# 推送消息报错：
+kafka.common.config.ConfigException: No resolvable bootstrap urls given in bootstrap.servers
+1、确认配置的地址是否可访问：
+spring.kafka.one.bootstrap-servers=192.168.3.105:9092
+
+2、确认是否存在要使用的主题
+./kafka-topics.sh --bootstrap-server node01:9092 --list
+
+# kafka连接的时候出现异常：
+# pip3 install kafka-python
+consumer = kafka.KafkaConsumer(group_id='test', bootstrap_servers=['30.10.16.67:9092', '30.10.16.68:9092','30.10.16.69:9092'])
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/local/lib/python3.6/site-packages/kafka/consumer/group.py", line 356, in __init__
+    self._client = KafkaClient(metrics=self._metrics, **self.config)
+  File "/usr/local/lib/python3.6/site-packages/kafka/client_async.py", line 244, in __init__
+    self.config['api_version'] = self.check_version(timeout=check_timeout)
+  File "/usr/local/lib/python3.6/site-packages/kafka/client_async.py", line 927, in check_version
+    raise Errors.NoBrokersAvailable()
+kafka.errors.NoBrokersAvailable: NoBrokersAvailable
+解决方法：
+请求的时候增加一个api_version参数，如：
+>>> consumer = kafka.KafkaConsumer(group_id='test', bootstrap_servers=['30.10.16.67:9092', '30.10.16.68:9092','30.10.16.69:9092'], api_version=(2, 11))
+>>> consumer.topics()
+注意：
+若kafka版本为0.10，则 api_version=(0, 10)
+若kafka版本为0.10.2，则 api_version=(0, 10, 2)
+这样设置就可以连接到kafka了。
+另外，若网络不通的话，该语句不会报错，但后面的consumer.topics()语句会一直卡住不返回结果。
+
+# 生产者推送消息出现错误：
+producer = kafka.KafkaProducer(bootstrap_servers=['192.168.3.105:9092'], api_version=(2, 11),
+                                            value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode(
+                                                'utf-8'))
+future = producer.send(topic, {'name': "123", "key": "asyn"})
+生产者消息推送不成功；
+查看kafka服务端日志如下：
+[2023-06-29 13:52:46,516] ERROR Closing socket for 172.18.0.3:9092-10.113.3.121:4594-3882 because of error (kafka.network.Processor)
+org.apache.kafka.common.errors.InvalidRequestException: Error getting request for apiKey: PRODUCE, apiVersion: 7, connectionId: 172.18.0.3:9092-10.113.3.121:4594-3882, listenerName: ListenerName(PLAINTEXT), principal: User:ANONYMOUS
+Caused by: java.lang.IllegalArgumentException: Invalid version for API key PRODUCE: 7
+问题原因：
+Kafka的api版本版本问题：
+api_version=(2, 11) 改为：api_version=(0, 10, 1)就好了；
+producer = kafka.KafkaProducer(bootstrap_servers=['192.168.3.105:9092'], api_version=(0, 10, 1),
+                                            value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode(
+                                                'utf-8'))
+可通过如下方法查看kafka api version:
+from kafka import KafkaProducer  # pip3 install kafka-python
+k = KafkaProducer(bootstrap_servers=['192.168.3.105:9092'])
+print(k.config['api_version'])
+
+# 问题，生产者推送的消息为何只有一个消费者收到：
+当生产者生产的消息仅有一个分区，而一个消费者没有使用subscribe；而其他的消费者使用的是subscribe，那么这个时候很有可能仅有一个消费者收到消息；
+KafkaConsumer.subscribe()：为consumer自动分配partition，有内部算法保证topic-partition以最优的方式均匀分配给同group下的不同consumer。
+KafkaConsumer.assign()：为consumer手动、显示的指定需要消费的topic-partitions，不受group.id限制。
+问：为什么有的消费者会读取不到数据
+答：可能原因1，同一个分区，同一个消费组内仅有一个消费者能连接，当这个消费者连接后，只有这个消费者能读取到数据，同组的其他消费者是读取不到数据的；
+可能原因2，新版kafka把offset保存到了一个__consumer_offsert的主题下。 这个__consumer_offsert有50个分区，通过将消费者组的id哈希值%50的值来确定要保存到那一个分区。
+当消费者的数量大于分区的数量时，有些消费者会读取不到数据。
+
+问：多个Kafka消费者要想同时消费相同Topic下的相同Partition的数据
+答：kafka消息存储，分partition.每个partition消息只记录一个消费者的offset.只能有一个consumer能连接。
+多个Kafka消费者要想同时消费相同Topic下的相同Partition的数据，则需要将这些Kafka消费者放到不同的消费者组中。
+
+问：更换了消费者的group_id,为什么会把已经消费的消息再消费一遍：
+答：对于同一个Topic（主题）来说，每个消费者组都可以拿到这个Topic中的全部数据。
+消费者组内的所有消费者协调在一起来订阅并消费Kafka Topic中的所有分区。这里，每个分区只能由同一个消费者组内的一个消费者来消费。
+
+问：如何进行重复消费：
+答：一个主题可以配置几个分区，生产者发送的消息分发到不同的分区中，消费者接收数据的时候是按照消费者组来接收的，Kafka确保每个分区的消息只能被同一个消费者组中的同一个消费者消费。
+如果想要重复消费，那么需要其他的消费者组来消费。即更换group_id。
+
+# 当生产者生产好了数据，当前仅有一个消费者，为何消费者每次第一次poll的数据都是空的？
+这可能是Group management的原因，第一次poll仅仅是告诉了Group management有新成员加入，这个时候Group management会重新分配分区；
+Group management就是要做这些事情：
+维持group的成员组成。这包括允许新的成员加入，检测成员的存活性，清除不再存活的成员。
+协调group成员的行为。
+类似下面这样会每次都取不到数据
+while True:
+    consumer = kafka.KafkaConsumer('GBD_DPG_DMA_MULTI_CLIECT_TOPIC', group_id='gid_T_SDMP-GBD_DPG_DMA_2375',
+                                   bootstrap_servers=['192.168.3.105:9092'], api_version=(1, 1, 0),
+                                   auto_offset_reset='earliest',
+                                   enable_auto_commit=True,  # 自动提交消费数据的offset
+                                   value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+                                   )
+    msg = consumer.poll(timeout_ms=5, max_records=1)  # 从kafka获取max_records条消息
+
+应该改成：
+consumer = kafka.KafkaConsumer('GBD_DPG_DMA_MULTI_CLIECT_TOPIC', group_id='gid_T_SDMP-GBD_DPG_DMA_2375',
+                                   bootstrap_servers=['192.168.3.105:9092'], api_version=(1, 1, 0),
+                                   auto_offset_reset='earliest',
+                                   enable_auto_commit=True,  # 自动提交消费数据的offset
+                                   value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+                                   )
+
+while True:
+    msg = consumer.poll(timeout_ms=5, max_records=1)  # 从kafka获取max_records条消息
+
+或者改成：
+while True:
+    consumer = kafka.KafkaConsumer('GBD_DPG_DMA_MULTI_CLIECT_TOPIC', group_id='gid_T_SDMP-GBD_DPG_DMA_2375',
+                                   bootstrap_servers=['192.168.3.105:9092'], api_version=(1, 1, 0),
+                                   auto_offset_reset='earliest',
+                                   enable_auto_commit=True,  # 自动提交消费数据的offset
+                                   value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+                                   )
+    msg = consumer.poll(timeout_ms=5, max_records=1)  # 从kafka获取max_records条消息
+    while not msg:
+        # 取不到数据继续取，直至成功
+        msg = consumer.poll(timeout_ms=5, max_records=1)  # 从kafka获取max_records条消息
+    consumer.close()
+注意：最后的consumer.close()，若缺失会存在重复消费的问题；
+
+# 导致重复消费原因
+导致kafka的重复消费问题原因在于，已经消费了数据，但是offset没来得及提交（比如Kafka没有或者不知道该数据已经被消费）。 总结以下场景导致Kakfa重复消费：
+原因1：强行kill线程，导致消费后的数据，offset没有提交（消费系统宕机、重启等）。
+原因2：设置offset为自动提交，关闭kafka时，如果在close之前，调用 consumer.unsubscribe() 则有可能部分offset没提交，下次重启会重复消费。
+
+# 从kafka读取数据后 数据会自动删除吗
+消息被消费后，并不会被删除，只有超过老化时间，才会被删除。
+消息被消费后，磁盘上的数据不会删除；kafka中数据的删除跟有没有消费者消费完全无关。数据的删除，只跟kafka broker下面的这两个配置有关：
+log.retention.hours=48 #数据最多保存48小时
+log.retention.bytes=1073741824 #数据最多1G
+
+# 同一主题，同一消费组，多个用户消息阻塞，即消费者b要等到消费者a把任务完成了才能开始，两个消费者不能同时进行任务：
+问题原因：
+消费者poll消费任务后，没有及时关闭消费者，即没有consumer.close() offset没提交，同组新创建消费者无法消费任务，造成了任务阻塞；
+解决方案：
+poll消费任务后，及时将消费者客户端关闭，再去做任务；这样不影响kafka对剩余任务的分配, 在a做任务的时候，b也可以进行消费。
+
+# 向kafka写入消息出错：
+org.springframework.kafka.KafkaException: Send failed; nested exception is org.apache.kafka.common.errors.TimeoutException: Topic GBD_DPG_DMA_MULTI_CLIECT_TOPIC not present in metadata after 60000 ms.
+可能原因，构建主题时候仅有一个分区；
+而写入的时候采用了多个分区；
+解决方法1：删除主题，定义为多个分区，写入的时候也可以指定多个分区；
+解决方法2：写入的时候不指定分区；所有数据写入一个分区；
+
+
+

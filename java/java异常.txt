@@ -469,3 +469,110 @@ CLASSPAHT=.;%JAVA_HOME\lib;%JAVA_HOME\lib\tools.jar;
 # 提示错误：illegal escape character in String literal
 写文件路径的时候可以使用/作为分隔符或者File.separator，最好不用\，因为这个斜杠用的时候需要在前面再加一个\转义，并且这个分隔符只对windows系统有用，局限性比较严重
 
+# 问题：
+FileNotFoundError: [Errno 2] No such file or directory: '/usr/lib/jvm'
+解决方法：
+先检查java是否安装，若安装了，检查JAVA_HOME是否在环境变量中；若不在则添加到环境变量中即可；
+
+# org.apache.ibatis SQL日志关闭不生效的问题：
+在application.properties中配置了；
+mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl
+并且修改了
+logback.xml 
+    <logger name="com.ppaa" level="ERROR" additivity="false">
+        <appender-ref ref="ERROR-LOG" />
+但最终还是在终端输出SQL日志信息；
+检查项目代码，发现有这么一句：
+configuration.setLogImpl(StdOutImpl.class);
+改为：
+configuration.setLogImpl(NoLoggingImpl.class);
+即可在终端关闭掉SQL日志信息：
+若没有关闭成功，在项目启动时，会在控制台直接打印如下提示：
+Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
+
+# 静态方法static读取的配置文件为空：
+工具类中的静态方法直接调用这种方式注入的成员变量会出现空指针异常，因为Java中的语法规定静态的方法只能调用静态的方法或者是成员变量
+在我们写工具类时候，经常使用静态方法，这样可以在写业务代码时候直接用工具类调用其静态方法，但是在静态方法中我们无法直接获取到yml或者application等配置文件里面的数据
+解决方法：
+正常情况获取配置文件的数据方法：@Value("${配置文件里面数据对应的key}")
+1、类要用@Component修饰
+2、利用@PostConstruct注解将配置文件获取的数据复制给静态类属性
+实现代码如下：
+package com.zoe.work.common;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
+import javax.validation.Valid;
+ 
+/**
+ * 获取服务器上文件的网络访问地址URL
+ * Created by robert on 2019/10/25 13:55
+ **/
+@Component
+public class FileUrlUtil {
+ 
+ 
+    @Value("${server.port}")
+    private  String port;
+ 
+    private static String serverPort;
+ 
+    /**
+     * 根据文件名组织URL
+     */
+    public static String getSatAddr(String fileName){
+ 
+        StringBuilder url = new StringBuilder();
+        //服务器的IP
+        String ip = null;
+        try {
+            ip = IpUtils.getLocalIp();
+            url.append("http://").append(ip).append(":").append(serverPort).append("/images/upload/").append(fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return url.toString();
+    }
+ 
+ 
+    //利用@PostConstruct将application中配置的值赋给本地的变量
+    @PostConstruct
+    public void getServelPort(){
+        serverPort = this.port;
+    }
+}
+但有时候上面这样还是不能获取配置参数，只能是不使用static:
+@Service
+public class KafkaCreateTopic {
+    private static final Logger logger = LoggerFactory.getLogger(KafkaCreateTopic.class);
+
+    @Value("${kafka.topic.dmaMultiCliectTopic}")
+    public String dmaMultiCliectTopic;
+
+    @Value("${spring.kafka.sdmp.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @PostConstruct
+    public void init(){
+        staticDmaMultiCliectTopic = dmaMultiCliectTopic;
+        staticBootstrapServers = bootstrapServers;
+
+        // 不使用static静态方法，则可读取到的配置参数
+        logger.info(String.format("创建kafka主题：%s", staticDmaMultiCliectTopic));
+        logger.info(String.format("连接kafka: %s", staticBootstrapServers));
+    }
+
+    public static String staticDmaMultiCliectTopic;
+
+    private static String staticBootstrapServers;
+
+    static {
+        // static静态方法读取到的配置参数为空
+        logger.info(String.format("创建kafka主题：%s", staticDmaMultiCliectTopic));
+        logger.info(String.format("连接kafka: %s", staticBootstrapServers));
+    }
+}
+在其他类中通过KafkaCreateTopic.staticDmaMultiCliectTopic,也可以访问对应的配置参数；
+
+
+

@@ -1,0 +1,96 @@
+
+pyhanlp安装
+pip3 install pyhanlp==0.1.84
+
+文件配置
+1.下载data-for-1.7.5：http://nlp.hankcs.com/download.php?file=data
+2.下载hanlp-1.8.4-release：https://github.com/hankcs/HanLP/releases/download/v1.8.4/hanlp-1.8.4-release.zip
+3.将data-for和hanlp-release放到pyhanlp文件目录 site-packages/pyhanlp/static 下。
+
+unzip hanlp-1.8.4-release.zip
+Archive:  hanlp-1.8.4-release.zip
+   creating: hanlp-1.8.4-release/
+  inflating: hanlp-1.8.4-release/hanlp-1.8.4.jar
+  inflating: hanlp-1.8.4-release/hanlp-1.8.4-sources.jar
+  inflating: hanlp-1.8.4-release/hanlp.properties
+
+ unzip data-for-1.7.5.zip
+Archive:  data-for-1.7.5.zip
+  inflating: README.url
+   creating: data/
+  inflating: data/README.url
+   creating: data/dictionary/
+  inflating: data/dictionary/CoreNatureDictionary.mini.txt
+  inflating: data/dictionary/CoreNatureDictionary.mini.txt.bin
+  inflating: data/dictionary/CoreNatureDictionary.ngram.mini.txt
+...
+
+4、将data-for-1.7.5文件中的data文件和hanlp-1.8.4-release中的hanlp.properties、hanlp-1.8.4.jar、hanlp-1.8.4-sources.jar复制到上面路径中的文件夹下
+最终目录结构：
+$ ls site-packages/pyhanlp/static/
+__init__.py  data              hanlp.properties.in  hanlp-1.8.4-sources.jar  README.url
+__pycache__  hanlp.properties  hanlp-1.8.4.jar      index.html
+
+
+  30/05/2023   18:13.46   /home/mobaxterm/AppData/Roaming/Python/Python39/site-packages/pyhanlp/static  cp hanlp-1.8.4.jar hanlp-portable-1.8.4.jar
+                                                                                                                                                                                                             ✔
+
+  30/05/2023   18:14.29   /home/mobaxterm/AppData/Roaming/Python/Python39/site-packages/pyhanlp/static  cp hanlp-1.8.4-sources.jar hanlp-portable-1.8.4-sources.jar
+
+
+5、更改刚才复制过去的hanlp.properties文件中的root路径：
+但实际测试发现更改没有用，得更改环境变量，如：
+import os
+os.environ['HANLP_STATIC_ROOT'] = 'D:/Users/AppData/Roaming/Python/Python39/site-packages/pyhanlp/static/'
+os.environ['HANLP_JAR_PATH'] = 'D:/Users/AppData/Roaming/Python/Python39/site-packages/pyhanlp/static/hanlp-1.8.4.jar'
+
+from pyhanlp import *
+conten_list=HanLP.parseDependency("自然语言处理太有魅力了！")
+print(conten_list)
+
+
+# 异常：
+TypeError: Class com.hankcs.hanlp.HanLP is not found
+问题原因java的Portable未安装：
+
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.8.4</version>
+        </dependency>
+
+JVM is already started
+
+重新加载一下即可；
+
+# 问题：
+UnicodeDecodeError: 'gbk' codec can't decode byte 0xac in position 3: illegal multibyte sequence
+解决方法：找到报错行，指定编码
+    with open(PATH_CONFIG, encoding='utf-8') as f:
+
+# 问题：
+java.lang.java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
+解决方法：
+将 site-packages\pyhanlp\__init__.py 中
+# 启动JVM
+startJVM(getDefaultJVMPath(), JAVA_JAR_CLASSPATH, "-Xms1g", "-Xmx1g")
+改为：
+# 启动JVM
+startJVM(getDefaultJVMPath(), JAVA_JAR_CLASSPATH, "-Xms2g", "-Xmx2g")
+
+# 问题
+python3.9，安装pip3 install pyhanlp==0.1.84报错：
+    抱歉，暂不支持 Python 3.9 及以上版本。请执行如下命令：
+        conda install -c conda-forge python=3.8 openjdk jpype1=0.7.0 -y
+        pip install pyhanlp
+解决方法：
+下载安装包文件，pyhanlp-0.1.84.tar.gz
+tar -zxvf pyhanlp-0.1.84.tar.gz
+找到setup.py文件将
+sys.version_info >= (3, 9)
+改为
+sys.version_info >= (3, 10)
+jpype1==0.7.0
+改为
+jpype1
+

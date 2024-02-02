@@ -15,3 +15,16 @@ AttributeError: partially initialized module 'cv2' has no attribute 'gapi_wip_gs
 # 解决方法，升级 opencv-python 版本：
 如：pip3 install -U opencv_python==4.5.5
 
+# 中文路径问题
+cv2.imread 读取中文路径失败
+cv2.imwrite 保存中文路径乱码
+解决方法：
+读取路径
+img = cv2.imread(input_file,cv2.IMREAD_COLOR)
+改为：
+img = cv2.imdecode(np.fromfile(input_file, dtype=np.uint8), 1)
+保存文件：
+cv2.imwrite(save_file,RedThresh)
+改为：
+cv2.imencode(os.path.splitext(save_file)[-1], RedThresh)[1].tofile(save_file) # 保存到中文路径
+

@@ -15,3 +15,20 @@ Error resolving dependencies Maven artifact ‘maven:/mysql:mysql-connector-java
 点击“添加”阿里云中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 保存后再测试发现已经解决。
 
+
+dbeaver定义变量及使用变量, 注意定义变量时候，末尾没有分号：
+@set project_uuid = 'AuthProjectGroup-QYeY2wuuAP'  
+select * from table_name where project_uuid = ${project_uuid} order by updated_date desc;
+
+但是多行变量赋值存在问题，下面结果将不正确：
+@set projectuuid = 'AuthProjectGroup-QYeY2wuuAP' 
+@set databasename = 'lkh_test_sqlserver'
+@set schemaname = 'dbo'
+select * from dms_common_analysis_task where project_uuid = :project_uuid and database_name = :database_name and schema_name = :schema_name ;
+select ${project_uuid}, ${database_name}, ${schema_name} ;
+select :projectuuid, :databasename, :schemaname ;
+
+@set test1 = 'Foo' 
+@set test2 = 'Bar'
+select :test1, :test2
+

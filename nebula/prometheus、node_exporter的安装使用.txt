@@ -96,7 +96,7 @@ scrape_configs:
   # 采集node exporter监控数据
   - job_name: 'node'
     static_configs:
-      - targets: ['10.8.163.62:9100']
+      - targets: ['113.121.154.62:9100']
 
 
 第九步：prometheus启动文件的制作
@@ -148,7 +148,7 @@ nohup ./node_exporter --web.listen-address 172.17.0.2:8080 > nodeout.file 2>&1 &
 
 mv *.service /usr/lib/systemd/system/
 mv node_exporter /usr/local/bin/
-sed -i 's/10.8.163.62/10.8.163.66/g' prometheus.yml
+sed -i 's/113.121.154.62/113.121.154.66/g' prometheus.yml
 systemctl daemon-reload
 systemctl enable node_exporter.service
 systemctl restart node_exporter.service

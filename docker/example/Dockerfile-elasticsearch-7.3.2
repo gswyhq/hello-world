@@ -1,0 +1,47 @@
+FROM openjdk:11
+
+# https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.2-linux-x86_64.tar.gz
+# https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.2/elasticsearch-analysis-ik-7.3.2.zip
+# https://github.com/KennFalcon/elasticsearch-analysis-hanlp/releases/download/v7.3.2/elasticsearch-analysis-hanlp-7.3.2.zip
+# https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v7.3.2/elasticsearch-analysis-pinyin-7.3.2.zip
+COPY . /root
+
+SHELL ["/bin/bash", "-c"]
+
+RUN mkdir /usr/elasticsearch && tar -zxvf /root/elasticsearch-7.3.2-linux-x86_64.tar.gz -C /usr/elasticsearch
+
+RUN cd /usr/elasticsearch/elasticsearch-7.3.2/config && \
+    sed -i 's/#cluster.name/cluster.name/g' elasticsearch.yml && \
+    sed -i 's/#node.name/node.name/g' elasticsearch.yml && \
+    sed -i 's/#network.host: 192.168.0.1/network.host: 0.0.0.0/g' elasticsearch.yml && \
+    sed -i 's/#cluster.initial_master_nodes: \["node-1", "node-2"\]/cluster.initial_master_nodes: \["node-1"\]/g' elasticsearch.yml && \
+    echo "http.cors.enabled: true" >> elasticsearch.yml && \
+    echo 'http.cors.allow-origin: "*"' >> elasticsearch.yml && \
+    echo "fs.file-max=65536" >> /etc/sysctl.conf && \
+    echo "vm.max_map_count=262144" >> /etc/sysctl.conf && \ 
+    echo "*	soft	nofile	65536" >> /etc/security/limits.conf && \
+    echo "*     hard    nofile  65536" >> /etc/security/limits.conf && \
+    echo "*     soft    nproc  65536" >> /etc/security/limits.conf && \
+    echo "*     hard    nproc  65536" >> /etc/security/limits.conf 
+
+RUN cd /usr/elasticsearch/elasticsearch-7.3.2/bin && \
+    echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-hanlp-7.3.2.zip && \
+    echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-ik-7.3.2.zip && \
+    echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-pinyin-7.3.2.zip
+
+RUN adduser --shell /bin/bash --disabled-password --gecos "" ela && \
+    chown -R ela:ela  /usr/elasticsearch/elasticsearch-7.3.2
+
+RUN echo "#!/bin/bash" >> /root/run_es.sh && \
+    echo "su - ela <<EOF" >> /root/run_es.sh && \
+    echo "ulimit -u 4096" >> /root/run_es.sh && \
+    echo "/bin/bash /usr/elasticsearch/elasticsearch-7.3.2/bin/elasticsearch" >> /root/run_es.sh && \
+    echo "EOF" >> /root/run_es.sh
+
+CMD /bin/bash
+
+# docker build -t elasticsearch:7.3.2 -f Dockerfile .
+# docker run --rm -it -p 9200:9200 elasticsearch:7.3.2 /bin/bash /root/run_es.sh
+
+
+

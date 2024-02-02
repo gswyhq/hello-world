@@ -1,0 +1,72 @@
+
+通过自定义的python脚本 transform.py 对hive的select结果进行处理
+
+# 第一步，准备python脚本：
+transform.py脚本内容(hive客户端环境一般支持python2)：
+```
+#!/usr/local/bin/python2.7
+# -*- coding=UTF-8 -*-
+
+from __future__ import print_function
+
+import sys
+
+'''
+echo -e "12345\tabcdef\n" |python transform.py aa bb
+{"aa":"12345","bb":"abcdef"}
+'''
+
+for line in sys.stdin:
+    if len(line) == 0:
+       break
+
+    if line.count('\n') == len(line):
+       continue
+
+    line=line.strip('\n')
+
+    arr=line.split('\t')
+
+    if len(arr) != len(sys.argv) - 1:
+       print ('error')
+       break
+
+    for i in range(0,len(arr)):
+
+        arr[i]='"%s":"%s"' % (sys.argv[i+1],arr[i])
+
+        content = ','.join(arr)
+
+    print( '{%s}' % content)
+
+if __name__ == '__main__':
+    #print(u'Hello, World!你好')
+    pass
+```
+
+# 第二步，准备hive-SQL;
+test.sql
+```
+add FILE /home/transform.py;
+
+SELECT TRANSFORM(t1.clid, t1.asr_start_time)
+USING 'python transform.py aa bb'
+AS json_data
+from (select * from db_safe.tabel_name where etl_date= '20240128' and clid in ('1642236719',
+'1642484019',
+'1642338924',
+'1642228645',
+'1642534557',
+'1642531555',
+'1642531024')
+order by clid, asr_start_time
+                        ) t1;
+```
+
+# 第三步，执行SQL
+hive -f test.sql
+
+解释：python中通过sys模块读取标准输入的内容；而标准输入内容来自TRANSFORM(t1.clid, t1.asr_start_time)，且各个列之间由TAB间隔，也就是\t；
+
+
+

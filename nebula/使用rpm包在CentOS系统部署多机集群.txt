@@ -80,7 +80,7 @@ wget -c -t 0 https://github.com/vesoft-inc/nebula-console/releases/download/v3.5
 [root@SCA-LQA700562 ~]# 
 
 连接任何一个已启动 graphd 进程的机器，添加 Storage 主机，然后执行命令SHOW HOSTS检查集群状态。例如：
-[root@SCA-LQA700562 ~]# ./nebula-console -addr 10.8.163.62 -port 9669 -u root -p 1234
+[root@SCA-LQA700562 ~]# ./nebula-console -addr 113.121.154.62 -port 9669 -u root -p 1234
 > ADD HOSTS 192.168.10.111:9779, 192.168.10.112:9779, 192.168.10.113:9779, 192.168.10.114:9779, 192.168.10.115:9779;
 > SHOW HOSTS;
 Welcome!

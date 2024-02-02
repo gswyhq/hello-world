@@ -234,3 +234,24 @@ OSError: libcudart.so.10.2: cannot open shared object file: No such file or dire
 如：因使用的是：torch 1.12.0+cu113， 
 pip3 install -U torchmetrics==0.9.0即可解决问题；
 
+
+# torch.load加载模型报错：
+ModuleNotFoundError: No module named 'det'
+用torch.save(model, checkpoint_path)保存的模型文件,那么会把对应的网络结构路径序列化到模型内部, 而一旦更改了网络结构(model/slim)路径,再torch.load()时会报错
+主要是因为保存与加载模型不在同一个环境，导致自定义参数无法识别；
+解决方法，保存模型的时候，网络结构、模型权重参数、优化器参数都保存
+custom_model = {'net': CNN(),
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict()
+                }
+
+torch.save(custom_model, 'custom_model.pkl')
+# 保存后的文件使用torch.load()后可以通过字典取值方式获取net、model_state_dict等键值内容。
+custom_model = torch.load('custom_model.pkl')
+model = custom_model['net']
+model.load_state_dict(custom_model['model_state_dict'])
+
+或者在load之前将原有模型保存路径添加到环境变量中：
+如：sys.path.append(rf"D:\Users\{USERNAME}\github_project/paddle2torch_PPOCRv3")
+之后再torch.load(...
+

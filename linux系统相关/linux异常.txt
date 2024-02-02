@@ -197,7 +197,7 @@ gpg: keyserver receive failed: No dirmngr
 
 cat URL.pub | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/NAME.gpg --import
 
-root@916cb5695249:~# gpg --import key1.txt 
+root@916cb5695249:~# gpg --import key1.txt
 gpg: key 73A4F27B8DD47936: 6 signatures not checked due to missing keys
 gpg: key 73A4F27B8DD47936: public key "Debian Archive Automatic Signing Key (11/bullseye) <ftpmaster@debian.org>" imported
 gpg: can't connect to the agent: IPC connect call failed
@@ -214,5 +214,19 @@ gpg --edit-key KEY trust quit
 
 root@916cb5695249:~# gpg --edit-key 73A4F27B8DD47936 trust quit
 输入5，再输入y;
-root@916cb5695249:~# gpg --import key1.txt 
+root@916cb5695249:~# gpg --import key1.txt
 
+# 问题：
+linux系统下遇到cannot execute binary file的问题，一般由以下情况造成：
+1、非root用户或者无执行权限
+2、编译环境不同（程序由其他操作环境复制过来）
+3、命令存在问题，如/bin/bash /bin/bash
+/bin/bash: /bin/bash: cannot execute binary file
+
+# 问题：
+systemctl命令不存在
+systemctl start httpd.service
+bash: systemctl: command not found
+启动服务，但是不行，没有systemctl这个命令
+解决方案
+使用service httpd start启动服务即可

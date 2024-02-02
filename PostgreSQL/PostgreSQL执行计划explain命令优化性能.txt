@@ -1,0 +1,93 @@
+
+explain 命令
+加上 ANALYZE 选项是真实的执行了SQL语句，对于插入、更新、删除或 CREATE TABLE AS 语句会真正的修改数据库，为了不影响真实数据，可以将 EXPLAIN ANALYZE 放到一个事务中，执行完后进行事务回滚，保证源数据不变：
+BEGIN;
+EXPLAIN analyze update public.s_user_task_field set field_index = 4  where field_id = '902E1372E483831D65E0613AF71D81C5';
+select * from public.s_user_task_field where field_id = '902E1372E483831D65E0613AF71D81C5';
+ROLLBACK;
+END;
+select * from public.s_user_task_field where field_id = '902E1372E483831D65E0613AF71D81C5';
+
+# 若事务中的SQL执行出错了，再次执行的时候就会报错：
+current transaction is aborted, commands ignored until end of transaction block
+原因是
+Postgres数据库中，同一事务中如果某次数据库操作中出错的话，那这个事务以后的数据库都会出错。
+要解决这个问题，只能够使用rollback，或者是commit去解决；
+即执行下 ROLLBACK 命令，再执行新的事务；
+
+
+# 当然，对于select语句不影响，直接使用就好：
+EXPLAIN analyze select * from table_name;
+
+# 查询缓存及详细信息
+--在不需要真正执行sql时，需把analyze去掉
+explain (analyze,verbose,buffers) select … ;
+
+# 默认情况下输出的执行计划是文本格式，但也可以输出为 JSON 格式，例如：
+postgres=# explain (format json) select * from users;
+
+# explain输出结果解释:
+全表扫描在Postgresql中也称为顺序扫描（seq scan），全表扫描就是把表中所有数据块从头到尾扫描一遍，然后从数据块中找到符合条件的数据块。
+全表扫描在 explain 执行计划结果中用 “Seq Scan” 表示
+
+索引通常是为了加快查询数据的速度增加的。索引扫描就是在索引中找到需要的数据行的位置，然后在到表的数据块中把相应的数据读取出来的过程。
+索引扫描在 explain 执行计划结果中用 “Index Scan” 表示
+
+explain结果中，关键字解读:
+cost=0.00..22.32，0.00代表启动成本，22.32代表返回所有数据的成本。
+rows=1032：表示返回多少行。
+width=56，表示每行平均宽度。
+actual time=0.060..1.167，实际花费的时间。
+loops=1，循环的次数
+Output，输出的字段名
+Buffers，缓冲命中数
+shared read，代表数据来自disk(磁盘)而并非cache(缓存)，当再次执行sql，会发现变成shared hit，说明数据已经在cache中
+Planning Time，生成执行计划的时间
+Execution Time，执行执行计划的时间
+
+# sql连接查询避免全表扫描
+在进行连接查询时，比如左连接t1 left join t2 ，在连接条件处，t1表（是保全的）是肯定要做全表扫描的，而t2表则不一定。
+比如使用查询条件on t1.id = t2.id+1,这个时候右表会进行全表扫描，而将条件改写为同等的on t1.id-1 = t2.id，则右表可使用索引，从而大幅提高查询速度。
+
+# 同理，下面SQL会对s_label_saturability_log进行全表扫描：
+explain analyze 
+select tf.*, sl.label_id, sl.total_num, sl.filter_num, sl.updated_date from s_user_task_field tf
+left join 
+ s_label_saturability_log sl on sl.label_id = tf.label_id
+			and sl.log_id = (
+			select
+				c.log_id
+			from
+				s_label_saturability_log c
+			where
+				sl.label_id = c.label_id
+			order by
+				c.created_date desc nulls last
+			limit 1)
+order by
+	tf.created_date desc,
+	tf.label_id asc
+limit 10 offset 0;
+
+# 改成下面这样，扫描s_label_saturability_log的时候，则可以利用索引（但前提是label_id字段已建有索引， CREATE INDEX idx_label_saturability_id ON public.s_label_saturability_log USING btree (label_id) ）：
+explain analyze 
+select
+	tf.*, sl.label_id, sl.total_num, sl.filter_num, sl.updated_date
+from
+	s_user_task_field tf
+left join (
+	select
+		*,
+		row_number() over (partition by label_id
+	order by
+		created_date desc nulls last) as rn
+	from
+		s_label_saturability_log) sl on
+	tf.label_id = sl.label_id
+	and sl.rn = 1
+order by
+	tf.created_date desc,
+	tf.label_id asc
+limit 10 offset 0;	
+
+

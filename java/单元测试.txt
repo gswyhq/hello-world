@@ -1,0 +1,63 @@
+
+1、@Value注解的值如何设置：
+可通过如下方法设置：
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(apiServiceImpl,"pageSize",1000); // 此处 pageSize为Value注解赋值变量；apiServiceImpl为类实例
+    }
+
+2、SecurityContextHolder.getContext().getAuthentication().getName()
+解决方法：
+Authentication authentication = Mockito.mock(Authentication.class);
+// Mockito.whens() for your authorization object
+SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+SecurityContextHolder.setContext(securityContext);
+
+3、返回值为void如何进行mock
+如 需要 Mockito.when如下语句：
+scheduleTaskDependencyService.insertScheduleTaskInfo(update, groupConfigModel);
+由于该方法的返回值为void，我们无法直接使用Mockito.when()来模拟它。但是，我们可以使用Mockito.doNothing()来代替它。这将使该方法在被调用时不会执行任何操作。
+Mockito.doNothing().when(scheduleTaskDependencyService).insertScheduleTaskInfo(Mockito.any(), Mockito.any());
+
+4、静态私有方法如何mock
+如：
+public static String getUuidMethod(){
+    ...
+}
+String db = ScriptConfig.getUuidMethod();
+
+解决方法：
+    private static MockedStatic<ScriptConfig> mockedScriptConfig;
+    @Before
+    public void setup(){
+        mockedScriptConfig=  Mockito.mockStatic(ScriptConfig.class);
+
+        mockedScriptConfig.when(()->ScriptConfig.getUuidMethod()).thenReturn(new String("postgresql"));
+    }
+    @After
+    public void after(){
+        mockedScriptConfig.close();
+    }
+
+5、使用Mockito模拟new 对象
+使用Mockito模拟new 对象
+String response = new RestTemplate().getForObject(URI.create(sb.toString()), String.class);
+使用Mockito模拟:
+        try (MockedConstruction<RestTemplate> mocked = Mockito.mockConstruction(RestTemplate.class, (mock, context) -> {
+            Mockito.when(mock.getForObject(Mockito.any(URI.class), Mockito.eq(String.class))).thenReturn(null);
+        })) {
+            
+            这里写包含new对象的调用方法;
+        }
+
+6、抽象类如何测试，abstract public class
+使用Mockito.mock(My.class, Mockito.CALLS_REAL_METHODS)，然后模拟调用的任何抽象方法。
+    @Test
+    public void shouldFailOnNullIdentifiers() {
+        My my = Mockito.mock(My.class, Mockito.CALLS_REAL_METHODS);
+        Assert.assertSomething(my.methodUnderTest());
+    }
+
+

@@ -128,3 +128,26 @@ b6f803814cce        cli
 .Mounts	容器挂载的卷
 .Networks	容器所用的网络名称
 
+---------------------------------------------------------------------------------------------------------
+# 查看某个容器实例的启动命令：
+这是个第三方包，需要先安装：
+
+docker pull cucker/get_command_4_run_container
+命令格式：
+
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cucker/get_command_4_run_container [容器名称]/[容器ID]
+可以将其封装为一个别名：
+
+echo "alias get_run_command='docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cucker/get_command_4_run_container'" >> ~/.bashrc \
+&& \
+. ~/.bashrc
+这样就可以这样用了：get_run_command [容器名称]/[容器ID]
+
+执行命令并查看结果
+
+执行命令
+
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cucker/get_command_4_run_container d35e11a780bd
+
+---------------------------------------------------------------------------------------------------------
+

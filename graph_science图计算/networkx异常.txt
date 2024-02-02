@@ -1,0 +1,9 @@
+
+# networkx 报错：
+graph.remove_nodes_from([1, 3])
+networkx.exception.NetworkXError: Frozen graph can't be modified
+因为冻结图无法修改，故而可以先将图转换为非冻结图，再修改即可：
+解决方法：
+unfrozen_graph = nx.Graph(graph)
+unfrozen_graph.remove_nodes_from([1, 3])
+

@@ -9,6 +9,12 @@ gswewf@gswewf-PC:~/yhb$ curl -XGET -u elastic:web12008 '192.168.3.145:9200/_cat/
 查看索引`dingding7500_faq`的段信息：
 gswewf@gswewf-PC:~$ curl -XGET localhost:9200/dingding7500_faq/_segments
 
+Segment是什么？
+每个shard（分片）包含多个segment（段），每一个segment都是一个倒排索引
+在查询的时，会把所有的segment查询结果汇总归并后最为最终的分片查询结果返回
+1.segment是不可变的，物理上你并不能从中删除信息，所以在删除文档的时候，是在文档上面打上一个删除的标记，然后在执行段合并的时候，进行删除
+2.索引segment段的个数越多，搜索性能越低且消耗内存更多
+
 # 按照正则匹配删除索引
 curl -XDELETE 'localhost:9200/logs_2013*'
 

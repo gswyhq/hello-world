@@ -5,6 +5,10 @@ Python的-m参数
 3、常用例子
 python -m SimpleHTTPServer    #python2中启动一个简单的http服务器
 python -m http.server    #python3中启动一个简单的http服务器
+
+# 在当前工作目录启动一个基本的 HTTP 服务器，可以让你通过浏览器访问本地文件。
+python -m http.server 8080
+
 $ python -m pyftpdlib -i localhost -p 8021 -d /home/someone  # 启动一个FTP服务
 # See python -m pyftpdlib -h
 

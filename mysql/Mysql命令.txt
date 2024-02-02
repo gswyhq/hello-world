@@ -225,3 +225,12 @@ DELETE FROM question WHERE  tag1=65
 ## 将将表 entity里面的 similar_word字段的'、'替换为‘,’ 
 UPDATE entity SET similar_word=REPLACE(similar_word, '、', ','); 
 
+# 多个查询结果合并成一个：
+     select a.*, b.* from(  SELECT id, database_table, schema_name, api_status
+        FROM data_query
+        ORDER BY id ASC limit 1,20)a,
+        (select count(1) as userTotalCount from data_query)b ;  
+
+# 修改字段注释：
+ALTER TABLE table_log2 MODIFY COLUMN ip_name varchar(15) comment '新的公网IP地址';
+

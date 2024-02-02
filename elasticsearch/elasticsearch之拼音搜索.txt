@@ -1,0 +1,616 @@
+
+智能搜索，拼音搜索，自动补全，如“保险qy”,搜索到“保险企业”；
+
+拼音搜索在中文搜索环境中是经常使用的一种功能，用户只需要输入关键词的拼音全拼或者拼音首字母，搜索引擎就可以搜索出相关结果。
+在国内，中文输入法基本上都是基于汉语拼音的，这种在符合用户输入习惯的条件下缩短用户输入时间的功能是非常受欢迎的；
+#
+一、安装拼音搜索插件
+#
+下载对应版本的elasticsearch-analysis-pinyin插件；
+https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v7.9.2/elasticsearch-analysis-pinyin-7.9.2.zip
+安装方法一：在elasticsearch安装目录下的的plugin目录新建analysis-pinyin目录，并解压下载的安装包；
+
+安装方法二：
+cd /usr/elasticsearch/elasticsearch-7.3.2/bin && \
+   echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-hanlp-7.3.2.zip && \
+   echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-ik-7.3.2.zip && \
+   echo "y" | ./elasticsearch-plugin install file:///root/elasticsearch-analysis-pinyin-7.3.2.zip
+
+重启elasticsearch，可以看到已经正常加载拼音插件
+curl localhost:9200/_cat/plugins
+node-1 analysis-hanlp  7.3.2
+node-1 analysis-ik     7.3.2
+node-1 analysis-pinyin 7.3.2
+
+二、使用拼音插件
+
+试一下分词效果，可以看到除了每个词的全频，还有每个字的首字母缩写；
+#
+curl -XPOST localhost:9200/_analyze  -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "analyzer": "pinyin",
+  "text": "我爱你,中国"
+}'
+
+#
+{
+  "tokens" : [
+    {
+      "token" : "wo",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "wanzg",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "ai",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 1
+    },
+    {
+      "token" : "ni",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 2
+    },
+    {
+      "token" : "zhong",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 3
+    },
+    {
+      "token" : "guo",
+      "start_offset" : 0,
+      "end_offset" : 0,
+      "type" : "word",
+      "position" : 4
+    }
+  ]
+}
+#
+IK分词器 有两种分词模式
+ik_smart 粗粒度分词
+ik_max_word 细粒度分词
+细粒度分词 就是最大力度的分词，但是不是 单个字单个字的分词；若需要单个字的分词，可以用标准分词器：standard
+标准分词器 standard, 会将中文分为单个字，而英文按空格拆分
+查看分词结果
+curl -XPOST  localhost:9200/_analyze -H 'Content-Type: application/json;charset=utf-8' -d ' {
+  "text": "湖北省武汉市光谷大道",
+  "tokenizer": "ik_max_word"
+}'
+{"tokens":[{"token":"湖北省","start_offset":0,"end_offset":3,"type":"CN_WORD","position":0},{"token":"湖北","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},{"token":"省","start_offset":2,"end_offset":3,"type":"CN_CHAR","position":2},{"token":"武汉市","start_offset":3,"end_offset":6,"type":"CN_WORD","position":3},{"token":"武汉","start_offset":3,"end_offset":5,"type":"CN_WORD","position":4},{"token":"市","start_offset":5,"end_offset":6,"type":"CN_CHAR","position":5},{"token":"光谷","start_offset":6,"end_offset":8,"type":"CN_WORD","position":6},{"token":"大道","start_offset":8,"end_offset":10,"type":"CN_WORD","position":7}]}
+
+# 若需要将英文字母也拆分为单个字母，可以使用下面这样：
+curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "my_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "my_tokenizer": {
+          "type": "ngram",
+          "max_gram": 1,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
+    }
+  }
+}
+'
+curl -X POST "localhost:9200/my_index/_analyze?pretty" -H 'Content-Type: application/json' -d'
+{
+  "analyzer": "my_analyzer",
+  "text": "公司qy gs 12-3"
+}
+'
+
+# 自定义pinyin filter，并创建mapping；
+curl -XPUT localhost:9200/milk -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "pinyin_filter":{
+          "type":"pinyin",
+          "keep_separate_first_letter" : false,
+          "keep_full_pinyin" : true,
+          "keep_original" : true,
+          "limit_first_letter_length" : 16,
+          "lowercase" : true,
+          "remove_duplicated_term" : true
+}
+      },
+      "analyzer": {
+        "ik_pinyin_analyzer":{
+          "tokenizer":"ik_max_word",
+           "filter":["pinyin_filter"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "brand":{
+        "type": "text",
+        "analyzer": "ik_pinyin_analyzer"
+      },
+      "series":{
+        "type": "text",
+        "analyzer": "ik_pinyin_analyzer"
+      },
+      "price":{
+        "type": "float"
+      }
+    }
+  }
+}'
+
+
+属性名字 说明
+keep_first_lettertrue: 将所有汉字的拼音首字母拼接到一起：刘德华 -> ldh
+keep_full_pinyintrue：在最终的分词结果中，会出现每个汉字的全拼：刘德华 -> liu , de, hua
+keep_none_chinesetrue: 是否保留非中文本，例如 java程序员， 在最终的分词结果单独出现 java
+keep_separate_first_letttrue: 在最终的分词结果单独将每个汉字的首字母作为一个结果：刘德华 -> l, d, h
+keep_joined_full_pinyintrue：在最终的分词结果中将所有汉字的拼音放到一起：刘德华 -> liudehua
+keep_none_chinese_in_joined_full_pinyintrue:将非中文内容文字和中文汉字拼音拼到一起
+none_chinese_pinyin_tokenizetrue: 会将非中文按照可能的拼音进行拆分
+keep_originaltrue: 保留原始的输入
+remove_duplicated_termtrue: 移除重复
+
+批量索引文档；
+curl -XPUT localhost:9200/_bulk -H 'Content-Type: application/json;charset=utf-8' -d '
+{"index":{"_index":"milk", "_id":1}}}
+{"brand":"蒙牛", "series":"特仑苏", "price":60}
+{"index":{"_index":"milk", "_id":2}}}
+{"brand":"蒙牛", "series":"真果粒", "price":40}
+{"index":{"_index":"milk", "_id":3}}}
+{"brand":"华山牧", "series":"华山牧", "price":49.90}
+{"index":{"_index":"milk", "_id":4}}}
+{"brand":"伊利", "series":"安慕希", "price":49.90}
+{"index":{"_index":"milk", "_id":5}}}
+{"brand":"伊利", "series":"金典", "price":49.90}
+'
+
+
+搜索, 可以看到，输入 tl、tel、telsu、特lsu 都可以把“特仑苏”搜索出来：
+curl -XPOST localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+ {
+   "query": {
+     "match_phrase_prefix": {
+       "series": "tl"
+     }
+   }
+ }'
+{"took":392,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":6.691126,"hits":[{"_index":"milk","_type":"_doc","_id":"1","_score":6.691126,"_source":{"brand":"蒙牛", "series":"特仑苏", "price":60} }]}}
+
+curl -XPOST localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "query": {
+    "match_phrase_prefix": {
+      "series": "tel"
+    }
+  }
+}'
+
+{"took":7,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":6.691126,"hits":[{"_index":"milk","_type":"_doc","_id":"1","_score":6.691126,"_source":{"brand":"蒙牛", "series":"特仑苏", "price":60} }]}}#
+
+curl -XPOST localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "query": {
+    "match_phrase_prefix": {
+      "series": "telsu"
+    }
+  }
+}'
+
+{"took":15,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":4.8486104,"hits":[{"_index":"milk","_type":"_doc","_id":"1","_score":4.8486104,"_source":{"brand":"蒙牛", "series":"特仑苏", "price":60} }]}}(
+
+curl -XPOST localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "query": {
+    "match_phrase_prefix": {
+      "series": "特lsu"
+    }
+  }
+}'
+{"took":17,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":11.593218,"hits":[{"_index":"milk","_type":"_doc","_id":"1","_score":11.593218,"_source":{"brand":"蒙牛", "series":"特仑苏", "price":60} }]}}
+
+但是要想输入 保险qy 搜索出 “保险企业”, 需要将 match_phrase_prefix 改为 match
+curl -XGET localhost:9200/milk/_analyze -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "text":"保险qy",
+  "analyzer": "ik_pinyin_analyzer"
+}'
+{"tokens":[{"token":"bao","start_offset":0,"end_offset":2,"type":"CN_WORD","position":0},
+           {"token":"xian","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+           {"token":"保险","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+           {"token":"bx","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+           {"token":"q","start_offset":2,"end_offset":4,"type":"ENGLISH","position":2},
+           {"token":"y","start_offset":2,"end_offset":4,"type":"ENGLISH","position":3},
+           {"token":"qy","start_offset":2,"end_offset":4,"type":"ENGLISH","position":3}]}
+
+curl -XGET localhost:9200/milk/_analyze -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "text":"保险企业",
+  "analyzer": "ik_pinyin_analyzer"
+}'
+{"tokens":[{"token":"bao","start_offset":0,"end_offset":2,"type":"CN_WORD","position":0},
+{"token":"xian","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+{"token":"保险","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+{"token":"bx","start_offset":0,"end_offset":2,"type":"CN_WORD","position":1},
+{"token":"qi","start_offset":2,"end_offset":4,"type":"CN_WORD","position":2},
+{"token":"ye","start_offset":2,"end_offset":4,"type":"CN_WORD","position":3},
+{"token":"企业","start_offset":2,"end_offset":4,"type":"CN_WORD","position":3},
+{"token":"qy","start_offset":2,"end_offset":4,"type":"CN_WORD","position":3}]}
+
+ curl -XPOST  localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '{
+  "query": {
+    "match": {
+      "series": "保险qy"
+    }
+  }
+}'
+{"took":4,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":
+{"total":{"value":33,"relation":"eq"},"max_score":4.993306,"hits":[
+{"_index":"milk","_type":"_doc","_id":"9","_score":4.993306,"_source":{"brand":"蒙牛", "series": "保险qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"12","_score":4.680952,"_source":{"brand":"蒙牛", "series": "保险par_qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"10","_score":4.5943375,"_source":{"brand":"蒙牛", "series": "保险qy_info" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"11","_score":4.00207,"_source":{"brand":"蒙牛", "series": "保险qy_infoaabbcc" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"13","_score":3.1904926,"_source":{"brand":"蒙牛", "series": "保险t0smdbds#smdbdatapar_qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"6","_score":3.0375125,"_source":{"brand":"蒙牛", "series": "保险企业" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"7","_score":2.8417377,"_source":{"brand":"蒙牛", "series": "保险企业个人" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"8","_score":2.8417377,"_source":{"brand":"蒙牛", "series": "保险企业列入" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"26","_score":2.829148,"_source":{"brand":"蒙牛", "series": "qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"29","_score":2.784577,"_source":{"brand":"蒙牛", "series": "par_qy" , "price":40}}]}}
+
+# 对查询结果高亮显示
+curl -XPOST localhost:9200/milk/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "query": {
+    "match_phrase_prefix": {
+      "series": "tl"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "series": {}
+    }
+  }
+}'
+{"took":498,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":6.691126,
+"hits":[{"_index":"milk","_type":"_doc","_id":"1","_score":6.691126,"_source":{"brand":"蒙牛", "series":"特仑苏", "price":60} ,
+"highlight":{"series":["<em>特</em><em>仑</em>苏"]}}]}}
+
+
+curl -XPUT localhost:9200/iktest/  -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+   "settings": {
+        "analysis": {
+            "analyzer": {
+                "ik_smart_pinyin": {
+                    "type": "custom",
+                    "tokenizer": "ik_smart",
+                    "filter": ["my_pinyin", "word_delimiter"]
+                },
+                "ik_max_word_pinyin": {
+                    "type": "custom",
+                    "tokenizer": "ik_max_word",
+                    "filter": ["my_pinyin", "word_delimiter"]
+                }
+            },
+            "filter": {
+                "my_pinyin": {
+                    "type" : "pinyin",
+                    "keep_separate_first_letter" : true,
+                    "keep_full_pinyin" : true,
+                    "keep_original" : true,
+                    "limit_first_letter_length" : 16,
+                    "lowercase" : true,
+                    "remove_duplicated_term" : true
+                }
+            }
+        }
+  }
+}
+'
+
+curl -XGET localhost:9200/iktest/_analyze -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "text":"湖北省武汉市光谷大道",
+  "analyzer": "ik_smart_pinyin"
+}'
+{"tokens":[{"token":"h","start_offset":0,"end_offset":3,"type":"CN_WORD","position":0},
+{"token":"hu","start_offset":0,"end_offset":3,"type":"CN_WORD","position":0},
+{"token":"湖北省","start_offset":0,"end_offset":3,"type":"CN_WORD","position":0},
+{"token":"hbs","start_offset":0,"end_offset":3,"type":"CN_WORD","position":0},
+{"token":"b","start_offset":0,"end_offset":3,"type":"CN_WORD","position":1},
+{"token":"bei","start_offset":0,"end_offset":3,"type":"CN_WORD","position":1},
+{"token":"s","start_offset":0,"end_offset":3,"type":"CN_WORD","position":2},
+{"token":"sheng","start_offset":0,"end_offset":3,"type":"CN_WORD","position":2},
+{"token":"w","start_offset":3,"end_offset":6,"type":"CN_WORD","position":3},
+{"token":"wu","start_offset":3,"end_offset":6,"type":"CN_WORD","position":3},
+{"token":"h","start_offset":3,"end_offset":6,"type":"CN_WORD","position":4},
+{"token":"han","start_offset":3,"end_offset":6,"type":"CN_WORD","position":4},
+{"token":"s","start_offset":3,"end_offset":6,"type":"CN_WORD","position":5},
+{"token":"shi","start_offset":3,"end_offset":6,"type":"CN_WORD","position":5},
+{"token":"武汉市","start_offset":3,"end_offset":6,"type":"CN_WORD","position":5},
+{"token":"whs","start_offset":3,"end_offset":6,"type":"CN_WORD","position":5},
+{"token":"g","start_offset":6,"end_offset":8,"type":"CN_WORD","position":6},
+{"token":"guang","start_offset":6,"end_offset":8,"type":"CN_WORD","position":6},
+{"token":"gu","start_offset":6,"end_offset":8,"type":"CN_WORD","position":7},
+{"token":"光谷","start_offset":6,"end_offset":8,"type":"CN_WORD","position":7},
+{"token":"gg","start_offset":6,"end_offset":8,"type":"CN_WORD","position":7},
+{"token":"d","start_offset":8,"end_offset":10,"type":"CN_WORD","position":8},
+{"token":"da","start_offset":8,"end_offset":10,"type":"CN_WORD","position":8},
+{"token":"dao","start_offset":8,"end_offset":10,"type":"CN_WORD","position":9},
+{"token":"大道","start_offset":8,"end_offset":10,"type":"CN_WORD","position":9},
+{"token":"dd","start_offset":8,"end_offset":10,"type":"CN_WORD","position":9}]}
+
+########################################### 中英文混合搜索示例 ################################################################################
+
+# 自定义pinyin filter，并创建mapping；
+curl -XPUT localhost:9200/milk2 -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "pinyin_filter":{
+          "type":"pinyin",
+          "keep_separate_first_letter" : false,
+          "keep_full_pinyin" : true,
+          "keep_original" : true,
+          "limit_first_letter_length" : 16,
+          "lowercase" : true,
+          "remove_duplicated_term" : true
+}
+      },
+      "analyzer": {
+        "ik_pinyin_analyzer":{
+          "tokenizer":"my_tokenizer",
+           "filter":["pinyin_filter"]
+        }
+      },
+      "tokenizer": {
+        "my_tokenizer": {
+          "type": "ngram",
+          "max_gram": 1,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text",
+        "analyzer": "ik_pinyin_analyzer",
+        "fields": {
+            "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+            }
+        }
+      }
+    }
+  }
+}'
+
+# 添加测试数据
+curl -XPUT localhost:9200/_bulk -H 'Content-Type: application/json;charset=utf-8' -d '
+{"index":{"_index":"milk2", "_id": 1 }}
+{"name": "保险理财产品" }
+{"index":{"_index":"milk2", "_id": 2 }}
+{"name": "保险t0smdbds#smdbdatapar_qy" }
+{"index":{"_index":"milk2", "_id": 3 }}
+{"name": "par_qy" }
+{"index":{"_index":"milk2", "_id": 4 }}
+{"name": "保险产品" }
+{"index":{"_index":"milk2", "_id": 5 }}
+{"name": "保险企业" }
+{"index":{"_index":"milk2", "_id": 6 }}
+{"name": "华山牧" }
+{"index":{"_index":"milk2", "_id": 7 }}
+{"name": "保险qy_infoaabbcc" }
+{"index":{"_index":"milk2", "_id": 8 }}
+{"name": "准则保险" }
+{"index":{"_index":"milk2", "_id": 9 }}
+{"name": "申报企业" }
+{"index":{"_index":"milk2", "_id": 10 }}
+{"name": "保险利润表" }
+{"index":{"_index":"milk2", "_id": 11 }}
+{"name": "金典" }
+{"index":{"_index":"milk2", "_id": 12 }}
+{"name": "股企业" }
+{"index":{"_index":"milk2", "_id": 13 }}
+{"name": "企业个人" }
+{"index":{"_index":"milk2", "_id": 14 }}
+{"name": "qy" }
+{"index":{"_index":"milk2", "_id": 15 }}
+{"name": "表保险" }
+{"index":{"_index":"milk2", "_id": 16 }}
+{"name": "保险qy" }
+{"index":{"_index":"milk2", "_id": 17 }}
+{"name": "安慕希" }
+{"index":{"_index":"milk2", "_id": 18 }}
+{"name": "企业" }
+{"index":{"_index":"milk2", "_id": 19 }}
+{"name": "保险qy_info" }
+{"index":{"_index":"milk2", "_id": 20 }}
+{"name": "保险公司" }
+{"index":{"_index":"milk2", "_id": 21 }}
+{"name": "保险" }
+{"index":{"_index":"milk2", "_id": 22 }}
+{"name": "t0smdbds#smdbdatapar_qy" }
+{"index":{"_index":"milk2", "_id": 23 }}
+{"name": "保险企业列入" }
+{"index":{"_index":"milk2", "_id": 24 }}
+{"name": "企业列入" }
+{"index":{"_index":"milk2", "_id": 25 }}
+{"name": "qy_info" }
+{"index":{"_index":"milk2", "_id": 26 }}
+{"name": "保险par_qy" }
+{"index":{"_index":"milk2", "_id": 27 }}
+{"name": "qy_infoaabbcc" }
+{"index":{"_index":"milk2", "_id": 28 }}
+{"name": "企业利润表" }
+{"index":{"_index":"milk2", "_id": 29 }}
+{"name": "工业企业" }
+{"index":{"_index":"milk2", "_id": 30 }}
+{"name": "企业现金流量" }
+{"index":{"_index":"milk2", "_id": 31 }}
+{"name": "股保险" }
+{"index":{"_index":"milk2", "_id": 32 }}
+{"name": "保险企业个人" }
+{"index":{"_index":"milk2", "_id": 33 }}
+{"name": "企业信息" }
+{"index":{"_index":"milk2", "_id": 34 }}
+{"name": "真果粒" }
+{"index":{"_index":"milk2", "_id": 35 }}
+{"name": "特仑苏" }
+{"index":{"_index":"milk2", "_id": 36 }}
+{"name": "企业表" }
+{"index":{"_index":"milk2", "_id": 37 }}
+{"name": "非上市保险" }
+'
+
+# 查看搜索效果
+curl -XPOST localhost:9200/milk2/_search -H 'Content-Type: application/json;charset=utf-8' -d '
+{
+  "query": {
+    "match": {
+      "name": "保险qy"
+    }
+  },
+  "size": 10
+}'
+
+ngram + pinyin_filter 的效果：
+{"took":18,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":33,"relation":"eq"},"max_score":3.407123,"hits":[
+{"_index":"milk2","_type":"_doc","_id":"5","_score":3.407123,"_source":{"name": "保险企业" }},
+{"_index":"milk2","_type":"_doc","_id":"16","_score":3.407123,"_source":{"name": "保险qy" }},
+{"_index":"milk2","_type":"_doc","_id":"23","_score":3.2080884,"_source":{"name": "保险企业列入" }},
+{"_index":"milk2","_type":"_doc","_id":"32","_score":3.2080884,"_source":{"name": "保险企业个人" }},
+{"_index":"milk2","_type":"_doc","_id":"26","_score":3.1182227,"_source":{"name": "保险par_qy" }},
+{"_index":"milk2","_type":"_doc","_id":"19","_score":3.0339022,"_source":{"name": "保险qy_info" }},
+{"_index":"milk2","_type":"_doc","_id":"7","_score":2.731643,"_source":{"name": "保险qy_infoaabbcc" }},
+{"_index":"milk2","_type":"_doc","_id":"33","_score":2.3601532,"_source":{"name": "企业信息" }},
+{"_index":"milk2","_type":"_doc","_id":"2","_score":2.3162675,"_source":{"name": "保险t0smdbds#smdbdatapar_qy" }},
+{"_index":"milk2","_type":"_doc","_id":"9","_score":2.2029061,"_source":{"name": "申报企业" }}]}}
+
+ik_max_word + pinyin_filter 的效果：
+{"took":17,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":33,"relation":"eq"},"max_score":4.993306,"hits":[
+{"_index":"milk","_type":"_doc","_id":"9","_score":4.993306,"_source":{"brand":"蒙牛", "series": "保险qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"12","_score":4.680952,"_source":{"brand":"蒙牛", "series": "保险par_qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"10","_score":4.5943375,"_source":{"brand":"蒙牛", "series": "保险qy_info" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"11","_score":4.00207,"_source":{"brand":"蒙牛", "series": "保险qy_infoaabbcc" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"13","_score":3.1904926,"_source":{"brand":"蒙牛", "series": "保险t0smdbds#smdbdatapar_qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"6","_score":3.0375125,"_source":{"brand":"蒙牛", "series": "保险企业" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"7","_score":2.8417377,"_source":{"brand":"蒙牛", "series": "保险企业个人" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"8","_score":2.8417377,"_source":{"brand":"蒙牛", "series": "保险企业列入" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"26","_score":2.829148,"_source":{"brand":"蒙牛", "series": "qy" , "price":40}},
+{"_index":"milk","_type":"_doc","_id":"29","_score":2.784577,"_source":{"brand":"蒙牛", "series": "par_qy" , "price":40}}]}}
+
+从该例查询数据上看，ngram + pinyin_filter 的效果要好于ik_max_word + pinyin_filter 的效果；
+但ngram + pinyin_filter 的效果也是有瑕疵的，比如“保险qy_infoaabbcc”等的分数太高，导致“保险”等未能召回进top10。
+注意是因为布尔查询采用"匹配越多越好(More-matches-is-better)"的方法，所以每个match子句的得分会被加起来变成最后的每个文档的得分。匹配两个子句的文档的得分会比只匹配了一个文档的得分高。
+对于query="保险qy"而言，在“保险qy_infoaabbcc”匹配到了4项，而在“保险”仅仅匹配到2项，故而最后总分前者更高。
+对于使用pinyin搜索，还有一个问题，就是有时候会搜索到不相关的内容，比如用“公司”能搜索到“高速”，因为两者拼音首字母相同。
+这样的问题可以通过二次排序的方法来解决，如下：
+curl -XPOST http://192.168.3.105:9200/milk2/_search -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "name": "保险qy"
+    }
+  },
+  "rescore": {
+    "window_size": 50,
+    "query": {
+      "score_mode": "multiply",
+      "rescore_query": {
+        "script_score": {
+          "query": {
+            "match": {
+              "name": "保险qy"
+            }
+          },
+          "script": {
+            "source": " String query = \u0027保险qy\u0027; \nint score = 0; \nfor (int i = 0; i < doc[\u0027name.keyword\u0027].length; ++i) {\n if (query.toString().contains(doc[\u0027name.keyword\u0027][i])){\n score += 1; \n } \n }\n return score/doc[\u0027name.keyword\u0027].length;"
+          }
+        }
+      },
+      "query_weight": 0.7,
+      "rescore_query_weight": 1.2
+    }
+  }
+}'
+
+# 上面的效果并不如意，改成下面这样，排序效果还算理想：
+curl -XPOST http://192.168.3.105:9200/milk2/_search -H 'Content-Type: application/json' -d'
+{
+  "size": 10,
+  "query": {
+    "match": {
+      "name": "保险qy"
+    }
+  },
+  "rescore": {
+    "window_size": 50,
+    "query": {
+      "score_mode": "multiply",
+      "rescore_query": {
+        "script_score": {
+          "query": {
+            "match": {
+              "name": "保险qy"
+            }
+          },
+          "script": {
+            "source": " String query = \u0027保险qy\u0027;\nint score = 0; \nfor (int i = 0;i < query.toString().length();i++) {\n if (doc[\u0027name.keyword\u0027].toString().contains(query.charAt(i).toString())){\n score += 1; \n } \n }\n return Double.parseDouble(score.toString())/Double.parseDouble(doc[\u0027name.keyword\u0027].toString().length().toString());"
+          }
+        }
+      },
+      "query_weight": 0.7,
+      "rescore_query_weight": 1.2
+    }
+  }
+}'
+
+{"took":9,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":33,"relation":"eq"},"max_score":1.9079891,"hits":[
+{"_index":"milk2","_type":"_doc","_id":"16","_score":1.9079891,"_source":{"name": "保险qy" }},
+{"_index":"milk2","_type":"_doc","_id":"26","_score":1.0477229,"_source":{"name": "保险par_qy" }},
+{"_index":"milk2","_type":"_doc","_id":"5","_score":0.9539946,"_source":{"name": "保险企业" }},
+{"_index":"milk2","_type":"_doc","_id":"19","_score":0.9267192,"_source":{"name": "保险qy_info" }},
+{"_index":"milk2","_type":"_doc","_id":"21","_score":0.9163171,"_source":{"name": "保险" }},
+{"_index":"milk2","_type":"_doc","_id":"15","_score":0.730038,"_source":{"name": "表保险" }},
+{"_index":"milk2","_type":"_doc","_id":"31","_score":0.7172231,"_source":{"name": "股保险" }},
+{"_index":"milk2","_type":"_doc","_id":"23","_score":0.67369854,"_source":{"name": "保险企业列入" }},
+{"_index":"milk2","_type":"_doc","_id":"32","_score":0.67369854,"_source":{"name": "保险企业个人" }},
+{"_index":"milk2","_type":"_doc","_id":"14","_score":0.61148494,"_source":{"name": "qy" }}]}}
+
+上面这样二次排序，虽说用“公司”也能搜索到“高速”，但对应的得分为0；这时用min_score是过滤不掉的；
+min_score 适用于初始查詢。这是match查詢，低于min_score文档不输入给rescore二次排序。
+rescore用于影响文档返回的排序scoring（您的初始查詢）。它不影响结果count的結果，只有order的結果。
+

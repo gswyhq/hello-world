@@ -1,0 +1,36 @@
+
+
+# 有时候，发送post请求的时候，需要用到用户名密码，如：
+curl -XPOST -u elastic:pppp1234 localhost:9200/milk2/_search -H 'Content-Type: application/json' -d '{"query": {"match": {"name.keyword": "华山牧"} } }'
+
+
+    public static JSONObject httpPostWithjson(String url, String es_user, String es_password, String json) throws IOException {
+        JSONObject jsonResult = null;
+        HttpPost httpPost = new HttpPost(url);
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        //username:password--->访问的用户名，密码,并使用base64进行加密，将加密的字节信息转化为string类型，encoding--->token
+//        System.out.printf("password789------------%s:%s%n", es_user, es_password);
+        String encoding = DatatypeConverter.printBase64Binary(String.format("%s:%s", es_user.trim(), es_password.trim()).getBytes(StandardCharsets.UTF_8));
+        try {
+            BasicResponseHandler handler = new BasicResponseHandler();
+            StringEntity entity = new StringEntity(json, "utf-8");//解决中文乱码问题
+            entity.setContentEncoding("UTF-8");
+            entity.setContentType("application/json");
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Authorization", "Basic " + encoding);
+            String result = httpClient.execute(httpPost, handler);
+            jsonResult = JSONObject.parseObject(result);
+            return jsonResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        } finally {
+            try {
+                httpClient.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return jsonResult;
+    }
+

@@ -10,3 +10,54 @@ yum install python36-devel
 python-dev的包在centos的yum中不叫python-dev，而是python-devel.
 ubuntu等系统该命令是：apt-get install python3-dev
 
+# 问题centos下安装g++报错：
+[root@asdfwoe23213]# yum -y install g++
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+No package g++ available.
+Error: Nothing to do
+因为在centos下g++安装包名字叫做：gcc-c++
+所以应该输入 yum install gcc-c++，即可。
+[root@asdfwoe23213]# yum -y install gcc-c++
+
+# 问题：
+pip3 install sasl
+CentOS7 下报错sasl/sasl.h: No such file or directory
+解决方法：
+yum search sasl
+yum -y install cyrus-sasl cyrus-sasl-devel cyrus-sasl-lib
+
+# 问题：CentOS7 安装python3.7
+[root@eef7d4b60c64 /]# yum -y install python37
+报错：
+No package python37 available.
+Error: Nothing to do
+即使更新源，也没有用：
+[root@eef7d4b60c64 /]# yum -y install epel-release
+[root@eef7d4b60c64 /]# yum -y update
+最后还是得从源码安装：
+安装python的yum依赖
+yum -y install zlib-devel bzip2-devel openssl-devel openssl-static ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel libffi-devel lzma gcc
+下载python3.7安装包
+# 将python3.7安装包，下载到/usr/local/src文件夹下
+cd /usr/local/src/
+安装python3
+安装python的yum依赖
+yum -y install zlib-devel bzip2-devel openssl-devel openssl-static ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel libffi-devel lzma gcc
+下载python3.7安装包
+# 将python3.7安装包，下载到/usr/local/src文件夹下
+cd /usr/local/src/
+wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz
+解压python3.7文件夹
+# 解压
+tar xvf Python-3.7.0.tar.xz
+# 重命名文件夹
+mv Python-3.7.0 python3
+# 进入到解压出的文件夹
+cd python3
+编译python3,7
+./configure --prefix=/usr/local/python3
+将python3.7 安装到/usr/local/python3 下
+make && make install
+
+

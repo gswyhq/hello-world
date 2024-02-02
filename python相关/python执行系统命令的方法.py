@@ -79,6 +79,18 @@ def main():
         commands.getstatus(file)
 
 
+## Windows系统执行系统命令时候可能报错：
+#
+#   File "C:\Program Files\Python39\lib\subprocess.py", line 507, in run
+#     stdout, stderr = process.communicate(input, timeout=timeout)
+#   File "C:\Program Files\Python39\lib\subprocess.py", line 1121, in communicate
+#     stdout = self.stdout.read()
+# UnicodeDecodeError: 'gbk' codec can't decode byte 0xad in position 53: illegal multibyte sequence
+# 在windows中通过subprocess调用cmd命令行。由于cmd控制台用的是gbk编码，而python用的是utf-8。utf-8的字符串，在gbk编码的控制台上运行，当然会运行不了。
+# 解决方法如下：
+# >>> p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+# >>> for line in p.stdout.readlines():
+# ...     print (line.decode('utf8'))
 
 
 if __name__ == "__main__":

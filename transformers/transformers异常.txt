@@ -4,3 +4,12 @@
 TypeError: TextEncodeInput must be Union[TextInputSequence, Tuple[InputSequence, InputSequence]]
 是由transformers版本更新导致的报错，由如果用transformers-4.x执行transformers-3.x的代码，在tokenize时可能报这个错误，原因是代码逻辑更新造成的不兼容。
 
+# 使用 Trainer 训练，在评估时候，速度越来越慢：
+from transformers import Trainer
+问题原因：
+在评估的时候，默认是最后计算指标metrics；这会导致将预测结果保留在内存中；
+内存得不到释放，导致评估阶段越到后面，评估速度越慢，评估耗时太久；
+解决方法：
+合理设置 eval_accumulation_steps 参数；
+eval_accumulation_steps(int) 可选参数，默认int为None:在将结果移动到CPU之前，累积输出张量的预测步骤数。如果如果不设置，整个预测将在GPU/TPU上累积，然后移动到CPU(更快，但需要更多的内存)。
+

@@ -1,0 +1,56 @@
+
+Oracle 的connect角色和create session权限的区别
+
+oracle数据库新建用户之后是无法登录的，需要赋予connect角色或者create session权限。
+
+注意：
+connect是角色不是权限，create session是权限不是角色。角色是权限的集合。而create session权限就是connect角色所拥有的权限之一。
+
+如果不能赋予connect角色，单给新建的用户赋予create session的权限也是能让其登录的。
+
+如何赋予角色或权限，语法是相同的
+
+# 赋予角色
+grant connect to YOUR_USER
+GRANT CONNECT, RESOURCE, DBA TO YOUR_USER;
+---注意：这里dba权限是针对dba管理员用户的，平时给普通用户赋权的时候，一般conn,resource权限日常就够了，包括测试人员和开发人员！
+
+# 赋予权限
+grant create session to YOUR_USER
+
+
+实验
+1、如果用户没有登录权限，报的错是：
+ERROR:
+ORA-01045: user TEST01 lacks CREATE SESSION privilege; logon denied
+
+2、赋予create session 之后
+执行如下之后
+grant create session to YOUR_USER
+
+重新登录，可登录
+
+root@dc1282a6eb67:/# sqlplus
+
+SQL*Plus: Release 12.1.0.2.0 Production on Sun Nov 27 17:53:48 2022
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Enter user-name: test01
+Enter password:
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL>
+SQL> show user
+USER is "TEST01"
+
+附录
+如何知道Oracle都有哪些内置的角色、内置的权限、角色下有什么权限？请看接下来本系列。
+
+PS: connect 角色都有什么权限？
+
+使用sys账号登录执行 select * from role_sys_privs where role='CONNECT'; （其他账号可能不一定能查出来）
+
+可以看到除了create session外还有 set container

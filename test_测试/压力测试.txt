@@ -54,6 +54,17 @@ gswewf@gswewf-pc:~$ head test.txt
 
 等同于：curl http://192.168.3.51:8000/ -d '{"question": "a卡在哪里能用", "uid": "1234567"}'
 
+带多个header请求头信息：
+主要说明-n -c  -T -p -H 参数，这几个是在进行带多个header信息的post请求压力测试中要用到的。
+-n  指定请求数   如 -n1000  指向要测试的url发送1000个请求
+-c  并发数，也就是一次发送多少请求  如-c100  说明每次发送100个请求
+-T  post发送的数据类型，也就是header中content-type的值  如-T application/json 说明发送的是json数据
+-p  使用post发送数据，后面跟发送内容，以文件路径的形式  如 -p data.txt 说明用post发送data.txt里面的内容，要注意的是data.txt里面的数据格式要和-T中声明的一致，如-T application/json 则data.txt格式就必须以{"name1":"xxx","name2":"xxx"}的形式
+-H 在header中添加信息   如-H “token:xxx” 则指在header中增加一行token:xxx的信息，但是增加多行信息-help中没有说明，在试过各种分割方式之后，绝望的发现增加多行header信息只需要再加一个-H就行，如 -H “token:xxx” -H “client:xxx” 就可以同时增加两行header信息
+最后跟上要测试的url就行，最终命令为：
+ab -p data.txt -T application/json -H "client:xxx" -H "token:xxx" -n400 -c400 http://localhost:8080/xxx
+
+指以post形式一次发送400个request给http://localhost:8080/xxx，request body的内容为data.txt，request header 的内容为"content-type:application/json  client:xxx  token:xxx"。
 
 结果解释：
 gswewf@gswewf-pc:~$ ab -c 10 -n 20 -p test.txt http://192.168.3.51:8000/
@@ -121,4 +132,12 @@ Percentage of the requests served within a certain time (ms)
 其中 50％ 的用户响应时间小于 369 毫秒 
 80 ％ 的用户响应时间小于 453 毫秒 
 最大的响应时间小于 487 毫秒 
+
+##############################################################################################################################################################################################
+windows环境使用ab命令：
+1、安装 mobaxterm 工具
+2、在 mobaxterm 终端安装 httpd-tools
+mobaxterm  apt-get install httpd-tools
+3、开始在mobaxterm终端使用ab命令
+
 

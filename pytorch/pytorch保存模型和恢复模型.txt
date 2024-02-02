@@ -13,4 +13,22 @@ torch.save(model, 'model.pkl')
 # 加载
 model = torch.load('model.pkl')
 
+保存与加载自定义模型
+# 保存
+可以自定义模型中保存哪些信息，例如网络结构、模型权重参数、优化器参数等：
+custom_model = {'net': CNN(),
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict()
+                }
+
+torch.save(custom_model, 'custom_model.pkl')
+
+# 加载
+保存后的文件使用torch.load()后可以通过字典取值方式获取net、model_state_dict等键值内容。
+custom_model = torch.load('custom_model.pkl')
+model = custom_model['net']
+model.load_state_dict(custom_model['model_state_dict'])
+
+# predict
+model(data)
 

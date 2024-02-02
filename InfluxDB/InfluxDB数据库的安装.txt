@@ -1,0 +1,90 @@
+
+
+InfluxDB是一个用于存储和分析时间序列数据的开源数据库。
+
+官方文档的开源地址请见https://github.com/influxdata/docs.influxdata.com
+中文地址(Github)：https://github.com/jasper-zhang/influxdb-document-cn
+
+InfluxDB默认使用下面的网络端口：
+
+TCP端口8086用作InfluxDB的客户端和服务端的http api通信
+TCP端口8088给备份和恢复数据的RPC服务使用
+另外，InfluxDB也提供了多个可能需要自定义端口的插件，所以的端口映射都可以通过配置文件修改，对于默认安装的InfluxDB，这个配置文件位于/etc/influxdb/influxdb.conf。
+
+
+Debain & Ubuntu
+Debian和Ubuntu用户可以直接用apt-get包管理来安装最新版本的InfluxDB。
+
+对于Ubuntu用户，可以用下面的命令添加InfluxDB的仓库
+
+curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+source /etc/lsb-release
+echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+Debian用户用下面的命令：
+
+curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+source /etc/os-release
+test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+然后安装、运行InfluxDB服务：
+
+sudo apt-get update && sudo apt-get install influxdb
+sudo service influxdb start
+如果你的系统可以使用Systemd(比如Ubuntu 15.04+, Debian 8+），也可以这样启动：
+
+sudo apt-get update && sudo apt-get install influxdb
+sudo systemctl start influxdb
+RedHat & CentOS
+RedHat和CentOS用户可以直接用yum包管理来安装最新版本的InfluxDB。
+
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdb.key
+EOF
+一旦加到了yum源里面，就可以运行下面的命令来安装和启动InfluxDB服务：
+
+sudo yum install influxdb
+sudo service influxdb start
+如果你的系统可以使用Systemd(比如CentOS 7+, RHEL 7+），也可以这样启动：
+
+sudo yum install influxdb
+sudo systemctl start influxdb
+
+
+配置
+安装好之后，每个配置文件都有了默认的配置，你可以通过命令influxd config来查看这些默认配置。
+
+在配置文件/etc/influxdb/influxdb.conf之中的大部分配置都被注释掉了，所有这些被注释掉的配置都是由内部默认值决定的。配置文件里任意没有注释的配置都可以用来覆盖内部默认值，需要注意的是，本地配置文件不需要包括每一项配置。
+
+有两种方法可以用自定义的配置文件来运行InfluxDB：
+方法1：运行的时候通过可选参数-config来指定：
+influxd -config /etc/influxdb/influxdb.conf
+方法2：设置环境变量INFLUXDB_CONFIG_PATH来指定，例如：
+echo $INFLUXDB_CONFIG_PATH
+/etc/influxdb/influxdb.conf
+
+其中-config的优先级高于环境变量。
+
+
+下载 influx CLI 客户端
+1. 下载 influxdb-1.8.10_linux_amd64.tar.gz 压缩包，并将其上传在 Linux 服务器。
+2. 执行 tar xvfz influxdb-1.8.10_linux_amd64.tar.gz 解压压缩包。
+连接数据库
+
+进入 influx CLI 路径，执行如下命令， 连接时序数据库 InfluxDB 版实例。
+./influx -host <DB_HOST> -port <DB_PORT> -username <USERNAME> -password <PASSWORD>
+-username：已创建好的用户账号。
+-password：用户账号对应的密码。
+-host：实例的访问地址，请配置为时序数据库 InfluxDB 版的内网访问地址。
+-port：网络端口，VPC 网络使用8086。
+执行示例如下所示：
+./influx -host 10.0.1.7 -port 8086 -username ctsdbi-m35uo1e8 -password test@123
+
+# 命令行将select查询结果写入文件：
+./bin/influx -host 30.88.88.88 -port 25710 -username abcd -password 123456 -database dbname -execute "select * from request_log where rt > 1000  and time > NOW() - 240h" -format csv > 2.csv
+
+

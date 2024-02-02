@@ -14,7 +14,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 
 # 若需要开启登录认证，则需要在`elasticsearch.yml`文件添加：
-http.cors.allow-headers: "Authorization"
+http.cors.allow-headers: Authorization,X-Requested-With,Content-Length,Content-Type
 
 然后在每次使用head插件的时候，按照如下的格式输入：
 http://localhost:9100/?auth_user=elastic&auth_password=changeme
@@ -84,6 +84,7 @@ gswyhq@gswyhq-PC:~/github_projects/elasticsearch-head$ vim Gruntfile.js
  98             }
  99         }
 
+更改后，不需要重启elasticsearch-head，但需要刷新浏览器页面，有时候刷新没有生效，可以清理下浏览器缓存，再重试下即可；
 
 # 打包成镜像：
 gswyhq@gswyhq-PC:~/github_projects/elasticsearch-head$ docker build -t elasticsearch-head:5-alpine-20180713 -f Dockerfile-alpine .

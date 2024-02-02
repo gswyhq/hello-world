@@ -1,0 +1,61 @@
+
+资料来源：https://neo4j.com/docs/graph-data-science/current/algorithms/pathfinding/
+
+
+路径算法
+路径查找算法查找两个或多个节点之间的路径或评估路径的可用性和质量。
+
+1、增量步进单源最短路径（Delta-Stepping Single-Source Shortest Path）
+
+Dijkstra Source-Target Shortest Path
+Dijkstra Single-Source Shortest Path
+A* Shortest Path
+Yen’s Shortest Path
+Breadth First Search
+Depth First Search
+Random Walk
+Minimum Weight Spanning Tree
+Minimum Directed Steiner Tree
+Minimum Weight k-Spanning Tree
+All Pairs Shortest Path
+
+APSP
+SSSP
+BFS
+ShortestPath
+
+###########################################################################################################################
+增量步进单源最短路径（Delta-Stepping Single-Source Shortest Path）
+增量步进单源最短路径（Delta-Stepping Single-Source Shortest Path）是单源最短路径（Single Source Shortest Path，SSSP）的变体；
+单源最短路径算法（SSSP），对在权图G=(V,E)，从一个源点s到汇点t有很多路径，其中路径上权和最少的路径，称从s到t的最短路径。求从源点s到其它所有点的最短路径问题，即SSSP。
+增量步进最短路径算法计算源节点与图形中所有可访问节点之间的所有最短路径。该算法支持具有正关系权重的加权图。要计算源节点和单个目标节点之间的最短路径，可以使用 Dijkstra Source-Target Shortest Path。
+与Dijkstra单源相比，增量步进算法是一种距离校正算法。此属性允许它并行遍历图形。该算法保证始终找到源节点和目标节点之间的最短路径。但是，如果两个节点之间存在多个最短路径，则不能保证算法在每次计算中返回相同的路径。
+第一步：创建样例数据
+CREATE (a:Location {name: 'A'}),
+       (b:Location {name: 'B'}),
+       (c:Location {name: 'C'}),
+       (d:Location {name: 'D'}),
+       (e:Location {name: 'E'}),
+       (f:Location {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
+
+###########################################################################################################################
+
+###########################################################################################################################
+
+###########################################################################################################################
+
+###########################################################################################################################+
+
+###########################################################################################################################
+
+
+

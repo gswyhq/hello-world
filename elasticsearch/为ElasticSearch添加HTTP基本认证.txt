@@ -195,7 +195,7 @@ root@81e692d0a377:/usr/share/elasticsearch#
 
 http.cors.enabled: true
 http.cors.allow-origin: "*"
-http.cors.allow-headers: "Authorization"
+http.cors.allow-headers: Authorization,X-Requested-With,Content-Length,Content-Type
 
 # 注意引号的前后都要给个空格。
 
@@ -485,4 +485,76 @@ docker build -t gswyhq/elasticsearch-x-pack-5.6.4:`date +%Y%m%d-%H%M%S` -f Docke
 docker run -d --name es_test -p 9200:9200 -p 9300:9300 gswyhq/elasticsearch-x-pack-5.6.4:20190903-115229
 默认用户名/密码：elastic/changeme
 
+##########################################################################################################################
+elasticsearch 7 开启认证方法
+第一步：生成ca证书
+ela@dc5a332fae31:~$ /usr/elasticsearch/elasticsearch-7.3.2/bin/elasticsearch-certutil ca
+直接一直回车，不输入内容
+会生成文件：/usr/elasticsearch/elasticsearch-7.3.2/elastic-stack-ca.p12
+
+第二步：生成p12密钥
+使用上面生成的ca证书"elastic-stack-ca.p12"生成p12密钥
+ela@dc5a332fae31:~$ /usr/elasticsearch/elasticsearch-7.3.2/bin/elasticsearch-certutil cert --ca /usr/elasticsearch/elasticsearch-7.3.2/elastic-stack-ca.p12
+同样不输入任何内容，直接一直回车；
+最后会在elasticsearch的家目录下看到新生成的密钥elastic-certificates.p12
+
+第三步：拷贝p12密钥到其它es节点
+首先在config/目录下创建个certs目录，然后将p12证书移动到certs目录下，方便后面在配置文件里引用
+ela@dc5a332fae31:~$ mkdir /usr/elasticsearch/elasticsearch-7.3.2/config/certs
+ela@dc5a332fae31:~$ mv /usr/elasticsearch/elasticsearch-7.3.2/elastic-certificates.p12 /usr/elasticsearch/elasticsearch-7.3.2/config/certs/
+ela@dc5a332fae31:~$ chmod -R 755 /usr/elasticsearch/elasticsearch-7.3.2/config/certs
+
+第四步：若是集群的话，将p12证书移动到certs目录下后直接将certs目录拷贝到其他es节点
+
+第五步：修改elasticsearch配置文件开启xpack
+所有es节点都需要配置
+
+[root@elk01 ~]# vim /usr/elasticsearch/elasticsearch-7.3.2/config/elasticsearch.yml
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+#下面是p12密钥文件的存储位置，建议使用绝对路径，当然相对路径也是可以的："certs/elastic-certificates.p12"
+xpack.security.transport.ssl.keystore.path: certs/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: certs/elastic-certificates.p12
+
+第六步：重启es节点
+[root@elk01 ~]# systemctl restart elasticsearch.service
+
+第七步：设置用户名密码
+在es集群中任意一台节点执行即可
+需要在集群状态正常的情况下设置，否则会报错
+自动随机生成每个用户的密码命令如下：
+[root@elk01 ~]# /usr/elasticsearch/elasticsearch-7.3.2/bin/elasticsearch-setup-passwords auto
+
+ela@7495c62cc6cf:~$ /usr/elasticsearch/elasticsearch-7.3.2/bin/elasticsearch-setup-passwords auto
+Initiating the setup of passwords for reserved users elastic,apm_system,kibana,logstash_system,beats_system,remote_monitoring_user.
+The passwords will be randomly generated and printed to the console.
+Please confirm that you would like to continue [y/N]y
+
+
+Changed password for user apm_system
+PASSWORD apm_system = 8wfTqrmc2bGAOWuOXneZ
+
+Changed password for user kibana
+PASSWORD kibana = NH4Sm21qhQUfb6iRsEXa
+
+Changed password for user logstash_system
+PASSWORD logstash_system = Ga2l2Nn0SY7eWS3mRT5O
+
+Changed password for user beats_system
+PASSWORD beats_system = nXViTueU8Y1VCQmX7Ign
+
+Changed password for user remote_monitoring_user
+PASSWORD remote_monitoring_user = QaQsf839fKaQp14BSzNR
+
+Changed password for user elastic
+PASSWORD elastic = nAMVOdGJY3zFW6oGoMJ9
+
+# 第八步：使用密码
+curl -XGET localhost:9200/_cat/indices --user elastic:nAMVOdGJY3zFW6oGoMJ9
+http://localhost:9100/?auth_user=elastic&auth_password=nAMVOdGJY3zFW6oGoMJ9
+
+# 第九步：修改密码
+curl -XPOST -u elastic:nAMVOdGJY3zFW6oGoMJ9 "localhost:9200/_security/user/elastic/_password" -H 'Content-Type: application/json' -d'{"password" : "elastic123456"}'
+这里elastic123456为修改后的密码
 

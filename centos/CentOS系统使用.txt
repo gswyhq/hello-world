@@ -1,0 +1,12 @@
+
+# 查看系统版本：
+[root@6577fd6c88 ~]# cat /etc/redhat-release 
+CentOS Linux release 7.4.1708 (Core) 
+[root@6577fd6c88 ~]# cat /etc/issue
+\S
+Kernel \r on an \m
+
+# 查看系统：
+[root@6577fd6c88 ~]# uname -a
+Linux 6577fd6c88 3.10.0-957.el7.x86_64 #1 SMP Thu Nov 8 23:39:32 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+
