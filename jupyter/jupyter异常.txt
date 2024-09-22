@@ -97,3 +97,28 @@ Jupyter command `jupyter-lab` not found.
 export PATH="$HOME/.local/bin:$PATH"
 当然也可以将该命令写入~/.bashrc文件中，这样不用每次都需要如此运行；
 
+# 有多个版本，如何更改python3, pip3的版本
+whereis python3 查看命令路径；
+或# which python3 查看命令路径；
+再删除原链接，再ls -n 重新设置新链接即可；
+pip3命令同理；
+
+# 有多个版本python，如何修改jupyter对应的python版本；
+1、先查看有多少个内核版本
+jupyter kernelspec list
+2、若无目标python版本内核，则通过如下命令安装对应python版本内核，如：
+pip3 install ipykernel
+3、删除旧的Jupyter内核版本，你可以使用以下命令：
+jupyter kernelspec remove [kernel-name]
+其中 [kernel-name] 是你想要删除的内核的名称，这可以通过 jupyter kernelspec list 命令查看。
+例如，如果你有一个名为 python3 的内核，并且想要删除它，你可以运行：
+jupyter kernelspec remove python3
+4、为新版本的 Python 创建内核：
+python -m ipykernel install --user --name=myenv
+其中 myenv 是你给这个内核指定的名称。
+列出所有可用内核以确认新内核已添加：
+jupyter kernelspec list
+启动 Jupyter Notebook 并在新笔记本中选择新内核。
+
+
+

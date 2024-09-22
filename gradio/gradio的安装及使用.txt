@@ -1,0 +1,18 @@
+
+Gradio：一个简单、直观、且强大的工具，让初学者到专业开发者的各个层次的人都能轻松展示和分享他们的AI模型。
+
+ Gradio的魅力在于它的易用性。无需复杂的前端知识，只需几行代码，你就能将任何机器学习模型转化为一个美观、交互式的界面。
+
+安装与配置
+环境要求：Gradio 需要Python 3.8 或更高版本的Python版本
+操作系统：Gradio可以在Windows、MacOS和Linux等主流操作系统上运行。
+安装步骤：使用pip安装，即打开你的终端或命令提示符，输入以下命令来安装Gradio
+pip install gradio
+检查安装：安装完成后，可以通过运行以下Python代码来检查Gradio是否正确安装
+import gradio as gr
+print(gr.__version__)
+
+
+更多参考资料：https://zhuanlan.zhihu.com/p/679668818
+
+
