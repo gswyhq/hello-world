@@ -102,6 +102,10 @@ select replace( user_id, ' ', '') ;
 这个时候可以使用 translate 函数 (示例：查询name大写后去空格为COCOPARK的数据)；
 select * from hive_db1.hive_test_table where translate(upper(name), ' ', '')= 'COCOPARK';
 
+字符串替换函数 translate：
+eg:select translate('Asher117','Asher','Viva')
+>Viva117
+
 # 小写字母变成大写字母：
 select upper("abde EDW xyz")
 
@@ -126,6 +130,11 @@ select md5('ABC');
 902fbdd2b1df0c4f70b4a5d23525e932  -
 echo 默认是带换行符做结尾的
 echo -n 可以去掉换行符
+
+# 将字符串映射为一个固定数字，可以用hash函数；
+select HASH('张三'), abs(HASH('张三')), md5('张三');
+返回结果：
+-838675700	838675700	615db57aa314529aaa0fbe95b3e95bd3
 
 # 返回字符串的第一个字符的ascii数字
 select ascii('abc');
@@ -154,4 +163,25 @@ select decode(project_name,
               'c','ccc',
               project_name) project_name
 from project
+
+# 字符串填充函数，如在左侧补0到指定长度，若超长则截断：
+select lpad('1', 5, '0'), lpad('123456789', 5, '0');
+返回结果：
+00001	12345
+
+# 将字符串按分隔符进行分割，并按数字进行排序，将排序后的结果合并成一个字符串：
+select concat_ws('|', collect_list(num)) sort_arr 
+from (
+	select explode(split('10|11|12|1|23|13|2|3|15|16|7|40|20', '\\|')) as num order by num+0
+)t ;
+结果：
+1|2|3|7|10|11|12|13|15|16|20|23|40
+注意：若split放到shell脚本里头，再通过 hive -e "$hql"执行的话，|作为分割符，需要用'\\\\|'来表示；
+
+# 通过小数点分割，取整：
+select split(3.1415926, '\\.')[0];
+
+# 按规律生成指定长度的字符串，如生成长度为7，首字母为E的字符串：比如生成格式：E000001、E000002、E000003.....E000100
+SELECT concat('E', lpad(cast(row_number() over() as string), 6, '0')) client_no
+FROM os_test.pa_test_user_info;
 

@@ -1262,4 +1262,7 @@ https://github.com/CyberCommy/baidu-qa-100w
 # 基于医疗泌尿专科知识构造的QA推理数据集
 http://openkg.cn/dataset/rjua-qadatasets
 
+# 音乐、乐谱数据集：
+https://hf-mirror.com/datasets/GTSinger/GTSinger
+
 

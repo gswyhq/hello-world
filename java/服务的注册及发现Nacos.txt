@@ -1,0 +1,69 @@
+
+
+
+1、什么是服务治理
+服务治理：微服务架构中最核心最基础的模块，用户实现各个微服务的自动化注册与发现
+
+服务注册：每个服务单元先注册中心登记自己服务的详细信息。服务注册中心以心跳的方式去检测清单中的服务是否可用，剔除掉不可用的服务。
+
+服务发现：服务调用方向服务注册中心咨询服务，实现对具体服务实例的访问。
+
+2、常见注册中心
+「Zookeeper」：是一个分布式服务框架，主要用来解决分布式应用中一些数据管理问题，如：状态同步服务，集群管理。
+「Eureka」：主要作用就是做服务注册与发现。
+「Consul」：主要面向分布式，服务化的系统提供服务注册、服务发现和配置管理功能。
+「Nacos」：是一个易于构建云原生应用的动态服务发现，配置管理和服务管理平台。
+
+3、Nacos简介
+nacos致力于发现、配置、管理微服务，快速实现动态服务发现服务配置、服务元数据以及流量管理。
+
+「核心功能：」
+
+「服务注册」：发送REST请求向Nacos Server注册自己的服务
+「服务心跳」：通过心跳机制维护Nacos Server，说明服务一直处于可用状态，防止被剔除，默认5s发送一次心跳
+「服务同步」:集群之间会相互同步服务实例，用来保证服务信息一致性
+「服务发现」：服务消费者获取Nacos Server上面注册的服务清单，缓存到Nacos Client本地会在Nacos Client开启一个定时任务的拉取服务最新的注册表信息更新到本地缓存。
+「服务健康检查」：开启一个定时任务来检查服务实例的健康情况，超过15s没有心跳的实例会将它的healthy属性设置为false，实例超过30s没有心跳。直接剔除该实例，如果被剔除的实例回复心跳则重新注册
+
+4、Nacos实战入门
+4.1、安装Nacos
+❝
+下载地址: https://github.com/alibaba/nacos/releases
+❞
+下载zip格式的安装包，然后进行解压缩操作
+
+4.2、启动Nacos
+# 进入bin目录
+cd bin
+#在cmd中启动
+startup.cmd -m standalone
+4.3、访问Nacos
+打开浏览器输入http://localhost:8848/nacos，即可访问服务， 默认密码是nacos/nacos
+
+5、在项目中如何使用
+5.1、在pom.xml中添加Nacos依赖
+
+<!--nacos客户端-->
+<dependency>
+ <groupId>com.alibaba.cloud</groupId>
+ <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+5.2、在启动类上面贴 「@EnableDiscoveryClient」 注解
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class ProductServer {
+    public static void main(String[] args) {
+        SpringApplication.run(ProductServer.class,args);
+    }
+}
+
+5.3、在application.yml中添加Nacos的服务地址
+
+spring:
+  cloud: 
+    nacos: 
+      discovery: 
+        server-addr: localhost:8848
+
+

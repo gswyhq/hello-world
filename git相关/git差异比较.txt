@@ -60,6 +60,10 @@ git push的撤销有两个命令可以达到：回退reset和反做revert
 git reset后通过git push origin master --force强制提交当前版本号；
 此时如果用“git push”会报错，因为我们本地库HEAD指向的版本比远程库的要旧；
 
+# 本地回退到指定的commit，但要保留本地修改，即git diff还能看到修改后的代码：
+git reset 6dcdc4664116
+代码回到了6dcdc4664116，之后的相关提交记录都没有了；但修改的代码还在，可以通过 git add添加文件并继续提交；
+
 如果我们想撤销之前的某一版本git push，但是又想保留该目标版本后面的版本，记录下这整个版本变动流程，就可以用这种方法。
 （1）反做，使用“git revert -n 版本号”命令。如下命令，我们反做版本号为8b89621的版本：
 git revert -n 8b89621019c9adc6fc4d242cd41daeb13aeb9861

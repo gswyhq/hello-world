@@ -28,4 +28,23 @@ group by col1 [,col2]   -->Reduce端执行
 [having]                -->Reduce端执行
  
 
+# 分组查询：
+SELECT
+    id,
+    CASE
+                when total_sum is null then null
+                when total_sum = 0 then '0'
+        WHEN total_sum>0 and total_sum<=10000 THEN '0万-1万'
+        WHEN total_sum>10000 and total_sum<=20000 THEN '1万-2万'
+        WHEN total_sum>20000 and total_sum<=30000 THEN '2万-3万'
+        WHEN total_sum>30000 and total_sum<=40000 THEN '3万-4万'
+        WHEN total_sum>40000 and total_sum<=50000 THEN '4万-5万'
+        WHEN total_sum>50000 and total_sum<=60000 THEN '5万-6万'
+        WHEN total_sum>60000 and total_sum<=70000 THEN '6万-7万'
+        WHEN total_sum>70000 and total_sum<=80000 THEN '7万-8万'
+        WHEN total_sum>80000 and total_sum<=90000 THEN '8万-9万'
+        WHEN total_sum>90000 and total_sum<=100000 THEN '9万-10万'
+        ELSE '10万以上'
+    END as total_sum
+FROM db_name.table_name;
 

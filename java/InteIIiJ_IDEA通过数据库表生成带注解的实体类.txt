@@ -151,6 +151,54 @@ oracle版本
     </context>
 </generatorConfiguration>
 
+postgreaql 版本：
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+    PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+    "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+<classPathEntry
+        location="D:\Users\zhangsan\.m2\repository\org\postgresql\postgresql\42.2.25\postgresql-42.2.25.jar" />
+<context id="postgresql">
+    <property name="javaFileEncoding" value="UTF-8"/>
+    <property name="xmlFormatter" value="org.mybatis.generator.api.dom.DefaultXmlFormatter"/>
+    <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+    <commentGenerator>
+        <property name="suppressAllComments" value="true" />
+    </commentGenerator>
+    <jdbcConnection driverClass="org.postgresql.Driver"
+                    connectionURL="jdbc:postgresql://192.168.3.105:3605/daas"
+                    userId="zhangsan"
+                    password="abcdefg">
+        <property name="nullCatalogMeansCurrent" value="true"/>
+    </jdbcConnection>
+    <javaTypeResolver>
+        <property name="forceBigDecimals" value="false" />
+    </javaTypeResolver>
+    <!-- 生产entity类 -->
+    <javaModelGenerator targetPackage="com.qsy.entity" targetProject="./src/main/java">
+        <property name="enableSubPackages" value="true"/>
+        <property name="trimStrings" value="true" />
+    </javaModelGenerator>
+    <!-- 生产mapper接口 可去除 -->
+    <sqlMapGenerator targetPackage="com.qsy.mapper" targetProject="./src/main/resources">
+        <property name="enableSubPackages" value="true"/>
+    </sqlMapGenerator>
+    <!-- 生产xml映射 可去除 -->
+    <javaClientGenerator type="XMLMAPPER" targetPackage="com.qsy.mapper" targetProject="./src/main/java">
+        <property name="enableSubPackages" value="true"/>
+    </javaClientGenerator>
+    <table  tableName="改成你自己的表"
+            enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+            enableSelectByExample="false" selectByExampleQueryId="false" >
+        <property name="useActualColumnNames" value="false"/>
+    </table>
+</context>
+</generatorConfiguration>
+
+
+
 继续右侧Maven-> Profiles -> Plugins -> mybatis-generator -> mybatis-generator:generate 右键 -> Run Maven build;
 至此entity、mapper、xml文件全部生成。
 

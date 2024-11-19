@@ -1,0 +1,6 @@
+
+# dbeaver连接mysql报错：
+Public Key Retrieval is not allowed
+解决方法：
+修改驱动属性，allowPublicKeyRetrieval 由 false 改为 true
+allowPublicKeyRetrieval=true

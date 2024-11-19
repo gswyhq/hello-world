@@ -33,14 +33,26 @@ Stream<Integer> stream = Stream.iterate(0, n -> n + 1); // 创建一个无限流
 需要注意的是，Stream 对象是一种一次性使用的对象，它只能被消费一次。一旦对 Stream 执行了终止操作（如收集结果、遍历元素），Stream 就会被关闭，后续无法再使用。因此，在使用 Stream 时，需要根据需要重新创建新的 Stream 对象。
 
 常用的 Stream 操作方法
-过滤（Filter）：filter() 方法接受一个 Predicate 函数作为参数，用于过滤 Stream 中的元素。只有满足 Predicate 条件的元素会被保留下来。例如：
 
+过滤（Filter）：filter() 方法接受一个 Predicate 函数作为参数，用于过滤 Stream 中的元素。只有满足 Predicate 条件的元素会被保留下来。
+例如：
 Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
 Stream<Integer> filteredStream = stream.filter(n -> n % 2 == 0); // 过滤出偶数
-映射（Map）：map() 方法接受一个 Function 函数作为参数，用于对 Stream 中的元素进行映射转换。对每个元素应用函数后的结果会构成一个新的 Stream。例如：
+# 筛选、计数：
+// 筛选出成绩不为空的学生人数
+count = list.stream().filter(p -> null != p.getScore()).count();
 
+映射（Map）：map() 方法接受一个 Function 函数作为参数，用于对 Stream 中的元素进行映射转换。对每个元素应用函数后的结果会构成一个新的 Stream。
+例如：
 Stream<String> stream = Stream.of("apple", "banana", "cherry");
 Stream<Integer> mappedStream = stream.map(s -> s.length()); // 映射为单词长度
+# 取出元素，形成列表，或者join成字符串：
+// 取出所有学生的成绩
+List<Double> scoreList = list.stream().map(p -> p.getScore()).collect(Collectors.toList());
+// 将学生姓名集合串成字符串，用逗号分隔
+String nameString = list.stream().map(p -> p.getName()).collect(Collectors.joining(","));
+
+
 扁平映射（FlatMap）：flatMap() 方法类似于 map() 方法，不同之处在于它可以将每个元素映射为一个流，并将所有流连接成一个流。这主要用于解决嵌套集合的情况。例如：
 
 List<List<Integer>> nestedList = Arrays.asList(
@@ -49,32 +61,57 @@ List<List<Integer>> nestedList = Arrays.asList(
     Arrays.asList(5, 6)
 );
 Stream<Integer> flattenedStream = nestedList.stream().flatMap(List::stream); // 扁平化为一个流
-截断（Limit）：limit() 方法可以限制 Stream 的大小，只保留前 n 个元素。例如：
 
+
+截断（Limit）：limit() 方法可以限制 Stream 的大小，只保留前 n 个元素。
+例如：
 Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
 Stream<Integer> limitedStream = stream.limit(3); // 只保留前 3 个元素
-跳过（Skip）：skip() 方法可以跳过 Stream 中的前 n 个元素，返回剩下的元素组成的新 Stream。例如：
 
+
+跳过（Skip）：skip() 方法可以跳过 Stream 中的前 n 个元素，返回剩下的元素组成的新 Stream。
+例如：
 Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
 Stream<Integer> skippedStream = stream.skip(2); // 跳过前 2 个元素
-排序（Sorted）：sorted() 方法用于对 Stream 中的元素进行排序，默认是自然顺序排序。还可以提供自定义的 Comparator 参数来指定排序规则。例如：
 
+
+排序（Sorted）：sorted() 方法用于对 Stream 中的元素进行排序，默认是自然顺序排序。还可以提供自定义的 Comparator 参数来指定排序规则。
+例如：
 Stream<Integer> stream = Stream.of(5, 2, 4, 1, 3);
 Stream<Integer> sortedStream = stream.sorted(); // 自然顺序排序
-去重（Distinct）：distinct() 方法用于去除 Stream 中的重复元素，根据元素的 equals() 和 hashCode() 方法来判断是否重复。例如：
+# 自定义排序：
+// 按学生成绩逆序排序 正序则不需要加.reversed()
+filterList = list.stream().filter(p -> null != p.getScore()).sorted(Comparator.comparing(UserPo::getScore).reversed()).collect(Collectors.toList());
 
+
+去重（Distinct）：distinct() 方法用于去除 Stream 中的重复元素，根据元素的 equals() 和 hashCode() 方法来判断是否重复。
+例如：
 Stream<Integer> stream = Stream.of(1, 2, 2, 3, 3, 3);
 Stream<Integer> distinctStream = stream.distinct(); // 去重
-汇总（Collect）：collect() 方法用于将 Stream 中的元素收集到结果容器中，如 List、Set、Map 等。可以使用预定义的 Collectors 类提供的工厂方法来创建收集器，也可以自定义收集器。例如：
 
+汇总（Collect）：collect() 方法用于将 Stream 中的元素收集到结果容器中，如 List、Set、Map 等。可以使用预定义的 Collectors 类提供的工厂方法来创建收集器，也可以自定义收集器。
+例如：
 Stream<String> stream = Stream.of("apple", "banana", "cherry");
 List<String> collectedList = stream.collect(Collectors.toList()); // 收集为 List
-归约（Reduce）：reduce() 方法用于将 Stream 中的元素依次进行二元操作，得到一个最终的结果。它接受一个初始值和一个 BinaryOperator 函数作为参数。例如：
+// 按成绩进行分组归集
+Map<Double, List<UserPo>> groupByScoreMap = list.stream().filter(p -> null != p.getScore()).collect(Collectors.groupingBy(UserPo::getScore));
+for (Map.Entry<Double, List<UserPo>> entry : groupByScoreMap.entrySet()) {
+    System.out.println("成绩：" + entry.getKey() + " 人数：" + entry.getValue().size());
+}
+// 返回list
+List<Double> scoreList = list.stream().map(p -> p.getScore()).collect(Collectors.toList());
+// 返回string用逗号分隔
+String nameString = list.stream().map(p -> p.getName()).collect(Collectors.joining(","));
 
+
+归约（Reduce）：reduce() 方法用于将 Stream 中的元素依次进行二元操作，得到一个最终的结果。它接受一个初始值和一个 BinaryOperator 函数作为参数。
+例如：
 Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
 Optional<Integer> sum = stream.reduce((a, b) -> a + b); // 对所有元素求和
-统计（Summary Statistics）：summaryStatistics() 方法可以从 Stream 中获取一些常用的统计信息，如元素个数、最小值、最大值、总和和平均值。例如：
 
+
+统计（Summary Statistics）：summaryStatistics() 方法可以从 Stream 中获取一些常用的统计信息，如元素个数、最小值、最大值、总和和平均值。
+例如：
 IntStream stream = IntStream.of(1, 2, 3, 4, 5);
 IntSummaryStatistics stats = stream.summaryStatistics();
 System.out.println("Count: " + stats.getCount());
@@ -82,6 +119,20 @@ System.out.println("Min: " + stats.getMin());
 System.out.println("Max: " + stats.getMax());
 System.out.println("Sum: " + stats.getSum());
 System.out.println("Average: " + stats.getAverage());
+
+statistics：统计，可以统计中位数，平均值，最大最小值
+DoubleSummaryStatistics statistics = filterList.stream().mapToDouble(p -> p.getScore()).summaryStatistics();
+System.out.println("列表中最大的数 : " + statistics.getMax());
+System.out.println("列表中最小的数 : " + statistics.getMin());
+System.out.println("所有数之和 : " + statistics.getSum());
+System.out.println("平均数 : " + statistics.getAverage());
+
+# 遍历修改元素值：
+除了forEach操作会改变原集合的数据，其他的操作均不会改变原集合，这点务必引起注意
+// 学生成绩太差了，及格率太低，给每个学生加10分，放个水
+// forEach
+filterList.stream().forEach(p -> p.setScore(p.getScore() + 10));
+
 以上只是 Stream API 提供的一部分常用操作方法，还有许多其他操作方法，如匹配（Match）、查找（Find）、遍历（ForEach）等
 
 三、Stream 的中间操作
@@ -341,7 +392,6 @@ numbers.stream()
 使用并行流可以通过利用多线程并行处理数据，从而提高程序的执行性能。下面是一些使用并行流提高性能的常见方法：
 
 创建并行流：要创建一个并行流，只需在普通流上调用 parallel() 方法。
-
 List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
 Stream<Integer> parallelStream = numbers.parallelStream();
 利用任务并行性：并行流会将数据分成多个小块，并在多个线程上并行处理这些小块。这样可以充分利用多核处理器的优势。

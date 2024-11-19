@@ -1,0 +1,29 @@
+
+# 计算现在距离某个日期多少天：
+select datediff(current_timestamp(), '2024-03-28 18:26:04.0');
+datediff(结束时间, 开始时间)
+
+# 获取当前时间时间戳，或者指定日期的时间戳：
+select unix_timestamp(), unix_timestamp('2023-12-15 13:29:23.0'), unix_timestamp('2023-12-15'),  unix_timestamp('2019-08-15','yyyy-MM-dd');
+依次获取当前时间，指定日期时间，错误格式时间，指定日期格式；
+返回数据结果：
+_c0	_c1	_c2	_c3
+1709516039	1702618163	[null]	1565798400
+当unix_timestamp参数为空时候，获取当前时间的时间戳；当unix_timestamp参数格式有问题时，返回null;
+输入的时间戳格式必须为'yyyy-MM-dd HH:mm:ss',如不符合则返回null
+也可以在第二个参数指定日期格式；
+
+# 时间戳 -> 字符串
+from_unixtime(bigint unixtime,string format)  将时间戳秒数转化为UTC时间，并用字符串表示，可通过format规定的时间格式，指定输出的时间格式，其中unixtime 是10位的时间戳值，而13位的所谓毫秒的是不可以的。
+select 
+	from_unixtime(1702618163),
+	from_unixtime(1702618163,'yyyy-MM-dd HH:mm:ss') , 
+	from_unixtime(1565798400,'yyyy-MM-dd'), 
+	from_unixtime(cast(1709516291488/1000 as int),'yyyy-MM-dd HH:mm:ss')   , 
+	from_unixtime(cast(substr(1709516291488,1,10) as int),'yyyy-MM-dd HH:mm:ss'),
+	from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') ;
+依次是获取默认时间戳的字符串，指定日期时间格式的字符串，仅指定日期格式的字符串，13位先转换10再获取字符串, 13位先转换为10位再获取字符串，当前时间的时间戳转换为字符串；
+_c0	_c1	_c2	_c3	_c4	_c5
+2023-12-15 13:29:23	2023-12-15 13:29:23	2019-08-15	2024-03-04 09:38:11	2024-03-04 09:38:11	2024-03-04 09:46:02
+注意：如果unixtime为13位的，需要先转成10位;
+

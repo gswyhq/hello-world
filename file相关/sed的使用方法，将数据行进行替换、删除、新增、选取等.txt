@@ -78,6 +78,12 @@ $ echo "第一,第二,第三" | sed 's|\(\w\+\),\(\w\+\),\(\w\+\)|\1\n\3\n\2\n\0
 第二
 第一,第二,第三
 
+# 正则匹配替换示例：
+root@23620ba1ca57:/test_20240129# string="#{y=year(current_date)/transaction_date=2023-12-19 00:00:00.0}"
+root@23620ba1ca57:/test_20240129# new_string=$(echo "$string" | sed 's/#{\(.*\)}/\1/g')
+root@23620ba1ca57:/test_20240129# echo "$new_string"
+y=year(current_date)/transaction_date=2023-12-19 00:00:00.0
+
 # 除了 / ,sed 中，竖线 | 也可以作为 模式 的分隔符。
 
 # sed,不支持非贪婪模式；删除前2个 - 的内容
@@ -234,4 +240,13 @@ sed -i '/<configuration>/a abcd\n123456' core-site.xml
 # 在DOS/Windows里，文本文件的换行符为\r\n，而在nix系统里则为\n，所以DOS/Windows里编辑过的文本文件到了nix里，每一行都多了个^M
 解决方法：
 使用sed命令sed -i "s/\r//" filename  或者 sed -i "s/^M//" filename直接替换结尾符为unix格式
+
+# 将一个或多个空格，替换成制表符 \t：
+echo "这是 一段     包含  多个     空格" | sed 's/ \{1,\}/\t/g'
+
+# 删除掉“=”前后的空格(可能是0个或多个)，其他位置的空格保留：
+`\s`是shell中的一个特殊字符序列，它代表任何空白字符，包括空格、制表符、换页符等。在正则表达式中，`\s`通常用于匹配空白字符。例如，`s/\s*/`表示匹配任何数量的空白字符。
+echo 'transaction_date  ="2024-05-31 00:00:00.0"' | sed 's/\s*=\s*/=/g'
+transaction_date="2024-05-31 00:00:00.0"
+
 

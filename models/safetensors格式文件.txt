@@ -1,0 +1,75 @@
+
+使用 torch.load() 保存模型，除非 weights_only 参数设置为True （只加载张量、原始类型和字典），否则隐式使用 pickle 模块，这是不安全的。可以构造恶意的 pickle 数据，该数据将在 unpickling 期间执行任意代码。切勿在不安全模式下加载可能来自不受信任来源的数据或可能已被篡改的数据，仅加载您信任的数据。为了规避类似的问题，新的权重存储格式 Safetensors 应运而生。
+
+Safetensors 是一种用于安全地存储张量的新格式，非常简单，但速度仍然很快（零拷贝）。
+
+pip install safetensors
+
+保存与加载张量
+保存张量：
+import torch
+from safetensors.torch import save_file
+
+tensors = {
+    "embedding": torch.zeros((2, 2)),
+    "attention": torch.zeros((2, 3))
+}
+save_file(tensors, "model.safetensors")
+
+加载张量：
+from safetensors import safe_open
+
+tensors = {}
+# with safe_open("model.safetensors", framework="pt", device=0) as f:
+with safe_open("model.safetensors", framework="pt", device='cpu') as f:
+    for k in f.keys():
+        tensors[k] = f.get_tensor(k) # loads the full tensor given a key
+print(tensors)
+# {'attention': tensor([[0., 0., 0.],
+#          [0., 0., 0.]], device='cuda:0'),
+#  'embedding': tensor([[0., 0.],
+#          [0., 0.]], device='cuda:0')}
+
+仅加载部分张量（延迟加载）：
+tensors = {}
+with safe_open("model.safetensors", framework="pt", device='cpu') as f:
+
+    tensor_slice = f.get_slice("embedding")
+    vocab_size, hidden_dim = tensor_slice.get_shape()
+    print(vocab_size, hidden_dim)
+    tensor = tensor_slice[:, :hidden_dim] # change the hidden_dim to load part of the tensor
+    print(tensor)
+# 2 2
+# tensor([[0., 0.],
+#         [0., 0.]])
+
+将PyTorch模型保存为Safetensors格式
+from torchvision.models import resnet18
+from safetensors.torch import load_model, save_model
+import torch
+
+model_pt = resnet18(pretrained=True)
+
+# 保存 state dict 为 safetensors格式
+save_model(model_pt, "resnet18.safetensors")
+# Instead of save_file(model.state_dict(), "model.safetensors")
+
+
+# 加载没有权重的模型
+model_st = resnet18(pretrained=False) 
+load_model(model_st, "resnet18.safetensors")
+# Instead of model.load_state_dict(load_file("model.safetensors"))
+
+
+# 使用随机图像对初始模型和从safetensors中加载权重的新模型进行推理
+img = torch.randn(2, 3, 224, 224)
+
+model_pt.eval()
+model_st.eval()
+
+
+with torch.no_grad():
+    print(torch.all(model_pt(img)==model_st(img))) # tensor(True)
+    
+
+

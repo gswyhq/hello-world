@@ -61,4 +61,23 @@ javaNLP/out/artifacts/javaNLP_jar/javaNLP.jar中没有主清单属性
 原因就是因为 Directory for META-INF/MANIFEST.MF: 路径选择错误，选择了main/java目录下所致。
 解决方法，删除打包好的jar文件，重新选择目标打包即可。
 
+# 若打包好后，java -jar ***.jar 报错：
+nested exception is java.lang.IllegalArgumentException: No auto configuration classes found in META-INF/spring.factories. 
+解决方法：
+在pom.xml中加入以下配置
+  <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <fork>true</fork>
+                            <mainClass>com.lv.DiscoveryApplicaion</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
 

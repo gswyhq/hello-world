@@ -1,0 +1,161 @@
+
+Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库。
+
+Frontend（FE），主要负责用户请求的接入、查询解析规划、元数据的管理、节点管理相关工作。
+
+Backend（BE），主要负责数据存储、查询计划的执行。
+
+一台机器上可以部署多个 BE 实例，但是只能部署一个 FE。如果需要 3 副本数据，那么至少需要 3 台机器各部署一个 BE 实例（而不是1台机器部署3个BE实例）。
+
+FE 角色分为 Follower 和 Observer，（Leader 为 Follower 组中选举出来的一种角色，以下统称 Follower）。
+FE 节点数据至少为1（1 个 Follower）。当部署 1 个 Follower 和 1 个 Observer 时，可以实现读高可用。当部署 3 个 Follower 时，可以实现读写高可用（HA）。
+Follower 的数量必须为奇数，Observer 数量随意。
+
+启动 FE
+在 FE 安装目录下执行下面的命令，来完成 FE 的启动。
+./bin/start_fe.sh --daemon
+
+查看 FE 运行状态
+你可以通过下面的命令来检查 Doris 是否启动成功
+curl http://127.0.0.1:8030/api/bootstrap
+
+这里 IP 和 端口分别是 FE 的 IP 和 http_port（默认 8030），如果是你在 FE 节点执行，直接运行上面的命令即可。
+如果返回结果中带有 "msg":"success" 字样，则说明启动成功。
+
+你也可以通过 Doris FE 提供的 Web UI 来检查，在浏览器里输入地址
+http:// fe_ip:8030
+
+若出现用户名、密码登录界面，说明 FE 启动成功
+这里我们使用 Doris 内置的默认用户 root 进行登录，密码是空
+这是一个 Doris 的管理界面，只能拥有管理权限的用户才能登录，普通用户不能登录。
+
+连接 FE
+可以通过 MySQL 客户端来连接 Doris FE
+
+下载mysql客户端：
+https://dev.mysql.com/downloads/mysql/
+解压下载的 MySQL 客户端，在 bin/ 目录下可以找到 mysql 命令行工具。然后执行下面的命令连接 Doris。
+mysql -uroot -P9030 -h127.0.0.1
+注意：
+这里使用的 root 用户是 doris 内置的默认用户，也是超级管理员用户，具体的用户权限查看 权限管理
+-P：这里是我们连接 Doris 的查询端口，默认端口是 9030，对应的是 fe.conf 里的 query_port
+-h：这里是我们连接的 FE IP 地址，如果你的客户端和 FE 安装在同一个节点可以使用 127.0.0.1。
+
+加密连接 FE
+Doris 支持基于 SSL 的加密连接，当前支持 TLS1.2，TLS1.3 协议，可以通过以下配置开启 Doris 的 SSL 模式： 修改 FE 配置文件conf/fe.conf，添加enable_ssl = true即可。
+接下来通过mysql客户端连接 Doris，mysql 支持五种 SSL 模式：
+
+1.mysql -uroot -P9030 -h127.0.0.1与mysql --ssl-mode=PREFERRED -uroot -P9030 -h127.0.0.1一样，都是一开始试图建立 SSL 加密连接，如果失败，则尝试使用普通连接。
+2.mysql --ssl-mode=DISABLE -uroot -P9030 -h127.0.0.1，不使用 SSL 加密连接，直接使用普通连接。
+3.mysql --ssl-mode=REQUIRED -uroot -P9030 -h127.0.0.1，强制使用 SSL 加密连接。
+4.mysql --ssl-mode=VERIFY_CA --ssl-ca=ca.pem -uroot -P9030 -h127.0.0.1，强制使用 SSL 加密连接，并且通过指定 CA 证书验证服务端身份是否有效。
+5.mysql --ssl-mode=VERIFY_CA --ssl-ca=ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem -uroot -P9030 -h127.0.0.1，强制使用 SSL 加密连接，双向验证。
+
+创建数据表
+创建一个数据库
+create database demo;
+
+创建数据表
+use demo;
+
+CREATE TABLE IF NOT EXISTS demo.example_tbl
+(
+    `user_id` LARGEINT NOT NULL COMMENT "用户id",
+    `date` DATE NOT NULL COMMENT "数据灌入日期时间",
+    `city` VARCHAR(20) COMMENT "用户所在城市",
+    `age` SMALLINT COMMENT "用户年龄",
+    `sex` TINYINT COMMENT "用户性别",
+    `last_visit_date` DATETIME REPLACE DEFAULT "1970-01-01 00:00:00" COMMENT "用户最后一次访问时间",
+    `cost` BIGINT SUM DEFAULT "0" COMMENT "用户总消费",
+    `max_dwell_time` INT MAX DEFAULT "0" COMMENT "用户最大停留时间",
+    `min_dwell_time` INT MIN DEFAULT "99999" COMMENT "用户最小停留时间"
+)
+AGGREGATE KEY(`user_id`, `date`, `city`, `age`, `sex`)
+DISTRIBUTED BY HASH(`user_id`) BUCKETS 1
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1"
+);
+
+示例数据
+10000,2017-10-01,北京,20,0,2017-10-01 06:00:00,20,10,10
+10000,2017-10-01,北京,20,0,2017-10-01 07:00:00,15,2,2
+10001,2017-10-01,北京,30,1,2017-10-01 17:05:45,2,22,22
+10002,2017-10-02,上海,20,1,2017-10-02 12:59:12,200,5,5
+10003,2017-10-02,广州,32,0,2017-10-02 11:20:00,30,11,11
+10004,2017-10-01,深圳,35,0,2017-10-01 10:00:15,100,3,3
+10004,2017-10-03,深圳,35,0,2017-10-03 10:20:22,11,6,6
+
+将上面的数据保存在test.csv文件中。
+
+导入数据
+这里我们通过 Stream load 方式将上面保存到文件中的数据导入到我们刚才创建的表里。
+
+curl  --location-trusted -u root: -T test.csv -H "column_separator:," http://127.0.0.1:8030/api/demo/example_tbl/_stream_load
+
+
+-T test.csv : 这里使我们刚才保存的数据文件，如果路径不一样，请指定完整路径
+-u root : 这里是用户名密码，我们使用默认用户 root，密码是空
+127.0.0.1:8030 : 分别是 fe 的 ip 和 http_port
+执行成功之后我们可以看到下面的返回信息
+
+{
+    "TxnId": 30303,
+    "Label": "8690a5c7-a493-48fc-b274-1bb7cd656f25",
+    "TwoPhaseCommit": "false",
+    "Status": "Success",
+    "Message": "OK",
+    "NumberTotalRows": 7,
+    "NumberLoadedRows": 7,
+    "NumberFilteredRows": 0,
+    "NumberUnselectedRows": 0,
+    "LoadBytes": 399,
+    "LoadTimeMs": 381,
+    "BeginTxnTimeMs": 3,
+    "StreamLoadPutTimeMs": 5,
+    "ReadDataTimeMs": 0,
+    "WriteDataTimeMs": 191,
+    "CommitAndPublishTimeMs": 175
+}
+
+NumberLoadedRows: 表示已经导入的数据记录数
+
+NumberTotalRows: 表示要导入的总数据量
+
+Status :Success 表示导入成功
+
+到这里我们已经完成的数据导入，下面就可以根据我们自己的需求对数据进行查询分析了。
+
+查询数据
+我们上面完成了建表，输数据导入，下面我们就可以体验 Doris 的数据快速查询分析能力。
+
+mysql> select * from example_tbl;
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+| user_id | date       | city   | age  | sex  | last_visit_date     | cost | max_dwell_time | min_dwell_time |
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+| 10000   | 2017-10-01 | 北京   |   20 |    0 | 2017-10-01 07:00:00 |   35 |             10 |              2 |
+| 10001   | 2017-10-01 | 北京   |   30 |    1 | 2017-10-01 17:05:45 |    2 |             22 |             22 |
+| 10002   | 2017-10-02 | 上海   |   20 |    1 | 2017-10-02 12:59:12 |  200 |              5 |              5 |
+| 10003   | 2017-10-02 | 广州   |   32 |    0 | 2017-10-02 11:20:00 |   30 |             11 |             11 |
+| 10004   | 2017-10-01 | 深圳   |   35 |    0 | 2017-10-01 10:00:15 |  100 |              3 |              3 |
+| 10004   | 2017-10-03 | 深圳   |   35 |    0 | 2017-10-03 10:20:22 |   11 |              6 |              6 |
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+6 rows in set (0.02 sec)
+
+mysql> select * from example_tbl where city='上海';
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+| user_id | date       | city   | age  | sex  | last_visit_date     | cost | max_dwell_time | min_dwell_time |
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+| 10002   | 2017-10-02 | 上海   |   20 |    1 | 2017-10-02 12:59:12 |  200 |              5 |              5 |
++---------+------------+--------+------+------+---------------------+------+----------------+----------------+
+1 row in set (0.05 sec)
+
+mysql> select city, sum(cost) as total_cost from example_tbl group by city;
++--------+------------+
+| city   | total_cost |
++--------+------------+
+| 广州   |         30 |
+| 上海   |        200 |
+| 北京   |         37 |
+| 深圳   |        111 |
++--------+------------+
+4 rows in set (0.05 sec)

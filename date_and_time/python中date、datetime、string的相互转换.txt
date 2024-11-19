@@ -16,6 +16,10 @@ dt = datetime.fromisoformat('2018-09-22 16:28:22.666')
 dt = datetime.fromisoformat('2018-09-22 16:28:22.666+08:00')
 dt = datetime.strptime('2018-09-22 16:28:22', '%Y-%m-%d %H:%M:%S')
 
+intime='2023-10-23 16:35:05.0'
+datetime.strptime(intime,'%Y-%m-%d %H:%M:%S.%f')
+Out[12]: datetime.datetime(2023, 10, 23, 16, 35, 5)
+
 时间的加减：
 >>> last = time1 - datetime.timedelta(hours = 24)
 >>> next_dat = time1 + datetime.timedelta(days=1, hours=23, minutes=59, seconds=59, microseconds=999999)

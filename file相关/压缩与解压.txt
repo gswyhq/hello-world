@@ -347,6 +347,14 @@ bzip2
 # 压缩成bz2文件，并保留源文件
 # gswyhq@gswyhq-pc:~/data/word-vectors$ bzip2 -k sgns.target.word-character.char1-1.dynwin5.thr10.neg5.dim300.iter5
 
+# 重定向并压缩到文件：
+hive -f select_20240822_150608.sql  |gzip > select_20240822_150608.txt.gz;
+
+# 解压gzip压缩的文件(若无-k参数，默认情况下源文件会删除)：
+gzip -d select_20240822_150608.txt.gz
+-d	解压缩文件
+-f	强制压缩文件，即使已经存在同名的压缩文件
+-k	压缩文件并保留原始文件
 
 总结
 1、*.tar 用 tar –xvf 解压

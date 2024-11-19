@@ -223,7 +223,8 @@ Out[15]: (50, 11)
 
 # 全部数据打乱，重新洗牌：
 方法1：采用pandas中自带的 sample这个方法。
-df = df.sample(frac=1)
+df = df.sample(frac=1) #打乱所有数据
+设置frac=0.5表示随机抽取50%的数据
 这样对可以对df进行shuffle。其中参数frac是要返回的比例，比如df中有10行数据，我只想返回其中的30%,那么frac=0.3。
 有时候，我们可能需要打混后数据集的index（索引）还是按照正常的排序。我们只需要这样操作
 df.sample(frac=1).reset_index(drop=True)
@@ -330,6 +331,17 @@ Out[112]:
 0  5  a
 2  5  c
 
+# 随机采样，Pandas随机删除5%的数据
+# 可以使用sample()函数来进行随机选取并删除指定比例的数据。
+# 计算要保留的样本数量, 计算保留多少行
+keep_count = int(len(df)-int(0.05*len(df)) )
+# 随机选取并删除5%的数据
+random_indexes = df.sample(n=keep_count).index
+new_df = df[df.index.isin(random_indexes)]
+
+# 使用skiprows参数，随机读取1%的数据(按行号读取，每100行读取一次)：
+df = pd.read_csv(file_name, skiprows=lambda x: x % 100 != 0)
+
 # 根据索引取行，筛选指定索引行号的数据，如：选取选取索引号为1、3、4的行, 按行号筛选；逗号后的指的列索引，冒号:，代表所有列；
 df2.loc[[1,3, 4],:]
 
@@ -410,6 +422,14 @@ df3=data_5316429_tag_df2.groupby(['流水号', '标注间隔天数']).apply(lamb
 为了将 groupby 排序列 重新设置为列，我们通常在调用完毕后再次调用reset_index（）方法
 而as_index参数也可以起到同样作用，该参数是控制groupby方法是否需要将列作为新的index。默认是True，为了达到上述目的，我们只需要将其设置为False即可
 >>> df.groupby(by='grade', as_index=False).sum()
+
+# 将某列大于阈值的替换成固定值：
+df = pd.DataFrame({
+    'A': [1, 2, 3, 4, 5],
+    'B': [10, 20, 30, 40, 50]
+})
+将A列大于3的替换成-1
+df['A'] = df['A'].apply(lambda x: -1 if x > 3 else x)
 
 def main():
     pass

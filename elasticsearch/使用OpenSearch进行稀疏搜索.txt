@@ -1,0 +1,187 @@
+
+OpenSearch和Elasticsearch (ES) 的关系，因为OpenSearch是由一群离开Elastic公司的开发人员创建的，他们离开了Elastic公司是因为Elastic公司宣布他们的商业许可证将改变，使得一些开发人员对于开源许可证的使用感到担忧。这些离开的开发人员创建了OpenSearch作为Elasticsearch的一个分支，并承诺将OpenSearch保持作为一个真正的开源项目，同时继续开发和支持OpenSearch。OpenSearch最初就是基于Elasticsearch的代码库。它们都是搜索引擎，使用相似的查询语言和索引管理方法。
+
+在 OpenSearch NeuralSearch 插件中推出了 Neural Sparse 功能
+
+当前语义检索的主要方法来自于稠密编码（Dense Encoding），待检索的文档以及查询文本都会被语言编码模型转换为一个高维空间中的向量。例如 Sentence-BERT 中的 TASB 模型会生成 768 维的向量，All-MiniLM-L6 则会将文本转化为 384 维的向量。这一类高维向量的索引需要用到特殊的 k-NN 搜索引擎，例如最早基于树结构的 FLANN、基于哈希的 LSH、还有后来出现基于邻近图与跳表的 HNSW 以及最新基于量化的 FAISS 引擎。
+
+而稀疏编码（Sparse Encoding）则会将文本转化为一组 token 与权值的组合。这里的 token 是语言编码模型采用分割器对文本进行切割后产生的文字单元。例如使用 WordPiece 分割器，token 可以在一定程度上理解为「单词」，但也会出现单词过长而被切分为两个 token 的情况。
+
+稠密编码:
+好好学习 -> [0.123,0.983,0.223,...,0.188]
+
+稀疏编码:
+好好学习 -> [("好", 0.238), ("好", 0.238), ("学习", 0.901)]
+
+由于稀疏编码所产生的 token - 权值组合，与传统文本匹配方法采用的 term-vector 非常类似，所以在 OpenSearch 中可以采用原生的 Lucene 索引去存储文档稀疏编码。相较于 k-NN 搜索引擎，原生的 Luence 引擎会更加轻便，占用的资源也较少。
+
+Neural Search 同时提供了一种能够提供极致线上检索速度的模式。在这种模式下，仅有待检索的文档会进行稀疏编码。相反，在在线检索的过程中，查询文本并不会调用语言编码模型进行编码。而仅仅使用分割器（tokenizer）对查询文本进行分割。由于省去了对深度学习模型的调用过程，不但大大降低了在线检索的时延，也节省了模型推理所需要的大量计算资源。
+
+在稀疏编码的过程中，文本被转化为一组 token 与权值的组合。这种转化产生了大量权值较低的 token，这些 token 虽然在搜索过程中占用了大部分时间，但对最终搜索结果的贡献并不显著。
+
+因此，我们提出了一种新的搜索策略，首先在第一次搜索中过滤掉这些低权值 token，仅依赖高权值 token 来定位排名较高的文档。随后在这些精选的文档上，重新引入之前被过滤的低权值 token 进行第二次详细评分，从而获取最终得分。
+
+通过这种方法，我们显著减少了两部分的延时：首先，在第一阶段搜索中，仅通过高权值 token 在倒排索引中进行匹配，大幅减少了不必要的计算时间。其次，在精确的小范围结果文档内再次评分时，我们仅对具有潜在相关性的文档计算低权值 token 的分数，进一步优化了处理时间。
+
+1. 设置启用 Neural Search
+
+首先设置集群配置来使得模型可以在本地集群上运行。
+
+PUT /_cluster/settings
+{
+  "transient" : {
+    "plugins.ml_commons.allow_registering_model_via_url" : true,
+    "plugins.ml_commons.only_run_on_ml_node" : false,
+    "plugins.ml_commons.native_memory_threshold" : 99
+  }
+}
+
+
+2. 部署编码器
+
+
+
+Opensearch 目前开源了 3 个模型。相关注册信息都可以在官方文档中获取。我们以 amazon/neural-sparse/opensearch-neural-sparse-encoding-v1 为例，首先使用 register API 来注册：
+
+
+
+POST /_plugins/_ml/models/_register?deploy=true
+{
+    "name": "amazon/neural-sparse/opensearch-neural-sparse-encoding-v1",
+    "version": "1.0.1",
+    "model_format": "TORCH_SCRIPT"
+}
+
+
+在集群的返回中，可以看到 task_id
+
+{
+    "task_id": "<task_id>",
+    "status": "CREATED"
+}
+
+用 task_id 来得到详细的注册信息：
+
+
+
+GET /_plugins/_ml/tasks/
+
+
+在 API 返回中，我们可以拿到具体的 model_id:
+
+
+
+{
+    "model_id": "<model_id>",
+    "task_type": "REGISTER_MODEL",
+    "function_name": "SPARSE_TOKENIZE",
+    "state": "COMPLETED",
+    "worker_node": [
+        "wubXZX7xTIC7RW2z8nzhzw"
+    ],
+    "create_time": 1701390988405,
+    "last_update_time": 1701390993724,
+    "is_async": true
+}
+
+3. 设置预处理管线
+
+在索引之前，每个文档需要被编码的文本字段需要被转变成稀疏向量。在 OpenSearch 中，这一过程是通过预处理器来自动实现的。你可以使用以下 API 来创建离线索引时的处理器管线：
+
+PUT /_ingest/pipeline/neural-sparse-pipeline
+{
+  "description": "An example neural sparse encoding pipeline",
+  "processors" : [
+    {
+      "sparse_encoding": {
+        "model_id": "<model_id>",
+        "field_map": {
+           "passage_text": "passage_embedding"
+        }
+      }
+    }
+  ]
+}
+
+如果需要开启两阶段加速功能 (非必需功能)，则需要建立一个两阶段搜索管线，并在索引建立之后设置为默认的搜索管线。
+
+
+
+建立一个默认参数的两阶段加速搜索管线方式如下，更详细的参数设置和意义请参考 2.15 及以后版本的 OpenSearch 官方文档。
+
+
+
+PUT /_search/pipeline/two_phase_search_pipeline
+{
+  "request_processors": [
+    {
+      "neural_sparse_two_phase_processor": {
+        "tag": "neural-sparse",
+        "description": "This processor is making two-phase processor."
+      }
+    }
+  ]
+}
+
+
+4. 设置索引
+
+
+
+神经稀疏搜索利用 rank_features 字段类型来存储编码得到的词元和相对应的权重。索引将使用上述预处理器来编码文本。我们可以按以下方式创建索一个包含两阶段搜索加速管线的索引（如果不想开启此功能，可把 `two_phase_search_pipeline` 替换为 `_none` 或删除 `settings.search` 这一配置单元）。
+
+
+
+PUT /my-neural-sparse-index
+{
+  "settings": {
+    "ingest":{
+        "default_pipeline":"neural-sparse-pipeline"
+    },
+    "search":{
+        "default_pipeline":"two_phase_search_pipeline"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "passage_embedding": {
+        "type": "rank_features"
+      },
+      "passage_text": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+
+5. 使用预处理器导入文档并搜索
+
+在设置索引之后，客户可以提交文档。客户提供文本字段，而摄取进程将自动将文本内容转换为稀疏向量，并根据预处理器中的字段映射 field_map 将其放入 rank_features 字段：
+
+PUT /my-neural-sparse-index/_doc/
+{
+   "passage_text": "Hello world"
+}
+
+
+在索引中进行稀疏语义搜索的接口如下，将 <model_id> 替换为第二步中注册的 model_id：
+
+
+GET my-neural-sparse-index/_search
+{
+  "query": {
+    "neural_sparse": {
+      "passage_embedding": {
+        "query_text": "Hi world",
+        "model_id": <model_id>
+      }
+    }
+  }
+}
+
+来源：
+亚马逊云创新「神经稀疏检索」：仅需要文本匹配就能实现语义搜索
+机器之心
+2024-06-30 18:20
+

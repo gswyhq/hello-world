@@ -48,6 +48,13 @@ alter table testljb add partition(age=1,sex='male');
 # 删除分区,删除分区age=1
 alter table testljb drop partition(age=1);
 注：加入表testljb有两个分区字段（上文已经提到多个分区先后顺序类似于windows的文件夹的树状结构），partitioned by(age int ,sex string)，那么我们删除age分区（第一个分区）时，会把该分区及其下面包含的所有sex分区一起删掉。
+删除指定分区：
+ALTER TABLE table_name DROP IF EXISTS PARTITION(year = 2015, month = 10, day = 1);
+或者：
+DELETE FROM my_table PARTITION (date = '2022-01-01');
+
+# 删除分区下的特定数据行（删除按条件筛选的数据行）：
+delete from user  partition(year = '2020') where  sex = '男'
 
 # 修复分区,修复分区就是重新同步hdfs上的分区信息。
 msck repair table table_name;

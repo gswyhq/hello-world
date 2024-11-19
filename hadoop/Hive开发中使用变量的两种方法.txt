@@ -86,4 +86,23 @@ QUAN=$(hive -S -e "select count(1) from test" | grep quantity | cut -f 2)
 hive -S -e "select 'quantity', count(1) from test" | grep quantity | { read a1 a2; echo $a2; }
 目前，建议使用方法一的脚本，方法二脚本若不能保证查询结果为一行，则会产生报错。
 
+---------------------------------------------------------------------------
+hive客户端中使用自定义变量(Hive按原样替换变量，但不执行它们),示例：
+hive (default)> set hivevar:v1=se;
+hive (default)> set hivevar:v2=l;
+hive (default)> set hivevar:v3=ec;
+hive (default)> set hivevar:v4=t 1+;
+hive (default)> set hivevar:v5=2;
+hive (default)> ${hivevar:v1}${hivevar:v2}${hivevar:v3}${hivevar:v4}${hivevar:v5};
+OK
+3
+
+---------------------------------------------------------------------------
+前一个select查询的结果，赋值给变量，再传递到后一个查询(需从shell执行)：
+$ hive --hivevar x=$(hive -e 'set hive.cli.print.header=false;select 1+2') -e 'select ${hivevar:x}*100'
+
+查询最新的分区，再根据分区条件进行查询：
+~]$ hive --hivevar dt=$(hadoop fs -ls /path/to/directory | sort -k6 -r | head -1 | tail -c 7) -e 'select * from db_name.table_name where dt =${hivevar:dt} limit 3'
+
+
 

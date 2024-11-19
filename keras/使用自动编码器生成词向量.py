@@ -68,6 +68,8 @@ seq = tokenizer.texts_to_sequences([sentence])
 pad_seq = pad_sequences(seq, maxlen)
 sentence_vec = encoder_model.predict(pad_seq)[0]
 
+
+
 def main():
     pass
 

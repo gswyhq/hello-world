@@ -1,4 +1,10 @@
 
+# 将某个字段导出为list:
+select collect_list(col) from hive_table;
+
+# 将某个字段导出为list,并去重：
+select collect_set(col) from hive_table;
+
 # 将字符串转换为map:
 select t2.id, str_to_map(t2.val, ' ', ':')
 from (
@@ -14,7 +20,15 @@ from (
                 ) t
         )t2
 ;
-
+说明：str_to_map (字符串参数, 分隔符1, 分隔符2)
+使用两个分隔符将文本拆分为键值对。
+分隔符1将文本分成K-V对，分隔符2分割每个K-V对。对于分隔符1默认分隔符是 ','，对于分隔符2默认分隔符是 '='。
+上语句输出结果：
+id	_c1
+1	{"104":"1"}
+2	{"104":"1"}
+3	{"104":"1","579":"1"}
+4	{"107":"1"}
 
 # 将map按key拆分为多行：
 SELECT  a.c1,
@@ -56,4 +70,12 @@ from (
 					map_value
 	)t3 
 	group by t3.map_key;
+
+# 取出每个key的值：
+原始数据，其中hist字段数据类型为：map<string,string>
+select ani, hist from test_table2 limit 1;
+z3ntbA==	{"intime":"2023-10-18 15:57:40.0","business_type":"202","hanguptime":"2023-10-18 15:58:25.0"}
+将map字段数据取出：
+select ani, hist['intime'] as intime, hist['hanguptime'] as hanguptime, hist['business_type'] as business_type from test_table2 limit 1;
+z3ntbA	2023-10-18 15:57:40.0	2023-10-18 15:58:25.0	202
 

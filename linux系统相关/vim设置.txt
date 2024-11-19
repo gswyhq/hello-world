@@ -96,4 +96,12 @@ hi CursorColumn cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=whi
 Settings -> Terminal -> Colors scheme: Customize -> Cursor settings -> Cursor color -> 设置颜色即可；
 设置好后，需在新开窗口中才会生效，已经打开窗口，是无效的；
 
+# 如何修改 vim打开文件注释的颜色
+1、打开你的 `~/.vimrc` 文件。
+2、输入以下指令来更改注释的前景色：
+```
+hi Comment ctermfg=6 # 将注释前景色设置为蓝色
+```
+这里`6` 是颜色的索引值，表示蓝色。你还可以选择其他颜色，如`0` 表示黑色，`1` 表示红色，依此类推。
+3、保存并退出文件。
 

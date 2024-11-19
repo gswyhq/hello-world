@@ -88,3 +88,19 @@ tblproperties ("skip.header.line.count"="1")
 location '/user/20181018';
 注意：实际上标题行数据导入到了hive，只是不显示而已，若将该表数据迁移到另外数据表时候，标题行还是存在的。
 
+# 若hive某些字段内容中含有换行符，直接select * 查询导出结果到文件的时候，往往会出现错行情况
+这个时候，可以使用map或array解决查询结果错行的问题
+如：
+select array( ani,
+	start_time, end_time, data, text)as curr
+from hive_table;
+或者：
+select map('ani', ani, 'start_time', start_time,'end_time', end_time,'data', data,'text', text)as json_data
+from hive_table;
+
+# 使用指定分割符, 指定查询输出分隔符,假设默认分隔符是\t，这里转换为,；
+# 方法一：sed
+hive -e "select * from pms.pms_algorithm_desc" | sed 's/\t/,/g' > ./aaa.txt
+# 方法二：tr
+hive -e "select * from pms.pms_tp_config" | tr "\t" ","
+

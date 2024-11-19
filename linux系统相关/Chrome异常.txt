@@ -26,3 +26,7 @@ $ sudo apt install ./google-chrome-stable_current_amd64.deb
 注意：
 需要在www.google.cn/chrome下载，在 https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb ，下载的deb包仍旧提示不是最新版本；
 
+# 问题：怎么全部保存浏览器中打开的所有标签页
+直接在浏览器里使用快捷键“Ctrl+Shift+D”
+按下此快捷键后，所有打开的标签页都会存在书签里的一个自定义文件夹里面
+

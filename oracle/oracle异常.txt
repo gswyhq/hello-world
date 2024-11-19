@@ -91,3 +91,13 @@ oracledb.exceptions.DatabaseError: ORA-00922: missing or invalid option
 # 问题：
 oracledb.exceptions.DatabaseError: ORA-01920: user name 'GENESYSDATA' conflicts with another user or role name
 检查用户名是否已经存在了；
+
+# 问题，插入数据时候报错：
+ORA-01747: invalid user.table.column, table.column, or column specification
+这个出错的原因是因为表的列名称使用了Oracle声明的关键字。
+可通过Oracle提供的V$RESERVED_WORDS，查看关键字
+select * from v$reserved_words ORDER BY KEYWORD ASC
+解决方法：
+方法1：将字段改成非关键字；
+方法2：使用双引号，如 SELECT "NUMBER" FROM TABLE_NAME;
+

@@ -47,6 +47,9 @@ awesome.export("mashup.mp3", format="mp3", parameters=["-ac", "2", "-vol", "150"
 # root@b56138676fb3:~# ffmpeg -i sample-en.mp3 from_mp3.wav
 # root@b56138676fb3:~# ffmpeg -i sample-en.flac from_flac.wav
 # root@b56138676fb3:~# ffmpeg -i sample-en.flac from_flac.mp3
+# 其他格式转换方法类似：
+# ffmpeg -i input.mp4 out.mp3
+# ffmpeg ffmpeg -i input.flac -id3v2_version 3 out.mp3
 
 # 方案三：通过docker镜像：
 # docker run --rm -it -v $PWD:/data gswyhq/ffmpeg:v4.1.4-1 ffmpeg -i /data/sample-en.wav /data/sample-en.mp3

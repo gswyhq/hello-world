@@ -1,0 +1,24 @@
+
+1、登录客户端：
+~$ clickhouse23-client client -h 192.168.3.105  -u zhangsan --password 123456
+
+
+2、查看数据库
+abcd032481 :) show databases;
+
+3、使用数据库：
+abcd032481 :) use table2;
+
+4、查看当前使用的数据库：
+abcd032481 :) select currentDatabase();
+
+5、查看数据表：
+abcd032481 :) show tables;
+
+6、执行查询命令：
+abcd032481 :) select * from db123.event_35qalpyl limit 3;
+
+7、查看表结构：
+abcd032481 :) desc db123.event_35qalpyl;
+
+

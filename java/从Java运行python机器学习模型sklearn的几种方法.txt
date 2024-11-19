@@ -194,4 +194,95 @@ javac  -encoding UTF-8 -cp .m2/repository/com/google/guava/failureaccess/1.0.1/f
 运行编译的java文件：
 java -cp .;.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar;.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.12.3/*.jar;.m2/repository/com/google/guava/guava/30.1-jre/guava-30.1-jre.jar;.m2/repository/org/jpmml/jpmml-model/1.5.15/pmml-model-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator/1.5.15/pmml-evaluator-1.5.15.jar;.m2/repository/org/jpmml/pmml-evaluator-extension/1.5.15/pmml-evaluator-extension-1.5.15.jar PmmlModel.RiskModel2
 
+# 方法3，示例2：xgboost 多分类：
+```python
+
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from xgboost.sklearn import XGBClassifier
+from sklearn2pmml import PMMLPipeline,sklearn2pmml, make_pmml_pipeline
+from pypmml import Model
+from nyoka import xgboost_to_pmml
+
+iris = load_iris()
+# 提取特征名称（数据的名称）
+feature = iris['feature_names']
+# feature = ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']
+# 目标名称
+target = 'class'
+# 获取数据
+data = iris['data']
+# 获取标签
+label = iris['target']
+# 获取训练集和测试集
+x_train, x_test, y_train, y_test = train_test_split(data, label, train_size=0.8)
+
+# 加载XGBoost
+params = {'objective': 'multi:softmax',
+         'num_class': len(set(y_train)),
+         'eta': 0.1,
+         'max_depth': 10,
+         'min_child_weight': 3,
+         'gamma': 0.1,
+         'eval_metric': ['merror', 'mlogloss'],
+         'nthread': 4}
+
+clt = XGBClassifier(**params)
+clt.fit(x_train,y_train)
+y_pred1 = clt.predict(x_test)
+pmml = PMMLPipeline([("class", clt)])
+y_pred2 = pmml.predict(x_test)
+
+# 转为PMML文件
+sklearn2pmml(pmml, "xgboost.pmml", with_repr = True)
+# 加载模型
+model = Model.fromFile('xgboost.pmml')
+y_pred3 = model.predict(x_test)
+
+print("训练后的模型预测正确率：", metrics.accuracy_score(y_test, y_pred1))
+print("转换为pmml模型预测正确率：", metrics.accuracy_score(y_test, y_pred2))
+print('加载pmml模型预测正确率：', metrics.accuracy_score(y_test, np.array([t[-1] for t in y_pred3])))
+```
+
+java pom.xml文件内容：
+    <dependency>
+      <groupId>org.pmml4s</groupId>
+      <artifactId>pmml4s_2.12</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+```java
+
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.pmml4s.model.Model;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+public class PMMLPredictor {
+    private static String filePath = "src/main/resources/pmml/xgboost.pmml";
+
+    public static void main(String[] args) {
+
+        Model model = Model.fromFile(filePath);
+        Float [] argsList = {6.3f, 3.4f, 5.6f, 2.4f};
+        String[] inputFieldList = {"sepal length (cm)", "sepal width (cm)", "petal length (cm)", "petal width (cm)"};
+        Map<String, Object> result = model.predict(new HashMap<String, Object>() {{
+            put("sepal length (cm)", 6.3F);
+            put("sepal width (cm)", 3.4F);
+            put("petal length (cm)", 5.6F);
+            put("petal width (cm)", 2.4F);
+        }});
+
+        log.info("模型预测的各个类别概率及最有可能的类别：{}", JSONObject.toJSONString(result));
+        log.info("模型预测的类别：{}", result.get("predicted_class"));
+
+//        {class_probability_0=0.006567756160065399, class_probability_2=0.9814572606372174, class_probability_1=0.011974983202717332, predicted_class=2}
+
+    }
+}
+```
 

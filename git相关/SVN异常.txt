@@ -1,0 +1,10 @@
+
+# svn 更新远程代码到本地时，出现错误：
+error Working copy '***\trunk' locked.
+error '***\trunk' is already locked.
+error Please execute the 'Cleanup' command.
+解决方法：
+使用 mobaxterm 切换到trunk 目录，执行 `svn cleanup` 命令；
+再执行`svn update` 命令，即可以更新最新的远程代码到本地了；
+
+

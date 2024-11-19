@@ -163,3 +163,11 @@ Main-Class: GPSConverter.LonLatDistance
 :: 将.class文件打包成jar文件：
 ~$ jar cvfm GPSConverter/Converter.jar GPSConverter/manf GPSConverter/*.class 
 
+# 字符串转换为数字再排序：
+order by 字段+0 ；如：
+select explode(split('10|11|12|1|23|13|2|3|15|16|7|40|20', '\\|')) as num order by num+0;
+
+# 给查询结果加上序号（从1开始）
+select code, row_number() over(partition by 1 ORDER BY code) as idx
+from test_table;
+

@@ -54,7 +54,16 @@ mpl.rcParams['font.family'] = 'sans-serif'
 mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体   
 mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题
 
-# 方法二（局部设置）：
+# 方法二（全局设置），设置为自定义路径下的字体：
+import matplotlib.pyplot as plt
+from matplotlib import font_manager 
+font_manager.fontManager.addfont('C:\Windows\Fonts\simhei.ttf')
+prop = font_manager.FontProperties(fname='C:\Windows\Fonts\simhei.ttf')
+plt.rcParams['font.family'] = prop.get_family()
+plt.rcParams['font.sans-serif'] = prop.get_name() #指定自定义路径中文字体为默认字体
+
+
+# 方法三（局部设置）：
 z = np.linspace(0., 5., 1000)  # [0, 5] 之间1000个均匀分布的点；
 gauss = np.exp(-z**2)
 cauchy = 1/(1+z**2)

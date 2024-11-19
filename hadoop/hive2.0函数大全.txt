@@ -1163,5 +1163,7 @@ Explodes an array of structs into a table. (As of Hive 0.10.).
 
 hive常用函数：https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF
 
+# 查看函数的说明及详细信息, 查看函数帮助：
+desc function extended sort_array;
  
  

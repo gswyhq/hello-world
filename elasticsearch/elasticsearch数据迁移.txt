@@ -189,3 +189,80 @@ gswewf@gswewf-PC:~$ docker run --rm  -ti -v $PWD/data:/data taskrabbit/elasticse
 gswewf@gswewf-PC:~/yhb/es_search$ docker run --rm -ti -v "$PWD/data:/data" taskrabbit/elasticsearch-dump /bin/multielasticdump --input="http://192.168.3.105:9200" --output="/data/jykl"
 # 从文件中导入数据到es
 gswewf@gswewf-PC:~/yhb/es_search$ docker run --rm -ti -v "$PWD/data:/data" taskrabbit/elasticsearch-dump /bin/multielasticdump --direction=load --output="http://elastic:web1_2008@192.168.3.145:9200" --input="/data/jykl"
+
+# es集群扩容，缩容，有时候为了降本需要，可能需要对es集群进行缩容：
+有如下5台主机，5个主节点，5个数据节点，共10个节点：
+~]$ curl "192.168.3.150:9200/_cat/nodes?v"
+ip           heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
+192.168.3.150           47          26   0    0.01    0.04     0.06 mdi       -      master-data-05
+192.168.3.117           54          99   1    0.09    0.11     0.13 mdi       *      master-data-02
+192.168.3.16            44          96   1    0.22    0.14     0.18 mdi       -      master-data-01
+192.168.3.118           35          97   2    0.00    0.02     0.08 di        -      data-node-08
+192.168.3.16            42          96   1    0.22    0.14     0.18 di        -      data-node-06
+192.168.3.117           31          99   1    0.09    0.11     0.13 di        -      data-node-07
+192.168.3.122           19          25   0    0.25    0.25     0.29 mdi       -      master-data-04
+192.168.3.118           39          97   2    0.00    0.02     0.08 mdi       -      master-data-03
+192.168.3.150           23          26   0    0.01    0.04     0.06 di        -      data-node-10
+192.168.3.122           50          25   0    0.25    0.25     0.29 di        -      data-node-09
+可通过如下命令，执行缩容命令
+该命令会将192.168.3.150,192.168.3.122这两台节点上的数据，迁移到 192.168.3.16、192.168.3.117、192.168.3.118
+curl -H "Content-Type: application/json" -XPUT 192.168.3.16:9200/_cluster/settings -d '{"transient": {"cluster.routing.allocation.exclude._ip": "192.168.3.150,192.168.3.122"}}' 
+命令执行完成后，后台会执行数据迁移动作
+等最终迁移完，通过下面命令查询，总节点数还是不变的：
+curl '192.168.3.16:9200/_cat/nodes?v'
+通过下面命令查询，发现是没有分片数据在192.168.3.122，192.168.3.150
+curl '192.168.3.117:9200/_cat/shards?v'
+通过下面命令可以查询健康状态及正在迁移分片数：
+curl -XGET '192.168.3.16:9200/_cluster/health?pretty'
+{
+  "cluster_name" : "tts-bancas",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 10,
+  "number_of_data_nodes" : 10,
+  "active_primary_shards" : 2118,
+  "active_shards" : 4199,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 100.0
+}
+解释：
+cluster_name：集群名称。
+status：集群健康状态（green、yellow、red）。
+timed_out：请求是否超时。
+number_of_nodes：集群中的节点数量。
+number_of_data_nodes：集群中的数据节点数量。
+active_primary_shards：活动的主分片数量。
+active_shards：活动的分片总数。
+relocating_shards：正在迁移的分片数量。
+initializing_shards：正在初始化的分片数量。
+unassigned_shards：未分配的分片数量。
+delayed_unassigned_shards：延迟未分配的分片数量。
+number_of_pending_tasks：待处理任务的数量。
+number_of_in_flight_fetch：正在获取的分片数量。
+task_max_waiting_in_queue_millis：任务在队列中等待的最长时间（毫秒）。
+active_shards_percent_as_number：活动分片的百分比。
+降低`discovery.zen.minimum_master_nodes`设置以保证多数派选举可以正常进行。如果你之前是3个主节点，可能需要将其降至2（但请注意这降低了集群的耐故障性）。修改这个设置并应用：
+curl -H 'Content-Type: application/json' -X PUT 192.168.3.16:9200/_cluster/settings -d'
+   {
+     "persistent": {
+       "discovery.zen.minimum_master_nodes": 2
+     }
+   }'
+还需下一步：1、关闭不需要的节点；2、修改配置文件移除即将停用的节点，防止重启时自动加入集群。
+
+扩容，则与缩容相反：
+手动指定 shard 分配到新增节点
+PUT _cluster/_settings
+{
+  "index.routing.allocation.include._ip": "x.x.x.x,y.y.y.y"
+}
+
+
+
+

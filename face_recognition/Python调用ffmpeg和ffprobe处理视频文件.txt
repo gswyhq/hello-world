@@ -49,6 +49,63 @@ ffmpeg -i ./plutopr.mp4 -vcodec copy -acodec copy -ss 00:00:10 -to 00:00:15 ./cu
 -i 表示源视频文件
 -y 表示如果输出文件已存在则覆盖。
 
+# mp4格式 转换为 mp3格式
+ffmpeg -i $ID.mp4 -acodec libmp3lame -ac 1 -ar 16000 $ID.mp3
+ffmpeg -i $ID.mp4 -vn -ab 128k -ar 16000 -y $ID.mp3
+ffmpeg -i $ID.mp4 $ID.mp3
+ffmpeg -i in.mp4 -q:a 0 -map a out.mp3
+
+-i: 表示输入的音频或视频
+-ac: channel 设置通道3, 默认为1
+-ar: sample rate 设置音频采样率
+-acodec: 使用codec编解码
+-ab: bitrate 设置音频码率
+-vn: 不做视频记录
+libmp3lame: 使用libmp3lame编码mp3
+-y: 覆盖输出文件
+-q:a 0：设置音频质量，0 为最高质量（最低压缩）。
+-map a：只提取音频流。
+
+mp4 to wav:
+ffmpeg -i $ID.mp4 -ac 1 -ar 16000 $ID.wav
+
+webm to mp3:
+ffmpeg -i $ID.webm -acodec libmp3lame -ac 1 -ar 16000 $ID.mp3
+
+webm to wav:
+ffmpeg -i $ID.webm -ac 1 -ar 16000 $ID.wav
+
+wav to mp3:
+ffmpeg -i input.wav -vn -ar 44100 -ac 2 -ab 192k -f mp3 output.mp3
+ffmpeg -i audio.wav -acodec libmp3lame audio.mp3
+-f: 强制使用某种输出格式，通常输入文件的格式是自动检测的，输出文件的格式根据后缀猜测，所以大多数情况不需要设置 -f 
+
+wav to flac:
+ffmpeg -i input.wav output.flac
+
+flac to wav:
+ffmpeg -i input.flac output.flac
+
+aac to mp3:
+ffmpeg -i audio.aac -acodec libmp3lame -ac 2 -ab 160 audio.mp3
+
+aac to wav:
+ffmpeg -i audio.aac audio.wav
+
+aac to ac3:
+ffmpeg -i audio.aac -acodec ac3 audio.ac3
+
+aac to ogg:
+ffmpeg -i input.aac -libvorbis output.ogg
+
+wav to ogg:
+ffmpeg -i input.wav -acodec libvorbis output.ogg
+
+wav to aac:
+ffmpeg -i input.wav -acodec libfaac output.aac
+
+wav to ac3:
+ffmpeg -i input.wav -acodec ac3 output.ac3
 
 
 

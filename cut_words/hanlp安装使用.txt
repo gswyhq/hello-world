@@ -1,0 +1,104 @@
+
+# 安装
+
+pip3 install hanlp
+
+import hanlp
+HanLP = hanlp.load(hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_SMALL_ZH) # 世界最大中文语料库
+HanLP(['字段名称'])
+                                   Out[2]: 
+{'tok/fine': [['字段', '名称']],
+ 'tok/coarse': [['字段', '名称']],
+ 'pos/ctb': [['NN', 'NN']],
+ 'pos/pku': [['n', 'n']],
+ 'pos/863': [['n', 'n']],
+ 'ner/msra': [[]],
+ 'ner/pku': [[]],
+ 'ner/ontonotes': [[]],
+ 'srl': [[]],
+ 'dep': [[(2, 'nn'), (0, 'root')]],
+ 'sdp': [[[(2, 'Host')], [(0, 'Root')]]],
+ 'con': [['TOP', [['NP', [['NN', ['字段']], ['NN', ['名称']]]]]]]}
+hanlp.__version__
+Out[3]: '2.1.0-beta.57'
+
+import hanlp
+HanLP = hanlp.pipeline() \
+    .append(hanlp.utils.rules.split_sentence, output_key='sentences') \
+    .append(hanlp.load('FINE_ELECTRA_SMALL_ZH'), output_key='tok') \
+    .append(hanlp.load('CTB9_POS_ELECTRA_SMALL'), output_key='pos') \
+    .append(hanlp.load('MSRA_NER_ELECTRA_SMALL_ZH'), output_key='ner', input_key='tok') \
+    .append(hanlp.load('CTB9_DEP_ELECTRA_SMALL', conll=0), output_key='dep', input_key='tok')\
+    .append(hanlp.load('CTB9_CON_ELECTRA_SMALL'), output_key='con', input_key='tok')
+HanLP('2021年HanLPv2.1为生产环境带来次世代最先进的多语种NLP技术。阿婆主来到北京立方庭参观自然语义科技公司。')
+                                   Out[4]: 
+{'sentences': ['2021年HanLPv2.1为生产环境带来次世代最先进的多语种NLP技术。',
+  '阿婆主来到北京立方庭参观自然语义科技公司。'],
+ 'tok': [['2021年',
+   'HanLPv2.1',
+   '为',
+   '生产',
+   '环境',
+   '带来',
+   '次',
+   '世代',
+   '最',
+   '先进',
+   '的',
+   '多',
+   '语种',
+   'NLP',
+   '技术',
+   '。'],
+  ['阿婆主', '来到', '北京', '立方庭', '参观', '自然', '语义', '科技', '公司', '。']],
+ 'pos': [['NT',
+   'NR',
+   'P',
+   'NN',
+   'NN',
+   'VV',
+   'JJ',
+   'NN',
+   'AD',
+   'VA',
+   'DEC',
+   'CD',
+   'NN',
+   'NR',
+   'NN',
+   'PU'],
+  ['NN', 'VV', 'NR', 'NR', 'VV', 'NN', 'NN', 'NN', 'NN', 'PU']],
+ 'ner': [[('2021年', 'DATE', 0, 1)],
+  [('北京', 'ORGANIZATION', 2, 3),
+   ('立方庭', 'LOCATION', 3, 4),
+   ('自然语义科技公司', 'ORGANIZATION', 5, 9)]],
+ 'dep': [[(6, 'tmod'),
+   (6, 'nsubj'),
+   (6, 'prep'),
+   (5, 'nn'),
+   (3, 'pobj'),
+   (0, 'root'),
+   (8, 'det'),
+   (15, 'nn'),
+   (10, 'advmod'),
+   (15, 'rcmod'),
+   (10, 'cpm'),
+   (13, 'nummod'),
+   (15, 'nn'),
+   (15, 'nn'),
+   (6, 'dobj'),
+   (6, 'punct')],
+  [(2, 'nsubj'),
+   (0, 'root'),
+   (4, 'nn'),
+   (2, 'dobj'),
+   (2, 'conj'),
+   (9, 'nn'),
+   (9, 'nn'),
+   (9, 'nn'),
+   (5, 'dobj'),
+   (2, 'punct')]],
+ 'con': [['TOP', [['IP', [['NP', [['_', ['2021年']]]], ['NP', [['_', ['HanLPv2.1']]]], ['VP', [['PP', [['_', ['为']], ['NP', [['_', ['生产']], ['_', ['环境']]]]]], ['VP', [['_', ['带来']], ['NP', [['CP', [['CP', [['IP', [['VP', [['NP', [['DP', [['_', ['次']]]], ['NP', [['_', ['世代']]]]]], ['ADVP', [['_', ['最']]]], ['VP', [['_', ['先进']]]]]]]], ['_', ['的']]]]]], ['NP', [['ADJP', [['_', ['多']]]], ['NP', [['_', ['语种']]]]]], ['NP', [['_', ['NLP']], ['_', ['技术']]]]]]]]]], ['_', ['。']]]]]],
+  ['TOP', [['IP', [['NP', [['_', ['阿婆主']]]], ['VP', [['VP', [['_', ['来到']], ['NP', [['_', ['北京']], ['_', ['立方庭']]]]]], ['VP', [['_', ['参观']], ['NP', [['_', ['自然']], ['_', ['语义']], ['_', ['科技']], ['_', ['公司']]]]]]]], ['_', ['。']]]]]]]}
+
+

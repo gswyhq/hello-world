@@ -40,6 +40,9 @@ rm -rf ~/.m2/repository/log4j ~/.m2/repository/org/slf4j
 3、Intellij IDEA -> 右侧 Maven -> 项目名称 -> Lifecycle -> clean -> install
 这时按照新的配置，重新安装对应依赖的 sl4j 和 log4j。
 
+第3步也可以命令行操作：$ mvn clean install -Dmaven.test.skip=true
+
+
 # java: 程序包org.slf4j.impl不存在
 解决方法：
 Intellij IDEA -> File -> settings -> Build, Execution, Deployment -> Build Tools -> Maven -> Importing > 勾选 Create module groups for multi-module Maven projects -> Automatically download: 同时勾选 Sources Documentation Annotations;
@@ -163,4 +166,15 @@ Help–>Edit Custom VM Options–>
 检查相应配置File–>settings–>Build,Execution,Deployment–>Compiler选项中有一个地方和堆大小有关
 即:
 Share Build process heap size(mybtes): 2048
+
+# IDEA启动报错，但没有详细的报错信息：
+Process finished with exit code 1 
+解决方法：捕获启动类的代码，如：
+try {
+   这里是启动代码
+}
+catch (Exception e) {
+    e.printStackTrace();
+}
+
 

@@ -185,3 +185,13 @@ sed -i "s/oldstring/newstring/g" `grep oldstring -rl path`
 # echo 输出字符串，并在字符串中间，输出换行、回车
 echo -e 'abcd\nefg'
 
+# 字符串比较：
+str="hello"
+echo "等值比较"
+if [ "${str}" = "hello" ]; then
+echo "字符串相等"
+else
+echo "字符串不相等"
+fi
+
+

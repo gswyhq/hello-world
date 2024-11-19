@@ -237,6 +237,22 @@ select * from newploay where (TO_CHAR(no3, 'yyyy-mm-dd hh24:mi:ss') LIKE '%2021%
 # 修改字段注释：
 表的列名备注信息增加：comment on column 表名.列名  is '备注信息';
 
+# 查询表的注释：
+SELECT tb.table_name, d.description
+FROM information_schema.tables tb
+         JOIN pg_class c ON c.relname = tb.table_name
+         LEFT JOIN pg_description d ON d.objoid = c.oid AND d.objsubid = '0'
+WHERE tb.table_schema = 'public' and tb.table_name='m_rt_00000056_a';
+
+# 查询字段的注释：
+SELECT col.table_name, col.column_name, col.ordinal_position AS o, d.description
+FROM information_schema.columns col
+         JOIN pg_class c ON c.relname = col.table_name
+         LEFT JOIN pg_description d ON d.objoid = c.oid AND d.objsubid = col.ordinal_position
+WHERE col.table_schema = 'public' and col.table_name='m_rt_00000056_a'
+ORDER BY col.table_name, col.ordinal_position;
+
+
 # update join 多表关联更新：
 update a
 set value = 'test'

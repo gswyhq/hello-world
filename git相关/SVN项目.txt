@@ -1,6 +1,6 @@
 
 # windows系统如何下载svn代码库
-第一步：安装TortoiseSVN
+第一步：安装TortoiseSVN, 注意需要勾选 Command ........选项，否则配置时没有svn.exe执行文件
 第二步：点击鼠标右键，选择【SVN Checkout…】
 第三步：在弹出的界面，输入 URL of repository:
 如：https://svn.siro-info.com:8081/svn/odm/trunk/efm_siro
@@ -9,7 +9,7 @@ Checkout directory: 选择本地存储路径；
 第四步：在弹出界面中输入用户名、密码
 此时已经拉入完SVN库，也就是电脑和svn建立了连接关系。接下里需要上传文件
 
-上传代码到svn
+# 上传代码到svn
 右键 -> TortoiserSVN -> Repo-browser
 在弹出的界面输入之前填入拉去svn库的地址
 登录成功后，弹出操作界面
@@ -17,6 +17,9 @@ Checkout directory: 选择本地存储路径；
 单击鼠标右键，选择Add folder，添加文件夹到svn上
 在弹出的界面上，选择要上传的文件夹
 选中后，点击OK按钮进行上传
+
+# 更新远程最新代码到本地：
+进到 trunk 目录中，右键 -> SVN Update
 
 # 命令行命令
 # 安装 svn
@@ -35,9 +38,18 @@ svn update
 svn commit -m "提交说明"
 将本地修改的代码提交到服务器。-m参数是提交说明，用于描述本次提交的内容。
 
+# 撤销本地文件的修改，恢复到最后一次提交的状态。
+svn revert ./clickhouse/dao/CHIndicatorMapper.java
+
 # 查看文件状态：
 svn status
 查看本地代码与服务器代码的差异。执行该命令时，SVN会列出本地代码库中与服务器代码库中不同的文件和目录，并显示出它们的状态。
+状态及说明：
+M 最常见的状态码，表示你修改过的文件
+？一般是你新建的文件，以及拖拽到工程的该路径下的文件
+！你从工程中直接删除的文件
+A/D 你将添加/删除的文件，提交后，远程svn库将会添加/删除该文件
+C 需要解决冲突的文件
 
 # 恢复文件：
 svn revert filename
@@ -81,6 +93,10 @@ svn info
 执行该命令时，SVN会显示出代码库的URL、版本信息、最后修改时间等详细信息。
  Relative URL: 或 URL: 即可确定当前所在的分支。
 
+truck（主干|主分支）：一般把项目提交到此文件夹里面，在truck中开发，如新功能的开发等。
+branches（分支）：一般把那些需要打分支，有可能会修改的项目代码，打分支到此目录，这个分支开发可以和主分支开发同时进行，并行开发，branch分支通常用于修复bug使用。
+tags（标记分支）：一般放那些阶段性（迭代）的项目代码，打分支到此目录。标记已经上线发布的版本，也可以笔记正在测试的版本，通常是只读。
+
 # 查看远程有哪些分支，列出所有branches下的分支
 svn ls svn://192.168.0.178/yewu/branches
 或者显示详细内容：
@@ -92,4 +108,27 @@ svn　switch　svn://***　svn://***本地目录当前分支
 svn switch http://localhost/test/456 . //(原为123的分支)当前所在目录分支到localhost/test/456
 svn switch 版本库根/branches/新分支名称
 
+命令行切换到指定分支：
+svn switch https://svn.example.com/repos/project/branches/feature-branch
+命令行切换到主分支：
+sav switch https://svn.example.com/repos/project/trunk
+
+客户端，svn 切换分支
+进入代码目录，右键 -> TortoiseSVN -> Switch -> /branches/分支名
+切换到主分支
+代码目录，右键 -> TortoiseSVN -> Switch -> /trunk
+
+# 命令行查看当前所在分支：
+svn info | grep '^URL:'
+Relative URL: ^/trunk
+
+# 查看本地与远程的异同：
+1. 比较本地文件和服务器最新版本之间的差异
+svn diff -r HEAD /path/to/file
+
+2. 比较本地文件和服务器版本号2120之间的差异
+svn diff -r 2120 /path/to/file
+
+3. 支持通配符：比较当前目录及其子目录下所有文件和服务器最新版本之间的差异
+svn diff -r HEAD *
 

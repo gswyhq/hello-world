@@ -42,4 +42,38 @@ END
 curl 12.45.23.12:8123 -d "with [1, 2] as ab select case when ab[1]> ab[2] then '大' when ab[1]<ab[2] then   '小' else '不知' end "
 
 
+# 多条件语句：
+multiIf(cond_1, then_1, cond_2, then_2...else)
+-- 允许您在查询中更紧凑地编写CASE运算符。类似于java中的switch语法（可以接受2n+1个参数）
+SELECT multiIf(1,'one',2,'two',3,'three','not this index');-- 关联case条件表达式
+
+# 获取列表中第一个不为空的值
+select coalesce(null, 0,2,3);
+coalesce(NULL, 0, 2, 3)|
+-----------------------|
+                      0|
+
+# 自定义函数，获取列表中第一个符合要求的值，但这里列表中不能出现null，否则会报错：DB::Exception: Unexpected type of filter column. (ILLEGAL_COLUMN) 
+SELECT arrayFirst(x -> isNotNull(x) and length(toString(x)) > 0, [ '', '', '3' ]);
+若改成下面这样的，则不会报错：
+SELECT arrayFirst(x -> case when isNotNull(x) and length(toString(x)) > 0 then true else false end, [ null , '', '3' ]);
+
+# arrayExists([func,] arr1, ...)
+如果 arr 中至少有一个元素 func 返回 0 以外的值，则返回 1。否则，它返回 0。
+
+# arrayAll([func,] arr1, ...)
+如果 func 为 arr 中的所有元素返回 0 以外的值，则返回 1。否则，它返回 0。
+
+# arrayLast(func, arr1, ...)
+返回 arr1 数组中的最后一个元素，其中 func 返回的值不是 0。
+
+# arrayFirstIndex(func, arr1, ...)
+返回 arr1 数组中第一个元素的索引，其中 func 返回的值不是 0。
+
+# arrayLastIndex(func, arr1, ...)
+返回 arr1 数组中最后一个元素的索引，其中 func 返回的值不是 0。
+
+# arrayMin
+返回源数组中的最小元素。
+如果指定了 func 函数，则返回此函数转换的元素的最小值。
 

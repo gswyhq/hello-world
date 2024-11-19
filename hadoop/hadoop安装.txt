@@ -74,6 +74,7 @@ hadoop-2.6.0  hadoop-2.6.0.tar.gz
 
 
 root@4e732add094a:~# cd hadoop-2.6.0
+# 查看hadoop的版本：
 root@4e732add094a:~/hadoop-2.6.0# ./bin/hadoop version
 事先得保证java环境配置好了，否则报错：
 Error: JAVA_HOME is not set and could not be found.

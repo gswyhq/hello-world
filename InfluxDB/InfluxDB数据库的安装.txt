@@ -87,4 +87,7 @@ echo $INFLUXDB_CONFIG_PATH
 # 命令行将select查询结果写入文件：
 ./bin/influx -host 30.88.88.88 -port 25710 -username abcd -password 123456 -database dbname -execute "select * from request_log where rt > 1000  and time > NOW() - 240h" -format csv > 2.csv
 
+windows系统，也可以通过如下客户端连接：
+InfluxDBStudio （https://github.com/CymaticLabs/InfluxDBStudio/releases/download/v0.2.0-beta.1/InfluxDBStudio-0.2.0.zip）
+下载解压后,免安装，直接运行InfluxDBStudio.exe 连接 InfluxDB即可。
 

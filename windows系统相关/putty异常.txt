@@ -1,0 +1,5 @@
+# 问题 putty终端只能显示最近200行的历史命令；更多的历史无法显示；
+问题原因及解决方法：
+默认状况下，Putty的输出显示最多200行，也就是说你cat一个500行的文件，它只能显示出最后的200行，你要经过滚动条看前300行的内容是看不到的，幸好这个值能够配置，具体位置是category->window下，将Lines of scrollback 由缺省的200改为一个更大的值，我改为了2000。
+具体操作方法：右键点击putty对话框左上角图标 -> Change Settings... -> category -> window -> Lines of scrollback 
+

@@ -111,5 +111,10 @@ class HttpTester:
             print()  
             
             
+# url 中文汉字的编码与解密：
+#urllib.parse.quote("最近一次登录日期7")
+#Out[7]: '%E6%9C%80%E8%BF%91%E4%B8%80%E6%AC%A1%E7%99%BB%E5%BD%95%E6%97%A5%E6%9C%9F7'
+#urllib.parse.unquote("%E6%9C%80%E8%BF%91%E4%B8%80%E6%AC%A1%E7%99%BB%E5%BD%95%E6%97%A5%E6%9C%9F7")
+#Out[8]: '最近一次登录日期7'
             
             

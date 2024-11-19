@@ -1,13 +1,19 @@
 shell 随机从文件中抽取若干行
 
-# 从文件中随机取出5行：
+# 从文件中随机取出5行, 即打乱前5行，并输出到终端，文件内容保持不变：
 shuf -n5 main.txt
 
   
+`shuf -n5 file.txt`
+这表示仅打乱文件的前5行，剩余的行将保持原样不变(剩余行并不输出到终端)。
+
 
 sort -R main.txt | head -5
 
- 
+shuf -n5 test3223.sh -o t12344.txt
+等价于：
+shuf -n5 test3223.sh > t12344.txt
+
 
 awk -vN=5 -vC="`wc -l file`" 'BEGIN{srand();while(n<N){i=int(rand()*C+1);if(!(i in a)){a[i]++;n++}}}NR in a' file
 

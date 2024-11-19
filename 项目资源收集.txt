@@ -327,4 +327,13 @@ https://github.com/geekyutao/Inpaint-Anything
 # 非法词(敏感词)检测
 https://github.com/toolgood/ToolGood.Words
 
+# 预测给定蛋白质结构上的糖结合位点。
+DeepGlycanSite 将蛋白质的几何和进化特征融入具有 Transformer 架构的深度等变图神经网络中，其性能显著超越了之前的先进方法，并能有效预测各种糖类分子的结合位点。
+https://github.com/xichengeva/DeepGlycanSite
+
+# 手写内容生成，生成手写文稿：
+简单实现，直接生成空白纸张上手写内容图片,无前端页面，https://github.com/karinlee1988/EasyHandWrite
+有前端页面，需分别启动前端，后端服务：https://github.com/vgocoder/handwriting-web
+可自定义背景，有前端页面调整，起一个服务即可：https://github.com/cpython666/HandwritingGenerator
+
 

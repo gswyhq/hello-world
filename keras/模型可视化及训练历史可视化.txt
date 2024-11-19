@@ -45,8 +45,23 @@ plt.legend(['Train', 'Test'], loc='upper left')
 plt.savefig("train_loss.png")
 plt.show()
 
+-------------------------------------------------------------------------------------------------------------------------------------------------
+# 第一步：将模型结构输出到图片：
+from keras.utils import plot_model
+plot_model(model, to_file='autoencoder.png', show_shapes=True)
 
- ————————————————
+#第二步：展示图片
+from IPython.display import Image
+Image(filename='autoencoder.png') 
+
+#或者，PIL 展示图片：
+import matplotlib.pyplot as plt
+from PIL import Image
+img = Image.open('autoencoder.png')
+plt.imshow(img)
+plt.show()
+
+————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 当然也可以通过启用TensorBoard
 在model的fit函数中加入TensorBoard的回调函数即可，训练数据就会自动保存在log_dir指定的目录内，然后在命令行启动命令 tensorboard --logdir=./log 即可。

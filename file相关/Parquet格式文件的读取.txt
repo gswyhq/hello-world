@@ -1,0 +1,51 @@
+
+Parquet格式
+Parquet是一种用于列式存储和压缩数据的文件格式，广泛应用于大数据处理和分析中。
+
+方法一：
+命令行查看
+Python的parquet-tools可以用于验证Parquet格式的文件、查看详细信息、读取数据内容。您可以自行安装或者使用如下命令安装。 
+pip3 install parquet-tools
+1、查看parquet文件的详细信息，如行数，列字段等：
+>parquet-tools inspect 00000.parquet
+2、显示文件的前几行：
+>parquet-tools show -n 2 00000.parquet
+或者显示文件指定列的内容，例如查看remote_addr、body_bytes_sent列。 
+parquet-tools show -n 2 -c remote_addr,body_bytes_sent 44_1693464263000000000_2288ff590970d092.parquet
+3、查看Parquet文件内容，也可以使用转成CSV格式的命令。 
+parquet-tools csv -n 2 44_1693464263000000000_2288ff590970d092.parquet
+
+###########################################################################################################
+方法二：
+使用 pyarrow打开Parquet文件
+pip install pyarrow fastparquet
+import pyarrow.parquet as pq
+
+parquet_file = pq.ParquetFile('data.parquet')
+data = parquet_file.read().to_pandas()
+
+###########################################################################################################
+方法三：
+使用 fastparquet打开Parquet文件
+
+import fastparquet as fp
+parquet_file = fp.ParquetFile('data.parquet')
+data = parquet_file.to_pandas()
+
+###########################################################################################################
+方法四：
+import pandas as pd
+file = pd.read_parquet(filename) # filename指的是你要读取的parquet的路径
+
+###########################################################################################################
+方法五：
+迭代访问
+import pyarrow.parquet as pq 
+parquet_file = pq.ParquetFile(parquet_file)
+batch_size = 200
+for batch in parquet_file.iter_batches(batch_size, [0]):
+    print(batch.column_names)    
+    for row in batch[batch.column_names[0]]:
+        yield row.as_py()
+
+

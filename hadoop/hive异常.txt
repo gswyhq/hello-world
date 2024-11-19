@@ -346,4 +346,31 @@ hive> drop table es_cmb_test;
 add jar hdfs://hdfs01-sh/tmp/hive_user8888/elasticsearch-hadoop-hive-7.9.2.jar;
 drop table if exists db_name.table_202112250210_ext;
 
+# insert 插入数据时候报错：
+No matching method for class org.apache.hadoop.hive.ql.udf.UDFToString with (array<map<string,string>>). Possible choices: _FUNC_(bigint)  _FUNC_(binary)  
+问题原因：
+select 的结果是复杂数据结构，但定义表时候是简单数据；
+解决方法，修改建表语句，定义对应的数据结构：
+create table data_type(
+	name string,
+	age int,
+	address map<string,string>,
+	friend struct<name:string,age:int>,
+	phone array<bigint>,
+        datas array<map<string,string>>
+)
+
+# having count() 无法去重
+having count(distinct columnA) 会报错columnA字段错误
+having count(columnA) 正常
+ ERROR ql.Driver: FAILED: SemanticException [Error 10002]: Line 35:31 Invalid column reference
+而且 若把 count语句放到select后面，having字句中又不能使用别名； 
+解决方法，改用with
+WITH ta1 AS (
+    SELECT        ani,        COUNT(DISTINCT intime_day) AS num    
+    FROM call_log    GROUP BY  ani
+)
+SELECT    ani, num
+FROM    ta1 WHERE    num > 1;
+
 

@@ -1,0 +1,23 @@
+
+问题：
+调用lightgbm库，设置了早停轮次“early_stopping_rounds”参数和打印log间隔“verbose_eval”参数后出现UserWarning。
+或者提示TypeError: fit() got an unexpected keyword argument ‘early_stopping_rounds‘。
+
+原因：
+由于LightGBM库在更新之后将老版本的函数进行了改动，导致需要传入的参数或传入参数的方式发生了改变。
+参数'early_stopping_rounds' 和'verbose_eval'已被弃用，改为通过“callbacks”参数传入“early_stopping”和“log_evaluation”。
+
+解决方法：
+将代码做如下修改：
+import lightgbm
+from lightgbm import log_evaluation, early_stopping
+callbacks = [log_evaluation(period=100), early_stopping(stopping_rounds=30)]
+ 
+cv_results = lightgbm.cv(
+                    metrics='auc',
+                    callbacks=callbacks
+                    )
+其中period=100指每迭代100次打印一次日志；
+stopping_rounds=30指如果验证集的误差在30次迭代内没有降低，则停止迭代。
+
+

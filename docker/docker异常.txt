@@ -532,3 +532,14 @@ error: Failed dependencies: libltdl.so.7()(64bit) is needed by
 解决办法：
  sudo yum install libtool-ltdl.x86_64
 
+# 问题，启动容器，ls命令无权限：
+root@d7de3bb93693:/chatbi# ls -alrt
+ls: cannot access '.': Operation not permitted
+ls: cannot access '..': Operation not permitted
+解决方法一：
+创建docker容器时加上--privileged=true参数
+docker run --rm -it -v $PWD:/chatbi -w /chatbi --privileged=true python:3.10 /bin/bash
+
+解决方法2：
+将docker版本升级至 20.10.8+ 、 libseccomp 升级至 2.4.2+
+

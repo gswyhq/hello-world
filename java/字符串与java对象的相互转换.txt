@@ -1,0 +1,20 @@
+
+# JSON 字符串 -> List<Map<String, Long>> 
+        String s = "[{'id':1234},{'id':1234},{'id':1234}]";
+        System.out.println("string: "+s);
+        
+        // 可以获取到类型匹配的对象
+        Type listType = new TypeReference<List<Map<String, Long>>>() {}.getType();
+        List<Map<String, Long>> list = JSON.parseObject(s, listType);
+        System.out.println(list);
+
+# JSON 字符串 -> List<String>
+List<String> finalColumns  = JSONArray.parseArray("[\"太原市\", \"无锡市\", \"深圳市\", \"沈阳市\", \"泉州市\", \"[其他]\"]", String.class);
+
+# JSON 字符串 -> 自定义对象类：
+UserDTO userDTO = JSON.parseObject("{\"user\":\"123006\",\"userGroup\":[]}", UserDTO.class);
+
+# java对象 -> json字符串
+JSONObject.toJSONString(javaObject))
+
+

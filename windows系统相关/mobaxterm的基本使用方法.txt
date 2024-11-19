@@ -63,3 +63,29 @@ Settings -> Terminal -> Colors scheme: Customize -> Cursor settings -> Cursor co
 > 设置颜色即可；
 设置好后，需在新开窗口中才会生效，已经打开窗口，是无效的；
 
+# mobaxterm中如何使用exe程序：
+1、下载好exe程序，如：
+https://github.com/jgm/pandoc/releases/download/3.4/pandoc-3.4-windows-x86_64.zip
+
+2、解压到目标目录
+D:\Users\pandoc-3.4
+
+3、mobaxterm 会话窗口，通过绝对路径访问，如：
+/drives/d/Users/user123/pandoc-3.4/pandoc.exe --help
+
+4、将exe程序目录添加到环境变量，直接访问，如：
+export PATH="$PATH:/drives/d/Users/pandoc-3.4"
+pandoc.exe --help
+
+# mobaxterm 终端使用 python3命令：
+~/.bash_aliases
+alias python3=python
+如下路径添加到环境变量PATH中
+/drives/c/Program Files/Python39/Scripts:/drives/c/Program Files/Python39
+
+# mobaxterm 终端使用jupyter命令：
+jupyter notebook --ip 0.0.0.0 --port 9999
+或：
+python3 /Users/***/AppData/Roaming/Python/Python39/site-packages/jupyter.py notebook --ip 0.0.0.0 --port 9999
+
+

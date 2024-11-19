@@ -347,7 +347,7 @@ def get_config(self):
 示例：
 
 class TokenAndPositionEmbedding(layers.Layer):
-    def __init__(self, maxlen, vocab_size, embed_dim):
+    def __init__(self, maxlen, vocab_size, embed_dim, **kwargs):
         super(TokenAndPositionEmbedding, self).__init__()
         self.token_emb = layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
         self.pos_emb = layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
@@ -359,6 +359,49 @@ class TokenAndPositionEmbedding(layers.Layer):
             'pos_emb': self.pos_emb,
         })
         return config
+
+
+问题：load_model加载模型的时候报错：
+TypeError: __init__() missing 3 required positional arguments: 'maxlen', 'vocab_size', and 'embed_dim'
+需要将自定义层中__init__ 函数参数设置默认值；
+若默认值设置为None可能会报错：
+TypeError: '<=' not supported between instances of 'NoneType' and 'int'
+这个时候，还需要设置 def get_config , 将 __init__的参数，在def get_config中进行设置，如下：
+
+class TokenAndPositionEmbedding(layers.Layer):
+    def __init__(self, maxlen=None, vocab_size=None, embed_dim=None, **kwargs):
+        super().__init__()
+        self.maxlen = maxlen
+        self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+        self.token_emb = layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
+        self.pos_emb = layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
+
+    def call(self, x, *args, **kwargs):
+        maxlen = K.shape(x)[-1]
+        positions = K.arange(start=0, stop=maxlen, step=1)
+        positions = self.pos_emb(positions)
+        x = self.token_emb(x)
+        return x + positions
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'token_emb': self.token_emb,
+            'pos_emb': self.pos_emb,
+            "maxlen": self.maxlen,
+            "vocab_size": self.vocab_size,
+            "embed_dim": self.embed_dim
+        })
+        return config
+
+
+问题：含有自定义网络层时候，load_model报错：
+TypeError: __init__() got an unexpected keyword argument 'name'
+解决办法：
+custom_objects参数中的自定义网络的__init__函数，添加 , **kwargs ,如：
+def __init__(self, maxlen, vocab_size, embed_dim, **kwargs)
+
 
 # 问题：
 出现dimension错误
@@ -715,4 +758,13 @@ ImportError: cannot import name 'transpose_shape' from 'keras.utils.generic_util
 解决方法：
 卸载掉keras tensorflow，重新安装即可；
 pip3 uninstall keras tensorflow
+
+# 保存或加载模型的时候报错：
+ValueError: Unable to load weights saved in HDF5 format into a subclassed Model which has not created its variables yet. Call the Model first, then load the weights.
+问题出在尝试加载HDF5格式的权重到一个未创建变量的子类模型上。在调用`load_weights`函数之前，您需要先构建和编译模型。
+解决方法：
+siamese_model = SiameseModel(siamese_network, margin=margin)
+siamese_model.build(input_shape=[(None, 14), (None, 14), (None, 14)])
+siamese_model.compile(optimizer=optimizers.Adam(5e-5))
+siamese_model.load_weights("model-01-0.848.hdf5")
 

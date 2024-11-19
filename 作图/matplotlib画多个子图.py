@@ -101,6 +101,35 @@ plt.xticks(range(3), ['A', 'Big', 'Cat'], color='red')
 
 fig.tight_layout()
 plt.show()
+
+####################################################################################################################################
+# 多子图双坐标系
+ds  = {"train": {"label_names": ['11~20岁', '21~30岁', '31~40岁', '41~50岁', '51~60岁', '61~70岁', '71~80岁', '81~90岁'],
+                 "label_values": [9, 1055, 6315, 5224, 2562, 610, 83, 7],
+                 "label_rate": [0.00025, 0.03925, 0.2141875, 0.166125, 0.06975, 0.009875, 0.0, 0.0]
+                }, 
+      "dev":{ "label_names": ['11~20岁', '21~30岁', '31~40岁', '41~50岁', '51~60岁', '61~70岁', '71~80岁', '81~90岁', '90岁以上'],
+              "label_values": [5, 276, 1550, 1292, 642, 166, 27, 3, 1],
+              "label_rate": [0.00075, 0.042, 0.20625, 0.1655, 0.06975, 0.011, 0.00025, 0.0, 0.0]
+            }
+      }
+
+def df2ax(ds, ax1):
+    label_names = ds['label_names']
+    label_values = ds['label_values']
+    label_rate = ds['label_rate']
+    ax1.bar(label_names, label_values, color="b", alpha=0.5)  # 柱形图
+    ax2 = ax1.twinx() # 双坐标系
+    ax2.plot(label_names, label_rate, color="y")  # 折线图
+    fig.legend(['频数', '占比'], loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes) # 定义图例
+
+fig, axs = plt.subplots(figsize=(16, 8), nrows=1, ncols=2) # 定义一行两列，共两个子图
+plt.xticks(rotation=45)
+df2ax(ds['train'], axs[0])
+df2ax(ds['dev'], axs[1])
+plt.show()
+
+####################################################################################################################################
     
 def main():
     generator_map_function()

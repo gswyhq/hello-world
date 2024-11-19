@@ -32,6 +32,8 @@ pd.read_csv(r'test.csv', sep=',', quoting=csv.QUOTE_NONE, header=None, engine='p
 2或csv.QUOTE_NONNUMERIC：所有非数字字段都有引号。
 3或csv.QUOTE_NONE：所有字段都没有引号。
 
+注意，quoting参数仅适用于由引号括起来的字段。如果CSV文件中没有引号或只有部分行被引号括起来，则quoting参数不会生效。在这种情况下，您需要手动解析CSV文件，以确保数据正确读取。
+
 用read_csv读取文件，报错 OSError: Initializing from file failed
 问题原因，读取的文件路径中有中文汉字；
 解决方案，设置engine参数，如：

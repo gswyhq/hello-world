@@ -306,3 +306,20 @@ python39 -m pip install lettuce
 USER_BASE: 'D:\\Users\\AppData\\Roaming\\Python' (exists)
 USER_SITE: 'D:\\Users\\AppData\\Roaming\\Python\\Python39\\site-packages
 
+# 若不想手动修改Python的site.py文件，也可以通过命令行修改环境变量 PYTHONUSERBASE 达到修改安装包 site-packages 的存放路径的目的：
+cmd命令行方法：
+set PYTHONUSERBASE=d:\Python
+mobaXterm命令行方法：
+export PYTHONUSERBASE="d:\\Python"
+shell命令行方法：
+export PYTHONUSERBASE=/home/gswyhq/python
+python3 -m site 查看修改后的效果：
+USER_BASE: 'd:\\Python' (exists)
+USER_SITE: 'd:\\Python\\Python37\\site-packages' (exists)
+ENABLE_USER_SITE: True
+
+
+也可以通过命令，查看当前用site-packages的路径：
+python3 -m site --user-site
+
+

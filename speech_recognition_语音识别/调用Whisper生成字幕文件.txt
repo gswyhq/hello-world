@@ -1,0 +1,29 @@
+
+pip3 install  openai-whisper==20240930
+安装好whisper后，找到包路径下文件 site-packages\whisper\__init__.py
+事先下载好模型文件：
+"large-v3-turbo": "https://openaipublic.azureedge.net/main/whisper/models/aff26ae408abcba5fbf8813c21e62b0941638c5f6eebfb145be0c9839262a19a/large-v3-turbo.pt"
+放到 "~/.cache/whisper" 路径下：
+
+
+命令行执行：
+~$ whisper audio.mp3 --model turbo
+生成的转录文本输出,当前目录中，txt、vtt、srt、tsv、json格式文件各一份
+并输出到终端，如：
+Detected language: Chinese
+[00:01.000 --> 00:01.600] 喂你好
+[00:01.600 --> 00:02.900] 喂你好
+[00:02.900 --> 00:06.080] 你好猫没打扰你们哈
+
+当然可以指定输出格式及输出路径, 将输出mp4文件的转录文本到ouptput路径中：
+~$ whisper 演示视频.mp4 --output_format srt --output_dir output
+
+python代码执行：
+import whisper
+
+model = whisper.load_model("turbo")
+result = model.transcribe("audio.mp3")
+print(result["text"])
+
+# 更多使用参考：https://github.com/openai/whisper
+

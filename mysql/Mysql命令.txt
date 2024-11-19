@@ -234,3 +234,10 @@ UPDATE entity SET similar_word=REPLACE(similar_word, '、', ',');
 # 修改字段注释：
 ALTER TABLE table_log2 MODIFY COLUMN ip_name varchar(15) comment '新的公网IP地址';
 
+# 修改表名的注释：
+ALTER TABLE wyg.student_new COMMENT '学生信息表新2';
+
+# 查询字段的注释：
+SELECT TABLE_SCHEMA,TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, column_comment FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'db' and TABLE_NAME = 'test';
+

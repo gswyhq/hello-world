@@ -3,8 +3,10 @@
 
 import numpy as np
 import pandas as pd
+import xgboost as xgb
+from sklearn.inspection import permutation_importance
 from sklearn.model_selection import cross_val_score, ShuffleSplit
-from sklearn.datasets import load_boston, load_breast_cancer
+from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
@@ -31,10 +33,36 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.cluster import DBSCAN
-from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE  #  imbalanced-learn
 from imblearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
+from scipy.cluster import hierarchy
+from scipy.spatial.distance import squareform
+from scipy.stats import spearmanr
+import matplotlib
+
+from sklearn.inspection import permutation_importance
+from sklearn.utils.fixes import parse_version
+
+try:
+    from sklearn.datasets import load_boston
+except Exception as e:
+    print('最新版本sklearn中boston数据集已经被移除，故而需要通过如下方法获取')
+
+    def load_boston():
+        boston = {}
+        # data_url = "http://lib.stat.cmu.edu/datasets/boston"  # 数据集下载地址
+        raw_df = pd.read_csv(rf"D:\Users\{USERNAME}\Downloads\boston.txt", sep="\s+", skiprows=22, header=None)
+        data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+        target = raw_df.values[1::2, 2]
+        feature_names = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']
+        data.shape, target.shape
+        # Out[10]: ((506, 13), (506,))
+        boston["data"] = data
+        boston["target"] = target
+        boston["feature_names"] = feature_names
+        return boston
 
 # 使用imlbearn库中上采样方法中的SMOTE接口
 from imblearn.over_sampling import SMOTE
@@ -154,9 +182,10 @@ def rfe_filter_feature(X, Y, names):
     # 越重要的特征，排序越靠前；
     return sorted(zip(map(lambda x: round(x, 4), rfe.ranking_), names))
 
+
 def mean_decrease_impurity():
     '''平均精确率减少,筛选特征'''
-    from sklearn.datasets import load_boston
+
     from sklearn.model_selection import ShuffleSplit
     from sklearn.metrics import r2_score
     from collections import defaultdict
@@ -209,7 +238,9 @@ def train_show(X, Y, field_list):
     # 平均精确率减少----Mean decrease accuracy
     # 另一种常用的特征选择方法就是直接度量每个特征对模型精确率的影响。主要思路是打乱每个特征的特征值顺序，并且度量顺序变动对模型的精确率的影响。
     # 很明显，对于不重要的变量来说，打乱顺序对模型的精确率影响不会太大，但是对于重要的变量来说，打乱顺序就会降低模型的精确率。
-    #
+    # 当两个特征相关联并且其中一个特征被随机重排时，模型仍然可以通过其相关特征来访问此特征。这将导致两个特征的重要性指标降低，而这两个特征实际上可能很重要。
+    # 当特征是共线特征时，置换一个特征对模型性能的影响很小，因为它可以从相关特征中获得相同的信息。
+
     #  尽管我们在所有特征上进行了训练得到了模型，然后才得到了每个特征的重要性测试，这并不意味着我们扔掉某个或者某些重要特征后模型的性能就一定会下降很多，因为即便某个特征删掉之后，其关联特征一样可以发挥作用，让模型性能基本上不变。
 
     # rf = RandomForestRegressor()
@@ -275,6 +306,83 @@ def train_show(X, Y, field_list):
     # plt.savefig("roc.png", bbox_inches="tight")
     plt.show()
 
+
+
+
+def plot_permutation_importance(clf, X, y, ax):
+    result = permutation_importance(clf, X, y, n_repeats=10, random_state=42, n_jobs=2)
+    perm_sorted_idx = result.importances_mean.argsort()
+
+    tick_labels_parameter_name = (
+        "tick_labels"
+        if parse_version(matplotlib.__version__) >= parse_version("3.9")
+        else "labels"
+    )
+    tick_labels_dict = {tick_labels_parameter_name: X.columns[perm_sorted_idx]}
+    ax.boxplot(result.importances[perm_sorted_idx].T, vert=False, **tick_labels_dict)
+    ax.axvline(x=0, color="k", linestyle="--")
+    return ax
+
+def plot_permutation_importance_multicollinear():
+    '''
+    当特征是共线特征时，置换一个特征对模型性能的影响很小，因为它可以从相关特征中获得相同的信息。
+    处理多线性特征的一种方法是对Spearman秩序相关性执行分层聚类，选择一个阈值，并从每个聚类中保留一个特征。
+    :return:
+    '''
+
+    X, y = load_breast_cancer(return_X_y=True, as_frame=True) # 二分类数据集；
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+    names = X_train.columns.to_list()
+
+    # 首先，我们绘制了相关特征的热图：
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
+    corr = spearmanr(X).correlation
+
+    # 确保矩阵是对称的
+    corr = (corr + corr.T) / 2
+    np.fill_diagonal(corr, 1)
+
+    # 将相关矩阵转换为距离矩阵
+    # 使用 Ward's linkage 进行分层聚类
+    distance_matrix = 1 - np.abs(corr)
+    dist_linkage = hierarchy.ward(squareform(distance_matrix))
+    dendro = hierarchy.dendrogram(
+        dist_linkage, labels=names, ax=ax1, leaf_rotation=90
+    )
+    dendro_idx = np.arange(0, len(dendro['ivl']))
+
+    ax2.imshow(corr[dendro['leaves'], :][:, dendro['leaves']])
+    ax2.set_xticks(dendro_idx)
+    ax2.set_yticks(dendro_idx)
+    ax2.set_xticklabels(dendro['ivl'], rotation='vertical')
+    ax2.set_yticklabels(dendro['ivl'])
+    fig.tight_layout()
+    plt.show()
+
+    # 接下来，我们通过对树状图的可视化检查来手动选择一个阈值，将我们的特征分组成簇，并从每个簇中选择一个特征来保存，从我们的数据集中选择这些特征，并训练一个新的随机森林。
+    cluster_ids = hierarchy.fcluster(dist_linkage, 1, criterion="distance")  # 此处的参数1，即为对树状图的可视化检查来手动选择的一个阈值
+    cluster_id_to_feature_ids = defaultdict(list)
+    for idx, cluster_id in enumerate(cluster_ids):
+        cluster_id_to_feature_ids[cluster_id].append(idx)
+    selected_features = [v[0] for v in cluster_id_to_feature_ids.values()]
+    selected_features_names = X.columns[selected_features]
+
+    X_train_sel = X_train[selected_features_names]
+    X_test_sel = X_test[selected_features_names]
+
+    clf_sel = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf_sel.fit(X_train_sel, y_train)
+    print(
+        f"剔除共线特征后的测试结果: {clf_sel.score(X_test_sel, y_test):.2}"
+    )
+
+    fig, ax = plt.subplots()
+    plot_permutation_importance(clf_sel, X_test_sel, y_test, ax)
+    ax.set_title("特征重要性")
+    ax.set_xlabel("准确度减少")
+    ax.figure.tight_layout()
+    plt.show()
+
 def sort_features_train():
     # 基于学习模型的特征排序 (Model based ranking)
     # 这种方法的思路是直接使用你要用的机器学习算法，针对每个单独的特征和响应变量建立预测模型。其实Pearson相关系数等价于线性回归里的标准化回归系数。
@@ -286,7 +394,7 @@ def sort_features_train():
     X = boston["data"]
     Y = boston["target"]
     names = boston["feature_names"]
-    rf = RandomForestRegressor()
+    rf = RandomForestRegressor(warm_start=True) #  warm_start 参数取值为 True，允许随机森林进行增量学习
     rf.fit(X, Y)
     # print "Features sorted by their score:"
     print(sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), names), reverse=True))
@@ -304,6 +412,49 @@ def sort_features_train():
     Y = breast["target"]
     names = breast["feature_names"]
     train_show(X, Y, names)
+
+def test_permutation_importance():
+    '''基于排列的重要性
+    '''
+    breast = load_breast_cancer()  # 二分类数据集；
+    X = breast["data"]
+    Y = breast["target"]
+    names = breast["feature_names"]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=0, shuffle=True)
+    # 将模型定义为随机森林
+    model = RandomForestClassifier(class_weight="balanced_subsample", random_state=0)
+    model.fit(X_train, y_train)
+    print("交叉验证结果：", model.score(X_test, y_test))
+
+    # permutation_importance函数可以计算给定数据集的估计器的特征重要性。n_repeats参数设置特征取值随机重排的次数，并返回样本的特征重要性。
+    r = permutation_importance(model, X_test, y_test,
+                               n_repeats=30,
+                               random_state=0)
+    for i in r.importances_mean.argsort()[::-1]:
+        if r.importances_mean[i] - 2 * r.importances_std[i] > 0:
+            print(f"{names[i]:<8}"
+                  f"{r.importances_mean[i]:.3f}"
+                  f" +/- {r.importances_std[i]:.3f}")
+    print("特征及其重要性：", [(r.importances_mean[i], names[i]) for i in r.importances_mean.argsort()[::-1]])
+
+def show_feature_importance():
+    '''xgboost展示特征重要性'''
+    breast = load_breast_cancer()  # 二分类数据集；
+    X = breast["data"]
+    Y = breast["target"]
+    names = breast["feature_names"]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1898)
+    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=1898)
+    xgb_model.fit(X_train, y_train)
+    xgb_model.get_booster().feature_names = list(names)
+    y_pred = xgb_model.predict(X_test)
+    print(confusion_matrix(y_test, y_pred))
+    # [[72  2]
+    #  [0 97]]
+    xgb_model.score(X_test, y_test)
+    # Out[73]: 0.9883040935672515
+    print('特征及其重要性：', xgb_model.get_booster().get_score())  # 基于不纯度的重要性倾向于高基数(取值很多)特征
+    xgb.plot_importance(xgb_model)
 
 
 def main():

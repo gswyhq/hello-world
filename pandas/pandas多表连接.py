@@ -195,6 +195,19 @@ pd.concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False,
 axis=0：竖方向（index）合并，如4行4列+4行4列=8行，合并方向index作列表相加，非合并方向columns取并集
 axis=1：横方向（columns）合并，如4行4列+4行4列=8列，合并方向columns作列表相加，非合并方向index取并集
 
+# 列合并，行数，视index是否匹配，若不匹配则增加：
+# 如两个2行2列合并后成了3行4列；
+df1 = pd.DataFrame([['a', 1], ['b', 2]],
+                   columns=['letter', 'number'], index=[0, 1])
+df4 = pd.DataFrame([['bird', 'polly'], ['monkey', 'george']],
+                   columns=['animal', 'name'], index=[1, 2])
+pd.concat([df1, df4], axis=1)
+Out[100]: 
+  letter  number  animal    name
+0      a     1.0     NaN     NaN
+1      b     2.0    bird   polly
+2    NaN     NaN  monkey  george
+
 join
 默认值：join=‘outer’
 非合并方向的行/列名称：取交集（inner），取并集（outer）。

@@ -1,0 +1,9 @@
+
+DBeaver如何连接ClickHouse数据库
+
+1,安装好了DBeaver后，双击打开；
+2、配置阿里的maven，配置自定义驱动源
+操作方法、窗口–>首选项–>驱动–>maven–>添加–>添加maven的url–>apply and close–>退出重新开
+URL：http://maven.aliyun.com/nexus/content/groups/public/
+3、dbeaver -> 新建连接 -> 选择clickhouse -> 填写ip,如192.168.3.105， 端口：如 8123，数据库/模式不用填写，再填写用户名密码即可以登录；
+

@@ -93,5 +93,39 @@ select name
 | 2019-05-10  | 新增会员数    | 80000     |
 +-------------+----------+-----------+
 
+# 有序地将多行数据合并成一行
+session_id	row_number	sku_id
+aa	2	a
+aa	3	c
+aa	1	b
+bb	2	d
+bb	3	c
+bb	1	a
+bb	4	a
+现对上数据按 session_id 进行分组合并，collect_list：合并为一个列表；collect_set：合并成一个集合（去重后的结果）
+select
+    session_id,
+    collect_list(sku_id),
+    collect_set(sku_id)
+from
+    (
+        select * from temp.tmp_as_test order by row_number desc
+    )
+    b
+group by
+    session_id
+输出结果为：
+aa	["c","a","b"]	["c","a","b"]
+bb	["a","c","d","a"]	["a","c","d"]
 
+# 将多个字段数据合并成一个dict,再同组多行的dict合并成list:
+select ani, collect_list(MAP('start_time', start_time,
+                             'end_time', end_time,
+			     'yitu_type', yitu_type 
+                            )
+			) as history,
+            count(*) as number 
+	from tmp_yuce_base_2 
+	group by ani ;
+先根据 ani 字段进行分组，再用MAP把 start_time、end_time、yitu_type三列合并成一个dict, 再用 collect_list 将多行的dict合并成一个list;
 

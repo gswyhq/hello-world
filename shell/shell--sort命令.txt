@@ -86,6 +86,10 @@ cat test_sort.txt |sort -n -t "|" -k 3
 cat clid_group1.txt |sort -n -t $'\t' -k 2
 如果不加$符号的话,会返回:sort: multi-character tab `\t'的错误。
 
+## 使用指定列（-k6:第6列, -r:降序）降序排列
+## 查询hive表的最新分区
+hadoop fs  -ls hdfs://hdfs/user/hive/pa_safe.db/user_2106929 | sort -k6 -r | head -1 | tail -c 11
+
 按时间排序：　　
 # 按修改文件时间升序排列：
 ls -rtl

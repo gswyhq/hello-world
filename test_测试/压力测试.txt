@@ -5,6 +5,14 @@ ab的原理：ab命令会创建多个并发访问线程，模拟多个访问者�
 
 ab命令对发出负载的计算机要求很低，它既不会占用很高CPU，也不会占用很多内存。但却会给目标服务器造成巨大的负载，其原理类似CC攻击。自己测试使用也需要注意，否则一次上太多的负载。可能造成目标服务器资源耗完，严重时甚至导致死机。
 
+
+在大多数Linux发行版中，可以通过包管理器安装ab：
+sudo apt-get install apache2-utils  # Debian/Ubuntu
+sudo yum install httpd-tools       # RedHat/CentOS
+
+安装完成后，可以通过以下命令检查ab版本：
+ab -V
+
 ab是apache自带的一个很好用的压力测试工具，当安装完apache的时候，就可以在bin下面找到ab
 
 也可以通过docker使用：

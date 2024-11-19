@@ -92,6 +92,12 @@ real    0m 30.19s
 user    0m 0.03s
 sys     0m 0.17s
 
+# select 生产样例值：
+WITH(
+  SELECT ['A','B','C','D']
+)AS dict
+SELECT number,dict[number%4+1] FROM numbers(4)
+
 
 参考文档：
 https://www.bookstack.cn/read/clickhouse-20.8-zh/4e1365d8b66effc7.md

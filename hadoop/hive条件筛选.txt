@@ -32,7 +32,17 @@ select t2.* from
 	)  t2
 where t2.rk > 1;
 
+# 条件筛选时候，null 值需要特别注意：
+select case when null != '理财' then 1 else 0 end,
+case when null = '理财' then 1 else 0 end,
+case when '理财' is null then 1 else 0 end,
+case when '理财' is not null then 1 else 0 end;
+上面结果是：0	0	0	1
+即 null不能通过=或 1= 进行判断，因为在Hive中，NULL值不等于任何值，包括NULL本身。因此，当您尝试比较NULL与非NULL值时，结果始终为false。
+where条件后，!= 某个具体值时，是不包括null的，这个时候，还需要添加个条件 col != '某值' or col is null;
 
-
+# hive中设置常量，并根据常量进行查询：
+hive (default)> set var_name='202410';
+hive (default)> select * FROM db_name.table_name where dt= ${hiveconf:var_name} limit 10;
 
 

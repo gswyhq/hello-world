@@ -60,4 +60,20 @@ String response = new RestTemplate().getForObject(URI.create(sb.toString()), Str
         Assert.assertSomething(my.methodUnderTest());
     }
 
+7、静态 Thread.sleep(120000L); 如何mock
+首先Thread.sleep是一个静态方法；其次，该方法没有返回值。对于Mockito等mock工具来说，这就是无法解决的问题了。
+得益于Powermockito对于静态方法进行Mock的能力，使用如下格式，就实现了预期的调用Thread.sleep时抛出中断异常的行为，从而实现了大大缩短程序执行时间的目标。
+// 使用PowerMockito模拟Thread类的静态方法sleep
+PowerMockito.mockStatic(Thread.class);
+PowerMockito.doNothing().when(Thread.class);
+Thread.sleep(Mockito.anyLong());
+
+# PostConstruct 如何 Mock
+    @PostConstruct
+    public  void init(){
+        executor= Executors.newFixedThreadPool(threadNum);
+    }
+通过如下方法来解决：
+ReflectionTestUtils.setField(apiServiceImpl,"executor",Executors.newFixedThreadPool(5)); // 此处 executor为PostConstruct注解赋值变量；apiServiceImpl为类实例
+
 

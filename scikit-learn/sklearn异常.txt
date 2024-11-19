@@ -1,0 +1,19 @@
+# 模型预测的时候报错：
+ValueError: Input contains NaN, infinity or a value too large for dtype('float32').
+问题原因：
+1、数据中有nan值, 或 infinity；
+2、数值型数据超出了float32范围；
+sklearn的RandomForestClassifier 会默认将array转换为float32
+float：2^23 = 8388608，一共七位，这意味着最多能有7位有效数字，但绝对能保证的为6位，也即float的精度为6~7位有效数字
+# 查看每一列是否有NaN：
+df.isnull().any(axis=0)
+# 查看每一行是否有NaN：
+df.isnull().any(axis=1)
+
+# 查看所有数据中是否有NaN最快的：
+df.isnull().values.any()
+
+
+
+
+

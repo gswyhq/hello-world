@@ -1,0 +1,303 @@
+
+
+获取fe（frontend）节点信息
+GET /rest/v2/manager/node/frontends
+ret = requests.get("http://192.168.3.23:8030/rest/v2/manager/node/frontends", auth=('root', ''))
+ret.json()
+Out[42]: 
+{'msg': 'success', 'code': 0, 'data': {'columnNames':
+    ['Name', 'Host', 'EditLogPort', 'HttpPort', 'QueryPort', 'RpcPort', 'Role', 'IsMaster', 'ClusterId', 'Join', 'Alive', 'ReplayedJournalId', 'LastHeartbeat', 'IsHelper', 'ErrMsg', 'Version', 'CurrentConnected'],
+    'rows': [['192.168.3.23_9010_1679906606147', '192.168.3.23', '9010', '8030', '9030', '9020', 'FOLLOWER', 'true', '430665151', 'true', 'true', '12586434', '2024-06-21 09:58:43', 'true', '', 'doris-2.0.4-rc06-003a815b63', 'Yes']]
+    }, 'count': 0}
+
+获取be（backend）节点信息
+GET /rest/v2/manager/node/backends
+ret = requests.get("http://192.168.3.23:8030/rest/v2/manager/node/backends", auth=('root', ''))
+ret.json()
+Out[46]: 
+{'msg': 'success', 'code': 0,
+ 'data': {
+    'columnNames':
+        ['BackendId', 'Host', 'HeartbeatPort', 'BePort', 'HttpPort', 'BrpcPort', 'LastStartTime', 'LastHeartbeat', 'Alive', 'SystemDecommissioned', 'TabletNum', 'DataUsedCapacity', 'TrashUsedCapcacity', 'AvailCapacity', 'TotalCapacity', 'UsedPct', 'MaxDiskUsedPct', 'RemoteUsedCapacity', 'Tag', 'ErrMsg', 'Version', 'Status', 'HeartbeatFailureCounter', 'NodeRole'],
+    'rows': [
+        ['10007', '192.168.3.19', '9050', '9060', '8040', '8060', '2024-03-22 17:27:12', '2024-06-21 10:01:28', 'true', 'false', '23972', '111.752 MB', '0.000 ', '38.150 GB', '58.970 GB', '35.31 %', '35.31 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:00:33","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix'],
+        ['10004', '192.168.3.20', '9050', '9060', '8040', '8060', '2024-03-22 17:24:31', '2024-06-21 10:01:28', 'true', 'false', '27327', '145.790 MB', '0.000 ', '38.086 GB', '58.970 GB', '35.42 %', '35.42 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:01:04","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix'],
+        ['10006', '192.168.3.21', '9050', '9060', '8040', '8060', '2024-03-22 17:17:31', '2024-06-21 10:01:28', 'true', 'false', '18373', '87.893 MB', '0.000 ', '36.127 GB', '58.970 GB', '38.74 %', '38.74 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:01:25","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix'],
+        ['10005', '192.168.3.22', '9050', '9060', '8040', '8060', '2024-03-22 17:09:35', '2024-06-21 10:01:28', 'true', 'false', '4329', '1.924 MB', '0.000 ', '31.276 GB', '58.970 GB', '46.96 %', '46.96 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:00:53","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix'],
+        ['151529', '192.168.3.23', '9050', '9060', '8040', '8060', '2024-03-22 16:25:54', '2024-06-21 10:01:28', 'true', 'false', '484', '0.000 ', '0.000 ', '9.382 GB', '58.970 GB', '84.09 %', '84.09 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:00:32","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix'],
+        ['10008', '192.168.3.24', '9050', '9060', '8040', '8060', '2024-03-22 17:00:20', '2024-06-21 10:01:28', 'true', 'false', '24311', '142.196 MB', '0.000 ', '39.965 GB', '58.970 GB', '32.23 %', '32.23 %', '0.000 ', '{"location" : "group_a"}', '', 'doris-2.0.4-rc06-003a815b63', '{"lastSuccessReportTabletsTime":"2024-06-21 10:00:50","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}', '0', 'mix']
+        ]}, 'count': 0}
+
+
+获取broker节点信息
+GET /rest/v2/manager/node/brokers
+
+# 获取节点列表：
+ret = requests.get("http://192.168.3.23:8030/rest/v2/manager/node/node_list", auth=('root', ''))
+ret.json()
+Out[55]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'backend': ['192.168.3.24:8040',
+   '192.168.3.23:8040',
+   '192.168.3.20:8040',
+   '192.168.3.22:8040',
+   '192.168.3.21:8040',
+   '192.168.3.19:8040'],
+  'frontend': ['192.168.3.23:8030']},
+ 'count': 0}
+
+# 获取集群http、mysql连接信息。
+ret = requests.get("http://192.168.3.23:8030/rest/v2/manager/cluster/cluster_info/conn_info", auth=('root', ''))
+ret.json()
+Out[60]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'http': ['192.168.3.23:8030'], 'mysql': ['192.168.3.23:9030']},
+ 'count': 0}
+
+# 查询所有be节点的ip，http_port:
+ 返回 Backends 列表，包括 Backend 的 IP、PORT 等信息。
+is_alive: 可选参数。是否返回存活的 BE 节点。默认为false，即返回所有 BE 节点。
+ret = requests.get("http://192.168.3.23:8030/api/backends", auth=('root', ''))
+ret.json()
+Out[38]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'backends': [{'ip': '192.168.3.24',
+    'http_port': 8040,
+    'is_alive': True},
+   {'ip': '192.168.3.23', 'http_port': 8040, 'is_alive': True},
+   {'ip': '192.168.3.20', 'http_port': 8040, 'is_alive': True},
+   {'ip': '192.168.3.22', 'http_port': 8040, 'is_alive': True},
+   {'ip': '192.168.3.21', 'http_port': 8040, 'is_alive': True},
+   {'ip': '192.168.3.19', 'http_port': 8040, 'is_alive': True}]},
+ 'count': 0}
+
+# 判断FE是否启动完成。
+ret = requests.get("http://192.168.3.23:8030/api/bootstrap", auth=('root', ''))
+ret.json()
+Out[64]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'replayedJournalId': 0, 'queryPort': 0, 'rpcPort': 0, 'version': ''},
+ 'count': 0}
+# code 为 0 表示FE节点启动成功。非 0 的错误码表示其他错误。
+
+# 获取fe节点的版本信息
+ret = requests.get("http://192.168.3.23:8030/api/fe_version_info", auth=('root', ''))
+ret.json()
+Out[80]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'feVersionInfo': {'dorisBuildTime': 'Sun, 21 Jan 2024 18:56:40 CST',
+   'dorisBuildShortHash': '003a815b63',
+   'dorisJavaCompileVersion': 'openjdk full version "1.8.0_312-8u312-b07-0ubuntu1~20.04-b07"',
+   'dorisBuildVersionMajor': 2,
+   'dorisBuildVersionMinor': 0,
+   'dorisBuildVersionPrefix': 'doris',
+   'dorisBuildVersionRcVersion': 'rc06',
+   'dorisBuildVersion': 'doris-2.0.4-rc06',
+   'dorisBuildInfo': 'VM-0-45-ubuntu',
+   'dorisBuildVersionPatch': 4,
+   'dorisBuildHash': 'git://VM-0-45-ubuntu@003a815b6329f7dc795dc890e32e2d37ed58a1e3'}},
+ 'count': 0}
+
+# 获取指定表的建表语句、建分区语句和建rollup语句。
+ret = requests.get("http://192.168.3.23:8030/api/_get_ddl?db=dorisvicco&table=w2_head_config", auth=('root', ''))
+ret.json()
+Out[87]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'create_partition': [],
+  'create_table': ['CREATE TABLE `w2_metric_head_config` (\n  `metric_code` varchar(100) NOT NULL COMMENT \'指标编码\',\n  `metric_name` varchar(100) NULL COMMENT \'指标名称\',\n  `menu_code` varchar(100) NULL COMMENT \'界面展示位置\',\n  `query_time_type` varchar(300) NULL COMMENT \'时间查询维度，逗号分隔\',\n  `query_time_name` varchar(300) NULL COMMENT \'时间查询名称，逗号分隔\',\n  `query_fields` varchar(300) NULL COMMENT \'查数字段，逗号分隔\',\n  `query_fields_name` varchar(300) NULL COMMENT \'查数字段名称，逗号分隔\',\n  `created_by` varchar(300) NULL DEFAULT "viccodeployop" COMMENT \'创建人\',\n  `created_date` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT \'创建时间\',\n  `updated_by` varchar(300) NULL DEFAULT "viccodeployop" COMMENT \'更新用户\',\n  `updated_date` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT \'更新时间\'\n) ENGINE=OLAP\nDUPLICATE KEY(`metric_code`, `metric_name`)\nCOMMENT \'界面表头配置\'\nDISTRIBUTED BY HASH(`metric_code`) BUCKETS 2\nPROPERTIES (\n"replication_allocation" = "tag.location.group_a: 3",\n"version_info" = "1",\n"is_being_synced" = "false",\n"storage_format" = "V2",\n"light_schema_change" = "true",\n"disable_auto_compaction" = "false",\n"enable_single_replica_compaction" = "false"\n);'],
+  'create_rollup': []},
+ 'count': 0}
+
+# 查询集群当前存活的 BE 节点数和宕机的 BE 节点数：
+ret = requests.get("http://192.168.3.23:8030/api/health", auth=('root', ''))
+ret.json()
+Out[91]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'online_backend_num': 6, 'total_backend_num': 6},
+ 'count': 0}
+
+# 指定数据库的数据量。单位字节。
+ret = requests.get("http://192.168.3.23:8030/api/show_data?db=db_name1", auth=('root', ''))
+ret.json()
+Out[109]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'default_cluster:db_name1': 2768646},
+ 'count': 0}
+
+# 查询有哪些数据库：
+GET /api/meta/namespaces/<ns_name>/databases
+获取所有数据库名称列表，按字母序排列。
+limit：限制返回的结果行数
+offset：分页信息, 即跳过的数据行数，需要和 limit 一起使用
+ret = requests.get("http://192.168.3.23:8030/api/meta/namespaces/default_cluster/databases", auth=('root', ''))
+ret.json()
+Out[111]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': ['default_cluster:__internal_schema',
+  'default_cluster:dorisvicco',
+  'default_cluster:information_schema',
+  'default_cluster:mysql',
+  'default_cluster:db_name1'],
+ 'count': 0}
+# 注意：请求url中的default_cluster，为集群名称，不同的数据库该名称可能不一样；
+
+# 获取指定数据库中的表列表，按字母序排列。
+GET /api/meta/namespaces/<ns_name>/databases/<db_name>/tables
+ret = requests.get("http://192.168.3.23:8030/api/meta/namespaces/default_cluster/databases/db_name1/tables", auth=('root', ''))
+ret.json()
+Out[121]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': ['t1',
+  't2',
+  't2',
+  't4',
+  'table_5'],
+ 'count': 0}
+
+# 获取指定数据库中，指定表的表结构信息。
+GET /api/meta/namespaces/<ns_name>/databases/<db_name>/tables/<tbl_name>/schema
+ret = requests.get("http://192.168.3.23:8030/api/meta/namespaces/default_cluster/databases/db_name1/tables/table_5/schema", auth=('root', ''))
+ret.json()
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'table_5': {'schema': [{'Field': 'calc_date',
+     'Type': 'DATE',
+     'Null': 'No',
+     'Extra': '',
+     'Default': None,
+     'Key': 'true'},
+    ...
+    {'Field': 'lcd',
+     'Type': 'DATETIME',
+     'Null': 'Yes',
+     'Extra': 'NONE',
+     'Default': 'CURRENT_TIMESTAMP',
+     'Key': 'false'}],
+   'is_base': True}},
+ 'count': 0}
+
+# 查询给定的 SQL 有关的表的建表语句。
+POST /api/query_schema/<ns_name>/<db_name>
+在本地文件 1.sql 中写入 SQL
+select tbl1.k2 from tbl1 join tbl2 on tbl1.k1 = tbl2.k1;
+使用 curl 命令获取建表语句
+curl -X POST -H 'Content-Type: text/plain'  -uroot: http://127.0.0.1:8030/api/query_schema/internal/db1 -d@1.sql
+
+# 查看集群各个数据库的数据量大小
+# 可以用来查询集群名称（ns_name），集群下面有哪些数据库；
+ret = requests.get("http://192.168.3.23:8030/api/show_meta_info?action=show_db_size", auth=('root', ''))
+ret.json()
+Out[132]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'default_cluster:information_schema': 0,
+  'default_cluster:dorisvicco': 510565695,
+  'default_cluster:db_name1': 2768646,
+  'default_cluster:__internal_schema': 0,
+  'default_cluster:mysql': 0},
+ 'count': 0}
+
+# 获取指定数据库下表的数据量,单位字节。
+ret = requests.get("http://192.168.3.23:8030/api/show_table_data?db=db_name1", auth=('root', ''))
+ret.json()
+Out[136]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'db_name1': {'t1': 1893804,
+   't2': 40074,
+   't3': 230442,
+   't4': 604326,
+   'table_5': 0}},
+ 'count': 0}
+ 
+# 查询指定表数据量,单位字节。
+ret = requests.get("http://192.168.3.23:8030/api/show_table_data?db=db_name1&table=t4", auth=('root', ''))
+ret.json()
+Out[138]: 
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'db_name1': {'t4': 604326}},
+ 'count': 0}
+
+# 执行语句并返回结果
+POST /api/query/<ns_name>/<db_name> -d '{"stmt" : "select * from tbl1"}'
+ret = requests.post("http://192.168.3.23:8030/api/query/default_cluster/dorisvicco", auth=('root', ''), json={"stmt":'SELECT * FROM dorisvicco.t2'})
+ret.json()
+{'data': {'type': 'result_set', 'meta': [{'name': 'p_day', 'type': 'DATE'}, {'name': 'freq_flag', 'type': 'CHAR'}, {'name': 'version_type', 'type': 'CHAR'}, {'name': 'p_level', 'type': 'CHAR'}, {'name': 'canc_date', 'type': 'CHAR'}, {'name': 'dept_type', 'type': 'CHAR'}, {'name': 'data_type', 'type': 'CHAR'}, {'name': 'region_00', 'type': 'CHAR'}, {'name': 'region_name_00', 'type': 'CHAR'}, {'name': 'region_code_01', 'type': 'CHAR'}, {'name': 'region_name_01', 'type': 'CHAR'}, {'name': 'region_code_02', 'type': 'CHAR'}, {'name': 'region_name_02', 'type': 'CHAR'}, {'name': 'region_code_03', 'type': 'CHAR'}, {'name': 'region_name_03', 'type': 'CHAR'}, {'name': 'deptno_01', 'type': 'CHAR'}, {'name': 'dept_name_01', 'type': 'CHAR'}, {'name': 'region_code_05', 'type': 'CHAR'}, {'name': 'region_name_05', 'type': 'CHAR'}, {'name': 'last_update_time', 'type': 'DATETIME'}, {'name': 'dept_bu_ke_num', 'type': 'DECIMAL'}, {'name': 'dept_bu_ke_num_tq', 'type': 'DECIMAL'}, {'name': 'dept_bu_ke_num_sq', 'type': 'DECIMAL'}, {'name': 'dept_avg_hr_num', 'type': 'DECIMAL'}, {'name': 'dept_avg_hr_num_tq', 'type': 'DECIMAL'}, {'name': 'dept_avg_hr_num_sq', 'type': 'DECIMAL'}, {'name': 'dept_avg_fyp_num', 'type': 'DECIMAL'}, {'name': 'dept_avg_fyp_num_tq', 'type': 'DECIMAL'}, {'name': 'dept_avg_fyp_num_sq', 'type': 'DECIMAL'}, {'name': 'pass_avg_bu_ke', 'type': 'DECIMAL'}, {'name': 'pass_avg_bu_ke_tq', 'type': 'DECIMAL'}, {'name': 'pass_avg_bu_ke_sq', 'type': 'DECIMAL'}, {'name': 'star_avg_bu_ke', 'type': 'DECIMAL'}, {'name': 'star_avg_bu_ke_tq', 'type': 'DECIMAL'}, {'name': 'star_avg_bu_ke_sq', 'type': 'DECIMAL'}, {'name': 'pass_bu_ke_num', 'type': 'DECIMAL'}, {'name': 'pass_bu_ke_num_tq', 'type': 'DECIMAL'}, {'name': 'pass_bu_ke_num_sq', 'type': 'DECIMAL'}, {'name': 'star_bu_ke_num', 'type': 'DECIMAL'}, {'name': 'star_bu_ke_num_tq', 'type': 'DECIMAL'}, {'name': 'star_bu_ke_num_sq', 'type': 'DECIMAL'}, {'name': 'pass_dept_target_rate', 'type': 'DECIMAL'}, {'name': 'star_dept_target_rate', 'type': 'DECIMAL'}, {'name': 'attribute1', 'type': 'CHAR'}, {'name': 'attribute2', 'type': 'CHAR'}, {'name': 'attribute3', 'type': 'CHAR'}, {'name': 'attribute4', 'type': 'CHAR'}, {'name': 'attribute5', 'type': 'CHAR'}, {'name': 'created_by', 'type': 'CHAR'}, {'name': 'created_date', 'type': 'DATETIME'}, {'name': 'updated_by', 'type': 'CHAR'}, {'name': 'updated_date', 'type': 'DATETIME'}, {'name': 'avg_nbev', 'type': 'DECIMAL'}, {'name': 'dept_avg_nbev', 'type': 'DECIMAL'}, {'name': 'star_dept_avg_nbev', 'type': 'DECIMAL'}],
+'data': [
+ ['2024-01-31', 'm_acc', 'v6', 'region_00', '20240101', '00', '02', 'G0L0', '总公司', '', '', '', '', '', '', '', '', '', '', None, 7864.0, None, None, 37.957146, None, None, 38514.395713, None, None, 0.9276449644, None, None, 0.0012716175, None, None, 7295.0, None, None, 10.0, None, None, None, None, None, None, None, None, None, 'lbdpimssqp', None, 'lbdpimssqp', None, None, None, None],
+ ['2024-01-31', 'm_acc', 'v6', 'region_00', '2024-01-01', '00', '02', 'G0L0', '总公司', '', '', '', '', '', '', '', '', '', '', '2024-02-01 15:56:50', 7864.0, None, None, 37.957146, None, None, 38514.395713, None, None, 0.9276449644, None, None, 0.0012716175, None, None, 7295.0, None, None, 10.0, None, None, None, None, None, None, None, None, None, 'lbdpimssqp', '2024-02-01 15:58:50', 'lbdpimssqp', '2024-02-01 15:58:50', None, None, None],
+], 'time': 60}, 'msg': 'success', 'code': 0}
+
+
+# 给定一个 SQL，用于获取该 SQL 对应的查询计划。
+POST /api/<db>/<table>/_query_plan -d '{"sql": "select * from db1.tbl1;"}'
+
+# 查询表有多少条数据记录：
+GET /api/<db>/<table>/_count
+ret = requests.get("http://192.168.3.23:8030/api/dorisvicco/t2/_count", auth=('root', ''))
+ret.json()
+Out[149]: {'msg': 'success', 'code': 0, 'data': {'size': 28, 'status': 200}, 'count': 0}
+
+# 获取指定表的结构信息：
+GET /api/<db>/<table>/_schema
+
+# 用于将文件上传到FE节点，可在稍后用于导入该文件。
+POST /api/<namespace>/<db>/<tbl>/upload
+路径参数：
+<namespace>：命名空间，目前仅支持 default_cluster
+<db>：指定的数据库
+<tbl>:指定的表
+请求参数
+column_separator:可选项，指定文件的分隔符。默认为 \t
+preview:可选项，如果设置为 true，则返回结果中会显示最多10行根据 column_separator 切分好的数据行。
+要上传的文件内容，Content-type 为 multipart/form-data
+
+# 导入已上传的文件
+PUT /api/<namespace>/<db>/<tbl>/upload
+路径参数
+<namespace>：命名空间，目前仅支持 default_cluster
+<db>：指定的数据库
+<tbl>：指定的表
+请求参数：
+file_id：指定导入的文件id，文件id由上传导入文件的API返回。
+file_uuid：指定导入的文件uuid，文件uuid由上传导入文件的API返回。
+要上传的文件内容，Content-type 为 multipart/form-data
+示例：PUT /api/default_cluster/db1/tbl1/upload?file_id=1&file_uuid=b87824a4-f6fd-42c9-b9f1-c6d68c5964c2
+
+# 查看格式为CSV或PARQUET的文件内容
+POST /api/import/file_review
+
+# 获取集群内的元数据信息，包括数据库列表、表列表以及表结构等。
+GET /api/meta/namespaces/<ns>/databases
+GET /api/meta/namespaces/<ns>/databases/<db>/tables
+GET /api/meta/namespaces/<ns>/databases/<db>/tables/<tbl>/schema
+ns：指定集群名。
+db：指定数据库。
+tbl：指定数据表。
+
+# 获取集群统计信息、库表数量等。
+GET /rest/v2/api/cluster_overview
+ret = requests.get("http://192.168.3.23:8030/rest/v2/api/cluster_overview", auth=('root', ''))
+ret.json()
+Out[153]:
+{'msg': 'success',
+ 'code': 0,
+ 'data': {'diskOccupancy': 512903940,
+  'remainDisk': 207130746886,
+  'feCount': 1,
+  'tblCount': 296,
+  'beCount': 6,
+  'dbCount': 5},
+ 'count': 0}
+

@@ -141,4 +141,20 @@ windows系统，解决方法：
 2、排除搜狗输入法热键占用：找到搜狗输入法悬浮图标，右键 -> 更多设置 -> 按键 -> 系统功能快捷键 -> 点击“系统功能快捷键设置” -> 取消勾选 简繁切换 Ctrl + Shift + F
 3、确认 Pycharm -> File -> Settings -> Keymap -> Main Menu -> Edit -> Find -> Find in Files的快捷键设置是不是 Ctrl + Shift + F
 
+# pycharm python Console 查看当前目录，切换目录
+pwd
+%cd ../.. 
+
+# pycharm插件安装后报异常：
+ requires plugin 'com.intellij.modules.java' to be installed
+解决方法：
+1、登录官网：https://plugins.jetbrains.com/
+2、输入缺失的插件进行搜索；
+3、下载依赖的插件进行安装；
+4、重启pycharm.
+
+# 问题：已经安装了ipython 且pycharm ：Settings -> Build -> Console,勾选了“Use IPython if available” ，但 Python Console还是无法使用：
+问题原因：ipython未正常安装；
+解决方法：可以尝试手动在PyCharm控制台中导入IPython模块：在控制台输入import IPython，然后通过IPython.start_ipython()启动IPython shell。
+若中间有报错，可以查看具体原因。
 

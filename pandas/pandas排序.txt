@@ -55,6 +55,24 @@ Out[167]:
 1  8  3  2
 3  2  2  1
 
+# 对index索引进行排序：
+df.sort_index()
+Out[56]: 
+   b  a  c
+0  2  3  3
+1  3  2  8
+2  1  4  1
+3  2  1  2
+
+# 对索引index, 按照自定义函数进行排序：
+sort_list= [1,0, 2, 3]
+df.sort_index(key=lambda x: [sort_list.index(i) for i in x])
+   b  a  c
+1  3  2  8
+0  2  3  3
+2  1  4  1
+3  2  1  2
+
 # 对， b、a两列按行求和，形成新的一列；
 df['ba']=df[['b','a']].sum(axis=1) 
 df
@@ -125,6 +143,21 @@ Out[30]:
 
 # 按 api_name列进行分组，再取出每组中rt列最大值的一行
 df.loc[df.groupby('api_name')['rt'].idxmax()]
+
+# 分组排序
+按照X列进行分组后对Y列进行升序排序
+res = df.groupby('X', sort=False).apply(lambda x: x.sort_values('Y', ascending=True)).reset_index(drop=True)
+
+# 分组排序，并附上组内序号：
+pandas分组排序时候，组内的数据如何排序，以及排序的标号如何显示（连续，跳跃等）
+常用语法：df.groupby(['company'])['salary'].rank(ascending=0, method='dense')
+按 company 列进行分组，并对salary 进行排序；
+ascending = 0 ：降序；ascending = 1 ：升序；
+method的数值, 可以为 dense、first、min、max
+dense：若排序列值一样，则序号一样，且不跳跃，最大序号<=组内元素数；
+first：若排序列值一样，则序号不一样，先出现序号小；最大序号=组内元素数；序号无跳跃；最大序号=组内元素数；
+min：若排序列值一样，则序号一样，且序号=排名小的；比如，排在3、4两个位置，那么序号取3；序号有跳跃；最大序号<=组内元素数；
+max: 若排序列值一样，则序号一样，且序号=排名大的；比如，排在3、4两个位置，那么序号取4；序号有跳跃；最大序号=组内元素数；
 
 方法3：在分组中取出最大值行（若最大值有多行，则取出所有最大值行）
 dft=pd.DataFrame([['A', 1.2], ['B', 2], ['C', 3], ['D', 4], ['A', 2], ['B', 3], ['A', 3], ['B', 1], ['C', 2.3], ['D', 1.4], ['A', 3.0]], columns=['tag', 'num'])

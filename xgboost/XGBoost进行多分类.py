@@ -17,6 +17,10 @@ from sklearn.metrics import mean_squared_error
 from xgboost import plot_importance
 import matplotlib.pyplot as plt
 
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+import xgboost
+
 # 33: lambda x:int(x == '?') 将第33列?转化为0 ，对应第34列数值-1
 # https://github.com/datasets/dermatology
 data_file = rf'D:/Users/{USERNAME}/github_project/dermatology/data/dermatology.csv'
@@ -46,19 +50,44 @@ param['silent'] = 1
 param['nthread'] = 4
 # 这里的并行是指：在同一棵树中，同一个节点选择哪个特征进行划分的时候，可以并行计算gini系数或者mse均方差
 
-watchlist = [(xg_train, 'train'), (xg_test, 'test')]
-num_round = 6
+watchlist = [(xg_train, 'train'), (xg_val, 'test')]
+num_round = 1000
+early_stopping_rounds = 3
+
+early_stopping = xgboost.callback.EarlyStopping(
+    rounds=early_stopping_rounds,
+    min_delta=1e-3,
+    save_best=True,
+    maximize=False,
+    metric_name="mlogloss",
+)
+evals_result = {}
 
 # 训练模型
 bst = xgb.train(param,  # 参数
                 xg_train,  # 训练数据
                 num_round,  # 弱学习器的个数
-                watchlist);
+                evals=watchlist,
+                early_stopping_rounds=early_stopping_rounds,
+                evals_result=evals_result,
+                callbacks=[early_stopping]);
 
 # 通过测试数据，检测模型的优劣
 pred = bst.predict(xg_test);
 print('predicting, classification error=%f' % (
             sum(int(pred[i]) != y_test[i] for i in range(len(y_test))) / float(len(y_test))))
+
+
+bst.save_model(f"model-{bst.best_iteration:02d}-{bst.best_score:.3f}.json")
+best_model_file = f"model-{bst.best_iteration:02d}-{bst.best_score:.3f}.json"
+print('最佳模型：', best_model_file)
+
+# 加载模型
+booster = xgb.Booster()
+booster.load_model(best_model_file)
+y_pred = booster.predict(xg_test)
+print("整体准确率(accuracy)：",  accuracy_score(y_test, y_pred))
+
 
 # 第二种情况：给出属于每个类别的概率
 # multi:softprob
@@ -92,6 +121,8 @@ print(metrics.confusion_matrix(y_test, ylabel))
 plot_importance(bst)
 plt.show()
 
+# 值越大，越重要
+print('各特征的权重：', bst.get_score(importance_type = 'weight', fmap=''))
 
 # 链接：https://juejin.cn/post/7033320187575140382
 

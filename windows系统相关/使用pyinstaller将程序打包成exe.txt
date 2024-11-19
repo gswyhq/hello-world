@@ -7,19 +7,20 @@
 pyinstaller [opts] yourprogram.py 
 参数含义
 
--F    指定打包后只生成一个exe格式的文件(建议写上这个参数)
-
+-F：生成单个可执行文件而不是一个文件夹。指定打包后只生成一个exe格式的文件(建议写上这个参数)
 -D    –onedir 创建一个目录，包含exe文件，但会依赖很多文件（默认选项）
-
 -c    –console, –nowindowed 使用控制台，无界面(默认)
-
--w    –windowed, –noconsole 使用窗口，无控制台
-
+-w    –windowed, –noconsole 使用窗口，无控制台，适用于图形界面程序。
 -p    添加搜索路径，让其找到对应的库。
-
 -i    改变生成程序的icon图标(比如给女朋友写的程序，换个好看的图标，默认的很丑)
+--onefile：等同于-F选项，生成单个可执行文件。
+--name：指定生成的可执行文件的名称。
+--icon：指定可执行文件的图标文件。
+-p：添加附加的Python模块搜索路径。
 
 实例说明
+pyinstaller --onefile --noconsole your_script.py
+添加--noconsole选项可以确保生成的可执行文件没有命令行窗口，从而隐藏源代码。
 
 比如你有个python程序叫test.py，绝对路径在[D:\project]，打包成一个exe格式的文件
 
@@ -31,8 +32,99 @@ pyinstaller -F -w D:\project\test.py
 
 pyinstaller -F -w -i D:\project\test.ico D:\project\test.py
 
+###########################################################################################################################
+pyinstaller 文件太大怎么解决？
+解决方法：通过虚拟环境解决
+第一步：创建个新目录，包含需要打包成exe的py文件；
+第二步：创建虚拟环境
+    使用venv模块创建一个新的虚拟环境。给环境命名，比如我们叫它myenv：
+    python3 -m venv myenv
+    这将会在当前目录下创建一个名为myenv的新文件夹，其中包含虚拟环境的所有组件。
+第三步：激活这个新环境：
+    Windows:
+    .\myenv\Scripts\activate
+    Linux/MacOS:
+    source myenv/bin/activate
+第四步：在虚拟环境中安装你需要的Python包，比如：
+    pip install package_name
+第五步：使用pyinstaller命令打包
+    pyinstaller -i 1729143564556.ico -F base64加解密.py
+第六步：
+    运行dist文件夹下的exe文件，检查是否运行成功即打包成功
+第七步：退出虚拟环境
+    当你完成工作后，可以使用 deactivate 命令退出虚拟环境。
+第八步：删除虚拟环境
+    rm -rf myenv
 
+# upx下载地址
+https://github.com/upx/upx/releases/tag/v4.2.4
 
+###########################################################################################################################
+问题：使用pyinstaller将py脚本打包成exe后，直接运行报错：
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\x\\AppData\\Local\\Temp\\_MEI6362\\pyecharts\\datasets\\map_filename.json'
+
+解决方法：
+打包成单文件的形式（即只生成一个exe文件），手动--add-data添加所需资源路径进行打包
+//用法：pyinstaller x.py --add-data "源地址;目标地址"。（目标的文件夹不存在会自动创建）
+// windows以;分割，linux以:分割
+//可使用多次 --add-data
+
+例如：
+C:\****\Desktop\打包脚本所在目录>pyinstaller -F -w -i aaa.ico aaa.py --add-data ..\Python\Python39\Lib\site-packages\pyecharts\render\templates;pyecharts/render/templates --add-data ..\Python\Python39\Lib\site-packages\pyecharts\datasets;pyecharts/datasets
+> pyinstaller -i 1729143564556.ico -F base64加解密.py --add-data myenv\Lib\site-packages\gradio_client;gradio_client
+
+# 问题：pyinstaller打包后找不到.pyc文件
+解决办法：
+将***.py复制一份副本，然后改名为***.pyc
+并通过-add-data 包含该pyc文件所在的目录；
+如：
+cp ./myenv/Lib/site-packages/gradio/blocks_events.py ./myenv/Lib/site-packages/gradio/blocks_events.pyc
+pyinstaller -i 1729143564556.ico -F base64加解密.py --add-data myenv\Lib\site-packages\gradio_client;gradio_client --add-data myenv\Lib\site-packages\gradio;gradio
+pyinstaller -c -i 1729143564556.ico --add-data "myenv/Lib/site-packages/gradio_client:gradio_client" --add-data "myenv/Lib/site-packages/gradio:gradio" -F base64加解密.py --hidden-import=gradio_client --hidden-import=gradio
+
+但有时候pyc文件太多，这样一个个操作太麻烦，可以通过下面方法
+1、使用compileall模块批量生成.pyc文件
+命令行方式：当需要将一个目录下的多个.py文件编译成.pyc文件时，可以使用compileall模块。例如，如果test文件夹下有test.py和test2.py两个文件，可以通过以下命令一次性将这两个文件编译成对应的.pyc文件：
+python -m compileall myenv/Lib/site-packages/gradio
+该命令会在test文件夹下生成__pycache__文件夹，其中包含.pyc文件
+2、将 __pycache__目录，并生成将__pycache__目录的下的文件移到到对应的目录的命令：
+find myenv/Lib/site-packages/gradio -name __pycache__ | sed 's/__pycache__//g' |xargs -i echo mv {}__pycache__/* {}
+3、find myenv/Lib/site-packages/gradio -name *.cpython-312.pyc|sed -e 's/cpython-312.pyc//g' |xargs -i echo mv {}cpython-312.pyc {}pyc > run_mv_pyc.sh
+/bin/bash run_mv_pyc.sh
+
+或者：
+find site-packages/gradio -name *.py |xargs -i echo cp {} {}c > run_cp_pyc.sh
+/bin/bash run_cp_pyc.sh
+
+# 问题：
+在运行exe程序时候，出现：运行出错： 'gbk' codec can't decode byte 0xcb in position 0: illegal multibyte sequence
+在cmd命令行输入：
+chcp 65001
+临时修改编码为utf-8
+再重新打包成exe
+重新打包时候指明参数： --python-option encoding=utf-8
+pyinstaller -c -i 1729143564556.ico --add-data "myenv/Lib/site-packages/gradio_client:gradio_client" --add-data "myenv/Lib/site-packages/gradio:gradio" --python-option encoding=utf-8  -F base64加解密.py --hidden-import=gradio_client --hidden-import=gradio
+
+还可以在程序中，通过如下方法输出对应的编码，有时候编码是正常的，只是对应的文件可能有问题，也会报错：
+print("默认编码：", sys.getdefaultencoding())
+
+如：对于gradio这个包有些特殊，需要
+find site-packages/gradio -name *.py |xargs -i echo cp {} {}c > run1234.sh
+/bin/bash run1234.sh
+再重新打包
+
+###########################################################################################################################
+若运行exe报错了，闪退，来不及看是什么报错怎么办？
+可以类似下面这样修改打包脚本，最后再改回来即可：
+import os,time
+try:
+    这里填入原有的程序内容
+
+except Exception as e:
+    print("运行出错：", e)
+    print("当前工作路径：", os.getcwd())
+    time.sleep(3000)
+###########################################################################################################################
 # 复制U盘文件
 # -*- coding:utf-8 -*-
 import os
@@ -56,4 +148,4 @@ while (True):
 usb_path就是U盘的盘符，比如你的电脑有C,D盘，那么U盘插上来以后路径就是E盘
 save_path就是你要把复制的文件保存在哪里
 
-
+###########################################################################################################################

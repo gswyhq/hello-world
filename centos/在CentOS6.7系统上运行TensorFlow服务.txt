@@ -1,0 +1,75 @@
+
+问题：直接在CentOS 6.7 系统上运行TensorFlow服务会报错：
+Caused by: java.lang.UnsatisfiedLinkError: /tmp/tensorflow_native_libraries-1722509427232-0/libtensorflow_jni.so: /lib64/libc.so.6: version `GLIBC_2.15' not found (required by /tmp/tensorflow_native_libraries-1722509427232-0/libtensorflow_jni.so)
+
+解决方法：
+升级 GLIBC 版本到2.17
+升级步骤：
+1、在有网络的机器离线下载glibc的安装包：
+yum install --downloadonly --downloaddir=/root/glibc-packages glibc
+
+2、采用忽略依赖方法依次安装gitbc-packages下面的安装包，如：
+rpm -ivh  --force --nodeps *.rpm
+
+[root@34e72a803539 ~]# cd glibc-packages/
+[root@34e72a803539 glibc-packages]# rpm -ivh  --force --nodeps *.rpm
+warning: glibc-2.17-326.el7_9.3.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID f4a80eb5: NOKEY
+Preparing...                ########################################### [100%]
+   1:glibc-common           ########################################### [ 25%]
+   2:glibc                  ########################################### [ 50%]
+   3:glibc-headers          ########################################### [ 75%]
+   4:glibc-devel            ########################################### [100%]
+[root@34e72a803539 glibc-packages]# ldd --version
+bash: /usr/bin/ldd: /usr/bin/bash: bad interpreter: No such file or directory
+
+3、建立 /usr/bin/bash 软连接 
+[root@34e72a803539 glibc-packages]# ln -s /bin/bash /usr/bin/bash
+[root@34e72a803539 glibc-packages]# ldd --version
+ldd (GNU libc) 2.17
+Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+[root@34e72a803539 glibc-packages]# ls
+glibc-2.17-326.el7_9.3.x86_64.rpm  glibc-common-2.17-326.el7_9.3.x86_64.rpm  glibc-devel-2.17-326.el7_9.3.x86_64.rpm  glibc-headers-2.17-326.el7_9.3.x86_64.rpm
+
+至此 glibc 已经升级到了2.17版本，使用TensorFlow不会报上面的错误，但会报新的错误：
+新问题：
+Caused by: java.lang.UnsatisfiedLinkError: /tmp/tensorflow_native_libraries-1722509744247-0/libtensorflow_jni.so: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.19' not found (required by /tmp/tensorflow_native_libraries-1722509744247-0/libtensorflow_jni.so)
+
+解决方法：
+1、在CentOS7 的机器上，找到 libstdc++.so.6.0.19
+[root@34e72a803539 ~]# find / -name libstdc++.so.6*
+/root/libstdc++.so.6.0.19
+
+2、将libstdc++.so.6.0.19 文件复制到 centos 6.7机器上，并替换掉之前的 libstdc++.so.6 文件：
+[root@34e72a803539 ~]# find / -name libstdc++.so.6
+/usr/lib64/libstdc++.so.6
+[root@34e72a803539 ~]# find / -name libstdc++.so.*
+/root/libstdc++.so.6.0.19
+[root@34e72a803539 ~]# cp /root/libstdc++.so.6.0.19 /usr/lib64/libstdc++.so.6
+cp: overwrite `/usr/lib64/libstdc++.so.6'? y
+[root@34e72a803539 ~]# strings /usr/lib64/libstdc++.so.6|grep GLIBCXX
+GLIBCXX_3.4
+GLIBCXX_3.4.1
+GLIBCXX_3.4.2
+GLIBCXX_3.4.3
+GLIBCXX_3.4.4
+GLIBCXX_3.4.5
+GLIBCXX_3.4.6
+GLIBCXX_3.4.7
+GLIBCXX_3.4.8
+GLIBCXX_3.4.9
+GLIBCXX_3.4.10
+GLIBCXX_3.4.11
+GLIBCXX_3.4.12
+GLIBCXX_3.4.13
+GLIBCXX_3.4.14
+GLIBCXX_3.4.15
+GLIBCXX_3.4.16
+GLIBCXX_3.4.17
+GLIBCXX_3.4.18
+GLIBCXX_3.4.19
+GLIBCXX_DEBUG_MESSAGE_LENGTH
+
+

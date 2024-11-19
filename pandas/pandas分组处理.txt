@@ -1,0 +1,27 @@
+
+# 对 'a', 'b' 两列进行分组，并对 number 列进行求和
+df2 = df.groupby(['a', 'b'])['number'].sum()
+注意：上面分组求和后，缺失对应的列名，后续操作起来不方便；
+
+# 重命名分组聚合后的列名
+# 方法1：
+df2 = df.groupby(['a', 'b']).agg(new_number=('number','sum'))
+# 方法2：
+df2 = df.groupby(['a', 'b'], as_index=False)['number'].agg({"new_number": "sum"})
+# 方法3：
+df2 = df.groupby(['a', 'b'], as_index=False).agg({'number':'sum'}).rename(columns={'number': 'new_number'})
+以上三种方法都是对a、b列，进行分组，再对number列进行求和，之后将求和后的列命名为 new_number;
+其中，方法1中是将a、b列作为了索引；
+
+# 分组，取统计数量最大的行, 对 a列进行分组，再取new_number列最大值，最大值列重命名为 max_number
+df3 = df2.groupby(['a'], as_index=False)['new_number'].agg({"max_number": "max"})
+
+# 对a列进行分组，并按number列进行降序排列：
+df.groupby('a', sort=False).apply(lambda x: x.sort_values('number', ascending=False)).reset_index(drop=True)
+
+# 对a列进行分组，并按number列进行降序排列, 并将排序序号赋值给列 sort_id
+df['sort_id'] = df['number'].groupby(df['a']).rank(ascending=False)
+
+# 但上面这种方法，筛选结果中缺失其他的无关列数据，可通过如下方法，既删选到了每组new_number最大值的行，又保留了其他无关列的数据；
+df3 = df2.groupby(['a'], as_index=False).apply(lambda t: t[t.new_number==t.new_number.max()])
+
