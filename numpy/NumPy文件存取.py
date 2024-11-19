@@ -122,3 +122,28 @@ array({'trajectories': array([[[729.78449821, 391.1702509],
 # 从numpy ndarray中提取字典项
 dt.item()['trajectories']
 
+####################################################################################
+问题：numpy.uint16对象 如何迭代写入二进制文件
+在Python中，你可以使用numpy.nditer对象来迭代numpy.uint16数组的元素，并使用struct模块将这些值写入二进制文件。以下是一个示例代码：
+
+import numpy as np
+import struct
+
+# 创建一个包含uint16类型元素的numpy数组
+arr = np.array([1, 2, 3, 4, 5], dtype=np.uint16)
+
+# 打开一个二进制文件进行写入
+with open('output.bin', 'wb') as f:
+    # 使用nditer来迭代数组
+    for value in np.nditer(arr):
+        # 将uint16的值转换为2个字节，并写入文件
+        f.write(struct.pack('H', value))
+这段代码创建了一个包含uint16类型元素的数组，然后使用struct.pack函数将数组中的每个元素打包为2个字节，最后将这些字节写入名为output.bin的二进制文件中。struct.pack函数中的格式字符串'H'表示要写入的是无符号短整型（uint16），而'wb'模式确保了文件会以二进制形式被写入。
+
+问题：numpy对象二进制文件，如何不一次全部加载到内存读取：
+with open(file_name, 'r') as f:
+    nbytes = f.seek(0, 2)
+    flen = f.tell() // np.dtype('uint16').itemsize
+data = np.memmap(file_name, dtype=np.dtype('uint16'), shape=(flen // max_length, max_length))
+
+
