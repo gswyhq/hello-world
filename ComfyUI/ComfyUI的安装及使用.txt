@@ -1,0 +1,198 @@
+
+ComfyUI 是一个用于生成和操控图像的图形用户界面（GUI），旨在提供用户友好的方式来创建和编辑图像。 它最大的特点就是节点化的设计，简介，美观，又强大，当然入门门槛稍微高一些。
+
+另外它对AI绘画的支持非常及时和全面，目前已经全面支持SD1.x, SD2.x, SDXL, Stable Video Diffusion, Stable Cascade, SD3 and Stable Audio, Flux等图文视频模型。
+
+import os
+import subprocess
+import sys
+
+# ComfyUI仓库
+git_url = "https://github.com/comfyanonymous/ComfyUI.git"
+
+if not os.path.exists('./ComfyUI'):
+    subprocess.run(["git", "clone", git_url])
+    subprocess.run(["pip", "install", "-r", "./ComfyUI/requirements.txt"])
+else:
+    print("已经存在ComfyUI")
+print('安装完成')
+
+
+# 使用ComfyUI运行FLUX，需要预先准备好FLUX的模型，CLIP模型，VAE模型。
+
+# Flux schnell fp8模型
+!wget -c "https://modelscope.cn/models/cunkai/FLUX.1-schnell-dev-merged-fp8/resolve/master/flux-schnell_fp8_unet.safetensors" -O "./ComfyUI/models/unet/flux1-schnell-fp8.safetensors"
+print('模型安装完成')
+
+FLUX模型路径为：ComfyUI\models\unet
+
+CLIP和VAE配置
+CLIP和VAE被称为“翻译家”和“草图艺术家”，这些可以帮我们做出更好的作品，所以也要配置一下。
+
+CLIP的路径为：ComfyUI\models\clip
+clip模型下载地址：
+https://hf-mirror.com/comfyanonymous/flux_text_encoders/tree/main
+或者：
+# Clip（文本编码）
+!wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/flux_text_encoders/repo?Revision=master&FilePath=clip_l.safetensors" -O "./ComfyUI/models/clip/clip_l.safetensors"
+!wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/flux_text_encoders/repo?Revision=master&FilePath=t5xxl_fp8_e4m3fn.safetensors" -O "./ComfyUI/models/clip/t5xxl_fp8_e4m3fn.safetensors"
+
+
+VAE的路径为：ComfyUI\models\vae
+# vae
+!wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/FLUX.1-dev/repo?Revision=master&FilePath=ae.safetensors" -O "./ComfyUI/models/vae/ae.safetensors"
+
+#########################################################################################################################
+# 插件安装
+需要将 Comfyui 更新到最新版本；如果你之前安装过 IP Adapter Plus 插件，则需要先在 custom_nodes 内删除之前的文件夹。
+插件可以通过 Manager 安装，但是更推荐在终端通过 git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus.git 命令来安装，可以获取最新的更新内容。
+import os
+import subprocess
+import sys
+
+def install_requirements(directory):
+    # 检查指定目录下是否有requirements.txt文件
+    requirements_path = os.path.join(directory, 'requirements.txt')
+    if os.path.exists(requirements_path):
+        print(f"Found requirements.txt in {directory}. Installing packages...")
+        # 使用pip安装requirements.txt中的包
+        subprocess.run(['pip', 'install', '-r', requirements_path])
+    else:
+        print(f"No requirements.txt found in {directory}.")
+
+urls = [
+    #manager插件
+    "https://github.com/ltdrdata/ComfyUI-Manager.git",
+    #ipadapter_plus插件
+    "https://github.com/cubiq/ComfyUI_IPAdapter_plus.git",
+    #comfyui_controlnet_aux插件
+    "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+    #comfyui_中文汉化插件
+    "https://github.com/AIGODLIKE/AIGODLIKE-ComfyUI-Translation.git",
+    #InstantID 肖像插件
+    "https://github.com/cubiq/ComfyUI_InstantID.git"
+]
+
+for url in urls:
+    dir = f"./ComfyUI/custom_nodes/{url.split('/')[-1].replace('.', '_')}"
+    subprocess.run(["git", "clone", "--progress", url, dir])
+    install_requirements(dir)
+
+print('安装完成')
+
+#########################################################################################################################
+# 插件模型的安装：
+import os
+
+print('开始下载ipadapter')
+
+#clip_vision
+!mkdir -p ./ComfyUI/models/clip_vision/
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fimage_encoder%2Fmodel.safetensors" -O "./ComfyUI/models/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=sdxl_models%2Fimage_encoder%2Fmodel.safetensors" -O "./ComfyUI/models/clip_vision/CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors"
+
+#ipadapter
+!mkdir -p ./ComfyUI/models/ipadapter/
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter_sd15.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter_sd15.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter_sd15_light_v11.bin" -O "./ComfyUI/models/ipadapter/ip-adapter_sd15_light_v11.bin"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter-plus_sd15.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter-plus_sd15.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter-plus-face_sd15.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter-plus-face_sd15.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter-full-face_sd15.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter-full-face_sd15.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=models%2Fip-adapter_sd15_vit-G.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter_sd15_vit-G.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=sdxl_models%2Fip-adapter_sdxl_vit-h.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter_sdxl_vit-h.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=sdxl_models%2Fip-adapter-plus_sdxl_vit-h.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=sdxl_models%2Fip-adapter-plus-face_sdxl_vit-h.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter-plus-face_sdxl_vit-h.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/AI-ModelScope/IP-Adapter/repo?Revision=master&FilePath=sdxl_models%2Fip-adapter_sdxl.safetensors" -O "./ComfyUI/models/ipadapter/ip-adapter_sdxl.safetensors"
+#ipadapter face
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-plusv2_sd15.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid-plusv2_sd15.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-plusv2_sdxl.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid-plusv2_sdxl.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-portrait-v11_sd15.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid-portrait-v11_sd15.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-portrait_sdxl.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid-portrait_sdxl.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-portrait_sdxl_unnorm.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid-portrait_sdxl_unnorm.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid_sd15.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid_sd15.bin"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid_sdxl.bin" -O "./ComfyUI/models/ipadapter/ip-adapter-faceid_sdxl.bin"
+
+#ipadapter lora
+!mkdir -p ./ComfyUI/models/loras/
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-plusv2_sd15_lora.safetensors" -O "./ComfyUI/models/loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid-plusv2_sdxl_lora.safetensors" -O "./ComfyUI/models/loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid_sd15_lora.safetensors" -O "./ComfyUI/models/loras/ip-adapter-faceid_sd15_lora.safetensors"
+!wget -c "https://modelscope.cn/api/v1/models/guaidao/IP-Adapter-FaceID/repo?Revision=master&FilePath=ip-adapter-faceid_sdxl_lora.safetensors" -O "./ComfyUI/models/loras/ip-adapter-faceid_sdxl_lora.safetensors"
+
+
+print('开始下载放大模型')
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=upscale/4x-UltraSharp.pth" -O "./ComfyUI/models/upscale_models/4x-UltraSharp.pth"
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=upscale/RealESRGAN_x4.pth" -O "./ComfyUI/models/upscale_models/RealESRGAN_x4.pth"
+
+print('开始下载insightface')
+!mkdir -p ./ComfyUI/models/insightface/models/buffalo_l/
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=buffalo_l/1k3d68.onnx"  -O "./ComfyUI/models/insightface/models/buffalo_l/1k3d68.onnx"
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=buffalo_l/2d106det.onnx"  -O "./ComfyUI/models/insightface/models/buffalo_l/2d106det.onnx"
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=buffalo_l/det_10g.onnx"  -O "./ComfyUI/models/insightface/models/buffalo_l/det_10g.onnx"
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=buffalo_l/genderage.onnx"  -O "./ComfyUI/models/insightface/models/buffalo_l/genderage.onnx"
+!wget -c "https://modelscope.cn/api/v1/models/cunkai/ComfyUI_Notebook/repo?Revision=master&FilePath=buffalo_l/w600k_r50.onnx"  -O "./ComfyUI/models/insightface/models/buffalo_l/w600k_r50.onnx"
+
+print('安装完成')
+#########################################################################################################################
+
+启动报错：
+  File "/mnt/workspace/flux-fp8/ComfyUI/custom_nodes/ComfyUI-Manager_git/glob/manager_server.py", line 1354, in <lambda>
+    threading.Thread(target=lambda: asyncio.run(default_cache_update())).start()
+    raise asyncio.TimeoutError from None
+asyncio.exceptions.TimeoutError
+解决方法：
+async def default_cache_update():
+    async def get_cache(filename):
+        uri = 'https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/' + filename
+        cache_uri = str(core.simple_hash(uri)) + '_' + filename
+        cache_uri = os.path.join(core.cache_dir, cache_uri)
+        print('cache_uri', cache_uri)
+        json_obj = await core.get_data(uri, True)
+
+        with core.cache_lock:
+            with open(cache_uri, "w", encoding='utf-8') as file:
+                json.dump(json_obj, file, indent=4, sort_keys=True)
+                print(f"[ComfyUI-Manager] default cache updated: {uri}")
+
+    a = get_cache("custom-node-list.json")
+    b = get_cache("extension-node-map.json")
+    c = get_cache("model-list.json")
+    d = get_cache("alter-list.json")
+    e = get_cache("github-stats.json")
+
+    await asyncio.gather(a, b, c, d, e)
+
+将上面代码修改为如下代码，并将对应的json文件移到对应core.cache_dir目录中：
+async def default_cache_update():
+    async def get_cache(filename):
+        # 构造本地缓存文件的路径
+        cache_uri = os.path.join(core.cache_dir, filename)
+        print('cache_uri', cache_uri)
+
+        # 读取本地文件
+        try:
+            with open(cache_uri, "r", encoding='utf-8') as file:
+                json_obj = json.load(file)
+            print(f"[ComfyUI-Manager] default cache loaded from local: {cache_uri}")
+        except FileNotFoundError:
+            print(f"[ComfyUI-Manager] Warning: {cache_uri} not found.")
+            json_obj = {}  # 或者其他适当的默认值
+
+        # 这里可以添加将 json_obj 写入缓存的逻辑，如果需要的话
+        # 但通常这一步是在确认缓存不存在或已过期时才执行
+
+        return json_obj  # 返回读取的数据，以便在外部使用
+
+    # 并发读取多个文件
+    tasks = [get_cache(filename) for filename in [
+        "custom-node-list.json",
+        "extension-node-map.json",
+        "model-list.json",
+        "alter-list.json",
+        "github-stats.json"
+    ]]
+    await asyncio.gather(*tasks)
+
+问题：有时候启动服务没有报错，但页面上却什么都没有，可能是下面两个文件被删除了：
+        删除：     custom_nodes/example_node.py.example
+        删除：     custom_nodes/websocket_image_save.py

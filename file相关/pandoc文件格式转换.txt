@@ -1,0 +1,53 @@
+
+如果你需要将文档从一种格式转换成另一种格式，那么Pandoc是你的一把瑞士军刀，Pandoc可以将下列格式文档进行相互转换。
+Markdown、Microsoft Word、OpenOffice/LibreOffice、Jupyter notebook、HTML、EPUB、roff man、LaTeX、甚至是PDF。
+
+sudo apt-get install pandoc
+sudo apt-get install texlive-latex-base
+sudo apt-get install texlive
+sudo apt-get install -y texlive-xetex  latex-cjk-all 
+
+txt -> word
+> pandoc test.txt -o test.docx
+在生成时也可以使用 -c 参数为文档指定样式文件（ css 文件）
+> pandoc test.txt -o test.docx -c style.css
+
+
+[WARNING] Missing character: There is no 的 in font [lmmono10-regular]:!
+
+查看安装了哪些中文字体：
+$ fc-list :lang=zh
+指定中文字体：
+pandoc 通天之路，散修之王.txt --pdf-engine=xelatex -o 通天之路，散修之王.pdf -V CJKmainfont='楷体'
+
+# 中文没有自动换行问题
+解决方法：
+1、到处模板文件
+$ pandoc -D latex > template.latex
+2、修改模板文件
+但貌似没有作用，最后还是通过下面方法转出PDF文件：
+$ pandoc -t html -V CJKmainfont='楷体'  通天之路，散修之王.txt -o 通天之路，散修之王.pdf
+但该方法缺失页码；
+
+
+或者：
+apt install -y groff ghostscript
+
+
+如何更改 PDF 输出中的页边距？
+选项
+
+-V geometry:margin=1in
+Shell
+会将每边的页边距设置为一英寸。如果你不想设置统一的页边距，可以这样做：
+
+-V geometry:"top=2cm, bottom=1.5cm, left=1cm, right=1cm"
+Shell
+或者
+
+-V geometry:"left=3cm, width=10cm"
+
+下面这样有页码，但还是不换行：
+pandoc --pdf-engine=xelatex -V geometry:"top=2cm, bottom=1.5cm, left=1cm, right=1cm" -V CJKmainfont='楷体' --wrap=preserve --columns=30 通天之路，散修之王.txt -o 通天之路，散修 之王.pdf
+
+

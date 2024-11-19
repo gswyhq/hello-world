@@ -1,0 +1,13 @@
+
+使用ffmpeg将mp4文件转换为amv格式
+
+1、apt-get update
+2、apt-get install ffmpeg
+3、ffmpeg -i "12_Muzzy_Comes_Back.mp4" -s 160x120 -vstrict -1 -block_size 882 -ac 1 -ar 22050  "12_Muzzy_Comes_Back.amv";
+-s 160x120 屏幕尺寸; 若太模糊可以改为：1920x1080,1280x720,640x480等
+-vstrict -1 支持16整数倍高度
+-block_size 设置音频块大小，数值具体取决于视频合并时的错误提示“Try -block_size 882”
+-ac 1 单声道
+-ar 22050 音频采样率
+
+

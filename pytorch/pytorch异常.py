@@ -255,3 +255,22 @@ model.load_state_dict(custom_model['model_state_dict'])
 如：sys.path.append(rf"D:\Users\{USERNAME}\github_project/paddle2torch_PPOCRv3")
 之后再torch.load(...
 
+# 模型预测时候报错：
+RuntimeError: Expected q_dtype == at::kHalf || q_dtype == at::kBFloat16 to be true, but got false.  (Could this error message be improved?  If so, please report an enhancement request to PyTorch.)
+解决方法：
+第一步，确认设备是否支持bfloat16:
+import transformers
+transformers.utils.import_utils.is_torch_bf16_gpu_available()
+若为真，则支持；
+第二步，模型转换：
+        # 将状态字典中的权重转换为bfloat16
+        for key in state_dict:
+            state_dict[key] = state_dict[key].bfloat16()
+
+        # 加载到模型中
+        model.load_state_dict(state_dict, strict=False)
+
+        # 设置模型为bfloat16浮点运算模式（如果模型支持）
+        model.to(torch.bfloat16)
+
+
