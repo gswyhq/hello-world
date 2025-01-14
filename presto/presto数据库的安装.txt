@@ -1,0 +1,76 @@
+
+docker pull prestodb/presto:latest
+
+2. 创建文件 ``config.properties`` 内容如下: 
+
+    coordinator=true
+    node-scheduler.include-coordinator=true
+    http-server.http.port=8080
+    discovery-server.enabled=true
+    discovery.uri=http://localhost:8080
+
+3. 创建文件 ``jvm.config`` 内容如下: 
+
+    -server
+    -Xmx2G
+    -XX:+UseG1GC
+    -XX:G1HeapRegionSize=32M
+    -XX:+UseGCOverheadLimit
+    -XX:+ExplicitGCInvokesConcurrent
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+ExitOnOutOfMemoryError
+    -Djdk.attach.allowAttachSelf=true
+     
+4. 启动容器:
+
+   ``docker run -p 8080:8080 -it -v ./config.properties:/opt/presto-server/etc/config.properties -v ./jvm.config:/opt/presto-server/etc/jvm.config --name presto prestodb/presto:latest``
+
+5、python连接
+pip3 install presto-python-client
+
+import prestodb
+
+# 建立连接，不指定 catalog 和 schema
+conn = prestodb.dbapi.connect(
+    host='your-presto-server-ip',
+    port=8080,
+    user='your_username'
+)
+
+cur = conn.cursor()
+
+# 获取所有可用的 catalog
+cur.execute('SHOW CATALOGS')
+catalogs = [row[0] for row in cur.fetchall()]
+print("Available catalogs:", catalogs)
+
+if catalogs:
+    selected_catalog = catalogs[0]  # 自动选择第一个 catalog
+    print(f"Selected catalog: {selected_catalog}")
+
+    # 使用选定的 catalog 连接
+    conn = prestodb.dbapi.connect(
+        host='your-presto-server-ip',
+        port=8080,
+        user='your_username',
+        catalog=selected_catalog
+    )
+    cur = conn.cursor()
+
+    # 获取选定 catalog 下的所有 schema
+    cur.execute(f'SHOW SCHEMAS FROM {selected_catalog}')
+    schemas = [row[0] for row in cur.fetchall()]
+    print("Available schemas:", schemas)
+
+    if schemas:
+        selected_schema = schemas[0]  # 自动选择第一个 schema
+        print(f"Selected schema: {selected_schema}")
+
+        # 执行查询
+        cur.execute(f'SELECT * FROM {selected_schema}.my_table LIMIT 10')  # 替换为实际的表名
+        rows = cur.fetchall()
+
+        for row in rows:
+            print(row)
+else:
+    print("No catalogs available.")
