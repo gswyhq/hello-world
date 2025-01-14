@@ -13,7 +13,7 @@ Properties
 # 指定使用哪个连接器
 connector.name=postgresql
 
-# PostgreSQL 数据库的主机地址和端口
+# PostgreSQL 数据库的主机地址和端口,mysql数据源时候，不需要指定数据库名，但postgresql则需要
 connection-url=jdbc:postgresql://<postgresql-host>:5432/<database-name>
 
 # PostgreSQL 用户名
@@ -53,11 +53,11 @@ conn = prestodb.dbapi.connect(
     port=8080,
     user='your_username',  # 替换为实际的用户名
     catalog='postgresql',  # 使用你刚刚配置的 catalog 名称
-    schema='<your-schema>' # 替换为实际的 schema 名称
+    schema='public' # 替换为实际的 schema 名称
 )
 
 cur = conn.cursor()
-cur.execute('SHOW TABLES')  # 列出所有表以验证连接
+cur.execute('SHOW echemas')  # 列出所有schema以验证连接
 rows = cur.fetchall()
 
 for row in rows:
