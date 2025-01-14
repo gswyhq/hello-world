@@ -79,6 +79,28 @@ $ sudo reboot
 $ sudo apt-get update
 $ sudo apt-get install -y git
 $ sudo apt-get install -y docker-ce
+
+1. 添加Docker的官方GPG密钥
+如果您使用的是阿里云镜像源，也可以直接从阿里云获取GPG密钥：
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+2. 确认密钥文件存在
+检查密钥文件是否已正确创建：
+ls -l /usr/share/keyrings/docker-archive-keyring.gpg
+如果该文件存在并且大小不为0，则说明密钥已成功添加。
+3. 更新Docker APT源列表文件
+确保您的/etc/apt/sources.list.d/docker.list文件内容如下（这里我们继续使用阿里云的镜像源）：
+deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian bullseye stable
+4. 清除并更新APT缓存
+清除现有的APT缓存并重新更新：
+sudo apt-get clean
+sudo apt-get update
+5. 安装Docker CE
+现在应该可以顺利安装Docker了：
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+6. 验证安装
+最后，验证Docker是否正确安装：
+docker --version
+
 $ sudo apt-get install -y bash-completion
 # 自动补全设置：
 ~/.bashrc 文件添加如下两行,设置git、docker的自动补全：
@@ -99,18 +121,38 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl restart docker
 
 # 修改docker 仓库容器本地存储路径：
-$ sudo vim /etc/default/docker
-添加如下内容：
-DOCKER_OPTS="--graph /home/gswyhq/docker/data"
-并且需要修改/lib/systemd/system/docker.service：
-gswyhq@gswyhq-PC:~/docker/data$ sudo vim /lib/systemd/system/docker.service 
-# 添加下面两行内容：
-EnvironmentFile=-/etc/default/docker                                       
-ExecStart=/usr/bin/dockerd $DOCKER_OPTS -H fd:// --containerd=/run/containerd/containerd.sock    
-# ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
-# 重启docker
-gswyhq@gswyhq-PC:~$ sudo systemctl daemon-reload  
-gswyhq@gswyhq-PC:~$ sudo service docker restart
-gswyhq@gswyhq-PC:~$ docker info |grep -i root
- Docker Root Dir: /home/gswyhq/docker/data
+Docker的默认存储路径（即Docker Root Dir）通常设置为/var/lib/docker。如果您想更改这个默认存储路径，可以通过修改Docker守护进程的配置文件来实现。以下是具体步骤：
+
+1. 修改Docker守护进程配置
+a. 创建或编辑Docker守护进程配置文件
+编辑或创建位于/etc/docker/daemon.json的Docker守护进程配置文件。如果该文件不存在，请创建它。
+sudo nano /etc/docker/daemon.json
+b. 添加或修改数据根目录配置项
+在daemon.json文件中添加或修改data-root字段，指定您希望使用的新的存储路径。例如，要将Docker的数据存储路径更改为/mnt/docker-data，您可以这样配置：
+{
+  "data-root": "/mnt/docker-data"
+}
+请确保新路径存在并且有适当的权限：
+sudo mkdir -p /mnt/docker-data
+sudo chown root:root /mnt/docker-data
+sudo chmod 755 /mnt/docker-data
+
+a. 停止Docker服务
+sudo systemctl stop docker
+b. 复制现有数据到新位置
+使用rsync工具来复制现有数据以确保一致性：
+sudo rsync -aqxP /var/lib/docker/ /mnt/docker-data/
+c. 删除旧的数据（可选）
+确认所有数据已成功迁移后，可以选择删除旧的数据以释放空间：
+sudo rm -rf /var/lib/docker
+请注意，在执行此操作之前，请确保所有数据都已正确迁移，并备份重要数据以防意外丢失。
+
+3. 重启Docker服务
+完成上述配置更改后，重启Docker服务以使更改生效：
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+4. 验证更改
+最后，验证Docker是否使用了新的存储路径：
+docker info | grep -i root
+输出应该显示新的Docker Root Dir路径。
 
