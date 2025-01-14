@@ -1,0 +1,55 @@
+
+1、提供一个mysql数据源，如：
+docker run -it -d --privileged=true --name=supersonic_mysql -e LANG='C.UTF-8' -e MYSQL_ROOT_PASSWORD=root_password -e MYSQL_DATABASE=supersonic_db -e MYSQL_USER=supersonic_user -e MYSQL_PASSWORD=supersonic_password -p 13306:3306 -v $PWD/mysql_data:/var/lib/mysql mysql:8.0
+
+2、创建 MySQL Catalog 配置文件
+为 MySQL 创建一个新的 catalog 文件，例如 mysql.properties，并将它放置在 Presto 的配置目录中（默认是 /opt/presto-server/etc/catalog/）。你可以通过 Docker 的 -v 参数将本地文件挂载到容器内的这个目录。
+示例 mysql.properties 文件内容：
+
+# 指定使用哪个连接器
+connector.name=mysql
+# MySQL 数据库的主机地址
+connection-url=jdbc:mysql://<mysql-host>:3306
+# MySQL 用户名
+connection-user=<your-username>
+# MySQL 密码
+connection-password=<your-password>
+
+~$ cat mysql.properties 
+connector.name=mysql
+connection-url=jdbc:mysql://192.168.1.106:13306
+connection-user=supersonic_user
+connection-password=supersonic_password
+
+3、更新 Presto 启动命令
+当你启动 Presto 容器时，需要确保将新创建的 mysql.properties 文件挂载到正确的目录。下面是更新后的 Docker 启动命令：
+docker run -p 8080:8080 \
+  -v ./config.properties:/opt/presto-server/etc/config.properties \
+  -v ./jvm.config:/opt/presto-server/etc/jvm.config \
+  -v ./mysql.properties:/opt/presto-server/etc/catalog/mysql.properties \
+  --name presto \
+  prestodb/presto:latest
+
+
+4、使用python代码来测试连接
+import prestodb
+# 连接到 Presto 并指定 catalog 和 schema
+conn = prestodb.dbapi.connect(
+    host='localhost',
+    port=8080,
+    user='your_username',  # 替换为实际的用户名
+    catalog='mysql',       # 使用你刚刚配置的 catalog 名称
+    schema='supersonic_db' # 替换为实际的 schema/database 名称
+)
+cur = conn.cursor()
+cur.execute('SHOW schemas')  # 列出所有模式以验证连接
+rows = cur.fetchall()
+for row in rows:
+    print(row)
+    
+['information_schema']
+['performance_schema']
+['supersonic_db']
+
+# 在 Presto 中，SHOW DATABASES 语句不被直接支持。Presto 使用 SHOW SCHEMAS 或 SHOW CATALOGS 来列出可用的模式（schemas）或数据源（catalogs）。由于你在连接时指定了 catalog='mysql' 和 schema='supersonic_db'，你应该使用 SHOW TABLES 或 SHOW COLUMNS FROM table_name 等命令来查询具体的表或列。
+

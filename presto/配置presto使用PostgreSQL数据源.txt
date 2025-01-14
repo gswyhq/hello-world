@@ -1,0 +1,65 @@
+
+配置 Presto 使用 PostgreSQL 数据源的过程与 MySQL 类似，你需要创建一个特定的 catalog 配置文件来定义如何连接到 PostgreSQL 数据库，并提供必要的连接参数，包括用户名和密码。以下是详细的步骤和示例。
+
+步骤 1：准备环境
+确保你已经按照之前的说明启动了 Presto 容器，并且你的 PostgreSQL 数据库服务正在运行并可以被访问。
+
+步骤 2：创建 PostgreSQL Catalog 配置文件
+为 PostgreSQL 创建一个新的 catalog 文件，例如 postgresql.properties，并将它放置在 Presto 的配置目录中（默认是 /opt/presto-server/etc/catalog/）。你可以通过 Docker 的 -v 参数将本地文件挂载到容器内的这个目录。
+
+示例 postgresql.properties 文件内容：
+Properties
+深色版本
+# 指定使用哪个连接器
+connector.name=postgresql
+
+# PostgreSQL 数据库的主机地址和端口
+connection-url=jdbc:postgresql://<postgresql-host>:5432/<database-name>
+
+# PostgreSQL 用户名
+connection-user=<your-username>
+
+# PostgreSQL 密码
+connection-password=<your-password>
+
+# 可选：指定 SSL 模式 (如果需要)
+# ssl=true
+# sslmode=require
+请替换 <postgresql-host>、<database-name>、<your-username> 和 <your-password> 为实际的值。如果你的 PostgreSQL 数据库使用了非默认端口，请相应地修改 connection-url 中的端口号。
+
+步骤 3：更新 Presto 启动命令
+当你启动 Presto 容器时，需要确保将新创建的 postgresql.properties 文件挂载到正确的目录。下面是更新后的 Docker 启动命令：
+
+Bash
+深色版本
+docker run -p 8080:8080 \
+  -v ./config.properties:/opt/presto-server/etc/config.properties \
+  -v ./jvm.config:/opt/presto-server/etc/jvm.config \
+  -v ./postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties \
+  --name presto \
+  prestodb/presto:latest
+步骤 4：验证配置
+启动容器后，你可以通过访问 Presto 的 Web UI (http://localhost:8080) 或者使用命令行工具来验证是否成功添加了 PostgreSQL catalog。
+
+使用命令行工具验证：
+假设你已经在 PyCharm 中配置好了虚拟环境，并安装了 presto-python-client，你可以尝试以下 Python 代码来测试连接：
+
+Python
+深色版本
+import prestodb
+
+conn = prestodb.dbapi.connect(
+    host='localhost',
+    port=8080,
+    user='your_username',  # 替换为实际的用户名
+    catalog='postgresql',  # 使用你刚刚配置的 catalog 名称
+    schema='<your-schema>' # 替换为实际的 schema 名称
+)
+
+cur = conn.cursor()
+cur.execute('SHOW TABLES')  # 列出所有表以验证连接
+rows = cur.fetchall()
+
+for row in rows:
+    print(row)
+
