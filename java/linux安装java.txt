@@ -1,6 +1,23 @@
 
 # 方法一：
 ~$ apt-get install openjdk-8-jdk
+安装后 java -version 检查安装情况；
+若安装完成并没有自动设置JAVA_HOME环境变量，需手动设置：
+方法：使用 which java或whereis java 命令可以找到 java 命令的执行路径，这通常是一个链接到实际安装位置的符号链接（symlink）。然后，你可以使用 ls -lrt（或更常用的 ls -l）命令来追踪这个符号链接指向的实际安装目录。
+gswyhq@gswyhq-PC:~$ whereis java
+java: /usr/bin/java /usr/share/java /usr/share/man/man1/java.1.gz
+gswyhq@gswyhq-PC:~$ ls -alrt /usr/bin/java
+lrwxrwxrwx 1 root root 22 12月 21 09:47 /usr/bin/java -> /etc/alternatives/java
+gswyhq@gswyhq-PC:~$ ls -alrt /etc/alternatives/java
+lrwxrwxrwx 1 root root 46 12月 21 09:47 /etc/alternatives/java -> /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+在这里，/etc/alternatives/java 是一个指向 /usr/lib/jvm/java-8-openjdk-amd64/bin/java 的符号链接。
+确定 JAVA_HOME:
+通常，JAVA_HOME 应该设置为包含 bin 目录的上一级目录。在这个例子中，JAVA_HOME 应该是 /usr/lib/jvm/java-11-openjdk-amd64。
+设置 JAVA_HOME 环境变量
+你可以在你的 shell 配置文件中（如 ~/.bashrc 或 ~/.bash_profile）添加以下行来设置 JAVA_HOME：
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+然后，执行 source ~/.bashrc（或对应的配置文件）来使更改生效。
 
 # 方法二：
 步骤1：https://mirrors.yangxingzhen.com/jdk/jdk-8u191-linux-x64.tar.gz 下载：jdk-8u191-linux-x64.tar.gz
@@ -9,4 +26,26 @@
     echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc && \
     echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc && \
     source ~/.bashrc
+
+###########################################################################################################
+
+
+maven linux 安装
+在Linux系统中安装Maven的步骤通常如下：
+确保你已经安装了Java，因为Maven是用Java编写的。你可以通过运行java -version来检查Java是否安装。
+下载Maven。你可以从Maven官方网站下载最新的版本：http://maven.apache.org/download.cgi
+解压Maven压缩包。假设你下载的是apache-maven-3.8.1-bin.tar.gz，你可以使用以下命令解压：
+tar -xvzf apache-maven-3.8.1-bin.tar.gz
+配置环境变量。编辑你的.bashrc或.bash_profile文件，添加以下行：
+export M2_HOME=/path/to/apache-maven-3.8.1
+export PATH=$PATH:$M2_HOME/bin
+替换/path/to/apache-maven-3.8.1为你的Maven解压目录。
+应用更改，运行：
+source ~/.bashrc
+或者
+source ~/.bash_profile
+验证Maven是否安装成功，运行：
+mvn -version
+如果Maven安装成功，你将看到Maven的版本信息、Java版本和操作系统信息。
+
 

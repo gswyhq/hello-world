@@ -37,6 +37,15 @@ https://hf-mirror.com/comfyanonymous/flux_text_encoders/tree/main
 !wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/flux_text_encoders/repo?Revision=master&FilePath=clip_l.safetensors" -O "./ComfyUI/models/clip/clip_l.safetensors"
 !wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/flux_text_encoders/repo?Revision=master&FilePath=t5xxl_fp8_e4m3fn.safetensors" -O "./ComfyUI/models/clip/t5xxl_fp8_e4m3fn.safetensors"
 
+# 下载 v1-5-pruned-emaonly.ckpt
+!wget -c "https://www.modelscope.cn/api/v1/models/AI-ModelScope/stable-diffusion-v1-5/repo?Revision=master&FilePath=v1-5-pruned-emaonly.ckpt" -O "./ComfyUI/models/checkpoints/v1-5-pruned-emaonly.ckpt"
+# 之前版本需要Clip，vae模型，后面仅仅需要提供 v1-5-pruned-emaonly.ckpt 即可：
+root@dsw-774764-cc8c866d9-qw9bn:/mnt/workspace/flux-fp8/ComfyUI/models/checkpoints# git log
+commit 1b3a650f19277c2a9f220fc00351cbdb5549800b (HEAD -> master, origin/master, origin/HEAD)
+
+
+# 下载：majicmixRealistic_v7.safetensors
+!wget -c "https://www.modelscope.cn/api/v1/models/GYMaster/majicmixRealistic_v7.safetensors/repo?Revision=master&FilePath=majicmixRealistic_v7.safetensors" -O "./ComfyUI/models/checkpoints/majicmixRealistic_v7.safetensors"
 
 VAE的路径为：ComfyUI\models\vae
 # vae
@@ -196,3 +205,42 @@ async def default_cache_update():
 问题：有时候启动服务没有报错，但页面上却什么都没有，可能是下面两个文件被删除了：
         删除：     custom_nodes/example_node.py.example
         删除：     custom_nodes/websocket_image_save.py
+
+汉化插件地址：https://github.com/AIGODLIKE/AIGODLIKE-ComfyUI-Translation，放到\ComfyUI\custom_nodes目录下。
+重启一下 ComfyUI。可以看到ComfyUI界面自动变成中文了。
+如果没有变成中文，可以点击"设置"按钮打开的操作界面将字段AGLTranslation-langualge设置为中文。
+
+工作流分享网站：https://comfyworkflows.com/
+
+提示词示例：
+1、黑夜给了我黑色的眼睛
+提示词：
+WALLPER,a medium-angle shot of an Asian woman with long black hair stands in front of a dark backdrop. She is dressed in a black strapless dress,adorned with a ruffled neckline. Her left arm is raised above her head,adding a touch of balance to the scene. The woman’s face is angled towards the right,her lips are slightly parted,as if she’s lips are pursed. Her eyes are closed,and her hair is cascading over her shoulders. The backdrop is a stark black,creating a stark contrast to the woman’s outfit.,
+2、你的眼眸，深邃的像银河
+提示词：
+WALLPERa close-up shot of a young Asian woman with longwavy black hair is adorned with gold hoop earrings. She is dressed in a white dress adorned with a floral pattern. The backdrop is blurredcreating a stark contrast to the woman’s white dress. The sun is shining on the right side of the imageadding a touch of warmth to the scene.
+3、闺房
+提示词：
+XS,masterpiece:1.2),best quality,high resolution,unity 8k wallpaper,(illustration:1),perfect lighting,extremely detailed CG,finely detail,extremely detailed,soft lighting and shadow,soft yet striking lighting,film grain:1.2,(skin pores:1.2),(detailed skin texture:1),((solo:1.5)),Detailed face,(see-through:1.1),misty,Low Key:1.1,depth of field,A young woman with dark hair and a floral top,sitting on what appears to be an armchair or sofa in her home.,
+4、傍晚的街头
+提示词：
+GFSM,XS,masterpiece:1.2),best quality,high resolution,unity 8k wallpaper,(illustration:1),perfect lighting,extremely detailed CG,finely detail,extremely detailed,soft lighting and shadow,soft yet striking lighting,film grain:1.2,(skin pores:1.2),(detailed skin texture:1),((solo:1.5)),Detailed face,(see-through:1.1),misty,Low Key:1.1,depth of field,A woman in a black coat stands confidently amidst an urban backdrop,her gaze directed off to one side.,
+5、浴缸
+提示词：
+XS,masterpiece:1.2),best quality,high resolution,unity 8k wallpaper,(illustration:1),perfect lighting,extremely detailed CG,finely detail,extremely detailed,soft lighting and shadow,soft yet striking lighting,film grain:1.2,(skin pores:1.2),(detailed skin texture:1),((solo:1.5)),Detailed face,(see-through:1.1),misty,Low Key:1.1,depth of field,A woman in a white dress lounging with her head on one hand and legs crossed,surrounded by rose petals inside an empty bathtub.,
+6、仙气
+提示词：
+XSmasterpiece:1.2),best quality,high resolution,unity 8k wallpaper,(illustration:1),perfect lighting,extremely detailed CG,finely detail,extremely detailed,soft lighting and shadow,soft yet striking lighting,film grain:1.2,(skin pores:1.2),(detailed skin texture:1),((solo:1.5)),Detailed face,(see-through:1.1),misty,Low Key:1.1,depth of field,Elegance and Mystique: A Smoke Ring Emanates from a Woman’s Mouth in an Artistic Portrait.
+7、牛仔短裤
+提示词：
+XS,masterpiece:1.2),best quality,high resolution,unity 8k wallpaper,(illustration:1),perfect lighting,extremely detailed CG,finely detail,extremely detailed,soft lighting and shadow,soft yet striking lighting,film grain:1.2,(skin pores:1.2),(detailed skin texture:1),((solo:1.5)),Detailed face,(see-through:1.1),misty,Low Key:1.1,depth of field,A woman posing on a bed with her back to us,showcasing an off-the shoulder top and denim shorts.,
+8、你蒙住了我的眼睛，说要给我幸福
+提示词：
+WALLPER,a medium-angle view of a woman’s face,adorned with a white mask. The woman’s head is encased in a veil,her hair cascades over her shoulders,adding a touch of beauty to the scene. Her eyes are closed,and her lips are painted a pinkish-pink shade. She is wearing a pair of gold earrings,and a black dress with a floral pattern on it. The backdrop is a soft,light blue,creating a stark contrast to the woman’s white dress.,
+9、你坐在月亮上，唱一首曾经的歌
+提示词：
+WALLPER,((best quality)), ((masterpiece)),A girl in Hanfu sitting on a crescent moon, wearing silk stockings and barefoot, surrounded by dreamy planets, viewed from the feet upwards, creating a mysterious and romantic atmosphere, high-quality image, high-resolution picture.
+
+10、紫色长发
+提示词：
+WALLPER,a medium-angle shot of a young Asian girl with long vibrant purple hair stands in front of a light blue backdrop. Her eyes are a deep blue and her lips are a vibrant pink. Her hair is cascading down her right shoulder framing her face. She is wearing a light pink hoodie adorned with a silver chain around her neck adding a pop of color to her outfit. The backdrop is a stark light blue creating a stark contrast to the girl’s purple hair.,
