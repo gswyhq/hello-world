@@ -35,3 +35,17 @@ pg_dump中备份的sql 或 归档文件中 create 和 copy 的目标已经是 sc
 
 psql --host=localhost --port=6000 --username=demo2  db_name < C:\Users\zhangtianxiao\Documents\pgsql\t_b.sql
 
+在设置定时备份时，如果需要输入数据库密码，你可以通过以下几种方式之一来处理：
+1. **使用 .pgpass 文件**：这是最安全的方法，因为密码不会被明文存储。在你的主目录下创建一个名为 `.pgpass` 的文件，然后添加一行，格式如下：
+   hostname:port:database:username:password
+   例如：
+   localhost:5432:db1:myuser:mypassword
+   确保文件的权限设置为 600，这样只有你才能读取它：
+   chmod 600 ~/.pgpass
+   当 `pg_dump` 运行时，它会自动查找 `.pgpass` 文件并从中获取密码。
+
+2. **使用环境变量**：你可以设置 `PGPASSWORD` 环境变量来存储密码。在 cron 任务中，你可以像这样设置：
+   PGPASSWORD=mypassword /usr/bin/pg_dump -U myuser -h localhost -Fc board > /path/to/backup/directory/board_$(date +%Y%m%d).backup
+   但是这种方法不太安全，因为密码可能会出现在进程列表中。
+
+

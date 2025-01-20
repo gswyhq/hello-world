@@ -25,9 +25,22 @@ file.close()
 # 前端html中直接调用base64编码,使用:
 # <img src="data:image/jpg;base64,这里是base64的编码"/>
 
+# react前端直接调用base64编码，示例：
+      <Space>
+          <div style={{ background: "url('data:image/png;base64,iVBO......AAElFTkSuQmCC') no-repeat left center / 100% 100%", display: 'inline-block', width: '36px', height: '36px', marginTop: '20px' }} />
+          <div className="logo" style={{ position: 'relative', top: '-2px' }}>
+      	ChatBi
+          </div>
+        </Space>
+
+# 在线图片转base64编码（使用在线转码工具需要慎重，可能会造成你的图片泄密）
+# https://www.jyshare.com/front-end/59/
+
 def main():
     pass
 
 
 if __name__ == '__main__':
     main()
+
+

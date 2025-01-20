@@ -208,6 +208,20 @@ select upper_inf(numrange(1.1,2.2)); -> false
 select range_merge('[1,2)'::int4range, '[3,4)'::int4range);
 返回值：[1, 4)
 
+# 对多个字段分别进行去重查询，查询结果组合成json:
+WITH cte AS (
+  SELECT array_agg(DISTINCT name) as name,
+         array_agg(DISTINCT age) as age
+  FROM public.demo_table
+)
+SELECT json_build_object(
+  '字段1的去重结果', name,
+  '字段2的去重结果', age
+) as result
+FROM cte;
+查询结果：
+{"字段1的去重结果" : ["张三","李四","王五"], "字段2的去重结果" : ["10岁","20岁"]}
+
 # 参考资料：
 https://www.postgresql.org/docs/current/functions-array.html
 https://www.postgresql.org/docs/current/functions-range.html

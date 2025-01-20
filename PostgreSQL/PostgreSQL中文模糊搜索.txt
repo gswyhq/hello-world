@@ -1,0 +1,321 @@
+
+postgresql 11版本
+最简单版本中文模糊搜索
+通过这种方式，每个字符都被单独索引，搜索“中国”时可以正确匹配“中华人民共和国”中的“中国”。
+
+-- 创建表
+CREATE TABLE public.qa_logs (
+    id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    qa_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sql_query TEXT,
+    question_tsv TSVECTOR  -- 添加 tsvector 列
+);
+
+-- 插入数据
+INSERT INTO public.qa_logs (question, answer, qa_date, sql_query)
+VALUES
+('abcd', '这是一个示例答案。', '2023-10-01 10:00:00', '示例查询'),
+('中华人民共和国', '这是中国的全称。', '2023-10-01 10:15:00', '示例查询'),
+('ad', '这是另一个示例。', '2023-10-01 10:30:00', '示例查询');
+
+INSERT INTO public.qa_logs (question, answer, qa_date, sql_query)
+VALUES
+('123', '这是一个示例答案。', '2023-10-01 10:00:00', '示例查询'),
+('中华人民共和国首都', '这是中国的全称。', '2023-10-01 10:15:00', '示例查询'),
+('中华民国', '这是一个中国的历史名称。', '2023-10-01 10:30:00', '示例查询'),
+('adad', '这是另一个示例。', '2023-10-01 10:45:00', '示例查询');
+
+-- 创建触发器函数
+CREATE OR REPLACE FUNCTION update_question_tsv()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.question_tsv := array_to_tsvector(
+        ARRAY(
+            SELECT unnest(regexp_split_to_array(NEW.question, ''))
+        )
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 创建触发器
+CREATE TRIGGER trigger_update_question_tsv
+BEFORE INSERT OR UPDATE ON public.qa_logs
+FOR EACH ROW EXECUTE FUNCTION update_question_tsv();
+
+-- 创建 GIN 索引
+CREATE INDEX idx_qa_logs_question_tsv ON public.qa_logs USING GIN (question_tsv);
+
+-- 手动更新 question_tsv 列
+-- 手动更新 question_tsv 列是为了确保在触发器生效之前，已经插入的数据也能被正确索引。一旦触发器生效，每次插入或更新数据时，question_tsv 列会自动更新，无需手动干预。
+UPDATE public.qa_logs
+SET question_tsv = array_to_tsvector(
+    ARRAY(
+        SELECT unnest(regexp_split_to_array(question, ''))
+    )
+);
+
+-- 验证 question_tsv 列的内容
+SELECT id, question, question_tsv FROM public.qa_logs;
+
+-- 使用 tsquery 进行搜索
+-- 搜索 'ad'
+SELECT * FROM public.qa_logs
+WHERE question_tsv @@ to_tsquery('simple', 'a & d');
+
+-- 搜索 '中国'
+SELECT * FROM public.qa_logs
+WHERE question_tsv @@ to_tsquery('simple', '中 & 国');
+
+-- 搜索 '中国人'
+SELECT * FROM public.qa_logs
+WHERE question_tsv @@ to_tsquery('simple', '中 & 国&人');
+
+-- 使用 rank 进行排序
+SELECT 
+    id,
+    question,
+    answer,
+    qa_date,
+    sql_query,
+    ts_rank(question_tsv, to_tsquery('simple', 'a & d')) AS rank
+FROM 
+    public.qa_logs
+WHERE 
+    question_tsv @@ to_tsquery('simple', 'a & d')
+ORDER BY 
+    rank DESC;
+
+-- 使用 rank 进行排序
+SELECT 
+    id,
+    question,
+    answer,
+    qa_date,
+    sql_query,
+    ts_rank(question_tsv, to_tsquery('simple', '中 & 国')) AS rank
+FROM 
+    public.qa_logs
+WHERE 
+    question_tsv @@ to_tsquery('simple', '中 & 国')
+ORDER BY 
+    rank DESC;
+
+
+-- 考虑字符串长度、交集等进行搜索：
+    SELECT 
+        id,
+        question,
+        answer,
+        qa_date,
+        sql_query,
+        question_tsv,
+        to_tsquery('simple', '中 & 国'),
+        ts_rank_cd(question_tsv, to_tsquery('simple', '中 & 国')) AS rank,
+        length(question) - length('中国') AS length_diff,
+        array_length(
+            array(
+                SELECT unnest(regexp_split_to_array(question, ''))
+                INTERSECT
+                SELECT unnest(regexp_split_to_array('中国', ''))
+            ),
+            1
+        ) AS intersection_count
+    FROM 
+        public.qa_logs
+    WHERE 
+        question_tsv @@ to_tsquery('simple', '中 & 国')
+
+###########################################################################################################################################
+在 PostgreSQL 中，pg_trgm 扩展默认使用的是三元组（trigrams）来进行字符串相似度计算。三元组是由连续的三个字符组成的子字符串。对于中文文本，三元组可能无法有效地捕捉到字符之间的相似性，因为中文字符通常是独立的，而不是像英文那样由多个字符组成单词。
+-- 创建表
+CREATE TABLE public.qa_logs (
+    id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    qa_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sql_query TEXT
+);
+
+-- 插入数据
+INSERT INTO public.qa_logs (question, answer, qa_date, sql_query)
+VALUES
+('abcd', '这是一个示例答案。', '2023-10-01 10:00:00', '示例查询'),
+('中华人民共和国', '这是中国的全称。', '2023-10-01 10:15:00', '示例查询'),
+('ad', '这是另一个示例。', '2023-10-01 10:30:00', '示例查询'),
+('如何创建一个表？', '使用 CREATE TABLE 语句。', '2023-10-01 10:00:00', 'CREATE TABLE example (id SERIAL PRIMARY KEY, name TEXT);'),
+('如何插入数据？', '使用 INSERT INTO 语句。', '2023-10-01 10:15:00', 'INSERT INTO example (name) VALUES (''Alice'');'),
+('如何查询数据？', '使用 SELECT 语句。', '2023-10-01 10:30:00', 'SELECT * FROM example;'),
+('123', '这是一个示例答案。', '2023-10-01 10:00:00', '示例查询'),
+('中华人民共和国首都', '这是中国的全称。', '2023-10-01 10:15:00', '示例查询'),
+('中华民国', '这是一个中国的历史名称。', '2023-10-01 10:30:00', '示例查询'),
+('adad', '这是另一个示例。', '2023-10-01 10:45:00', '示例查询');
+
+-- 启用 pg_trgm 扩展
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- 创建 GIN 索引
+CREATE INDEX idx_qa_logs_question_trgm ON public.qa_logs USING GIN (question gin_trgm_ops);
+
+
+-- 使用 pg_trgm 进行更高效的中文搜索
+SELECT *, similarity(question, 'abc中国') FROM public.qa_logs
+ORDER BY similarity(question, 'abc中国') DESC;
+
+SELECT *, word_similarity(question, '如何创建') FROM public.qa_logs
+ ORDER BY word_similarity(question, '如何创建') DESC;
+
+-- abc中国 无法匹配到 中华人民共和国 
+SELECT *, similarity(question, 'abc中国') FROM public.qa_logs
+ORDER BY similarity(question, 'abc中国') DESC;
+
+select similarity('怎么创建', '如何创建');
+
+SELECT show_trgm('abc中国'), show_trgm('中华人民共和国');
+
+-- 删除 pg_trgm 扩展及其所有依赖对象
+DROP EXTENSION IF EXISTS pg_trgm CASCADE;
+
+-- 验证 pg_trgm 是否仍然在当前数据库中安装
+SELECT * FROM pg_extension WHERE extname = 'pg_trgm';
+
+-- 查看所有可用的扩展（包括未安装的）
+SELECT * FROM pg_available_extensions WHERE name = 'pg_trgm';
+
+pg_available_extensions 列出了所有在数据库集群中可用的扩展，即使它们未在当前数据库中安装。
+pg_extension 列出了当前数据库中已安装的扩展。
+执行 DROP EXTENSION IF EXISTS pg_trgm CASCADE; 只会删除当前数据库中的 pg_trgm 扩展，而不会影响其他数据库或 pg_available_extensions 中的记录。
+
+##########################################################################################################################################
+为了更好地处理中文文本的相似度计算，可以考虑以下几种方法：
+方法1：使用单字切分：将中文文本按单字切分，然后计算相似度。
+但存在缺陷，abc中国，搜索不到 中华人民共和国
+SELECT 
+    id, 
+    question, 
+    answer, 
+    qa_date, 
+    sql_query, 
+    similarity(array_to_string(array_agg(c), ''), array_to_string(array_agg(c2), '')) AS sim
+FROM 
+    public.qa_logs, 
+    regexp_split_to_table(question, '') AS c, 
+    regexp_split_to_table('abc中国', '') AS c2
+GROUP BY 
+    id, question, answer, qa_date, sql_query
+ORDER BY 
+    sim DESC;
+
+方法2：使用其他相似度算法：例如 pg_similarity 扩展，它提供了更多的相似度算法。
+pg_similarity 并不是 PostgreSQL 的默认扩展，因此需要确保该扩展已经正确安装在您的 PostgreSQL 实例中。以下是一些步骤来解决这个问题：
+1. 确认 pg_similarity 扩展是否已安装
+首先，确认 pg_similarity 扩展是否已经安装在您的 PostgreSQL 实例中。您可以检查扩展目录：
+ls /opt/bitnami/postgresql/share/extension/
+查看输出中是否包含 pg_similarity.control 文件。如果没有，说明该扩展尚未安装。
+使用包管理器安装
+如果您使用的是基于 Debian 或 Red Hat 的系统，可以尝试使用包管理器安装 pg_similarity。例如，在 Debian/Ubuntu 系统上：
+sudo apt-get update
+sudo apt-get install postgresql-contrib
+在 Red Hat/CentOS 系统上：
+sudo yum install postgresql-contrib
+请注意，pg_similarity 可能不在 postgresql-contrib 包中，您可能需要从源码编译安装。
+
+安装 pg_similarity 扩展后，需要加载 pg_similarity 扩展
+CREATE EXTENSION IF NOT EXISTS pg_similarity;
+使用 pg_similarity 进行相似度计算
+SELECT 
+    id, 
+    question, 
+    answer, 
+    qa_date, 
+    sql_query, 
+    cossim(question, 'abc中国') AS sim
+FROM 
+    public.qa_logs
+ORDER BY 
+    sim DESC;
+
+方法3：自定义相似度函数：编写自定义的相似度函数来处理中文文本。
+
+CREATE OR REPLACE FUNCTION custom_similarity(text, text) RETURNS float8 AS $$
+DECLARE
+    arr1 text[] := regexp_split_to_array($1, '');
+    arr2 text[] := regexp_split_to_array($2, '');
+    common_count int := 0;
+    total_count int := 0;
+    i int;
+BEGIN
+    RAISE NOTICE 'arr1: %', arr1;
+    RAISE NOTICE 'arr2: %', arr2;
+
+    IF array_length(arr1, 1) > 0 AND array_length(arr2, 1) > 0 THEN
+        total_count := array_length(arr1, 1) + array_length(arr2, 1);
+        RAISE NOTICE 'total_count: %', total_count;
+
+        FOR i IN 1..array_length(arr1, 1) LOOP
+            RAISE NOTICE 'Checking character: %', arr1[i];
+            IF array_position(arr2, arr1[i]) IS NOT NULL THEN
+                common_count := common_count + 1;
+                RAISE NOTICE 'Character % found in arr2', arr1[i];
+            ELSE
+                RAISE NOTICE 'Character % not found in arr2', arr1[i];
+            END IF;
+        END LOOP;
+        RAISE NOTICE 'common_count: %', common_count;
+    END IF;
+
+    IF total_count = 0 THEN
+        RETURN 0.0;
+    ELSE
+        RETURN common_count::float8 / total_count;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+该自定义函数中添加一些调试信息来检查函数的执行情况。例如，使用 RAISE NOTICE 打印中间结果：
+该日志在dbeaver中，可以通过Ctrl+Shift+O来查看，或者点击 SQL编辑框左下角的那个‘显示服务器输出’来查看
+
+SELECT 
+    id, 
+    question, 
+    answer, 
+    qa_date, 
+    sql_query, 
+    custom_similarity(question, 'abc中国2') AS sim
+FROM 
+    public.qa_logs
+ORDER BY 
+    sim DESC;
+
+
+# 如何查看的删除自定义函数：
+假设您有一个名为 custom_similarity 的函数，并且您想查看和删除它。
+1 查看 custom_similarity 函数
+SELECT 
+    proname AS function_name,
+    pg_get_function_identity_arguments(oid) AS arguments,
+    pg_get_function_result(oid) AS return_type,
+    prosrc AS function_definition
+FROM 
+    pg_proc
+WHERE 
+    proname = 'custom_similarity'
+    AND pronamespace = 'public'::regnamespace;
+
+2 删除 custom_similarity 函数
+DROP FUNCTION IF EXISTS custom_similarity(text, text) CASCADE;
+要删除单个函数，可以使用 DROP FUNCTION 命令。您需要指定函数名和参数类型。
+DROP FUNCTION IF EXISTS custom_similarity(text, text) CASCADE;
+IF EXISTS：如果函数不存在，则不会报错。
+CASCADE：删除依赖于该函数的对象（如触发器、视图等）。
+
+
+若效果不满意，那只能是使用：
+https://github.com/paradedb/paradedb
+
+##########################################################################################################################################
+
+
+

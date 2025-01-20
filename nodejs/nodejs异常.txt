@@ -101,3 +101,13 @@ root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# du -h /root/node-v12
 root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm config set tarball /root/node-v12.12.0-headers.tar.gz
 root@90367af4013e:~/apache-atlas-sources-2.2.0/dashboardv2# npm install /root/uri-js-4.2.2.tgz
 
+# pnpm命令不存在：
+解决方法：
+1、安装pnpm
+npm install pnpm -g 
+2、若安装成功，但pnpm -v还是不能使用，则需要把npm路径添加到环境变量
+通过下面命令查询npm路径
+npm config get prefix
+如：D:\Users\zhangsan\AppData\Roaming\npm
+并将该路径添加到环境变量PATH中
+

@@ -448,6 +448,10 @@ Averaged Perceptron Tagger [ download | source ] https://raw.githubusercontent.c
 下载到：/usr/local/lib/nltk_data/taggers；
 即：/usr/local/lib/nltk_data/taggers/averaged_perceptron_tagger.zip，#并不需要解压
 
+nltk_data,数据离线下载及设置：
+1、需要在Github上下载nltk_data-gh-pages.zip文件，https://github.com/nltk/nltk_data.git
+2、并将文件夹中的packages文件夹重新命名为nltk_data
+3、将nltk_data放置上面对应路径之一即可；
 
 
 思维导图软件安装，应用商店搜索下载安装。或者

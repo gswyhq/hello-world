@@ -111,6 +111,71 @@ demo = gr.ChatInterface(
 )
 
 ###########################################################################################################################
+# 输入’重置‘清空历史对话消息，history=[]
+import gradio as gr
+import random
+import time
+
+
+def respond(message, chat_history):
+    print("chat_history", chat_history)
+    bot_message = f"你好：{message}"
+    chat_history.append({"role": "user", "content": message})
+    chat_history.append({"role": "assistant", "content": bot_message})
+    if message in ['重置', '清空消息']:
+        chat_history = []
+    return "", chat_history
+
+with gr.Blocks() as demo:
+    chatbot = gr.Chatbot(type="messages", label='问答对话框')
+    msg = gr.Textbox(label='请在这里输入你的问题', value='今天天气怎么样？')
+
+    msg.submit(respond, [msg, chatbot], [msg, chatbot])
+
+demo.launch(server_name='0.0.0.0', server_port=7860, share=True)
+
+###########################################################################################################################
+# 输入’重置‘清空历史对话消息，history=[],并输出多个数据窗口，包括除对话窗口外的其他窗口
+
+import gradio as gr
+
+def chat(message, history):
+    # 创建一个新的空历史记录，以避免影响后续的调用
+    print("history=", history)
+
+    history.append({"role": "user", "content": message})
+    if message in ['重置', '清空消息']:
+        history = []
+
+    if "python" in message.lower():
+        bot_message = "Type Python or JavaScript to see the code."
+        history.append({"role": "assistant", "content": bot_message})
+        return "", gr.Code(language="python", value="python_code"), history
+    elif "javascript" in message.lower():
+        bot_message = "Type Python or JavaScript to see the code."
+        history.append({"role": "assistant", "content": bot_message})
+        return "", gr.Code(language="javascript", value="js_code"), history
+    else:
+        bot_message = "Please ask about Python or JavaScript."
+        history.append({"role": "assistant", "content": bot_message})
+        return "", None, history
+
+with gr.Blocks() as demo:
+    code = gr.Code(render=False)
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("<center><h1>Write Python or JavaScript</h1></center>")
+            chatbot = gr.Chatbot(type="messages", label='问答对话框')
+            msg = gr.Textbox(label='请在这里输入你的问题', value='今天天气怎么样？')
+        with gr.Column():
+            gr.Markdown("<center><h1>Code Artifacts</h1></center>")
+            code.render()
+
+    msg.submit(chat, [msg, chatbot], [msg, code, chatbot])
+
+demo.launch(server_name='0.0.0.0', server_port=7860, share=True)
+
+###########################################################################################################################
 # 多模态功能添加到您的聊天机器人
 # 您可能希望为您的聊天机器人添加多模态功能。
 # 例如，您可能希望用户能够轻松地上传图片或文件到您的聊天机器人并对其提问。您可以通过向 gr.ChatInterface 类传递一个参数(multimodal=True)来使您的聊天机器人"多模态"。
@@ -125,6 +190,23 @@ def count_files(message, history):
 	你的函数的第一个参数应该接受一个由提交的文本和上传的文件组成的字典，看起来像这样： {"text": "user input", "file": ["file_path1", "file_path2", ...]}
 	'''
 	num_files = len(message["files"])  # 计算上传文件的数量
+
+	for file_name in message['files']:
+		if file_name.lower().endswith("xlsx"):
+			df = pd.read_excel(file_name)
+			return gr.HTML(df.to_html(index=False))
+		if file_name.lower().endswith("wav"):
+			return gr.Audio(file_name)
+		if file_name.lower().endswith(".jpg"):
+			return gr.Image(file_name)
+	# 返回复杂的Responses, 但貌似不支持多种输出数据组合；
+	# 上面介绍的还都是返回字符串，称之为chatbot中的text，也可以返回更加复杂的结构：
+	# gr.Image
+	# gr.Plot
+	# gr.Audio
+	# gr.HTML
+	# gr.Video
+	# gr.Gallery
 	return f"你好：{message['text']}\n你上传了 {num_files} 个文件，分别为：{'、'.join(message['files'])}"  # 返回一个字符串，包含上传的文件数量
 
 
@@ -138,7 +220,54 @@ demo = gr.ChatInterface(
 	cache_examples=True,
 )
 
+
 ###########################################################################################################################
+# 问答对话框，并额外展示生成的代码
+import gradio as gr
+
+python_code = """
+def fib(n):
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
+"""
+
+js_code = """
+function fib(n) {
+    if (n <= 0) return 0;
+    if (n === 1) return 1;
+    return fib(n - 1) + fib(n - 2);
+}
+"""
+
+def chat(message, history):
+    if "python" in message.lower():
+        return "Type Python or JavaScript to see the code.", gr.Code(language="python", value=python_code)
+    elif "javascript" in message.lower():
+        return "Type Python or JavaScript to see the code.", gr.Code(language="javascript", value=js_code)
+    else:
+        return f"请输入 Python 或 JavaScript.{gr.__version__}", None
+
+with gr.Blocks() as demo:
+    code = gr.Code(render=False)
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("<center><h1>生成 Python 或 JavaScript代码</h1></center>")
+            gr.ChatInterface(
+                chat,
+                examples=["Python", "JavaScript"],
+                additional_outputs=[code],
+                type="messages"
+            )
+        with gr.Column():
+            gr.Markdown("<center><h1>生成的代码</h1></center>")
+            code.render()
+
+###########################################################################################################################
+
 # 添加额外的输入组件。在输入问题时候，输入最大输出字符数
 
 import gradio as gr  # 导入gradio库，用于创建交云式界面

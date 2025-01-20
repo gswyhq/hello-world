@@ -241,3 +241,12 @@ ALTER TABLE wyg.student_new COMMENT '学生信息表新2';
 SELECT TABLE_SCHEMA,TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, column_comment FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = 'db' and TABLE_NAME = 'test';
 
+# 时间字段，随机增加一定天数；imp_date 的定义如下：
+`imp_date` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+样例数据为：2023-11-02，修改该字段时间，增加1~30天不等； 
+UPDATE s2_pv_uv_statis
+    SET imp_date = DATE_ADD(
+        STR_TO_DATE(imp_date, '%Y-%m-%d'), 
+        INTERVAL FLOOR(RAND() * 30 + 1) DAY -- 随机增加 1~30天
+    );
+

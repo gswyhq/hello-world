@@ -1,0 +1,21 @@
+
+
+问题：chromadb后台一直报错：
+ERROR:    [20-11-2024 11:01:32] Giving up send_request(...) after 4 tries (requests.exceptions.ConnectionError: HTTPSConnectionPool(host='us.i.posthog.com', port=443): Max retries exceeded with url: /batch/ (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f55706beb10>: Failed to resolve 'us.i.posthog.com' ([Errno -3] Temporary failure in name resolution)")))
+解决方案：
+该报错不影响使用；若不需要报错，则通过如下方法解决
+import chromadb
+from chromadb import Settings
+
+client = chromadb.Client(settings=Settings(anonymized_telemetry=False))
+
+# chroma查询时候报错：
+{"error":"RuntimeError('Cannot return the results in a contigious 2D array. Probably ef or M is too small')"}
+解决方案：
+import chromadb
+from chromadb.api.types import normalize_embeddings
+# 连接 chroma 数据库
+client = chromadb.HttpClient(host="30.171.80.45", port=8899)
+client.get_or_create_collection(COLLECTION_NAME,metadata={"hnsw:M": 1024})
+
+

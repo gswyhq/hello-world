@@ -1,0 +1,196 @@
+
+Presto有约束，要使用账号/密码，必须要先支持SSL，以HTTPS访问才行。生成jks文件，用于SSL认证。在生成jks文件时，CN一定要配成泛域名，并且要设置密码，比如设置成presto_ssl，后续要用。
+# 第一步：生成presto.jks文件
+1.1、准备openssl.cnf文件
+# cat openssl.cnf
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+C = CN
+ST = Some-State
+L = Some-City
+O = Some-Company
+OU = Some-Organization
+CN = 192.168.3.105
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 192.168.3.105
+IP.2 = 172.17.0.4
+IP.3 = 172.17.0.5
+IP.4 = 172.17.0.3
+IP.5 = 172.17.0.6
+IP.6 = 172.17.0.7
+其中192.168.3.105为宿主机ip，其他为presto容器内ip；
+
+1.2、使用配置文件生成密钥和证书：
+openssl req -new -newkey rsa:4096 -nodes -keyout domain.key -config openssl.cnf -x509 -extensions v3_req -sha256 -days 3650 -out domain.crt
+这里的`-extensions v3_req`参数告诉OpenSSL在生成证书时应用`openssl.cnf`文件中定义的`v3_req`扩展。
+运行上述命令后，使用`openssl x509 -noout -text -in domain.crt`检查生成的证书，你应该能看到`subjectAltName`扩展及其包含的IP地址列表。
+
+1.3、使用`openssl`将证书和私钥合并为PKCS#12格式**：
+   首先，确保你有证书文件（例如`domain.crt`）和对应的私钥文件（例如`domain.key`）。然后，运行以下命令将它们合并为一个PKCS#12文件（例如`domain.p12`）：
+需要输个密码，这个密码用于保护生成的PKCS#12文件（`domain.p12`）。它是用来加密整个PKCS#12文件的，包括其中的证书和私钥。当你需要从PKCS#12文件中提取证书或私钥时，会需要这个密码。
+(DEV)[root@CQA-L0803392 ssl]# openssl pkcs12 -export -out domain.p12 -in domain.crt -inkey domain.key
+123456
+
+1.4、使用`keytool`将PKCS#12文件转换为JKS格式
+# keytool -importkeystore -deststoretype JKS -destkeystore presto.jks -srckeystore domain.p12 -srcstoretype PKCS12
+需要输入2个密码，   - `destkeystore`的密码，即目标JKS文件（`presto.jks`）的密码。这个密码用于保护JKS文件，确保只有授权用户可以访问其中的证书和私钥。
+   - `srckeystore`的密码，即源PKCS#12文件（`domain.p12`）的密码。这是你在使用`openssl`时设置的那个密码，用于解密PKCS#12文件。
+ **Presto配置文件中的密码**：在Presto的`config.properties`文件中，`http-server.https.keystore.key`配置项指定的是JKS文件（`presto.jks`）的密码，也就是你在使用`keytool`创建JKS文件时设置的那个密码。这个密码用于保护JKS文件中的证书和私钥，确保HTTPS服务能够正确加载它们。
+
+总结来说，`openssl`生成PKCS#12文件时设置的密码与`keytool`创建JKS文件时设置的密码是不同的，前者用于保护PKCS#12文件，后者用于保护JKS文件。而在Presto配置中，你只需要提供JKS文件的密码，即`keytool`创建JKS文件时所使用的密码。
+
+
+
+# 第二步：配置密码库，即最后登录presto时候用到的用户名密码：
+配置密码库
+创建密码文件库password.db，添加用户和密码。此时需要用到htpasswd工具，如果机器上没有需要自行安装，使用下面命令来添加用户。
+~$ htpasswd -B -C 10 password.db username
+
+这里以添加用户密码分别root和toor为例，password.db文件中已经正确添加了root用户。
+~$ touch password.db
+~$ htpasswd -B -C 10 password.db root
+New password:
+Re-type new password:
+Adding password for user root
+$ cat password.db
+root:$2y$10$eellteFAhaRrAZSA3weVVeK0u6vM8EYhvtOeV/m4Ep.CXMCFYhv4W
+
+命令解释：
+1. `$ touch password.db`：这行命令创建了一个名为`password.db`的新文件。如果没有这个文件，`touch`命令会创建它；如果文件已存在，则不会有任何操作。
+2. `$ htpasswd -B -C 10 password.db root`：这行命令使用`htpasswd`工具来添加一个用户名为`root`的用户到`password.db`文件中。参数`-B`表示使用bcrypt算法加密密码，`-C 10`表示设置bcrypt的工作因子为10，这会影响密码加密的强度和时间。
+3. `$ cat password.db`：这行命令显示`password.db`文件的内容，可以看到里面存储了`root`用户的加密后的密码。
+
+如果没有`htpasswd`命令，你可以通过以下方式在Linux系统中安装它：
+- 对于基于Debian的系统（如Ubuntu）：
+  ```
+  sudo apt-get update
+  sudo apt-get install apache2-utils
+  ```
+- 对于基于Red Hat的系统（如CentOS）：
+  ```
+  sudo yum install httpd-tools
+  ```
+安装完成后，你就可以使用`htpasswd`命令来创建和管理HTTP基本认证的用户密码数据库了。
+
+# 第三步：修改配置文件
+config.properties，如下：
+
+properties 代码解读复制代码coordinator=true
+node-scheduler.include-coordinator=true
+# 禁用HTTP，测试发现禁用会报错
+# http-server.http.enabled=false
+http-server.http.port=8080
+discovery-server.enabled=true
+discovery.uri=http://0.0.0.0:8080
+
+# 开启SSL配置
+http-server.https.enabled=true
+http-server.https.port=8443
+# jks文件
+http-server.https.keystore.path=/opt/presto-server/etc/presto.jks
+# jks文件密码，即生成presto.jks文件时候的密码
+http-server.https.keystore.key=presto_ssl
+
+# 开启密码认证
+http-server.authentication.type=PASSWORD
+
+
+jvm.config，同未配置ssl，保持不变，如：
+$ cat jvm.config
+-server
+-Xmx2G
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=32M
+-XX:+UseGCOverheadLimit
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:+ExitOnOutOfMemoryError
+-Djdk.attach.allowAttachSelf=true
+
+新增password-authenticator.properties文件，指定认证类型为文件以及对应的密码库位置。
+
+~$ cat password-authenticator.properties
+password-authenticator.name=file
+file.password-file=/opt/presto-server/etc/password.db
+
+# 第四步，启动presto容器：
+docker run -d --privileged=true -p 8443:8443 \
+  -e TZ=Asia/Shanghai \
+  -v $PWD/config.properties:/opt/presto-server/etc/config.properties \
+  -v $PWD/jvm.config:/opt/presto-server/etc/jvm.config \
+  -v $PWD/catalog:/opt/presto-server/etc/catalog \
+  -v $PWD/password-authenticator.properties:/opt/presto-server/etc/password-authenticator.properties \
+  -v $PWD/password.db:/opt/presto-server/etc/password.db \
+  -v $PWD/presto.jks:/opt/presto-server/etc/presto.jks \
+  --name presto \
+  prestodb/presto:latest
+
+浏览器访问：https://192.168.3.105:8443/
+并输入htpasswd命令时候设置的用户名密码；
+
+Dbeaver访问。JDBC地址配置为jdbc:presto://192.168.3.105:8443/mysql1?SSL=true&SSLKeyStorePath=D%3A%5CUsers%5Cpresto.jks&SSLKeyStorePassword=presto_ssl
+其中，D%3A%5CUsers%5Cpresto.jks -> D:\Users\presto.jks绝对路径转义, 即上面生成的jks文件，presto_ssl就是上文的密码。
+除此之外，还有个用户密码，即生成password.db文件的用户名密码；
+所用的驱动为： io.prestosql.jdbc.PrestoDriver
+这里是mysql1, 是指presto的catalog目录下的文件：mysql1.properties
+
+#######################################################################################################################
+java ssl认证连接
+import io.prestosql.jdbc.PrestoConnection;
+import io.prestosql.jdbc.PrestoDriver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+
+    public void testProsto2(){
+            try {
+                // 注册Presto JDBC驱动
+                DriverManager.registerDriver(new PrestoDriver());
+
+                // 连接到Presto服务器
+                String url = "jdbc:presto://192.168.3.105:8443/mysql1";
+                String user = "root"; // 如果需要身份验证，则提供用户名
+                String password = "123456"; // 如果需要身份验证，则提供密码
+                Properties connectionProperties = new Properties();
+                connectionProperties.put("SSL", "true"); // 启用SSL
+                connectionProperties.put("SSLTrustStorePath", "D:\\Users\\user123\\chatbi\\presto\\presto.jks"); // 指定信任存储的路径
+                connectionProperties.put("SSLTrustStorePassword", "presto_ssl"); // 指定信任存储的密码
+                connectionProperties.put("user", user);
+                connectionProperties.put("password", password);
+
+                PrestoConnection conn = (PrestoConnection) DriverManager.getConnection(url, connectionProperties);
+
+                // 创建Statement对象
+                Statement stmt = conn.createStatement();
+
+                // 执行SQL查询以获取所有schemas
+                ResultSet rs = stmt.executeQuery("SHOW SCHEMAS");
+
+                // 处理结果集
+                while (rs.next()) {
+                    System.out.println(rs.getString(1)); // 输出schema名称
+                }
+
+                // 关闭资源
+                rs.close();
+                stmt.close();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
+
+

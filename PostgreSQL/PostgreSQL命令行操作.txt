@@ -85,6 +85,29 @@ CREATE ROLE
 # 修改用户密码命令：
 trade=# alter user tradeopr password '654321';
 
+# 如果你希望新创建的用户能够创建数据库或创建其他用户，你需要授予他们额外的权限。例如，要允许 `boarddata` 用户创建数据库和新的用户，可以使用以下命令：
+ALTER USER boarddata CREATEDB;
+ALTER USER boarddata CREATEROLE;
+
+#赋予用户myuser对指定表table1 有读取、插入、更新等权限：
+GRANT select,insert,update,delete on table table1 to myuser;
+
+#或者更改表的所有权：
+ALTER TABLE table1 OWNER TO new_user;
+
+# 命令行运行SQL脚本：
+进入了`psql`环境，你可以使用`\i`命令来运行你的SQL脚本：
+   \i myscript.sql
+
+# 删除原始数据库 "old_db"。
+DROP DATABASE old_db;
+
+# 删除pg表的指定字段(这里是uid、age、name)：
+alter table public.demo_table2
+drop column uid,
+drop column age,
+drop column name;
+
 # 查看某个角色的权限：
 trade=# \c - postgres
 You are now connected to database "trade" as user "postgres".

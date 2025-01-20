@@ -95,7 +95,7 @@ def greet(name):
 with gr.Blocks() as demo:
     name = gr.Textbox(label="姓名")
     output = gr.Textbox(label="输出结果")
-    greet_btn = gr.Button("运行")
+    greet_btn = gr.Button("运行", variant="primary") # variant设置提交按键的颜色
     greet_btn.click(fn=greet, inputs=name, outputs=output)
 # Blocks 由 with 子句组成，在该子句中创建的任何组件都会自动添加到应用程序中。
 # 组件在应用程序中按创建的顺序垂直显示
@@ -308,6 +308,33 @@ demo.launch(share=True, auth=login, auth_message="欢迎登录987", debug=True)
 # launch方法中提供了一个参数auth，可以方便地增加用户登录功能。
 
 ###########################################################################################################################
+# 获取请求头等信息
+import gradio as gr
+
+def predict(text, request: gr.Request):
+    headers = request.headers
+    host = request.client.host
+    user_agent = request.headers["user-agent"]
+    return {
+        "ip": host,
+        "user_agent": user_agent,
+        "headers": headers,
+    }
+
+gr.Interface(predict, "text", "json").launch()
+
+###########################################################################################################################
+# 添加gradio到FastAPI应用中
+from fastapi import FastAPI
+import gradio as gr
+app = FastAPI()
+@app.get("/")
+def read_main():
+    return {"message": "This is your main app"}
+io = gr.Interface(lambda x: "Hello, " + x + "!", "textbox", "textbox")
+app = gr.mount_gradio_app(app, io, path="/gradio")
+
+###########################################################################################################################
 # 文本分类的演示系统
 import gradio as gr
 # 导入transformers相关包
@@ -316,6 +343,29 @@ from transformers import pipeline
 gr.Interface.from_pipeline(pipeline("text-classification", model="uer/roberta-base-finetuned-dianping-chinese")).launch()
 # gr.Interface.from_pipeline(pipeline("text-generation", model="qwen/Qwen2-1.5B")).launch()
 
+###########################################################################################################################
+# 动态更新下拉列表，点击刷新的时候，更新下拉列表，下拉列表更新时候，再更新其他的展示框，实现联动
+DATA_SOURCE_DICT = {}
+def update_dropdown():
+    global DATA_SOURCE_DICT
+    DATA_SOURCE_DICT[('pg', 'db', 'table')] = 'prompt'
+    return gr.Dropdown(choices=['.'.join(dbt) for dbt in DATA_SOURCE_DICT.keys()])
+
+def update_prompt(db_table):
+    global DATA_SOURCE_DICT
+    print("db_table", db_table)
+    prompt = DATA_SOURCE_DICT.get(tuple(db_table.split('.')), '')
+    return db_table, prompt
+
+with gr.Blocks() as demo:
+    db_table = gr.Dropdown([], label="数据源", info="若数据源列表为空，请刷新数据源", scale=10)
+    add_button = gr.Button("刷新数据源",size="sm", variant="primary")
+    add_button.click(update_dropdown, inputs=[], outputs=db_table)
+    prompt = gr.Textbox(value="", label="提示词", lines=9, max_lines=10)
+    db_table.change(update_prompt, inputs=[db_table], outputs=[db_table, prompt])
+    prompt.change(lambda x: x, inputs=prompt, outputs=prompt) # change必不可少，不然页面不展示内容，或不可点击
+
+###########################################################################################################################
 
 # 输入组件 (Inputs)
 # Audio：允许用户上传音频文件或直接录音。参数：source: 指定音频来源（如麦克风）、type: 指定返回类型。 示例：gr.Audio(source="microphone", type="filepath")

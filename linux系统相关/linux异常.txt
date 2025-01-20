@@ -230,3 +230,20 @@ bash: systemctl: command not found
 启动服务，但是不行，没有systemctl这个命令
 解决方案
 使用service httpd start启动服务即可
+
+# 问题：
+es启动不了，查看es日志，无相关问题，但查看linux日志，有如下报错：
+$ grep -i error -C 3 /var/log/messages
+kernel: sd 0:0:8:0: [sdf] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE 
+kernel: sd 0:0:8:0: [sdf] tag#0 Sense Key : Medium Error [current]
+kernel: sd 0:0:8:0: [sdf] tag#0 Add. Sense: Unrecovered read error
+kernel: sd 0:0:8:0: [sdf] tag#0 CDB: Read(16) 88 00 00 00 00 00 00 61 ed 08 00 00 00 08 00 00 
+kernel: blk_update_request: critical medium error, dev sdf, sector 6417672
+abrt-hook-ccpp: Process 47575 (java) of user 14300 killed by SIGABRT - dumping core
+问题原因：
+sdf磁盘存在问题了；
+即 df -h 命令
+Filesystem                                              Size  Used Avail Use% Mounted on
+Filesystem 列对应为 sdf 磁盘存在问题；
+
+

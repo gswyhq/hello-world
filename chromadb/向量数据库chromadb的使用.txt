@@ -1,0 +1,100 @@
+
+docker安装：
+docker pull chromadb/chroma
+方法1：
+1、启动容器
+docker run --rm -it --entrypoint="/bin/bash" -e TZ='CST-8' --privileged=true  chromadb/chroma
+2、启动chromadb服务
+root@7bf662ece48b:/chroma# uvicorn chromadb.app:app --workers 1 --host 0.0.0.0 --port 8000 --proxy-headers --log-config chromadb/log_config.yml --timeout-keep-alive 30
+
+方法2：
+直接启动chromadb服务
+docker run -d --name supersonic_chroma --privileged=true -e TZ='CST-8' -p 8899:8000 chromadb/chroma
+docker run -d --name supersonic_chroma_v2 --privileged=true -e TZ='CST-8' -p 8898:8000 -v $PWD/chroma_data:/chroma/chroma  -e IS_PERSISTENT=TRUE -e ANONYMIZED_TELEMETRY=TRUE chromadb/chroma
+# -e选项用于设置环境变量，IS_PERSISTENT=TRUE表示数据持久化，ANONYMIZED_TELEMETRY=TRUE表示开启匿名遥测。
+
+# 查看日志：
+# docker exec -it supersonic_chroma tail ./chroma.log
+
+#######################################################################################################################################
+
+
+#######################################################################################################################################
+# 客户端连接访问：
+# 第一步，安装客服端连接包
+$ pip install chromadb-client # python http-client only library
+
+import chromadb
+# 连接 chroma 数据库
+client = chromadb.HttpClient(host="localhost", port=8000)
+
+# 创建 collection
+collection = client.create_collection("all-my-documents")
+
+# 向 collection 添加文档
+collection.add(
+    documents=["This is document1", "This is document2"],
+    metadatas=[{"source": "notion"}, {"source": "google-docs"}], # filter on these!
+    ids=["doc1", "doc2"], # unique for each doc
+    embeddings = [[1.2, 2.1, 2, 1.0], [1.2, 2.1, 3.1, 0.8]]
+)
+
+# 查询
+results = collection.query(
+    query_texts=["This is a query document"],
+    query_embeddings=[[1,2,3,4]],
+    n_results=2,
+    # where={"metadata_field": "is_equal_to_this"}, # optional filter
+    # where_document={"$contains":"search_string"}  # optional filter
+)
+
+# 查看有多少个 collections
+client.count_collections()
+
+# 获取 collections 列表：
+client.list_collections()
+Out[19]: [Collection(name=all-my-documents)]
+
+# 删除指定 collections ：
+client.delete_collection('all-my-documents')
+
+#######################################################################################################################################
+# 当然也可以针对文本使用预训练的模型进行向量化
+
+# 模型来源：https://www.modelscope.cn/models/AI-ModelScope/bge-small-zh-v1.5/files
+import os 
+from sentence_transformers import SentenceTransformer
+USERNAME = os.getenv("USERNAME")
+sentences_1 = ["样例数据-1", "样例数据-2"]
+sentences_2 = ["样例数据-3", "样例数据-4"]
+model_dir = rf"D:\Users\{USERNAME}\data\bge-small-zh-v1.5"
+model = SentenceTransformer(model_dir)
+embedding_fn = lambda x:model.encode(x, normalize_embeddings=True)
+
+# 创建 collection,并指定向量函数
+collection = client.create_collection("all-my-documents")
+
+# 向 collection 添加文档
+documents=["静夜思", "床前明月光","离离原上草", "一岁一枯荣", "桃花潭水深千尺", "不及汪伦送我情"]
+collection.add(
+    documents=documents,
+    metadatas=[{"source": "notion" if i %2 ==0 else "google-docs"} for i in range(len(documents)) ], # filter on these!
+    ids=[f"doc{i}" for i in range(len(documents)) ], # unique for each doc
+    embeddings = embedding_fn(documents)
+)
+
+# 查询
+results = collection.query(
+    query_texts=["岁月"],
+    n_results=2,
+    query_embeddings = embedding_fn(["岁月"]),
+    # where={"metadata_field": "is_equal_to_this"}, # optional filter
+    # where_document={"$contains":"search_string"}  # optional filter
+)
+
+
+
+
+
+
+

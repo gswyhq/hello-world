@@ -60,6 +60,9 @@ count=blocks：只拷贝输入文件的前blocks块
 [gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=2 of=file3
 [gswyhq.IQSZ-L4856] ➤ dd if=Tencent_AILab_ChineseEmbedding.tar.gz bs=1.6G count=1 skip=3 of=file4
 
+# 将文件abc.zip 拆分为多个文件，每个文件大小为15MB的文件：
+split -b 15MB abc.zip
+
 # 将拆分后的文件合并成一个文件
 [gswyhq.IQSZ-L4856] ➤ cat file1 file2 file3 file4 > file_all
 
