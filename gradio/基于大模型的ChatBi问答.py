@@ -56,7 +56,7 @@ You must answer strictly in the following JSON format: {
 import gradio as gr
 import pandas as pd
 import time  # 导入time模块，虽然在这个例子中未直接使用，但可用于其他功能如延迟
-import psycopg2
+import psycopg2 # pip3 install psycopg2-binary
 from psycopg2 import OperationalError
 
 # 数据库连接参数

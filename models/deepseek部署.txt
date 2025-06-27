@@ -1,0 +1,7 @@
+
+# 方法一：
+$ docker run --rm -it -v $PWD/DeepSeek-R1-Distill-Qwen-1.5B:/root/deepseek -w /root/deepseek docker.1ms.run/vllm/vllm-openai:v0.6.4
+ /bin/bash 
+
+# vllm serve /root/deepseek --max-model-len 32768 --enforce-eager --device cpu
+
