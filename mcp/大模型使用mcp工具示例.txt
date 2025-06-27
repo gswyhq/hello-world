@@ -1,0 +1,147 @@
+
+all_tools = []
+for server in self.servers:
+    tools = await server.list_tools()
+    all_tools.extend(tools)
+
+# 一次性生成所有tools的提示
+tools_description = "\n".join([tool.format_for_llm() for tool in all_tools])
+
+# {tools_description}拼接到system提示，后续chat时注入
+system_message = f'''
+您是一位乐于助人的助手，可以使用这些工具：
+{tools_description}
+
+根据用户的问题选择合适的工具。如果不需要工具，请直接回复用户的问题。
+重要提示：当需要使用工具时，您必须仅仅以以下确切的JSON对象格式回应，不准出现其他内容：
+{
+	"tool": "tool-name",
+	"arguments": {
+		"argument-name": "value"
+		}
+}
+
+在收到工具的回应后：
+1. 将原始数据转化为自然流畅的对话回应
+2. 保持回应简洁，但信息丰富
+3. 关注最相关的信息
+4. 使用用户问题中的适当上下文
+5. 避免简单重复原始数据请仅使用上述明确定义的工具。
+'''
+
+messages = [{"role": "system", "content": system_message}]
+
+大模型调用工具示例过程：
+```python
+import requests
+import os
+from datetime import datetime
+import json
+
+# 定义工具列表，模型在选择使用哪个工具时会参考工具的name和description
+tools = [
+    # 工具1 获取当前时刻的时间
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_time",
+            "description": "当你想知道现在的时间时非常有用。",
+            "parameters": {},  # 因为获取当前时间无需输入参数，因此parameters为空字典
+        },
+    },
+    # 工具2 获取指定城市的天气
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_weather",
+            "description": "当你想查询指定城市的天气时非常有用。",
+            "parameters": {  # 查询天气时需要提供位置，因此参数设置为location
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "城市或县区，比如北京市、杭州市、余杭区等。",
+                    }
+                },
+                "required": ["location"],
+            },
+        },
+    },
+]
+
+
+# 模拟天气查询工具。返回结果示例：“北京今天是晴天。”
+def get_current_weather(location):
+    return f"{location}今天是晴天。 "
+
+
+# 查询当前时间的工具。返回结果示例：“当前时间：2024-04-15 17:15:18。“
+def get_current_time():
+    # 获取当前日期和时间
+    current_datetime = datetime.now()
+    # 格式化当前日期和时间
+    formatted_time = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    # 返回格式化后的当前时间
+    return f"当前时间：{formatted_time}。"
+
+
+def get_response(messages):
+    # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+    body = {"model": "qwen-plus", "messages": messages, "tools": tools}
+
+    response = requests.post(url, headers=headers, json=body)
+    return response.json()
+
+
+def call_with_messages():
+    messages = [
+        {
+            "content": input(
+                "请输入："
+            ),  # 提问示例："现在几点了？" "一个小时后几点" "北京天气如何？"
+            "role": "user",
+        }
+    ]
+
+    # 模型的第一轮调用
+    first_response = get_response(messages)
+    print(f"\n第一轮调用结果：{first_response}")
+    assistant_output = first_response["choices"][0]["message"]
+    if assistant_output["content"] is None:
+        assistant_output["content"] = ""
+    messages.append(assistant_output)
+    if (
+        "tool_calls" not in assistant_output
+    ):  # 如果模型判断无需调用工具，则将assistant的回复直接打印出来，无需进行模型的第二轮调用
+        print(f"最终答案：{assistant_output['content']}")
+        return
+    # 如果模型选择的工具是get_current_weather
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "get_current_weather":
+        tool_info = {"name": "get_current_weather", "role": "tool"}
+        location = json.loads(
+            assistant_output["tool_calls"][0]["function"]["arguments"]
+        )["location"]
+        tool_info["content"] = get_current_weather(location)
+    # 如果模型选择的工具是get_current_time
+    elif assistant_output["tool_calls"][0]["function"]["name"] == "get_current_time":
+        tool_info = {"name": "get_current_time", "role": "tool"}
+        tool_info["content"] = get_current_time()
+    print(f"工具输出信息：{tool_info['content']}")
+    messages.append(tool_info)
+
+    # 模型的第二轮调用，对工具的输出进行总结
+    second_response = get_response(messages)
+    print(f"第二轮调用结果：{second_response}")
+    print(f"最终答案：{second_response['choices'][0]['message']['content']}")
+
+
+if __name__ == "__main__":
+    call_with_messages()
+
+```
+
+# 参考资料：http://github.com/modelcontextprotocol/python-sdk/tree/main/examples/clients/simple-chatbot/mcp_simple_chatbot
+

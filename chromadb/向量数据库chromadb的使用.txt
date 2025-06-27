@@ -93,8 +93,153 @@ results = collection.query(
 )
 
 
+#####################################################################################################################################
 
 
 
+import os
+import chromadb  # pip3 install chromadb-client==0.6.3
+from chromadb.utils import embedding_functions
+from chromadb import Documents, EmbeddingFunction
+from sentence_transformers import SentenceTransformer
+import json
+USERNAME = os.getenv("USERNAME")
+# sentences_1 = ["样例数据-1", "样例数据-2"]
+# sentences_2 = ["样例数据-3", "样例数据-4"]
+model_dir = rf"D:\Users\{USERNAME}\data\bge-small-zh-v1.5"
+# model = SentenceTransformer(model_dir)
+# embedding_fn = lambda x:model.encode(x, normalize_embeddings=True)
+
+
+# 正确实现嵌入函数类
+class MyEmbeddingFunction(EmbeddingFunction[Documents]):
+    def __init__(self, model_dir):
+        self.model = SentenceTransformer(model_dir)
+
+    def __call__(self, input: Documents) -> list[list[float]]:
+        # 注意参数名必须严格为 input
+        embeddings = self.model.encode(
+            input,
+            normalize_embeddings=True,
+            show_progress_bar=False
+        )
+        return embeddings.tolist()
+
+# 连接到 Chroma 服务器
+client = chromadb.HttpClient(host='192.168.3.73', port=8899)
+
+# 使用默认的嵌入模型
+emb_fn = MyEmbeddingFunction(model_dir)
+# 创建/获取知识库集合（每个数据库独立存储）
+collection = client.get_or_create_collection(
+    name="knowledge_base",
+    embedding_function=emb_fn,
+    metadata={"hnsw:space": "cosine"}  # 集合级别的配置
+)
+# 添加示例数据（包含多维元数据）
+collection.add(
+    embeddings=emb_fn(["规则", "指标", '用户', '字段数据']),
+    # 可以直接提供文档关联列表embeddings，Chroma 将存储关联文档而不嵌入它们本身（即documents参数不会计算对应的向量，当embeddings参数为空时候，才会根据documents计算向量；）。
+    # 还可以将文档（documents参数）存储在别处，只需向 Chroma 提供一个列表embeddings即可。您可以使用 将ids嵌入与存储在别处的文档相关联。
+    documents=[
+        "用户表包含用户ID和注册日期",  # 表元数据
+        "DAU 定义为日活跃用户数",      # 指标定义
+        "数据校验规则：ID不为空",      # 规则定义
+        "字段user_id表示唯一用户标识"   # 字段释义
+    ],
+    metadatas=[
+        {"type": "table", "theme": "user", "scene": "basic"},
+        {"type": "metric", "theme": "engagement", "scene": "analysis"},
+        {"type": "rule", "theme": "data_quality", "scene": "validation"},
+        {"type": "field", "theme": "user", "scene": "definition"}
+    ],
+    # metadatas 元数据字典列表，以存储额外的信息并实现筛选功能
+    ids=["id1", "id2", "id3", "id4"]  # 每个文档必须有一个唯一的关联id。Chroma 不会为您跟踪 ID 的唯一性，由调用者决定是否添加相同的 ID 两次。在一次添加多个文档，文档id不能重复，但第二次添加可以与第一次重复（而且第二次添加数据无报错但不生效）
+)
+
+# 过滤元数据支持以下运算符：
+# $eq- 等于（字符串，整数，浮点数）
+# $ne- 不等于（字符串、整数、浮点数）
+# $gt- 大于（整数，浮点数）
+# $gte- 大于或等于（整数，浮点数）
+# $lt- 小于（整数，浮点数）
+# $lte- 小于或等于（整数，浮点数）
+
+def search_knowledge(search_term: str,
+                    search_type: str = None,
+                    theme: str = None,
+                    scene: str = None,
+                    n_results: int = 10):
+    """
+    支持多维过滤的搜索函数
+    :param search_term: 搜索关键词
+    :param search_type: 条件1
+    :param theme: 条件2
+    :param scene: 添加3
+    :param n_results: 返回结果数
+    :return:
+    """
+    # 构建过滤条件
+    where_filter = []
+    if search_type:
+        where_filter.append({"type":search_type})
+    if theme:
+        where_filter.append({"theme":theme})
+    if scene:
+        where_filter.append({"scene":scene})
+    # 执行查询
+    # where_filter = {"$and": [{"color": "red"}, {"price": {"$gte": 4.20}}]}
+    if len(where_filter) > 1:
+        where_clause = {"$and": where_filter}
+    elif len(where_filter) == 1:
+        where_clause = where_filter[0]
+    else:
+        where_clause = None
+    # where_filter = {"$and": where_filter} if len(where_filter) > 1 else where_filter
+    results = collection.query(
+        query_texts=[search_term],
+        where=where_clause,
+        n_results=n_results
+    )
+    return results
+
+# 示例搜索：在数据质量主题的规则中查找
+print("搜索校验规则:")
+print(search_knowledge("数据校验", search_type="rule", theme="data_quality")) # 限定条件，条件优先，向量匹配次后
+print(search_knowledge("数据校验"))  # 不限定条件搜索；
+
+# 示例搜索：在用户主题的所有类型中查找
+print("\n搜索用户相关:")
+print(search_knowledge("用户", theme="user"))
+print(search_knowledge("用户"))
+# 示例搜索：全库搜索（不限定类型和主题）
+print("\n全库搜索:")
+print(search_knowledge("数据"))
+
+# where_document 过滤器字典来根据文档的内容进行过滤，并且是根据字符串（并不是向量）过滤；
+#  where 过滤器字典来根据每个文档关联的元数据（metadatas）进行过滤
+collection.query(
+    query_texts=['用户'],
+    n_results=10,
+    where=None,
+    where_document={"$contains":"注册日期"}
+)
+
+# 删除文档，或者删除整个知识库
+collection.delete(where={"theme":"user"})  # 根据条件删除文档；
+client.delete_collection("knowledge_base") # 删除整个知识库：
+
+
+# 查看所有的数据库列表：
+client.list_collections()
+
+# 文档id生成可以通过如下方式，即使是前后两次同样文档重复插入了，但因为id是相同的数据不会重复：
+str(uuid.uuid5(uuid.NAMESPACE_DNS, '文档内容'))
+Out[12]: '2e0ffe38-c785-5cbb-9611-15527dc01535'
+
+# 查询指定库下的指定条数或所有文档：
+collection  = client.get_or_create_collection('text2dsl_agent_collection')
+collection.get(limit=10)
+若上面limit不设置则查询所有文档
 
 

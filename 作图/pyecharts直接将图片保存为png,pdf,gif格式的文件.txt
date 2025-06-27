@@ -56,7 +56,9 @@ from snapshot_selenium.snapshot import make_snapshot
 
 def get_chrome_driver(executable_path):
     options = webdriver.ChromeOptions()
-    options.add_argument("headless")
+    options.add_argument('--disable-web-security')  # 禁用同源策略
+    options.add_argument('--allow-running-insecure-content')  # 允许不安全内容
+    options.add_argument('headless')  # 无头模式
     service = Service(executable_path=executable_path)
     return webdriver.Chrome(options=options, service=service)
 

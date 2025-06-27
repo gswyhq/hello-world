@@ -35,3 +35,31 @@ show server_version;
 --2.2 查看数字版本信息包括小版号
 SHOW server_version_num;
 
+进入pg客户端；
+ psql -U postgres board
+
+进入了`psql`环境，你可以使用`\i`命令来运行你的SQL脚本：
+   \i myscript.sql
+
+# 命令行查询当前数据库，有哪些数据表：
+db1=# \dt public.*;
+
+# 重命名表：
+ ALTER TABLE tmp_out_jiayi_client_detail_daily_0402 RENAME TO tmp_out_jiayi_client_detail_daily;
+
+# 添加字段：
+ALTER TABLE table_name add column col_name1 TEXT, ADD COLUMN col_name2 TEXT;
+
+# 添加字段注释：
+COMMENT ON COLUMN table_name.col_name1 IS '字段注释1';
+
+-- 复制一个表为另外一个表
+-- 创建新表，结构与原表相同，包括字段注释
+CREATE TABLE tmp_out_jiayi_client_detail_daily_distinct_caseid (
+    LIKE tmp_out_jiayi_client_detail_daily INCLUDING ALL
+);
+
+-- 将数据从原表插入到新表
+INSERT INTO tmp_out_jiayi_client_detail_daily_distinct_caseid
+SELECT * FROM tmp_out_jiayi_client_detail_daily;
+

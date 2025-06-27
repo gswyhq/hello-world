@@ -13,4 +13,49 @@ Please check your internet connection. This can happen if your antivirus softwar
 解决方法：可通过下面的项目获取对应的文件；
 git clone https://github.com/Dust-Catcher/gradio.git
 
+# 问题：因输入内容有特殊字符，导致输入聊天文本在页面上没有展示出来，怎么解决：
+比如 输入 险种四大赛道 <prod_line_label>是啥，在页面上面仅仅展示：险种四大赛道
+问题根源：
+当输入中出现类似 <prod_line_label> 的结构时：
+Gradio 的 Chatbot 组件默认会将消息内容渲染为 HTML
+前端会将 <prod_line_label> 识别为未闭合的 HTML 标签
+浏览器会隐藏后续内容（因为认为标签未闭合）
+解决方法：
+Markdown 代码块包裹
+通过 ``` 包裹内容，强制以纯文本形式渲染，避免 HTML 标签解析：
+formatted_msg = f"```\n{user_message}\n```"
+前端会渲染为代码块样式，但保留了原始符号
+def user(user_message, history):
+    # 用代码块包裹用户输入（保留所有符号）
+    formatted_msg = f"```\n{user_message}\n```"
+    return "", history + [[formatted_msg, None]]
+
+def bot(model_name, history, request: gr.Request):
+    user_id = request.session_hash
+    start_time = time.time()
+    logger.info(f"用户ID：{user_id}，请求的问题：{history[-1][0]}")
+
+    answerStr = ""
+    for answer_chunk in 请求大模型的流式结果:
+        # 用代码块包裹每个响应片段
+        formatted_chunk = f"```\n{answer_chunk}\n```"
+        history[-1][1] += formatted_chunk
+        answerStr += answer_chunk
+        yield history
+    
+    logger.info(f"用户ID：{user_id}，结果：{answerStr}")
+
+with gr.Blocks() as demo:
+    chatbot = gr.Chatbot(
+        label='DeepSeek模型问答对话框',
+        height=700,
+        render_markdown=True,
+        sanitize_html=False,
+        elem_id="chatbot"
+    )
+    # 其他组件保持不变...
+
+demo.queue(status_update_rate="auto", default_concurrency_limit=120, max_size=120)
+demo.launch(server_name='0.0.0.0', server_port=7860, share=True)
+
 

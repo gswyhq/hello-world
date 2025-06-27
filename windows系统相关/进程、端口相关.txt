@@ -7,4 +7,9 @@ window下当使用某个端口时，发现这个端口被占用，但是正规�
 tasklist|findstr 2472;
 taskkill /pid 2472 -t -f;
 
+D:\Users>netstat -ano|findstr :8090
+  TCP    0.0.0.0:8090           0.0.0.0:0              LISTENING       32888
+  TCP    [::]:8090              [::]:0                 LISTENING       32888
 
+D:\Users>taskkill /F /PID 32888
+成功: 已终止 PID 为 32888 的进程。

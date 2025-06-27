@@ -325,14 +325,27 @@ gr.Interface(predict, "text", "json").launch()
 
 ###########################################################################################################################
 # 添加gradio到FastAPI应用中
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 import gradio as gr
 app = FastAPI()
 @app.get("/")
 def read_main():
     return {"message": "This is your main app"}
+
+# 添加自定义路由
+@app.get("/abc/{rest_of_path:path}")
+async def ai_redirect(request: Request, rest_of_path: str):
+    new_url = f"http://192.168.3.105/ui/chat/fb7b4eb8dc90c18b"
+    return RedirectResponse(url=new_url)
+
 io = gr.Interface(lambda x: "Hello, " + x + "!", "textbox", "textbox")
 app = gr.mount_gradio_app(app, io, path="/gradio")
+import uvicorn
+uvicorn.run(app, host='0.0.0.0', port=7860)
+# 启动后，浏览器访问：http://localhost:7860/gradio/
+# 若需要设置根路径，则需要在FastAPI(root_path='/ai')里设置，最终访问页面：http://localhost:7860/ai/gradio/
+# 此时，在gr.mount_gradio_app或uvicorn.run里设置root_path是无效的；
 
 ###########################################################################################################################
 # 文本分类的演示系统

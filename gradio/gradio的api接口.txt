@@ -1,0 +1,361 @@
+
+使用gradio部署了一个问答机器人，使用api请求模拟网页端请求：
+
+########################################################################################################################
+
+方法一：python包gradio_client
+from gradio_client import Client
+client = Client("http://192.168.3.105:7680", auth=("admin",  '123456'))
+result = client.predict(
+		history_size=0,
+		model_name="DeepSeek-R1-32B",
+		keep1_check=False,
+		history=[['中国首都在哪里？', None]],
+		api_name="/chat"
+)
+print(result)
+Loaded as API: http://192.168.3.105:7680 ✔
+[['中国首都在哪里？', '\n\n</think>\n\n中国首都是北京。<eom>']]
+
+########################################################################################################################
+方法二：curl请求
+# Step 1: 登录认证
+curl -X POST https://gradio-auth-demo.hf.space/login \
+     -d "username=user&password=pass123" \
+     -c auth_cookies.txt
+
+# Step 2: 提交预测请求
+EVENT_ID=$(curl -X POST https://gradio-auth-demo.hf.space/call/predict \
+               -b auth_cookies.txt \
+               -H "Content-Type: application/json" \
+               -d '{"data": ["Test input"]}' \
+               | awk -F'"' '{print $4}')
+
+# Step 3: 获取结果
+curl -N "https://gradio-auth-demo.hf.space/call/predict/$EVENT_ID" \
+     -b auth_cookies.txt
+
+########################################################################################################################
+方法三：python requests包
+import requests
+import json
+# 配置参数
+BASE_URL = "http://192.168.3.105:7680"
+USERNAME = "admin"
+PASSWORD = '123456'
+
+# 创建持久会话
+session = requests.Session()
+# Step 1: 登录认证
+try:
+    login_response = session.post(
+        f"{BASE_URL}/login",
+        data={"username": USERNAME, "password": PASSWORD}
+    )
+    login_response.raise_for_status()  # 检查HTTP错误
+    # 验证登录是否成功
+    if login_response.json().get("success") != True:
+        raise ValueError("Authentication failed")
+except Exception as e:
+    print(f"登录失败: {str(e)}")
+    exit(1)
+# Step 2: 提交预测请求
+try:
+    predict_response = session.post(
+        f"{BASE_URL}/gradio_api/call/chat",
+        headers={"Content-Type": "application/json"},
+        json={"data": [3, "DeepSeek-R1-32B", True, [["中国首都在哪里？",None]]]}
+    )
+    predict_response.raise_for_status()
+    # 解析事件ID
+    event_id = predict_response.json().get("event_id")
+    if not event_id:
+        raise ValueError("No event_id in response")
+except Exception as e:
+    print(f"预测请求失败: {str(e)}")
+    exit(1)
+# Step 3: 获取流式结果
+try:
+    with session.get(
+            f"{BASE_URL}/gradio_api/call/chat/{event_id}",
+            stream=True
+    ) as response:
+        response.raise_for_status()
+        # 实时处理事件流
+        for line in response.iter_lines():
+            if line:
+                decoded_line = line.decode('unicode_escape')
+                if decoded_line.startswith(('event:', 'data:')):
+                    print(decoded_line)
+                # 可在此添加业务逻辑处理事件数据
+except Exception as e:
+    print(f"获取结果失败: {str(e)}")
+    exit(1)
+
+# 可能存在问题：
+response.iter_lines() 可能因以下原因无法正确解析数据：
+数据未按换行符分割：服务端可能以其他方式（如长度前缀）分块。
+响应编码或压缩问题：需确认响应是否为纯文本或需要解压。
+
+# 改进代码：
+# 尝试逐字节读取而非按行读取
+for chunk in response.iter_content(chunk_size=128):
+    if chunk:
+        print(chunk.decode('utf-8'), end='\n', flush=True)
+
+########################################################################################################################
+方法四：java请求
+import cn.hutool.core.io.FileUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+public class DpskClient {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(DpskClient.class);
+    // 固定参数
+    volatile static long stopTimestamp = 0L;
+    volatile static String authCookie = "";
+    static String loginUrl = "/login";
+    static String askUrl = "/gradio_api/call/chat";
+    static String answerUrl = "/gradio_api/call/chat/";
+
+    //配置参数
+    String dpskHost = "http://192.168.3.105:7680";
+    String dpskUser = "admin";
+    String dpskPsw = "";
+    String dpskTxt = "{\"data\":[3,\"DeepSeek-R1-Distill-Qwen-32B\",true,[_ask_str_]]}";
+    Boolean dpskDebugLog = Boolean.FALSE;
+
+    //成员变量
+    private String answerTxt;
+    private String askTxt;
+
+
+    public DpskClient(String dpskHost, String dpskUser, String dpskPsw, String dpskTxt, Boolean dpskDebugLog) {
+        this.dpskHost = dpskHost;
+        this.dpskUser = dpskUser;
+        this.dpskPsw = dpskPsw;
+        this.dpskTxt = dpskTxt;
+        this.dpskDebugLog = dpskDebugLog;
+    }
+
+    public String ask(String ask_str) {
+        if (stopTimestamp > 0L && System.currentTimeMillis() < (stopTimestamp + 300_000L)) {
+            // 客户端错误（接口返回非200状态码），暂停5分钟
+            return null;
+        }
+        try {
+            // 第一部分：发送 POST 请求
+            final JSONArray jsonObject = new JSONArray();
+            jsonObject.add(0, ask_str);// 当前问题
+            jsonObject.add(1, null);// 历史对话
+            askTxt = dpskTxt.replace("_ask_str_", jsonObject.toJSONString());
+
+            URL askUrlObj = new URL(dpskHost + DpskClient.askUrl);
+            HttpURLConnection askConnection = (HttpURLConnection) askUrlObj.openConnection();
+            askConnection.setRequestMethod("POST");
+            askConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            askConnection.setRequestProperty("Cookie", authCookie);
+            askConnection.setDoOutput(true);
+
+            try (final OutputStream os = askConnection.getOutputStream()) {
+                log.info("ask:"+askUrlObj.toString() + "    :" + askTxt);
+                os.write(askTxt.getBytes(StandardCharsets.UTF_8));
+            }
+
+            log.info("Response Code: " + askConnection.getResponseCode());
+            if ("401".equals(askConnection.getResponseCode() + "")) {
+                loginSys();
+                askConnection.disconnect();
+                {// 登陆后再次请求
+                    askConnection = (HttpURLConnection) askUrlObj.openConnection();
+                    askConnection.setRequestMethod("POST");
+                    askConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    askConnection.setRequestProperty("Cookie", authCookie);
+                    askConnection.setDoOutput(true);
+
+                    try (final OutputStream os = askConnection.getOutputStream()) {
+                        log.info(askUrlObj.toString() + "    :" + askTxt);
+                        os.write(askTxt.getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+            }
+
+            if (!"200".equals(askConnection.getResponseCode() + "")) {
+                log.info("Response2 Code: " + askConnection.getResponseCode());
+                stopTimestamp = System.currentTimeMillis();
+                return null;
+            }
+
+            // 读取 POST 请求的响应
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(askConnection.getInputStream()))) {
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+
+                // 提取 EVENT_ID（假设响应格式与 curl 命令一致）
+                String[] parts = response.toString().split("\"");
+                if (parts.length >= 4) {
+                    // 第二部分：发送 GET 请求
+                    readStream(parts[3]);
+                } else {
+                    log.info("无法提取 EVENT_ID");
+                }
+            } finally {
+                askConnection.disconnect();
+            }
+        } catch (Exception e) {
+            log.error(askTxt + "\n {}", e);
+        }
+        return answerTxt;
+    }
+
+    public void readStream(String streamId) throws IOException {
+        URL answerUrlObj = new URL(dpskHost + DpskClient.answerUrl + streamId);
+        log.info("answerUrl: " + answerUrlObj.toString());
+        HttpURLConnection getConnection = (HttpURLConnection) answerUrlObj.openConnection();
+        getConnection.setRequestMethod("GET");
+        getConnection.setRequestProperty("Cookie", authCookie);
+        getConnection.setDoOutput(true);
+        boolean event_complete = false;
+        try (BufferedReader getIn = new BufferedReader(new InputStreamReader(getConnection.getInputStream(), StandardCharsets.UTF_8))) {
+            String getLine;
+            while ((getLine = getIn.readLine()) != null) {
+                if (dpskDebugLog) {
+                    log.debug("res:" + getLine);
+                }
+                if (event_complete) {
+                    getResult(getLine);
+                    event_complete = false;
+                }
+                if ("event: complete".equals(getLine)) {
+                    // 答复完成 调用 getResult 方法获得最终结果
+                    event_complete = true;
+                }
+            }
+        }
+    }
+
+
+    public String loginSys() {
+        String cookieStr = null;
+        HttpURLConnection connection = null;
+        try {
+            // 创建URL对象
+            URL loginUrlObj = new URL(dpskHost + DpskClient.loginUrl);
+            // 打开连接
+            connection = (HttpURLConnection) loginUrlObj.openConnection();
+            // 设置请求方法为POST
+            connection.setRequestMethod("POST");
+            // 设置请求头
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            // 允许输出
+            connection.setDoOutput(true);
+            // 设置请求参数
+            String params = "username=" + dpskUser + "&password=" + dpskPsw;
+            // 写入参数
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(params.getBytes());
+                os.flush();
+            }
+            // 连接
+            connection.connect();
+            // 检查响应码
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // 读取响应内容
+                // 获取Cookie
+                Map<String, List<String>> headerFields = connection.getHeaderFields();
+                if (cookieStr == null) {
+                    List<String> cookies = headerFields.get("Set-Cookie");
+                    if (cookies != null && !cookies.isEmpty()) {
+                        for (String s : cookies) {
+                            if (s.contains("unsecure")) {
+                                cookieStr = s;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (cookieStr == null) {
+                    List<String> cookies = headerFields.get("set-cookie");
+                    if (cookies != null && !cookies.isEmpty()) {
+                        for (String s : cookies) {
+                            if (s.contains("unsecure")) {
+                                cookieStr = s;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (cookieStr != null && cookieStr.indexOf(";") > 1) {
+                    log.info("cookieStr={}", cookieStr);
+                    cookieStr = cookieStr.substring(0, cookieStr.indexOf(";"));
+                    log.info("cookieStr={}", cookieStr);
+                }
+            } else {
+                log.info("loginSys-err，响应码: " + responseCode);
+            }
+        } catch (IOException e) {
+            log.error("{}", e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return DpskClient.authCookie = cookieStr;
+    }
+
+    public String getResult(String msg) {
+        log.info("answer:" + msg.length() + " msg=:" + msg);
+        if (msg.endsWith(", \"\"]]]")) {
+            // 返回空结果
+            log.error(askTxt + " , 返回空结果 answer: " + msg);
+            return answerTxt = null;
+        } else if (msg.endsWith("\\u89e3\\u6790\\u6d41\\u5f0f\\u63a5\\u53e3\\u5931\\u8d25\\uff01<eom>\"]]]")) {
+            // 读流异常
+            log.error(askTxt + " , 读流异常 answer: " + msg);
+            return answerTxt = null;
+        }
+        String startChar = "```json";
+        String endChar = "```";
+
+        String respTxt = msg.replace("\\n", "").replace("\n", "")
+                .replace("\\t", "")
+                .replace("\\\"", "\"");
+        ;
+        String jsonTxt = null;
+        try {
+            String validTxt = respTxt.substring(respTxt.indexOf(startChar) + startChar.length());
+            validTxt = validTxt.split(endChar)[0];
+            JSONObject jsonObject = JSONObject.parseObject(validTxt);
+            jsonTxt = JSONObject.toJSONString(jsonObject);
+            log.info("jsonTxt={}", jsonTxt);
+        } catch (Exception e) {
+            log.error("parseObject askTxt={},respTxt={}", askTxt, respTxt);
+        }
+        return answerTxt = jsonTxt;
+    }
+
+
+    public static void main(String[] args) {
+        String ask_str = "中国首都是哪里？";
+        System.out.println(new DpskClient("http://192.168.3.105:7680", "admin", "123456", "{\"data\":[3,\"DeepSeek-R1-Distill-Qwen-32B\",true,[_ask_str_]]}", true).ask(ask_str));
+
+    }
+} 

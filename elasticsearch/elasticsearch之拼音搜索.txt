@@ -22,6 +22,11 @@ node-1 analysis-hanlp  7.3.2
 node-1 analysis-ik     7.3.2
 node-1 analysis-pinyin 7.3.2
 
+下载方法2：
+https://release.infinilabs.com/analysis-pinyin/stable/
+https://release.infinilabs.com/analysis-ik/stable/
+https://release.infinilabs.com/analysis-hanlp/stable/
+
 二、使用拼音插件
 
 试一下分词效果，可以看到除了每个词的全频，还有每个字的首字母缩写；

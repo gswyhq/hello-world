@@ -444,6 +444,52 @@ with gr.Blocks() as demo:
 	msg.submit(respond, [msg, chatbot], [msg, chatbot])
 
 ###########################################################################################################################
+# 流式聊天机器人（Streaming chatbots）
+# 流式聊天机器人的响应是逐步生成并显示的，这样用户在等待完整回复的过程中，可以逐步看到部分回复（实时反馈），提高了互动的流畅度和用户体验。在聊天函数中，使用 yield 逐步生成响应，就能实现一个流式聊天机器人。
+
+import time
+import gradio as gr
+
+def slow_echo(message, history):
+    for i in range(len(message)):
+        time.sleep(0.3)
+        yield "You typed: " + message[: i+1]
+
+gr.ChatInterface(slow_echo).launch()
+
+###########################################################################################################################
+
+import random
+
+with gr.Blocks() as demo:
+	model_name = gr.Dropdown(['DeepSeek-R1-Distill-Qwen-32B', "DeepSeek-R1-BF16模型", "DeepSeek-V3-BF16模型"],
+							 label="请选择模型", info="", scale=10)
+	chatbot = gr.Chatbot()
+	msg = gr.Textbox()
+
+
+	def user(user_message, history):
+		return "", history + [[user_message, None]]
+
+	def bot(model_name, history):
+		print("输入问题为：", history[-1][0])
+		print('model:', model_name)
+		bot_message = random.choice(["How are you?", "I love you", "I'm very hungry"])
+		history[-1][1] = ""
+		for character in bot_message:
+			history[-1][1] += character
+			time.sleep(0.05)
+			yield history
+
+
+	msg.submit(user, [msg, chatbot], [msg, chatbot], queue=False).then(
+		bot, [model_name, chatbot], chatbot
+	)
+	# then 是 msg.submit 的后续操作。它表示在 msg.submit 完成后，立即执行另一个函数（这里是 bot 函数）
+
+demo.launch(server_name='0.0.0.0', server_port=7860, share=True)
+###########################################################################################################################
+
 # 自定义布局输入组件方面
 import gradio as gr  # 导入gradio库，用于创建交互式Web应用
 import time  # 导入time模块，用于实现延迟效果

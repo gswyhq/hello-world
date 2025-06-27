@@ -4,7 +4,7 @@
 import chromadb
 from chromadb.api.types import normalize_embeddings
 # 连接 chroma 数据库
-client = chromadb.HttpClient(host="30.171.80.45", port=8899)
+client = chromadb.HttpClient(host="192.168.3.73", port=8899)
 
 import os
 from sentence_transformers import SentenceTransformer

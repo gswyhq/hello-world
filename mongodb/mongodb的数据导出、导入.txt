@@ -62,6 +62,9 @@ root@b8780dcc5b2f:/# /usr/bin/mongodump -h 192.168.3.130 --port 27017 -o /home/z
 3,导出指定数据库
 root@b8780dcc5b2f:/# /usr/bin/mongodump -h 192.168.3.130 --port 27017 -d book_dingding -o /home/zhangy/mongodb/
 
+导出指定库表到JSON文件：
+root@f1c638937d50:/# mongoexport  --host=192.3.95.35 --port=27017 -u roosteropr -p ****** --db 库名 --collection 表名 --out 导出文件名.json
+
 mongorestore还原数据库
 
 1,常用命令格式

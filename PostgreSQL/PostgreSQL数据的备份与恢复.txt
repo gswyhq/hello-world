@@ -48,4 +48,23 @@ psql --host=localhost --port=6000 --username=demo2  db_name < C:\Users\zhangtian
    PGPASSWORD=mypassword /usr/bin/pg_dump -U myuser -h localhost -Fc board > /path/to/backup/directory/board_$(date +%Y%m%d).backup
    但是这种方法不太安全，因为密码可能会出现在进程列表中。
 
+# 目的：将数据库maxkb的数据复制、迁移到数据库maxkb2:
+操作方法：使用 `pg_dump` 和 `pg_restore`
+步骤1. **导出原数据库**
+   使用 `pg_dump` 导出为自定义格式（保留权限、数据、表结构等）：
+   ```bash
+   pg_dump -Fc -U 用户名 -d maxkb > maxkb.dump
+   ```
+
+步骤2. **创建新数据库**
+   连接到 PostgreSQL 并创建空数据库：
+   ```sql
+   CREATE DATABASE maxkb2;
+   ```
+
+步骤3. **导入数据到新数据库**
+   使用 `pg_restore` 导入备份：
+   ```bash
+   pg_restore -U 用户名 -d maxkb2 maxkb.dump
+   ```
 

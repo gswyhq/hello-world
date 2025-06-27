@@ -15,7 +15,13 @@ client = chromadb.Client(settings=Settings(anonymized_telemetry=False))
 import chromadb
 from chromadb.api.types import normalize_embeddings
 # 连接 chroma 数据库
-client = chromadb.HttpClient(host="30.171.80.45", port=8899)
+client = chromadb.HttpClient(host="192.168.3.73", port=8899)
 client.get_or_create_collection(COLLECTION_NAME,metadata={"hnsw:M": 1024})
 
+# 基于内存时候报错：
+chroma_client = chromadb.Client()
+RuntimeError: Chroma is running in http-only client mode, and can only be run with 'chromadb.api.fastapi.FastAPI' or 'chromadb.api.async_fastapi.AsyncFastAPI' as the chroma_api_impl.             see https://docs.trychroma.com/guides#using-the-python-http-only-client for more information.
+
+问题原因及解决方法：可能是因为 chromadb 和 chromadb-client 版本不匹配造成；
+可以都卸载掉，重新安装并注意安装时候有无报错；
 

@@ -1,0 +1,56 @@
+
+MCP Inspector 是一个用于测试和调试 MCP 服务器的开发工具
+
+第一步：
+命令行安装SQL查询的mcp服务：
+pip install xiyan-mcp-server
+
+第二步：
+编写LLM及数据库配置 config.yml 文件
+```yaml
+model:
+  name: "LLM名称"
+  key: "xxxx"   # key可从https://www.modelscope.cn/my/myaccesstoken 页面获取
+  url: "http://192.168.3.105:8827/v1/"
+
+database:
+  host: "192.168.3.105"
+  port: 3306
+  user: "root"
+  password: "123456"
+  database: "mydb"
+```
+
+第三步：
+安装 node.js 
+apt-get install nodejs
+或：
+yum install nodejs 
+
+第四步：
+用终端启动inspector
+npx @modelcontextprotocol/inspector -e YML="./config.yml" python -m xiyan_mcp_server
+
+Inspector 运行一个 MCP Inspector (MCPI) 客户端 UI（默认端口 6274）和一个 MCP Proxy (MCPP) 服务器（默认端口 6277）。
+在浏览器中打开 MCPI 客户端 UI （http://localhost:6274）以使用 Inspector。
+
+打开inspector web服务，点击connect，绿灯亮起表示已连接
+切换到tools页面，点击list tools会跳出来文本到sql的工具
+点击get_data工具，用自然语言取个数据看看
+输入问题“广东省有哪些医院”，点击“run tool”
+输出是个markdown格式的数据
+
+注意事项：
+1、若是windows环境，配置文件又是utf-8编码，可能需要修改xiyan-mcp-server中配置文件的读取代码，指定编码为utf-8
+  with open(config_path, 'r', encoding='utf-8') as file:
+      config = yaml.safe_load(file)
+2、若大模型请求报超时错误，则需要更改超时配置
+在浏览器页面，修改Configuration下的MCP_SERVER_REQUEST_TIMEOUT参数：
+如设置超时时间为6min即设置为360000
+3、为了更方便交互，可能需要找一个客户端来调用后台的数据服务。目前有非常多支持MCP的客户端，goose，这是一个开源的支持MCP的client。
+下载地址：
+https://block.github.io/goose/docs/quickstart/
+下载后根据提示一步步安装即可。
+
+
+

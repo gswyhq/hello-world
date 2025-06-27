@@ -101,4 +101,32 @@ HanLP('2021年HanLPv2.1为生产环境带来次世代最先进的多语种NLP技
  'con': [['TOP', [['IP', [['NP', [['_', ['2021年']]]], ['NP', [['_', ['HanLPv2.1']]]], ['VP', [['PP', [['_', ['为']], ['NP', [['_', ['生产']], ['_', ['环境']]]]]], ['VP', [['_', ['带来']], ['NP', [['CP', [['CP', [['IP', [['VP', [['NP', [['DP', [['_', ['次']]]], ['NP', [['_', ['世代']]]]]], ['ADVP', [['_', ['最']]]], ['VP', [['_', ['先进']]]]]]]], ['_', ['的']]]]]], ['NP', [['ADJP', [['_', ['多']]]], ['NP', [['_', ['语种']]]]]], ['NP', [['_', ['NLP']], ['_', ['技术']]]]]]]]]], ['_', ['。']]]]]],
   ['TOP', [['IP', [['NP', [['_', ['阿婆主']]]], ['VP', [['VP', [['_', ['来到']], ['NP', [['_', ['北京']], ['_', ['立方庭']]]]]], ['VP', [['_', ['参观']], ['NP', [['_', ['自然']], ['_', ['语义']], ['_', ['科技']], ['_', ['公司']]]]]]]], ['_', ['。']]]]]]]}
 
+HanLP的工作流程是先加载模型，模型的标示符存储在hanlp.pretrained这个包中，按照NLP任务归类。
+
+import hanlp
+hanlp.pretrained.mtl.ALL # MTL多任务，具体任务见模型名称，语种见名称最后一个字段或相应语料库
+{'OPEN_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_SMALL_ZH': 'https://file.hankcs.com/hanlp/mtl/open_tok_pos_ner_srl_dep_sdp_con_electra_small_20201223_035557.zip',
+ 'OPEN_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH': 'https://file.hankcs.com/hanlp/mtl/open_tok_pos_ner_srl_dep_sdp_con_electra_base_20201223_201906.zip',
+ 'CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_SMALL_ZH': 'https://file.hankcs.com/hanlp/mtl/close_tok_pos_ner_srl_dep_sdp_con_electra_small_20210111_124159.zip',
+ 'CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH': 'https://file.hankcs.com/hanlp/mtl/close_tok_pos_ner_srl_dep_sdp_con_electra_base_20210111_124519.zip',
+ 'CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ERNIE_GRAM_ZH': 'https://file.hankcs.com/hanlp/mtl/close_tok_pos_ner_srl_dep_sdp_con_ernie_gram_base_aug_20210904_145403.zip',
+ 'UD_ONTONOTES_TOK_POS_LEM_FEA_NER_SRL_DEP_SDP_CON_MT5_SMALL': 'https://file.hankcs.com/hanlp/mtl/ud_ontonotes_tok_pos_lem_fea_ner_srl_dep_sdp_con_mt5_small_20210228_123458.zip',
+ 'UD_ONTONOTES_TOK_POS_LEM_FEA_NER_SRL_DEP_SDP_CON_XLMR_BASE': 'https://file.hankcs.com/hanlp/mtl/ud_ontonotes_tok_pos_lem_fea_ner_srl_dep_sdp_con_xlm_base_20210602_211620.zip',
+ 'NPCMJ_UD_KYOTO_TOK_POS_CON_BERT_BASE_CHAR_JA': 'https://file.hankcs.com/hanlp/mtl/npcmj_ud_kyoto_tok_pos_ner_dep_con_srl_bert_base_char_ja_20210914_133742.zip'}
+调用hanlp.load进行加载，模型会自动下载到本地缓存。自然语言处理分为许多任务，分词只是最初级的一个。与其每个任务单独创建一个模型，不如利用HanLP的联合模型一次性完成多个任务：
+
+HanLP = hanlp.load(hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH)
+
+词性标注，默认CTB标准：
+HanLP(['HanLP为生产环境带来次世代最先进的多语种NLP技术。', '我的希望是希望张晚霞的背影被晚霞映红。'], tasks='pos').pretty_print()
+
+执行PKU词性标注：
+HanLP(['HanLP为生产环境带来次世代最先进的多语种NLP技术。', '我的希望是希望张晚霞的背影被晚霞映红。'], tasks='pos/pku').pretty_print()
+
+同时执行所有标准的词性标注：
+print(HanLP(['HanLP为生产环境带来次世代最先进的多语种NLP技术。', '我的希望是希望张晚霞的背影被晚霞映红。'], tasks='pos*'))
+
+
+# 更多使用参考：https://github.com/hankcs/HanLP/blob/doc-zh/plugins/hanlp_demo/hanlp_demo/zh/pos_stl.ipynb
+
 

@@ -590,3 +590,45 @@ GET /_search
   }
 }
 
+# 高亮搜索，在Elasticsearch搜索时，如何确定是哪个输入条件匹配到了结果
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "data_content": "深圳市"
+          }
+        }
+      ]
+    }
+  },
+  "highlight": {
+    "fields": {
+      "data_content": {}
+    }
+  },
+  "_source": [
+    "data_content"
+  ]
+}
+匹配中的内容会用<em>**</em>包裹起来，查询结果：
+[{'_id': '109',
+  '_index': 'recommended_conotent_20250217',
+  '_score': 12.7673025,
+  '_source': {'data_content': '深圳市'},
+  '_type': '_doc',
+  'highlight': {'data_content': ['<em>深</em><em>圳</em><em>市</em>']}},
+ {'_id': '250',
+  '_index': 'recommended_conotent_20250217',
+  '_score': 1.0095667,
+  '_source': {'data_content': '城市'},
+  '_type': '_doc',
+  'highlight': {'data_content': ['城<em>市</em>']}},
+ {'_id': '3',
+  '_index': 'recommended_conotent_20250217',
+  '_score': 0.8814292,
+  '_source': {'data_content': '百色市'},
+  '_type': '_doc',
+  'highlight': {'data_content': ['百色<em>市</em>']}}]
+

@@ -40,6 +40,9 @@ mysqldump -uroot -p123456 --all-databases > all.sql
  3 导出某些库
  系统命令行
  mysqldump -uusername -ppassword --databases db1 db2 > db1db2.sql
+
+ 导出数据库时候，若没有权限，可以使用不锁表导出数据：
+bash-5.1# mysqldump -u zhangsan -p --skip-lock-tables db1 > db1.sql
  
  4 导入某些库
  mysql命令行

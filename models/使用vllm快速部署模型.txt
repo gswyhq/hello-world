@@ -1,0 +1,110 @@
+
+vLLM 是一个快速且易于使用的库，专门用于大型语言模型（LLM）的推理和服务。它的主要特点包括：
+高效：优化了推理速度，适用于需要快速响应的应用场景。
+易用：使用与 transformers 库兼容的分词器（Tokenizer），简化了输入的准备工作。
+扩展性：自 v0.6.0 版本起，支持工具调用（Tool Calls），可以自动解析生成的工具调用（如果格式被支持）。
+
+# 在线服务部署
+python -m vllm.entrypoints.openai.api_server --model /root/Qwen3-0.6B --max-model-len 120
+
+或者：
+vllm serve Qwen/Qwen3-0.6B --enable-reasoning --reasoning-parser deepseek_r1
+
+# 设置 KV cache值为10GB
+docker run --rm -it -p 8000:8000 \
+  -v $PWD/Qwen3-0.6B:/root/Qwen3-0.6B \
+  -e VLLM_CPU_KVCACHE_SPACE=10 \
+  openeuler/vllm-cpu:0.8.5-oe2403lts \
+  --model /root/Qwen3-0.6B
+
+# 若内存不够 减少 --max-model-len 参数值,这样可以降低对KV cache的需求，从而避免内存不足的问题
+docker run --rm -it -p 8000:8000 \
+  -v $PWD/Qwen3-0.6B:/root/Qwen3-0.6B \
+  -e VLLM_CPU_KVCACHE_SPACE=4 \
+  openeuler/vllm-cpu:0.8.5-oe2403lts \
+  --model /root/Qwen3-0.6B \
+  --max-model-len 20480
+
+# 仅仅离线推理
+from vllm import LLM
+prompts = ["Hello, 中国的首都是"]  # Sample prompts.
+llm = LLM(model="/root/Qwen3-0.6B")  # Create an LLM.
+outputs = llm.generate(prompts)
+print(outputs)
+
+# 启动vLLM服务器时需启用工具调用相关参数：
+vllm serve meta-llama/Llama-3.1-8B-Instruct \
+    --enable-auto-tool-choice \  # 启用自动工具选择
+    --tool-call-parser llama3_json \  # 指定工具解析器
+    --chat-template examples/tool_chat_template_llama3.1_json.jinja  # 指定适配模型的聊天模板
+关键参数：
+--tool-call-parser：根据模型选择解析器（如hermes、mistral、llama3_json）。
+--chat-template：指定模板以处理工具消息和模型响应格式。更多模型见：https://github.com/vllm-project/vllm.git
+
+vllm serve Qwen/Qwen2.5-7B-Chat \
+    --enable-auto-tool-choice \
+    --tool-call-parser hermes \  # 复用Hermes解析器
+    --chat-template examples/tool_chat_template_qwen.jinja
+vLLM通过hermes解析器提取结构化数据，不依赖模型自身实现。
+
+专用配置：
+vllm serve deepseek-ai/DeepSeek-V3-0324 \
+    --enable-auto-tool-choice \
+    --tool-call-parser deepseek_v3 \  # 专用解析器
+    --chat-template examples/tool_chat_template_deepseekv3.jinja
+实现特点：
+使用自定义的deepseek_v3解析器处理模型特有格式。
+聊天模板需严格对齐模型训练时的工具调用提示格式。
+
+
+########################################################################################################################################
+
+1. 确认服务状态
+首先检查服务是否正常运行：
+
+
+curl http://localhost:8732/health
+正常应返回{"status":"healthy"}
+
+curl http://localhost:8000/tokenize   -H "Content-Type: application/json"   -d '{"model": "/root/Qwen3-0.6B", "prompt": "北京"}'
+{"count":1,"max_model_len":2048,"tokens":[68990]}
+
+curl -XGET http://localhost:8000/version
+{"version":"0.8.5"}
+
+2. 发送推理请求
+使用以下任意一种方式发起请求：
+
+方式一：cURL命令
+
+curl http://localhost:8732/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "/root/Qwen3-0.6B",
+    "messages": [
+      {"role": "user", "content": "请用中文写一首关于春天的诗"}
+    ],
+    "temperature": 0.7
+  }'
+方式二：Python代码
+
+import requests
+
+response = requests.post(
+    "http://localhost:8732/v1/chat/completions",
+    json={
+        "model": "/root/Qwen3-0.6B",
+        "messages": [
+            {"role": "user", "content": "请用中文解释人工智能的工作原理"}
+        ],
+        "temperature": 0.7
+    }
+)
+print(response.json())
+
+# vllm启动服务，出现问题："Illegal instruction (core dumped)"
+所谓 Illegal instruction (错误指令)，表示处理器(CPU)收到了一条它不支持的指令:
+因为vllm采用了特定的优化编译，需要依赖一定(新型)的CPU指令集。
+若不支持则报该错误。
+
+

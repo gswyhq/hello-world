@@ -1,0 +1,81 @@
+
+# docker启动一个mongo镜像实例
+docker run -e LANG=C.UTF-8 --name some-mongo -p 27017:27017 -v $PWD/data:/data/db -d docker.io/mongo:5.0.0
+
+#、进入容器bash
+docker exec -it some-mongo /bin/bash
+
+#、导出数据到文件：
+root@f1c638937d50:/# mongoexport  --host=192.168.3.105 --port=27017 -u roosteropr -p ****** --db rooster --collection your_collection --out your_collection.json
+
+#、连接指定数据库(rooster)：
+root@f1c638937d50:/# mongo --host=29.3.95.35 --port=27017 -u roosteropr -p ****** rooster
+
+#、查看当前库：
+MongoDB Enterprise mongos> show dbs
+rooster  34.826GB
+MongoDB Enterprise mongos> db.version()
+6.0.14
+
+#、查看当前库有哪些表，列出全部的表名：
+MongoDB Enterprise mongos> db.getCollectionNames()
+
+#、按关键词搜索表名，并列出（搜索表名中含有‘_enc’字符的表）：
+MongoDB Enterprise mongos> db.getCollectionNames().filter(n => n.includes('_enc'))
+
+#、搜索dm_开头的表：
+MongoDB Enterprise mongos> db.getCollectionNames().filter(n => n.startsWith("dm_"));
+
+#、搜索表名包含 'test' 且区分大小写：
+db.getCollectionNames().filter(n => n.includes('test'));
+
+#、搜索不包含 'test' 且不区分大小写：
+db.getCollectionNames().filter(n => 
+  !n.toLowerCase().includes('test')  // 转为小写后判断是否包含
+);
+
+#、搜索表名不包含 "test"（不区分大小写）
+db.getCollectionNames().filter(n => 
+  !/test/i.test(n)  // i 表示不区分大小写
+);
+
+#、排除名称中包含 "log" 或 "tmp" 的集合（不区分大小写）
+db.getCollectionNames().filter(n => 
+  !/(log|tmp)/i.test(n)
+);
+
+#、查询表有多少条数据：
+MongoDB Enterprise mongos> db.getCollection('dw_group_safe_dwd_group_sjyx_cust_label_pfm_p3_zplus').count();
+
+#、查询表有多少GB数据？
+db.getCollection('your_collection').stats().storageSize / Math.pow(1024, 3);
+
+// 列出所有数据库
+> show dbs
+
+// 切换数据库
+> use your_db
+
+// 查看集合
+> show collections
+2. 数据查询
+
+// 查询前5条数据
+> db.your_collection.find().limit(5).pretty()
+
+// 条件查询
+> db.your_collection.find({ "field": "value" })
+
+// 连接到MongoDB并切换到数据库
+use mydatabase;
+
+// 查询前10条数据
+db.mycollection.find().limit(10);
+
+// 或者查询随机的10条数据
+db.mycollection.aggregate([ { $sample: { size: 10 } } ]);
+
+
+
+
+

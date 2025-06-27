@@ -5,4 +5,96 @@ Invalid HTTP_HOST header: 'triples_tuple_xia:8000'. The domain name provided is 
 解决方案：
 `docker-compose.yml`文件中的服务名，不能有下划线；将下划线改为中划线即可：triples_tuple_xia -> triples-tuple-xia
 
+# 问题：
+启动django项目，加载前端静态代码，为何报404错误；
+但若通过npm run dev又可以正常访问；
+出现问题原因，很有可能是npm run build执行有问题；
+比如前一次npm run build执行失败了，或者其他的原因中止了；
+后面再执行一次npm run build成功了；这个时候构建的dist文件目录是存在问题的，哈希文件可能不正常；
+正常的做法是依次重新执行下面的命令：
+:: 强制删除依赖目录
+rmdir /s /q node_modules
+
+:: 删除锁文件
+del /f package-lock.json
+
+:: 清除npm缓存
+npm cache clean --force
+
+:: 删除构建目录
+rd /s /q dist
+
+:: 重新安装依赖
+npm install --force
+
+:: 执行构建
+npm run build
+
+# 问题：
+后端代码在前端没有翻译成简体中文；
+from django.utils.translation import gettext_lazy as _, gettext, to_locale
+{'key': _('space'), 'value': '(?<! ) (?! )'}
+解决方法：
+第一步:查看有无对应的mo、po文件
+.po是文本文件，方便编辑，而.mo是二进制文件
+find . -name *.po
+./apps/locales/en_US/LC_MESSAGES/django.po
+./apps/locales/zh_CN/LC_MESSAGES/django.po
+第二步：查看文件中是否存在对应的需要翻译的space字符：
+cat ./apps/locales/zh_CN/LC_MESSAGES/django.po|grep -C 2 space
+
+#: .\apps\dataset\serializers\document_serializers.py:1028
+msgid "space"
+msgstr "空格"
+第三步：检查po文件中space与py文件中所在行数是否一致；
+第四步：若不一致，则删除旧的po文件，重新生成po文件：
+# 进入项目根目录
+# 生成所有语言翻译po文件
+(cd apps && django-admin makemessages -l en)
+(cd apps && django-admin makemessages -l zh_Hans)
+(cd apps && django-admin makemessages -l zh_Hant)
+第五步：将po文件编译成mo文件
+# 编译翻译文件
+(cd apps && django-admin compilemessages)
+第六步：效果验证
+# 在后端根目录执行（即manage.py文件所在目录）：
+cd apps && django-admin makemessages -l zh_Hans 
+# 通过apps目录下的manage.py启动shell
+python apps/manage.py shell
+在打开的Python shell中执行：
+
+# 验证配置加载
+from django.conf import settings
+print(settings.LANGUAGES)  # 应看到你当前的配置
+
+# 测试翻译功能
+from django.utils.translation import activate, gettext as _
+activate('zh')  # 对应配置中的'zh'
+print(_("space"))  # 应输出"空格"
+
+# 附加验证（检查是否加载正确翻译文件）
+activate('zh-hans')  # 测试标准代码映射
+print(_("space"))  # 也应输出"空格"
+
+# 运行命令报错：
+django-admin makemessages -l zh_Hans
+CommandError: Can't find msguniq. Make sure you have GNU gettext tools 0.15 or newer installed.
+解决方法：
+1. 安装GNU gettext工具
+对于 Ubuntu/Debian 系统：
+sudo apt-get update
+sudo apt-get install gettext
+对于 CentOS/RHEL 系统：
+sudo yum install gettext
+# 或新版本系统
+sudo dnf install gettext
+对于 Windows：
+访问 gettext binaries 下载最新版 https://mlocati.github.io/articles/gettext-iconv-windows.html
+安装时勾选 "Add to PATH"
+重启命令行终端
+2. 验证安装
+gettext --version
+# 应显示类似：gettext (GNU gettext-runtime) 0.21
+3. 重新运行Django命令
+django-admin makemessages -l zh_Hans
 

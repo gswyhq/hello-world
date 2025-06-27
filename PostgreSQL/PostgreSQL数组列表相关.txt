@@ -222,6 +222,22 @@ FROM cte;
 查询结果：
 {"字段1的去重结果" : ["张三","李四","王五"], "字段2的去重结果" : ["10岁","20岁"]}
 
+# 去重保留最新时间的记录：
+理解SQL语句：
+SELECT DISTINCT ON (user_id) *：按user_id去重，每个user_id只保留一条记录。
+ORDER BY user_id, start_date DESC：先按user_id排序，再按start_date降序排列，确保每个user_id的第一条记录是start_date最大的。
+创建新表并插入数据：
+使用CREATE TABLE AS创建新表并插入结果：
+CREATE TABLE new_table AS
+SELECT DISTINCT ON (user_id) * 
+FROM public.tmp_out_jiayi_client_detail_daily 
+ORDER BY user_id, start_date DESC;
+如果新表已存在，使用INSERT INTO插入数据：
+INSERT INTO new_table
+SELECT DISTINCT ON (user_id) * 
+FROM public.tmp_out_jiayi_client_detail_daily 
+ORDER BY user_id, start_date DESC;
+
 # 参考资料：
 https://www.postgresql.org/docs/current/functions-array.html
 https://www.postgresql.org/docs/current/functions-range.html

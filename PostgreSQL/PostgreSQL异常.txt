@@ -124,3 +124,46 @@ CREATE TABLE IF NOT EXISTS config_activity_log
   activity_timestamp      timestamp DEFAULT current_timestamp
 );
 
+# postgresql命令行，查询的时候，结果都是空的，而且有时候正常语法，还报语法错误：
+解决方法，清除一下缓存：
+普通的 VACUUM 命令会清理死元组并回收空间，但不会释放操作系统的磁盘空间。它会标记这些空间为可用于未来的插入。这种操作是非阻塞的，可以在数据库正常运行时执行，不会对其他事务产生显著影响。
+用法：
+VACUUM;
+
+# drop 一个表耗时非常久是怎么回事？
+DROP TABLE是DDL命令，通常不会逐行删除，而是直接删除文件。不过如果表被其他会话锁定，或者有未完成的事务，DROP TABLE会被阻塞，导致延迟。
+通过 SELECT * FROM pg_locks WHERE relation = 'tmp_table3'::regclass; 检查锁状态。
+若查询结果不为空，则说明有锁表的情况发生；
+user3=> SELECT * FROM pg_locks WHERE relation = 'tmp_table3'::regclass;
+ locktype | database | relation | page | tuple | virtualxid | transactionid | classid | objid | objsubid | virtualtransaction | pid  |      mode       | granted | fastpath
+----------+----------+----------+------+-------+------------+---------------+---------+-------+----------+--------------------+------+-----------------+---------+----------
+ relation |    16398 |    16617 |      |       |            |               |         |       |          | 42/10889           | 4366 | AccessShareLock | t       | f
+ relation |    16398 |    16617 |      |       |            |               |         |       |          | 47/47605           | 4345 | AccessShareLock | t       | f
+ relation |    16398 |    16617 |      |       |            |               |         |       |          | 40/7962            | 4361 | AccessShareLock | t       | f
+ relation |    16398 |    16617 |      |       |            |               |         |       |          | 46/1133            | 4389 | AccessShareLock | t       | f
+ relation |    16398 |    16617 |      |       |            |               |         |       |          | 44/453             | 1070 | AccessShareLock | t       | f
+(5 rows)
+根据锁查询结果，该表正被5个进程（PID: 4366/4345/4361/4389/1070）以读模式（AccessShareLock）占用，导致 DROP TABLE 被阻塞。以下是解决方案：
+强制终止阻塞进程（需超级用户权限）
+-- 批量终止所有占用该表的进程
+
+user3=> SELECT pg_terminate_backend(pid)
+user3-> FROM pg_locks
+user3-> WHERE relation = 'tmp_table3'::regclass
+user3->   AND pid <> pg_backend_pid();
+ pg_terminate_backend
+----------------------
+ t
+ t
+ t
+(3 rows)
+
+user3=> SELECT * FROM pg_locks WHERE relation = 'tmp_table3'::regclass;
+ locktype | database | relation | page | tuple | virtualxid | transactionid | classid | objid | objsubid | virtualtransaction | pid | mode | granted | fastpath
+----------+----------+----------+------+-------+------------+---------------+---------+-------+----------+--------------------+-----+------+---------+----------
+(0 rows)
+重试 DROP TABLE
+user3=> drop table tmp_table3;
+DROP TABLE
+
+

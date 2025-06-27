@@ -936,3 +936,9 @@ USER=gswyhq
 DESKTOP_SESSION=deepin
 ...
 
+# mv带有特殊字符文件时候出错：
+mv "\-LLM-Prompt-Engineering-Google-master.zip" LLM-Prompt-Engineering-Google-master.zip
+/bin/mv: cannot stat '\-LLM-Prompt-Engineering-Google-master.zip': No such file or directory
+实际上该文件是存在的，解决方法：
+mv ./-LLM-Prompt-Engineering-Google-master.zip LLM-Prompt-Engineering-Google-master.zip
+

@@ -262,3 +262,25 @@ curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d' {
     "script": "ctx._source.age += 5"
 }'
 
+# 排除节点
+# curl -H "Content-Type: application/json" -XPUT 192.168.3.122:9200/_cluster/settings -d '{"transient": {"cluster.routing.allocation.exclude._ip": "192.168.3.16"}}'
+
+# 排除后，执行验证：
+curl 192.168.3.122:9200/_cluster/settings?pretty
+# 若"relocating_shards" 为0， "active_shards_percent_as_number"为100，代表迁移完成；
+
+#被排除节点无活跃分片：执行以下命令验证：
+curl -XGET "192.168.3.16:9200/_cat/allocation?v&h=ip,node,shards,disk.indices,disk.used"
+#若输出中 shards 列为 0，说明分片已全部迁出
+
+# 查询默认值：
+curl -X GET "http://192.168.3.16:9200/_cluster/settings?pretty&include_defaults=true&flat_settings=true"
+
+# 排除节点，执行太慢：
+# 修改 Elasticsearch 集群的持久化设置（persistent settings），具体是调整索引恢复（indices recovery）的最大带宽限制
+# 持久化设置（persistent）会跨集群重启生效，与临时设置（transient）不同
+curl -X PUT "http://192.168.3.150:9200/_cluster/settings" \
+     -H 'Content-Type: application/json' \
+     -d '{"transient": {"indices.recovery.max_bytes_per_sec": "200mb"}}'
+
+

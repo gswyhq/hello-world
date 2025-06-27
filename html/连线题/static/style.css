@@ -1,0 +1,74 @@
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 60px 40px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.button {
+    width: 200px;
+    height: 40px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: white;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.button.selected {
+    border-color: #20c7fb;
+    background: #8ac5d3;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+#unitSelect {
+    padding: 10px;
+    margin: 0 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #ffAF50;
+}
+
+#resetBtn, #submitBtn {
+    position: fixed;
+    top: 20px;
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#submitBtn {
+    left: 160px;
+}
+
+#score {
+    position: relative;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #333;
+}

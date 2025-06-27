@@ -190,3 +190,8 @@ zebra stripes   are neat    $1
 somemissed      
 $20
 
+# 控制字的颜色：
+<span style=\"color:red\">①客户数较年初下降17万，主因是产险净流失导致下降21万</span>
+
+
+

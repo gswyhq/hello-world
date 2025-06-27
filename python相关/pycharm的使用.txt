@@ -158,3 +158,17 @@ pwd
 解决方法：可以尝试手动在PyCharm控制台中导入IPython模块：在控制台输入import IPython，然后通过IPython.start_ipython()启动IPython shell。
 若中间有报错，可以查看具体原因。
 
+# AI助手——continue插件
+一、安装 Continue 插件
+1. 打开 PyCharm 的设置窗口，在菜单栏中依次点击 “File” - “Preferences...”。不同版本的 PyCharm 可能菜单布局略有差异，但大致路径相同。
+2. 在弹出的设置窗口中，找到 “Plugins” 菜单。这里是管理 PyCharm 插件的地方，所有安装、更新、卸载插件的操作都在此进行。
+3. 在插件模块的搜索框中输入 “Continue” 进行搜索。搜索结果会显示出相关插件，找到 “Continue Dev” 插件，该插件的介绍表明它能让开发者创建、共享和使用自定义 AI 代码助手，功能十分强大。
+4. 点击 “Continue Dev” 插件，然后选择 “Install” 进行安装。安装过程可能需要一些时间，取决于网络速度和电脑性能。安装成功后，PyCharm 界面会出现 Continue 插件的图标。
+二、配置模型
+1. 安装完成后，通过按下 “Cmd +J” 快捷键或者点击 PyCharm 右侧的 Continue 图标，打开 Continue 窗口。首次打开时，按照窗口侧边栏的提示进行操作，设置聊天 / 编辑模型和自动完成模型。
+2. 点击添加自定义模型，此时会弹出选择服务提供商的界面。首先点击Continue中的Select model，选择里面的Add Chat Model。
+3. 然后我们在Provider中选择Deepseek(当然也可以是其他模型)，在Model中选择DeepSeek Coder，在API key中填入我们在DeepSeek官网获取的API即可, “API Base URL” 填写 “https://***.com/v1”。
+4. 点击 “Connect” 后，可能会遇到报错情况，如 “404 Error”。此时不要慌张，这是因为配置文件中的模型名称与实际支持的模型存在差异。打开插件创建的 Config.yaml 配置文件，一般路径为 “~/.continue/config.yaml”。
+5. 在配置文件中，找到对应的模型配置项。将模型名称修改为 “****”，即将模型名称修改为API Base URL支持的模型，具体支持的模型可前往官网查看。修改完成后保存配置文件。
+
+

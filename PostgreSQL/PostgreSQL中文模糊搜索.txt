@@ -316,6 +316,17 @@ CASCADE：删除依赖于该函数的对象（如触发器、视图等）。
 https://github.com/paradedb/paradedb
 
 ##########################################################################################################################################
+select version();
+
+SELECT
+  '中华 人民 共和国' AS content,
+  'nothing | true' AS keywords,
+  to_tsvector('english', '中华 人民 共和国'),
+    to_tsquery('english', 'nothing | true'),
+  ts_rank_cd(
+    to_tsvector('english', '中 华 人 民 共 和 国'),
+    to_tsquery('english', 'abc | 中 | 国')
+  ) AS relevance;
 
 
 

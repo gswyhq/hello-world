@@ -1,0 +1,156 @@
+
+一、下载所需文件（在可联网的机器上操作）
+主安装包
+根据您的x86_64架构下载(安装文件较大有1.6GB)：
+wget https://ollama.com/download/ollama-linux-amd64.tgz
+
+ollama各版本地址： https://github.com/ollama/ollama/releases/
+
+二、传输文件到离线服务器
+将以下文件上传到服务器：
+ollama-linux-amd64.tgz
+
+三、在离线服务器上安装
+安装Ollama
+# 方法1：
+curl -fsSL -o install.sh https://ollama.com/install.sh
+注释掉install.sh中下载部分，改为：
+$SUDO tar -xzf ollama-linux-amd64.tgz -C "$OLLAMA_INSTALL_DIR"
+再只是install脚本安装
+
+# 方法2：
+# 创建安装目录
+sudo install -d /usr/local/bin /usr/local/lib/ollama
+
+# 解压主程序
+sudo tar -xzf ollama-linux-amd64.tgz -C /usr/local/lib/ollama
+
+# 创建符号链接
+sudo ln -sf /usr/local/lib/ollama/ollama /usr/local/bin/ollama
+
+配置systemd服务
+sudo tee /etc/systemd/system/ollama.service >/dev/null <<EOF
+[Unit]
+Description=Ollama Service
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+EOF
+
+# 创建用户并启动服务
+sudo useradd -r -s /bin/false ollama
+sudo systemctl daemon-reload
+sudo systemctl enable --now ollama
+
+四、验证安装
+ollama --version
+systemctl status ollama
+
+注意事项
+如果不需要服务化，可直接运行ollama serve启动
+完整日志查看：journalctl -u ollama -f
+
+################################################################################
+Ollama 模型库
+类似 Docker 托管镜像的 Docker Hub，Ollama 也有个 Library 托管支持的大模型。
+Ollama 模型库地址：https://ollama.com/library
+如：
+ollama run qwen3:0.6b
+
+导入huggingface的模型：
+ollama run hf.co/{username}/{repository}
+ 
+要选择不同的量化方案，只需在命令中添加一个标签：
+ollama run hf.co/{username}/{repository}:{quantization}
+例如：量化名称不区分大小写
+ollama run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:IQ3_M  
+ollama run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0
+
+从本地加载gguf模型：
+Ollama 支持采用 Modelfile 文件中导入 GGUF 模型
+1、创建Modelfile文件,（文件名是自定义的)，内容如下：
+# 创建文件
+vi Modelfile
+# 文件内容为模型的路径
+FROM <model_path>/model_name.gguf
+
+2、ollama引入或者创建模型
+# 模型名称可以自定义，即后续在ollama中的标识
+ollama create <model_name> -f <path_to_Modelfile>
+
+查看模型列表
+3、ollama list
+
+ollama 命令 如docker命令类似，如：
+ollama serve # 启动ollama
+ollama create # 从模型文件创建模型
+ollama show # 显示模型信息
+ollama run # 运行模型
+ollama pull # 从注册仓库中拉取模型
+ollama push # 将模型推送到注册仓库
+ollama list # 列出已下载模型
+ollama cp # 复制模型
+ollama rm # 删除模型
+ollama help # 获取有关任何命令的帮助信息
+ollama ps #查看运行中的模型
+移除模型：ollama rm <model_name>
+
+迁移模型
+1.将服务器下面目录对应的模型文件打为压缩包：
+/usr/share/ollama/.ollama/models/blobs
+2.将服务器下面目录中的模型文件夹，打为压缩包
+/usr/share/ollama/.ollama/models/manifests/registry.ollama.ai/library/模型名称
+3.将上述的压缩包放到新环境中的ollama对应目录中，即可
+
+################################################################################
+ollama环境变量：
+默认配置文件在：/etc/systemd/system/ollama.service
+也可以编辑~/.bashrc进行覆盖并重启ollama
+新版的ollama已经支持OpenAI的API格式
+
+Ollama 提供了多种环境变量以供配置：
+ollama默认限制上下文的长度是2048
+OLLAMA_CONTEXT_LENGTH=2048 
+OLLAMA_DEBUG：是否开启调试模式，默认为 false。
+OLLAMA_FLASH_ATTENTION：是否闪烁注意力，默认为 true。
+OLLAMA_HOST：Ollama 服务器的主机地址，默认为空。
+OLLAMA_KEEP_ALIVE：保持连接的时间，默认为 5m。
+OLLAMA_LLM_LIBRARY：LLM 库，默认为空。
+OLLAMA_MAX_LOADED_MODELS：最大加载模型数，默认为 1。
+OLLAMA_MAX_QUEUE：最大队列数，默认为空。
+OLLAMA_MAX_VRAM：最大虚拟内存，默认为空。
+OLLAMA_MODELS：模型目录，默认为空。
+OLLAMA_NOHISTORY：是否保存历史记录，默认为 false。
+OLLAMA_NOPRUNE：是否启用剪枝，默认为 false。
+OLLAMA_NUM_PARALLEL：并行数，默认为 1。
+OLLAMA_ORIGINS：允许的来源，默认为空。
+OLLAMA_RUNNERS_DIR：运行器目录，默认为空。
+OLLAMA_SCHED_SPREAD：调度分布，默认为空。
+OLLAMA_FLASH_ATTENTION: 启用 Flash Attention。
+OLLAMA_TMPDIR：临时文件目录，默认为空。
+
+重新加载systemd配置并重启服务
+1.重新加载systemd
+sudo systemctl daemon-reload
+2.启动服务
+sudo systemctl start ollama
+重启ollama
+sudo systemctl restart ollama
+3.查看状态
+sudo systemctl status ollama
+4.若想停止服务
+sudo systemctl stop ollama
+5. 设置开机自启动
+sudo systemctl enable ollama
+6. 若想停止开机自启动
+sudo systemctl disable ollama
+
+

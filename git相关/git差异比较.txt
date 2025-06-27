@@ -74,7 +74,13 @@ git commit -m "本次提交的解释说明"
 # git diff 比较忽略空格换行符：
 有时候文件明明仅仅改动一点点，但是git diff 一比较，发现有一大片的不同，这时可能是因为空格，换行符引起的，需要在比较的时候忽略掉：
 git diff --ignore-all-space  -- 待比较的文件.txt
-git diff -w代表--ignore-all-space
+git diff -w 代表--ignore-all-space
+git diff --ignore-blank-lines --ignore-space-change 
+--ignore-blank-lines 忽略空行的变更
+--ignore-space-change 忽略行内空格的变更
+
+# 忽略文件权限变化：
+git config core.fileMode false
 
 使用git diff时如何忽略某些文件
     第一步：自定义diff驱动器

@@ -273,4 +273,11 @@ transformers.utils.import_utils.is_torch_bf16_gpu_available()
         # 设置模型为bfloat16浮点运算模式（如果模型支持）
         model.to(torch.bfloat16)
 
+# 问题，为何cpu环境pip安装torch时候，会安装一些无用的cuda相关包，而且体积超大；
+# 可以直接下cpu环境的torch包安装
+如：https://download.pytorch.org/whl/cpu/torch-2.7.0%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl
+若是dockerfile中，则不同包不要分层安装，应该一起安装，包含CPU环境的torch;
+如：
+RUN cd /root/whl && pip install --no-cache-dir \
+    torch-2.7.0+cpu-cp311-cp311-manylinux_2_28_x86_64.whl certifi-2024.8.30-py3-none-any.whl click-8.1.8-py3-none-any.whl langgraph-0.3.27-py3-none-any.whl presto_python_client-0.8.4-py3-none-any.whl six-1.17.0-py2.py3-none-any.whl charset_normalizer-2.1.1-py3-none-any.whl idna-3.9-py3-none-any.whl polib-1.2.0-py2.py3-none-any.whl requests-2.32.3-py3-none-any.whl urllib3-2.3.0-py3-none-any.whl langchain_core-0.3.59-py3-none-any.whl langgraph_checkpoint-2.0.25-py3-none-any.whl langgraph_prebuilt-0.1.8-py3-none-any.whl langchain==0.3.23 langchain-openai==0.3.12 langchain-anthropic==0.3.12 langchain-community==0.3.21 langchain-deepseek==0.1.3 langchain-google-genai==2.1.2 langchain-mcp-adapters==0.0.5 langchain-huggingface==0.1.2 langchain-ollama==0.3.2 django==4.2.20 djangorestframework==3.16.0 mcp==1.4.1 python-docx==1.1.2 pymysql==1.1.1 accelerate==1.6.0  && cd .. && rm -rf whl && rm -rf /root/.cache
 
