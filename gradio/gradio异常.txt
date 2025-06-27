@@ -13,4 +13,19 @@ Please check your internet connection. This can happen if your antivirus softwar
 解决方法：可通过下面的项目获取对应的文件；
 git clone https://github.com/Dust-Catcher/gradio.git
 
+# Jupyter Notebook 或 IPython 环境中运行 uvicorn.run() 时常见的问题:
+RuntimeError: asyncio.run() cannot be called from a running event loop
+错误原因分析：
+Python 的 asyncio.run() 函数只能在一个没有事件循环（event loop）的环境中调用。但在 Jupyter Notebook 或 IPython 中，已经有一个事件循环在运行了（通常是 nest_asyncio.apply() 或 IPython 自带的事件循环），所以当你调用：
+uvicorn.run(app, host="0.0.0.0", port=7860)
+实际上内部调用了 asyncio.run()，就会抛出这个异常。
+✅ 解决方案
+如果你是在 Jupyter Notebook 中运行 Gradio + Uvicorn 的组合，可以使用 nest_asyncio 来解决嵌套事件循环的问题。
+步骤如下：
+安装 nest_asyncio：
+pip install nest_asyncio
+在代码开头添加：
+import nest_asyncio
+nest_asyncio.apply()
+然后正常运行你的代码
 
