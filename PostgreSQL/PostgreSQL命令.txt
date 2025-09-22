@@ -63,3 +63,40 @@ CREATE TABLE tmp_out_jiayi_client_detail_daily_distinct_caseid (
 INSERT INTO tmp_out_jiayi_client_detail_daily_distinct_caseid
 SELECT * FROM tmp_out_jiayi_client_detail_daily;
 
+-- 用户对某表权限的撤销及恢复：
+撤销 TRUNCATE 权限	REVOKE TRUNCATE ON table_name1 FROM user3;
+恢复 TRUNCATE 权限	GRANT TRUNCATE ON TABLE table_name1 TO user3;
+
+-- 禁止某个用户对某表删除操作
+-- 1. 查看当前权限
+\z+ public.table_name1
+
+-- 2. 撤销 TRUNCATE 权限
+REVOKE TRUNCATE ON TABLE public.table_name1 FROM user3;
+
+-- 3. 撤销 DELETE 权限（如果需要）
+REVOKE DELETE ON TABLE public.table_name1 FROM user3;
+
+PostgreSQL 中 不能直接 REVOKE DROP；单将表的所有权转移给其他用户（如管理员），这样，user3 用户将不再拥有该表的所有权，也就无法执行 DROP TABLE table_name1。
+-- 4. 转移表所有权（禁止 DROP）
+ALTER TABLE public.table_name1 OWNER TO postgres;
+
+-- 5. 重新授予 SELECT 等权限
+GRANT SELECT, INSERT, UPDATE,REFERENCES,TRIGGER ON TABLE public.table_name1 TO user3;
+
+你可以使用以下命令查看当前 user3 用户对表的权限：
+\z table_name1
+输出示例：
+                          Access privileges
+ Schema |         Table          |  Access privileges
+--------+------------------------+-----------------------
+ public | table_name1   | user3=arwdDxt/owner
+a = INSERT
+r = SELECT
+w = UPDATE
+d = DELETE
+D = TRUNCATE
+x = REFERENCES
+t = TRIGGER
+如果 D（TRUNCATE）或 d（DELETE）存在，说明用户有权限。
+

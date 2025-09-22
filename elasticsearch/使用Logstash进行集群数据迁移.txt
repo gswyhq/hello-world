@@ -1,0 +1,53 @@
+
+目标：es 5.4.3 数据迁移到 es 7.17.23
+
+1. 下载 Logstash
+下载并使用 Logstash 6.x（例如 6.8.23），这是最后一个支持 Elasticsearch 5.x 的版本。
+使用 Logstash 6.x 从 Elasticsearch 5.4.3 读取数据。
+将数据写入 Elasticsearch 7.17.23（Logstash 6.x 仍然可以连接到 Elasticsearch 7.x）。
+
+# 示例：下载 Logstash 6.8.23（根据你的需求选择版本）
+wget https://artifacts.elastic.co/downloads/logstash/logstash-6.8.23.tar.gz
+tar -xzf logstash-6.8.23.tar.gz
+cd logstash-6.8.23
+
+java -version
+openjdk version "1.8.0_292"
+OpenJDK Runtime Environment (build 1.8.0_292-b10)
+OpenJDK 64-Bit Server VM (build 25.292-b10, mixed mode)
+
+3、Logstash 配置
+示例配置文件 logstash.conf
+
+input {
+  elasticsearch {
+    hosts => ["http://192.168.3.16:9200"]  # 旧集群（无认证）
+    index => "index1"
+    size => 1000
+    scroll => "50m"
+  }
+}
+
+filter {
+  # 删除默认添加的 @timestamp 和 @version 字段
+  mutate {
+    remove_field => [ "@timestamp", "@version" ]
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://7.x集群地址:9200"]  # 新集群（有认证）
+    index => "index1"  # 保持原索引名
+    user => "your_username"
+    password => "your_password"
+  }
+}
+
+4、执行迁移命令
+在 Logstash 安装目录下执行：
+./bin/logstash -f logstash.conf
+
+注意：
+如果目标索引不存在，Logstash 会自动创建索引（使用默认设置）。
+

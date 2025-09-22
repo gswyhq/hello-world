@@ -143,3 +143,51 @@ MATCH (person:Person)
 MERGE (city:City { name: person.bornIn })
 MERGE (person)-[r:BORN_IN]->(city)
 RETURN person.name, person.bornIn, city;
+
+# 创建一个节点，若不存在，则新建：
+# OPTIONAL MATCH 会尝试匹配，但 即使没有匹配到，也会返回一个 p = NULL
+OPTIONAL MATCH (p:Person {name: "钱瑗"})
+WITH p
+WHERE p IS NULL
+CREATE (:Person {
+    name: "钱瑗",
+    alias: "圆圆",
+    nationality: "中国",
+    ethnicity: "汉族",
+    birthPlace: "英国牛津",
+    birthDate: "1937年5月",
+    deathDate: "1997年3月4日",
+    occupation: "教授、博士生导师"
+});
+
+# 创建节点（若已经存在则更新）及关系：
+MERGE (p1:Person {name: "钱瑗"})
+SET p1 += {
+    alias: "圆圆",
+    nationality: "中国",
+    ethnicity: "汉族",
+    birthPlace: "英国牛津",
+    birthDate: "1937年5月",
+    deathDate: "1997年3月4日",
+    occupation: "教授、博士生导师"
+}
+
+MERGE (p2:Person {name: "钱钟书"})
+SET p2 += {
+    nationality: "中国"
+}
+
+MERGE (p1)-[:RELATED_TO {type: "father"}]->(p2)
+
+# 查询name若没有则创建，并更新其他属性
+MERGE (p1:Person {name: "钱瑗"})
+SET p1 += {
+    alias: "圆圆",
+    nationality: "中国",
+    ethnicity: "汉族",
+    birthPlace: "英国牛津",
+    birthDate: "1937年5月",
+    deathDate: "1997年3月4日",
+    occupation: "教授、博士生导师"
+}
+

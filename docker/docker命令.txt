@@ -73,3 +73,10 @@ docker commit container01 new_image:tag
 docker run --name container02 -p 80:80 new_image:tag
 优缺点：这种方式的优点是不会影响统一宿主机上的其他容器，缺点是管理起来显得比较乱，没有第二种方法那么直观。
 
+# docker容器日志如何重定向到文件：
+docker logs postgresql-15432 > pg.log
+docker logs postgresql-15432 |tee pg.log
+上面两种方法都是无效的，需要使用：
+script -c "docker logs postgresql-15432" pg.log
+
+

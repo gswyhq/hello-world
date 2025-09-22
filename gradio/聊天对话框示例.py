@@ -519,7 +519,91 @@ with gr.Blocks() as demo:
 
 
 ###########################################################################################################################
+import gradio as gr
+import time
 
+
+# 模拟后台处理函数，返回一个完整的答案字符串
+def process_question(question):
+	# 模拟处理时间
+	time.sleep(1)
+	return f"这是对 '{question}' 的详细回答。"
+
+
+# 改正后的核心函数，用于处理多个问题并流式返回结果
+def stream_answers(input_text):
+	"""
+    处理输入框中的多个问题，并以流式方式更新Chatbot。
+    """
+	if not input_text.strip():
+		# 如果输入为空，可以给一个提示或直接返回
+		yield []
+		return
+
+	questions = input_text.strip().split("\n")
+
+	if len(questions) > 10:
+		# 返回一个错误信息，也需要是Chatbot格式
+		yield [["错误", "最多只能上传 10 个问题！"]]
+		return
+
+	chatbot_history = []
+	for question in questions:
+		# 1. 将当前问题添加到对话历史中，答案部分暂时为空字符串
+		chatbot_history.append([question, ""])
+		# yield 一次，让用户的问题立即显示出来
+		yield chatbot_history
+
+		# 2. 调用后台函数获取完整答案
+		full_answer = process_question(question)
+
+		# 3. 模拟打字机效果，逐字更新并 yield
+		for char in full_answer:
+			chatbot_history[-1][1] += char
+			time.sleep(0.05)  # 控制流式输出的速度
+			yield chatbot_history  # 每次都 yield 完整的历史记录
+
+
+# 创建 Gradio 界面
+def create_interface():
+	with gr.Blocks(theme=gr.themes.Soft()) as demo:
+		gr.Markdown("## 批量实时问答展示界面")
+		gr.Markdown("在下方文本框中输入多个问题，每行一个，然后点击“提交”。")
+
+		with gr.Row():
+			input_text = gr.Textbox(
+				label="输入问题",
+				lines=10,
+				placeholder="请输入问题，每行一个...\n例如：\n什么是Gradio？\n如何实现流式输出？"
+			)
+
+		submit_btn = gr.Button("提交", variant="primary")
+
+		chatbot = gr.Chatbot(
+			label="问答结果",
+			bubble_full_width=False,
+			height=500
+		)
+
+		# 将点击事件连接到新的流式处理函数
+		submit_btn.click(
+			fn=stream_answers,
+			inputs=input_text,
+			outputs=chatbot
+		)
+
+		# 添加一个清空按钮，方便使用
+		def clear_inputs():
+			return "", []
+
+		clear_btn = gr.Button("清空")
+		clear_btn.click(fn=clear_inputs, inputs=None, outputs=[input_text, chatbot])
+
+	return demo
+
+demo = create_interface()
+
+###########################################################################################################################
 def main():
 	# 启动Gradio界面
 	demo.launch(server_name='0.0.0.0',

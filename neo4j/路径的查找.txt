@@ -120,6 +120,19 @@ MATCH (a)-[:发展|推荐*0...2]->(c) RETURN c;
 MATCH p=allShortestPaths((m:Link {name:'Alan'})-[*..6]-(n:Link {name:'Antonio'}))
 WHERE all(x in nodes(p) where id(x)=1231) return p LIMIT  10
 
+# 某个节点及下游所有路径：
+MATCH path = (n:Node {name: '客均合同数'})-[:下游*]->(downstream) RETURN DISTINCT path
+
+# 查询某个节点所有下游节点路径，并希望展示每条关系的前节点和后节点
+MATCH p = (n:Node)-[r:下游*]->(downstream) 
+WHERE n.name = "客均合同数" 
+UNWIND relationships(p) AS rel
+RETURN 
+  startNode(rel).name AS startNodeName,
+  endNode(rel).name AS endNodeName,
+  type(rel) AS relType,
+  properties(rel) AS relProperties
+
 # 查看某个用法的帮助：
 CALL apoc.help("dijkstra")
 

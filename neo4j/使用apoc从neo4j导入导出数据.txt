@@ -210,3 +210,12 @@ edges.csv
 ,,"33","29","ACTED_IN","[""Viper""]"
 ,,"34","29","ACTED_IN","[""Carole""]"
 
+neo4j 4.3.2版本，导入、导出数据命令：
+# 导出全部数据到cypher文件：
+neo4j@neo4j> CALL apoc.export.cypher.all("result_all.cypher",{});
+文件存储在：/var/lib/neo4j/import/result_all.cypher
+
+# 从cypher文件导入数据到neo4j：
+./bin/cypher-shell -u neo4j -p password123423 -f /var/lib/neo4j/result_all_250725.cypher
+
+

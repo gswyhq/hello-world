@@ -4,6 +4,41 @@ TRUNCATE TABLE tablename;
 //当表中有外键时，要用级联方式删所有关联的数据
 TRUNCATE TABLE tablename CASCADE;
 
+// 删除表，包括数据及表结构：
+DROP TABLE tablename;
+
+# 注意：
+DROP table 删除表，会释放磁盘空间，但TRUNCATE不会释放磁盘空间。
+TRUNCATE TABLE tablename;
+TRUNCATE 不会立即释放磁盘空间，只是将表的“可见性”标记为“空”，等待后续的 VACUUM 操作来回收空间
+
+VACUUM FULL tablename;
+VACUUM FULL 会重写整个表，并回收未使用的空间。
+它会将表重新写入一个新的物理文件中，释放未使用的空间。
+缺点：需要表级锁，表在操作期间不可用。
+
+在 PostgreSQL 中，执行 VACUUM FULL 时，它会锁定表（ACCESS EXCLUSIVE 锁），这意味着在 VACUUM FULL 执行期间，其他所有操作（包括 SELECT、UPDATE、DELETE、INSERT、甚至 TRUNCATE）都会被阻塞。
+如果你执行了 VACUUM FULL，但发现它执行时间太长，或者你希望中止它，可以按照以下步骤进行操作：
+1、找到正在执行 VACUUM FULL 的进程 ID（PID）：
+SELECT pid, usename, query, state, now() - query_start AS duration
+FROM pg_stat_activity
+WHERE query LIKE 'VACUUM%';
+这会列出所有正在执行 VACUUM 的进程，包括 VACUUM FULL。
+2、找到对应的 pid 后，使用 pg_terminate_backend(pid) 来中止该进程：
+SELECT pg_terminate_backend(12345); -- 替换为实际的 PID
+3、检查锁是否已经被释放：
+SELECT * FROM pg_locks WHERE relation = 'your_table_name'::regclass;
+或者查看当前活动的查询：
+SELECT * FROM pg_stat_activity WHERE state != 'idle';
+4、如何查看任务状态
+SELECT pid, usename, query, state, now() - query_start AS duration FROM pg_stat_activity WHERE query LIKE 'VACUUM%';
+通过 pg_stat_activity 看到该查询是 active，说明它还在运行中。
+如果 duration 持续增长，说明还在运行。
+如果 duration 停止增长，说明可能已经完成或卡住。
+5、清理所有空间的连接，即中止现在运行的数据库连接，如select查询等。
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state='idle' AND backend_type='client backend';
+若不想中止，仅仅想查询，可以运行：
+SELECT * FROM pg_stat_activity WHERE state='idle' AND backend_type='client backend';
 
 SELECT * FROM "c_relation" where db = 'de_safe' and table_collision = 'data_collision_info';
 where 后面限定条件查询值需是单引号，若是双引号会报错：

@@ -1,0 +1,215 @@
+
+官方文档：https://maxkb.cn/docs/installation/offline_installtion/ 
+GitHub：https://github.com/1Panel-dev/MaxKB
+https://github.com/1Panel-dev/MaxKB-docs.git
+
+环境准备：
+* 前端环境准备  
+安装 node ，v16及以上版本
+* 后端环境准备  
+安装 python ，版本 v3.11.x
+安装 pycharm
+* 数据库  
+安装 PostgreSql ，版本 v15.x
+
+
+服务是如何启动的？
+答：通过如下命令启动：
+```shell
+docker run -d -it \
+  --name maxkb_8036_v1.10.7 \
+  -p 8036:8080 \
+  -v $PWD/app:/opt/maxkb/app \
+  -v $PWD/logs:/opt/maxkb/app/data/logs \
+  -e PYTHONPATH=/opt/maxkb/app/sandbox/python-packages \
+  -e MAXKB_DB_NAME=maxkb \
+  -e MAXKB_DB_HOST=192.168.3.105 \
+  -e MAXKB_DB_PORT=5432 \
+  -e MAXKB_DB_USER=****** \
+  -e MAXKB_DB_PASSWORD=****** \
+  -e MAXKB_DB_ENGINE=django.db.backends.postgresql_psycopg2 \
+  -e DASHSCOPE_HTTP_BASE_URL=http://192.168.3.105:8023 \
+  -e MAXKB_EMBEDDING_MODEL_PATH=/opt/maxkb/model/embedding \
+  -e MAXKB_EMBEDDING_MODEL_NAME=/opt/maxkb/model/embedding/shibing624_text2vec-base-chinese \
+  maxkb:v1.10.7 \
+  'rm -f /opt/maxkb/app/tmp/*.pid && echo "PID文件已删除" && export PYTHONPATH=/opt/maxkb/app/apps:$PYTHONPATH && django-admin compilemessages --settings=smartdoc.settings.base && cd /opt/maxkb/app && echo "开始启动" &&  python -u /opt/maxkb/app/main.py start'
+```
+
+### 3.2 配置文件
+项目启动之前，需要准备配置文件及目录
+* 准备配置文件
+```shell
+# 将config_example.yml配置文件拷贝至 /opt/maxkb/conf目录下
+cp config_example.yml /opt/maxkb/conf
+```
+* 配置 /opt/maxkb/conf/config_example.yml
+```yaml
+# 数据库配置（将以下信息替换为实际环境信息）
+DB_NAME: maxkb
+DB_HOST: localhost
+DB_PORT: 5432
+DB_USER: root
+DB_PASSWORD: xxx
+DB_ENGINE: django.db.backends.postgresql_psycopg2
+
+# 模型相关配置
+# 模型路径:如果EMBEDDING_MODEL_NAME是绝对路径则无效,反之则会从https://huggingface.co/下载模型到当前目录
+EMBEDDING_MODEL_PATH: /opt/maxkb/model/
+# 模型名称:如果模型名称是路径,则会加载目录下的模型,如果是模型名称,则会在https://huggingface.co/下载模型 模型的下载位置为EMBEDDING_MODEL_PATH
+EMBEDDING_MODEL_NAME: /opt/maxkb/model/shibing624_text2vec-base-chinese
+```
+
+## 4 开发调试
+### 4.1 启动前端
+```shell
+# 在 `ui`目录 执行安装前端需要的依赖
+npm install
+
+# 然后启动项目
+npm run dev
+```
+启动成功后，如下图显示。
+```shell
+Your application is running here: http://0.0.0.0:8000
+```
+
+### 4.2 启动后端
+后端系统，需要启动 web服务、本地模型服务、和异步任务队列服务。 注意: 在项目根目录执行
+
+在 MaxKB 项目根目录下依次执行以下命令，启动 Web 服务。
+```shell
+# 安装 poetry 包管理器
+pip install poetry
+# 注意：poetry包管理器不是必需的，也可以通过pip安装，但没有对应的requirements.txt文件
+
+# 安装后端需要的依赖
+poetry install
+* 注意：如果在国内安装，需要配置 poetry 的源，否则下载非常慢，经常无法正常安装，配置命令为：`poetry source add --priority=primary mirrors http://mirrors.aliyun.com/pypi/simple`
+
+# 启动项目
+python main.py start
+```
+
+在 MaxKB 项目根目录下依次执行以下命令，启动本地模型服务。
+```shell
+# 启动项目
+python main.py dev local_model
+```
+
+在 MaxKB 项目根目录下依次执行以下命令，启动异步任务服务。
+```shell
+# 启动项目
+python main.py dev celery
+```
+
+若在windows系统，pycharm中，需要一次启动全部后端的服务，不能执行python main.py start
+需要修改main.py 并设置 dev web celery local_model
+即："C:\Program Files\Python312\python.exe" D:\Users\...\MaxKB\main.py dev web celery local_model 
+
+## 5 访问项目
+前后端都启动成功后，就可以通过前端路由（前端启动出现的访问地址）在浏览器中进行访问。  
+
+也可以前端编译好对应的文件，挂载到后端启动服务：
+```cmd
+:: 强制删除依赖目录
+rmdir /s /q node_modules
+
+:: 删除锁文件
+del /f package-lock.json
+
+:: 清除npm缓存
+npm cache clean --force
+
+:: 删除构建目录
+rd /s /q dist
+
+:: 重新安装依赖
+npm install --force
+
+:: 执行构建
+npm run build
+
+::#  服务器部署方法：
+::#  1、本地执行上面的命令，获得ui下的dist目录；
+::#  2、服务器上面重新git clone代码；
+::#  3、替换掉git clone 里头的ui/dist目录
+::#  4、重启docker服务；
+::#[root@192.168.3.105 app]# rm -rf data apps/static ui/dist
+::#[ecsuser@192.168.3.105 app]$ git pull origin
+::#[ecsuser@192.168.3.105 app]$ cd ui/
+::#[ecsuser@192.168.3.105 ui]$ cp ../../app_20250318/ui/dist_20250318.tar.gz .
+::#[ecsuser@192.168.3.105 ui]$ tar -zxvf dist_20250318.tar.gz
+
+
+1、maxkb问答报错："('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"，是什么原因？
+答：出现该错误的原因，一般是因为向量模型没有启动，或者向量模型端口被占用了；
+
+2、请问maxkb怎么在AI回答后抛出几个问题让用户选择？
+答：配置参考：
+请选择：
+<quick_question>集团客户数</quick_question>
+<quick_question>{{AI 对话1.answer}}</quick_question>
+
+3、maxkb如何输出图表？
+答：<echarts_rander></echarts_rander>
+作用：此标签用于展示echarts图表，搭配函数库使用。
+参考代码如下：
+其中，可以从 https://echarts.apache.org/examples/zh/index.html#chart-type-bar 官网选择自己喜欢的模版，替换option的值即可
+```python
+# coding=utf-8
+ 
+def aa():
+    import json
+    option = """
+option = {
+  title: {
+    text: 'Basic Radar Chart'
+  },
+  legend: {
+    data: ['Allocated Budget', 'Actual Spending']
+  },
+  radar: {
+    // shape: 'circle',
+    indicator: [
+      { name: 'Sales', max: 6500 },
+      { name: 'Administration', max: 16000 },
+      { name: 'Information Technology', max: 30000 },
+      { name: 'Customer Support', max: 38000 },
+      { name: 'Development', max: 52000 },
+      { name: 'Marketing', max: 25000 }
+    ]
+  },
+  series: [
+    {
+      name: 'Budget vs spending',
+      type: 'radar',
+      data: [
+        {
+          value: [4200, 3000, 20000, 35000, 50000, 18000],
+          name: 'Allocated Budget'
+        },
+        {
+          value: [5000, 14000, 28000, 26000, 42000, 21000],
+          name: 'Actual Spending'
+        }
+      ]
+    }
+  ]
+};
+  """
+    return json.dumps({'actionType': 'EVAL', 'option': option, 'style': {'height': '300px', 'width': '100%'}})
+```
+之后再配置个指定回复即可，如：
+好的，输出图如下：
+<echarts_rander>
+{{折线图.result}}
+</echarts_rander>
+
+3、展示HTML内容
+<html_rander></html_rander>
+作用：此标签可展示HTML的内容。
+
+更多使用参考：https://bbs.fit2cloud.com/t/topic/11172
+
+
+

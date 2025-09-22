@@ -19,3 +19,65 @@ CLASSPATH
 JAVA_HOME
 PATH
 
+# java8、java17多版本共存：
+https://adoptium.net/zh-CN/temurin/releases/?version=8
+https://adoptium.net/zh-CN/temurin/releases/?version=17
+
+解压后得到对应目录：
+JDK 8：C:\Program Files\Java\jdk1.8.0_361
+JDK 17：C:\Program Files\Java\jdk-17.0.8
+创建两个环境变量：
+JAVA_HOME_8：指向 JDK 8 的路径，如 C:\Program Files\Java\jdk1.8.0_361
+JAVA_HOME_17：指向 JDK 17 的路径，如 C:\Program Files\Java\jdk-17.0.8
+
+在 PATH 中添加 JDK 的 bin 目录，例如：
+%JAVA_HOME%\bin
+
+快速切换 JDK 版本：
+1. 创建 setjdk8.bat
+@echo off
+setx JAVA_HOME "C:\Program Files\Java\jdk1.8.0_361"
+setx PATH "%JAVA_HOME%\bin;%PATH%"
+echo JDK 8 已设置
+2. 创建 setjdk17.bat
+@echo off
+setx JAVA_HOME "C:\Program Files\Java\jdk-17.0.8"
+setx PATH "%JAVA_HOME%\bin;%PATH%"
+echo JDK 17 已设置
+
+验证jdk版本：
+java -version
+javac -version
+
+下载maven， https://downloads.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
+Maven 3.9.11 与 JDK 17 和 JDK 1.8.0_* 都是兼容的
+
+设置 Maven 路径
+export MAVEN_HOME=/home/mobaxterm/apache-maven-3.8.8
+export PATH=$MAVEN_HOME/bin:$PATH
+
+Maven 构建项目时，会使用 JAVA_HOME 指定的 JDK。例如：
+如果 JAVA_HOME 指向 C:\Program Files\Java\jdk1.8.0_291，那么 Maven 就会使用 JDK 8。
+如果 JAVA_HOME 指向 C:\Program Files\Java\jdk-17.0.5，那么 Maven 就会使用 JDK 17。
+
+如何查看当前 Maven 使用的 JDK：
+mvn -v
+
+示例：在 JDK 17 上运行 Maven 3.9.11
+# 设置 JAVA_HOME 为 JDK 17
+export JAVA_HOME=/path/to/jdk17
+export PATH=$JAVA_HOME/bin:$PATH
+
+# 运行 Maven
+mvn clean install
+
+示例：在 JDK 8 上运行 Maven 3.9.11
+
+# 设置 JAVA_HOME 为 JDK 8
+export JAVA_HOME=/path/to/jdk1.8.0_172
+export PATH=$JAVA_HOME/bin:$PATH
+
+# 运行 Maven
+mvn clean install
+
+

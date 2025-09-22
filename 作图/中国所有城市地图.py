@@ -22,6 +22,9 @@ c = (
     # .render("map_china_cities.html")
 )
 
+# 获取html文件内容
+# html_data = c.render_embed()
+
 image_file = r'china_cities.png'
 make_snapshot(snapshot, c.render(),
               image_file)

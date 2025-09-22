@@ -38,7 +38,7 @@ openssl req -new -newkey rsa:4096 -nodes -keyout domain.key -config openssl.cnf 
 1.3、使用`openssl`将证书和私钥合并为PKCS#12格式**：
    首先，确保你有证书文件（例如`domain.crt`）和对应的私钥文件（例如`domain.key`）。然后，运行以下命令将它们合并为一个PKCS#12文件（例如`domain.p12`）：
 需要输个密码，这个密码用于保护生成的PKCS#12文件（`domain.p12`）。它是用来加密整个PKCS#12文件的，包括其中的证书和私钥。当你需要从PKCS#12文件中提取证书或私钥时，会需要这个密码。
-(DEV)[root@CQA-L0803392 ssl]# openssl pkcs12 -export -out domain.p12 -in domain.crt -inkey domain.key
+(DEV)[root@192.168.3.105 ssl]# openssl pkcs12 -export -out domain.p12 -in domain.crt -inkey domain.key
 123456
 
 1.4、使用`keytool`将PKCS#12文件转换为JKS格式

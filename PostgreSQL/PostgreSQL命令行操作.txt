@@ -85,6 +85,19 @@ CREATE ROLE
 # 修改用户密码命令：
 trade=# alter user tradeopr password '654321';
 
+# 创建只读用户：
+CREATE USER readonly_user WITH ENCRYPTED PASSWORD '123456';
+alter user readonly_user set default_transaction_read_only=on;
+GRANT USAGE ON SCHEMA public to readonly_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO readonly_user;
+GRANT USAGE ON SCHEMA public to readonly_user;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO readonly_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly_user;
+特别注意：下面语句只影响执行该语句的用户（比如 postgres）之后创建的表。
+如果你是以 postgres 用户执行这条语句，那么只有 postgres 创建的新表会自动授予 dbmonopr SELECT 权限。
+其他用户（如 alice）创建的表不会自动授予 dbmonopr SELECT 权限。这个时候需要切换到alice账号，再执行一遍该语句：
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO dbmonopr;
+
 # 如果你希望新创建的用户能够创建数据库或创建其他用户，你需要授予他们额外的权限。例如，要允许 `boarddata` 用户创建数据库和新的用户，可以使用以下命令：
 ALTER USER boarddata CREATEDB;
 ALTER USER boarddata CREATEROLE;

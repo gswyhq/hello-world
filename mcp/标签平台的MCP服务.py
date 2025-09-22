@@ -152,6 +152,35 @@ res = asyncio.run(call_tool(servers, mcp_server, mcp_tool, tool_params))
 [content.text for content in res.content]
 Out[10]: ['{"status": "success", "data": {"user_id": "UID_1001", "base_tags": [{"name": "高净值用户", "weight": 0.9}, {"name": "活跃用户", "weight": 0.85}, {"name": "新用户", "weight": 0.7}, {"name": "高消费用户", "weight": 0.8}, {"name": "低频用户", "weight": 0.6}, {"name": "忠诚用户", "weight": 0.95}, {"name": "潜在流失用户", "weight": 0.5}, {"name": "高价值用户", "weight": 0.9}, {"name": "低价值用户", "weight": 0.4}, {"name": "高活跃度用户", "weight": 0.85}], "behavior_tags": [{"name": "购买频率高", "last_active": "2023-10-01T12:00:00Z"}, {"name": "最近登录", "last_active": "2023-10-02T12:00:00Z"}, {"name": "购买大额商品", "last_active": "2023-10-03T12:00:00Z"}, {"name": "参与活动", "last_active": "2023-10-04T12:00:00Z"}, {"name": "浏览时间长", "last_active": "2023-10-05T12:00:00Z"}, {"name": "多次购买", "last_active": "2023-10-06T12:00:00Z"}, {"name": "高评价用户", "last_active": "2023-10-07T12:00:00Z"}, {"name": "推荐新用户", "last_active": "2023-10-08T12:00:00Z"}, {"name": "多次退货", "last_active": "2023-10-09T12:00:00Z"}, {"name": "多次投诉", "last_active": "2023-10-10T12:00:00Z"}]}}']
 
+# 若上面代码请求报错，则需要更改为：
+NotImplementedError: As of langchain-mcp-adapters 0.1.0, MultiServerMCPClient cannot be used as a context manager (e.g., async with MultiServerMCPClient(...)). Instead, you can do one of the following:
+1. client = MultiServerMCPClient(...)
+   tools = await client.get_tools()
+2. client = MultiServerMCPClient(...)
+   async with client.session(server_name) as session:
+       tools = await load_mcp_tools(session)
+
+针对上面报错的修改版本：
+import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
+async def call_tool(servers, session, tool_name, tool_params):
+    client = MultiServerMCPClient(servers)
+    try:
+        async with client.session(session) as session_obj:
+            result = await session_obj.call_tool(tool_name, tool_params)
+            return result
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        raise
+servers = {'math': {'url': 'http://192.168.3.34:8003/sse', 'transport': 'sse'}}
+mcp_server = 'math'
+mcp_tool = 'get_user_tags'
+tool_params = {'user_id': 'UID_1001'}
+res = asyncio.run(call_tool(servers, mcp_server, mcp_tool, tool_params))
+[content.text for content in res.content] 
+Out[31]: ['{"status": "success", "data": {"user_id": "UID_1001", "base_tags": [{"name": "高净值用户", "weight": 0.9}, {"name": "活跃用户", "weight": 0.85}, {"name": "新用户", "weight": 0.7}, {"name": "高消费用户", "weight": 0.8}, {"name": "低频用户", "weight": 0.6}, {"name": "忠诚用户", "weight": 0.95}, {"name": "潜在流失用户", "weight": 0.5}, {"name": "高价值用户", "weight": 0.9}, {"name": "低价值用户", "weight": 0.4}, {"name": "高活跃度用户", "weight": 0.85}], "behavior_tags": [{"name": "购买频率高", "last_active": "2023-10-01T12:00:00Z"}, {"name": "最近登录", "last_active": "2023-10-02T12:00:00Z"}, {"name": "购买大额商品", "last_active": "2023-10-03T12:00:00Z"}, {"name": "参与活动", "last_active": "2023-10-04T12:00:00Z"}, {"name": "浏览时间长", "last_active": "2023-10-05T12:00:00Z"}, {"name": "多次购买", "last_active": "2023-10-06T12:00:00Z"}, {"name": "高评价用户", "last_active": "2023-10-07T12:00:00Z"}, {"name": "推荐新用户", "last_active": "2023-10-08T12:00:00Z"}, {"name": "多次退货", "last_active": "2023-10-09T12:00:00Z"}, {"name": "多次投诉", "last_active": "2023-10-10T12:00:00Z"}]}}']
+
+
 #######################################################################################################################
 #"streamable-http"模式的客户端请求
 from mcp.client.streamable_http import streamablehttp_client

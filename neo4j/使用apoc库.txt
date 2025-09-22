@@ -1,4 +1,32 @@
 
+apoc安装：
+1、下载对应版本apoc的jar包，如neo4j version 4.3.2 则可以下载：apoc-4.3.0.12-all.jar
+下载地址：https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.3.0.12/apoc-4.3.0.12-all.jar
+
+2、将 apoc-4.3.0.12-all.jar 放到 plugins 目录下，并设置 dbms.security.procedures.allowlist=apoc.coll.*,apoc.load.*
+示例：
+docker run --detach --name=neo4j_7474  -e NEO4J_AUTH=neo4j/123456 -p 1337:1337 -p 7474:7474 -p 7687:7687 -v $PWD/neo4j_plugins:/var/lib/neo4j/plugins -v $PWD/neo4j_data:/var/lib/neo4j/data -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\* -e NEO4J_dbms_security_procedures_allowlist=apoc.coll.\\\*,apoc.load.\\\* -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true --env NEO4J_dbms_allow__format__migration=true -e NEO4J_dbms_shell_enabled=true -e NEO4J_dbms_shell_host=0.0.0.0 -e NEO4J_dbms_shell_port=1337 -e NEO4J_dbms_memory_heap_initial__size=512m -e NEO4J_dbms_memory_heap_max__size=512m neo4j:4.3.2
+
+# 使用apoc进行全文搜索：
+1、创建索引：
+CALL db.index.fulltext.createNodeIndex("personIndex", ["Person", "University", "Work"], ["name"], {
+analyzer: "standard"})
+
+2、基于创建的索引进行搜索：
+CALL db.index.fulltext.queryNodes("personIndex", "杨绛", { limit: 5 }) YIELD node, score
+RETURN node.name AS name, score;
+CALL db.index.fulltext.queryNodes("personIndex", "杨绛", { limit: 5 }) YIELD node, score
+MATCH (node)-[r]-()
+RETURN node.name AS name, type(r) AS relType, r, endNode(r).name AS connectedNodeName;
+CALL db.index.fulltext.queryNodes("personIndex", "杨绛", { limit: 5 }) YIELD node, score
+MATCH (node)-[r]-()
+RETURN 
+  node.name AS name,
+  properties(node) AS nodeProps,  // 返回节点的所有属性
+  type(r) AS relType,
+  r AS relationship,
+  properties(endNode(r)) AS connectedNodeProps  // 返回连接节点的所有属性
+
 参考： https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_graph_refactoring
 
 # 查看某一函数的帮助信息, 如查看`apoc.date.format`的用法:
