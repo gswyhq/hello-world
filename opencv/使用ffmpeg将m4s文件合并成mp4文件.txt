@@ -1,0 +1,9 @@
+
+ffmpeg -i "500001619531610-1-30232.m4s" -i "500001619531610-1-30064.m4s" -c copy "合并的文件.mp4"
+
+ffmpeg -i video.m4s -i audio.m4s -codec copy output.mp4
+即前面一个是视频文件，后面一个是音频文件
+
+m4s 转换为wav:
+ffmpeg -i audio.m4s audio.wav
+
