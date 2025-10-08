@@ -26,11 +26,9 @@ def gif_to_png(gif_file):
         frame.save(save_file,**frame.info)
 
 def jpeg_to_png(jpeg_file):
-    
-    assert jpeg_file.lower().endswith('.jpeg'), '输入应该为jepg格式文件'
-    save_file = jpeg_file.replace('.jpeg', '.png')
+    assert any(jpeg_file.lower().endswith(ext) for ext in ('.jpg', '.jpeg')), '输入应该为jpg、jepg格式文件'
+    save_file = jpeg_file.rsplit('.', maxsplit=1)[0]+'.png'
     im = Image.open(jpeg_file)
-
     im.save(save_file, "png")  # 保存图像为png格式
 
 def main():

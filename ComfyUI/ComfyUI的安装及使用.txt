@@ -211,6 +211,7 @@ async def default_cache_update():
 如果没有变成中文，可以点击"设置"按钮打开的操作界面将字段AGLTranslation-langualge设置为中文。
 
 工作流分享网站：https://comfyworkflows.com/
+官网：https://docs.comfy.org/zh-CN/development/core-concepts/workflow
 
 提示词示例：
 1、黑夜给了我黑色的眼睛

@@ -91,4 +91,11 @@ def convert_image_to_svg(input_image_path, output_svg_path, max_size=64, merge_t
 # 调用函数，输入JPG文件
 convert_image_to_svg("input_image.jpg", "output.svg")
 
+# 方法三
+# 安装 ImageMagick 和 potrace
+sudo apt install imagemagick, potrace  # Linux
+# 转换 PNG 为 PBM
+convert temp_21035-2.png -type Bilevel temp_21035-2.pbm
+# 转换为 SVG
+potrace -s temp_21035-2.pbm -o temp_21035-2.svg
 
