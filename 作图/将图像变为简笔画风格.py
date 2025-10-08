@@ -74,3 +74,14 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+'''
+使用大模型将图片转换为简笔画(手绘图、线图)的方法：
+使用模型 Qwen-Image-Edit
+1、上传图片
+2、输入提示词：Convert this image into a clean black and white line drawing with no colors or shading
+或者中文提示词：将这张图片转换为清晰的黑白线描图，不包含任何色彩或阴影。
+
+'''
+

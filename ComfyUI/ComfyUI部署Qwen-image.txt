@@ -1,0 +1,38 @@
+
+1、下载模型：
+wget -c -t 0 https://www.modelscope.cn/models/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/master/split_files/diffusion_models/qwen_image_edit_fp8_e4m3fn.safetensors
+
+wget -c -t 0 https://www.modelscope.cn/models/Comfy-Org/Qwen-Image_ComfyUI/resolve/master/split_files/vae/qwen_image_vae.safetensors
+
+wget -c -t 0 https://www.modelscope.cn/models/Comfy-Org/Qwen-Image_ComfyUI/resolve/master/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors
+
+wget -c -t 0 https://www.modelscope.cn/models/lightx2v/Qwen-Image-Lightning/resolve/master/Qwen-Image-Lightning-8steps-V2.0-bf16.safetensors
+
+模型目录结构：
+  ComfyUI/
+├──   models/
+│   ├──   diffusion_models/
+│   │   └── qwen_image_edit_fp8_e4m3fn.safetensors
+│   ├──   loras/
+│   │   └── Qwen-Image-Lightning-8steps-V2.0-bf16.safetensors
+│   ├──   vae/
+│   │   └── qwen_image_vae.safetensors
+│   └──   text_encoders/
+│       └── qwen_2.5_vl_7b_fp8_scaled.safetensors
+
+2、下载ComfyUI
+git clone https://github.com/comfyanonymous/ComfyUI
+cd ComfyUI
+pip install -r requirements.txt
+
+3、运行ComfyUI服务
+python3 main.py
+
+浏览器打开：localhost:8188
+
+上传工作流配置文件：https://raw.githubusercontent.com/Comfy-Org/workflow_templates/refs/heads/main/templates/image_qwen_image_edit.json
+
+上传图片，修改提示词，生成图片
+
+
+
