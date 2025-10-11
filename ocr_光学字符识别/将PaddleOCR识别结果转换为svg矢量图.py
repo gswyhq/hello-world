@@ -15,24 +15,16 @@ def remove_gray_background_for_chinese_char(image_path, output_path, threshold=1
     # 打开图片并转为 RGBA（确保有透明通道）
     img = Image.open(image_path).convert("RGBA")
     data = img.getdata()
-
     new_data = []
     for item in data:
-        # item 是 (R, G, B, A)
         r, g, b, a = item
-        # 计算灰度值（平均法）
         gray = (r + g + b) // 3
-        # 如果灰度值大于阈值，认为是背景，设为透明
         if gray > threshold:
-            new_data.append((255, 255, 255, 0))  # 透明
+            new_data.append((0, 0, 0, 0))  # 完全透明
         else:
             new_data.append((0, 0, 0, 255))  # 黑色，保留汉字笔迹
-
     img.putdata(new_data)
     img.save(output_path, "PNG")
-    # 如果你希望保存为二值图像（黑白，无透明通道），可以这样做：
-    binary_img = img.convert("1")  # 二值化
-    binary_img.save(output_path, "PNG")
 
 # OCR 结果转 SVG 的函数
 def convert_image_to_svg(input_image_path, output_svg_path, max_size=64):

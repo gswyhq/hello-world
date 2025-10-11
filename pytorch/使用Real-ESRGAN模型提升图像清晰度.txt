@@ -1,0 +1,45 @@
+
+使用Real-ESRGAN模型提升图像清晰度
+
+1、下载代码
+git clone https://github.com/xinntao/Real-ESRGAN.git
+
+2、下载模型：
+在https://github.com/xinntao/Real-ESRGAN/releases 下载模型 realesr-general-x4v3.pth、realesr-general-wdn-x4v3.pth：
+并放到weights目录中
+root@fb56cffd13e2:~/Real-ESRGAN/weights# pwd
+/root/Real-ESRGAN/weights
+root@fb56cffd13e2:~/Real-ESRGAN/weights# md5sum *
+1de2f3aa3d1da4ca9b5d540566eea201  README.md
+4dc198a34475fa0df73fe82bcf6e5948  realesr-general-wdn-x4v3.pth
+91a7644643c884ee00737db24e478156  realesr-general-x4v3.pth
+
+3、准备环境：
+特别是下面三个包，若太高版本可能不行
+numpy                   1.26.4
+torch                   1.13.1+cpu
+torchvision             0.14.1+cpu
+python环境采用的是python3.10
+apt-get install -y libgl1 libgl1-mesa-glx  libglib2.0-0
+
+4、执行命令转换图像：
+root@fb56cffd13e2:~/Real-ESRGAN# python3 inference_realesrgan.py -n realesr-general-x4v3 -i inputs/temp_21035.png -o results --fp32
+Testing 0 temp_21035
+root@fb56cffd13e2:~/Real-ESRGAN# ls -alrt results/
+total 228
+drwxr-xr-x 16 1101 1101   4096 Oct 10 15:52 ..
+drwxr-xr-x  2 root root     32 Oct 10 15:56 .
+-rw-r--r--  1 root root 227685 Oct 10 15:56 temp_21035_out.png
+
+
+5、若报如下错误，则需要创建对应的空目录及空文件即可：
+Traceback (most recent call last):
+  File "/root/Real-ESRGAN/inference_realesrgan.py", line 8, in <module>
+    from realesrgan import RealESRGANer
+  File "/root/Real-ESRGAN/realesrgan/__init__.py", line 6, in <module>
+    from .version import *
+ModuleNotFoundError: No module named 'realesrgan.version'
+# 解决方法：
+root@fb56cffd13e2:~/Real-ESRGAN# mkdir realesrgan/version
+root@fb56cffd13e2:~/Real-ESRGAN# echo "" > realesrgan/version/__init__.py
+
