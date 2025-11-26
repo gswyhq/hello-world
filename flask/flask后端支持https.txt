@@ -148,4 +148,41 @@ curl -k https://192.168.3.107:5000/health
 客户端体验：导入一次根证书，即可信任所有服务节点
 这样就实现了“一证多用”的内网 HTTPS 服务架构，非常适合开发演示、测试环境或小型内网系统。
 
+################################################################################################
+
+若是fastapi加载gradio应用，生成证书方法同上，使用方法如下：
+
+# app.py
+import gradio as gr
+from fastapi import FastAPI
+
+# Step 1: 创建 Gradio 应用
+def greet(name):
+    return f"Hello, {name}! Served via FastAPI + Gradio over HTTPS."
+
+with gr.Blocks() as demo:
+    name = gr.Textbox(label="Name")
+    output = gr.Textbox(label="Greeting")
+    btn = gr.Button("Greet")
+    btn.click(greet, inputs=name, outputs=output)
+
+# Step 2: 创建 FastAPI 应用
+fastapi_app = FastAPI()
+
+# Step 3: 将 Gradio 挂载到 FastAPI（注意：mount_gradio_app 返回的是新的 FastAPI app！）
+app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+
+# 注意：gr.mount_gradio_app 返回的是一个 Starlette/FastAPI 兼容的 ASGI app
+# 所以我们最终运行的是 `app`，不是原来的 fastapi_app
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "app:app",           # 模块名:变量名
+        host="0.0.0.0",
+        port=7860,
+        ssl_keyfile="./key.pem",
+        ssl_certfile="./cert.pem",
+        reload=False
+    )
 
